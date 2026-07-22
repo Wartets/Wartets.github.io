@@ -309,14 +309,14 @@ class FileSystemManager {
 			if (!destFolder.children.has(finalName)) break;
 
 			finalName = `${baseNameForCopy} (${counter})${extForCopy}`;
-			 if (destFolder.children.has(finalName)) {
-				 let copyCounter = 2;
-				 finalName = `Copy of ${baseNameForCopy} (${copyCounter})${extForCopy}`;
-				 while(destFolder.children.has(finalName)) {
-					 copyCounter++;
-					 finalName = `Copy of ${baseNameForCopy} (${copyCounter})${extForCopy}`;
-				 }
-			 }
+			if (destFolder.children.has(finalName)) {
+				let copyCounter = 2;
+				finalName = `Copy of ${baseNameForCopy} (${copyCounter})${extForCopy}`;
+				while(destFolder.children.has(finalName)) {
+					copyCounter++;
+					finalName = `Copy of ${baseNameForCopy} (${copyCounter})${extForCopy}`;
+				}
+			}
 			counter++;
 		}
 		
@@ -444,7 +444,7 @@ document.addEventListener('DOMContentLoaded', () => {
 		if (bootScreen.style.display !== 'none') {
 			bootScreen.style.display = 'none';
 			welcomeScreen.classList.remove('hidden');
-			
+
 			loginTimeout = setTimeout(() => {
 				if (loginUser && welcomeScreen.style.display !== 'none') loginUser.click();
 			}, 1500);
@@ -524,7 +524,7 @@ function setupDesktopSelection() {
 		} else {
 			return;
 		}
-		
+
 		if (e.target === activeContainer && e.offsetX > e.target.clientWidth) {
 			return;
 		}
@@ -535,7 +535,7 @@ function setupDesktopSelection() {
 		containerRect = activeContainer.getBoundingClientRect();
 		scrollStartX = activeContainer.scrollLeft || 0;
 		scrollStartY = activeContainer.scrollTop || 0;
-		
+
 		startX = e.clientX - containerRect.left + scrollStartX;
 		startY = e.clientY - containerRect.top + scrollStartY;
 
@@ -552,7 +552,7 @@ function setupDesktopSelection() {
 		selectionBox.style.top = `${startY}px`;
 		selectionBox.style.width = '0px';
 		selectionBox.style.height = '0px';
-		
+
 		activeContainer.appendChild(selectionBox);
 	});
 
@@ -575,7 +575,7 @@ function setupDesktopSelection() {
 		selectionBox.style.height = `${height}px`;
 
 		const icons = activeContainer.querySelectorAll('.project-icon');
-		
+
 		icons.forEach(icon => {
 			const iconRect = icon.getBoundingClientRect();
 			const iconLeft = iconRect.left - containerRect.left + currentScrollX;
@@ -640,7 +640,7 @@ function openPDFWindow(file) {
 	const win = createXPWindow(id, file.name, contentHTML, 800, 600, {
 		iconSrc: file.icon
 	});
-	
+
 	const content = win.querySelector('.xp-window-content');
 	content.style.padding = '0';
 	content.style.overflow = 'hidden';
@@ -722,7 +722,7 @@ function initializeFileSystem() {
 	fs.load();
 
 	const existingNames = new Set(fs.root.listContent().map(el => el.name));
-	
+
 	projects.flat().forEach(project => {
 		if (typeof project === 'object' && project !== null && project.title) {
 			if (!existingNames.has(project.title)) {
@@ -2075,7 +2075,7 @@ function openFilteredProjectsFolder(category) {
 	const folderWindow = createXPWindow(id, title, contentHTML, 700, 500);
 
 	const folderContent = folderWindow.querySelector('#filtered-projects-folder-content');
-	
+
 	const flattenedProjects = [];
 	projects.forEach(projectGroup => {
 		const projectsInGroup = Array.isArray(projectGroup) ? projectGroup : [projectGroup];
