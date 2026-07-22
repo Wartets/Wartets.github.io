@@ -741,12 +741,12 @@ function renderDesktopIcons() {
 
 	const appIcons = [{
 		name: "My Computer",
-		icon: "XPIcon.png",
+		icon: "../assets/images/desk/XPIcon.png",
 		action: () => showXPDialog('Error', 'Feature not implemented yet.', 'error'),
 		type: "system"
 	}, {
 		name: "Recycle Bin",
-		icon: "trash.png",
+		icon: "../assets/images/desk/trash.png",
 		action: () => showXPDialog(
 			'Error',
 			'Recycle Bin is empty. (feature not implemented yet)',
@@ -3055,7 +3055,7 @@ function openDisplaySettings() {
 		<div style="padding: 10px;">
 			<h4>Background</h4>
 			<div style="display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 20px;">
-				<img src="../assets/images/windows_xp_original-wallpaper-1920x1080.jpg" data-wallpaper="../assets/images/windows_xp_original-wallpaper-1920x1080.jpg" style="width: 100px; height: 75px; border: 1px solid var(--xp-border-dark); cursor: pointer;" class="wallpaper-thumbnail">
+				<img src="../assets/images/desk/windows_xp_original.jpg" data-wallpaper="../assets/images/desk/windows_xp_original.jpg" style="width: 100px; height: 75px; border: 1px solid var(--xp-border-dark); cursor: pointer;" class="wallpaper-thumbnail">
 				<img src="https://images7.alphacoders.com/115/thumb-1920-1158141.jpg" data-wallpaper="https://images7.alphacoders.com/115/thumb-1920-1158141.jpg" style="width: 100px; height: 75px; border: 1px solid var(--xp-border-dark); cursor: pointer;" class="wallpaper-thumbnail">
 				<img src="https://e1.pxfuel.com/desktop-wallpaper/347/445/desktop-wallpaper-classic-windows-xp-1920x1080-old-windows.jpg" data-wallpaper="https://e1.pxfuel.com/desktop-wallpaper/347/445/desktop-wallpaper-classic-windows-xp-1920x1080-old-windows.jpg" style="width: 100px; height: 75px; border: 1px solid var(--xp-border-dark); cursor: pointer;" class="wallpaper-thumbnail">
 				<img src="https://e1.pxfuel.com/desktop-wallpaper/594/212/desktop-wallpaper-the-13-best-takes-on-the-windows-xp-bliss-bliss.jpg" data-wallpaper="https://e1.pxfuel.com/desktop-wallpaper/594/212/desktop-wallpaper-the-13-best-takes-on-the-windows-xp-bliss-bliss.jpg" style="width: 100px; height: 75px; border: 1px solid var(--xp-border-dark); cursor: pointer;" class="wallpaper-thumbnail">
@@ -3067,7 +3067,7 @@ function openDisplaySettings() {
 	`;
 	const displayWindow = createXPWindow(id, title, contentHTML, 400, 350, { iconSrc: 'https://api.iconify.design/mdi/monitor-screenshot.svg' });
 
-	let selectedWallpaper = localStorage.getItem('desktopBackground') || './img/windows_xp_original-wallpaper-1920x1080.jpg';
+	let selectedWallpaper = localStorage.getItem('desktopBackground') || '../assets/images/desk/windows_xp_original.jpg';
 	const wallpaperThumbnails = displayWindow.querySelectorAll('.wallpaper-thumbnail');
 
 	wallpaperThumbnails.forEach(thumbnail => {
