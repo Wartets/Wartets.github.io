@@ -1,0 +1,75 @@
+{
+	"meta": {
+		"title": "Colin Bossu Réaubourg",
+		"description": "Portfolio and homepage of Colin Bossu Réaubourg (Wartets). Exploration of works in mathematics, physics, software engineering, and acoustic creations."
+	},
+	"nav": {
+		"home": "Home",
+		"projects": "Projects",
+		"library": "Library",
+		"music": "Music",
+		"language": "Language"
+	},
+	"hero": {
+		"title": "Colin Bossu Réaubourg",
+		"subtitle": "Wartets",
+		"description": "Interactive simulations, physics research, software engineering, and digital creations."
+	},
+	"about": {
+		"title": "About",
+		"p1": "Currently a third-year Physics undergraduate student at Université Paris Cité, my work focuses on natural phenomena modeling, high-performance numerical simulation, and scientific computing. I develop physics engines and virtual analysis environments designed to simulate complex systems.",
+		"p2": "My areas of interest include quantum mechanics, fluid dynamics, and statistical physics. I have contributed to activities at the Materials and Quantum Phenomena Laboratory (MPQ) and am involved in scientific communication as the Vice President of the Phisis Association.",
+		"p3": "",
+		"p4": "",
+		"p5": ""
+	},
+	"skills": {
+		"title": "Technical Skills",
+		"programming": "Engineering & Computing",
+		"programming_desc": "Python, JavaScript, C++20, WebGL2/OpenGL, LaTeX, Git, Linux/Windows/MacOS, Docker, CI/CD",
+		"science": "Scientific Tools & Methods",
+		"science_desc": "Numerical modeling (LBM, Lenia, Barnes-Hut), Raman spectroscopy, use of AlGaAs entangled photon sources, data analysis, scientific visualization",
+		"music": "Music",
+		"music_desc": "Composition, acoustics, musical training (Éric Satie Conservatory, 2011-2019)"
+	},
+	"projects": {
+		"featured_title": "Featured Projects",
+		"recent_title": "Recent Projects",
+		"view_all": "All projects",
+		"open": "Open",
+		"code": "Source code"
+	},
+	"library": {
+		"featured_title": "Featured Works",
+		"recent_title": "Recent Works",
+		"view_all": "All works",
+		"read": "Read document"
+	},
+	"music_section": {
+		"title": "Music Space",
+		"description": "Selection of acoustic and electroacoustic works structured around algorithmic frameworks, signal processing, and frequency synthesis.",
+		"featured_title": "Featured Compositions",
+		"view_all": "All music library",
+		"play": "Play",
+		"pause": "Pause"
+	},
+	"links": {
+		"title": "External Links & Networks",
+		"github_desc": "Repositories, source code, and open-source projects.",
+		"linkedin_desc": "Academic background, collaborations, and professional network.",
+		"youtube_desc": "Visual demonstrations, numerical simulations, and scientific communication.",
+		"email_desc": "Institutional contact and academic correspondence."
+	},
+	"footer": {
+		"rights": "All rights reserved.",
+		"license": "Under MIT license",
+		"designed_by": "Designed by",
+		"github_text": "Source code available on",
+		"poetry": "Poetry"
+	},
+	"ui": {
+		"loading": "Loading data...",
+		"new": "New",
+		"unknown_author": "Unknown author"
+	}
+}
