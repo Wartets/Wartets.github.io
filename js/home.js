@@ -497,7 +497,6 @@ function renderMusicSection() {
         card.className = 'music-card';
 
         const audio = new Audio();
-        audio.crossOrigin = "anonymous";
         const resolvedUrl = resolveMusicUrl(track.filePath);
         audio.src = resolvedUrl;
         audio.preload = 'metadata';
