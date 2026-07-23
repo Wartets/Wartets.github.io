@@ -560,6 +560,25 @@ function initLibrary() {
 		if (canvas.classList.contains('loaded')) return;
 
 		if (!window.pdfjsLib) return;
+        
+		const cacheKey = `pdf_lib_preview_${filePath}`;
+		const cachedDataUrl = sessionStorage.getItem(cacheKey);
+		
+		if (cachedDataUrl) {
+			const img = new Image();
+			img.onload = () => {
+				const ctx = canvas.getContext('2d', { alpha: false });
+				canvas.width = img.width;
+				canvas.height = img.height;
+				ctx.drawImage(img, 0, 0);
+				canvas.classList.add('loaded');
+				const loader = canvas.parentElement ? canvas.parentElement.querySelector('.preview-loader') : null;
+				if (loader) loader.style.display = 'none';
+				if (canvas.parentElement) canvas.parentElement.style.animation = 'none';
+			};
+			img.src = cachedDataUrl;
+			return;
+		}
 
 		try {
 			let loadingTask;
@@ -588,7 +607,8 @@ function initLibrary() {
 			}
 
 			const page = await pdf.getPage(1);
-			const viewport = page.getViewport({ scale: 1.0 });
+			const scale = window.devicePixelRatio || 1.5;
+			const viewport = page.getViewport({ scale: Math.max(1.5, scale) });
 			const context = canvas.getContext('2d', { alpha: false, willReadFrequently: false });
 			
 			if (!context) {
@@ -606,6 +626,10 @@ function initLibrary() {
 
 			await page.render(renderContext).promise;
 			page.cleanup();
+			
+			try {
+				sessionStorage.setItem(cacheKey, canvas.toDataURL('image/jpeg', 0.9));
+			} catch (e) {}
 
 			const loader = canvas.parentElement ? canvas.parentElement.querySelector('.preview-loader') : null;
 			if (loader) loader.style.display = 'none';

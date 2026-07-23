@@ -1,34 +1,182 @@
 <!DOCTYPE html>
-<html>
-<head>
+<html lang="en">
 <head>
 	<meta charset="UTF-8">
-	<title>Home Page</title>
+	<meta name="viewport" content="width=device-width, initial-scale=0.9">
+	<title data-i18n="meta.title">Colin Bossu Réaubourg | Wartets</title>
 	<link rel="canonical" href="https://wartets.github.io/">
-	<link rel="icon" href="assets/images/browser-icon">
-	<meta name="description" content="Home page of Wartets (Colin Bossu Réaubourg), showcasing interactive simulations, experiments, and digital creations. Explore a range of immersive experiences in maths, physics, music, and art.">
-	<meta name="keywords" content="Wartets, Colin Bossu Réaubourg, interactive, simulation, physics, maths, music, game, art, science">
+	<link rel="icon" href="assets/images/browser-icon.png">
+	<meta name="description" content="Portfolio and home page of Colin Bossu Réaubourg (Wartets). Discover my work in mathematics, physics, software development, and music creation." data-i18n="meta.description">
 	<meta name="robots" content="index, follow">
 
-	<meta property="og:title" content="Colin Bossu Réaubourg | Home page">
-	<meta property="og:description" content="Home page of Wartets (Colin Bossu Réaubourg), showcasing interactive simulations, experiments, and digital creations. Explore a range of immersive experiences in maths, physics, music, and art.">
-	<meta property="og:image" content="https://wartets.github.io/images/app-icon.jpg">
+	<meta property="og:title" content="Colin Bossu Réaubourg | Wartets" data-i18n="meta.title">
+	<meta property="og:description" content="Portfolio and home page of Colin Bossu Réaubourg (Wartets). Discover my work in mathematics, physics, software development, and music creation." data-i18n="meta.description">
+	<meta property="og:image" content="https://wartets.github.io/assets/images/app-icon.jpg">
 	<meta property="og:type" content="website">
 
-	<link rel="stylesheet" href="projects/style.css"> <!-- Use this file for the home page until the main style file is created -->
+	<link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+	<link rel="dns-prefetch" href="https://cdnjs.cloudflare.com">
+	<link rel="preload" href="projects/style.css" as="style">
+	<link rel="preload" href="css/home.css" as="style">
+	<link rel="preload" href="js/i18n.js" as="script">
+	<link rel="preload" href="js/home.js" as="script">
+
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+	<link rel="stylesheet" href="projects/style.css">
+	<link rel="stylesheet" href="css/home.css">
 </head>
 <body>
+	<div class="bg-gradient"></div>
+	<div class="bg-noise"></div>
 
-<h1>Home Page</h1>
+	<nav class="main-nav">
+		<a href="#" class="nav-brand">Wartets</a>
+		<div class="nav-links">
+			<a href="#" class="nav-link" data-i18n="nav.home"></a>
+			<a href="projects/" class="nav-link" data-i18n="nav.projects"></a>
+			<a href="library/" class="nav-link" data-i18n="nav.library"></a>
+			<a href="Music-Library/" class="nav-link" data-i18n="nav.music"></a>
+			<div class="custom-lang-selector" id="customLangSelector">
+				<div class="lang-trigger">
+					<i class="fa-solid fa-globe lang-icon" aria-hidden="true"></i>
+					<span id="langCurrent">English</span>
+					<i class="fa-solid fa-chevron-down lang-chevron" aria-hidden="true"></i>
+				</div>
+				<ul class="lang-options">
+					<li data-lang="en">English</li>
+					<li data-lang="fr">Français</li>
+				</ul>
+			</div>
+		</div>
+	</nav>
 
-<ul>
-	<li><a href="desk/">desk</a></li>
-	<li><a href="library/">library</a></li>
-	<li><a href="projects/">projects</a></li>
-	<li><a href="poetry/">poetry</a></li>
-	<li><a href="old/">old</a></li>
-	<li><a href="404.html">404</a></li>
-</ul>
+	<header class="site-header noselect">
+		<div class="header-content">
+			<h1 data-i18n="hero.title"></h1>
+			<h4 data-i18n="hero.subtitle"></h4>
+			<p data-i18n="hero.description"></p>
+		</div>
+	</header>
 
+	<main>
+		<section class="home-section" id="about">
+			<h2 class="section-title" data-i18n="about.title"></h2>
+			<div class="about-grid">
+				<div class="about-content">
+					<p data-i18n="about.p1"></p>
+					<p data-i18n="about.p2"></p>
+					<p data-i18n="about.p3"></p>
+					<p data-i18n="about.p4"></p>
+					<p data-i18n="about.p5"></p>
+					<div class="about-links">
+						<a href="https://github.com/Wartets" target="_blank" rel="noopener noreferrer" class="about-link" data-preview-url="https://github.com/Wartets">
+							<i class="fa-brands fa-github"></i> GitHub
+						</a>
+						<a href="https://linkedin.com/in/colin-bossu" target="_blank" rel="noopener noreferrer" class="about-link" data-preview-url="https://linkedin.com/in/colin-bossu">
+							<i class="fa-brands fa-linkedin"></i> LinkedIn
+						</a>
+						<a href="https://youtube.com/@wartets" target="_blank" rel="noopener noreferrer" class="about-link" data-preview-url="https://youtube.com/@wartets">
+							<i class="fa-brands fa-youtube"></i> YouTube
+						</a>
+					</div>
+				</div>
+				<div class="skills-container">
+					<h3 class="skill-main-title" data-i18n="skills.title"></h3>
+
+					<div class="skill-group">
+						<div class="skill-title" data-i18n="skills.programming"></div>
+						<div class="skill-list" data-i18n="skills.programming_desc"></div>
+					</div>
+					<div class="skill-group">
+						<div class="skill-title" data-i18n="skills.science"></div>
+						<div class="skill-list" data-i18n="skills.science_desc"></div>
+					</div>
+					<div class="skill-group">
+						<div class="skill-title" data-i18n="skills.music"></div>
+						<div class="skill-list" data-i18n="skills.music_desc"></div>
+					</div>
+				</div>
+			</div>
+		</section>
+
+		<section class="home-section">
+			<div class="section-header-row" id="featured-projects">
+				<h2 class="section-title" data-i18n="projects.featured_title"></h2>
+				<a href="projects/" class="minimal-link">
+					<span data-i18n="projects.view_all"></span>
+					<i class="fa-solid fa-arrow-right"></i>
+				</a>
+			</div>
+			<div id="featured-projects-grid" class="dynamic-grid projects-grid home-grid-override"></div>
+
+			<div class="section-header-row" id="recent-projects">
+				<h2 class="section-title" data-i18n="projects.recent_title"></h2>
+				<a href="projects/" class="minimal-link">
+					<span data-i18n="projects.view_all"></span>
+					<i class="fa-solid fa-arrow-right"></i>
+				</a>
+			</div>
+			<div id="recent-projects-grid" class="dynamic-grid projects-grid home-grid-override"></div>
+		</section>
+
+		<section class="home-section">
+			<div class="section-header-row" id="featured-library">
+				<h2 class="section-title" data-i18n="library.featured_title"></h2>
+				<a href="library/" class="minimal-link">
+					<span data-i18n="library.view_all"></span>
+					<i class="fa-solid fa-arrow-right"></i>
+				</a>
+			</div>
+			<div id="featured-library-grid" class="dynamic-grid projects-grid home-grid-override"></div>
+
+			<div class="section-header-row" id="recent-library">
+				<h2 class="section-title" data-i18n="library.recent_title"></h2>
+				<a href="library/" class="minimal-link">
+					<span data-i18n="library.view_all"></span>
+					<i class="fa-solid fa-arrow-right"></i>
+				</a>
+			</div>
+			<div id="recent-library-grid" class="dynamic-grid projects-grid home-grid-override"></div>
+		</section>
+
+		<section class="home-section">
+			<div class="section-header-row" id="featured-music">
+				<h2 class="section-title" data-i18n="music_section.featured_title"></h2>
+				<a href="Music-Library/" class="minimal-link">
+					<span data-i18n="music_section.view_all"></span>
+					<i class="fa-solid fa-arrow-right"></i>
+				</a>
+			</div>
+			<div id="featured-music-grid" class="dynamic-grid home-grid-override"></div>
+		</section>
+	</main>
+
+	<footer class="site-footer custom-footer-margin">
+		<div class="footer-content">
+			<p class="copyright">
+				© <span id="current-year">2026</span>. <span data-i18n="footer.rights">Tous droits réservés.</span> <a href="https://github.com/Wartets/Wartets.github.io/blob/main/LICENSE" target="_blank" rel="noopener noreferrer" class="footer-link" data-i18n="footer.license">Sous licence MIT</a>
+				<a href="old/" id="secret-old-trigger" aria-hidden="true" class="secret-old-dot">.</a>
+			</p>
+			<nav class="footer-nav">
+				<span><span data-i18n="footer.designed_by">Conçu par</span> <a href="https://wartets.github.io/" class="footer-link">Wartets <i class="fa-solid fa-arrow-up-right-from-square"></i></a></span>
+				<span class="divider"></span>
+				<span><span data-i18n="footer.github_text">Code source disponible sur</span> <a href="https://github.com/wartets/wartets.github.io" target="_blank" rel="noopener noreferrer" class="footer-link">GitHub <i class="fa-brands fa-github"></i></a></span>
+				<span class="divider"></span>
+				<a href="desk/" id="secret-desk-trigger" title="Desk / Workspace" class="secret-desk-icon">
+					<img src="assets/images/desk/xp-computer-icon.webp" alt="Windows XP Portfolio Icon">
+				</a>
+			</nav>
+		</div>
+	</footer>
+
+	<button id="backToTop" class="back-to-top" aria-label="Back to top">
+		<i class="fa-solid fa-arrow-up"></i>
+	</button>
+
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+	<script src="projects/projects.js"></script>
+	<script src="library/documents.js"></script>
+	<script src="js/i18n.js"></script>
+	<script src="js/home.js"></script>
 </body>
 </html>

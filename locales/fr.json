@@ -1,0 +1,75 @@
+{
+	"meta": {
+		"title": "Colin Bossu Réaubourg | Wartets",
+		"description": "Portefolio et page d'accueil de Colin Bossu Réaubourg (Wartets). Découverte des travaux en physique, mathématiques, ingénierie logicielle et créations sonores."
+	},
+	"nav": {
+		"home": "Accueil",
+		"projects": "Projets",
+		"library": "Bibliothèque",
+		"music": "Musique",
+		"language": "Langue"
+	},
+	"hero": {
+		"title": "Colin Bossu Réaubourg",
+		"subtitle": "Wartets",
+		"description": "Simulations interactives, recherche en physique, ingénierie logicielle et créations numériques."
+	},
+	"about": {
+		"title": "À Propos",
+		"p1": "Étudiant en 3ème année de Licence de Physique à l'Université Paris Cité, mon travail est axé sur la modélisation des phénomènes naturels, la simulation numérique à haute performance et l'informatique scientifique. Je développe des moteurs de calcul physique et des environnements virtuels d'analyse visant à simuler des systèmes complexes.",
+		"p2": "Mes domaines d'intérêt incluent la mécanique quantique, la dynamique des fluides et la physique statistique. J'ai contribué aux activités du Laboratoire Matériaux et Phénomènes Quantiques et m'implique dans la diffusion des connaissances scientifiques via la Vice-Présidence de l'Association Phisis.",
+		"p3": "",
+		"p4": "",
+		"p5": ""
+	},
+	"skills": {
+		"title": "Compétences Techniques",
+		"programming": "Ingénierie & Informatique",
+		"programming_desc": "Python, JavaScript, C++20, WebGL2/OpenGL, LaTeX, Git, Linux/Windows/MacOS, Docker, CI/CD",
+		"science": "Outils & Méthodes Scientifiques",
+		"science_desc": "Modélisation numérique (LBM, Lenia, Barnes-Hut), Spectroscopie Raman, Utilisation de Sources AlGaAs de photons intriqués, Analyse de données, Visualisation scientifique",
+		"music": "Musique",
+		"music_desc": "Composition, Acoustique, Formation musicale (Conservatoire Éric Satie, 2011-2019)"
+	},
+	"projects": {
+		"featured_title": "Projets Sélectionnés",
+		"recent_title": "Derniers Projets",
+		"view_all": "Tous les projets",
+		"open": "Consulter",
+		"code": "Code source"
+	},
+	"library": {
+		"featured_title": "Travaux Sélectionnés",
+		"recent_title": "Derniers Travaux",
+		"view_all": "Toute la bibliothèque",
+		"read": "Consulter le document"
+	},
+	"music_section": {
+		"title": "Espace Musical",
+		"description": "Sélection d'œuvres acoustiques et électroacoustiques articulées autour de structures algorithmiques, du traitement de signal et de la synthèse fréquentielle.",
+		"featured_title": "Compositions Sélectionnées",
+		"view_all": "Toute la librairie musicale",
+		"play": "Écouter",
+		"pause": "Pause"
+	},
+	"links": {
+		"title": "Liaisons Extérieures & Réseaux",
+		"github_desc": "Dépôts informatiques, codes sources et projets open-source.",
+		"linkedin_desc": "Parcours académique, collaborations et réseau professionnel.",
+		"youtube_desc": "Démonstrations visuelles, simulations numériques et vulgarisation.",
+		"email_desc": "Contact institutionnel et échanges académiques."
+	},
+	"footer": {
+		"rights": "Tous droits réservés.",
+		"license": "Sous licence MIT",
+		"designed_by": "Conçu par",
+		"github_text": "Code source disponible sur",
+		"poetry": "Poésie"
+	},
+	"ui": {
+		"loading": "Chargement des données...",
+		"new": "Nouveau",
+		"unknown_author": "Auteur inconnu"
+	}
+}
