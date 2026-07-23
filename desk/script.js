@@ -1693,7 +1693,7 @@ function openWinamp() {
 				artist: "Wartets",
 				title: "Projet 8.4"
 			},
-			url: "Projet_8.4.mp3",
+			url: "assets/musics/Projet_8.4.mp3",
 			duration: 4.333
 		}],
 		zIndex: 9000
