@@ -324,7 +324,7 @@
 .doc-card {
 	background: var(--color-surface);
 	border-radius: var(--radius-lg);
-	overflow: hidden;
+	overflow: visible !important;
 	display: flex;
 	flex-direction: column;
 	position: relative;
@@ -349,6 +349,8 @@
 	position: relative;
 	overflow: hidden;
 	border-bottom: 1px solid var(--color-border);
+	border-top-left-radius: var(--radius-lg);
+	border-top-right-radius: var(--radius-lg);
 }
 
 .doc-preview-loader {
@@ -420,13 +422,32 @@
 
 .home-project-card {
 	cursor: pointer;
+	overflow: visible !important;
 	transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.home-project-card .card-img {
+	border-top-left-radius: var(--radius-lg);
+	border-top-right-radius: var(--radius-lg);
 }
 
 .home-project-card:hover {
 	transform: translateY(-4px);
 	border-color: rgba(255, 255, 255, 0.2);
 	box-shadow: 0 16px 32px rgba(0, 0, 0, 0.4);
+}
+
+.doc-card::after,
+.home-project-card::after {
+	content: "";
+	position: absolute;
+	top: -10px;
+	bottom: -25px;
+	left: -10px;
+	right: -10px;
+	z-index: -1;
+	background: transparent;
+	pointer-events: auto !important;
 }
 
 .doc-card-meta {
