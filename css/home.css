@@ -337,7 +337,7 @@
 }
 
 .doc-card:hover {
-	transform: translateY(-5px);
+	transform: translateY(-4px);
 	border-color: rgba(255, 255, 255, 0.2);
 	box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
 }
@@ -369,6 +369,7 @@
 }
 
 .doc-card-content {
+	height: 160px;
 	padding: 1.5rem;
 	display: flex;
 	flex-direction: column;
@@ -397,8 +398,8 @@
 	font-size: 0.9rem;
 	color: var(--color-text-secondary);
 	display: -webkit-box;
-	line-clamp: 2;
-	-webkit-line-clamp: 2;
+	line-clamp: 3;
+	-webkit-line-clamp: 3;
 	-webkit-box-orient: vertical;
 	overflow: hidden;
 	margin-bottom: 1rem;
@@ -408,11 +409,13 @@
 .doc-card.is-truncated:hover .doc-card-description {
 	line-clamp: unset;
 	-webkit-line-clamp: unset;
-	overflow-y: auto;
-	max-height: 120px;
+	overflow-y: clip;
+	max-height: 70px;
 	padding-right: 4px;
 	scrollbar-width: thin;
 	scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
+	margin-bottom: 0;
+	padding-bottom: 0;
 }
 
 .home-project-card {
@@ -436,14 +439,14 @@
 	color: var(--color-text-secondary);
 	font-family: var(--font-mono);
 	width: 100%;
-	max-height: 60px;
+	height: 1.28rem;
 	opacity: 1;
-	transition: max-height 0.4s ease, opacity 0.3s ease, margin-top 0.4s ease;
 	overflow: hidden;
 }
 
 .doc-card.is-truncated:hover .doc-card-meta {
-	max-height: 0;
+	display: none;
+	height: 0;
 	opacity: 0;
 	margin-top: 0;
 	padding-top: 0;
@@ -476,13 +479,19 @@
 
 .home-project-card.is-truncated:hover .card-desc-clamp {
 	display: block;
-	-webkit-line-clamp: unset;
 	line-clamp: unset;
+	-webkit-line-clamp: unset;
 	overflow-y: auto;
-	height: 4.8em;
+	height: auto;
+	max-height: 5.8em;
 	padding-right: 4px;
 	scrollbar-width: thin;
 	scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
+	position: relative;
+	z-index: 10;
+	pointer-events: auto;
+	overscroll-behavior: contain;
+	touch-action: pan-y;
 }
 
 .card-links-flex {
@@ -496,15 +505,6 @@
 	transition: max-height 0.4s ease, opacity 0.3s ease, padding 0.4s ease, margin-top 0.4s ease;
 	overflow: hidden;
 }
-
-/* .home-project-card:hover .card-links-flex {
-	max-height: 0;
-	opacity: 0;
-	padding-top: 0;
-	padding-bottom: 0;
-	margin-top: 0;
-	border-top-color: transparent;
-} */
 
 .music-card {
 	background: var(--color-surface);
@@ -941,4 +941,19 @@
 	.home-section {
 		margin-bottom: 3rem;
 	}
+}
+
+.title-moon-icon {
+	height: var(--moon-height, 0.78em);
+	width: var(--moon-width, 0.78em);
+	margin-top: var(--moon-margin-top, 0px);
+	margin-right: var(--moon-margin-right, 2px);
+	margin-bottom: var(--moon-margin-bottom, 0px);
+	margin-left: var(--moon-margin-left, 2px);
+	vertical-align: var(--moon-vertical-align, -0.05em);
+	transform: scale(var(--moon-scale-x, 1), var(--moon-scale-y, 1));
+	display: inline-block;
+	object-fit: fill;
+	-webkit-text-fill-color: initial;
+	filter: drop-shadow(0 0 2px rgba(255, 255, 255, 0.5));
 }

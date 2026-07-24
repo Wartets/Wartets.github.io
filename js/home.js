@@ -41,6 +41,7 @@ document.addEventListener("DOMContentLoaded", () => {
 		hasRendered = true;
 		renderDynamicSections();
 		restoreScrollPosition();
+		updateTitleWithMoonPhase();
 		setTimeout(checkTextTruncation, 200);
 	};
 
@@ -48,6 +49,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 	document.addEventListener('i18nReady', () => {
 		safeRender();
+		updateTitleWithMoonPhase();
 	});
 
 	if (Object.keys(window.translations || {}).length > 0) {
@@ -693,14 +695,28 @@ function checkTextTruncation() {
 		const desc = card.querySelector('.doc-card-description, .card-desc-clamp');
 		if (desc) {
 			card.classList.remove('is-truncated');
-			if (desc.scrollHeight > desc.clientHeight + 2) {
+			if (desc.scrollHeight > desc.clientHeight + 5) {
 				card.classList.add('is-truncated');
 			}
 		}
 	});
 }
 
-function updateFaviconToMoonPhase() {
+const ENABLE_MOON_PHASE_TITLE_REPLACEMENT = true;
+
+const MOON_TITLE_CONFIG = {
+	height: "0.78em",
+	width: "0.78em",
+	scaleX: 1.0,
+	scaleY: 1.0,
+	marginTop: "0px",
+	marginRight: "6px",
+	marginBottom: "0px",
+	marginLeft: "-2px",
+	verticalAlign: "-0.05em"
+};
+
+function getMoonPhaseImagePath() {
 	const synodicMonth = 29.53058867;
 	const knownNewMoon = new Date('2026-07-14T11:43:00Z').getTime();
 	const now = Date.now();
@@ -713,10 +729,37 @@ function updateFaviconToMoonPhase() {
 	day = Math.max(1, Math.min(30, day));
 
 	const fileName = day.toString().padStart(2, '0') + '.png';
-	const imagePath = `assets/images/moon_phases/${fileName}`;
+	return `assets/images/moon_phases/${fileName}`;
+}
 
+function updateFaviconToMoonPhase() {
+	const imagePath = getMoonPhaseImagePath();
 	const link = document.querySelector("link[rel='icon']");
 	if (link) {
 		link.href = imagePath;
 	}
+}
+
+function updateTitleWithMoonPhase() {
+	if (!ENABLE_MOON_PHASE_TITLE_REPLACEMENT) return;
+	const titleEl = document.querySelector('.site-header h1');
+	if (!titleEl) return;
+
+	titleEl.style.setProperty('--moon-height', MOON_TITLE_CONFIG.height);
+	titleEl.style.setProperty('--moon-width', MOON_TITLE_CONFIG.width);
+	titleEl.style.setProperty('--moon-scale-x', MOON_TITLE_CONFIG.scaleX);
+	titleEl.style.setProperty('--moon-scale-y', MOON_TITLE_CONFIG.scaleY);
+	titleEl.style.setProperty('--moon-margin-top', MOON_TITLE_CONFIG.marginTop);
+	titleEl.style.setProperty('--moon-margin-right', MOON_TITLE_CONFIG.marginRight);
+	titleEl.style.setProperty('--moon-margin-bottom', MOON_TITLE_CONFIG.marginBottom);
+	titleEl.style.setProperty('--moon-margin-left', MOON_TITLE_CONFIG.marginLeft);
+	titleEl.style.setProperty('--moon-vertical-align', MOON_TITLE_CONFIG.verticalAlign);
+
+	const rawText = (window.t && titleEl.hasAttribute('data-i18n'))
+		? window.t(titleEl.getAttribute('data-i18n'))
+		: titleEl.textContent;
+
+	const imagePath = getMoonPhaseImagePath();
+	const moonImgHtml = `<img src="${imagePath}" alt="o" class="title-moon-icon">`;
+	titleEl.innerHTML = rawText.replace(/[oO]/g, moonImgHtml);
 }
