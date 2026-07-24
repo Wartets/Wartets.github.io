@@ -455,7 +455,6 @@ function resolveMusicUrl(url) {
                     window.location.protocol === 'file:';
 
     if (isLocal) {
-        // Si l'URL est absolue mais pointe vers GitHub Pages, on la convertit en chemin local pour le débogage
         if (targetUrl.startsWith('https://wartets.github.io/Music-Library/')) {
             targetUrl = targetUrl.replace('https://wartets.github.io/Music-Library/', 'Music-Library/');
         }
@@ -465,11 +464,9 @@ function resolveMusicUrl(url) {
         }
         
         if (targetUrl.startsWith('Music-Library/')) {
-            // Permet l'accès direct aux fichiers locaux si le serveur englobe le répertoire parent commun
             if (window.location.pathname.includes('/Wartets.github.io/')) {
                 targetUrl = '../' + targetUrl;
             } else {
-                // Fallback vers le CDN si le serveur local est limité au dossier Wartets.github.io
                 targetUrl = 'https://wartets.github.io/' + targetUrl;
             }
         }
@@ -480,7 +477,9 @@ function resolveMusicUrl(url) {
     }
 
     try {
-        return encodeURI(decodeURI(targetUrl));
+        return encodeURI(decodeURI(targetUrl))
+            .replace(/\(/g, '%28')
+            .replace(/\)/g, '%29');
     } catch (e) {
         return targetUrl;
     }
@@ -497,9 +496,10 @@ function renderMusicSection() {
         card.className = 'music-card';
 
         const audio = new Audio();
+        audio.crossOrigin = 'anonymous';
         const resolvedUrl = resolveMusicUrl(track.filePath);
         audio.src = resolvedUrl;
-        audio.preload = 'metadata';
+        audio.preload = 'none';
 
         audio.addEventListener('error', () => {
             const err = audio.error;
