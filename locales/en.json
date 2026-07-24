@@ -17,8 +17,8 @@
 	},
 	"about": {
 		"title": "About",
-		"p1": "Currently a third-year Physics undergraduate student at Université Paris Cité, my work focuses on natural phenomena modeling, high-performance numerical simulation, and scientific computing. I develop physics engines and virtual analysis environments designed to simulate complex systems.",
-		"p2": "My areas of interest include quantum mechanics, fluid dynamics, and statistical physics. I have contributed to activities at the Materials and Quantum Phenomena Laboratory (MPQ) and am involved in scientific communication as the Vice President of the Phisis Association.",
+		"p1": "Currently a third-year Physics undergraduate student at Université Paris Cité, my work focuses on <span class=\"skill-tooltip\" data-skill-tips=\"Fluid mechanics, N-body dynamics, continuous dynamical systems\">natural phenomena modeling</span>, high-performance numerical simulation, and <span class=\"skill-tooltip\" data-skill-tips=\"High-performance computing (HPC), numerical integration, parallelization\">scientific computing</span>. I develop physics engines and <span class=\"skill-tooltip\" data-skill-tips=\"Interactive visualization interfaces, WebGL, real-time 3D rendering\">virtual analysis environments</span> designed to simulate complex systems.",
+		"p2": "My areas of interest include quantum mechanics, <span class=\"skill-tooltip\" data-skill-tips=\"Lattice Boltzmann Method (LBM), hydrodynamic instabilities, turbulence\">fluid dynamics</span>, and <span class=\"skill-tooltip\" data-skill-tips=\"Cellular automata (Lenia), random walks, non-equilibrium complex systems\">statistical physics</span>. I have contributed to activities at the <span class=\"skill-tooltip\" data-skill-tips=\"Experimental study of AlGaAs sources, entangled photon pair generation, signal processing\">Materials and Quantum Phenomena Laboratory</span> and am involved in the dissemination of scientific knowledge through the Vice Presidency of the <span class=\"skill-tooltip\" data-skill-tips=\"Physics student association of Université Paris Cité\">Phisis</span> Association.",
 		"p3": "",
 		"p4": "",
 		"p5": ""

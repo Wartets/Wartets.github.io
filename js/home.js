@@ -41,7 +41,10 @@ document.addEventListener("DOMContentLoaded", () => {
 		hasRendered = true;
 		renderDynamicSections();
 		restoreScrollPosition();
+		setTimeout(checkTextTruncation, 200);
 	};
+
+	window.addEventListener('resize', checkTextTruncation);
 
 	document.addEventListener('i18nReady', () => {
 		safeRender();
@@ -52,7 +55,53 @@ document.addEventListener("DOMContentLoaded", () => {
 	}
 
 	setupBackToTop();
+	setupTooltips();
 });
+
+function setupTooltips() {
+	let tooltipEl = document.querySelector('.global-skill-tooltip');
+	if (!tooltipEl) {
+		tooltipEl = document.createElement('div');
+		tooltipEl.className = 'tooltip global-skill-tooltip';
+		document.body.appendChild(tooltipEl);
+	}
+
+	document.addEventListener('mouseover', (e) => {
+		const target = e.target.closest('.skill-tooltip');
+		if (target) {
+			const text = target.getAttribute('data-skill-tips');
+			if (!text) return;
+			
+			tooltipEl.innerHTML = text;
+			tooltipEl.classList.add('visible');
+
+			const rect = target.getBoundingClientRect();
+			
+			let top = rect.top - tooltipEl.offsetHeight - 10;
+			let left = rect.left + (rect.width / 2) - (tooltipEl.offsetWidth / 2);
+
+			if (top < 10) {
+				top = rect.bottom + 10;
+			}
+			
+			if (left < 10) {
+				left = 10;
+			} else if (left + tooltipEl.offsetWidth > window.innerWidth - 10) {
+				left = window.innerWidth - tooltipEl.offsetWidth - 10;
+			}
+
+			tooltipEl.style.top = `${top}px`;
+			tooltipEl.style.left = `${left}px`;
+		}
+	});
+
+	document.addEventListener('mouseout', (e) => {
+		const target = e.target.closest('.skill-tooltip');
+		if (target) {
+			tooltipEl.classList.remove('visible');
+		}
+	});
+}
 
 function updateFooterYear() {
 	const yearEl = document.getElementById('current-year');
@@ -247,7 +296,7 @@ function buildProjectGrid(containerId, projectList) {
 function renderLibrarySection() {
 	if (!window.libraryData || !window.libraryData.documents) return;
 
-	const allDocs = window.libraryData.documents;
+	const allDocs = window.libraryData.documents.filter(d => d.show !== false);
 
 	const featuredDocs = [];
 	FEATURED_DOC_SLUGS.forEach(slug => {
@@ -636,6 +685,18 @@ function setupBackToTop() {
 
 	btn.addEventListener('click', () => {
 		window.scrollTo({ top: 0, behavior: 'smooth' });
+	});
+}
+
+function checkTextTruncation() {
+	document.querySelectorAll('.doc-card, .home-project-card').forEach(card => {
+		const desc = card.querySelector('.doc-card-description, .card-desc-clamp');
+		if (desc) {
+			card.classList.remove('is-truncated');
+			if (desc.scrollHeight > desc.clientHeight + 2) {
+				card.classList.add('is-truncated');
+			}
+		}
 	});
 }
 

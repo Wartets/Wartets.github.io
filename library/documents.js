@@ -49,7 +49,8 @@ window.libraryData = {
 			authorIds: ["cbr"],
 			tags: ["physics", "quantum", "university", "lecture", "lesson"],
 			langId: "fr",
-			timestamp: "2025-12-13T00:00:00Z"
+			timestamp: "2025-12-13T00:00:00Z",
+			show: true
 		},
 		{
 			id: "doc-002",
@@ -62,7 +63,8 @@ window.libraryData = {
 			authorIds: ["cbr"],
 			tags: ["mathematics", "university", "lecture", "lesson"],
 			langId: "fr",
-			timestamp: "2025-12-13T00:00:00Z"
+			timestamp: "2025-12-13T00:00:00Z",
+			show: true
 		},
 		{
 			id: "doc-003",
@@ -75,7 +77,8 @@ window.libraryData = {
 			authorIds: ["cbr", "atp"],
 			tags: ["physics", "experimental", "university", "lecture"],
 			langId: "fr",
-			timestamp: "2025-12-07T00:00:00Z"
+			timestamp: "2025-12-07T00:00:00Z",
+			show: true
 		},
 		{
 			id: "doc-004",
@@ -88,7 +91,8 @@ window.libraryData = {
 			authorIds: ["cbr"],
 			tags: ["physics", "quantum", "exercise"],
 			langId: "fr",
-			timestamp: "2025-10-16T00:00:00Z"
+			timestamp: "2025-10-16T00:00:00Z",
+			show: true
 		},
 		{
 			id: "doc-005",
@@ -101,7 +105,8 @@ window.libraryData = {
 			authorIds: ["cbr"],
 			tags: ["mathematics", "exercise", "probabilities"],
 			langId: "fr",
-			timestamp: "2025-11-07T00:00:00Z"
+			timestamp: "2025-11-07T00:00:00Z",
+			show: true
 		},
 		{
 			id: "doc-006",
@@ -114,7 +119,8 @@ window.libraryData = {
 			authorIds: ["cbr"],
 			tags: ["physics", "quantum", "lesson", "computer"],
 			langId: "fr",
-			timestamp: "2025-09-29T00:00:00Z"
+			timestamp: "2025-09-29T00:00:00Z",
+			show: true
 		},
 		{
 			id: "doc-007",
@@ -127,7 +133,8 @@ window.libraryData = {
 			authorIds: ["cbr"],
 			tags: ["physics", "optics", "university", "lecture", "lesson"],
 			langId: "fr",
-			timestamp: "2025-09-25T00:00:00Z"
+			timestamp: "2025-09-25T00:00:00Z",
+			show: true
 		},
 		{
 			id: "doc-008",
@@ -140,7 +147,8 @@ window.libraryData = {
 			authorIds: ["cbr"],
 			tags: ["physics", "mathematics"],
 			langId: "fr",
-			timestamp: "2025-08-10T00:00:00Z"
+			timestamp: "2025-08-10T00:00:00Z",
+			show: true
 		},
 		{
 			id: "doc-009",
@@ -153,7 +161,8 @@ window.libraryData = {
 			authorIds: ["cbr"],
 			tags: ["physics", "mathematics", "computer science"],
 			langId: "fr",
-			timestamp: "2025-12-09T00:00:00Z"
+			timestamp: "2025-12-09T00:00:00Z",
+			show: true
 		},
 		{
 			id: "doc-010",
@@ -166,7 +175,8 @@ window.libraryData = {
 			authorIds: ["cbr"],
 			tags: ["mathematics", "arithmetic", "number theory"],
 			langId: "en",
-			timestamp: "2025-12-17T23:42:50Z"
+			timestamp: "2025-12-17T23:42:50Z",
+			show: true
 		},
 		{
 			id: "doc-011",
@@ -179,7 +189,8 @@ window.libraryData = {
 			authorIds: ["cbr"],
 			tags: ["mathematics", "computer science", "number theory"],
 			langId: "fr",
-			timestamp: "2026-01-06T23:27:23Z"
+			timestamp: "2026-01-06T23:27:23Z",
+			show: true
 		},
 		{
 			id: "doc-012",
@@ -192,7 +203,8 @@ window.libraryData = {
 			authorIds: ["cbr"],
 			tags: ["physics", "relativity", "gravitation", "mathematics"],
 			langId: "fr",
-			timestamp: "2026-01-10T00:00:00Z"
+			timestamp: "2026-01-10T00:00:00Z",
+			show: true
 		},
 		{
 			id: "doc-013",
@@ -205,7 +217,8 @@ window.libraryData = {
 			authorIds: ["cbr"],
 			tags: ["mathematics", "analysis", "combinatorics", "number theory"],
 			langId: "fr",
-			timestamp: "2026-01-23T21:42:00Z"
+			timestamp: "2026-01-23T21:42:00Z",
+			show: true
 		},
 		{
 			id: "doc-014",
@@ -218,7 +231,8 @@ window.libraryData = {
 			authorIds: ["cbr"],
 			tags: ["physics", "relativity", "cosmology", "black holes"],
 			langId: "fr",
-			timestamp: "2026-01-08T18:12:00Z"
+			timestamp: "2026-01-08T18:12:00Z",
+			show: true
 		},
 		{
 			id: "doc-015",
@@ -231,7 +245,8 @@ window.libraryData = {
 			authorIds: ["cbr"],
 			tags: ["mathematics", "probability", "geometry", "calculus"],
 			langId: "fr",
-			timestamp: "2026-01-10T14:00:00Z"
+			timestamp: "2026-01-10T14:00:00Z",
+			show: true
 		},
 		{
 			id: "doc-016",
@@ -244,7 +259,8 @@ window.libraryData = {
 			authorIds: ["cbr"],
 			tags: ["physics", "statistical mechanics", "diffusion", "probability"],
 			langId: "fr",
-			timestamp: "2026-01-15T12:00:00Z"
+			timestamp: "2026-01-15T12:00:00Z",
+			show: true
 		},
 		{
 			id: "doc-017",
@@ -257,7 +273,8 @@ window.libraryData = {
 			authorIds: ["cbr"],
 			tags: ["physics", "mechanics", "ballistics", "kinematics"],
 			langId: "fr",
-			timestamp: "2026-01-16T02:00:00Z"
+			timestamp: "2026-01-16T02:00:00Z",
+			show: true
 		},
 		{
 			id: "doc-018",
@@ -270,7 +287,8 @@ window.libraryData = {
 			authorIds: ["cbr"],
 			tags: ["physics", "mathematics", "geometry", "kinematics"],
 			langId: "fr",
-			timestamp: "2026-01-16T10:00:00Z"
+			timestamp: "2026-01-16T10:00:00Z",
+			show: true
 		},
 		{
 			id: "doc-019",
@@ -283,7 +301,8 @@ window.libraryData = {
 			authorIds: ["cbr"],
 			tags: ["physics", "granular matter", "mathematics", "simulation"],
 			langId: "fr",
-			timestamp: "2026-01-17T01:00:00Z"
+			timestamp: "2026-01-17T01:00:00Z",
+			show: true
 		},
 		{
 			id: "doc-020",
@@ -296,7 +315,8 @@ window.libraryData = {
 			authorIds: ["cbr"],
 			tags: ["physics", "fluid dynamics", "mechanics"],
 			langId: "fr",
-			timestamp: "2026-01-17T15:27:00Z"
+			timestamp: "2026-01-17T15:27:00Z",
+			show: true
 		},
 		{
 			id: "doc-021",
@@ -309,7 +329,8 @@ window.libraryData = {
 			authorIds: ["cbr"],
 			tags: ["physics", "fluid dynamics", "CFD", "WASM", "WebGL", "LBM", "turbulence", "numerical methods"],
 			langId: "en",
-			timestamp: "2026-01-23T10:00:00Z"
+			timestamp: "2026-01-23T10:00:00Z",
+			show: true
 		},
 		{
 			id: "doc-022",
@@ -322,7 +343,8 @@ window.libraryData = {
 			authorIds: ["cbr"],
 			tags: ["mathematics", "analysis", "calculus", "Gegenbauer", "distributions"],
 			langId: "fr",
-			timestamp: "2026-02-03T21:35:00Z"
+			timestamp: "2026-02-03T21:35:00Z",
+			show: true
 		},
 		{
 			id: "doc-023",
@@ -335,7 +357,8 @@ window.libraryData = {
 			authorIds: ["cbr"],
 			tags: ["mathematics", "number theory", "algebra", "analytic number theory", "cryptography", "physics"],
 			langId: "en",
-			timestamp: "2026-02-28T12:06:00Z"
+			timestamp: "2026-02-28T12:06:00Z",
+			show: true
 		},
 		{
 			id: "doc-024",
@@ -348,7 +371,8 @@ window.libraryData = {
 			authorIds: ["cbr"],
 			tags: ["physics", "mathematics", "geometry", "gravitation", "fluid dynamics"],
 			langId: "fr",
-			timestamp: "2026-03-08T20:59:00Z"
+			timestamp: "2026-03-08T20:59:00Z",
+			show: true
 		},
 		{
 			id: "doc-025",
@@ -361,7 +385,8 @@ window.libraryData = {
 			authorIds: ["cbr"],
 			tags: ["physics", "fluid dynamics", "thermodynamics", "mechanics"],
 			langId: "fr",
-			timestamp: "2026-03-11T10:00:00Z"
+			timestamp: "2026-03-11T10:00:00Z",
+			show: true
 		},
 		{
 			id: "doc-026",
@@ -374,7 +399,8 @@ window.libraryData = {
 			authorIds: ["cbr"],
 			tags: ["mathematics", "statistics", "probability", "modeling"],
 			langId: "fr",
-			timestamp: "2026-03-11T14:30:00Z"
+			timestamp: "2026-03-11T14:30:00Z",
+			show: true
 		},
 		{
 			id: "doc-027",
@@ -387,7 +413,8 @@ window.libraryData = {
 			authorIds: ["cbr"],
 			tags: ["physics", "quantum", "particle physics", "mathematics", "algebra"],
 			langId: "fr",
-			timestamp: "2026-03-10T09:00:00Z"
+			timestamp: "2026-03-10T09:00:00Z",
+			show: true
 		},
 		{
 			id: "doc-028",
@@ -400,7 +427,8 @@ window.libraryData = {
 			authorIds: ["cbr"],
 			tags: ["physics", "quantum", "condensed matter", "solid state", "materials", "lesson"],
 			langId: "fr",
-			timestamp: "2026-03-11T22:33:00Z"
+			timestamp: "2026-03-11T22:33:00Z",
+			show: true
 		},
 		{
 			id: "doc-029",
@@ -413,7 +441,8 @@ window.libraryData = {
 			authorIds: ["cbr"],
 			tags: ["physics", "mathematics", "geometry", "kinematics", "topology", "astronomy"],
 			langId: "fr",
-			timestamp: "2026-04-14T00:00:00Z"
+			timestamp: "2026-04-14T00:00:00Z",
+			show: true
 		},
 		{
 			id: "doc-030",
@@ -426,7 +455,8 @@ window.libraryData = {
 			authorIds: ["cbr"],
 			tags: ["physics", "quantum", "communication", "lecture"],
 			langId: "fr",
-			timestamp: "2026-06-29T09:00:00Z"
+			timestamp: "2026-06-29T09:00:00Z",
+			show: true
 		},
 	]
 };
