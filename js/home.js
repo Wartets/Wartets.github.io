@@ -58,7 +58,18 @@ document.addEventListener("DOMContentLoaded", () => {
 
 	setupBackToTop();
 	setupTooltips();
+	setupSkillsGlow();
 });
+
+function setupSkillsGlow() {
+	const container = document.querySelector('.skills-container');
+	if (!container) return;
+	container.addEventListener('mousemove', (e) => {
+		const rect = container.getBoundingClientRect();
+		container.style.setProperty('--mouse-x', `${e.clientX - rect.left}px`);
+		container.style.setProperty('--mouse-y', `${e.clientY - rect.top}px`);
+	});
+}
 
 function setupTooltips() {
 	let tooltipEl = document.querySelector('.global-skill-tooltip');
@@ -669,7 +680,10 @@ function setupBackToTop() {
 
 	window.addEventListener('scroll', () => {
 		if (window.scrollY > 400) {
-			btn.classList.add('visible');
+			if (!btn.classList.contains('bubble-pop')) {
+				btn.style.display = 'flex';
+				btn.classList.add('visible');
+			}
 			if (footer) {
 				const footerRect = footer.getBoundingClientRect();
 				const windowHeight = window.innerHeight;
@@ -680,13 +694,54 @@ function setupBackToTop() {
 					btn.style.bottom = '30px';
 				}
 			}
-		} else {
+		} else if (!btn.classList.contains('bubble-pop') && !btn.classList.contains('scrolling-to-top')) {
 			btn.classList.remove('visible');
 		}
 	}, { passive: true });
 
 	btn.addEventListener('click', () => {
+		if (btn.classList.contains('bubble-pop') || btn.classList.contains('scrolling-to-top')) return;
+
+		btn.classList.add('scrolling-to-top');
 		window.scrollTo({ top: 0, behavior: 'smooth' });
+
+		const checkArrivedAtTop = setInterval(() => {
+			if (window.scrollY <= 5) {
+				clearInterval(checkArrivedAtTop);
+				btn.classList.remove('scrolling-to-top');
+				btn.classList.add('bubble-pop');
+
+				const rect = btn.getBoundingClientRect();
+				const centerX = rect.left + rect.width / 2;
+				const centerY = rect.top + rect.height / 2;
+
+				const particleCount = 12;
+				const radius = 50;
+				for (let i = 0; i < particleCount; i++) {
+					const angle = (i / particleCount) * Math.PI * 2;
+					const dx = Math.cos(angle) * radius + (Math.random() * 10 - 5);
+					const dy = Math.sin(angle) * radius + (Math.random() * 10 - 5);
+
+					const p = document.createElement('span');
+					p.className = 'bubble-particle';
+					p.style.left = `${centerX}px`;
+					p.style.top = `${centerY}px`;
+					p.style.setProperty('--dx', `${dx}px`);
+					p.style.setProperty('--dy', `${dy}px`);
+					document.body.appendChild(p);
+
+					setTimeout(() => p.remove(), 450);
+				}
+
+				const onAnimationEnd = (e) => {
+					if (e.target !== btn) return;
+					btn.removeEventListener('animationend', onAnimationEnd);
+					btn.classList.remove('visible', 'bubble-pop');
+					btn.style.display = 'none';
+				};
+				btn.addEventListener('animationend', onAnimationEnd);
+			}
+		}, 30);
 	});
 }
 
@@ -762,4 +817,49 @@ function updateTitleWithMoonPhase() {
 	const imagePath = getMoonPhaseImagePath();
 	const moonImgHtml = `<img src="${imagePath}" alt="o" class="title-moon-icon">`;
 	titleEl.innerHTML = rawText.replace(/[oO]/g, moonImgHtml);
+
+	const moonElements = titleEl.querySelectorAll('.title-moon-icon');
+	if (moonElements.length === 0) return;
+
+	let pressTimer = null;
+	let cycleInterval = null;
+	let currentPhaseIndex = 1;
+
+	const startInteraction = (e) => {
+		e.preventDefault();
+		moonElements.forEach(el => el.classList.add('moon-charging'));
+		pressTimer = setTimeout(() => {
+			moonElements.forEach(el => {
+				el.classList.remove('moon-charging');
+				el.classList.add('moon-spinning');
+			});
+			cycleInterval = setInterval(() => {
+				currentPhaseIndex = (currentPhaseIndex % 30) + 1;
+				const phaseString = currentPhaseIndex.toString().padStart(2, '0');
+				const newSrc = `assets/images/moon_phases/${phaseString}.png`;
+				moonElements.forEach(el => { el.src = newSrc; });
+			}, 35);
+		}, 450);
+	};
+
+	const stopInteraction = () => {
+		clearTimeout(pressTimer);
+		if (cycleInterval) {
+			clearInterval(cycleInterval);
+			cycleInterval = null;
+		}
+		moonElements.forEach(el => {
+			el.classList.remove('moon-charging', 'moon-spinning');
+			el.src = getMoonPhaseImagePath();
+		});
+	};
+
+	moonElements.forEach(moonElement => {
+		moonElement.addEventListener('mousedown', startInteraction);
+		moonElement.addEventListener('touchstart', startInteraction, { passive: false });
+	});
+
+	window.addEventListener('mouseup', stopInteraction);
+	window.addEventListener('mouseleave', stopInteraction);
+	window.addEventListener('touchend', stopInteraction);
 }

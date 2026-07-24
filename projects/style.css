@@ -1312,6 +1312,64 @@ body {
 	-webkit-backdrop-filter: blur(10px);
 }
 
+.back-to-top::before {
+	content: '';
+	position: absolute;
+	inset: 0;
+	border-radius: 50%;
+	border: 2px solid rgba(255, 255, 255, 0.8);
+	opacity: 0;
+	transform: scale(1);
+	pointer-events: none;
+}
+
+.back-to-top.bubble-pop {
+	opacity: 1 !important;
+	animation: bubblePop 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.back-to-top.bubble-pop::before {
+	animation: bubbleBurstRing 0.4s ease-out forwards;
+}
+
+.bubble-particle {
+	position: fixed;
+	width: 5px;
+	height: 5px;
+	border-radius: 50%;
+	background: #ffffff;
+	box-shadow: 0 0 6px rgba(255, 255, 255, 0.9);
+	pointer-events: none;
+	z-index: 9999;
+	transform: translate(-50%, -50%);
+	animation: particleFly 0.45s cubic-bezier(0.1, 0.8, 0.3, 1) forwards;
+}
+
+@keyframes bubblePop {
+	0% { transform: scale(1); opacity: 1; }
+	35% { transform: scale(1.28); opacity: 1; }
+	45% { transform: scale(1.35); opacity: 0.8; }
+	60% { transform: scale(0); opacity: 0; }
+	100% { transform: scale(0); opacity: 0; }
+}
+
+@keyframes bubbleBurstRing {
+	0% { transform: scale(1); opacity: 0.8; border-width: 2px; }
+	35% { transform: scale(1.28); opacity: 1; border-width: 3px; }
+	100% { transform: scale(2.4); opacity: 0; border-width: 1px; }
+}
+
+@keyframes particleFly {
+	0% {
+		transform: translate(-50%, -50%) translate(0, 0) scale(1);
+		opacity: 1;
+	}
+	100% {
+		transform: translate(-50%, -50%) translate(var(--dx), var(--dy)) scale(0);
+		opacity: 0;
+	}
+}
+
 .back-to-top.visible {
 	opacity: 0.4;
 	visibility: visible;

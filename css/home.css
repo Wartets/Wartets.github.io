@@ -261,6 +261,43 @@
 	border-radius: var(--radius-lg);
 	padding: 2.5rem;
 	backdrop-filter: blur(10px);
+	position: relative;
+	overflow: hidden;
+}
+
+.skills-container::after {
+	content: "";
+	position: absolute;
+	inset: 0;
+	background: radial-gradient(800px circle at var(--mouse-x, 50%) var(--mouse-y, 50%), rgba(255, 255, 255, 0.06), transparent 40%);
+	opacity: 0;
+	transition: opacity 0.5s;
+	z-index: 1;
+	pointer-events: none;
+}
+
+.skills-container:hover::after {
+	opacity: 1;
+}
+
+.skills-container::before {
+	content: "";
+	position: absolute;
+	inset: 0;
+	border-radius: var(--radius-lg);
+	padding: 1px;
+	background: linear-gradient(135deg, rgba(255, 248, 248, 0.15), transparent 50%, rgba(248, 248, 255, 0.15));
+	-webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+	-webkit-mask-composite: xor;
+	mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+	mask-composite: exclude;
+	pointer-events: none;
+	transition: background 0.5s ease;
+	z-index: 2;
+}
+
+.skills-container:hover::before {
+	background: linear-gradient(170deg, rgba(248, 255, 248, 0.35), transparent 50%, rgba(248, 248, 255, 0.35));
 }
 
 .skill-main-title {
@@ -462,7 +499,7 @@
 	width: 100%;
 	height: 1.28rem;
 	opacity: 1;
-	overflow: hidden;
+	overflow: visible;
 }
 
 .doc-card.is-truncated:hover .doc-card-meta {
@@ -473,6 +510,11 @@
 	padding-top: 0;
 	padding-bottom: 0;
 	border: none;
+	overflow: hidden;
+}
+
+.doc-card:hover .doc-card-meta {
+	overflow: hidden;
 }
 
 .doc-card-meta .doc-author {
@@ -976,5 +1018,22 @@
 	display: inline-block;
 	object-fit: fill;
 	-webkit-text-fill-color: initial;
-	filter: drop-shadow(0 0 2px rgba(255, 255, 255, 0.5));
+	filter: none;
+	cursor: pointer;
+	user-select: none;
+	transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), filter 1s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.title-moon-icon.moon-charging {
+	filter: drop-shadow(0 0 12px rgba(255, 255, 255, 0.2));
+}
+
+.title-moon-icon.moon-spinning {
+	animation: moonSpinFast 0.35s linear infinite;
+	filter: drop-shadow(0 0 12px rgba(255, 255, 255, 0.1));
+}
+
+@keyframes moonSpinFast {
+	from { transform: scale(var(--moon-scale-x, 1), var(--moon-scale-y, 1)) rotate(0deg); }
+	to { transform: scale(var(--moon-scale-x, 1), var(--moon-scale-y, 1)) rotate(360deg); }
 }
