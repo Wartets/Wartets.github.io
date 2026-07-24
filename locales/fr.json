@@ -17,8 +17,8 @@
 	},
 	"about": {
 		"title": "À Propos",
-		"p1": "Étudiant en 3ème année de Licence de Physique à l'Université Paris Cité, mon travail est axé sur la modélisation des phénomènes naturels, la simulation numérique à haute performance et l'informatique scientifique. Je développe des moteurs de calcul physique et des environnements virtuels d'analyse visant à simuler des systèmes complexes.",
-		"p2": "Mes domaines d'intérêt incluent la mécanique quantique, la dynamique des fluides et la physique statistique. J'ai contribué aux activités du Laboratoire Matériaux et Phénomènes Quantiques et m'implique dans la diffusion des connaissances scientifiques via la Vice-Présidence de l'Association Phisis.",
+		"p1": "Étudiant en 3ème année de Licence de Physique à l'Université Paris Cité, mon travail est axé sur la <span class=\"skill-tooltip\" data-skill-tips=\"Mécanique des fluides, dynamique à N-corps, systèmes dynamiques continus\">modélisation des phénomènes naturels</span>, la simulation numérique à haute performance et l'<span class=\"skill-tooltip\" data-skill-tips=\"Calcul haute performance (HPC), intégration numérique, parallélisation\">informatique scientifique</span>. Je développe des moteurs de calcul physique et des <span class=\"skill-tooltip\" data-skill-tips=\"Interfaces de visualisation interactive, WebGL, rendu 3D temps réel\">environnements virtuels d'analyse</span> visant à simuler des systèmes complexes.",
+		"p2": "Mes domaines d'intérêt incluent la mécanique quantique, la <span class=\"skill-tooltip\" data-skill-tips=\"Méthode de Boltzmann sur réseau (LBM), instabilités hydrodynamiques, turbulence\">dynamique des fluides</span> et la <span class=\"skill-tooltip\" data-skill-tips=\"Automates cellulaires (Lenia), marches aléatoires, systèmes complexes hors équilibre\">physique statistique</span>. J'ai contribué aux activités du <span class=\"skill-tooltip\" data-skill-tips=\"Étude expérimentale des sources AlGaAs, génération de paires de photons intriqués, traitement du signal\">Laboratoire Matériaux et Phénomènes Quantiques</span> et m'implique dans la diffusion des connaissances scientifiques via la Vice-Présidence de l'Association <span class=\"skill-tooltip\" data-skill-tips=\"Association étudiante de Physique de L'université Paris Cité\">Phisis</span>.",
 		"p3": "",
 		"p4": "",
 		"p5": ""
@@ -26,11 +26,11 @@
 	"skills": {
 		"title": "Compétences Techniques",
 		"programming": "Ingénierie & Informatique",
-		"programming_desc": "Python, JavaScript, C++20, WebGL2/OpenGL, LaTeX, Git, Linux/Windows/MacOS, Docker, CI/CD",
+		"programming_desc": "<span class=\"skill-tooltip\" data-skill-tips=\"NumPy, SciPy, Numba, Multithreading, PyTorch\">Python</span>, <span class=\"skill-tooltip\" data-skill-tips=\"Node.js, Three.js\">JavaScript</span>, <span class=\"skill-tooltip\" data-skill-tips=\"STL, Eigen, OpenMP\">C++20</span>, <span class=\"skill-tooltip\" data-skill-tips=\"Shaders GLSL, pipelines graphiques, calcul par GPU\">WebGL2/OpenGL</span>, LaTeX, Git, <span class=\"skill-tooltip\" data-skill-tips=\"Administration système, scripting Bash, environnements POSIX\">Linux/Windows/MacOS</span>, <span class=\"skill-tooltip\" data-skill-tips=\"Automatisation des déploiements\">Docker, CI/CD</span>",
 		"science": "Outils & Méthodes Scientifiques",
-		"science_desc": "Modélisation numérique (LBM, Lenia, Barnes-Hut), Spectroscopie Raman, Utilisation de Sources AlGaAs de photons intriqués, Analyse de données, Visualisation scientifique",
+		"science_desc": "Modélisation numérique (LBM, Lenia, Barnes-Hut), <span class=\"skill-tooltip\" data-skill-tips=\"Caractérisation optique non-destructive, analyse des modes de vibration moléculaires du TiSe₂ au laboratoire MPQ\">Spectroscopie Raman</span>, <span class=\"skill-tooltip\" data-skill-tips=\"Optique quantique non-linéaire, corrélation de photons, bancs optiques\">Utilisation de Sources AlGaAs de photons intriqués</span>, <span class=\"skill-tooltip\" data-skill-tips=\"Ajustements de modèles, filtrage numérique, traitement statistique\">Analyse de données</span>, Visualisation scientifique",
 		"music": "Musique",
-		"music_desc": "Composition, Acoustique, Formation musicale (Conservatoire Éric Satie, 2011-2019)"
+		"music_desc": "Composition, <span class=\"skill-tooltip\" data-skill-tips=\"Guitare, Batterie, Instruments à vent, Claviers, Logic Pro\">Acoustique</span>, <span class=\"skill-tooltip\" data-skill-tips=\"Conservatoire Éric Satie, 2011-2019\">Formation musicale</span>"
 	},
 	"projects": {
 		"featured_title": "Projets Sélectionnés",

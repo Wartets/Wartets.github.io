@@ -294,6 +294,48 @@
 	line-height: 1.6;
 }
 
+.skill-tooltip {
+	position: relative;
+	cursor: help;
+	border-bottom: 1px dotted rgba(255, 255, 255, 0.4);
+	transition: color 0.2s ease, border-color 0.2s ease;
+}
+
+.skill-tooltip:hover {
+	color: var(--color-text-primary);
+	border-color: var(--color-text-primary);
+}
+
+.skill-tooltip::after {
+	content: attr(data-skill-tips);
+	position: absolute;
+	bottom: 100%;
+	left: 50%;
+	transform: translateX(-50%) translateY(-4px);
+	background: rgba(15, 15, 15, 0.95);
+	backdrop-filter: blur(10px);
+	-webkit-backdrop-filter: blur(10px);
+	color: var(--color-text-primary);
+	padding: 6px 12px;
+	border-radius: 6px;
+	font-size: 0.75rem;
+	font-family: var(--font-mono);
+	white-space: nowrap;
+	opacity: 0;
+	visibility: hidden;
+	transition: opacity 0.2s ease, visibility 0.2s ease, transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+	border: 1px solid rgba(255, 255, 255, 0.15);
+	box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+	z-index: 100;
+	pointer-events: none;
+}
+
+.skill-tooltip:hover::after {
+	opacity: 1;
+	visibility: visible;
+	transform: translateX(-50%) translateY(-8px);
+}
+
 .dynamic-grid {
 	display: grid;
 	grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));

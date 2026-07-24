@@ -26,7 +26,7 @@
 	"skills": {
 		"title": "Technical Skills",
 		"programming": "Engineering & Computing",
-		"programming_desc": "Python, JavaScript, C++20, WebGL2/OpenGL, LaTeX, Git, Linux/Windows/MacOS, Docker, CI/CD",
+		"programming_desc": "<span class=\"skill-tooltip\" data-skill-tips=\"NumPy, SciPy, Numba, Multithreading, PyTorch\">Python</span>, <span class=\"skill-tooltip\" data-skill-tips=\"Node.js, Three.js\">JavaScript</span>, <span class=\"skill-tooltip\" data-skill-tips=\"STL, Eigen, OpenMP\">C++20</span>, WebGL2/OpenGL, LaTeX, Git, Linux/Windows/MacOS, Docker, CI/CD",
 		"science": "Scientific Tools & Methods",
 		"science_desc": "Numerical modeling (LBM, Lenia, Barnes-Hut), Raman spectroscopy, use of AlGaAs entangled photon sources, data analysis, scientific visualization",
 		"music": "Music",
