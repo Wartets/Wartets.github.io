@@ -63,6 +63,7 @@
 	"footer": {
 		"rights": "Tous droits réservés.",
 		"license": "Sous licence MIT",
+		"nasa_credit": "Imagerie lunaire : NASA SVS",
 		"designed_by": "Conçu par",
 		"github_text": "Code source disponible sur",
 		"poetry": "Poésie"
