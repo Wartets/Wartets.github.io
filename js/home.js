@@ -198,6 +198,7 @@ const FEATURED_MUSIC_TRACKS = [
 		title: "Projet 27",
 		genre: "Electronic/Pop",
 		date: "2026",
+		album: "Album 7.1",
 		filePath: "https://media.githubusercontent.com/media/Wartets/Music-Library/refs/heads/main/assets/Album 7 (2026)/Album 7.1/Projet 27/Projet 27 1.1.m4a",
 	},
 	{
@@ -205,6 +206,7 @@ const FEATURED_MUSIC_TRACKS = [
 		title: "Projet 12",
 		genre: "Techno",
 		date: "2025",
+		album: "Album 6.1",
 		filePath: "https://media.githubusercontent.com/media/Wartets/Music-Library/refs/heads/main/assets/Album 6 (2025)/Album 6.1/Projet 12/Projet-12.mp3",
 	},
 	{
@@ -212,6 +214,7 @@ const FEATURED_MUSIC_TRACKS = [
 		title: "Projet 8",
 		genre: "Electronic/Funk Pop",
 		date: "2024",
+		album: "Album 6.1",
 		filePath: "assets/musics/Projet_8.4.mp3",
 	},
 	{
@@ -219,6 +222,7 @@ const FEATURED_MUSIC_TRACKS = [
 		title: "Dance",
 		genre: "Ambiant/Folklore",
 		date: "2024",
+		album: "Album 5.1",
 		filePath: "https://media.githubusercontent.com/media/Wartets/Music-Library/refs/heads/main/assets/Album 5 (2023-2024)/Album 5.1/dance/dance - 24_02_2024 22.35.wav",
 	},
 	{
@@ -226,6 +230,7 @@ const FEATURED_MUSIC_TRACKS = [
 		title: "Projet 2",
 		genre: "Electronic",
 		date: "2023",
+		album: "Album 5.1",
 		filePath: "https://media.githubusercontent.com/media/Wartets/Music-Library/refs/heads/main/assets/Album 5 (2023-2024)/Album 5.1/Projet 2/Projet 2 - 24_10_2023 19.26.wav",
 	},
 	{
@@ -233,6 +238,7 @@ const FEATURED_MUSIC_TRACKS = [
 		title: "End of Chapter One",
 		genre: "Ambient",
 		date: "2023",
+		album: "Album 4.2",
 		filePath: "https://media.githubusercontent.com/media/Wartets/Music-Library/refs/heads/main/assets/Album 4 (2021-2022-2023)/Album 4.2/End of Chapter one/End of Chapter one 1.0.wav",
 	},
 	{
@@ -240,6 +246,7 @@ const FEATURED_MUSIC_TRACKS = [
 		title: "Cell",
 		genre: "Ambient/Rock",
 		date: "2022",
+		album: "Album 4.2",
 		filePath: "https://media.githubusercontent.com/media/Wartets/Music-Library/refs/heads/main/assets/Album 4 (2021-2022-2023)/Album 4.2/Cell/Cell 1.2.m4a",
 	},
 	{
@@ -247,12 +254,100 @@ const FEATURED_MUSIC_TRACKS = [
 		title: "Hypocritical World's Nostalgia",
 		genre: "Synthwave",
 		date: "2021",
+		album: "Album 4.1",
 		filePath: "https://media.githubusercontent.com/media/Wartets/Music-Library/refs/heads/main/assets/Album 4 (2021-2022-2023)/Album 4.1/Hypocritical world's Nostalgia/Hypocritical world's Nostalgia.m4a",
 	},
 ];
 
 let activeAudioElement = null;
 let activePlayButton = null;
+let sharedAudioCtx = null;
+let sharedAnalyser = null;
+const audioSourceMap = new WeakMap();
+let visualizerFrameId = null;
+
+function setupAudioContext() {
+	if (!sharedAudioCtx) {
+		const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+		if (AudioContextClass) {
+			sharedAudioCtx = new AudioContextClass();
+			sharedAnalyser = sharedAudioCtx.createAnalyser();
+			sharedAnalyser.fftSize = 32;
+			sharedAnalyser.smoothingTimeConstant = 0.75;
+		}
+	}
+	if (sharedAudioCtx && sharedAudioCtx.state === 'suspended') {
+		sharedAudioCtx.resume();
+	}
+}
+
+function runEqualizerAnimation(card, audio) {
+	if (visualizerFrameId) {
+		cancelAnimationFrame(visualizerFrameId);
+		visualizerFrameId = null;
+	}
+
+	setupAudioContext();
+
+	if (sharedAudioCtx && sharedAnalyser) {
+		sharedAnalyser.fftSize = 128;
+		sharedAnalyser.smoothingTimeConstant = 0.75;
+
+		if (!audioSourceMap.has(audio)) {
+			try {
+				const source = sharedAudioCtx.createMediaElementSource(audio);
+				source.connect(sharedAnalyser);
+				sharedAnalyser.connect(sharedAudioCtx.destination);
+				audioSourceMap.set(audio, source);
+			} catch (e) {
+				card.classList.remove('has-audio-analyser');
+			}
+		}
+
+		if (audioSourceMap.has(audio)) {
+			card.classList.add('has-audio-analyser');
+			const bars = card.querySelectorAll('.music-equalizer span');
+			const freqData = new Uint8Array(sharedAnalyser.frequencyBinCount);
+			const binIndices = [1, 3, 7, 13, 22, 34];
+			const weightFactors = [0.35, 0.55, 0.90, 1.45, 2.20, 3.40];
+
+			function updateFrame() {
+				if (!card.classList.contains('is-playing')) return;
+				sharedAnalyser.getByteFrequencyData(freqData);
+
+				bars.forEach((bar, idx) => {
+					const binIdx = binIndices[idx] || (idx * 5 + 1);
+					const weight = weightFactors[idx] || 1.0;
+					const rawVal = freqData[binIdx] || 0;
+					const normalized = Math.pow(rawVal / 255, 0.75);
+					const amplitude = normalized * weight;
+					const scale = Math.min(1.0, Math.max(0.12, amplitude));
+					bar.style.transform = `scaleY(${scale.toFixed(2)})`;
+				});
+
+				visualizerFrameId = requestAnimationFrame(updateFrame);
+			}
+
+			updateFrame();
+			return;
+		}
+	}
+
+	card.classList.remove('has-audio-analyser');
+}
+
+function stopEqualizerAnimation(card) {
+	if (visualizerFrameId) {
+		cancelAnimationFrame(visualizerFrameId);
+		visualizerFrameId = null;
+	}
+	if (card) {
+		const bars = card.querySelectorAll('.music-equalizer span');
+		bars.forEach(bar => {
+			bar.style.transform = '';
+		});
+	}
+}
 
 function sanitizeUrl(url, baseFolder) {
 	if (!url) return '';
@@ -645,10 +740,19 @@ function renderMusicSection() {
 		card.innerHTML = `
 			<div class="music-card-header">
 				<div class="music-info">
-					<span class="music-genre">${track.genre}</span>
+					<div class="music-meta-tags">
+						<span class="music-album">${track.album}</span>
+						<span class="music-tag-divider">•</span>
+						<span class="music-genre">${track.genre}</span>
+					</div>
 					<h3 class="music-title">${track.title}</h3>
 				</div>
-				<span class="music-date">${track.date}</span>
+				<div class="music-header-right">
+					<span class="music-date">${track.date}</span>
+					<div class="music-equalizer" aria-hidden="true">
+						<span></span><span></span><span></span><span></span><span></span><span></span>
+					</div>
+				</div>
 			</div>
 			<div class="music-player-controls">
 				<button class="music-play-btn" type="button" aria-label="${window.t('music_section.play')}: ${track.title}" aria-pressed="false">
@@ -692,6 +796,8 @@ function renderMusicSection() {
 			playBtn.innerHTML = '<i class="fa-solid fa-play"></i>';
 			progressBar.value = 0;
 			currentTimeEl.textContent = "0:00";
+			card.classList.remove('is-playing');
+			stopEqualizerAnimation(card);
 			activeAudioElement = null;
 			activePlayButton = null;
 		});
@@ -704,6 +810,11 @@ function renderMusicSection() {
 				if (activePlayButton) {
 					activePlayButton.innerHTML = '<i class="fa-solid fa-play" aria-hidden="true"></i>';
 					activePlayButton.setAttribute('aria-pressed', 'false');
+					const parentCard = activePlayButton.closest('.music-card');
+					if (parentCard) {
+						parentCard.classList.remove('is-playing');
+						stopEqualizerAnimation(parentCard);
+					}
 				}
 			}
 
@@ -711,6 +822,8 @@ function renderMusicSection() {
 				audio.play().then(() => {
 					playBtn.innerHTML = '<i class="fa-solid fa-pause" aria-hidden="true"></i>';
 					playBtn.setAttribute('aria-pressed', 'true');
+					card.classList.add('is-playing');
+					runEqualizerAnimation(card, audio);
 					activeAudioElement = audio;
 					activePlayButton = playBtn;
 				}).catch(err => {
@@ -720,6 +833,8 @@ function renderMusicSection() {
 				audio.pause();
 				playBtn.innerHTML = '<i class="fa-solid fa-play" aria-hidden="true"></i>';
 				playBtn.setAttribute('aria-pressed', 'false');
+				card.classList.remove('is-playing');
+				stopEqualizerAnimation(card);
 				activeAudioElement = null;
 				activePlayButton = null;
 			}
