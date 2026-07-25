@@ -46,7 +46,14 @@ document.addEventListener("DOMContentLoaded", () => {
 		setTimeout(checkTextTruncation, 200);
 	};
 
-	window.addEventListener('resize', checkTextTruncation);
+	let resizeDebounceTimer = null;
+	window.addEventListener('resize', () => {
+		checkTextTruncation();
+		clearTimeout(resizeDebounceTimer);
+		resizeDebounceTimer = setTimeout(() => {
+			pdfDocCache.clear();
+		}, 300);
+	});
 
 	document.addEventListener('i18nReady', () => {
 		safeRender();
@@ -229,6 +236,11 @@ function renderDynamicSections() {
 	renderProjectsSection();
 	renderLibrarySection();
 	renderMusicSection();
+
+	const announcer = document.getElementById('aria-status-announcer');
+	if (announcer) {
+		announcer.textContent = window.t('ui.loading_complete') || 'Data loading complete.';
+	}
 }
 
 function renderProjectsSection() {
@@ -282,7 +294,7 @@ function buildProjectGrid(containerId, projectList) {
 		});
 
 		const imagePath = sanitizeUrl(project.image, 'projects');
-		const imgHtml = imagePath ? `<img src="${imagePath}" alt="${project.title}" class="card-img media-blur-up" loading="lazy" onload="this.classList.add('loaded')">` : '';
+		const imgHtml = imagePath ? `<img src="${imagePath}" alt="${project.title}" class="card-img media-blur-up" loading="lazy" onload="this.classList.add('loaded')" onerror="this.style.display='none'">` : '';
 
 		const date = new Date(project.timestamp);
 		const dateStr = `${date.toLocaleString(document.documentElement.lang || 'en', { month: 'short' })} ${date.getFullYear()}`;

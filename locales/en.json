@@ -70,6 +70,7 @@
 	},
 	"ui": {
 		"loading": "Loading data...",
+		"loading_complete": "Data loading complete.",
 		"new": "New",
 		"unknown_author": "Unknown author"
 	}

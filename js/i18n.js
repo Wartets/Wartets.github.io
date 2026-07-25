@@ -42,6 +42,13 @@ document.addEventListener("DOMContentLoaded", () => {
         document.addEventListener('click', () => {
             toggleDropdown(false);
         });
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && customLangSelector.classList.contains('open')) {
+                toggleDropdown(false);
+                if (trigger) trigger.focus();
+            }
+        });
     }
 
     function loadLanguage(lang) {
@@ -58,6 +65,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
                 if (langCurrent) {
                     langCurrent.textContent = lang === 'fr' ? 'Français' : 'English';
+                }
+
+                const announcer = document.getElementById('aria-status-announcer');
+                if (announcer) {
+                    announcer.textContent = lang === 'fr' ? 'Langue changée en français.' : 'Language changed to English.';
                 }
 
                 const event = new CustomEvent('i18nReady', { detail: { lang } });
