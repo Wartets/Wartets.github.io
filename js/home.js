@@ -14,6 +14,7 @@ function setupSectionAnchors() {
 
 document.addEventListener("DOMContentLoaded", () => {
 	setupScrollRestoration();
+	setupScrollProgressBar();
 	updateFooterYear();
 	setupSectionAnchors();
 	updateFaviconToMoonPhase();
@@ -121,6 +122,25 @@ function updateFooterYear() {
 	if (yearEl) {
 		yearEl.textContent = new Date().getFullYear();
 	}
+}
+
+function setupScrollProgressBar() {
+	const progressBar = document.getElementById('scroll-progress-bar');
+	if (!progressBar) return;
+
+	const updateProgress = () => {
+		const scrollTop = window.scrollY || document.documentElement.scrollTop;
+		const docHeight = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+		const scrollPercent = docHeight > 0 ? (scrollTop / docHeight) * 100 : 0;
+		const clamped = Math.min(100, Math.max(0, scrollPercent));
+		
+		progressBar.style.width = `${clamped}%`;
+		progressBar.setAttribute('aria-valuenow', Math.round(clamped).toString());
+	};
+
+	window.addEventListener('scroll', updateProgress, { passive: true });
+	window.addEventListener('resize', updateProgress, { passive: true });
+	updateProgress();
 }
 
 function setupScrollRestoration() {
@@ -262,7 +282,7 @@ function buildProjectGrid(containerId, projectList) {
 		});
 
 		const imagePath = sanitizeUrl(project.image, 'projects');
-		const imgHtml = imagePath ? `<img src="${imagePath}" alt="${project.title}" class="card-img" loading="lazy" onload="this.classList.add('loaded')">` : '';
+		const imgHtml = imagePath ? `<img src="${imagePath}" alt="${project.title}" class="card-img media-blur-up" loading="lazy" onload="this.classList.add('loaded')">` : '';
 
 		const date = new Date(project.timestamp);
 		const dateStr = `${date.toLocaleString(document.documentElement.lang || 'en', { month: 'short' })} ${date.getFullYear()}`;
@@ -422,8 +442,8 @@ function buildDocumentGrid(containerId, docList) {
 
 		card.innerHTML = `
 			<div class="doc-preview-wrapper">
-				<i class="fa-solid fa-circle-notch fa-spin doc-preview-loader"></i>
-				<canvas class="doc-canvas"></canvas>
+				<i class="fa-solid fa-circle-notch fa-spin doc-preview-loader" aria-hidden="true"></i>
+				<canvas class="doc-canvas media-blur-up"></canvas>
 			</div>
 			<div class="doc-card-content">
 				<h3 class="doc-card-title">${doc.title}</h3>
@@ -455,7 +475,7 @@ async function renderPdfPreview(canvas, filePath) {
 				canvas.width = img.width;
 				canvas.height = img.height;
 				ctx.drawImage(img, 0, 0);
-				canvas.style.opacity = '1';
+				canvas.classList.add('loaded');
 				const loader = canvas.parentElement ? canvas.parentElement.querySelector('.doc-preview-loader') : null;
 				if (loader) loader.style.display = 'none';
 			};
@@ -496,7 +516,7 @@ async function renderPdfPreview(canvas, filePath) {
 			sessionStorage.setItem(cacheKey, canvas.toDataURL('image/jpeg', 0.9));
 		} catch (e) {}
 
-		canvas.style.opacity = '1';
+		canvas.classList.add('loaded');
 		const loader = canvas.parentElement ? canvas.parentElement.querySelector('.doc-preview-loader') : null;
 		if (loader) loader.style.display = 'none';
 

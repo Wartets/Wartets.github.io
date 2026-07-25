@@ -26,10 +26,11 @@
 	<link rel="stylesheet" href="css/home.css">
 </head>
 <body>
+	<div id="scroll-progress-bar" class="scroll-progress-bar" role="progressbar" aria-label="Progression du défilement" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"></div>
 	<div class="bg-gradient"></div>
 	<div class="bg-noise"></div>
 
-	<nav class="main-nav">
+	<nav class="main-nav" aria-label="Main navigation">
 		<a href="#" class="nav-brand">Colin Bossu Réaubourg</a>
 		<div class="nav-links">
 			<a href="#" class="nav-link" data-i18n="nav.home"></a>
@@ -37,14 +38,14 @@
 			<a href="library/" class="nav-link" data-i18n="nav.library"></a>
 			<a href="Music-Library/" class="nav-link" data-i18n="nav.music"></a>
 			<div class="custom-lang-selector" id="customLangSelector">
-				<div class="lang-trigger">
+				<button type="button" class="lang-trigger" id="langTrigger" aria-haspopup="listbox" aria-expanded="false" aria-label="Change language">
 					<i class="fa-solid fa-globe lang-icon" aria-hidden="true"></i>
 					<span id="langCurrent">English</span>
 					<i class="fa-solid fa-chevron-down lang-chevron" aria-hidden="true"></i>
-				</div>
-				<ul class="lang-options">
-					<li data-lang="en">English</li>
-					<li data-lang="fr">Français</li>
+				</button>
+				<ul class="lang-options" id="langOptions" role="listbox" aria-labelledby="langTrigger">
+					<li data-lang="en" role="option" tabindex="0">English</li>
+					<li data-lang="fr" role="option" tabindex="0">Français</li>
 				</ul>
 			</div>
 		</div>
@@ -59,8 +60,9 @@
 	</header>
 
 	<main>
-		<section class="home-section" id="about">
-			<h2 class="section-title" data-i18n="about.title"></h2>
+		<div id="aria-status-announcer" class="sr-only" role="status" aria-live="polite" aria-atomic="true"></div>
+		<section class="home-section" id="about" aria-labelledby="about-title">
+			<h2 class="section-title" id="about-title" data-i18n="about.title"></h2>
 			<div class="about-grid">
 				<div class="about-content">
 					<p data-i18n="about.p1"></p>
@@ -154,13 +156,13 @@
 	<footer class="site-footer custom-footer-margin">
 		<div class="footer-content">
 			<p class="copyright">
-				© <span id="current-year">2026</span>. <span data-i18n="footer.rights">Tous droits réservés.</span> <a href="https://github.com/Wartets/Wartets.github.io/blob/main/LICENSE" target="_blank" rel="noopener noreferrer" class="footer-link" data-i18n="footer.license">Sous licence MIT</a> •<a href="https://svs.gsfc.nasa.gov/vis/" target="_blank" rel="noopener noreferrer" class="footer-link" data-i18n="footer.nasa_credit">Imagerie lunaire : NASA SVS</a>
+				© <span id="current-year">2026</span>. <span data-i18n="footer.rights">All rights reserved.</span> <a href="https://github.com/Wartets/Wartets.github.io/blob/main/LICENSE" target="_blank" rel="noopener noreferrer" class="footer-link" data-i18n="footer.license">MIT License</a> •<a href="https://svs.gsfc.nasa.gov/vis/" target="_blank" rel="noopener noreferrer" class="footer-link" data-i18n="footer.nasa_credit">Lunar imagery: NASA SVS</a>
 				<a href="old/" id="secret-old-trigger" aria-hidden="true" class="secret-old-dot">.</a>
 			</p>
 			<nav class="footer-nav">
-				<span><span data-i18n="footer.designed_by">Conçu par</span> <a href="https://wartets.github.io/" class="footer-link">Wartets <i class="fa-solid fa-arrow-up-right-from-square"></i></a></span>
+				<span><span data-i18n="footer.designed_by">Designed by</span> <a href="https://wartets.github.io/" class="footer-link">Wartets <i class="fa-solid fa-arrow-up-right-from-square"></i></a></span>
 				<span class="divider"></span>
-				<span><span data-i18n="footer.github_text">Code source disponible sur</span> <a href="https://github.com/wartets/wartets.github.io" target="_blank" rel="noopener noreferrer" class="footer-link">GitHub <i class="fa-brands fa-github"></i></a></span>
+				<span><span data-i18n="footer.github_text">Source code available at</span> <a href="https://github.com/wartets/wartets.github.io" target="_blank" rel="noopener noreferrer" class="footer-link">GitHub <i class="fa-brands fa-github"></i></a></span>
 				<span class="divider"></span>
 				<a href="desk/" id="secret-desk-trigger" title="Desk / Workspace" class="secret-desk-icon">
 					<img src="assets/images/desk/xp-computer-icon.webp" alt="Windows XP Portfolio Icon">

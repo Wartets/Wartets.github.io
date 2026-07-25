@@ -10,21 +10,37 @@ document.addEventListener("DOMContentLoaded", () => {
         const trigger = customLangSelector.querySelector('.lang-trigger');
         const options = customLangSelector.querySelectorAll('.lang-options li');
         
-        trigger.addEventListener('click', (e) => {
-            e.stopPropagation();
-            customLangSelector.classList.toggle('open');
-        });
+        const toggleDropdown = (open) => {
+            const isOpened = open !== undefined ? open : !customLangSelector.classList.contains('open');
+            customLangSelector.classList.toggle('open', isOpened);
+            if (trigger) trigger.setAttribute('aria-expanded', isOpened.toString());
+        };
+
+        if (trigger) {
+            trigger.addEventListener('click', (e) => {
+                e.stopPropagation();
+                toggleDropdown();
+            });
+        }
 
         options.forEach(opt => {
-            opt.addEventListener('click', (e) => {
-                const selectedLang = e.target.getAttribute('data-lang');
+            const selectLang = (e) => {
+                const selectedLang = e.currentTarget.getAttribute('data-lang');
                 switchLanguage(selectedLang);
-                customLangSelector.classList.remove('open');
+                toggleDropdown(false);
+            };
+
+            opt.addEventListener('click', selectLang);
+            opt.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    selectLang(e);
+                }
             });
         });
 
         document.addEventListener('click', () => {
-            customLangSelector.classList.remove('open');
+            toggleDropdown(false);
         });
     }
 
