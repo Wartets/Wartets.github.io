@@ -1203,6 +1203,23 @@
 	border: 0 !important;
 }
 
+.noscript-banner {
+	background: rgba(255, 180, 0, 0.08);
+	border: 1px solid rgba(255, 180, 0, 0.25);
+	color: #e6c200;
+	padding: 0.85rem 1.25rem;
+	margin: 5rem auto 1rem;
+	max-width: 1200px;
+	border-radius: var(--radius-sm);
+	font-size: 0.88rem;
+	text-align: center;
+}
+
+.noscript-banner a {
+	color: #ffffff;
+	text-decoration: underline;
+}
+
 @media print {
 	.main-nav,
 	.scroll-progress-bar,
@@ -1275,4 +1292,9 @@
 		filter: none !important;
 		opacity: 1 !important;
 	}
+}
+
+.site-header h1 {
+	font-weight: 500;
+	opacity: 0.85;
 }
