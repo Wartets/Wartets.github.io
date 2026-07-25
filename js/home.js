@@ -194,33 +194,61 @@ const FEATURED_DOC_SLUGS = [
 
 const FEATURED_MUSIC_TRACKS = [
 	{
-		id: "250",
-		title: "Projet 8.4",
-		genre: "Electro",
+		id: "1",
+		title: "Projet 27",
+		genre: "Electronic/Pop",
+		date: "2026",
+		filePath: "https://media.githubusercontent.com/media/Wartets/Music-Library/refs/heads/main/assets/Album 7 (2026)/Album 7.1/Projet 27/Projet 27 1.1.m4a",
+	},
+	{
+		id: "2",
+		title: "Projet 12",
+		genre: "Techno",
+		date: "2025",
+		filePath: "https://media.githubusercontent.com/media/Wartets/Music-Library/refs/heads/main/assets/Album 6 (2025)/Album 6.1/Projet 12/Projet-12.mp3",
+	},
+	{
+		id: "3",
+		title: "Projet 8",
+		genre: "Electronic/Funk Pop",
 		date: "2024",
 		filePath: "assets/musics/Projet_8.4.mp3",
 	},
 	{
-		id: "251",
-		title: "Projet 27",
-		genre: "Electro",
-		date: "2026",
-		filePath: "https://wartets.github.io/Music-Library/assets/Album 7 (2026)/Album 7.1/Projet 27/Projet 27 1.1.m4a",
+		id: "4",
+		title: "Dance",
+		genre: "Ambiant/Folklore",
+		date: "2024",
+		filePath: "https://media.githubusercontent.com/media/Wartets/Music-Library/refs/heads/main/assets/Album 5 (2023-2024)/Album 5.1/dance/dance - 24_02_2024 22.35.wav",
 	},
 	{
-		id: "252",
-		title: "Quatro",
-		genre: "Electro",
-		date: "2025",
-		filePath: "Music-Library/assets/Single/quatro/quatro.m4a",
-	},
-	{
-		id: "253",
-		title: "Musique 1",
-		genre: "Electro",
+		id: "5",
+		title: "Projet 2",
+		genre: "Electronic",
 		date: "2023",
-		filePath: "assets/musics/music.mp3",
-	}
+		filePath: "https://media.githubusercontent.com/media/Wartets/Music-Library/refs/heads/main/assets/Album 5 (2023-2024)/Album 5.1/Projet 2/Projet 2 - 24_10_2023 19.26.wav",
+	},
+	{
+		id: "6",
+		title: "End of Chapter One",
+		genre: "Ambient",
+		date: "2023",
+		filePath: "https://media.githubusercontent.com/media/Wartets/Music-Library/refs/heads/main/assets/Album 4 (2021-2022-2023)/Album 4.2/End of Chapter one/End of Chapter one 1.0.wav",
+	},
+	{
+		id: "7",
+		title: "Cell",
+		genre: "Ambient/Rock",
+		date: "2022",
+		filePath: "https://media.githubusercontent.com/media/Wartets/Music-Library/refs/heads/main/assets/Album 4 (2021-2022-2023)/Album 4.2/Cell/Cell 1.2.m4a",
+	},
+	{
+		id: "8",
+		title: "Hypocritical World's Nostalgia",
+		genre: "Synthwave",
+		date: "2021",
+		filePath: "https://media.githubusercontent.com/media/Wartets/Music-Library/refs/heads/main/assets/Album 4 (2021-2022-2023)/Album 4.1/Hypocritical world's Nostalgia/Hypocritical world's Nostalgia.m4a",
+	},
 ];
 
 let activeAudioElement = null;
