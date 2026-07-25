@@ -611,11 +611,11 @@ function renderMusicSection() {
 				<span class="music-date">${track.date}</span>
 			</div>
 			<div class="music-player-controls">
-				<button class="music-play-btn" aria-label="Play Track">
-					<i class="fa-solid fa-play"></i>
+				<button class="music-play-btn" type="button" aria-label="${window.t('music_section.play')}: ${track.title}" aria-pressed="false">
+					<i class="fa-solid fa-play" aria-hidden="true"></i>
 				</button>
 				<div class="music-progress-container">
-					<input type="range" class="music-progress" value="0" min="0" max="100" step="0.01">
+					<input type="range" class="music-progress" value="0" min="0" max="100" step="0.01" aria-label="${track.title} - Avancement">
 					<div class="music-time-display">
 						<span class="current-time">0:00</span> / <span class="total-time">0:01</span>
 					</div>
@@ -662,13 +662,15 @@ function renderMusicSection() {
 			if (activeAudioElement && activeAudioElement !== audio) {
 				activeAudioElement.pause();
 				if (activePlayButton) {
-					activePlayButton.innerHTML = '<i class="fa-solid fa-play"></i>';
+					activePlayButton.innerHTML = '<i class="fa-solid fa-play" aria-hidden="true"></i>';
+					activePlayButton.setAttribute('aria-pressed', 'false');
 				}
 			}
 
 			if (audio.paused) {
 				audio.play().then(() => {
-					playBtn.innerHTML = '<i class="fa-solid fa-pause"></i>';
+					playBtn.innerHTML = '<i class="fa-solid fa-pause" aria-hidden="true"></i>';
+					playBtn.setAttribute('aria-pressed', 'true');
 					activeAudioElement = audio;
 					activePlayButton = playBtn;
 				}).catch(err => {
@@ -676,7 +678,8 @@ function renderMusicSection() {
 				});
 			} else {
 				audio.pause();
-				playBtn.innerHTML = '<i class="fa-solid fa-play"></i>';
+				playBtn.innerHTML = '<i class="fa-solid fa-play" aria-hidden="true"></i>';
+				playBtn.setAttribute('aria-pressed', 'false');
 				activeAudioElement = null;
 				activePlayButton = null;
 			}

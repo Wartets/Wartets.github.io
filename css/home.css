@@ -1126,3 +1126,38 @@
 		-webkit-text-fill-color: initial !important;
 	}
 }
+
+.skip-link {
+	position: absolute;
+	top: -100px;
+	left: 1rem;
+	background: #050505;
+	color: var(--color-accent);
+	padding: 0.75rem 1.25rem;
+	border: 1px solid var(--color-border);
+	border-radius: var(--radius-sm);
+	z-index: 10002;
+	text-decoration: none;
+	font-weight: 600;
+	transition: top 0.2s ease;
+}
+
+.skip-link:focus {
+	top: 1rem;
+	outline: 2px solid var(--color-accent);
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.scroll-progress-bar,
+	.card-img.media-blur-up,
+	.doc-canvas.media-blur-up,
+	.title-moon-icon,
+	.doc-card,
+	.card,
+	.music-card {
+		animation: none !important;
+		transition: none !important;
+		filter: none !important;
+		opacity: 1 !important;
+	}
+}
