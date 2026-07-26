@@ -199,7 +199,7 @@ const FEATURED_MUSIC_TRACKS = [
 		genre: "Electronic/Pop",
 		date: "2026",
 		album: "Album 7.1",
-		filePath: "https://media.githubusercontent.com/media/Wartets/Music-Library/refs/heads/main/assets/Album 7 (2026)/Album 7.1/Projet 27/Projet 27 1.1.m4a",
+		filePath: "https://media.githubusercontent.com/media/Wartets/Music-Library/refs/heads/main/assets/Album 7 (2026)/Album 7.1/Projet 27/Projet 27.2.opus",
 	},
 	{
 		id: "2",
