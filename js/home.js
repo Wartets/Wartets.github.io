@@ -369,7 +369,12 @@ function renderProjectsSection() {
 
 	const featuredProjects = [];
 	FEATURED_PROJECT_TITLES.forEach(title => {
-		const found = allProjects.find(p => p.title.toLowerCase().includes(title.toLowerCase()));
+		const search = String(title).toLowerCase();
+
+		const found = allProjects.find(p =>
+			String(p.title).toLowerCase().includes(search)
+		);
+
 		if (found && !featuredProjects.some(fp => fp.title === found.title)) {
 			featuredProjects.push(found);
 		}
