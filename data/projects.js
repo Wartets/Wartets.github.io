@@ -573,7 +573,7 @@ const projects = [
 	},
 	[
 		{
-			title: { en: "music", fr: "musique" },
+			title: { en: "Music-Library", fr: "Bibliothèque Musicale" },
 			timestamp: "2026-05-05T11:56:00Z",
 			github: "https://wartets.github.io/music/",
 			description: {
