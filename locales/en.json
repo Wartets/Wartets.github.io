@@ -68,11 +68,12 @@
 	},
 	"footer": {
 		"rights": "All rights reserved.",
-		"license": "Under MIT license",
+		"license": "Under MIT License",
 		"nasa_credit": "Lunar imagery: NASA SVS",
 		"designed_by": "Designed by",
-		"github_text": "Source code available on",
-		"poetry": "Poetry"
+		"github_text": "Check out more projects on",
+		"poetry": "Poetry",
+		"xp_title": "Discover the Windows XP Version"
 	},
 	"ui": {
 		"loading": "Loading data...",
@@ -115,6 +116,9 @@
 		"error_loading": "Error loading document.",
 		"unknown_date": "Unknown date",
 		"previous_page": "Previous page",
-		"next_page": "Next page"
+		"next_page": "Next page",
+		"close_esc": "Close (Esc)",
+		"open_text_file": "Open Text File",
+		"download_poem": "Download Poem"
 	}
 }

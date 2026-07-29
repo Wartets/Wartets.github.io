@@ -11,34 +11,28 @@
 	padding: 1rem 2rem;
 	display: flex;
 	flex-direction: column;
-	gap: 0;
 }
 
 .nav-row-primary {
 	display: flex;
+	flex-wrap: wrap;
 	justify-content: space-between;
 	align-items: center;
 	width: 100%;
+	gap: 0.75rem 1.5rem;
 }
 
-.nav-row-controls {
-	display: none;
+.nav-controls {
+	display: flex;
 	align-items: center;
 	justify-content: center;
-	flex-wrap: wrap;
-	gap: 12px;
-	width: 100%;
-	margin-top: 0.85rem;
-	padding-top: 0.85rem;
-	border-top: 1px solid var(--color-border);
+	flex: 1 1 320px;
+	min-width: 0;
 }
 
-.main-nav:has(.nav-row-controls) .nav-row-controls {
-	display: flex;
-}
-
-.nav-row-controls .header-search-group,
-.nav-row-controls .header-controls-group {
+.nav-controls .header-search-group,
+.nav-controls .header-controls-group,
+.nav-controls .search-filter-pill {
 	background: rgba(255, 255, 255, 0.04);
 	border: 1px solid rgba(255, 255, 255, 0.08);
 	backdrop-filter: none;
@@ -46,21 +40,25 @@
 	box-shadow: none;
 }
 
-.nav-row-controls .header-search-group {
+.nav-controls .header-search-group,
+.nav-controls .search-filter-pill {
 	display: flex;
 	align-items: center;
+	flex-wrap: wrap;
+	justify-content: center;
 	border-radius: 50px;
 	padding: 6px 6px 6px 16px;
 	flex: 1 1 260px;
-	max-width: 340px;
+	max-width: 620px;
 	transition: border-color 0.3s ease;
 }
 
-.nav-row-controls .header-search-group:focus-within {
+.nav-controls .header-search-group:focus-within,
+.nav-controls .search-filter-pill:focus-within {
 	border-color: rgba(255, 255, 255, 0.2);
 }
 
-.nav-row-controls .header-controls-group {
+.nav-controls .header-controls-group {
 	display: flex;
 	align-items: center;
 	border-radius: 50px;
@@ -996,21 +994,29 @@
 		margin-top: 0.25rem;
 	}
 
-	.nav-row-controls {
+	.nav-controls {
+		order: 2;
+		flex: 1 1 100%;
 		flex-direction: column;
 		align-items: stretch;
 		margin-top: 0.6rem;
 		padding-top: 0.6rem;
+		border-top: 1px solid var(--color-border);
 	}
 
-	.nav-row-controls .header-search-group,
-	.nav-row-controls .header-controls-group {
+	.nav-controls .header-search-group,
+	.nav-controls .header-controls-group,
+	.nav-controls .search-filter-pill {
 		max-width: none;
 		width: 100%;
 	}
 
-	.nav-row-controls .header-controls-group {
+	.nav-controls .header-controls-group {
 		flex-wrap: wrap;
+	}
+
+	.nav-links {
+		order: 3;
 	}
 
 	.nav-link {

@@ -71,8 +71,9 @@
 		"license": "Sous licence MIT",
 		"nasa_credit": "Imagerie lunaire : NASA SVS",
 		"designed_by": "Conçu par",
-		"github_text": "Code source disponible sur",
-		"poetry": "Poésie"
+		"github_text": "Découvrez plus de projets sur",
+		"poetry": "Poésie",
+		"xp_title": "Découvrir la version Windows XP"
 	},
 	"ui": {
 		"loading": "Chargement des données...",
@@ -115,6 +116,9 @@
 		"error_loading": "Erreur lors du chargement du document.",
 		"unknown_date": "Date inconnue",
 		"previous_page": "Page précédente",
-		"next_page": "Page suivante"
+		"next_page": "Page suivante",
+		"close_esc": "Fermer (Échap)",
+		"open_text_file": "Ouvrir le fichier texte",
+		"download_poem": "Télécharger le poème"
 	}
 }

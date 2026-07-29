@@ -34,9 +34,8 @@
 	<link rel="stylesheet" href="../css/project.css">
 	<link rel="stylesheet" href="../css/home.css">
 	<script>window.SITE_ROOT = "../";</script>
-	<script src="../js/site-common.js" defer></script>
+	<script src="../js/site-commons.js" defer></script>
 	<script src="../js/i18n.js" defer></script>
-	<script src="../js/i18n-data.js" defer></script>
 </head>
 <body>
 	<div class="bg-gradient"></div>
@@ -45,6 +44,51 @@
 	<nav class="main-nav" aria-label="Main navigation">
 		<div class="nav-row-primary">
 			<a href="../" class="nav-brand">Colin Bossu Réaubourg</a>
+			<div class="nav-controls">
+				<div class="header-search-group">
+					<i class="fa-solid fa-magnifying-glass search-icon" aria-hidden="true"></i>
+					<input type="search" id="searchInput" data-i18n-placeholder="controls.search_placeholder" placeholder="Search..." autocomplete="off" spellcheck="false" autocapitalize="off">
+					<button id="clearSearchBtn" class="search-clear" data-i18n-aria-label="controls.clear_search" aria-label="Clear Search" type="button">
+						<i class="fa-solid fa-xmark" aria-hidden="true"></i>
+					</button>
+				</div>
+				<div class="header-controls-group">
+					<div id="customSelect" class="filter-part">
+						<div class="filter-trigger" role="button" tabindex="0" aria-expanded="false" aria-haspopup="listbox">
+							<i class="fa-solid fa-filter filter-icon" aria-hidden="true"></i>
+							<span data-i18n="controls.all">All</span>
+						</div>
+						<div class="filter-dropdown">
+							<div class="filter-option selected" data-value="all" data-i18n="controls.all">All</div>
+						</div>
+					</div>
+					<div class="sort-part">
+						<div id="sortFilter" class="filter-part">
+							<div class="filter-trigger" role="button" tabindex="0" aria-expanded="false" aria-haspopup="listbox">
+								<i class="fa-solid fa-arrow-down-wide-short filter-icon" aria-hidden="true"></i>
+								<span data-i18n="controls.sort_date">Date</span>
+							</div>
+							<div class="filter-dropdown">
+								<div class="filter-option selected" data-value="date" data-i18n="controls.sort_date">Date</div>
+								<div class="filter-option" data-value="title" data-i18n="controls.sort_title">Title</div>
+								<div class="filter-option" data-value="category" data-i18n="controls.sort_category">Category</div>
+								<div class="filter-option" data-value="language" data-i18n="controls.sort_language">Language</div>
+							</div>
+						</div>
+						<button id="sortOrderBtn" class="view-btn" data-i18n-aria-label="controls.toggle_sort_order" aria-label="Toggle Sort Order">
+							<i class="fa-solid fa-arrow-down-long"></i>
+						</button>
+					</div>
+					<div class="view-toggle-part">
+						<button id="grid-view-btn" class="view-btn active" data-i18n-aria-label="controls.grid_view" aria-label="Grid View">
+							<i class="fa-solid fa-border-all"></i>
+						</button>
+						<button id="list-view-btn" class="view-btn" data-i18n-aria-label="controls.list_view" aria-label="List View">
+							<i class="fa-solid fa-list-ul"></i>
+						</button>
+					</div>
+				</div>
+			</div>
 			<div class="nav-links">
 				<a href="../" class="nav-link" data-i18n="nav.home">Home</a>
 				<a href="./" class="nav-link" data-i18n="nav.projects">Projects</a>
@@ -60,51 +104,6 @@
 						<li data-lang="en" role="option" tabindex="0">English</li>
 						<li data-lang="fr" role="option" tabindex="0">Français</li>
 					</ul>
-				</div>
-			</div>
-		</div>
-		<div class="nav-row-controls">
-			<div class="header-search-group">
-				<i class="fa-solid fa-magnifying-glass search-icon" aria-hidden="true"></i>
-				<input type="search" id="searchInput" data-i18n-placeholder="controls.search_placeholder" placeholder="Search..." autocomplete="off" spellcheck="false" autocapitalize="off">
-				<button id="clearSearchBtn" class="search-clear" data-i18n-aria-label="controls.clear_search" aria-label="Clear Search" type="button">
-					<i class="fa-solid fa-xmark" aria-hidden="true"></i>
-				</button>
-			</div>
-			<div class="header-controls-group">
-				<div id="customSelect" class="filter-part">
-					<div class="filter-trigger" role="button" tabindex="0" aria-expanded="false" aria-haspopup="listbox">
-						<i class="fa-solid fa-filter filter-icon" aria-hidden="true"></i>
-						<span data-i18n="controls.all">All</span>
-					</div>
-					<div class="filter-dropdown">
-						<div class="filter-option selected" data-value="all" data-i18n="controls.all">All</div>
-					</div>
-				</div>
-				<div class="sort-part">
-					<div id="sortFilter" class="filter-part">
-						<div class="filter-trigger" role="button" tabindex="0" aria-expanded="false" aria-haspopup="listbox">
-							<i class="fa-solid fa-arrow-down-wide-short filter-icon" aria-hidden="true"></i>
-							<span data-i18n="controls.sort_date">Date</span>
-						</div>
-						<div class="filter-dropdown">
-							<div class="filter-option selected" data-value="date" data-i18n="controls.sort_date">Date</div>
-							<div class="filter-option" data-value="title" data-i18n="controls.sort_title">Title</div>
-							<div class="filter-option" data-value="category" data-i18n="controls.sort_category">Category</div>
-							<div class="filter-option" data-value="language" data-i18n="controls.sort_language">Language</div>
-						</div>
-					</div>
-					<button id="sortOrderBtn" class="view-btn" data-i18n-aria-label="controls.toggle_sort_order" aria-label="Toggle Sort Order">
-						<i class="fa-solid fa-arrow-down-long"></i>
-					</button>
-				</div>
-				<div class="view-toggle-part">
-					<button id="grid-view-btn" class="view-btn active" data-i18n-aria-label="controls.grid_view" aria-label="Grid View">
-						<i class="fa-solid fa-border-all"></i>
-					</button>
-					<button id="list-view-btn" class="view-btn" data-i18n-aria-label="controls.list_view" aria-label="List View">
-						<i class="fa-solid fa-list-ul"></i>
-					</button>
 				</div>
 			</div>
 		</div>
@@ -127,7 +126,7 @@
 	<main id="gallery" class="projects-grid" role="region" aria-label="Projects gallery">
 		<div class="loader-wrapper" role="status" aria-live="polite">
 			<i class="fa-solid fa-circle-notch fa-spin" aria-hidden="true"></i>
-			<p>LOADING PROJECTS...</p>
+			<p data-i18n="controls.loading_projects">Loading projects...</p>
 		</div>
 		<div id="no-results-message" class="no-results hidden" role="status" aria-live="polite">
 			<i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
@@ -171,13 +170,13 @@
 	
 	<footer class="site-footer">
 		<div class="footer-content">
-			<p class="copyright">&copy; <span id="current-year">2026</span>. All rights reserved. <a href="https://github.com/Wartets/Wartets.github.io/blob/main/LICENSE" target="_blank" rel="noopener noreferrer" class="footer-link">Under MIT License</a></p>
+			<p class="copyright">&copy; <span id="current-year">2026</span>. <span data-i18n="footer.rights">All rights reserved.</span> <a href="https://github.com/Wartets/Wartets.github.io/blob/main/LICENSE" target="_blank" rel="noopener noreferrer" class="footer-link" data-i18n="footer.license">Under MIT License</a></p>
 			<nav class="footer-nav">
-				<span>Designed by <a href="https://wartets.github.io/" target="_blank" rel="noopener noreferrer" class="footer-link">Wartets <i class="fa-solid fa-arrow-up-right-from-square"></i></a></span>
+				<span><span data-i18n="footer.designed_by">Designed by</span> <a href="https://wartets.github.io/" target="_blank" rel="noopener noreferrer" class="footer-link">Wartets <i class="fa-solid fa-arrow-up-right-from-square"></i></a></span>
 				<span class="divider"></span>
-				<span>Check out more projects on <a href="https://github.com/wartets" target="_blank" rel="noopener noreferrer" class="footer-link">GitHub <i class="fa-brands fa-github"></i></a></span>
+				<span><span data-i18n="footer.github_text">Check out more projects on</span> <a href="https://github.com/wartets" target="_blank" rel="noopener noreferrer" class="footer-link">GitHub <i class="fa-brands fa-github"></i></a></span>
 				<span class="divider"></span>
-				<a href="window/index.html" target="_blank" id="xp-portfolio-link" title="Discover the Windows XP Version">
+				<a href="window/index.html" target="_blank" id="xp-portfolio-link" data-i18n-title="footer.xp_title" title="Discover the Windows XP Version">
 					<img src="../assets/images/desk/xp-computer-icon.webp" alt="Windows XP Portfolio Icon">
 				</a>
 			</nav>
