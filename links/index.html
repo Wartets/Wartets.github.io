@@ -16,6 +16,9 @@
 		a { color: #8ab4ff; text-decoration: none; }
 		a:hover { text-decoration: underline; }
 		.label { color: #777; font-size: 0.85rem; margin-left: 8px; }
+		li { opacity: 0; transform: translateY(6px); animation: linksItemReveal 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+		@keyframes linksItemReveal { to { opacity: 1; transform: translateY(0); } }
+		@media (prefers-reduced-motion: reduce) { li { animation: none; opacity: 1; transform: none; } }
 	</style>
 </head>
 <body>
@@ -27,6 +30,8 @@
 	<ul id="project-links"></ul>
 	<h1>Documents (PDF)</h1>
 	<ul id="pdf-links"></ul>
+	<h1>Poems</h1>
+	<ul id="poem-links"></ul>
 	<script src="../data/projects.js"></script>
 	<script src="../data/library.js"></script>
 	<script src="script.js"></script>

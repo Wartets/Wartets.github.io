@@ -1,3 +1,20 @@
+function applyStagger(container) {
+	if (!container) return;
+	Array.from(container.children).forEach((item, index) => {
+		item.style.animationDelay = `${Math.min(index, 24) * 35}ms`;
+	});
+}
+
+function loadScriptOnce(src) {
+	return new Promise((resolve, reject) => {
+		const script = document.createElement('script');
+		script.src = src;
+		script.onload = () => resolve();
+		script.onerror = () => reject(new Error(`Failed to load ${src}`));
+		document.body.appendChild(script);
+	});
+}
+
 document.addEventListener('DOMContentLoaded', () => {
 	const internalPages = [
 		{ name: 'Home', url: 'https://wartets.github.io/' },
@@ -25,6 +42,7 @@ document.addEventListener('DOMContentLoaded', () => {
 		li.appendChild(a);
 		internalList.appendChild(li);
 	});
+	applyStagger(internalList);
 
 	const socialList = document.getElementById('social-links');
 	socialLinks.forEach(link => {
@@ -37,6 +55,7 @@ document.addEventListener('DOMContentLoaded', () => {
 		li.appendChild(a);
 		socialList.appendChild(li);
 	});
+	applyStagger(socialList);
 
 	function resolveLocalizedText(value, fallbackLang) {
 		if (value === null || value === undefined) return '';
@@ -82,10 +101,12 @@ document.addEventListener('DOMContentLoaded', () => {
 			projectList.appendChild(li);
 		});
 	}
+	applyStagger(projectList);
 
+	const pdfLibraryData = window.libraryData;
 	const pdfList = document.getElementById('pdf-links');
-	if (pdfList && window.libraryData && Array.isArray(window.libraryData.documents)) {
-		const documents = window.libraryData.documents
+	if (pdfList && pdfLibraryData && Array.isArray(pdfLibraryData.documents)) {
+		const documents = pdfLibraryData.documents
 			.filter(doc => doc && doc.show !== false && doc.filePath)
 			.slice()
 			.sort((a, b) => {
@@ -107,6 +128,40 @@ document.addEventListener('DOMContentLoaded', () => {
 			li.appendChild(a);
 
 			pdfList.appendChild(li);
+		});
+	}
+	applyStagger(pdfList);
+
+	const poemList = document.getElementById('poem-links');
+	if (poemList) {
+		loadScriptOnce('../data/poetry.js').then(() => {
+			const poemLibraryData = window.libraryData;
+			window.libraryData = pdfLibraryData;
+
+			if (poemLibraryData && Array.isArray(poemLibraryData.documents)) {
+				const poems = poemLibraryData.documents
+					.filter(doc => doc && doc.filePath)
+					.slice()
+					.sort((a, b) => new Date(b.timestamp || 0) - new Date(a.timestamp || 0));
+
+				poems.forEach(poem => {
+					const li = document.createElement('li');
+					li.textContent = resolveLocalizedText(poem.title) || poem.filePath.split('/').pop();
+					li.appendChild(document.createTextNode(' '));
+
+					const a = document.createElement('a');
+					a.href = poem.filePath;
+					a.target = '_blank';
+					a.rel = 'noopener noreferrer';
+					a.textContent = 'TXT';
+					li.appendChild(a);
+
+					poemList.appendChild(li);
+				});
+			}
+			applyStagger(poemList);
+		}).catch(() => {
+			window.libraryData = pdfLibraryData;
 		});
 	}
 });

@@ -73,35 +73,61 @@ window.tGenre = function(genre) {
 	return dict[genre] || genre;
 };
 
+function applyLanguageData(lang, data) {
+	window.translations = data;
+	window.currentSiteLang = lang;
+	applyTranslations(data);
+	document.documentElement.lang = lang;
+	localStorage.setItem('site_lang', lang);
+
+	const langCurrent = document.getElementById('langCurrent');
+	if (langCurrent) {
+		langCurrent.textContent = lang === 'fr' ? 'Français' : 'English';
+	}
+
+	const announcer = document.getElementById('aria-status-announcer');
+	if (announcer) {
+		announcer.textContent = lang === 'fr' ? 'Langue changée en français.' : 'Language changed to English.';
+	}
+
+	const event = new CustomEvent('i18nReady', { detail: { lang } });
+	document.dispatchEvent(event);
+}
+
 function loadLanguage(lang) {
+	const cacheKey = `i18n_cache_${lang}`;
+	let cachedRaw = null;
+
+	try {
+		cachedRaw = sessionStorage.getItem(cacheKey);
+	} catch (error) {
+		cachedRaw = null;
+	}
+
+	if (cachedRaw) {
+		try {
+			applyLanguageData(lang, JSON.parse(cachedRaw));
+		} catch (error) {
+			cachedRaw = null;
+		}
+	}
+
 	fetch(`${window.SITE_ROOT}locales/${lang}.json`)
 		.then(response => {
 			if (!response.ok) throw new Error('Translation file not found');
 			return response.json();
 		})
 		.then(data => {
-			window.translations = data;
-			window.currentSiteLang = lang;
-			applyTranslations(data);
-			document.documentElement.lang = lang;
-			localStorage.setItem('site_lang', lang);
-
-			const langCurrent = document.getElementById('langCurrent');
-			if (langCurrent) {
-				langCurrent.textContent = lang === 'fr' ? 'Français' : 'English';
-			}
-
-			const announcer = document.getElementById('aria-status-announcer');
-			if (announcer) {
-				announcer.textContent = lang === 'fr' ? 'Langue changée en français.' : 'Language changed to English.';
-			}
-
-			const event = new CustomEvent('i18nReady', { detail: { lang } });
-			document.dispatchEvent(event);
+			const serialized = JSON.stringify(data);
+			if (cachedRaw === serialized) return;
+			try {
+				sessionStorage.setItem(cacheKey, serialized);
+			} catch (error) {}
+			applyLanguageData(lang, data);
 		})
 		.catch(error => {
 			console.error('Error loading language file:', error);
-			if (lang !== 'en') loadLanguage('en');
+			if (lang !== 'en' && !cachedRaw) loadLanguage('en');
 		});
 }
 
