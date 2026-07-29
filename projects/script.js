@@ -138,8 +138,8 @@ document.addEventListener('DOMContentLoaded', () => {
 			let valA, valB;
 			switch (currentSortField) {
 				case 'title':
-					valA = a.title.toLowerCase();
-					valB = b.title.toLowerCase();
+					valA = projectTitle(a).toLowerCase();
+					valB = projectTitle(b).toLowerCase();
 					return valA.localeCompare(valB) * multiplier;
 				case 'category':
 					valA = (a.keywords && a.keywords[0]) ? a.keywords[0].toLowerCase() : '';
@@ -184,6 +184,10 @@ document.addEventListener('DOMContentLoaded', () => {
 	}
 
 	sortProjects();
+
+	const projectTitle = (p) => window.tData(p.title);
+	const projectDesc = (p) => window.tData(p.description);
+	const projectLongDesc = (p) => window.tData(p.longDescription || p.longDescrition) || projectDesc(p);
 
 	const allKeywords = new Set();
 	sortedProjects.forEach(p => {
@@ -643,12 +647,14 @@ document.addEventListener('DOMContentLoaded', () => {
 				if (projectDate > now && !showHiddenProjects) return;
 
 				const isNew = (now - projectDate) < newThreshold;
-				const longDescText = project.longDescription || project.longDescrition || project.description;
+				const longDescText = projectLongDesc(project);
+				const titleText = projectTitle(project);
+				const descText = projectDesc(project);
 
 				const card = document.createElement('div');
 				card.className = 'card';
-				card.dataset.title = project.title.toLowerCase();
-				card.dataset.desc = project.description.toLowerCase();
+				card.dataset.title = titleText.toLowerCase();
+				card.dataset.desc = descText.toLowerCase();
 				card.dataset.keywords = (project.keywords || []).join(',').toLowerCase();
 				card.dataset.longdesc = (longDescText || '').toLowerCase();
 				card.dataset.show = project.show;
@@ -768,8 +774,8 @@ document.addEventListener('DOMContentLoaded', () => {
 				const primaryCategory = (project.keywords && project.keywords[0]) ? 
 					project.keywords[0].charAt(0).toUpperCase() + project.keywords[0].slice(1) : '';
 
-				const displayTitle = searchQuery ? highlightText(project.title, searchQuery) : project.title;
-				const displayDesc = searchQuery ? highlightText(project.description, searchQuery) : project.description;
+				const displayTitle = searchQuery ? highlightText(titleText, searchQuery) : titleText;
+				const displayDesc = searchQuery ? highlightText(descText, searchQuery) : descText;
 				const displayLongDesc = searchQuery ? highlightText(longDescText, searchQuery) : longDescText;
 
 				const formattedDate = formatDate(project.timestamp);
@@ -987,19 +993,19 @@ document.addEventListener('DOMContentLoaded', () => {
 				const lastQuery = card.dataset.lastQuery || '';
 				if (lastQuery !== searchQuery) {
 					card.dataset.lastQuery = searchQuery;
-					const project = sortedProjects.find(p => p.title.toLowerCase() === card.dataset.title);
+					const project = sortedProjects.find(p => projectTitle(p).toLowerCase() === card.dataset.title);
 					if (project) {
 						const titleEl = card.querySelector('.card-title');
 						const descEl = card.querySelector('.description');
 						const longDescEl = card.querySelector('.long-description');
-						const longDescText = project.longDescription || project.longDescrition || project.description;
+						const longDescText = projectLongDesc(project);
 
 						if (titleEl) {
 							const badges = titleEl.querySelectorAll('.badge');
-							titleEl.innerHTML = searchQuery ? highlightText(project.title, searchQuery) : project.title;
+							titleEl.innerHTML = searchQuery ? highlightText(projectTitle(project), searchQuery) : projectTitle(project);
 							badges.forEach(b => titleEl.appendChild(b));
 						}
-						if (descEl) descEl.innerHTML = searchQuery ? highlightText(project.description, searchQuery) : project.description;
+						if (descEl) descEl.innerHTML = searchQuery ? highlightText(projectDesc(project), searchQuery) : projectDesc(project);
 						if (longDescEl) longDescEl.innerHTML = searchQuery ? highlightText(longDescText, searchQuery) : longDescText;
 					}
 				}
@@ -1053,10 +1059,10 @@ document.addEventListener('DOMContentLoaded', () => {
 		modalImg.src = project.image || '';
 		modalImg.style.display = project.image ? 'block' : 'none';
 
-		modalTitle.textContent = project.title;
+		modalTitle.textContent = projectTitle(project);
 		modalDate.textContent = formatDate(project.timestamp);
 
-		modalDesc.textContent = project.longDescription || project.longDescrition || project.description;
+		modalDesc.textContent = projectLongDesc(project);
 
 		if (project.keywords) {
 			modalTags.innerHTML = project.keywords.map(tag => `<span class="tag">#${tag}</span>`).join('');
@@ -1192,4 +1198,11 @@ document.addEventListener('DOMContentLoaded', () => {
 	setTimeout(() => {
 		renderProjects();
 	}, 0);
+
+	document.addEventListener('i18nReady', () => {
+		container.innerHTML = '';
+		documentCardsCache.clear ? documentCardsCache.clear() : null;
+		Array.from(container.children).forEach(c => c.remove());
+		renderProjects();
+	});
 });

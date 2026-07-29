@@ -357,6 +357,11 @@ function renderDynamicSections() {
 	}
 }
 
+document.addEventListener('i18nReady', () => {
+	if (typeof projects !== 'undefined') renderProjectsSection();
+	if (window.libraryData && window.libraryData.documents) renderLibrarySection();
+});
+
 function renderProjectsSection() {
 	if (typeof projects === 'undefined') return;
 
@@ -408,7 +413,9 @@ function buildProjectGrid(containerId, projectList) {
 		});
 
 		const imagePath = sanitizeUrl(project.image, 'projects');
-		const imgHtml = imagePath ? `<img src="${imagePath}" alt="${project.title}" class="card-img media-blur-up" loading="lazy" onload="this.classList.add('loaded')" onerror="this.style.display='none'">` : '';
+		const projectTitle = window.tData(project.title);
+		const projectDescription = window.tData(project.description);
+		const imgHtml = imagePath ? `<img src="${imagePath}" alt="${projectTitle}" class="card-img media-blur-up" loading="lazy" onload="this.classList.add('loaded')" onerror="this.style.display='none'">` : '';
 
 		const date = new Date(project.timestamp);
 		const dateStr = `${date.toLocaleString(document.documentElement.lang || 'en', { month: 'short' })} ${date.getFullYear()}`;
@@ -420,16 +427,18 @@ function buildProjectGrid(containerId, projectList) {
 		card.innerHTML = `
 			${imgHtml}
 			<div class="card-header">
-				<h3 class="card-title">${project.title}</h3>
+				<h3 class="card-title">${projectTitle}</h3>
 				<span class="date">${dateStr}</span>
 			</div>
 			<div class="expanded-content" style="display:flex;">
-				<p class="description card-desc-clamp">${project.description}</p>
+				<p class="description card-desc-clamp">${projectDescription}</p>
 			</div>
 			<div class="links card-links-flex">
 				${linksHtml}
 			</div>
 		`;
+
+		card.dataset.projectRef = project.title.en || project.title;
 
 		card.addEventListener('click', (e) => {
 			if (e.target.closest('a') || e.target.closest('.btn')) return;
@@ -572,8 +581,8 @@ function buildDocumentGrid(containerId, docList) {
 				<canvas class="doc-canvas media-blur-up"></canvas>
 			</div>
 			<div class="doc-card-content">
-				<h3 class="doc-card-title">${doc.title}</h3>
-				<p class="doc-card-description">${doc.description}</p>
+				<h3 class="doc-card-title">${window.tData(doc.title)}</h3>
+				<p class="doc-card-description">${window.tData(doc.description)}</p>
 				<div class="doc-card-meta">
 					<span class="doc-author" title="${fullAuthorNames}">${displayAuthors}</span>
 					<span class="doc-date">${dateStr}</span>

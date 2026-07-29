@@ -73,5 +73,23 @@
 		"loading_complete": "Data loading complete.",
 		"new": "New",
 		"unknown_author": "Unknown author"
+	},
+	"controls": {
+		"search_placeholder": "Search...",
+		"clear_search": "Clear search",
+		"all_categories": "All Categories",
+		"all_tags": "All Tags",
+		"all": "All",
+		"sort_by": "Sort by",
+		"sort_date": "Date",
+		"sort_title": "Title",
+		"sort_category": "Category",
+		"sort_author": "Author",
+		"sort_language": "Language",
+		"toggle_sort_order": "Toggle sort order",
+		"grid_view": "Grid view",
+		"list_view": "List view",
+		"no_results_title": "No results found matching your criteria.",
+		"reset_filters": "Reset filters"
 	}
 }

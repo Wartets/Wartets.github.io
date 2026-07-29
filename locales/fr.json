@@ -73,5 +73,23 @@
 		"loading_complete": "Chargement des données terminé.",
 		"new": "Nouveau",
 		"unknown_author": "Auteur inconnu"
+	},
+	"controls": {
+		"search_placeholder": "Rechercher...",
+		"clear_search": "Effacer la recherche",
+		"all_categories": "Toutes les catégories",
+		"all_tags": "Tous les tags",
+		"all": "Tout",
+		"sort_by": "Trier par",
+		"sort_date": "Date",
+		"sort_title": "Titre",
+		"sort_category": "Catégorie",
+		"sort_author": "Auteur",
+		"sort_language": "Langue",
+		"toggle_sort_order": "Inverser l'ordre de tri",
+		"grid_view": "Vue en grille",
+		"list_view": "Vue en liste",
+		"no_results_title": "Aucun résultat ne correspond à vos critères.",
+		"reset_filters": "Réinitialiser les filtres"
 	}
 }

@@ -1,10 +1,16 @@
 const projects = [
 	{
-		title: "Lenia GPU Simulator",
+		title: { en: "Lenia GPU Simulator", fr: "Simulateur Lenia GPU" },
 		timestamp: "2026-03-01T13:24:00Z",
 		github: "https://github.com/Wartets/Lenia",
-		description: "A high-performance, real-time Lenia simulator powered by C++20 and OpenGL compute shaders. Explore complex artificial life with 500+ pre-loaded species and multichannel dynamics at massive scales.",
-		longDescription: "This project is a state-of-the-art implementation of Lenia, a continuous cellular automaton that produces lifelike emergent behaviors. Built for extreme performance, the engine utilizes a 'Zero-Copy' architecture where the entire simulation state lives in VRAM, leveraging OpenGL 4.6 compute shaders to achieve throughputs exceeding 10 Gcells/s. It features a massive library of 548 pre-loaded species (including Orbium and Scutium), support for multichannel RGB dynamics, and 11 distinct growth functions. The application includes professional analysis tools for centroid tracking, stability monitoring, and real-time performance metrics, all accessible through a highly customizable, detachable ImGui interface. It bridges the gap between mathematical research and interactive artistic exploration.",
+		description: {
+			en: "A high-performance, real-time Lenia simulator powered by C++20 and OpenGL compute shaders. Explore complex artificial life with 500+ pre-loaded species and multichannel dynamics at massive scales.",
+			fr: "Un simulateur Lenia temps réel haute performance, propulsé par C++20 et des compute shaders OpenGL. Explorez une vie artificielle complexe avec plus de 500 espèces préchargées et une dynamique multicanal à très grande échelle."
+		},
+		longDescription: {
+			en: "This project is a state-of-the-art implementation of Lenia, a continuous cellular automaton that produces lifelike emergent behaviors. Built for extreme performance, the engine utilizes a 'Zero-Copy' architecture where the entire simulation state lives in VRAM, leveraging OpenGL 4.6 compute shaders to achieve throughputs exceeding 10 Gcells/s. It features a massive library of 548 pre-loaded species (including Orbium and Scutium), support for multichannel RGB dynamics, and 11 distinct growth functions. The application includes professional analysis tools for centroid tracking, stability monitoring, and real-time performance metrics, all accessible through a highly customizable, detachable ImGui interface. It bridges the gap between mathematical research and interactive artistic exploration.",
+			fr: "Ce projet est une implémentation de pointe de Lenia, un automate cellulaire continu produisant des comportements émergents proches du vivant. Conçu pour une performance extrême, le moteur repose sur une architecture 'Zero-Copy' où l'intégralité de l'état de simulation réside en VRAM, exploitant les compute shaders OpenGL 4.6 pour dépasser 10 Gcells/s. Il embarque une bibliothèque de 548 espèces préchargées (dont Orbium et Scutium), une dynamique RGB multicanal, et 11 fonctions de croissance distinctes. L'application propose des outils d'analyse professionnels pour le suivi de centroïde, la surveillance de stabilité et des métriques de performance en temps réel, accessibles via une interface ImGui détachable et hautement personnalisable. Il relie recherche mathématique et exploration artistique interactive."
+		},
 		icon: "../assets/images/card/Lenia-card.png",
 		image: "../assets/images/card/Lenia-card.png",
 		link: "https://wartets.github.io/Lenia/docs/",
@@ -13,11 +19,17 @@ const projects = [
 		show: true
 	},
 	{
-		title: "Turbulence Simulation",
+		title: { en: "Turbulence Simulation", fr: "Simulation de Turbulence" },
 		timestamp: "2026-02-01T09:43:58Z",
 		github: "https://github.com/wartets/Turbulence-sim",
-		description: "A high-performance 2D fluid dynamics simulation running in the browser. Powered by a C++/WebAssembly engine using the Lattice Boltzmann Method, it features multi-threading, WebGL2 rendering, and advanced physics models.",
-		longDescription: "A high-performance 2D fluid dynamics simulation that brings complex turbulence models to the web. The core of the simulation is a C++ engine compiled to WebAssembly, utilizing the Lattice Boltzmann Method (LBM) for computational efficiency. The engine is multi-threaded to leverage modern hardware, ensuring smooth, real-time interaction. It supports a wide range of physical phenomena, including buoyancy, vorticity confinement, Large Eddy Simulation (LES) via the Smagorinsky model, and non-Newtonian fluid rheology. Users can interact with the fluid through a customizable brush system and visualize various fields like velocity, vorticity, and pressure. The rendering is handled by a custom WebGL2 engine, complete with particle advection and post-processing filters, making it a powerful tool for both education and artistic exploration.",
+		description: {
+			en: "A high-performance 2D fluid dynamics simulation running in the browser. Powered by a C++/WebAssembly engine using the Lattice Boltzmann Method, it features multi-threading, WebGL2 rendering, and advanced physics models.",
+			fr: "Une simulation de dynamique des fluides 2D haute performance s'exécutant dans le navigateur. Propulsée par un moteur C++/WebAssembly utilisant la méthode de Boltzmann sur réseau, elle intègre multithreading, rendu WebGL2 et modèles physiques avancés."
+		},
+		longDescription: {
+			en: "A high-performance 2D fluid dynamics simulation that brings complex turbulence models to the web. The core of the simulation is a C++ engine compiled to WebAssembly, utilizing the Lattice Boltzmann Method (LBM) for computational efficiency. The engine is multi-threaded to leverage modern hardware, ensuring smooth, real-time interaction. It supports a wide range of physical phenomena, including buoyancy, vorticity confinement, Large Eddy Simulation (LES) via the Smagorinsky model, and non-Newtonian fluid rheology. Users can interact with the fluid through a customizable brush system and visualize various fields like velocity, vorticity, and pressure. The rendering is handled by a custom WebGL2 engine, complete with particle advection and post-processing filters, making it a powerful tool for both education and artistic exploration.",
+			fr: "Une simulation de dynamique des fluides 2D haute performance amenant des modèles de turbulence complexes sur le web. Le cœur du moteur est écrit en C++ et compilé en WebAssembly, utilisant la méthode de Boltzmann sur réseau (LBM) pour son efficacité de calcul. Le moteur est multithreadé pour exploiter le matériel moderne et garantir une interaction fluide en temps réel. Il prend en charge un large éventail de phénomènes physiques : flottabilité, confinement de vorticité, simulation des grandes échelles (LES) via le modèle de Smagorinsky, et rhéologie de fluides non newtoniens. Les utilisateurs interagissent avec le fluide via un système de pinceau personnalisable et visualisent différents champs (vitesse, vorticité, pression). Le rendu repose sur un moteur WebGL2 sur mesure, avec advection de particules et filtres de post-traitement."
+		},
 		icon: "../assets/images/card/Turbulence-sim-card.png",
 		image: "../assets/images/card/Turbulence-sim-card.png",
 		link: "https://github.com/Wartets/Turbulence-sim/blob/main/README.md",

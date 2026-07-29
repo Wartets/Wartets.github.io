@@ -15,8 +15,11 @@ window.libraryData = {
 	documents: [
 		{
 			id: "txt-01",
-			title: "Amis",
-			description: "Un hommage à l'amitié comme pilier de l'équilibre mental, mêlé à la peur constante de la perte et de l'éloignement.",
+			title: { fr: "Amis", en: "Friends" },
+			description: {
+				fr: "Un hommage à l'amitié comme pilier de l'équilibre mental, mêlé à la peur constante de la perte et de l'éloignement.",
+				en: "A tribute to friendship as a pillar of mental balance, intertwined with the constant fear of loss and distance."
+			},
 			filePath: "https://wartets.github.io/Ouverture/assets/poems/Amis.txt",
 			categoryId: 1,
 			authorIds: ["cbr"],

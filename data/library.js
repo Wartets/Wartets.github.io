@@ -41,8 +41,11 @@ window.libraryData = {
 		{
 			id: "doc-001",
 			slug: "introduction-physique-quantique",
-			title: "Introduction à la Physique Quantique",
-			description: "Notes de cours magistral de troisième année de licence.",
+			title: { fr: "Introduction à la Physique Quantique", en: "Introduction to Quantum Physics" },
+			description: {
+				fr: "Notes de cours magistral de troisième année de licence.",
+				en: "Lecture notes from a third-year undergraduate course."
+			},
 			filePath: "https://wartets.github.io/assets/documents/Cours_Quantique_1.pdf",
 			categoryIds: [1],
 			typeId: "course",
@@ -55,8 +58,11 @@ window.libraryData = {
 		{
 			id: "doc-002",
 			slug: "mathematiques-5-cours",
-			title: "Mathématiques 5 - Cours",
-			description: "Écriture tensorielle, Analyse complexe, Séries de Fourier et Équations différentielles.",
+			title: { fr: "Mathématiques 5 - Cours", en: "Mathematics 5 - Course" },
+			description: {
+				fr: "Écriture tensorielle, Analyse complexe, Séries de Fourier et Équations différentielles.",
+				en: "Tensor notation, complex analysis, Fourier series and differential equations."
+			},
 			filePath: "https://wartets.github.io/assets/documents/Cours_Mathématiques_5.pdf",
 			categoryIds: [2],
 			typeId: "course",

@@ -84,26 +84,36 @@ document.addEventListener("DOMContentLoaded", () => {
             });
     }
 
+    function resolveKey(translations, path) {
+        const keys = path.split('.');
+        let value = translations;
+        keys.forEach(key => {
+            if (value) value = value[key];
+        });
+        return value;
+    }
+
     function applyTranslations(translations) {
-        const elements = document.querySelectorAll('[data-i18n]');
-
-        elements.forEach(el => {
-            const keys = el.getAttribute('data-i18n').split('.');
-            let value = translations;
-
-            keys.forEach(key => {
-                if (value) value = value[key];
-            });
-
-            if (value) {
-                if (el.tagName === 'META') {
-                    el.setAttribute('content', value);
-                } else if (el.tagName === 'TITLE') {
-                    document.title = value;
-                } else {
-                    el.innerHTML = value;
-                }
+        document.querySelectorAll('[data-i18n]').forEach(el => {
+            const value = resolveKey(translations, el.getAttribute('data-i18n'));
+            if (!value) return;
+            if (el.tagName === 'META') {
+                el.setAttribute('content', value);
+            } else if (el.tagName === 'TITLE') {
+                document.title = value;
+            } else {
+                el.innerHTML = value;
             }
+        });
+
+        document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+            const value = resolveKey(translations, el.getAttribute('data-i18n-placeholder'));
+            if (value) el.setAttribute('placeholder', value);
+        });
+
+        document.querySelectorAll('[data-i18n-aria-label]').forEach(el => {
+            const value = resolveKey(translations, el.getAttribute('data-i18n-aria-label'));
+            if (value) el.setAttribute('aria-label', value);
         });
     }
 
@@ -120,6 +130,13 @@ document.addEventListener("DOMContentLoaded", () => {
             else return path;
         }
         return value || path;
+    };
+
+    window.tData = function(field, fallbackLang = 'en') {
+        if (field === null || field === undefined) return '';
+        if (typeof field === 'string') return field;
+        const lang = window.currentSiteLang || defaultLang;
+        return field[lang] || field[fallbackLang] || field[Object.keys(field)[0]] || '';
     };
 
     loadLanguage(currentLang);

@@ -150,7 +150,7 @@ function initLibrary() {
 
 			const lines = text.split('\n').map(line => line.trim()).filter(line => line.length > 0);
 
-			let parsedTitle = doc.title;
+			let parsedTitle = window.tData(doc.title);
 			let parsedDateStr = null;
 			let timestamp = doc.timestamp;
 
@@ -169,6 +169,7 @@ function initLibrary() {
 			return {
 				...doc,
 				title: parsedTitle || "Untitled",
+				description: window.tData(doc.description),
 				timestamp: timestamp,
 				dateStr: parsedDateStr || "Unknown Date",
 				authorNames: doc.authorIds.map(id => authorMap.get(id) || 'Unknown').join(', '),
@@ -180,7 +181,8 @@ function initLibrary() {
 			console.error("Error fetching doc:", doc.id, error);
 			return {
 				...doc,
-				title: doc.title || "Error Loading",
+				title: window.tData(doc.title) || "Error Loading",
+				description: window.tData(doc.description),
 				authorNames: doc.authorIds.map(id => authorMap.get(id) || 'Unknown').join(', '),
 				categoryName: categoryMap.get(doc.categoryId) || 'Uncategorized',
 				timestamp: 0,
@@ -647,7 +649,7 @@ function initLibrary() {
 		document.body.style.overflow = 'hidden';
 
 		const titleEl = document.getElementById('modal-doc-title');
-		if (titleEl) titleEl.textContent = doc.title;
+		if (titleEl) titleEl.textContent = window.tData(doc.title);
 
 		if (modalDownloadBtn) {
 			modalDownloadBtn.onclick = (e) => {
@@ -912,6 +914,10 @@ function initLibrary() {
 	});
 
 	prepareLibrary();
+
+	document.addEventListener('i18nReady', () => {
+		prepareLibrary();
+	});
 }
 
 if (document.readyState === 'loading') {

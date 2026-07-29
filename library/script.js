@@ -164,6 +164,8 @@ function initLibrary() {
 		
 		return {
 			...doc,
+			title: window.tData(doc.title),
+			description: window.tData(doc.description),
 			categoryIds: catIds,
 			categoryName: catNames.join(', '),
 			primaryCategoryName: catNames[0],
@@ -1471,6 +1473,17 @@ function initLibrary() {
 	initializeFromURL();
 	populateFilters();
 	renderDocuments();
+
+	document.addEventListener('i18nReady', () => {
+		processedDocs = processedDocs.map(doc => {
+			const original = (libraryData.documents || []).find(d => d.id === doc.id);
+			if (!original) return doc;
+			return { ...doc, title: window.tData(original.title), description: window.tData(original.description) };
+		});
+		documentCardsCache.clear();
+		grid.innerHTML = '';
+		renderDocuments();
+	});
 }
 
 if (document.readyState === 'loading') {
