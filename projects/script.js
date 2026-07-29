@@ -16,6 +16,11 @@ document.addEventListener('DOMContentLoaded', () => {
 	const noResultsMessage = document.getElementById('no-results-message');
 	const resetFiltersBtn = document.getElementById('reset-filters-btn');
 	const siteFooter = document.querySelector('.site-footer');
+	const paginationControls = document.getElementById('pagination-controls');
+
+	const ITEMS_PER_PAGE_GRID = 12;
+	const ITEMS_PER_PAGE_LIST = 10;
+	let currentPage = 1;
 
 	let sortDropdown = null;
 	let sortTrigger = null;
@@ -96,6 +101,35 @@ document.addEventListener('DOMContentLoaded', () => {
 			initialSortOption.classList.add('selected');
 			if (sortTrigger) sortTrigger.textContent = initialSortOption.textContent;
 		}
+	}
+
+	function renderPaginationControls(totalPages) {
+		if (!paginationControls) return;
+		if (totalPages <= 1) {
+			paginationControls.innerHTML = '';
+			paginationControls.classList.add('hidden');
+			return;
+		}
+		paginationControls.classList.remove('hidden');
+		paginationControls.innerHTML = `
+			<button class="pagination-btn pagination-prev" ${currentPage <= 1 ? 'disabled' : ''} aria-label="Previous page"><i class="fa-solid fa-chevron-left"></i></button>
+			<span class="pagination-status">${currentPage} / ${totalPages}</span>
+			<button class="pagination-btn pagination-next" ${currentPage >= totalPages ? 'disabled' : ''} aria-label="Next page"><i class="fa-solid fa-chevron-right"></i></button>
+		`;
+		paginationControls.querySelector('.pagination-prev').addEventListener('click', () => {
+			if (currentPage > 1) {
+				currentPage--;
+				renderProjects();
+				container.scrollIntoView({ behavior: 'smooth', block: 'start' });
+			}
+		});
+		paginationControls.querySelector('.pagination-next').addEventListener('click', () => {
+			if (currentPage < totalPages) {
+				currentPage++;
+				renderProjects();
+				container.scrollIntoView({ behavior: 'smooth', block: 'start' });
+			}
+		});
 	}
 
 	function sortProjects() {
@@ -288,6 +322,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 				currentSortField = option.dataset.value;
 				localStorage.setItem('projectsSortField', currentSortField);
+				currentPage = 1;
 				sortProjects();
 				renderProjects();
 			});
@@ -312,6 +347,7 @@ document.addEventListener('DOMContentLoaded', () => {
 		gridBtn.addEventListener('click', () => {
 			if (currentViewMode === 'grid') return;
 			currentViewMode = 'grid';
+			currentPage = 1;
 			localStorage.setItem('projectsViewMode', currentViewMode);
 			gridBtn.classList.add('active');
 			listBtn.classList.remove('active');
@@ -321,6 +357,7 @@ document.addEventListener('DOMContentLoaded', () => {
 		listBtn.addEventListener('click', () => {
 			if (currentViewMode === 'list') return;
 			currentViewMode = 'list';
+			currentPage = 1;
 			localStorage.setItem('projectsViewMode', currentViewMode);
 			listBtn.classList.add('active');
 			gridBtn.classList.remove('active');
@@ -406,6 +443,7 @@ document.addEventListener('DOMContentLoaded', () => {
 			customTrigger.textContent = option.textContent;
 
 			currentFilter = normalizeFilter(option.dataset.value);
+			currentPage = 1;
 			updateURL('filter', currentFilter === 'all' ? null : currentFilter);
 			renderProjects();
 		});
@@ -851,7 +889,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
 		const cards = Array.from(container.querySelectorAll('.card'));
 		sortedProjects.forEach(p => { const c = cards.find(c => c.dataset && c.dataset.title === p.title.toLowerCase()); if (c) container.appendChild(c); });
-		let visibleCount = 0;
 
 		const searchTerm = normalizeFilter(searchQuery);
 		const searchTermAlt = searchTerm ? searchTerm.replace(/-/g, ' ') : '';
@@ -875,6 +912,8 @@ document.addEventListener('DOMContentLoaded', () => {
 			}
 			return score;
 		};
+
+		const eligibleCards = [];
 
 		cards.forEach(card => {
 			if (card.tagName === 'P') return; 
@@ -908,9 +947,42 @@ document.addEventListener('DOMContentLoaded', () => {
 			}
 
 			if (matchesFilter && matchesSearch) {
+				eligibleCards.push(card);
+			} else {
+				card.classList.add('hidden');
+				card.classList.remove('expanded');
+				const btn = card.querySelector('.expand-trigger');
+				if (btn) btn.innerHTML = 'Details <i class="fa-solid fa-expand"></i>';
+				card.style.display = "none";
+			}
+		});
+
+		if (searchTerm) {
+			eligibleCards.sort((a, b) => {
+				const scoreA = searchScores.get(a) || 0;
+				const scoreB = searchScores.get(b) || 0;
+				if (scoreA !== scoreB) return scoreB - scoreA;
+				const indexA = orderIndex.get(a.dataset.title) ?? 0;
+				const indexB = orderIndex.get(b.dataset.title) ?? 0;
+				return indexA - indexB;
+			});
+		}
+
+		eligibleCards.forEach(card => container.appendChild(card));
+
+		const itemsPerPage = currentViewMode === 'list' ? ITEMS_PER_PAGE_LIST : ITEMS_PER_PAGE_GRID;
+		const totalPages = Math.max(1, Math.ceil(eligibleCards.length / itemsPerPage));
+		if (currentPage > totalPages) currentPage = totalPages;
+		if (currentPage < 1) currentPage = 1;
+		const pageStart = (currentPage - 1) * itemsPerPage;
+		const pageEnd = pageStart + itemsPerPage;
+		const visibleCount = eligibleCards.length;
+
+		eligibleCards.forEach((card, index) => {
+			const inCurrentPage = index >= pageStart && index < pageEnd;
+			if (inCurrentPage) {
 				card.classList.remove('hidden');
 				card.style.display = "";
-				visibleCount++;
 
 				const lastQuery = card.dataset.lastQuery || '';
 				if (lastQuery !== searchQuery) {
@@ -940,17 +1012,7 @@ document.addEventListener('DOMContentLoaded', () => {
 			}
 		});
 
-		if (searchTerm) {
-			const orderedCards = [...cards].sort((a, b) => {
-				const scoreA = searchScores.get(a) || 0;
-				const scoreB = searchScores.get(b) || 0;
-				if (scoreA !== scoreB) return scoreB - scoreA;
-				const indexA = orderIndex.get(a.dataset.title) ?? 0;
-				const indexB = orderIndex.get(b.dataset.title) ?? 0;
-				return indexA - indexB;
-			});
-			orderedCards.forEach(card => container.appendChild(card));
-		}
+		renderPaginationControls(totalPages);
 
 		if (noResultsMessage) {
 			if (visibleCount === 0) {
@@ -972,6 +1034,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 	searchInput.addEventListener('input', debounce((e) => {
 		searchQuery = normalizeSearch(e.target.value);
+		currentPage = 1;
 		if (clearSearchBtn) {
 			clearSearchBtn.classList.toggle('visible', searchQuery.length > 0);
 		}
