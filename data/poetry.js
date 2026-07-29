@@ -29,8 +29,11 @@ window.libraryData = {
 		},
 		{
 			id: "txt-02",
-			title: "Bisous sur le front",
-			description: "Pastiche théâtral inspiré de Cyrano, déclinant les différentes significations d'un baiser sur le front avec humour et tendresse.",
+			title: { fr: "Bisous sur le front", en: "Kisses on the Forehead" },
+			description: {
+				fr: "Pastiche théâtral inspiré de Cyrano, déclinant les différentes significations d'un baiser sur le front avec humour et tendresse.",
+				en: "A theatrical pastiche inspired by Cyrano, exploring the different meanings of a kiss on the forehead with humor and tenderness."
+			},
 			filePath: "https://wartets.github.io/Ouverture/assets/poems/Bisous sur le front.txt",
 			categoryId: 1,
 			authorIds: ["cbr"],
@@ -40,8 +43,11 @@ window.libraryData = {
 		},
 		{
 			id: "txt-03",
-			title: "Boulet",
-			description: "Une métaphore guerrière sur les mécanismes de défense émotionnelle et l'escalade des conflits.",
+			title: { fr: "Boulet", en: "Cannonball" },
+			description: {
+				fr: "Une métaphore guerrière sur les mécanismes de défense émotionnelle et l'escalade des conflits.",
+				en: "A martial metaphor on emotional defense mechanisms and the escalation of conflict."
+			},
 			filePath: "https://wartets.github.io/Ouverture/assets/poems/Boulet.txt",
 			categoryId: 1,
 			authorIds: ["cbr"],
@@ -51,8 +57,11 @@ window.libraryData = {
 		},
 		{
 			id: "txt-04",
-			title: "Casser les pinceaux",
-			description: "Une anaphore sombre construisant l'anti-portrait d'un humain dominé par l'égoïsme, le mensonge et la froideur.",
+			title: { fr: "Casser les pinceaux", en: "Breaking the Brushes" },
+			description: {
+				fr: "Une anaphore sombre construisant l'anti-portrait d'un humain dominé par l'égoïsme, le mensonge et la froideur.",
+				en: "A dark anaphora building the anti-portrait of a human dominated by selfishness, lies, and coldness."
+			},
 			filePath: "https://wartets.github.io/Ouverture/assets/poems/Casser les pinceaux.txt",
 			categoryId: 1,
 			authorIds: ["cbr"],
@@ -62,8 +71,11 @@ window.libraryData = {
 		},
 		{
 			id: "txt-05",
-			title: "Chambres intérieures",
-			description: "Exploration des couloirs de la mémoire, entre fantômes du passé, science et résilience émotionnelle.",
+			title: { fr: "Chambres intérieures", en: "Inner Chambers" },
+			description: {
+				fr: "Exploration des couloirs de la mémoire, entre fantômes du passé, science et résilience émotionnelle.",
+				en: "An exploration of the corridors of memory, between ghosts of the past, science, and emotional resilience."
+			},
 			filePath: "https://wartets.github.io/Ouverture/assets/poems/Chambres intérieures.txt",
 			categoryId: 1,
 			authorIds: ["cbr"],
@@ -73,8 +85,11 @@ window.libraryData = {
 		},
 		{
 			id: "txt-06",
-			title: "Childhood",
-			description: "English version of 'Enfance'. A nostalgic look back at the innocence and boundless imagination of youth.",
+			title: { fr: "Enfance", en: "Childhood" },
+			description: {
+				fr: "Version anglaise d'« Enfance ». Un regard nostalgique sur l'innocence et l'imagination sans limites de la jeunesse.",
+				en: "English version of 'Enfance'. A nostalgic look back at the innocence and boundless imagination of youth."
+			},
 			filePath: "https://wartets.github.io/Ouverture/assets/poems/Childhood.txt",
 			categoryId: 1,
 			authorIds: ["cbr"],
@@ -84,8 +99,11 @@ window.libraryData = {
 		},
 		{
 			id: "txt-07",
-			title: "Chimie",
-			description: "Une plainte rimée et humoristique sur la difficulté d'apprendre la chimie et le par cœur face à la logique.",
+			title: { fr: "Chimie", en: "Chemistry" },
+			description: {
+				fr: "Une plainte rimée et humoristique sur la difficulté d'apprendre la chimie et le par cœur face à la logique.",
+				en: "A rhymed, humorous complaint about the difficulty of learning chemistry and memorization versus logic."
+			},
 			filePath: "https://wartets.github.io/Ouverture/assets/poems/Chimie.txt",
 			categoryId: 1,
 			authorIds: ["cbr"],
@@ -95,8 +113,11 @@ window.libraryData = {
 		},
 		{
 			id: "txt-08",
-			title: "Cold Stars",
-			description: "A romantic contemplation of a winter night, contrasting external cold with internal warmth found in love.",
+			title: { fr: "Étoiles froides", en: "Cold Stars" },
+			description: {
+				fr: "Une contemplation romantique d'une nuit d'hiver, contrastant le froid extérieur avec la chaleur intérieure trouvée dans l'amour.",
+				en: "A romantic contemplation of a winter night, contrasting external cold with internal warmth found in love."
+			},
 			filePath: "https://wartets.github.io/Ouverture/assets/poems/Cold Stars.txt",
 			categoryId: 1,
 			authorIds: ["cbr"],
@@ -106,8 +127,11 @@ window.libraryData = {
 		},
 		{
 			id: "txt-09",
-			title: "Confiance",
-			description: "L'analyse lucide de l'anxiété de performance, du perfectionnisme et de la peur de décevoir autrui.",
+			title: { fr: "Confiance", en: "Confidence" },
+			description: {
+				fr: "L'analyse lucide de l'anxiété de performance, du perfectionnisme et de la peur de décevoir autrui.",
+				en: "A lucid analysis of performance anxiety, perfectionism, and the fear of disappointing others."
+			},
 			filePath: "https://wartets.github.io/Ouverture/assets/poems/Confiance.txt",
 			categoryId: 1,
 			authorIds: ["cbr"],
@@ -117,8 +141,11 @@ window.libraryData = {
 		},
 		{
 			id: "txt-10",
-			title: "Diversité",
-			description: "Poème au vocabulaire riche et onirique, évoquant la complexité du monde et la beauté des paradoxes.",
+			title: { fr: "Diversité", en: "Diversity" },
+			description: {
+				fr: "Poème au vocabulaire riche et onirique, évoquant la complexité du monde et la beauté des paradoxes.",
+				en: "A poem with rich, dreamlike vocabulary, evoking the complexity of the world and the beauty of paradoxes."
+			},
 			filePath: "https://wartets.github.io/Ouverture/assets/poems/Diversité.txt",
 			categoryId: 1,
 			authorIds: ["cbr"],
@@ -128,8 +155,11 @@ window.libraryData = {
 		},
 		{
 			id: "txt-11",
-			title: "Enfance",
-			description: "Nostalgie des jours insouciants, des cabanes et de la liberté perdue face au temps qui passe.",
+			title: { fr: "Enfance", en: "Childhood" },
+			description: {
+				fr: "Nostalgie des jours insouciants, des cabanes et de la liberté perdue face au temps qui passe.",
+				en: "Nostalgia for carefree days, treehouses, and the freedom lost to passing time."
+			},
 			filePath: "https://wartets.github.io/Ouverture/assets/poems/Enfance.txt",
 			categoryId: 1,
 			authorIds: ["cbr"],
@@ -139,8 +169,11 @@ window.libraryData = {
 		},
 		{
 			id: "txt-12",
-			title: "Foudre",
-			description: "Prose poétique sur l'attraction, la singularité des êtres et le vertige incontrôlable du coup de foudre.",
+			title: { fr: "Foudre", en: "Lightning" },
+			description: {
+				fr: "Prose poétique sur l'attraction, la singularité des êtres et le vertige incontrôlable du coup de foudre.",
+				en: "Poetic prose on attraction, the singularity of individuals, and the uncontrollable vertigo of love at first sight."
+			},
 			filePath: "https://wartets.github.io/Ouverture/assets/poems/Foudre.txt",
 			categoryId: 2,
 			authorIds: ["cbr"],
@@ -150,8 +183,11 @@ window.libraryData = {
 		},
 		{
 			id: "txt-13",
-			title: "Gentillesse",
-			description: "Un portrait ironique et mordant, utilisant des comparaisons absurdes pour décrire une 'muse' étrange.",
+			title: { fr: "Gentillesse", en: "Kindness" },
+			description: {
+				fr: "Un portrait ironique et mordant, utilisant des comparaisons absurdes pour décrire une 'muse' étrange.",
+				en: "An ironic, biting portrait using absurd comparisons to describe a strange 'muse'."
+			},
 			filePath: "https://wartets.github.io/Ouverture/assets/poems/Gentillesse.txt",
 			categoryId: 1,
 			authorIds: ["cbr"],
@@ -161,8 +197,11 @@ window.libraryData = {
 		},
 		{
 			id: "txt-14",
-			title: "Lassitude d’écriture 2",
-			description: "L'expression poétique du blocage artistique et de la disparition de l'envie de créer.",
+			title: { fr: "Lassitude d'écriture 2", en: "Writing Weariness 2" },
+			description: {
+				fr: "L'expression poétique du blocage artistique et de la disparition de l'envie de créer.",
+				en: "A poetic expression of artistic block and the disappearance of the desire to create."
+			},
 			filePath: "https://wartets.github.io/Ouverture/assets/poems/Lassitude d’écriture 2.txt",
 			categoryId: 1,
 			authorIds: ["cbr"],
@@ -172,8 +211,11 @@ window.libraryData = {
 		},
 		{
 			id: "txt-15",
-			title: "Lassitude d’écriture",
-			description: "Court texte sur l'épuisement spécifique lié à la rédaction de lettres de motivation.",
+			title: { fr: "Lassitude d'écriture", en: "Writing Weariness" },
+			description: {
+				fr: "Court texte sur l'épuisement spécifique lié à la rédaction de lettres de motivation.",
+				en: "A short text on the specific exhaustion tied to writing cover letters."
+			},
 			filePath: "https://wartets.github.io/Ouverture/assets/poems/Lassitude d’écriture.txt",
 			categoryId: 3,
 			authorIds: ["cbr"],
@@ -183,8 +225,11 @@ window.libraryData = {
 		},
 		{
 			id: "txt-16",
-			title: "L’Ombre de mon Éclat",
-			description: "Portrait intense et lumineux d'une femme charismatique, mêlant admiration, sarcasme et fascination.",
+			title: { fr: "L'Ombre de mon Éclat", en: "The Shadow of My Brilliance" },
+			description: {
+				fr: "Portrait intense et lumineux d'une femme charismatique, mêlant admiration, sarcasme et fascination.",
+				en: "An intense, luminous portrait of a charismatic woman, blending admiration, sarcasm, and fascination."
+			},
 			filePath: "https://wartets.github.io/Ouverture/assets/poems/L’Ombre de mon Éclat.txt",
 			categoryId: 2,
 			authorIds: ["cbr"],
@@ -194,8 +239,11 @@ window.libraryData = {
 		},
 		{
 			id: "txt-17",
-			title: "Métro",
-			description: "Tableau urbain du métro parisien au matin, entre fatigue collective et routine mécanique.",
+			title: { fr: "Métro", en: "Subway" },
+			description: {
+				fr: "Tableau urbain du métro parisien au matin, entre fatigue collective et routine mécanique.",
+				en: "An urban tableau of the Parisian subway in the morning, between collective fatigue and mechanical routine."
+			},
 			filePath: "https://wartets.github.io/Ouverture/assets/poems/Métro.txt",
 			categoryId: 1,
 			authorIds: ["cbr"],
@@ -205,8 +253,11 @@ window.libraryData = {
 		},
 		{
 			id: "txt-18",
-			title: "Now",
-			description: "A poem about the fleeting nature of the present moment and the intimacy shared in silence.",
+			title: { fr: "Maintenant", en: "Now" },
+			description: {
+				fr: "Un poème sur la nature fugace de l'instant présent et l'intimité partagée dans le silence.",
+				en: "A poem about the fleeting nature of the present moment and the intimacy shared in silence."
+			},
 			filePath: "https://wartets.github.io/Ouverture/assets/poems/Now.txt",
 			categoryId: 1,
 			authorIds: ["cbr"],
@@ -216,8 +267,11 @@ window.libraryData = {
 		},
 		{
 			id: "txt-19",
-			title: "Otite",
-			description: "Description viscérale de la douleur physique et de l'insomnie causées par la maladie.",
+			title: { fr: "Otite", en: "Ear Infection" },
+			description: {
+				fr: "Description viscérale de la douleur physique et de l'insomnie causées par la maladie.",
+				en: "A visceral description of the physical pain and insomnia caused by illness."
+			},
 			filePath: "https://wartets.github.io/Ouverture/assets/poems/Otite.txt",
 			categoryId: 1,
 			authorIds: ["cbr"],
@@ -227,8 +281,11 @@ window.libraryData = {
 		},
 		{
 			id: "txt-20",
-			title: "Palette et pinceaux",
-			description: "Une anaphore idéaliste décrivant la création d'un humain parfait, doté d'empathie et de sagesse.",
+			title: { fr: "Palette et pinceaux", en: "Palette and Brushes" },
+			description: {
+				fr: "Une anaphore idéaliste décrivant la création d'un humain parfait, doté d'empathie et de sagesse.",
+				en: "An idealistic anaphora describing the creation of a perfect human being, endowed with empathy and wisdom."
+			},
 			filePath: "https://wartets.github.io/Ouverture/assets/poems/Palette et pinceaux.txt",
 			categoryId: 1,
 			authorIds: ["cbr"],
@@ -238,8 +295,11 @@ window.libraryData = {
 		},
 		{
 			id: "txt-21",
-			title: "Pastiche",
-			description: "Récit en prose sur un mime cachant sa tristesse derrière son art silencieux.",
+			title: { fr: "Pastiche", en: "Pastiche" },
+			description: {
+				fr: "Récit en prose sur un mime cachant sa tristesse derrière son art silencieux.",
+				en: "A prose narrative about a mime hiding his sadness behind his silent art."
+			},
 			filePath: "https://wartets.github.io/Ouverture/assets/poems/Pastiche.txt",
 			categoryId: 2,
 			authorIds: ["cbr"],
@@ -249,8 +309,11 @@ window.libraryData = {
 		},
 		{
 			id: "txt-22",
-			title: "Quaternions",
-			description: "Mariage de la poésie et des mathématiques complexes, évoquant la beauté cachée de l'univers.",
+			title: { fr: "Quaternions", en: "Quaternions" },
+			description: {
+				fr: "Mariage de la poésie et des mathématiques complexes, évoquant la beauté cachée de l'univers.",
+				en: "A marriage of poetry and complex mathematics, evoking the hidden beauty of the universe."
+			},
 			filePath: "https://wartets.github.io/Ouverture/assets/poems/Quaternions.txt",
 			categoryId: 1,
 			authorIds: ["cbr"],
@@ -260,8 +323,11 @@ window.libraryData = {
 		},
 		{
 			id: "txt-23",
-			title: "See You Again",
-			description: "Texte en prose poétique, portrait vibrant de 'Lou', mêlant souvenirs sensoriels et manque.",
+			title: { fr: "See You Again", en: "See You Again" },
+			description: {
+				fr: "Texte en prose poétique, portrait vibrant de 'Lou', mêlant souvenirs sensoriels et manque.",
+				en: "A poetic prose piece, a vibrant portrait of 'Lou', blending sensory memories and longing."
+			},
 			filePath: "https://wartets.github.io/Ouverture/assets/poems/See You Again.txt",
 			categoryId: 2,
 			authorIds: ["cbr"],
@@ -271,8 +337,11 @@ window.libraryData = {
 		},
 		{
 			id: "txt-24",
-			title: "Soirée",
-			description: "Réflexion sur l'éphémère des rencontres festives, l'ambiguïté des sentiments et le regret.",
+			title: { fr: "Soirée", en: "Evening" },
+			description: {
+				fr: "Réflexion sur l'éphémère des rencontres festives, l'ambiguïté des sentiments et le regret.",
+				en: "A reflection on the ephemeral nature of festive encounters, the ambiguity of feelings, and regret."
+			},
 			filePath: "https://wartets.github.io/Ouverture/assets/poems/Soirée.txt",
 			categoryId: 1,
 			authorIds: ["cbr"],
@@ -282,8 +351,11 @@ window.libraryData = {
 		},
 		{
 			id: "txt-25",
-			title: "Triste sagesse",
-			description: "Poème sur le désenchantement lié à l'accumulation du savoir et le sentiment de stagnation.",
+			title: { fr: "Triste sagesse", en: "Sad Wisdom" },
+			description: {
+				fr: "Poème sur le désenchantement lié à l'accumulation du savoir et le sentiment de stagnation.",
+				en: "A poem on the disenchantment tied to the accumulation of knowledge and a feeling of stagnation."
+			},
 			filePath: "https://wartets.github.io/Ouverture/assets/poems/Triste sagesse.txt",
 			categoryId: 1,
 			authorIds: ["cbr"],
@@ -293,8 +365,11 @@ window.libraryData = {
 		},
 		{
 			id: "txt-26",
-			title: "Vertige d’Entre-Deux",
-			description: "Longue entrée de journal introspective sur le burnout étudiant, la physique, et les ruptures amicales.",
+			title: { fr: "Vertige d'Entre-Deux", en: "Vertigo of In-Between" },
+			description: {
+				fr: "Longue entrée de journal introspective sur le burnout étudiant, la physique, et les ruptures amicales.",
+				en: "A long introspective journal entry on student burnout, physics, and broken friendships."
+			},
 			filePath: "https://wartets.github.io/Ouverture/assets/poems/Vertige d’Entre-Deux.txt",
 			categoryId: 3,
 			authorIds: ["cbr"],

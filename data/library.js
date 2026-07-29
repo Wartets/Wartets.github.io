@@ -75,8 +75,11 @@ window.libraryData = {
 		{
 			id: "doc-003",
 			slug: "rapport-physique-experimentale-etude-lasso",
-			title: "Rapport de physique expérimentale - Etude du lasso",
-			description: "Étude expérimentale de la bifurcation supercritique d’un anneau en rotation : effets de géométrie finie et imperfections.",
+			title: { fr: "Rapport de physique expérimentale - Etude du lasso", en: "Experimental Physics Report - Study of the Lasso" },
+			description: {
+				fr: "Étude expérimentale de la bifurcation supercritique d'un anneau en rotation : effets de géométrie finie et imperfections.",
+				en: "Experimental study of the supercritical bifurcation of a rotating ring: effects of finite geometry and imperfections."
+			},
 			filePath: "https://wartets.github.io/assets/documents/Rapport_Final_Physique_Expérimentale.pdf",
 			categoryIds: [1],
 			typeId: "report",
@@ -89,8 +92,8 @@ window.libraryData = {
 		{
 			id: "doc-004",
 			slug: "resolution-equation-schrodinger-potentiel-periodique",
-			title: "Résolution de l'équation de Schrödinger pour un potentiel périodique fini",
-			description: "",
+			title: { fr: "Résolution de l'équation de Schrödinger pour un potentiel périodique fini", en: "Solving the Schrödinger Equation for a Finite Periodic Potential" },
+			description: { fr: "", en: "" },
 			filePath: "https://wartets.github.io/assets/documents/Résolution_eqShrod_period_fini.pdf",
 			categoryIds: [1],
 			typeId: "exercise",
@@ -103,8 +106,11 @@ window.libraryData = {
 		{
 			id: "doc-005",
 			slug: "probabilites-et-lancer-de-des",
-			title: "Probabilités et Lancer de Dés",
-			description: "Calcul des probabilités associées aux sommes obtenues lors de lancers de dés.",
+			title: { fr: "Probabilités et Lancer de Dés", en: "Probability and Dice Rolls" },
+			description: {
+				fr: "Calcul des probabilités associées aux sommes obtenues lors de lancers de dés.",
+				en: "Calculation of the probabilities associated with the sums obtained when rolling dice."
+			},
 			filePath: "https://wartets.github.io/assets/documents/Lancé_de_dés.pdf",
 			categoryIds: [2],
 			typeId: "exercise",
@@ -117,8 +123,11 @@ window.libraryData = {
 		{
 			id: "doc-006",
 			slug: "informatique-quantique-avec-qiskit",
-			title: "Informatique Quantique avec Qiskit",
-			description: "Traité sur l'information quantique avec Qiskit",
+			title: { fr: "Informatique Quantique avec Qiskit", en: "Quantum Computing with Qiskit" },
+			description: {
+				fr: "Traité sur l'information quantique avec Qiskit",
+				en: "A treatise on quantum information using Qiskit."
+			},
 			filePath: "https://wartets.github.io/assets/documents/Informatique_Quantique_avec_Qiskit.pdf",
 			categoryIds: [1, 3],
 			typeId: "course",
@@ -131,8 +140,11 @@ window.libraryData = {
 		{
 			id: "doc-007",
 			slug: "optique-et-electromagnetisme-cours",
-			title: "Optique et électromagnétisme - Cours",
-			description: "Optique ondulatoire et électromagnétisme dans les milieu.",
+			title: { fr: "Optique et électromagnétisme - Cours", en: "Optics and Electromagnetism - Course" },
+			description: {
+				fr: "Optique ondulatoire et électromagnétisme dans les milieu.",
+				en: "Wave optics and electromagnetism in media."
+			},
 			filePath: "https://wartets.github.io/assets/documents/Cours_OOEM.pdf",
 			categoryIds: [1],
 			typeId: "course",
@@ -145,8 +157,11 @@ window.libraryData = {
 		{
 			id: "doc-008",
 			slug: "formules-mathematiques-physique",
-			title: "Quelques formules mathématiques pour la physique",
-			description: "Formules mathématiques couramment utilisées en physique, présentées de manière concise comme référence analytique.",
+			title: { fr: "Quelques formules mathématiques pour la physique", en: "Some Mathematical Formulas for Physics" },
+			description: {
+				fr: "Formules mathématiques couramment utilisées en physique, présentées de manière concise comme référence analytique.",
+				en: "Mathematical formulas commonly used in physics, presented concisely as an analytical reference."
+			},
 			filePath: "https://wartets.github.io/assets/documents/Quelques_formules_mathématiques_pour_la_physique.pdf",
 			categoryIds: [1, 2],
 			typeId: "reference",
@@ -159,8 +174,11 @@ window.libraryData = {
 		{
 			id: "doc-009",
 			slug: "theorie-algebrique-unites-constantes-normalisation",
-			title: "Théorie Algébrique des Unités, Constantes et Normalisation Physique",
-			description: "Formalisme mathématique, métrologie et implémentation numérique de la théroie des unitées",
+			title: { fr: "Théorie Algébrique des Unités, Constantes et Normalisation Physique", en: "Algebraic Theory of Units, Constants, and Physical Normalization" },
+			description: {
+				fr: "Formalisme mathématique, métrologie et implémentation numérique de la théroie des unitées",
+				en: "Mathematical formalism, metrology, and numerical implementation of the theory of units."
+			},
 			filePath: "https://wartets.github.io/assets/documents/theorie_algebrique_unites.pdf",
 			categoryIds: [1, 2, 3],
 			typeId: "theory",
@@ -173,8 +191,11 @@ window.libraryData = {
 		{
 			id: "doc-010",
 			slug: "arithmetic-and-number-theory",
-			title: "Arithmetic and Number Theory",
-			description: "Selected Problems on Perfect Squares and Divisibility",
+			title: { fr: "Arithmétique et Théorie des Nombres", en: "Arithmetic and Number Theory" },
+			description: {
+				fr: "Problèmes choisis sur les carrés parfaits et la divisibilité.",
+				en: "Selected Problems on Perfect Squares and Divisibility"
+			},
 			filePath: "https://wartets.github.io/assets/documents/Arithmetic_and_Number_Theory.pdf",
 			categoryIds: [2],
 			typeId: "exercise",
@@ -187,8 +208,11 @@ window.libraryData = {
 		{
 			id: "doc-011",
 			slug: "resolution-problemes-np-complets-monte-carlo",
-			title: "Résolution de Problèmes NP-Complets par Méthodes de Monte Carlo",
-			description: "Application de l’algorithme de Metropolis-Hastings au Sudoku",
+			title: { fr: "Résolution de Problèmes NP-Complets par Méthodes de Monte Carlo", en: "Solving NP-Complete Problems Using Monte Carlo Methods" },
+			description: {
+				fr: "Application de l'algorithme de Metropolis-Hastings au Sudoku",
+				en: "Application of the Metropolis-Hastings algorithm to Sudoku."
+			},
 			filePath: "https://wartets.github.io/assets/documents/sudoku_monte_carlo_np_complet.pdf",
 			categoryIds: [2, 3],
 			typeId: "paper",
@@ -201,8 +225,11 @@ window.libraryData = {
 		{
 			id: "doc-012",
 			slug: "curiosites-gravitation-cylindrique",
-			title: "Quelques Curiosités de la Gravitation Cylindrique",
-			description: "Exploration théorique des structures de l'espace-temps, des effets de bord Newtoniens aux singularités relativistes.",
+			title: { fr: "Quelques Curiosités de la Gravitation Cylindrique", en: "Some Curiosities of Cylindrical Gravitation" },
+			description: {
+				fr: "Exploration théorique des structures de l'espace-temps, des effets de bord Newtoniens aux singularités relativistes.",
+				en: "Theoretical exploration of spacetime structures, from Newtonian edge effects to relativistic singularities."
+			},
 			filePath: "https://wartets.github.io/assets/documents/Gravitation_Cylindrique.pdf",
 			categoryIds: [1],
 			typeId: "theory",
@@ -215,8 +242,11 @@ window.libraryData = {
 		{
 			id: "doc-013",
 			slug: "factorielles",
-			title: "Factorielles",
-			description: "Panorama des hiérarchies de croissance et des structures arithmétiques : des extensions analytiques aux factorielles exotiques",
+			title: { fr: "Factorielles", en: "Factorials" },
+			description: {
+				fr: "Panorama des hiérarchies de croissance et des structures arithmétiques : des extensions analytiques aux factorielles exotiques",
+				en: "An overview of growth hierarchies and arithmetic structures: from analytic extensions to exotic factorials."
+			},
 			filePath: "https://wartets.github.io/assets/documents/Factorielles.pdf",
 			categoryIds: [2],
 			typeId: "theory",
@@ -229,8 +259,11 @@ window.libraryData = {
 		{
 			id: "doc-014",
 			slug: "dynamique-horizons-apparents",
-			title: "Dynamique des Horizons Apparents",
-			description: "Étude de la métrique de McVittie en régimes de Sitter, Fantôme, Rebond et Friedmann.",
+			title: { fr: "Dynamique des Horizons Apparents", en: "Dynamics of Apparent Horizons" },
+			description: {
+				fr: "Étude de la métrique de McVittie en régimes de Sitter, Fantôme, Rebond et Friedmann.",
+				en: "Study of the McVittie metric in de Sitter, Phantom, Bounce, and Friedmann regimes."
+			},
 			filePath: "https://wartets.github.io/assets/documents/Dynamique_des_Horizons_Apparents.pdf",
 			categoryIds: [1, 13],
 			typeId: "theory",
@@ -243,8 +276,11 @@ window.libraryData = {
 		{
 			id: "doc-015",
 			slug: "probabilites-galettes-des-rois",
-			title: "Probabilités et Galettes des rois",
-			description: "Étude géométrique du découpage de la Galette des Rois : quantification du risque d'intersection avec la fève et analyse de la sensibilité au centrage (paradoxe de la maladresse).",
+			title: { fr: "Probabilités et Galettes des rois", en: "Probability and the King Cake" },
+			description: {
+				fr: "Étude géométrique du découpage de la Galette des Rois : quantification du risque d'intersection avec la fève et analyse de la sensibilité au centrage (paradoxe de la maladresse).",
+				en: "A geometric study of slicing the King Cake: quantifying the risk of intersecting the trinket and analyzing sensitivity to centering (the clumsiness paradox)."
+			},
 			filePath: "https://wartets.github.io/assets/documents/Probabilités_et_Galettes_des_rois.pdf",
 			categoryIds: [2],
 			typeId: "exercise",
@@ -257,8 +293,11 @@ window.libraryData = {
 		{
 			id: "doc-016",
 			slug: "dynamique-systemes-particules-milieu-confine",
-			title: "Dynamique des Systèmes de Particules en Milieu Confiné",
-			description: "Du problème classique des fourmis sur une règle (1D) à l'analyse statistique de la diffusion et du temps de sortie dans un carré (2D).",
+			title: { fr: "Dynamique des Systèmes de Particules en Milieu Confiné", en: "Dynamics of Particle Systems in Confined Media" },
+			description: {
+				fr: "Du problème classique des fourmis sur une règle (1D) à l'analyse statistique de la diffusion et du temps de sortie dans un carré (2D).",
+				en: "From the classic problem of ants on a ruler (1D) to the statistical analysis of diffusion and exit time in a square (2D)."
+			},
 			filePath: "https://wartets.github.io/assets/documents/Fourmis.pdf",
 			categoryIds: [1, 2],
 			typeId: "theory",
@@ -271,8 +310,11 @@ window.libraryData = {
 		{
 			id: "doc-017",
 			slug: "determination-enveloppe-de-surete",
-			title: "Détermination de l’Enveloppe de Sûreté",
-			description: "Étude comparative des trajectoires balistiques dans le vide et en milieu fluide linéaire : équations horaires et parabole de sûreté.",
+			title: { fr: "Détermination de l'Enveloppe de Sûreté", en: "Determination of the Safety Envelope" },
+			description: {
+				fr: "Étude comparative des trajectoires balistiques dans le vide et en milieu fluide linéaire : équations horaires et parabole de sûreté.",
+				en: "A comparative study of ballistic trajectories in vacuum and in a linear fluid medium: equations of motion and the safety parabola."
+			},
 			filePath: "https://wartets.github.io/assets/documents/Enveloppe_de_Surete.pdf",
 			categoryIds: [1],
 			typeId: "theory",
@@ -285,8 +327,11 @@ window.libraryData = {
 		{
 			id: "doc-018",
 			slug: "etude-cinematique-ellipse-roulante",
-			title: "Étude Cinématique d’une Ellipse Roulante",
-			description: "Détermination des trajectoires d’un point du contour et du foyer (ondulaire) et lien avec les surfaces de Delaunay.",
+			title: { fr: "Étude Cinématique d'une Ellipse Roulante", en: "Kinematic Study of a Rolling Ellipse" },
+			description: {
+				fr: "Détermination des trajectoires d'un point du contour et du foyer (ondulaire) et lien avec les surfaces de Delaunay.",
+				en: "Determination of the trajectories of a point on the contour and of the focus (wave-like curve), and connection to Delaunay surfaces."
+			},
 			filePath: "https://wartets.github.io/assets/documents/Cinematique_Ellipse.pdf",
 			categoryIds: [1, 2],
 			typeId: "theory",
@@ -299,8 +344,11 @@ window.libraryData = {
 		{
 			id: "doc-019",
 			slug: "analyse-systeme-granulaire-discret",
-			title: "Analyse d'un Système Granulaire Discret",
-			description: "Document illustrant l'analyse théorique des systèmes granulaires discrets, avec des exemples de formalismes mathématiques, d'algorithmes et de mise en page scientifique.",
+			title: { fr: "Analyse d'un Système Granulaire Discret", en: "Analysis of a Discrete Granular System" },
+			description: {
+				fr: "Document illustrant l'analyse théorique des systèmes granulaires discrets, avec des exemples de formalismes mathématiques, d'algorithmes et de mise en page scientifique.",
+				en: "A document illustrating the theoretical analysis of discrete granular systems, with examples of mathematical formalisms, algorithms, and scientific layout."
+			},
 			filePath: "https://wartets.github.io/assets/documents/Système_granulaire_discret.pdf",
 			categoryIds: [1, 2, 3],
 			typeId: "paper",
@@ -313,8 +361,11 @@ window.libraryData = {
 		{
 			id: "doc-020",
 			slug: "modelisation-analytique-impact-jet-ressaut-hydraulique",
-			title: "Modélisation Analytique de l'Impact d'un Jet et du Ressaut Hydraulique",
-			description: "Étude des régimes stationnaires et de la dynamique transitoire d'expansion. Modélisation de l'évolution du rayon du cratère formé par un jet vertical.",
+			title: { fr: "Modélisation Analytique de l'Impact d'un Jet et du Ressaut Hydraulique", en: "Analytical Modeling of Jet Impact and the Hydraulic Jump" },
+			description: {
+				fr: "Étude des régimes stationnaires et de la dynamique transitoire d'expansion. Modélisation de l'évolution du rayon du cratère formé par un jet vertical.",
+				en: "Study of steady-state regimes and the transient expansion dynamics. Modeling of the evolution of the crater radius formed by a vertical jet."
+			},
 			filePath: "https://wartets.github.io/assets/documents/Impact_jet_eau.pdf",
 			categoryIds: [1],
 			typeId: "theory",
@@ -327,9 +378,12 @@ window.libraryData = {
 		{
 			id: "doc-021",
 			slug: "real-time-web-cfd-lattice-boltzmann",
-			title: "Real-Time Interactive Fluid Dynamics on the Web",
-			description: "A Multiphysics Lattice Boltzmann Approach using WebAssembly and WebGL2. Technical study on high-performance CFD engine implementation, including LES turbulence and non-Newtonian rheology.",
-			"filePath": "https://wartets.github.io/assets/documents/Turbulence-sim.pdf",
+			title: { fr: "Dynamique des Fluides Interactive en Temps Réel sur le Web", en: "Real-Time Interactive Fluid Dynamics on the Web" },
+			description: {
+				fr: "Une approche multiphysique par la méthode de Boltzmann sur réseau utilisant WebAssembly et WebGL2. Étude technique sur l'implémentation d'un moteur CFD haute performance, incluant la turbulence LES et la rhéologie non-newtonienne.",
+				en: "A Multiphysics Lattice Boltzmann Approach using WebAssembly and WebGL2. Technical study on high-performance CFD engine implementation, including LES turbulence and non-Newtonian rheology."
+			},
+			filePath: "https://wartets.github.io/assets/documents/Turbulence-sim.pdf",
 			categoryIds: [1, 2, 3, 7],
 			typeId: "paper",
 			authorIds: ["cbr"],
@@ -341,8 +395,11 @@ window.libraryData = {
 		{
 			id: "doc-022",
 			slug: "analyse-algebrique-derivees-n-iemes",
-			title: "Analyse Algébrique des Dérivées n-ièmes",
-			description: "Étude structurelle des fonctions homogènes singulières sans simplification. Analyse de la propagation des termes algébriques, lien avec les polynômes de Gegenbauer et émergence distributionnelle.",
+			title: { fr: "Analyse Algébrique des Dérivées n-ièmes", en: "Algebraic Analysis of n-th Derivatives" },
+			description: {
+				fr: "Étude structurelle des fonctions homogènes singulières sans simplification. Analyse de la propagation des termes algébriques, lien avec les polynômes de Gegenbauer et émergence distributionnelle.",
+				en: "A structural study of singular homogeneous functions without simplification. Analysis of the propagation of algebraic terms, connection to Gegenbauer polynomials, and distributional emergence."
+			},
 			filePath: "https://wartets.github.io/assets/documents/Derivees_de_abs.pdf",
 			categoryIds: [2],
 			typeId: "theory",
@@ -355,8 +412,11 @@ window.libraryData = {
 		{
 			id: "doc-023",
 			slug: "advanced-course-gaussian-primes",
-			title: "Advanced Course on Gaussian Primes",
-			description: "From Foundations to Modern Applications. A comprehensive mathematical exposition on the ring of Gaussian integers, covering prime classification, ideal theory, the Dedekind zeta function, Diophantine equations, and modern applications in cryptography and physics.",
+			title: { fr: "Cours Avancé sur les Nombres Premiers de Gauss", en: "Advanced Course on Gaussian Primes" },
+			description: {
+				fr: "Des fondements aux applications modernes. Un exposé mathématique complet sur l'anneau des entiers de Gauss, couvrant la classification des nombres premiers, la théorie des idéaux, la fonction zêta de Dedekind, les équations diophantiennes et les applications modernes en cryptographie et en physique.",
+				en: "From Foundations to Modern Applications. A comprehensive mathematical exposition on the ring of Gaussian integers, covering prime classification, ideal theory, the Dedekind zeta function, Diophantine equations, and modern applications in cryptography and physics."
+			},
 			filePath: "https://wartets.github.io/assets/documents/Gaussian_primes.pdf",
 			categoryIds: [1, 2, 3],
 			typeId: "course",
@@ -369,8 +429,11 @@ window.libraryData = {
 		{
 			id: "doc-024",
 			slug: "geometrie-equilibre-fluide-ndim",
-			title: "Géométrie d'équilibre d'un fluide auto-gravitant en dimension N",
-			description: "Preuve variationnelle et analyse hydrostatique : application de l'inégalité de réarrangement de Riesz pour démontrer la forme sphérique d'équilibre.",
+			title: { fr: "Géométrie d'équilibre d'un fluide auto-gravitant en dimension N", en: "Equilibrium Geometry of a Self-Gravitating Fluid in N Dimensions" },
+			description: {
+				fr: "Preuve variationnelle et analyse hydrostatique : application de l'inégalité de réarrangement de Riesz pour démontrer la forme sphérique d'équilibre.",
+				en: "A variational proof and hydrostatic analysis: applying the Riesz rearrangement inequality to demonstrate the spherical equilibrium shape."
+			},
 			filePath: "https://wartets.github.io/assets/documents/Géométrie_équilibre_fluide_Ndim.pdf",
 			categoryIds: [1, 2],
 			typeId: "theory",
@@ -383,8 +446,11 @@ window.libraryData = {
 		{
 			id: "doc-025",
 			slug: "modelisation-solidification-fluide-conduite-inclinee",
-			title: "Modélisation de la Solidification d’un Fluide en Conduite Inclinée",
-			description: "Étude thermodynamique et mécanique des fluides en régime permanent. Analyse des conditions d'apparition et du temps caractéristique de solidification selon l'inclinaison.",
+			title: { fr: "Modélisation de la Solidification d'un Fluide en Conduite Inclinée", en: "Modeling the Solidification of a Fluid in an Inclined Pipe" },
+			description: {
+				fr: "Étude thermodynamique et mécanique des fluides en régime permanent. Analyse des conditions d'apparition et du temps caractéristique de solidification selon l'inclinaison.",
+				en: "A thermodynamic and fluid mechanics study under steady-state conditions. Analysis of the onset conditions and characteristic solidification time as a function of inclination."
+			},
 			filePath: "https://wartets.github.io/assets/documents/Solidification_liquide_en_mouvement.pdf",
 			categoryIds: [1],
 			typeId: "theory",
@@ -397,8 +463,11 @@ window.libraryData = {
 		{
 			id: "doc-026",
 			slug: "modelisation-statistique-probabiliste-phenomenes-bimodaux",
-			title: "Modélisation Statistique et Probabiliste de Phénomènes Bimodaux",
-			description: "Analyse comparative entre biais de sélection (distributions pondérées pour les débits Wi-Fi) et processus additifs de mélange (trafic routier journalier).",
+			title: { fr: "Modélisation Statistique et Probabiliste de Phénomènes Bimodaux", en: "Statistical and Probabilistic Modeling of Bimodal Phenomena" },
+			description: {
+				fr: "Analyse comparative entre biais de sélection (distributions pondérées pour les débits Wi-Fi) et processus additifs de mélange (trafic routier journalier).",
+				en: "A comparative analysis between selection bias (weighted distributions for Wi-Fi throughput) and additive mixing processes (daily road traffic)."
+			},
 			filePath: "https://wartets.github.io/assets/documents/Mesure_de_debit_de_reseau_et_trafic_routier.pdf",
 			categoryIds: [2],
 			typeId: "theory",
@@ -411,8 +480,11 @@ window.libraryData = {
 		{
 			id: "doc-027",
 			slug: "construction-progressive-modele-standard",
-			title: "Construction progressive du Modèle Standard",
-			description: "Des symétries physiques aux groupes SU(N). Formalisation de la transition conceptuelle des symétries globales vers les théories de jauge non-abéliennes et mécanisme de Higgs.",
+			title: { fr: "Construction progressive du Modèle Standard", en: "Progressive Construction of the Standard Model" },
+			description: {
+				fr: "Des symétries physiques aux groupes SU(N). Formalisation de la transition conceptuelle des symétries globales vers les théories de jauge non-abéliennes et mécanisme de Higgs.",
+				en: "From physical symmetries to SU(N) groups. Formalizing the conceptual transition from global symmetries to non-abelian gauge theories and the Higgs mechanism."
+			},
 			filePath: "https://wartets.github.io/assets/documents/Construction_Modele_Standard.pdf",
 			categoryIds: [1, 2],
 			typeId: "course",
@@ -425,8 +497,11 @@ window.libraryData = {
 		{
 			id: "doc-028",
 			slug: "introduction-physique-quantique-materiaux",
-			title: "Introduction à la physique quantique des matériaux",
-			description: "Cours de Matière Condensée abordant l'électron comme objet quantique, la dualité onde-corpuscule, les modèles de Drude et Sommerfeld, et une introduction à la supraconductivité.",
+			title: { fr: "Introduction à la physique quantique des matériaux", en: "Introduction to the Quantum Physics of Materials" },
+			description: {
+				fr: "Cours de Matière Condensée abordant l'électron comme objet quantique, la dualité onde-corpuscule, les modèles de Drude et Sommerfeld, et une introduction à la supraconductivité.",
+				en: "A Condensed Matter course addressing the electron as a quantum object, wave-particle duality, the Drude and Sommerfeld models, and an introduction to superconductivity."
+			},
 			filePath: "https://wartets.github.io/assets/documents/Cours_Matière_Condensée_1.pdf",
 			categoryIds: [1],
 			typeId: "course",
@@ -439,8 +514,11 @@ window.libraryData = {
 		{
 			id: "doc-029",
 			slug: "geometrie-cinematique-multi-spheres",
-			title: "Géométrie et Cinématique Multi-Sphères",
-			description: "Étude Analytique des Faisceaux Coniques et de leurs Empreintes Topologiques. Application au calcul exact de la fraction de remplissage lunaire observée depuis un point terrestre.",
+			title: { fr: "Géométrie et Cinématique Multi-Sphères", en: "Multi-Sphere Geometry and Kinematics" },
+			description: {
+				fr: "Étude Analytique des Faisceaux Coniques et de leurs Empreintes Topologiques. Application au calcul exact de la fraction de remplissage lunaire observée depuis un point terrestre.",
+				en: "An analytical study of conical beams and their topological footprints. Application to the exact calculation of the observed lunar fill fraction from a terrestrial point."
+			},
 			filePath: "https://wartets.github.io/assets/documents/phase_de_lune.pdf",
 			categoryIds: [1, 2, 13],
 			typeId: "theory",
@@ -453,8 +531,11 @@ window.libraryData = {
 		{
 			id: "doc-030",
 			slug: "rapport-stage-MPQ-QITE-2026",
-			title: "Sources AlGaAs de photons intriqués pour les communications quantiques",
-			description: "Rapport de stage sur la participation à une expérience de distribution de photons intriqués sur réseau de fibres déployé.",
+			title: { fr: "Sources AlGaAs de photons intriqués pour les communications quantiques", en: "AlGaAs Entangled Photon Sources for Quantum Communications" },
+			description: {
+				fr: "Rapport de stage sur la participation à une expérience de distribution de photons intriqués sur réseau de fibres déployé.",
+				en: "Internship report on participating in an entangled photon distribution experiment over a deployed fiber network."
+			},
 			filePath: "https://wartets.github.io/assets/documents/Rapport_Stage_MPQ_QITE_2026.pdf",
 			categoryIds: [1, 3],
 			typeId: "paper",
