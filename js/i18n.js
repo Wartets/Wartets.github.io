@@ -2,6 +2,8 @@ document.addEventListener("DOMContentLoaded", () => {
     const defaultLang = 'en';
     let currentLang = localStorage.getItem('site_lang') || defaultLang;
     window.translations = {};
+    window.SITE_ROOT = window.SITE_ROOT || '';
+    window.currentSiteLang = currentLang;
 
     const customLangSelector = document.getElementById('customLangSelector');
     const langCurrent = document.getElementById('langCurrent');
@@ -52,13 +54,14 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function loadLanguage(lang) {
-        fetch(`locales/${lang}.json`)
+        fetch(`${window.SITE_ROOT}locales/${lang}.json`)
             .then(response => {
                 if (!response.ok) throw new Error('Translation file not found');
                 return response.json();
             })
             .then(data => {
                 window.translations = data;
+                window.currentSiteLang = lang;
                 applyTranslations(data);
                 document.documentElement.lang = lang;
                 localStorage.setItem('site_lang', lang);
