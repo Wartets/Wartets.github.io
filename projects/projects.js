@@ -393,14 +393,14 @@ const projects = [
 	},
 	[
 		{
-			title: "Music-Library",
+			title: "music",
 		timestamp: "2026-05-05T11:56:00Z",
-			github: "https://wartets.github.io/Music-Library/",
+			github: "https://wartets.github.io/music/",
 			description: "A complete library of all my completed and published musical works since 2018.",
 			longDescription: "This website is designed as a local-first, offline-capable web application for managing and playing strictly organized, high-resolution music collections. All my music and compositions are featured and presented clearly on the website.",
 			icon: "../assets/images/card/Music-Library-card.png",
 			image: "../assets/images/card/Music-Library-card.png",
-			link: "https://wartets.github.io/Music-Library/",
+			link: "https://wartets.github.io/music/",
 			keywords: ["music", "creative", "electronic", "ambient"],
 			languages: ["en", "fr", "it"],
 			show: true
@@ -433,3 +433,4 @@ const projects = [
 		}
 	]
 ];
+

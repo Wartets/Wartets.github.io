@@ -199,7 +199,7 @@ const FEATURED_MUSIC_TRACKS = [
 		genre: "Electronic/Pop",
 		date: "2026",
 		album: "Album 7.1",
-		filePath: "https://media.githubusercontent.com/media/Wartets/Music-Library/refs/heads/main/assets/Album 7 (2026)/Album 7.1/Projet 27/Projet 27.2.opus",
+		filePath: "https://media.githubusercontent.com/media/Wartets/music/refs/heads/main/assets/Album 7 (2026)/Album 7.1/Projet 27/Projet 27.2.opus",
 	},
 	{
 		id: "2",
@@ -207,7 +207,7 @@ const FEATURED_MUSIC_TRACKS = [
 		genre: "Techno",
 		date: "2025",
 		album: "Album 6.1",
-		filePath: "https://media.githubusercontent.com/media/Wartets/Music-Library/refs/heads/main/assets/Album 6 (2025)/Album 6.1/Projet 12/Projet-12.mp3",
+		filePath: "https://media.githubusercontent.com/media/Wartets/music/refs/heads/main/assets/Album 6 (2025)/Album 6.1/Projet 12/Projet-12.mp3",
 	},
 	{
 		id: "3",
@@ -223,7 +223,7 @@ const FEATURED_MUSIC_TRACKS = [
 		genre: "Ambiant/Folklore",
 		date: "2024",
 		album: "Album 5.1",
-		filePath: "https://media.githubusercontent.com/media/Wartets/Music-Library/refs/heads/main/assets/Album 5 (2023-2024)/Album 5.1/dance/dance - 24_02_2024 22.35.wav",
+		filePath: "https://media.githubusercontent.com/media/Wartets/music/refs/heads/main/assets/Album 5 (2023-2024)/Album 5.1/dance/dance - 24_02_2024 22.35.wav",
 	},
 	{
 		id: "5",
@@ -231,7 +231,7 @@ const FEATURED_MUSIC_TRACKS = [
 		genre: "Electronic",
 		date: "2023",
 		album: "Album 5.1",
-		filePath: "https://media.githubusercontent.com/media/Wartets/Music-Library/refs/heads/main/assets/Album 5 (2023-2024)/Album 5.1/Projet 2/Projet 2 - 24_10_2023 19.26.wav",
+		filePath: "https://media.githubusercontent.com/media/Wartets/music/refs/heads/main/assets/Album 5 (2023-2024)/Album 5.1/Projet 2/Projet 2 - 24_10_2023 19.26.wav",
 	},
 	{
 		id: "6",
@@ -239,7 +239,7 @@ const FEATURED_MUSIC_TRACKS = [
 		genre: "Ambient",
 		date: "2023",
 		album: "Album 4.2",
-		filePath: "https://media.githubusercontent.com/media/Wartets/Music-Library/refs/heads/main/assets/Album 4 (2021-2022-2023)/Album 4.2/End of Chapter one/End of Chapter one 1.0.wav",
+		filePath: "https://media.githubusercontent.com/media/Wartets/music/refs/heads/main/assets/Album 4 (2021-2022-2023)/Album 4.2/End of Chapter one/End of Chapter one 1.0.wav",
 	},
 	{
 		id: "7",
@@ -247,7 +247,7 @@ const FEATURED_MUSIC_TRACKS = [
 		genre: "Ambient/Rock",
 		date: "2022",
 		album: "Album 4.2",
-		filePath: "https://media.githubusercontent.com/media/Wartets/Music-Library/refs/heads/main/assets/Album 4 (2021-2022-2023)/Album 4.2/Cell/Cell 1.2.m4a",
+		filePath: "https://media.githubusercontent.com/media/Wartets/music/refs/heads/main/assets/Album 4 (2021-2022-2023)/Album 4.2/Cell/Cell 1.2.m4a",
 	},
 	{
 		id: "8",
@@ -255,7 +255,7 @@ const FEATURED_MUSIC_TRACKS = [
 		genre: "Synthwave",
 		date: "2021",
 		album: "Album 4.1",
-		filePath: "https://media.githubusercontent.com/media/Wartets/Music-Library/refs/heads/main/assets/Album 4 (2021-2022-2023)/Album 4.1/Hypocritical world's Nostalgia/Hypocritical world's Nostalgia.m4a",
+		filePath: "https://media.githubusercontent.com/media/Wartets/music/refs/heads/main/assets/Album 4 (2021-2022-2023)/Album 4.1/Hypocritical world's Nostalgia/Hypocritical world's Nostalgia.m4a",
 	},
 ];
 
@@ -673,15 +673,15 @@ function resolveMusicUrl(url) {
 					window.location.protocol === 'file:';
 
 	if (isLocal) {
-		if (targetUrl.startsWith('https://wartets.github.io/Music-Library/')) {
-			targetUrl = targetUrl.replace('https://wartets.github.io/Music-Library/', 'Music-Library/');
+		if (targetUrl.startsWith('https://wartets.github.io/music/')) {
+			targetUrl = targetUrl.replace('https://wartets.github.io/music/', 'music/');
 		}
 
 		if (targetUrl.startsWith('http://') || targetUrl.startsWith('https://')) {
 			return targetUrl;
 		}
 		
-		if (targetUrl.startsWith('Music-Library/')) {
+		if (targetUrl.startsWith('music/')) {
 			if (window.location.pathname.includes('/Wartets.github.io/')) {
 				targetUrl = '../' + targetUrl;
 			} else {
@@ -689,7 +689,7 @@ function resolveMusicUrl(url) {
 			}
 		}
 	} else {
-		if (targetUrl.startsWith('Music-Library/')) {
+		if (targetUrl.startsWith('music/')) {
 			targetUrl = '/' + targetUrl;
 		}
 	}
@@ -1041,3 +1041,4 @@ function updateTitleWithMoonPhase() {
 	window.addEventListener('mouseleave', stopInteraction);
 	window.addEventListener('touchend', stopInteraction);
 }
+
