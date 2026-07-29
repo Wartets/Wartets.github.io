@@ -40,40 +40,32 @@
 	<div class="bg-noise"></div>
 
 	<nav class="main-nav" aria-label="Main navigation">
-		<a href="../" class="nav-brand">Colin Bossu Réaubourg</a>
-		<div class="nav-links">
-			<a href="../" class="nav-link" data-i18n="nav.home">Home</a>
-			<a href="../projects/" class="nav-link" data-i18n="nav.projects">Projects</a>
-			<a href="../library/" class="nav-link" data-i18n="nav.library">Library</a>
-			<a href="../music/" class="nav-link" data-i18n="nav.music">Music</a>
-			<div class="custom-lang-selector" id="customLangSelector">
-				<button type="button" class="lang-trigger" id="langTrigger" aria-haspopup="listbox" aria-expanded="false" aria-label="Change language">
-					<i class="fa-solid fa-globe lang-icon" aria-hidden="true"></i>
-					<span id="langCurrent">English</span>
-					<i class="fa-solid fa-chevron-down lang-chevron" aria-hidden="true"></i>
-				</button>
-				<ul class="lang-options" id="langOptions" role="listbox" aria-labelledby="langTrigger">
-					<li data-lang="en" role="option" tabindex="0">English</li>
-					<li data-lang="fr" role="option" tabindex="0">Français</li>
-				</ul>
+		<div class="nav-row-primary">
+			<a href="../" class="nav-brand">Colin Bossu Réaubourg</a>
+			<div class="nav-links">
+				<a href="../" class="nav-link" data-i18n="nav.home">Home</a>
+				<a href="../projects/" class="nav-link" data-i18n="nav.projects">Projects</a>
+				<a href="../library/" class="nav-link" data-i18n="nav.library">Library</a>
+				<a href="../music/" class="nav-link" data-i18n="nav.music">Music</a>
+				<div class="custom-lang-selector" id="customLangSelector">
+					<button type="button" class="lang-trigger" id="langTrigger" aria-haspopup="listbox" aria-expanded="false" aria-label="Change language">
+						<i class="fa-solid fa-globe lang-icon" aria-hidden="true"></i>
+						<span id="langCurrent">English</span>
+						<i class="fa-solid fa-chevron-down lang-chevron" aria-hidden="true"></i>
+					</button>
+					<ul class="lang-options" id="langOptions" role="listbox" aria-labelledby="langTrigger">
+						<li data-lang="en" role="option" tabindex="0">English</li>
+						<li data-lang="fr" role="option" tabindex="0">Français</li>
+					</ul>
+				</div>
 			</div>
 		</div>
-	</nav>
-
-	<header class="site-header noselect">
-		<div class="header-content">
-			<h1>Thought's Library</h1>
-			<p>A collection of poems, thoughts and writings.</p>
-		</div>
-	</header>
-
-	<section class="controls-section">
-		<div class="controls-container">
+		<div class="nav-row-controls">
 			<div class="search-filter-pill">
 				<div class="search-part">
 					<i class="fa-solid fa-magnifying-glass search-icon"></i>
-					<input type="text" id="searchInput" placeholder="Search...">
-					<button id="clearSearchBtn" class="search-clear" aria-label="Clear Search">
+					<input type="text" id="searchInput" data-i18n-placeholder="controls.search_placeholder" placeholder="Search...">
+					<button id="clearSearchBtn" class="search-clear" data-i18n-aria-label="controls.clear_search" aria-label="Clear Search">
 						<i class="fa-solid fa-xmark"></i>
 					</button>
 				</div>
@@ -81,20 +73,20 @@
 				<div id="categoryFilter" class="filter-part">
 					<div class="filter-trigger">
 						<i class="fa-solid fa-filter filter-icon"></i>
-						<span>All Categories</span>
+						<span data-i18n="controls.all_categories">All Categories</span>
 					</div>
 					<div class="filter-dropdown">
-						<div class="filter-option selected" data-value="all">All Categories</div>
+						<div class="filter-option selected" data-value="all" data-i18n="controls.all_categories">All Categories</div>
 					</div>
 				</div>
 				<div class="pill-separator"></div>
 				<div id="tagFilter" class="filter-part">
 					<div class="filter-trigger">
 						<i class="fa-solid fa-tags filter-icon"></i>
-						<span>All Tags</span>
+						<span data-i18n="controls.all_tags">All Tags</span>
 					</div>
 					<div class="filter-dropdown">
-						<div class="filter-option selected" data-value="all">All Tags</div>
+						<div class="filter-option selected" data-value="all" data-i18n="controls.all_tags">All Tags</div>
 					</div>
 				</div>
 				<div class="pill-separator"></div>
@@ -102,31 +94,38 @@
 					<div id="sortFilter" class="filter-part">
 						<div class="filter-trigger">
 							<i class="fa-solid fa-arrow-down-wide-short filter-icon"></i>
-							<span>Date</span>
+							<span data-i18n="controls.sort_date">Date</span>
 						</div>
 						<div class="filter-dropdown">
-							<div class="filter-option selected" data-value="date">Date</div>
-							<div class="filter-option" data-value="title">Title</div>
-							<div class="filter-option" data-value="category">Category</div>
-							<div class="filter-option" data-value="author">Author</div>
+							<div class="filter-option selected" data-value="date" data-i18n="controls.sort_date">Date</div>
+							<div class="filter-option" data-value="title" data-i18n="controls.sort_title">Title</div>
+							<div class="filter-option" data-value="category" data-i18n="controls.sort_category">Category</div>
+							<div class="filter-option" data-value="author" data-i18n="controls.sort_author">Author</div>
 						</div>
 					</div>
-					<button id="sortOrderBtn" class="view-btn" aria-label="Toggle Sort Order">
+					<button id="sortOrderBtn" class="view-btn" data-i18n-aria-label="controls.toggle_sort_order" aria-label="Toggle Sort Order">
 						<i class="fa-solid fa-arrow-down-long"></i>
 					</button>
 				</div>
 				<div class="pill-separator"></div>
 				<div class="view-toggle-part">
-					<button id="grid-view-btn" class="view-btn active" aria-label="Grid View">
+					<button id="grid-view-btn" class="view-btn active" data-i18n-aria-label="controls.grid_view" aria-label="Grid View">
 						<i class="fa-solid fa-border-all"></i>
 					</button>
-					<button id="list-view-btn" class="view-btn" aria-label="List View">
+					<button id="list-view-btn" class="view-btn" data-i18n-aria-label="controls.list_view" aria-label="List View">
 						<i class="fa-solid fa-list-ul"></i>
 					</button>
 				</div>
 			</div>
 		</div>
-	</section>
+	</nav>
+
+	<header class="site-header noselect">
+		<div class="header-content">
+			<h1 data-i18n="poetry.page_title">Thought's Library</h1>
+			<p data-i18n="poetry.page_subtitle">A collection of poems, thoughts and writings.</p>
+		</div>
+	</header>
 
 	<div id="list-header" class="list-header">
 		<div class="header-col title-col" data-sort="title">Title <i class="fa-solid fa-arrow-down"></i></div>

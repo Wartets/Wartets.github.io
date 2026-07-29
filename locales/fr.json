@@ -40,10 +40,16 @@
 		"code": "Code source"
 	},
 	"library": {
+		"page_title": "Bibliothèque de Documents",
+		"page_subtitle": "Une collection organisée de rapports, notes et documents.",
 		"featured_title": "Travaux Sélectionnés",
 		"recent_title": "Derniers Travaux",
 		"view_all": "Toute la bibliothèque",
 		"read": "Consulter le document"
+	},
+	"poetry": {
+		"page_title": "Bibliothèque de Pensées",
+		"page_subtitle": "Une collection de poèmes, pensées et écrits."
 	},
 	"music_section": {
 		"title": "Espace Musical",
@@ -90,6 +96,25 @@
 		"grid_view": "Vue en grille",
 		"list_view": "Vue en liste",
 		"no_results_title": "Aucun résultat ne correspond à vos critères.",
-		"reset_filters": "Réinitialiser les filtres"
+		"reset_filters": "Réinitialiser les filtres",
+		"title_col": "Titre",
+		"category_col": "Catégorie",
+		"author_col": "Auteur",
+		"lang_col": "Langue",
+		"date_col": "Date",
+		"open_link": "Consulter",
+		"source_code": "Code source",
+		"read_document": "Lire le document",
+		"copy_link": "Copier le lien",
+		"open_new_tab": "Ouvrir dans un nouvel onglet",
+		"download": "Télécharger",
+		"close": "Fermer",
+		"back_to_top": "Retour en haut",
+		"loading_projects": "Chargement des projets...",
+		"loading_documents": "Chargement des documents...",
+		"error_loading": "Erreur lors du chargement du document.",
+		"unknown_date": "Date inconnue",
+		"previous_page": "Page précédente",
+		"next_page": "Page suivante"
 	}
 }

@@ -94,8 +94,11 @@ body {
 .site-header h4 { color: var(--color-text-secondary); font-weight: 400; font-size: 1.1rem; margin-bottom: 1rem; }
 .site-header p { color: var(--color-text-secondary); font-size: 1rem; max-width: 600px; margin: 0 auto; }
 
-.controls-section { display: flex; justify-content: center; margin-bottom: 4rem; padding: 0 1rem; position: sticky; top: 20px; z-index: 100; pointer-events: none; width: 100%; }
-.controls-container { pointer-events: auto; animation: slideUpFade 1s cubic-bezier(0.16, 1, 0.3, 1) forwards; opacity: 0; transform: translateY(20px); max-width: 100%; }
+.search-filter-pill {
+	animation: slideUpFade 1s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+	opacity: 0;
+	transform: translateY(20px);
+}
 .search-filter-pill { 
 	display: flex; 
 	align-items: center; 
@@ -853,12 +856,6 @@ body {
 	
 	.site-header h1 {
 		font-size: 2rem;
-	}
-
-	.controls-section {
-		top: 10px;
-		margin-bottom: 2rem;
-		padding: 0 0.5rem;
 	}
 
 	.search-filter-pill {

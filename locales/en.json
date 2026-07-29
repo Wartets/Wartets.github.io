@@ -40,10 +40,16 @@
 		"code": "Source code"
 	},
 	"library": {
+		"page_title": "Document Library",
+		"page_subtitle": "A curated collection of papers, notes, and documents.",
 		"featured_title": "Featured Works",
 		"recent_title": "Recent Works",
 		"view_all": "All works",
 		"read": "Read document"
+	},
+	"poetry": {
+		"page_title": "Thought's Library",
+		"page_subtitle": "A collection of poems, thoughts and writings."
 	},
 	"music_section": {
 		"title": "Music Space",
@@ -90,6 +96,25 @@
 		"grid_view": "Grid view",
 		"list_view": "List view",
 		"no_results_title": "No results found matching your criteria.",
-		"reset_filters": "Reset filters"
+		"reset_filters": "Reset filters",
+		"title_col": "Title",
+		"category_col": "Category",
+		"author_col": "Author",
+		"lang_col": "Lang",
+		"date_col": "Date",
+		"open_link": "Open",
+		"source_code": "Source code",
+		"read_document": "Read document",
+		"copy_link": "Copy link",
+		"open_new_tab": "Open in new tab",
+		"download": "Download",
+		"close": "Close",
+		"back_to_top": "Back to top",
+		"loading_projects": "Loading projects...",
+		"loading_documents": "Loading documents...",
+		"error_loading": "Error loading document.",
+		"unknown_date": "Unknown date",
+		"previous_page": "Previous page",
+		"next_page": "Next page"
 	}
 }

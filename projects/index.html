@@ -43,32 +43,27 @@
 	<div class="bg-noise"></div>
 
 	<nav class="main-nav" aria-label="Main navigation">
-		<a href="../" class="nav-brand">Colin Bossu Réaubourg</a>
-		<div class="nav-links">
-			<a href="../" class="nav-link" data-i18n="nav.home">Home</a>
-			<a href="./" class="nav-link" data-i18n="nav.projects">Projects</a>
-			<a href="../library/" class="nav-link" data-i18n="nav.library">Library</a>
-			<a href="../music/" class="nav-link" data-i18n="nav.music">Music</a>
-			<div class="custom-lang-selector" id="customLangSelector">
-				<button type="button" class="lang-trigger" id="langTrigger" aria-haspopup="listbox" aria-expanded="false" aria-label="Change language">
-					<i class="fa-solid fa-globe lang-icon" aria-hidden="true"></i>
-					<span id="langCurrent">English</span>
-					<i class="fa-solid fa-chevron-down lang-chevron" aria-hidden="true"></i>
-				</button>
-				<ul class="lang-options" id="langOptions" role="listbox" aria-labelledby="langTrigger">
-					<li data-lang="en" role="option" tabindex="0">English</li>
-					<li data-lang="fr" role="option" tabindex="0">Français</li>
-				</ul>
+		<div class="nav-row-primary">
+			<a href="../" class="nav-brand">Colin Bossu Réaubourg</a>
+			<div class="nav-links">
+				<a href="../" class="nav-link" data-i18n="nav.home">Home</a>
+				<a href="./" class="nav-link" data-i18n="nav.projects">Projects</a>
+				<a href="../library/" class="nav-link" data-i18n="nav.library">Library</a>
+				<a href="../music/" class="nav-link" data-i18n="nav.music">Music</a>
+				<div class="custom-lang-selector" id="customLangSelector">
+					<button type="button" class="lang-trigger" id="langTrigger" aria-haspopup="listbox" aria-expanded="false" aria-label="Change language">
+						<i class="fa-solid fa-globe lang-icon" aria-hidden="true"></i>
+						<span id="langCurrent">English</span>
+						<i class="fa-solid fa-chevron-down lang-chevron" aria-hidden="true"></i>
+					</button>
+					<ul class="lang-options" id="langOptions" role="listbox" aria-labelledby="langTrigger">
+						<li data-lang="en" role="option" tabindex="0">English</li>
+						<li data-lang="fr" role="option" tabindex="0">Français</li>
+					</ul>
+				</div>
 			</div>
 		</div>
-	</nav>
-
-	<header class="site-header page-header-with-controls noselect">
-		<div class="header-content">
-			<h1>Wartets' Pr<span id="easterEggO" role="button" tabindex="0" aria-label="Secret O">O</span>jects</h1>
-			<p data-i18n="header.projects_subtitle">Interactive simulations, games, experiments, and digital creations.</p>
-		</div>
-		<div class="header-controls-bar">
+		<div class="nav-row-controls">
 			<div class="header-search-group">
 				<i class="fa-solid fa-magnifying-glass search-icon" aria-hidden="true"></i>
 				<input type="search" id="searchInput" data-i18n-placeholder="controls.search_placeholder" placeholder="Search..." autocomplete="off" spellcheck="false" autocapitalize="off">
@@ -112,6 +107,13 @@
 					</button>
 				</div>
 			</div>
+		</div>
+	</nav>
+
+	<header class="site-header noselect">
+		<div class="header-content">
+			<h1>Wartets' Pr<span id="easterEggO" role="button" tabindex="0" aria-label="Secret O">O</span>jects</h1>
+			<p data-i18n="header.projects_subtitle">Interactive simulations, games, experiments, and digital creations.</p>
 		</div>
 	</header>
 	

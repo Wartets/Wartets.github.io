@@ -38,11 +38,17 @@ const projects = [
 		show: true
 	},
 	{
-		title: "TikZ Generator",
+		title: { en: "TikZ Generator", fr: "Générateur TikZ" },
 		timestamp: "2026-01-16T09:43:58Z",
 		github: "https://github.com/wartets/TikZ-Generator",
-		description: "A powerful visual editor for generating TikZ code for LaTeX documents. Create diagrams, electric circuits, and geometric figures intuitively and export the code in real-time.",
-		longDescription: "TikZ Generator is a comprehensive web-based tool designed to bridge the gap between visual drawing and LaTeX coding. It provides an intuitive canvas where users can draw geometric shapes, arrows, and complex diagrams using a variety of tools. The application features specialized libraries for drawing electric circuits (using Circuitikz), optics, logic gates, and flowcharts. As you draw, the application generates clean, copy-paste ready TikZ code in real-time. Key features include freehand drawing with smoothing, a robust property editor for styling (colors, line styles, arrows), undo/redo functionality, and local state persistence. It is an essential utility for students, teachers, and researchers who need to incorporate high-quality vector graphics into their LaTeX documents without writing code from scratch.",
+		description: {
+			en: "A powerful visual editor for generating TikZ code for LaTeX documents. Create diagrams, electric circuits, and geometric figures intuitively and export the code in real-time.",
+			fr: "Un éditeur visuel puissant pour générer du code TikZ pour vos documents LaTeX. Créez des diagrammes, des circuits électriques et des figures géométriques intuitivement et exportez le code en temps réel."
+		},
+		longDescription: {
+			en: "TikZ Generator is a comprehensive web-based tool designed to bridge the gap between visual drawing and LaTeX coding. It provides an intuitive canvas where users can draw geometric shapes, arrows, and complex diagrams using a variety of tools. The application features specialized libraries for drawing electric circuits (using Circuitikz), optics, logic gates, and flowcharts. As you draw, the application generates clean, copy-paste ready TikZ code in real-time. Key features include freehand drawing with smoothing, a robust property editor for styling (colors, line styles, arrows), undo/redo functionality, and local state persistence. It is an essential utility for students, teachers, and researchers who need to incorporate high-quality vector graphics into their LaTeX documents without writing code from scratch.",
+			fr: "TikZ Generator est un outil web complet conçu pour combler l'écart entre le dessin visuel et l'écriture de code LaTeX. Il offre un canevas intuitif permettant de dessiner des formes géométriques, des flèches et des diagrammes complexes à l'aide de nombreux outils. L'application propose des bibliothèques spécialisées pour dessiner des circuits électriques (via Circuitikz), de l'optique, des portes logiques et des organigrammes. Au fil du dessin, l'application génère un code TikZ propre et prêt à être copié en temps réel. Parmi les fonctionnalités clés : dessin à main levée avec lissage, éditeur de propriétés robuste pour le style (couleurs, styles de traits, flèches), historique annuler/rétablir et persistance locale de l'état. C'est un outil essentiel pour les étudiants, enseignants et chercheurs souhaitant intégrer des graphiques vectoriels de haute qualité dans leurs documents LaTeX sans écrire de code à la main."
+		},
 		icon: "../assets/images/card/TikZ-Generator-card.png",
 		image: "../assets/images/card/TikZ-Generator-card.png",
 		link: "https://wartets.github.io/TikZ-Generator/",
@@ -51,11 +57,17 @@ const projects = [
 		show: true
 	},
 	{
-		title: "Document Library",
+		title: { en: "Document Library", fr: "Bibliothèque de Documents" },
 		timestamp: "2025-08-10T00:00:00Z",
 		github: "https://github.com/library",
-		description: "Interactive digital library for academic notes and papers. Features a custom PDF viewer, real-time search, and dynamic filtering.",
-		longDescription: "A comprehensive digital archive designed to organize and present academic notes, research papers, and personal documents. The application features a custom-built PDF viewer with lazy loading and preview generation, ensuring a seamless reading experience directly in the browser. It incorporates advanced filtering, sorting, and fuzzy search capabilities to efficiently navigate through categories like Physics, Mathematics, and Computer Science. ",
+		description: {
+			en: "Interactive digital library for academic notes and papers. Features a custom PDF viewer, real-time search, and dynamic filtering.",
+			fr: "Bibliothèque numérique interactive pour notes et rapports académiques. Dotée d'un lecteur PDF personnalisé, d'une recherche en temps réel et d'un filtrage dynamique."
+		},
+		longDescription: {
+			en: "A comprehensive digital archive designed to organize and present academic notes, research papers, and personal documents. The application features a custom-built PDF viewer with lazy loading and preview generation, ensuring a seamless reading experience directly in the browser. It incorporates advanced filtering, sorting, and fuzzy search capabilities to efficiently navigate through categories like Physics, Mathematics, and Computer Science.",
+			fr: "Une archive numérique complète conçue pour organiser et présenter des notes académiques, des rapports de recherche et des documents personnels. L'application propose un lecteur PDF sur mesure avec chargement différé et génération d'aperçus, garantissant une expérience de lecture fluide directement dans le navigateur. Elle intègre un filtrage avancé, un tri et une recherche approximative pour naviguer efficacement entre les catégories comme Physique, Mathématiques et Informatique."
+		},
 		icon: "../assets/images/card/Document-Library-card.png",
 		image: "../assets/images/card/Document-Library-card.png",
 		link: "https://wartets.github.io/library/index.html",
@@ -64,11 +76,17 @@ const projects = [
 		show: true
 	},
 	{
-		title: "Thought's Library",
+		title: { en: "Thought's Library", fr: "Bibliothèque de Pensées" },
 		timestamp: "2026-01-14T00:00:00Z",
 		github: "https://github.com/Wartets/poetry/index.html",
-		description: "Library of all my poems and thoughts, presented in an interactive web format. Organized for easy navigation with features like categorization by theme and search functionality.",
-		longDescription: "A digital collection of personal poems and thoughts, presented in an interactive web format. This project serves as a creative outlet and a way to share reflections, ideas, and literary works with others. The library is organized for easy navigation and includes features such as categorization by theme, search functionality, and a visually appealing design that enhances the reading experience.",
+		description: {
+			en: "Library of all my poems and thoughts, presented in an interactive web format. Organized for easy navigation with features like categorization by theme and search functionality.",
+			fr: "Bibliothèque de tous mes poèmes et pensées, présentée dans un format web interactif. Organisée pour une navigation facile avec catégorisation par thème et fonction de recherche."
+		},
+		longDescription: {
+			en: "A digital collection of personal poems and thoughts, presented in an interactive web format. This project serves as a creative outlet and a way to share reflections, ideas, and literary works with others. The library is organized for easy navigation and includes features such as categorization by theme, search functionality, and a visually appealing design that enhances the reading experience.",
+			fr: "Une collection numérique de poèmes et pensées personnels, présentée dans un format web interactif. Ce projet sert d'exutoire créatif et de moyen de partager réflexions, idées et œuvres littéraires. La bibliothèque est organisée pour une navigation facile et propose une catégorisation par thème, une fonction de recherche et un design soigné qui enrichit l'expérience de lecture."
+		},
 		icon: "../assets/images/card/Thoughts-Library-card.png",
 		image: "../assets/images/card/Thoughts-Library-card.png",
 		link: "https://wartets.github.io/poetry/",
@@ -77,11 +95,17 @@ const projects = [
 		show: false
 	},
 	{
-		title: "N-Body-Simulation",
+		title: { en: "N-Body-Simulation", fr: "Simulation à N-Corps" },
 		timestamp: "2026-01-01T08:00:00Z",
 		github: "https://github.com/wartets/N-Body-Simulation",
-		description: "An advanced physics sandbox for simulating N-body systems with gravity, electromagnetism, and collisions. Features extensive tools for creating, modifying, and analyzing complex cosmic scenarios in real-time.",
-		longDescription: "An advanced physics sandbox for simulating N-body systems under various physical laws. This feature-rich simulation allows users to model gravitational, electric, and magnetic interactions with high precision. It incorporates a Barnes-Hut algorithm for efficient long-range force calculation, enabling large-scale simulations. The engine supports elastic bonds, solid barriers, and various environmental zones like viscosity, thermal, and custom force fields. Advanced features include body fragmentation, thermodynamic properties, and a complete undo/redo history for all actions. The highly interactive interface provides real-time control over every simulation parameter, body property, and environmental effect, making it a powerful tool for both educational exploration and complex cosmic experimentation.",
+		description: {
+			en: "An advanced physics sandbox for simulating N-body systems with gravity, electromagnetism, and collisions. Features extensive tools for creating, modifying, and analyzing complex cosmic scenarios in real-time.",
+			fr: "Un bac à sable physique avancé pour simuler des systèmes à N corps avec gravité, électromagnétisme et collisions. Doté d'outils complets pour créer, modifier et analyser des scénarios cosmiques complexes en temps réel."
+		},
+		longDescription: {
+			en: "An advanced physics sandbox for simulating N-body systems under various physical laws. This feature-rich simulation allows users to model gravitational, electric, and magnetic interactions with high precision. It incorporates a Barnes-Hut algorithm for efficient long-range force calculation, enabling large-scale simulations. The engine supports elastic bonds, solid barriers, and various environmental zones like viscosity, thermal, and custom force fields. Advanced features include body fragmentation, thermodynamic properties, and a complete undo/redo history for all actions. The highly interactive interface provides real-time control over every simulation parameter, body property, and environmental effect, making it a powerful tool for both educational exploration and complex cosmic experimentation.",
+			fr: "Un bac à sable physique avancé pour simuler des systèmes à N corps sous diverses lois physiques. Cette simulation riche en fonctionnalités permet de modéliser avec précision les interactions gravitationnelles, électriques et magnétiques. Elle intègre un algorithme de Barnes-Hut pour un calcul efficace des forces à longue portée, permettant des simulations à grande échelle. Le moteur prend en charge les liaisons élastiques, les barrières solides et diverses zones environnementales telles que viscosité, thermique et champs de force personnalisés. Les fonctionnalités avancées incluent la fragmentation des corps, les propriétés thermodynamiques et un historique annuler/rétablir complet. L'interface hautement interactive offre un contrôle en temps réel sur chaque paramètre de simulation, propriété de corps et effet environnemental, en faisant un outil puissant tant pour l'exploration pédagogique que pour l'expérimentation cosmique complexe."
+		},
 		icon: "../assets/images/card/N-Body-Simulation-card.png",
 		image: "../assets/images/card/N-Body-Simulation-card.png",
 		link: "https://wartets.github.io/N-Body-Simulation/",
@@ -90,11 +114,17 @@ const projects = [
 		show: true
 	},
 	{
-		title: "FDTD Wave Simulator",
+		title: { en: "FDTD Wave Simulator", fr: "Simulateur d'Ondes FDTD" },
 		timestamp: "2025-12-01T08:00:01Z",
 		github: "https://github.com/wartets/FDTD-Wave-Simulator",
-		description: "A web-based simulator for 2D wave propagation using the FDTD method. Visualize phenomena like interference and reflection with interactive tools for sources, obstacles, and boundary conditions.",
-		longDescription: "This project is a high-performance numerical simulator that models and visualizes 2D scalar wave propagation using the Finite-Difference Time-Domain (FDTD) method. The application features a client-server architecture where a powerful Python backend (using Flask and SocketIO) handles the complex physics calculations, while a responsive JavaScript frontend provides real-time visualization and an interactive user interface. Users can explore wave phenomena like interference, reflection, and diffraction by drawing wave sources and obstacles directly onto the grid. The simulation is highly configurable, offering control over grid dimensions, wave speed, and various boundary conditions—including fixed (Dirichlet), periodic, reflecting (Neumann), and absorbing (Mur). The dynamic visualization uses a selectable colormap that can be normalized in real-time, providing a clear and intuitive representation of wave amplitude. It serves as an excellent educational tool for students and enthusiasts to explore the principles of wave physics.",
+		description: {
+			en: "A web-based simulator for 2D wave propagation using the FDTD method. Visualize phenomena like interference and reflection with interactive tools for sources, obstacles, and boundary conditions.",
+			fr: "Un simulateur web de propagation d'ondes 2D utilisant la méthode FDTD. Visualisez des phénomènes comme l'interférence et la réflexion grâce à des outils interactifs pour sources, obstacles et conditions aux limites."
+		},
+		longDescription: {
+			en: "This project is a high-performance numerical simulator that models and visualizes 2D scalar wave propagation using the Finite-Difference Time-Domain (FDTD) method. The application features a client-server architecture where a powerful Python backend (using Flask and SocketIO) handles the complex physics calculations, while a responsive JavaScript frontend provides real-time visualization and an interactive user interface. Users can explore wave phenomena like interference, reflection, and diffraction by drawing wave sources and obstacles directly onto the grid. The simulation is highly configurable, offering control over grid dimensions, wave speed, and various boundary conditions—including fixed (Dirichlet), periodic, reflecting (Neumann), and absorbing (Mur). The dynamic visualization uses a selectable colormap that can be normalized in real-time, providing a clear and intuitive representation of wave amplitude. It serves as an excellent educational tool for students and enthusiasts to explore the principles of wave physics.",
+			fr: "Ce projet est un simulateur numérique haute performance qui modélise et visualise la propagation d'ondes scalaires 2D grâce à la méthode des différences finies dans le domaine temporel (FDTD). L'application repose sur une architecture client-serveur où un backend Python puissant (utilisant Flask et SocketIO) gère les calculs physiques complexes, tandis qu'un frontend JavaScript réactif fournit une visualisation en temps réel et une interface interactive. Les utilisateurs peuvent explorer des phénomènes ondulatoires comme l'interférence, la réflexion et la diffraction en dessinant directement des sources d'ondes et des obstacles sur la grille. La simulation est hautement configurable, offrant un contrôle sur les dimensions de la grille, la vitesse des ondes et diverses conditions aux limites — fixes (Dirichlet), périodiques, réfléchissantes (Neumann) et absorbantes (Mur). La visualisation dynamique utilise une palette de couleurs sélectionnable pouvant être normalisée en temps réel, offrant une représentation claire et intuitive de l'amplitude des ondes. C'est un excellent outil pédagogique pour explorer les principes de la physique ondulatoire."
+		},
 		icon: "../assets/images/card/FDTD-Wave-Simulator-card.png",
 		image: "../assets/images/card/FDTD-Wave-Simulator-card.png",
 		link: "https://wartets.github.io/FDTD-Wave-Simulator/",
@@ -103,11 +133,17 @@ const projects = [
 		show: true
 	},
 	{
-		title: "Origami",
+		title: { en: "Origami", fr: "Origami" },
 		timestamp: "2025-11-01T08:00:00Z",
 		github: "https://github.com/wartets/Origami",
-		description: "An interactive web-based origami simulator to explore the mathematical axioms of paper folding. Create complex crease patterns, experiment with folds, and visualize the geometric principles behind the art of origami.",
-		longDescription: "Origami is an advanced, interactive web-based simulator dedicated to exploring the mathematical principles of paper folding. The application provides a comprehensive toolset based on the seven Huzita-Hatori axioms, allowing users to construct complex crease patterns with geometric precision. Users create folds by selecting points and edges on virtual paper, with real-time visual feedback that includes construction lines and a preview of the resulting crease. The simulation engine accurately handles face splitting, vertex reflection, and the complex layering of paper that results from each fold. It also includes an undo/redo history, state persistence, an X-ray mode to see hidden layers, and the ability to import standard Crease Pattern (.cp) files. This project is both an educational tool for learning geometric constructions and a creative sandbox for origami enthusiasts and mathematicians.",
+		description: {
+			en: "An interactive web-based origami simulator to explore the mathematical axioms of paper folding. Create complex crease patterns, experiment with folds, and visualize the geometric principles behind the art of origami.",
+			fr: "Un simulateur web interactif d'origami pour explorer les axiomes mathématiques du pliage de papier. Créez des motifs de plis complexes, expérimentez des pliages et visualisez les principes géométriques de l'art de l'origami."
+		},
+		longDescription: {
+			en: "Origami is an advanced, interactive web-based simulator dedicated to exploring the mathematical principles of paper folding. The application provides a comprehensive toolset based on the seven Huzita-Hatori axioms, allowing users to construct complex crease patterns with geometric precision. Users create folds by selecting points and edges on virtual paper, with real-time visual feedback that includes construction lines and a preview of the resulting crease. The simulation engine accurately handles face splitting, vertex reflection, and the complex layering of paper that results from each fold. It also includes an undo/redo history, state persistence, an X-ray mode to see hidden layers, and the ability to import standard Crease Pattern (.cp) files. This project is both an educational tool for learning geometric constructions and a creative sandbox for origami enthusiasts and mathematicians.",
+			fr: "Origami est un simulateur web interactif avancé dédié à l'exploration des principes mathématiques du pliage de papier. L'application propose un ensemble d'outils complets basés sur les sept axiomes de Huzita-Hatori, permettant de construire des motifs de plis complexes avec une précision géométrique. Les plis se créent en sélectionnant des points et des arêtes sur le papier virtuel, avec un retour visuel en temps réel incluant des lignes de construction et un aperçu du pli résultant. Le moteur de simulation gère avec précision la division des faces, la réflexion des sommets et le superposition complexe du papier résultant de chaque pli. Il inclut également un historique annuler/rétablir, une persistance de l'état, un mode radiographique pour voir les couches cachées, et la possibilité d'importer des fichiers Crease Pattern (.cp) standards. Ce projet est à la fois un outil pédagogique pour apprendre les constructions géométriques et un bac à sable créatif pour les passionnés d'origami et les mathématiciens."
+		},
 		icon: "../assets/images/card/Origami-card.png",
 		image: "../assets/images/card/Origami-card.png",
 		link: "https://wartets.github.io/Origami/",

@@ -227,7 +227,7 @@ function initLibrary() {
 	}
 
 	function resetMetaTags() {
-		document.title = defaultMetas.title || "Wartets' Library";
+		document.title = defaultMetas.title || window.t('library.page_title');
 		const update = (selector, attribute, content) => {
 			if (!content) return;
 			const el = document.querySelector(selector);
@@ -531,8 +531,8 @@ function initLibrary() {
 						searchInput.value = '';
 						currentFilter = 'all';
 						currentTagFilter = 'all';
-						if (filterTrigger) filterTrigger.textContent = 'All Categories';
-						if (tagTrigger) tagTrigger.textContent = 'All Tags';
+						if (filterTrigger) filterTrigger.textContent = window.t('controls.all_categories');
+						if (tagTrigger) tagTrigger.textContent = window.t('controls.all_tags');
 						if (filterDropdown) filterDropdown.querySelectorAll('.selected').forEach(el => el.classList.remove('selected'));
 						if (tagDropdown) tagDropdown.querySelectorAll('.selected').forEach(el => el.classList.remove('selected'));
 						renderDocuments();
@@ -816,7 +816,7 @@ function initLibrary() {
 	
 	async function generateOgImage(doc) {
 	const ogImageTag = document.querySelector("meta[property='og:image']");
-	const defaultImageUrl = 'https://wartets.github.io/assets/images/card/Document-Library-card.png';
+	const defaultImageUrl = window.SITE_ROOT + 'assets/images/card/Document-Library-card.png';
 
 	if (!ogImageTag) return;
 
