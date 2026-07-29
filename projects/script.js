@@ -1130,4 +1130,3 @@ document.addEventListener('DOMContentLoaded', () => {
 		renderProjects();
 	}, 0);
 });
-

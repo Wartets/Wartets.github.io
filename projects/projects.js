@@ -433,4 +433,3 @@ const projects = [
 		}
 	]
 ];
-

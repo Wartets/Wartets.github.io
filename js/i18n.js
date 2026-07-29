@@ -121,4 +121,3 @@ document.addEventListener("DOMContentLoaded", () => {
 
     loadLanguage(currentLang);
 });
-

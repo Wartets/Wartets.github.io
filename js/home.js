@@ -15,9 +15,7 @@ function setupSectionAnchors() {
 document.addEventListener("DOMContentLoaded", () => {
 	setupScrollRestoration();
 	setupScrollProgressBar();
-	updateFooterYear();
 	setupSectionAnchors();
-	updateFaviconToMoonPhase();
 
 	const oldSecretTrigger = document.getElementById('secret-old-trigger');
 	const deskSecretTrigger = document.getElementById('secret-desk-trigger');
@@ -122,13 +120,6 @@ function setupTooltips() {
 			tooltipEl.classList.remove('visible');
 		}
 	});
-}
-
-function updateFooterYear() {
-	const yearEl = document.getElementById('current-year');
-	if (yearEl) {
-		yearEl.textContent = new Date().getFullYear();
-	}
 }
 
 function setupScrollProgressBar() {
@@ -906,33 +897,6 @@ const MOON_TITLE_CONFIG = {
 	verticalAlign: "-0.05em"
 };
 
-function getMoonPhaseDayNumber() {
-	const synodicMonth = 29.53058867;
-	const knownNewMoon = new Date('2026-07-14T11:43:00Z').getTime();
-	const now = Date.now();
-
-	const diff = (now - knownNewMoon) / 86400000;
-	let age = diff % synodicMonth;
-	if (age < 0) age += synodicMonth;
-
-	let day = Math.floor(age) + 1;
-	return Math.max(1, Math.min(30, day));
-}
-
-function getMoonPhaseImagePath() {
-	const day = getMoonPhaseDayNumber();
-	const fileName = day.toString().padStart(2, '0') + '.png';
-	return `assets/images/moon_phases/${fileName}`;
-}
-
-function updateFaviconToMoonPhase() {
-	const imagePath = getMoonPhaseImagePath();
-	const link = document.querySelector("link[rel='icon']");
-	if (link) {
-		link.href = imagePath;
-	}
-}
-
 function updateTitleWithMoonPhase() {
 	if (!ENABLE_MOON_PHASE_TITLE_REPLACEMENT) return;
 	const titleEl = document.querySelector('.site-header h1');
@@ -1041,4 +1005,3 @@ function updateTitleWithMoonPhase() {
 	window.addEventListener('mouseleave', stopInteraction);
 	window.addEventListener('touchend', stopInteraction);
 }
-

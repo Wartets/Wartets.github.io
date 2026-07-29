@@ -4,8 +4,15 @@
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=0.9">
 	<title>Wartets' Projects</title>
+	<meta name="robots" content="noindex, follow">
+	<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+	<link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
+	<link rel="preload" href="../css/old.css" as="style">
+	<link rel="preload" href="../js/site-common.js" as="script">
+	<link rel="preload" href="script.js" as="script">
 	<link rel="stylesheet" href="../css/old.css">
 	<link rel="icon" href="https://wartets.github.io/assets/images/browser-icon.png">
+	<script src="../js/site-common.js" defer></script>
 	<meta name="description" content="Explore the interactive simulations, experiments, and creations by Wartets (Colin Bossu). From fractals to physics simulations, discover a range of immersive experiences.">
 	<meta name="keywords" content="Wartets, Colin Bossu, interactive simulations, fractals, physics, maths, music, game, art, 3D visualization, bird flocking, N-body simulation, solar system, SoundCloud, music, YouTube">
 	<meta name="robots" content="index, follow">
@@ -53,7 +60,7 @@
 		<button id="back-to-top" onclick="scrollToTop()">↑</button>
 	</main>
 	<footer>
-		<p>&copy; 2024. All rights reserved. Designed by 
+		<p>&copy; <span id="current-year">2024</span>. All rights reserved under the <a href="https://github.com/Wartets/Wartets.github.io/blob/main/LICENSE" target="_blank">MIT License</a>. Designed by 
 			<a href="https://wartets.github.io/" target="_blank">&#x2197;Wartets</a>.
 			<wbr>Check out more projects on <a href="https://github.com/wartets" target="_blank">&#x2197;GitHub</a>.
 		</p>
@@ -65,4 +72,3 @@
 	<script src="script-animal.js"></script>
 </body>
 </html>
-

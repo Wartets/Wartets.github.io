@@ -1478,4 +1478,3 @@ if (document.readyState === 'loading') {
 } else {
 	initLibrary();
 }
-

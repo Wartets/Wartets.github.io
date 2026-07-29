@@ -1,0 +1,10 @@
+/* TEAM */
+Developer: Colin Bossu Réaubourg (Wartets)
+Contact: github.com/Wartets
+From: France
+
+/* SITE */
+Last update: 2026/07/29
+Standards: HTML5, CSS3, ES2022
+Components: GSAP, Fuse.js, PDF.js, Font Awesome
+Software: Visual Studio Code, Notepas++

@@ -1,0 +1,5 @@
+Contact: https://github.com/Wartets
+Canonical: https://wartets.github.io/.well-known/security.txt
+Preferred-Languages: en, fr
+Expires: 2027-07-29T00:00:00.000Z
+

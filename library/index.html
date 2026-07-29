@@ -38,9 +38,12 @@
 	<link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
 	<link rel="dns-prefetch" href="https://cdnjs.cloudflare.com">
 	<link rel="preload" href="../css/library.css" as="style">
+	<link rel="preload" href="../js/site-common.js" as="script">
+	<link rel="preload" href="documents.js" as="script">
 	<link rel="preload" href="script.js" as="script">
 	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 	<link rel="stylesheet" href="../css/library.css">
+	<script src="../js/site-common.js" defer></script>
 </head>
 <body>
 	<div class="bg-gradient"></div>
@@ -165,7 +168,7 @@
 
 	<footer class="site-footer">
 		<div class="footer-content">
-			<p class="copyright">&copy; 2026. All rights reserved.</p>
+			<p class="copyright">&copy; <span id="current-year">2026</span>. All rights reserved. <a href="https://github.com/Wartets/Wartets.github.io/blob/main/LICENSE" target="_blank" rel="noopener noreferrer" class="footer-link">Under MIT License</a></p>
 			<nav class="footer-nav">
 				<span>Designed by <a href="https://wartets.github.io/" target="_blank" rel="noopener noreferrer" class="footer-link">Wartets <i class="fa-solid fa-arrow-up-right-from-square"></i></a></span>
 				<span class="divider"></span>

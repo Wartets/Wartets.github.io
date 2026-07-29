@@ -23,4 +23,3 @@
 <br>&emsp;&emsp;&emsp;&emsp;"knows_the_exact_distance_to_the_andromeda_galaxy": true,
 <br>&emsp;&emsp;}
 <br>}</p>
-
