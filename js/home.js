@@ -360,7 +360,18 @@ function renderDynamicSections() {
 document.addEventListener('i18nReady', () => {
 	if (typeof projects !== 'undefined') renderProjectsSection();
 	if (window.libraryData && window.libraryData.documents) renderLibrarySection();
+	updateMusicGenreTranslations();
 });
+
+function updateMusicGenreTranslations() {
+	const cards = document.querySelectorAll('#featured-music-grid .music-card');
+	cards.forEach((card, index) => {
+		const track = FEATURED_MUSIC_TRACKS[index];
+		if (!track) return;
+		const genreEl = card.querySelector('.music-genre');
+		if (genreEl) genreEl.textContent = window.tGenre(track.genre);
+	});
+}
 
 function renderProjectsSection() {
 	if (typeof projects === 'undefined') return;
@@ -752,7 +763,7 @@ function renderMusicSection() {
 					<div class="music-meta-tags">
 						<span class="music-album">${track.album}</span>
 						<span class="music-tag-divider">•</span>
-						<span class="music-genre">${track.genre}</span>
+						<span class="music-genre">${window.tGenre(track.genre)}</span>
 					</div>
 					<h3 class="music-title">${track.title}</h3>
 				</div>

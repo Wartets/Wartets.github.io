@@ -265,7 +265,7 @@ function initLibrary() {
 				const option = document.createElement('div');
 				option.className = 'filter-option';
 				option.dataset.value = tag;
-				option.textContent = tag.charAt(0).toUpperCase() + tag.slice(1);
+				option.textContent = window.tTag(tag);
 				tagDropdown.appendChild(option);
 			});
 		}
@@ -437,7 +437,7 @@ function initLibrary() {
 			if (matchesCategory && matchesTag && matchesSearch) {
 				const hasMoreTags = docTags.length > 3;
 				const visibleTags = docTags.slice(0, 3);
-				const tagsHtml = visibleTags.map(tag => `<span class="doc-tag">${tag}</span>`).join('');
+				const tagsHtml = visibleTags.map(tag => `<span class="doc-tag">${window.tTag(tag)}</span>`).join('');
 				const tagsMoreIndicator = hasMoreTags ? `<span class="doc-tag-more">+${docTags.length - 3}</span>` : '';
 				const displayTitle = highlightText(doc.title);
 				const displayDesc = doc.description ? highlightText(doc.description) : '';
@@ -780,7 +780,7 @@ function initLibrary() {
 				const allTags = JSON.parse(tagsElement.dataset.allTags);
 				if (allTags.length > 3) {
 					tagsElement.style.cursor = 'help';
-					const tooltipContent = allTags.map(tag => tag.charAt(0).toUpperCase() + tag.slice(1)).join(', ');
+					const tooltipContent = allTags.map(tag => window.tTag(tag)).join(', ');
 					dateTooltip.innerHTML = tooltipContent;
 					dateTooltip.classList.add('visible');
 
@@ -1488,6 +1488,13 @@ function initLibrary() {
 				date: doc.creationDate.toLocaleDateString(dateLocale, { month: 'short', year: 'numeric' })
 			};
 		});
+		if (tagDropdown) {
+			tagDropdown.querySelectorAll('.filter-option[data-value]').forEach(opt => {
+				if (opt.dataset.value === 'all') return;
+				opt.textContent = window.tTag(opt.dataset.value);
+				if (opt.classList.contains('selected') && tagTrigger) tagTrigger.textContent = opt.textContent;
+			});
+		}
 		documentCardsCache.clear();
 		grid.innerHTML = '';
 		renderDocuments();

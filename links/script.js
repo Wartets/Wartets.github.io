@@ -38,15 +38,24 @@ document.addEventListener('DOMContentLoaded', () => {
 		socialList.appendChild(li);
 	});
 
+	function resolveLocalizedText(value, fallbackLang) {
+		if (value === null || value === undefined) return '';
+		if (typeof value === 'string') return value;
+		const lang = fallbackLang || 'en';
+		return value[lang] || value.en || value.fr || Object.values(value)[0] || '';
+	}
+
 	const projectList = document.getElementById('project-links');
 	if (typeof projects !== 'undefined') {
 		const seen = new Set();
 		projects.flat().forEach(project => {
-			if (!project || !project.title || seen.has(project.title)) return;
-			seen.add(project.title);
+			if (!project) return;
+			const title = resolveLocalizedText(project.title);
+			if (!title || seen.has(title)) return;
+			seen.add(title);
 
 			const li = document.createElement('li');
-			li.textContent = project.title;
+			li.textContent = title;
 
 			if (project.link) {
 				li.appendChild(document.createTextNode(' '));
@@ -71,6 +80,33 @@ document.addEventListener('DOMContentLoaded', () => {
 			}
 
 			projectList.appendChild(li);
+		});
+	}
+
+	const pdfList = document.getElementById('pdf-links');
+	if (pdfList && window.libraryData && Array.isArray(window.libraryData.documents)) {
+		const documents = window.libraryData.documents
+			.filter(doc => doc && doc.show !== false && doc.filePath)
+			.slice()
+			.sort((a, b) => {
+				const tsA = Array.isArray(a.timestamp) ? a.timestamp[0] : a.timestamp;
+				const tsB = Array.isArray(b.timestamp) ? b.timestamp[0] : b.timestamp;
+				return new Date(tsB || 0) - new Date(tsA || 0);
+			});
+
+		documents.forEach(doc => {
+			const li = document.createElement('li');
+			li.textContent = resolveLocalizedText(doc.title) || doc.filePath.split('/').pop();
+			li.appendChild(document.createTextNode(' '));
+
+			const a = document.createElement('a');
+			a.href = doc.filePath;
+			a.target = '_blank';
+			a.rel = 'noopener noreferrer';
+			a.textContent = 'PDF';
+			li.appendChild(a);
+
+			pdfList.appendChild(li);
 		});
 	}
 });

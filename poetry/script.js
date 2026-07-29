@@ -244,7 +244,7 @@ function initLibrary() {
 				const option = document.createElement('div');
 				option.className = 'filter-option';
 				option.dataset.value = tag;
-				option.textContent = tag.charAt(0).toUpperCase() + tag.slice(1);
+				option.textContent = window.tTag(tag);
 				tagDropdown.appendChild(option);
 			});
 		}
@@ -337,7 +337,7 @@ function initLibrary() {
 				card.dataset.viewMode = currentViewMode;
 
 				const tagsHtml = (doc.tags || []).slice(0, 3).map(tag => 
-					`<span class="doc-tag">${tag}</span>`
+					`<span class="doc-tag">${window.tTag(tag)}</span>`
 				).join('');
 
 				if (currentViewMode === 'grid') {
@@ -957,6 +957,8 @@ function initLibrary() {
 	prepareLibrary();
 
 	document.addEventListener('i18nReady', () => {
+		documentCardsCache.clear();
+		grid.querySelectorAll('.doc-card').forEach(card => card.remove());
 		prepareLibrary();
 	});
 }

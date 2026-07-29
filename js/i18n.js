@@ -59,6 +59,20 @@ window.tData = function(field, fallbackLang = 'en') {
 	return field[lang] || field[fallbackLang] || field[Object.keys(field)[0]] || '';
 };
 
+window.tTag = function(tag) {
+	if (!tag) return '';
+	const key = String(tag).toLowerCase();
+	const dict = (window.translations && window.translations.tags) || {};
+	if (dict[key]) return dict[key];
+	return key.replace(/[-_]/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+};
+
+window.tGenre = function(genre) {
+	if (!genre) return '';
+	const dict = (window.translations && window.translations.genres) || {};
+	return dict[genre] || genre;
+};
+
 function loadLanguage(lang) {
 	fetch(`${window.SITE_ROOT}locales/${lang}.json`)
 		.then(response => {

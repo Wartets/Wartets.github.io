@@ -238,7 +238,7 @@ document.addEventListener('DOMContentLoaded', () => {
 		const option = document.createElement('div');
 		option.className = 'filter-option';
 		option.dataset.value = keyword;
-		option.textContent = keyword.charAt(0).toUpperCase() + keyword.slice(1);
+		option.textContent = window.tTag(keyword);
 		option.setAttribute('role', 'option');
 		customOptionsContainer.appendChild(option);
 	});
@@ -551,7 +551,7 @@ document.addEventListener('DOMContentLoaded', () => {
 				const allTags = JSON.parse(tagsElement.dataset.allTags);
 				if (allTags.length > 4) {
 					tagsElement.style.cursor = 'help';
-					const tooltipContent = allTags.map(tag => tag.charAt(0).toUpperCase() + tag.slice(1)).join(', ');
+					const tooltipContent = allTags.map(tag => window.tTag(tag)).join(', ');
 					showTooltip(tagsElement, tooltipContent);
 				}
 			} catch (err) {}
@@ -799,7 +799,7 @@ document.addEventListener('DOMContentLoaded', () => {
 				let tagsHtml = '';
 				if (allTags.length > 0) {
 					tagsHtml = `<div class="tags" data-all-tags='${JSON.stringify(allTags)}'>
-						${visibleTags.map(tag => `<span class="tag">#${tag}</span>`).join('')}
+						${visibleTags.map(tag => `<span class="tag">#${window.tTag(tag)}</span>`).join('')}
 						${hasMoreTags ? `<span class="tag tag-more">+${allTags.length - 4}</span>` : ''}
 					</div>`;
 				}
@@ -1199,6 +1199,11 @@ document.addEventListener('DOMContentLoaded', () => {
 	}, 0);
 
 	document.addEventListener('i18nReady', () => {
+		customOptionsContainer.querySelectorAll('.filter-option[data-value]').forEach(opt => {
+			if (opt.dataset.value === 'all') return;
+			opt.textContent = window.tTag(opt.dataset.value);
+			if (opt.classList.contains('selected')) customTrigger.textContent = opt.textContent;
+		});
 		container.innerHTML = '';
 		renderProjects();
 	});
