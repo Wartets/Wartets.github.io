@@ -62,7 +62,7 @@ document.addEventListener('DOMContentLoaded', () => {
 	const normalizeFilter = (value) => (value || '').toString().trim().toLowerCase();
 		
 	if (typeof projects === 'undefined') {
-		container.innerHTML = '<p style="text-align:center; color:red;">Error: The file projects.js was not found or failed to load.</p>';
+		container.innerHTML = '<p style="text-align:center; color:red;">Error: The file ../data/projects.js was not found or failed to load.</p>';
 		return;
 	}
 

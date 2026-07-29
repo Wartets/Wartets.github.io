@@ -141,7 +141,7 @@ function initLibrary() {
 	const libraryData = window.libraryData;
 
 	if (!libraryData || !libraryData.documents) {
-		console.error('Library data is missing. Ensure documents.js is loaded correctly.');
+		console.error('Library data is missing. Ensure ../data/library.js is loaded correctly.');
 		grid.innerHTML = '<div class="loader-wrapper"><p>Error: Library data could not be loaded.</p></div>';
 		return;
 	}
