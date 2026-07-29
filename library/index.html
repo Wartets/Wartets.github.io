@@ -56,15 +56,14 @@
 		<div class="nav-row-primary">
 			<a href="../" class="nav-brand">Colin Bossu Réaubourg</a>
 			<div class="nav-controls">
-				<div class="search-filter-pill">
-					<div class="search-part">
-						<i class="fa-solid fa-magnifying-glass search-icon" aria-hidden="true"></i>
-						<input type="search" id="searchInput" data-i18n-placeholder="controls.search_placeholder" placeholder="Search..." autocomplete="off" spellcheck="false" autocapitalize="off">
-						<button id="clearSearchBtn" class="search-clear" data-i18n-aria-label="controls.clear_search" aria-label="Clear Search" type="button">
-							<i class="fa-solid fa-xmark" aria-hidden="true"></i>
-						</button>
-					</div>
-					<div class="pill-separator"></div>
+				<div class="header-search-group">
+					<i class="fa-solid fa-magnifying-glass search-icon" aria-hidden="true"></i>
+					<input type="search" id="searchInput" data-i18n-placeholder="controls.search_placeholder" placeholder="Search..." autocomplete="off" spellcheck="false" autocapitalize="off">
+					<button id="clearSearchBtn" class="search-clear" data-i18n-aria-label="controls.clear_search" aria-label="Clear Search" type="button">
+						<i class="fa-solid fa-xmark" aria-hidden="true"></i>
+					</button>
+				</div>
+				<div class="header-controls-group">
 					<div id="categoryFilter" class="filter-part">
 						<div class="filter-trigger" role="button" tabindex="0" aria-expanded="false" aria-haspopup="listbox">
 							<i class="fa-solid fa-filter filter-icon" aria-hidden="true"></i>
@@ -74,7 +73,6 @@
 							<div class="filter-option selected" data-value="all" data-i18n="controls.all_categories">All Categories</div>
 						</div>
 					</div>
-					<div class="pill-separator"></div>
 					<div id="tagFilter" class="filter-part">
 						<div class="filter-trigger" role="button" tabindex="0" aria-expanded="false" aria-haspopup="listbox">
 							<i class="fa-solid fa-tags filter-icon" aria-hidden="true"></i>
@@ -84,7 +82,6 @@
 							<div class="filter-option selected" data-value="all" data-i18n="controls.all_tags">All Tags</div>
 						</div>
 					</div>
-					<div class="pill-separator"></div>
 					<div class="sort-part">
 						<div id="sortFilter" class="filter-part">
 							<div class="filter-trigger" role="button" tabindex="0" aria-expanded="false" aria-haspopup="listbox">
@@ -103,7 +100,6 @@
 							<i class="fa-solid fa-arrow-down-long"></i>
 						</button>
 					</div>
-					<div class="pill-separator"></div>
 					<div class="view-toggle-part">
 						<button id="grid-view-btn" class="view-btn active" data-i18n-aria-label="controls.grid_view" aria-label="Grid View">
 							<i class="fa-solid fa-border-all"></i>
@@ -142,14 +138,14 @@
 	</header>
 
 	<div id="list-header" class="list-header">
-		<div class="header-col title-col" data-sort="title">Title <i class="fa-solid fa-arrow-down"></i></div>
-		<div class="header-col category-col" data-sort="category">Category <i class="fa-solid fa-arrow-down"></i></div>
-		<div class="header-col author-col" data-sort="author">Author <i class="fa-solid fa-arrow-down"></i></div>
-		<div class="header-col lang-col" data-sort="lang">Lang <i class="fa-solid fa-arrow-down"></i></div>
-		<div class="header-col date-col" data-sort="date">Date <i class="fa-solid fa-arrow-down"></i></div>
+		<div class="header-col title-col" data-sort="title"><span data-i18n="controls.title_col">Title</span> <i class="fa-solid fa-arrow-down"></i></div>
+		<div class="header-col category-col" data-sort="category"><span data-i18n="controls.category_col">Category</span> <i class="fa-solid fa-arrow-down"></i></div>
+		<div class="header-col author-col" data-sort="author"><span data-i18n="controls.author_col">Author</span> <i class="fa-solid fa-arrow-down"></i></div>
+		<div class="header-col lang-col" data-sort="lang"><span data-i18n="controls.lang_col">Lang</span> <i class="fa-solid fa-arrow-down"></i></div>
+		<div class="header-col date-col" data-sort="date"><span data-i18n="controls.date_col">Date</span> <i class="fa-solid fa-arrow-down"></i></div>
 	</div>
 
-	<main id="document-grid" class="document-grid" role="region" aria-label="Document library">
+	<main id="document-grid" class="document-grid" role="region" data-i18n-aria-label="ui.document_library" aria-label="Document library">
 		<div class="loader-wrapper" role="status" aria-live="polite">
 			<i class="fa-solid fa-circle-notch fa-spin" aria-hidden="true"></i>
 			<p data-i18n="controls.loading_documents">Loading documents...</p>
@@ -184,7 +180,7 @@
 		</div>
 	</div>
 
-	<button id="backToTop" class="back-to-top" aria-label="Back to top">
+	<button id="backToTop" class="back-to-top" data-i18n-aria-label="controls.back_to_top" aria-label="Back to top">
 		<i class="fa-solid fa-arrow-up"></i>
 	</button>
 

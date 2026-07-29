@@ -179,8 +179,7 @@ document.addEventListener('DOMContentLoaded', () => {
 	function formatDate(timestamp) {
 		if (!timestamp) return '';
 		const date = new Date(timestamp);
-		const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sept', 'Oct', 'Nov', 'Dec'];
-		return `${months[date.getMonth()]} ${date.getFullYear()}`;
+		return date.toLocaleDateString(document.documentElement.lang || 'en', { month: 'short', year: 'numeric' });
 	}
 
 	sortProjects();
@@ -540,12 +539,12 @@ document.addEventListener('DOMContentLoaded', () => {
 			const timestamp = dateElement.dataset.timestamp;
 			if (timestamp) {
 				const date = new Date(timestamp);
-				const formattedDate = date.toLocaleDateString('en-US', { 
+				const formattedDate = date.toLocaleDateString(document.documentElement.lang || 'en', { 
 					year: 'numeric', 
 					month: 'long', 
 					day: 'numeric' 
 				});
-				showTooltip(dateElement, `Created: ${formattedDate}`);
+				showTooltip(dateElement, `${window.t('ui.created_label')} ${formattedDate}`);
 			}
 		} else if (tagsElement && tagsElement.dataset.allTags) {
 			try {
@@ -579,8 +578,8 @@ document.addEventListener('DOMContentLoaded', () => {
 				"position": index + 1,
 				"item": {
 					"@type": "SoftwareApplication",
-					"name": project.title,
-					"description": project.description,
+					"name": projectTitle(project),
+					"description": projectDesc(project),
 					"applicationCategory": "EducationalApplication",
 					"operatingSystem": "Web",
 					"url": project.link || project.github,
@@ -661,7 +660,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 				card.setAttribute('tabindex', '0');
 				card.setAttribute('role', 'button');
-				card.setAttribute('aria-label', `View details of ${project.title}`);
+				card.setAttribute('aria-label', `${window.t('ui.view_details')} ${titleText}`);
 
 				card.addEventListener('mousemove', (e) => {
 					const rect = card.getBoundingClientRect();
@@ -696,7 +695,7 @@ document.addEventListener('DOMContentLoaded', () => {
 						card.classList.add('expanded');
 						const currentBtn = card.querySelector('.expand-trigger');
 						if (currentBtn) currentBtn.innerHTML = 'Close <i class="fa-solid fa-compress"></i>';
-						updateURL('project', project.title.toLowerCase().replace(/\s+/g, '-'));
+						updateURL('project', projectTitle(project).toLowerCase().replace(/\s+/g, '-'));
 					} else {
 						updateURL('project', null);
 					}
@@ -894,7 +893,7 @@ document.addEventListener('DOMContentLoaded', () => {
 		const state = Flip.getState(".card");
 
 		const cards = Array.from(container.querySelectorAll('.card'));
-		sortedProjects.forEach(p => { const c = cards.find(c => c.dataset && c.dataset.title === p.title.toLowerCase()); if (c) container.appendChild(c); });
+		sortedProjects.forEach(p => { const target = cards.find(card => card.dataset && card.dataset.title === projectTitle(p).toLowerCase()); if (target) container.appendChild(target); });
 
 		const searchTerm = normalizeFilter(searchQuery);
 		const searchTermAlt = searchTerm ? searchTerm.replace(/-/g, ' ') : '';
@@ -1201,8 +1200,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
 	document.addEventListener('i18nReady', () => {
 		container.innerHTML = '';
-		documentCardsCache.clear ? documentCardsCache.clear() : null;
-		Array.from(container.children).forEach(c => c.remove());
 		renderProjects();
 	});
 });

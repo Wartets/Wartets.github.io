@@ -8,7 +8,8 @@
 		"projects": "Projets",
 		"library": "Bibliothèque",
 		"music": "Musique",
-		"language": "Langue"
+		"language": "Langue",
+		"change_language": "Changer de langue"
 	},
 	"hero": {
 		"title": "Colin Bossu Réaubourg",
@@ -75,11 +76,25 @@
 		"poetry": "Poésie",
 		"xp_title": "Découvrir la version Windows XP"
 	},
+	"error404": {
+		"title": "404",
+		"heading": "Page introuvable",
+		"description": "La page que vous recherchez n'existe pas ou a été déplacée.",
+		"back": "Retour"
+	},
 	"ui": {
 		"loading": "Chargement des données...",
 		"loading_complete": "Chargement des données terminé.",
 		"new": "Nouveau",
-		"unknown_author": "Auteur inconnu"
+		"unknown_author": "Auteur inconnu",
+		"projects_gallery": "Galerie de projets",
+		"document_library": "Bibliothèque de documents",
+		"pagination": "Pagination",
+		"view_details": "Voir les détails de",
+		"open_item": "Ouvrir",
+		"created_label": "Créé le :",
+		"creation_date_label": "Date de création :",
+		"revisited_label": "Révisé le :"
 	},
 	"controls": {
 		"search_placeholder": "Rechercher...",

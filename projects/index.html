@@ -117,13 +117,13 @@
 	</header>
 	
 	<div id="list-header" class="list-header">
-		<div class="header-col title-col" data-sort="title">Title <i class="fa-solid fa-arrow-down"></i></div>
-		<div class="header-col category-col" data-sort="category">Category <i class="fa-solid fa-arrow-down"></i></div>
-		<div class="header-col lang-col" data-sort="language">Lang <i class="fa-solid fa-arrow-down"></i></div>
-		<div class="header-col date-col" data-sort="date">Date <i class="fa-solid fa-arrow-down"></i></div>
+		<div class="header-col title-col" data-sort="title"><span data-i18n="controls.title_col">Title</span> <i class="fa-solid fa-arrow-down"></i></div>
+		<div class="header-col category-col" data-sort="category"><span data-i18n="controls.category_col">Category</span> <i class="fa-solid fa-arrow-down"></i></div>
+		<div class="header-col lang-col" data-sort="language"><span data-i18n="controls.lang_col">Lang</span> <i class="fa-solid fa-arrow-down"></i></div>
+		<div class="header-col date-col" data-sort="date"><span data-i18n="controls.date_col">Date</span> <i class="fa-solid fa-arrow-down"></i></div>
 	</div>
 
-	<main id="gallery" class="projects-grid" role="region" aria-label="Projects gallery">
+	<main id="gallery" class="projects-grid" role="region" data-i18n-aria-label="ui.projects_gallery" aria-label="Projects gallery">
 		<div class="loader-wrapper" role="status" aria-live="polite">
 			<i class="fa-solid fa-circle-notch fa-spin" aria-hidden="true"></i>
 			<p data-i18n="controls.loading_projects">Loading projects...</p>
@@ -135,7 +135,7 @@
 		</div>
 	</main>
 
-	<nav id="pagination-controls" class="pagination-controls hidden" aria-label="Pagination"></nav>
+	<nav id="pagination-controls" class="pagination-controls hidden" data-i18n-aria-label="ui.pagination" aria-label="Pagination"></nav>
 
 	<div id="projectModal" class="modal-overlay">
 		<div class="modal-backdrop"></div>
@@ -164,7 +164,7 @@
 		</div>
 	</div>
 	
-	<button id="backToTop" class="back-to-top" aria-label="Back to top">
+	<button id="backToTop" class="back-to-top" data-i18n-aria-label="controls.back_to_top" aria-label="Back to top">
 		<i class="fa-solid fa-arrow-up"></i>
 	</button>
 	

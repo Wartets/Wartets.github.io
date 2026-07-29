@@ -320,6 +320,7 @@ function initLibrary() {
 						openDocumentViewer(doc);
 					}
 				});
+				card.setAttribute('aria-label', `${window.t('ui.open_item')} ${doc.title}`);
 
 				card.addEventListener('mousemove', (e) => {
 					const rect = card.getBoundingClientRect();
@@ -528,11 +529,23 @@ function initLibrary() {
 	}
 
 	if (categoryFilter) {
+		const categoryFilterTrigger = categoryFilter.querySelector('.filter-trigger');
+		if (categoryFilterTrigger) {
+			categoryFilterTrigger.addEventListener('keydown', (e) => {
+				if (e.key === 'Enter' || e.key === ' ') {
+					e.preventDefault();
+					categoryFilter.classList.toggle('open');
+					categoryFilterTrigger.setAttribute('aria-expanded', categoryFilter.classList.contains('open'));
+				}
+			});
+		}
 		categoryFilter.addEventListener('click', (e) => {
 			if (e.target.closest('.filter-trigger')) {
 				categoryFilter.classList.toggle('open');
+				if (categoryFilterTrigger) categoryFilterTrigger.setAttribute('aria-expanded', categoryFilter.classList.contains('open'));
 			} else if (e.target.classList.contains('filter-option')) {
 				categoryFilter.classList.remove('open');
+				if (categoryFilterTrigger) categoryFilterTrigger.setAttribute('aria-expanded', 'false');
 				if (filterDropdown) filterDropdown.querySelectorAll('.filter-option').forEach(opt => opt.classList.remove('selected'));
 				e.target.classList.add('selected');
 				if (filterTrigger) filterTrigger.textContent = e.target.textContent;
@@ -827,12 +840,26 @@ function initLibrary() {
 	}
 
 	if (sortFilter) {
+		const sortFilterTrigger = sortFilter.querySelector('.filter-trigger');
+		if (sortFilterTrigger) {
+			sortFilterTrigger.addEventListener('keydown', (e) => {
+				if (e.key === 'Enter' || e.key === ' ') {
+					e.preventDefault();
+					sortFilter.classList.toggle('open');
+					sortFilterTrigger.setAttribute('aria-expanded', sortFilter.classList.contains('open'));
+					if (categoryFilter) categoryFilter.classList.remove('open');
+					if (tagFilter) tagFilter.classList.remove('open');
+				}
+			});
+		}
 		sortFilter.addEventListener('click', (e) => {
 			if (e.target.closest('.filter-trigger')) {
 				sortFilter.classList.toggle('open');
+				if (sortFilterTrigger) sortFilterTrigger.setAttribute('aria-expanded', sortFilter.classList.contains('open'));
 				if (categoryFilter) categoryFilter.classList.remove('open');
 			} else if (e.target.classList.contains('filter-option')) {
 				sortFilter.classList.remove('open');
+				if (sortFilterTrigger) sortFilterTrigger.setAttribute('aria-expanded', 'false');
 				if (sortDropdown) sortDropdown.querySelectorAll('.filter-option').forEach(opt => opt.classList.remove('selected'));
 				e.target.classList.add('selected');
 				if (sortTrigger) sortTrigger.textContent = e.target.textContent;
@@ -877,13 +904,27 @@ function initLibrary() {
 	}
 
 	if (tagFilter) {
+		const tagFilterTrigger = tagFilter.querySelector('.filter-trigger');
+		if (tagFilterTrigger) {
+			tagFilterTrigger.addEventListener('keydown', (e) => {
+				if (e.key === 'Enter' || e.key === ' ') {
+					e.preventDefault();
+					tagFilter.classList.toggle('open');
+					tagFilterTrigger.setAttribute('aria-expanded', tagFilter.classList.contains('open'));
+					if (categoryFilter) categoryFilter.classList.remove('open');
+					if (sortFilter) sortFilter.classList.remove('open');
+				}
+			});
+		}
 		tagFilter.addEventListener('click', (e) => {
 			if (e.target.closest('.filter-trigger')) {
 				tagFilter.classList.toggle('open');
+				if (tagFilterTrigger) tagFilterTrigger.setAttribute('aria-expanded', tagFilter.classList.contains('open'));
 				if (categoryFilter) categoryFilter.classList.remove('open');
 				if (sortFilter) sortFilter.classList.remove('open');
 			} else if (e.target.classList.contains('filter-option')) {
 				tagFilter.classList.remove('open');
+				if (tagFilterTrigger) tagFilterTrigger.setAttribute('aria-expanded', 'false');
 				if (tagDropdown) tagDropdown.querySelectorAll('.filter-option').forEach(opt => opt.classList.remove('selected'));
 				e.target.classList.add('selected');
 				if (tagTrigger) tagTrigger.textContent = e.target.textContent;

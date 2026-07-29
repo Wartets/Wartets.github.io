@@ -8,7 +8,8 @@
 		"projects": "Projects",
 		"library": "Library",
 		"music": "Music",
-		"language": "Language"
+		"language": "Language",
+		"change_language": "Change language"
 	},
 	"hero": {
 		"title": "Colin Bossu Réaubourg",
@@ -75,11 +76,25 @@
 		"poetry": "Poetry",
 		"xp_title": "Discover the Windows XP Version"
 	},
+	"error404": {
+		"title": "404",
+		"heading": "Page Not Found",
+		"description": "The page you are looking for doesn't exist or has been moved.",
+		"back": "Go Back"
+	},
 	"ui": {
 		"loading": "Loading data...",
 		"loading_complete": "Data loading complete.",
 		"new": "New",
-		"unknown_author": "Unknown author"
+		"unknown_author": "Unknown author",
+		"projects_gallery": "Projects gallery",
+		"document_library": "Document library",
+		"pagination": "Pagination",
+		"view_details": "View details of",
+		"open_item": "Open",
+		"created_label": "Created:",
+		"creation_date_label": "Creation date:",
+		"revisited_label": "Revisited:"
 	},
 	"controls": {
 		"search_placeholder": "Search...",

@@ -366,16 +366,20 @@ function renderProjectsSection() {
 	if (typeof projects === 'undefined') return;
 
 	const allProjects = projects.flat().filter(p => p.show !== false);
+	const projectTitleEn = (p) => {
+		if (p.title && typeof p.title === 'object') return p.title.en || Object.values(p.title)[0] || '';
+		return p.title || '';
+	};
 
 	const featuredProjects = [];
 	FEATURED_PROJECT_TITLES.forEach(title => {
 		const search = String(title).toLowerCase();
 
 		const found = allProjects.find(p =>
-			String(p.title).toLowerCase().includes(search)
+			projectTitleEn(p).toLowerCase().includes(search)
 		);
 
-		if (found && !featuredProjects.some(fp => fp.title === found.title)) {
+		if (found && !featuredProjects.includes(found)) {
 			featuredProjects.push(found);
 		}
 	});

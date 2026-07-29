@@ -173,7 +173,7 @@ function initLibrary() {
 			authorNames: authorFullNames.length > 0 ? authorFullNames : 'Unknown',
 			lang: langCode,
 			langName: langMap.get(langCode) || langCode.toUpperCase(),
-			date: creationDate.toLocaleDateString('en-US', { month: 'short', year: 'numeric' }),
+			date: creationDate.toLocaleDateString(document.documentElement.lang || 'en', { month: 'short', year: 'numeric' }),
 			timestamps: timestamps,
 			allDates: allDates,
 			creationDate: creationDate
@@ -420,6 +420,7 @@ function initLibrary() {
 						openPdfViewer(doc);
 					}
 				});
+				card.setAttribute('aria-label', `${window.t('ui.open_item')} ${doc.title}`);
 
 				card.addEventListener('mousemove', (e) => {
 					const rect = card.getBoundingClientRect();
@@ -721,10 +722,11 @@ function initLibrary() {
 				const timestamps = JSON.parse(dateElement.dataset.timestamps);
 				if (timestamps.length > 0) {
 					const dates = timestamps.map(ts => new Date(ts));
-					let tooltipContent = `Creation date: ${dates[0].toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}`;
+					const dateLocale = document.documentElement.lang || 'en';
+					let tooltipContent = `${window.t('ui.creation_date_label')} ${dates[0].toLocaleDateString(dateLocale, { year: 'numeric', month: 'long', day: 'numeric' })}`;
 
 					for (let i = 1; i < dates.length; i++) {
-						tooltipContent += `<br>Revisited: ${dates[i].toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}`;
+						tooltipContent += `<br>${window.t('ui.revisited_label')} ${dates[i].toLocaleDateString(dateLocale, { year: 'numeric', month: 'long', day: 'numeric' })}`;
 					}
 
 					dateTooltip.innerHTML = tooltipContent;
@@ -1475,10 +1477,16 @@ function initLibrary() {
 	renderDocuments();
 
 	document.addEventListener('i18nReady', () => {
+		const dateLocale = document.documentElement.lang || 'en';
 		processedDocs = processedDocs.map(doc => {
 			const original = (libraryData.documents || []).find(d => d.id === doc.id);
 			if (!original) return doc;
-			return { ...doc, title: window.tData(original.title), description: window.tData(original.description) };
+			return {
+				...doc,
+				title: window.tData(original.title),
+				description: window.tData(original.description),
+				date: doc.creationDate.toLocaleDateString(dateLocale, { month: 'short', year: 'numeric' })
+			};
 		});
 		documentCardsCache.clear();
 		grid.innerHTML = '';
