@@ -947,7 +947,10 @@ function updateTitleWithMoonPhase() {
 
 	const imagePath = getMoonPhaseImagePath();
 	const moonImgHtml = `<img src="${imagePath}" alt="o" class="title-moon-icon">`;
-	titleEl.innerHTML = rawText.replace(/[oO]/g, moonImgHtml);
+	titleEl.innerHTML = rawText
+		.split(' ')
+		.map(word => `<span class="title-word">${word.replace(/[oO]/g, moonImgHtml)}</span>`)
+		.join(' ');
 
 	const moonElements = titleEl.querySelectorAll('.title-moon-icon');
 	if (moonElements.length === 0) return;

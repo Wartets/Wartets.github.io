@@ -3,6 +3,11 @@
 		"title": "Colin Bossu Réaubourg",
 		"description": "Portefolio et page d'accueil de Colin Bossu Réaubourg (Wartets). Découverte des travaux en physique, mathématiques, ingénierie logicielle et créations sonores."
 	},
+	"header": {
+		"projects_title_before": "Pr",
+		"projects_title_after": "jets de Wartets",
+		"projects_subtitle": "Simulations interactives, jeux, expériences et créations numériques."
+	},
 	"nav": {
 		"home": "Accueil",
 		"projects": "Projets",
@@ -86,6 +91,9 @@
 		"loading": "Chargement des données...",
 		"loading_complete": "Chargement des données terminé.",
 		"new": "Nouveau",
+		"updated": "Mis à jour",
+		"untitled": "Sans titre",
+		"uncategorized": "Non classé",
 		"unknown_author": "Auteur inconnu",
 		"projects_gallery": "Galerie de projets",
 		"document_library": "Bibliothèque de documents",
@@ -124,6 +132,7 @@
 		"copy_link": "Copier le lien",
 		"open_new_tab": "Ouvrir dans un nouvel onglet",
 		"download": "Télécharger",
+		"details": "Détails",
 		"close": "Fermer",
 		"back_to_top": "Retour en haut",
 		"loading_projects": "Chargement des projets...",

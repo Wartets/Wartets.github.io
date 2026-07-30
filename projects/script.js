@@ -176,6 +176,14 @@ document.addEventListener('DOMContentLoaded', () => {
 		sv: 'Swedish'
 	};
 
+	function expandTriggerDetailsHTML() {
+		return `${window.t('controls.details')} <i class="fa-solid fa-expand"></i>`;
+	}
+
+	function expandTriggerCloseHTML() {
+		return `${window.t('controls.close')} <i class="fa-solid fa-compress"></i>`;
+	}
+
 	function formatDate(timestamp) {
 		if (!timestamp) return '';
 		const date = new Date(timestamp);
@@ -492,7 +500,7 @@ document.addEventListener('DOMContentLoaded', () => {
 			if (expandedCard) {
 				expandedCard.classList.remove('expanded');
 				const btn = expandedCard.querySelector('.expand-trigger');
-				if (btn) btn.innerHTML = 'Details <i class="fa-solid fa-expand"></i>';
+				if (btn) btn.innerHTML = expandTriggerDetailsHTML();
 				updateURL('project', null);
 			}
 
@@ -688,13 +696,13 @@ document.addEventListener('DOMContentLoaded', () => {
 					if (previouslyExpanded) {
 						previouslyExpanded.classList.remove('expanded');
 						const btn = previouslyExpanded.querySelector('.expand-trigger');
-						if (btn) btn.innerHTML = 'Details <i class="fa-solid fa-expand"></i>';
+						if (btn) btn.innerHTML = expandTriggerDetailsHTML();
 					}
 
 					if (!isExpanded) {
 						card.classList.add('expanded');
 						const currentBtn = card.querySelector('.expand-trigger');
-						if (currentBtn) currentBtn.innerHTML = 'Close <i class="fa-solid fa-compress"></i>';
+						if (currentBtn) currentBtn.innerHTML = expandTriggerCloseHTML();
 						updateURL('project', projectTitle(project).toLowerCase().replace(/\s+/g, '-'));
 					} else {
 						updateURL('project', null);
@@ -767,7 +775,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 				let badgeHtml = '';
 				if (isNew) {
-					badgeHtml = `<span class="badge badge-new">New</span>`;
+					badgeHtml = `<span class="badge badge-new">${window.t('ui.new')}</span>`;
 				}
 
 				const primaryCategory = (project.keywords && project.keywords[0]) ? 
@@ -820,7 +828,7 @@ document.addEventListener('DOMContentLoaded', () => {
 					<div class="links">
 						${linksHtml}
 						<button class="btn expand-trigger" style="margin-left:auto; border:none; background:transparent;">
-							Details <i class="fa-solid fa-expand"></i>
+							${expandTriggerDetailsHTML()}
 						</button>
 					</div>
 				`;
@@ -841,7 +849,7 @@ document.addEventListener('DOMContentLoaded', () => {
 									const titleEl = card.querySelector('.card-title');
 									const updatedBadge = document.createElement('span');
 									updatedBadge.className = 'badge badge-updated';
-									updatedBadge.textContent = 'Updated';
+									updatedBadge.textContent = window.t('ui.updated');
 									titleEl.appendChild(updatedBadge);
 								}
 							}
@@ -866,7 +874,7 @@ document.addEventListener('DOMContentLoaded', () => {
 										if (!existing) {
 											const updatedBadge = document.createElement('span');
 											updatedBadge.className = 'badge badge-updated';
-											updatedBadge.textContent = 'Updated';
+											updatedBadge.textContent = window.t('ui.updated');
 											titleEl.appendChild(updatedBadge);
 										}
 									}
@@ -1178,7 +1186,7 @@ document.addEventListener('DOMContentLoaded', () => {
 		document.querySelectorAll('.card.expanded').forEach(c => {
 			c.classList.remove('expanded');
 			const btn = c.querySelector('.expand-trigger');
-			if (btn) btn.innerHTML = 'Details <i class="fa-solid fa-expand"></i>';
+			if (btn) btn.innerHTML = expandTriggerDetailsHTML();
 		});
 
 		if (projParam) {
@@ -1186,7 +1194,7 @@ document.addEventListener('DOMContentLoaded', () => {
 			if (target) {
 				target.classList.add('expanded');
 				const btn = target.querySelector('.expand-trigger');
-				if (btn) btn.innerHTML = 'Close <i class="fa-solid fa-compress"></i>';
+				if (btn) btn.innerHTML = expandTriggerCloseHTML();
 				setTimeout(() => {
 					gsap.to(window, {duration: 0.5, scrollTo: {y: target, offsetY: 100}});
 				}, 100);

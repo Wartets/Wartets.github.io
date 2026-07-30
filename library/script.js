@@ -152,7 +152,7 @@ function initLibrary() {
 
 	let processedDocs = (libraryData.documents || []).map(doc => {
 		const catIds = doc.categoryIds || (doc.categoryId ? [doc.categoryId] : []);
-		const catNames = catIds.map(id => categoryMap.get(id) || 'Uncategorized');
+		const catNames = catIds.map(id => categoryMap.get(id) || window.t('ui.uncategorized'));
 		const langCode = doc.langId || doc.lang || 'en';
 		
 		const docAuthors = (doc.authorIds || []).map(id => authorMap.get(id)).filter(a => a);
@@ -170,7 +170,7 @@ function initLibrary() {
 			categoryName: catNames.join(', '),
 			primaryCategoryName: catNames[0],
 			authorsData: docAuthors,
-			authorNames: authorFullNames.length > 0 ? authorFullNames : 'Unknown',
+			authorNames: authorFullNames.length > 0 ? authorFullNames : window.t('ui.unknown_author'),
 			lang: langCode,
 			langName: langMap.get(langCode) || langCode.toUpperCase(),
 			date: creationDate.toLocaleDateString(document.documentElement.lang || 'en', { month: 'short', year: 'numeric' }),

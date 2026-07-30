@@ -168,12 +168,12 @@ function initLibrary() {
 
 			return {
 				...doc,
-				title: parsedTitle || "Untitled",
+				title: parsedTitle || window.t('ui.untitled'),
 				description: window.tData(doc.description),
 				timestamp: timestamp,
-				dateStr: parsedDateStr || "Unknown Date",
-				authorNames: doc.authorIds.map(id => authorMap.get(id) || 'Unknown').join(', '),
-				categoryName: categoryMap.get(doc.categoryId) || 'Uncategorized',
+				dateStr: parsedDateStr || window.t('controls.unknown_date'),
+				authorNames: doc.authorIds.map(id => authorMap.get(id) || window.t('ui.unknown_author')).join(', '),
+				categoryName: categoryMap.get(doc.categoryId) || window.t('ui.uncategorized'),
 				formattedDate: parsedDateStr || (timestamp ? new Date(timestamp).toLocaleDateString('en-GB') : '')
 			};
 
@@ -181,10 +181,10 @@ function initLibrary() {
 			console.error("Error fetching doc:", doc.id, error);
 			return {
 				...doc,
-				title: window.tData(doc.title) || "Error Loading",
+				title: window.tData(doc.title) || window.t('controls.error_loading'),
 				description: window.tData(doc.description),
-				authorNames: doc.authorIds.map(id => authorMap.get(id) || 'Unknown').join(', '),
-				categoryName: categoryMap.get(doc.categoryId) || 'Uncategorized',
+				authorNames: doc.authorIds.map(id => authorMap.get(id) || window.t('ui.unknown_author')).join(', '),
+				categoryName: categoryMap.get(doc.categoryId) || window.t('ui.uncategorized'),
 				timestamp: 0,
 				formattedDate: ''
 			};
