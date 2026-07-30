@@ -340,5 +340,12 @@
 		"Ambient": "Ambient",
 		"Ambient/Rock": "Ambient/Rock",
 		"Synthwave": "Synthwave"
+	},
+	"anecdote": {
+		"section_title": "Anecdote of the Day",
+		"unavailable": "Anecdote temporarily unavailable.",
+		"none_available": "No anecdote available.",
+		"close": "Close",
+		"context_unavailable": "Content unavailable."
 	}
 }
