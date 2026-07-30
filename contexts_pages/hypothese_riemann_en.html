@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Understanding the Riemann Hypothesis</title>
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+	<link rel="stylesheet" href="../css/project.css">
+	<link rel="stylesheet" href="../css/anecdotes.css">
+	<link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.css">
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.css" data-katex-style>
+</head>
+<body>
+	<div class="bg-gradient"></div>
+	<div class="bg-noise"></div>
+	<main id="main-content" style="max-width:800px;margin:6rem auto;padding:0 1.5rem;">
+		<h1 id="context-page-title">Understanding the Riemann Hypothesis</h1>
+		<div id="context-render-target" class="anecdote-markdown-body"></div>
+	</main>
+	<script type="text/markdown" id="context-markdown-source">The Riemann zeta function is defined for every complex number $s$ with real part strictly greater than 1 by the series:
+
+$$\zeta(s) = \sum_{n=1}^{\infty} \frac{1}{n^s}$$
+
+Riemann proved in 1859 that this function extends analytically to the entire complex plane, except for a simple pole at $s = 1$, and satisfies a functional equation relating $\zeta(s)$ to $\zeta(1-s)$.
+
+## The zeros of the function
+
+The function has so-called trivial zeros, located at the negative even integers $s = -2, -4, -6, \ldots$, a direct consequence of the functional equation.
+
+It also has infinitely many non-trivial zeros, all located within the critical strip $0 < \mathrm{Re}(s) < 1$. The Riemann hypothesis states that every one of these non-trivial zeros satisfies precisely:
+
+$$\mathrm{Re}(s) = \frac{1}{2}$$
+
+## A deep link with prime numbers
+
+The zeta function connects to the distribution of prime numbers through the Euler product:
+
+$$\zeta(s) = \prod_{p \text{ prime}} \frac{1}{1 - p^{-s}}$$
+
+This identity, valid for $\mathrm{Re}(s) > 1$, shows that the analytic behavior of $\zeta$ encodes the entire set of prime numbers. Riemann explicitly links the position of the non-trivial zeros to the error term of the prime-counting function $\pi(x)$, which approximates the number of primes less than $x$.
+
+If the Riemann hypothesis is true, the gap between $\pi(x)$ and its logarithmic integral approximation $\mathrm{Li}(x)$ is bounded as tightly as possible, on the order of $O(\sqrt{x}\ln x)$.
+
+## Numerical verification and current status
+
+More than ten trillion non-trivial zeros have been numerically verified and all lie exactly on the critical line $\mathrm{Re}(s) = 1/2$, though no general proof has been established to date.
+
+The Riemann hypothesis is one of the seven Millennium Prize Problems proposed by the Clay Mathematics Institute in 2000, each carrying a one-million-dollar reward. To date, only the Poincaré conjecture, proven by Grigori Perelman in 2003, has been resolved among these seven problems.</script>
+	<script type="module">
+		import { ensureMarkdownAssets, renderMarkdownWithMath } from '/js/anecdotes/markdown-render.js';
+
+		async function renderContextPage() {
+			const source = document.getElementById('context-markdown-source');
+			const target = document.getElementById('context-render-target');
+			if (!source || !target) return;
+			await ensureMarkdownAssets();
+			target.innerHTML = await renderMarkdownWithMath(source.textContent);
+		}
+
+		if (document.readyState === 'loading') {
+			document.addEventListener('DOMContentLoaded', renderContextPage);
+		} else {
+			renderContextPage();
+		}
+	</script>
+</body>
+</html>

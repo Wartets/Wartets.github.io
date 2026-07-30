@@ -22,5 +22,133 @@ export default [
 		addedDate: '2026-07-30',
 		scheduling: { type: 'annual', dates: ['02-29'] },
 		path: '/data/anecdotes/mathematiques/annee_bissextile.js'
+	},
+	{
+		id: 'anecdote_probleme_de_bale',
+		priority: 4,
+		enabled: true,
+		addedDate: '2026-07-30',
+		scheduling: { type: 'anytime', dates: [] },
+		path: '/data/anecdotes/mathematiques/probleme_de_bale.js'
+	},
+	{
+		id: 'anecdote_hypothese_riemann',
+		priority: 3,
+		enabled: true,
+		addedDate: '2026-07-30',
+		scheduling: { type: 'anytime', dates: [] },
+		path: '/data/anecdotes/mathematiques/hypothese_riemann.js'
+	},
+	{
+		id: 'anecdote_theoreme_incompletude_godel',
+		priority: 4,
+		enabled: true,
+		addedDate: '2026-07-30',
+		scheduling: { type: 'anytime', dates: [] },
+		path: '/data/anecdotes/mathematiques/theoreme_incompletude_godel.js'
+	},
+	{
+		id: 'anecdote_dernier_theoreme_fermat',
+		priority: 4,
+		enabled: true,
+		addedDate: '2026-07-30',
+		scheduling: { type: 'annual', dates: ['06-23'] },
+		path: '/data/anecdotes/mathematiques/dernier_theoreme_fermat.js'
+	},
+	{
+		id: 'anecdote_jour_pi',
+		priority: 3,
+		enabled: true,
+		addedDate: '2026-07-30',
+		scheduling: { type: 'annual', dates: ['03-14'] },
+		path: '/data/anecdotes/mathematiques/jour_pi.js'
+	},
+	{
+		id: 'anecdote_theoreme_noether',
+		priority: 3,
+		enabled: true,
+		addedDate: '2026-07-30',
+		scheduling: { type: 'annual', dates: ['03-23'] },
+		path: '/data/anecdotes/mathematiques/theoreme_noether.js'
+	},
+	{
+		id: 'anecdote_decouverte_neptune',
+		priority: 3,
+		enabled: true,
+		addedDate: '2026-07-30',
+		scheduling: { type: 'annual', dates: ['09-23'] },
+		path: '/data/anecdotes/physique/decouverte_neptune.js'
+	},
+	{
+		id: 'anecdote_experience_michelson_morley',
+		priority: 4,
+		enabled: true,
+		addedDate: '2026-07-30',
+		scheduling: { type: 'anytime', dates: [] },
+		path: '/data/anecdotes/physique/experience_michelson_morley.js'
+	},
+	{
+		id: 'anecdote_hypothese_quantique_planck',
+		priority: 3,
+		enabled: true,
+		addedDate: '2026-07-30',
+		scheduling: { type: 'annual', dates: ['12-14'] },
+		path: '/data/anecdotes/physique/hypothese_quantique_planck.js'
+	},
+	{
+		id: 'anecdote_decouverte_electron',
+		priority: 4,
+		enabled: true,
+		addedDate: '2026-07-30',
+		scheduling: { type: 'annual', dates: ['04-30'] },
+		path: '/data/anecdotes/physique/decouverte_electron.js'
+	},
+	{
+		id: 'anecdote_annee_miraculeuse_einstein',
+		priority: 3,
+		enabled: true,
+		addedDate: '2026-07-30',
+		scheduling: { type: 'anytime', dates: [] },
+		path: '/data/anecdotes/physique/annee_miraculeuse_einstein.js'
+	},
+	{
+		id: 'anecdote_decouverte_boson_higgs',
+		priority: 3,
+		enabled: true,
+		addedDate: '2026-07-30',
+		scheduling: { type: 'annual', dates: ['07-04'] },
+		path: '/data/anecdotes/physique/decouverte_boson_higgs.js'
+	},
+	{
+		id: 'anecdote_premiere_detection_ondes_gravitationnelles',
+		priority: 3,
+		enabled: true,
+		addedDate: '2026-07-30',
+		scheduling: { type: 'annual', dates: ['02-11'] },
+		path: '/data/anecdotes/physique/premiere_detection_ondes_gravitationnelles.js'
+	},
+	{
+		id: 'anecdote_machine_de_turing',
+		priority: 2,
+		enabled: true,
+		addedDate: '2026-07-30',
+		scheduling: { type: 'annual', dates: ['06-23'] },
+		path: '/data/anecdotes/histoire_sciences/machine_de_turing.js'
+	},
+	{
+		id: 'anecdote_decouverte_structure_adn',
+		priority: 4,
+		enabled: true,
+		addedDate: '2026-07-30',
+		scheduling: { type: 'annual', dates: ['02-28'] },
+		path: '/data/anecdotes/histoire_sciences/decouverte_structure_adn.js'
+	},
+	{
+		id: 'anecdote_limite_chandrasekhar',
+		priority: 4,
+		enabled: true,
+		addedDate: '2026-07-30',
+		scheduling: { type: 'anytime', dates: [] },
+		path: '/data/anecdotes/physique/limite_chandrasekhar.js'
 	}
 ];

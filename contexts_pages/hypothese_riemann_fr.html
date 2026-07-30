@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Comprendre l'hypothèse de Riemann</title>
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+	<link rel="stylesheet" href="../css/project.css">
+	<link rel="stylesheet" href="../css/anecdotes.css">
+	<link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.css">
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.css" data-katex-style>
+</head>
+<body>
+	<div class="bg-gradient"></div>
+	<div class="bg-noise"></div>
+	<main id="main-content" style="max-width:800px;margin:6rem auto;padding:0 1.5rem;">
+		<h1 id="context-page-title">Comprendre l'hypothèse de Riemann</h1>
+		<div id="context-render-target" class="anecdote-markdown-body"></div>
+	</main>
+	<script type="text/markdown" id="context-markdown-source">La fonction zêta de Riemann est définie pour tout nombre complexe $s$ de partie réelle strictement supérieure à 1 par la série :
+
+$$\zeta(s) = \sum_{n=1}^{\infty} \frac{1}{n^s}$$
+
+Riemann démontre en 1859 que cette fonction se prolonge analytiquement à tout le plan complexe, à l'exception d'un pôle simple en $s = 1$, et vérifie une équation fonctionnelle reliant $\zeta(s)$ à $\zeta(1-s)$.
+
+## Les zéros de la fonction
+
+La fonction possède des zéros dits triviaux, situés aux entiers pairs négatifs $s = -2, -4, -6, \ldots$, conséquence directe de l'équation fonctionnelle.
+
+Elle possède également une infinité de zéros non triviaux, tous situés dans la bande critique $0 < \mathrm{Re}(s) < 1$. L'hypothèse de Riemann affirme que chacun de ces zéros non triviaux vérifie précisément :
+
+$$\mathrm{Re}(s) = \frac{1}{2}$$
+
+## Un lien profond avec les nombres premiers
+
+La fonction zêta se relie à la répartition des nombres premiers par le produit eulérien :
+
+$$\zeta(s) = \prod_{p \text{ premier}} \frac{1}{1 - p^{-s}}$$
+
+Cette identité, valable pour $\mathrm{Re}(s) > 1$, montre que le comportement analytique de $\zeta$ encode l'ensemble des nombres premiers. Riemann relie explicitement la position des zéros non triviaux au terme d'erreur de la fonction de comptage des nombres premiers $\pi(x)$, qui approxime le nombre de nombres premiers inférieurs à $x$.
+
+Si l'hypothèse de Riemann est vraie, l'écart entre $\pi(x)$ et son approximation logarithmique intégrale $\mathrm{Li}(x)$ est borné de la façon la plus resserrée possible, de l'ordre de $O(\sqrt{x}\ln x)$.
+
+## Vérifications numériques et statut actuel
+
+Plus de dix mille milliards de zéros non triviaux ont été vérifiés numériquement et se situent tous exactement sur la droite critique $\mathrm{Re}(s) = 1/2$, sans qu'aucune démonstration générale n'ait pu être établie à ce jour.
+
+L'hypothèse de Riemann figure parmi les sept problèmes du prix du millénaire proposés par l'institut Clay de mathématiques en 2000, dotés chacun d'une récompense d'un million de dollars. À ce jour, seule la conjecture de Poincaré, démontrée par Grigori Perelman en 2003, a été résolue parmi ces sept problèmes.</script>
+	<script type="module">
+		import { ensureMarkdownAssets, renderMarkdownWithMath } from '/js/anecdotes/markdown-render.js';
+
+		async function renderContextPage() {
+			const source = document.getElementById('context-markdown-source');
+			const target = document.getElementById('context-render-target');
+			if (!source || !target) return;
+			await ensureMarkdownAssets();
+			target.innerHTML = await renderMarkdownWithMath(source.textContent);
+		}
+
+		if (document.readyState === 'loading') {
+			document.addEventListener('DOMContentLoaded', renderContextPage);
+		} else {
+			renderContextPage();
+		}
+	</script>
+</body>
+</html>

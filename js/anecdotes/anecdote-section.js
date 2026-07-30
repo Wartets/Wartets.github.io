@@ -125,7 +125,10 @@ async function openContextModal(context, triggerElement, langCode) {
 
 	if (context.external) {
 		try {
-			const rawMarkdown = await fetchExternalContextMarkdown(context.externalPath);
+			const resolvedExternalPath = typeof context.externalPath === 'string'
+				? context.externalPath
+				: (context.externalPath[langCode] || context.externalPath.en || context.externalPath.fr);
+			const rawMarkdown = await fetchExternalContextMarkdown(resolvedExternalPath);
 			await ensureMarkdownAssets();
 			modalBody.innerHTML = await renderMarkdownWithMath(rawMarkdown);
 		} catch (error) {
