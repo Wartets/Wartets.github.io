@@ -1,10 +1,62 @@
 import { loadRegistry, loadAnecdoteModule } from './loader.js';
 import { resolveSpecialEntry } from './scheduler.js';
 import { computeGeneralDaysCounter, pickGeneralEntry } from './cycle-engine.js';
-import { getAuthoritativeUTCDate, toUTCDateOnly } from './time-sync.js';
+import { getAuthoritativeUTCDate, toUTCDateOnly, getCachedUTCDateNowSync } from './time-sync.js';
 import { ensureMarkdownAssets, renderMarkdownWithMath, containsMath } from './markdown-render.js';
 import { openModal, closeModal } from './modal.js';
 import { frenchTypography } from './format.js';
+
+const preciseTooltipRegistry = new Map();
+let preciseTooltipElement = null;
+
+function ensurePreciseTooltipElement() {
+	if (preciseTooltipElement) return preciseTooltipElement;
+	preciseTooltipElement = document.createElement('div');
+	preciseTooltipElement.className = 'anecdote-precise-tooltip';
+	document.body.appendChild(preciseTooltipElement);
+	return preciseTooltipElement;
+}
+
+function positionPreciseTooltip(target) {
+	const tooltip = ensurePreciseTooltipElement();
+	const rect = target.getBoundingClientRect();
+	const tooltipRect = tooltip.getBoundingClientRect();
+	let left = rect.left + (rect.width / 2) - (tooltipRect.width / 2);
+	let top = rect.top - tooltipRect.height - 8;
+	if (left < 8) left = 8;
+	if (left + tooltipRect.width > window.innerWidth - 8) left = window.innerWidth - tooltipRect.width - 8;
+	if (top < 8) top = rect.bottom + 8;
+	tooltip.style.left = `${left}px`;
+	tooltip.style.top = `${top}px`;
+}
+
+function registerPreciseTooltip(entryId, tooltipFn, langCode) {
+	preciseTooltipRegistry.set(entryId, { tooltipFn, langCode });
+}
+
+document.addEventListener('mouseover', (event) => {
+	const target = event.target.closest('.has-precise-tooltip');
+	if (!target) return;
+	const entry = preciseTooltipRegistry.get(target.dataset.tooltipEntryId);
+	if (!entry) return;
+	const tooltip = ensurePreciseTooltipElement();
+	tooltip.textContent = entry.tooltipFn(entry.langCode, getCachedUTCDateNowSync());
+	tooltip.classList.add('visible');
+	positionPreciseTooltip(target);
+});
+
+document.addEventListener('mouseout', (event) => {
+	const target = event.target.closest('.has-precise-tooltip');
+	if (target && preciseTooltipElement) {
+		preciseTooltipElement.classList.remove('visible');
+	}
+});
+
+function translate(key, lang, fallbackFr, fallbackEn) {
+	const translated = window.t ? window.t(key) : key;
+	if (translated && translated !== key) return translated;
+	return lang === 'fr' ? fallbackFr : fallbackEn;
+}
 
 const CONTAINER_ID = 'anecdote-container';
 let renderedDateISO = null;
@@ -36,7 +88,7 @@ function ensureModalSkeleton() {
 	overlay.tabIndex = -1;
 	overlay.innerHTML = `
 		<div class="anecdote-modal-container">
-			<button type="button" class="anecdote-modal-close" aria-label="${currentLang() === 'fr' ? 'Fermer' : 'Close'}">&times;</button>
+			<button type="button" class="anecdote-modal-close" aria-label="${translate('anecdote.close', currentLang(), 'Fermer', 'Close')}">&times;</button>
 			<h3 id="anecdote-context-modal-title" class="anecdote-modal-title"></h3>
 			<div id="anecdote-context-modal-body" class="anecdote-modal-body"></div>
 		</div>
@@ -49,22 +101,23 @@ function ensureModalSkeleton() {
 	overlay.querySelector('.anecdote-modal-close').addEventListener('click', closeModal);
 }
 
-async function fetchExternalContextHTML(path) {
+async function fetchExternalContextMarkdown(path) {
 	const response = await fetch(path);
-	if (!response.ok) throw new Error(`Impossible de charger ${path}`);
+	if (!response.ok) throw new Error(`Unable to load ${path}`);
 	const text = await response.text();
 	const parser = new DOMParser();
 	const doc = parser.parseFromString(text, 'text/html');
+	const source = doc.getElementById('context-markdown-source');
+	if (source) return source.textContent;
 	const main = doc.querySelector('main');
-	return main ? main.innerHTML : text;
+	return main ? main.textContent : text;
 }
 
-async function openContextModal(context, index, triggerElement, langCode) {
+async function openContextModal(context, triggerElement, langCode) {
 	ensureModalSkeleton();
 	const modal = document.getElementById('anecdote-context-modal');
 	const modalTitle = document.getElementById('anecdote-context-modal-title');
 	const modalBody = document.getElementById('anecdote-context-modal-body');
-	modal.id = `anecdote-modal-context-${index}`;
 
 	modalTitle.textContent = (context.title && (context.title[langCode] || context.title.en)) || '';
 	modalBody.innerHTML = '';
@@ -72,10 +125,11 @@ async function openContextModal(context, index, triggerElement, langCode) {
 
 	if (context.external) {
 		try {
-			const html = await fetchExternalContextHTML(context.externalPath);
-			modalBody.innerHTML = html;
+			const rawMarkdown = await fetchExternalContextMarkdown(context.externalPath);
+			await ensureMarkdownAssets();
+			modalBody.innerHTML = await renderMarkdownWithMath(rawMarkdown);
 		} catch (error) {
-			modalBody.textContent = langCode === 'fr' ? 'Contenu indisponible.' : 'Content unavailable.';
+			modalBody.textContent = translate('anecdote.context_unavailable', langCode, 'Contenu indisponible.', 'Content unavailable.');
 		}
 	} else {
 		const rawBody = (context.body && (context.body[langCode] || context.body.en)) || '';
@@ -109,20 +163,19 @@ function renderLinksRow(entry, langCode) {
 		const trigger = document.createElement('button');
 		trigger.type = 'button';
 		trigger.className = 'anecdote-link anecdote-context-trigger';
-		trigger.textContent = (context.title && (context.title[langCode] || context.title.en)) || `Contexte ${index + 1}`;
+		trigger.textContent = (context.title && (context.title[langCode] || context.title.en)) || (langCode === 'fr' ? `Contexte ${index + 1}` : `Context ${index + 1}`);
 		trigger.setAttribute('aria-haspopup', 'dialog');
 		trigger.setAttribute('aria-expanded', 'false');
-		trigger.setAttribute('aria-controls', `anecdote-modal-context-${index}`);
-		trigger.addEventListener('click', () => openContextModal(context, index, trigger, langCode));
+		trigger.setAttribute('aria-controls', 'anecdote-context-modal');
+		trigger.addEventListener('click', () => openContextModal(context, trigger, langCode));
 		row.appendChild(trigger);
 	});
 
 	return row;
 }
 
-async function renderAnecdote(container, entry) {
+async function renderAnecdote(container, entry, today, preciseNow) {
 	const langCode = currentLang();
-	const today = toUTCDateOnly(await getAuthoritativeUTCDate());
 	const fullEntry = await loadAnecdoteModule(entry.path, langCode);
 
 	const domainText = (fullEntry.domain && (fullEntry.domain[langCode] || fullEntry.domain.en)) || '';
@@ -144,6 +197,12 @@ async function renderAnecdote(container, entry) {
 	contentEl.className = 'anecdote-content';
 	contentEl.textContent = contentText;
 
+	if (typeof fullEntry.tooltip === 'function') {
+		contentEl.classList.add('has-precise-tooltip');
+		contentEl.dataset.tooltipEntryId = fullEntry.id;
+		registerPreciseTooltip(fullEntry.id, fullEntry.tooltip, langCode);
+	}
+
 	card.appendChild(domainEl);
 	card.appendChild(contentEl);
 
@@ -160,7 +219,8 @@ async function loadAndRenderToday(container) {
 	container.style.minHeight = `${measuredHeight || 180}px`;
 
 	currentRegistry = await loadRegistry();
-	const today = toUTCDateOnly(await getAuthoritativeUTCDate());
+	const preciseNow = await getAuthoritativeUTCDate();
+	const today = toUTCDateOnly(preciseNow);
 	const todayISODate = today.toISOString().slice(0, 10);
 	renderedDateISO = todayISODate;
 
@@ -168,7 +228,7 @@ async function loadAndRenderToday(container) {
 
 	const specialEntry = resolveSpecialEntry(currentRegistry, today);
 	if (specialEntry) {
-		await renderAnecdote(container, specialEntry);
+		await renderAnecdote(container, specialEntry, today, preciseNow);
 		return;
 	}
 
@@ -176,11 +236,11 @@ async function loadAndRenderToday(container) {
 
 	if (!generalEntry) {
 		const langCode = currentLang();
-		container.innerHTML = `<div class="anecdote-card"><p class="anecdote-content">${langCode === 'fr' ? 'Aucune anecdote disponible.' : 'No anecdote available.'}</p></div>`;
+		container.innerHTML = `<div class="anecdote-card"><p class="anecdote-content">${translate('anecdote.none_available', langCode, 'Aucune anecdote disponible.', 'No anecdote available.')}</p></div>`;
 		return;
 	}
 
-	await renderAnecdote(container, generalEntry);
+	await renderAnecdote(container, generalEntry, today, preciseNow);
 }
 
 function watchDayRollover(container) {

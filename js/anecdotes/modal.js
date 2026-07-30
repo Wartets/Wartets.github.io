@@ -66,8 +66,13 @@ export function closeModal() {
 	activeModal.setAttribute('aria-hidden', 'true');
 	activeModal = null;
 
-	if (lastFocusedElement && typeof lastFocusedElement.focus === 'function') {
-		lastFocusedElement.focus();
+	if (lastFocusedElement) {
+		if (lastFocusedElement.hasAttribute('aria-expanded')) {
+			lastFocusedElement.setAttribute('aria-expanded', 'false');
+		}
+		if (typeof lastFocusedElement.focus === 'function') {
+			lastFocusedElement.focus();
+		}
 	}
 	lastFocusedElement = null;
 }

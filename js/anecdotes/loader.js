@@ -12,9 +12,13 @@ function buildFallback(lang) {
 		domain: { fr: 'Indisponible', en: 'Unavailable' },
 		priority: 10,
 		scheduling: { type: 'anytime', dates: [] },
-		content: () => lang === 'fr'
-			? 'Anecdote indisponible pour le moment.'
-			: 'Anecdote temporarily unavailable.',
+		content: () => {
+			const translated = window.t ? window.t('anecdote.unavailable') : null;
+			if (translated && translated !== 'anecdote.unavailable') return translated;
+			return lang === 'fr'
+				? 'Anecdote indisponible pour le moment.'
+				: 'Anecdote temporarily unavailable.';
+		},
 		sources: [],
 		contexts: []
 	};

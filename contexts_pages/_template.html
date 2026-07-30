@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fr">
 <head>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,13 +7,33 @@
 	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 	<link rel="stylesheet" href="../css/project.css">
 	<link rel="stylesheet" href="../css/anecdotes.css">
+	<link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.css">
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.css">
 </head>
 <body>
 	<div class="bg-gradient"></div>
 	<div class="bg-noise"></div>
-	<main id="main-content" class="anecdote-markdown-body" style="max-width:800px;margin:6rem auto;padding:0 1.5rem;">
-		<h1>Context Title</h1>
-		<p>Detailed content of the context.</p>
+	<main id="main-content" style="max-width:800px;margin:6rem auto;padding:0 1.5rem;">
+		<h1 id="context-page-title">Context Title</h1>
+		<div id="context-render-target" class="anecdote-markdown-body"></div>
 	</main>
+	<script type="text/markdown" id="context-markdown-source">Detailed content of the context.</script>
+	<script type="module">
+		import { ensureMarkdownAssets, renderMarkdownWithMath } from '/js/anecdotes/markdown-render.js';
+
+		async function renderContextPage() {
+			const source = document.getElementById('context-markdown-source');
+			const target = document.getElementById('context-render-target');
+			if (!source || !target) return;
+			await ensureMarkdownAssets();
+			target.innerHTML = await renderMarkdownWithMath(source.textContent);
+		}
+
+		if (document.readyState === 'loading') {
+			document.addEventListener('DOMContentLoaded', renderContextPage);
+		} else {
+			renderContextPage();
+		}
+	</script>
 </body>
 </html>

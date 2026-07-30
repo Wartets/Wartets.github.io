@@ -65,6 +65,14 @@ export function containsMath(text) {
 	return /\$\$|\\\[|\\\(|\$[^\$\n]+\$/.test(text);
 }
 
+export function sanitizeHtml(html) {
+	const purifyConfig = {
+		ADD_TAGS: ['math', 'annotation', 'semantics', 'mrow', 'mi', 'mo', 'mn', 'msup', 'msub'],
+		ADD_ATTR: ['class', 'style', 'aria-hidden']
+	};
+	return window.DOMPurify ? window.DOMPurify.sanitize(html, purifyConfig) : html;
+}
+
 export async function renderMarkdownWithMath(rawText) {
 	const needsMath = containsMath(rawText);
 	if (needsMath) await injectKatexAssets();
@@ -73,11 +81,7 @@ export async function renderMarkdownWithMath(rawText) {
 	const parsedHtml = window.marked ? window.marked.parse(tokenized) : tokenized;
 	const withMath = needsMath ? reinjectMathTokens(parsedHtml, tokens) : parsedHtml;
 
-	const purifyConfig = {
-		ADD_TAGS: ['math', 'annotation', 'semantics', 'mrow', 'mi', 'mo', 'mn', 'msup', 'msub'],
-		ADD_ATTR: ['class', 'style', 'aria-hidden']
-	};
-	return window.DOMPurify ? window.DOMPurify.sanitize(withMath, purifyConfig) : withMath;
+	return sanitizeHtml(withMath);
 }
 
 export async function ensureMarkdownAssets() {

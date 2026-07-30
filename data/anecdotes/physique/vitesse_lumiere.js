@@ -5,7 +5,7 @@ export default {
 	enabled: true,
 	priority: 5,
 	addedDate: '2026-07-30',
-	domain: { fr: 'Physique — Relativité', en: 'Physics — Relativity' },
+	domain: { fr: 'Physique - Relativité', en: 'Physics - Relativity' },
 	scheduling: { type: 'anytime', dates: [] },
 	content: (lang) => {
 		const value = formatNumber(299792458, lang);

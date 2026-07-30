@@ -1,5 +1,35 @@
-.anecdote-container {
+#anecdote-container {
 	min-height: 180px;
+}
+
+.anecdote-content.has-precise-tooltip {
+	cursor: help;
+}
+
+.anecdote-precise-tooltip {
+	position: fixed;
+	background: rgba(20, 20, 20, 0.95);
+	backdrop-filter: blur(12px);
+	-webkit-backdrop-filter: blur(12px);
+	color: var(--color-text-primary);
+	padding: 8px 12px;
+	border-radius: 8px;
+	font-size: 0.8rem;
+	font-family: var(--font-mono);
+	line-height: 1.5;
+	pointer-events: none;
+	z-index: 10000;
+	opacity: 0;
+	visibility: hidden;
+	transition: opacity 0.2s ease, visibility 0.2s ease;
+	box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6);
+	border: 1px solid rgba(255, 255, 255, 0.15);
+	white-space: nowrap;
+}
+
+.anecdote-precise-tooltip.visible {
+	opacity: 1;
+	visibility: visible;
 }
 
 .anecdote-container.is-transitioning .anecdote-card {
