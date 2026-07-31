@@ -278,5 +278,125 @@ export default [
 		addedDate: '2026-07-31',
 		scheduling: { type: 'annual', dates: ['08-14'] },
 		path: '/data/anecdotes/physique/turing_reaction_diffusion.js'
+	},
+	{
+		id: 'anecdote_bell_theorem_chsh',
+		priority: 4,
+		enabled: true,
+		addedDate: '2026-07-31',
+		scheduling: { type: 'anytime', dates: [] },
+		path: '/data/anecdotes/physique/bell_theorem_chsh.js'
+	},
+	{
+		id: 'anecdote_galois_group_theory',
+		priority: 4,
+		enabled: true,
+		addedDate: '2026-07-31',
+		scheduling: { type: 'annual', dates: ['05-29'] },
+		path: '/data/anecdotes/mathematiques/galois_group_theory.js'
+	},
+	{
+		id: 'anecdote_chiral_anomaly_abj',
+		priority: 4,
+		enabled: true,
+		addedDate: '2026-07-31',
+		scheduling: { type: 'anytime', dates: [] },
+		path: '/data/anecdotes/physique/chiral_anomaly_abj.js'
+	},
+	{
+		id: 'anecdote_poincare_brouwer_tokamak',
+		priority: 4,
+		enabled: true,
+		addedDate: '2026-07-31',
+		scheduling: { type: 'anytime', dates: [] },
+		path: '/data/anecdotes/physique/poincare_brouwer_tokamak.js'
+	},
+	{
+		id: 'anecdote_hong_ou_mandel_interference',
+		priority: 4,
+		enabled: true,
+		addedDate: '2026-07-31',
+		scheduling: { type: 'annual', dates: ['08-31'] },
+		path: '/data/anecdotes/physique/hong_ou_mandel_interference.js'
+	},
+	{
+		id: 'anecdote_hamilton_quaternions',
+		priority: 4,
+		enabled: true,
+		addedDate: '2026-07-31',
+		scheduling: { type: 'annual', dates: ['10-16'] },
+		path: '/data/anecdotes/mathematiques/hamilton_quaternions.js'
+	},
+	{
+		id: 'anecdote_unruh_effect_vacuum',
+		priority: 4,
+		enabled: true,
+		addedDate: '2026-07-31',
+		scheduling: { type: 'anytime', dates: [] },
+		path: '/data/anecdotes/physique/unruh_effect_vacuum.js'
+	},
+	{
+		id: 'anecdote_arago_poisson_spot',
+		priority: 4,
+		enabled: true,
+		addedDate: '2026-07-31',
+		scheduling: { type: 'anytime', dates: [] },
+		path: '/data/anecdotes/physique/arago_poisson_spot.js'
+	},
+	{
+		id: 'anecdote_gauss_theorema_egregium_curvature',
+		priority: 4,
+		enabled: true,
+		addedDate: '2026-07-31',
+		scheduling: { type: 'annual', dates: ['10-08'] },
+		path: '/data/anecdotes/mathematiques/gauss_theorema_egregium_curvature.js'
+	},
+	{
+		id: 'anecdote_quantum_hall_effect_von_klitzing',
+		priority: 4,
+		enabled: true,
+		addedDate: '2026-07-31',
+		scheduling: { type: 'annual', dates: ['02-05'] },
+		path: '/data/anecdotes/physique/quantum_hall_effect_von_klitzing.js'
+	},
+	{
+		id: 'anecdote_buffon_needle_pi',
+		priority: 4,
+		enabled: true,
+		addedDate: '2026-07-31',
+		scheduling: { type: 'anytime', dates: [] },
+		path: '/data/anecdotes/mathematiques/buffon_needle_pi.js'
+	},
+	{
+		id: 'anecdote_noether_second_theorem_gauge',
+		priority: 4,
+		enabled: true,
+		addedDate: '2026-07-31',
+		scheduling: { type: 'anytime', dates: [] },
+		path: '/data/anecdotes/mathematiques/noether_second_theorem_gauge.js'
+	},
+	{
+		id: 'anecdote_larmor_precession_mri_spin',
+		priority: 4,
+		enabled: true,
+		addedDate: '2026-07-31',
+		scheduling: { type: 'anytime', dates: [] },
+		path: '/data/anecdotes/physique/larmor_precession_mri_spin.js'
+	},
+	{
+		id: 'anecdote_penrose_singularity_theorem',
+		priority: 4,
+		enabled: true,
+		addedDate: '2026-07-31',
+		scheduling: { type: 'annual', dates: ['01-15'] },
+		path: '/data/anecdotes/physique/penrose_singularity_theorem.js'
+	},
+	{
+		id: 'anecdote_cmb_tv_static',
+		priority: 4,
+		enabled: true,
+		addedDate: '2026-07-31',
+		scheduling: { type: 'anytime', dates: [] },
+		path: '/data/anecdotes/physique/cmb_tv_static.js'
 	}
 ];

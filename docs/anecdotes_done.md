@@ -22,6 +22,21 @@ Ce fichier répertorie les anecdotes de `docs/anecdotes_list.md` déjà impléme
 | 15 | anecdote_landauer_limit_maxwell_demon | data/anecdotes/physique/landauer_limit_maxwell_demon.js |
 | 16 | anecdote_banach_tarski_paradox | data/anecdotes/mathematiques/banach_tarski_paradox.js |
 | 17 | anecdote_turing_reaction_diffusion | data/anecdotes/physique/turing_reaction_diffusion.js |
+| 18 | anecdote_bell_theorem_chsh | data/anecdotes/physique/bell_theorem_chsh.js |
+| 19 | anecdote_galois_group_theory | data/anecdotes/mathematiques/galois_group_theory.js |
+| 20 | anecdote_chiral_anomaly_abj | data/anecdotes/physique/chiral_anomaly_abj.js |
+| 21 | anecdote_poincare_brouwer_tokamak | data/anecdotes/physique/poincare_brouwer_tokamak.js |
+| 22 | anecdote_hong_ou_mandel_interference | data/anecdotes/physique/hong_ou_mandel_interference.js |
+| 23 | anecdote_hamilton_quaternions | data/anecdotes/mathematiques/hamilton_quaternions.js |
+| 24 | anecdote_unruh_effect_vacuum | data/anecdotes/physique/unruh_effect_vacuum.js |
+| 25 | anecdote_arago_poisson_spot | data/anecdotes/physique/arago_poisson_spot.js |
+| 27 | anecdote_gauss_theorema_egregium_curvature | data/anecdotes/mathematiques/gauss_theorema_egregium_curvature.js |
+| 28 | anecdote_quantum_hall_effect_von_klitzing | data/anecdotes/physique/quantum_hall_effect_von_klitzing.js |
+| 31 | anecdote_buffon_needle_pi | data/anecdotes/mathematiques/buffon_needle_pi.js |
+| 32 | anecdote_noether_second_theorem_gauge | data/anecdotes/mathematiques/noether_second_theorem_gauge.js |
+| 33 | anecdote_larmor_precession_mri_spin | data/anecdotes/physique/larmor_precession_mri_spin.js |
+| 34 | anecdote_penrose_singularity_theorem | data/anecdotes/physique/penrose_singularity_theorem.js |
+| 36 | anecdote_cmb_tv_static | data/anecdotes/physique/cmb_tv_static.js |
 
 ## Anecdotes ignorées (doublons de contenu avec une anecdote déjà existante)
 
@@ -35,4 +50,4 @@ Ce fichier répertorie les anecdotes de `docs/anecdotes_list.md` déjà impléme
 
 ## Prochain lot à traiter
 
-À partir de l'anecdote #18 (`anecdote_bell_theorem_chsh`) dans `docs/anecdotes_list.md`.
+À partir de l'anecdote #37 (`anecdote_math_point_nine_repeating`) dans `docs/anecdotes_list.md`.
