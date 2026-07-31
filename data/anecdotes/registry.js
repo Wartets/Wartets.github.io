@@ -198,5 +198,85 @@ export default [
 		addedDate: '2026-07-31',
 		scheduling: { type: 'anytime', dates: [] },
 		path: '/data/anecdotes/physique/avian_magnetoreception.js'
+	},
+	{
+		id: 'anecdote_ramanujan_hardy_partition',
+		priority: 4,
+		enabled: true,
+		addedDate: '2026-07-31',
+		scheduling: { type: 'annual', dates: ['12-22'] },
+		path: '/data/anecdotes/mathematiques/ramanujan_hardy_partition.js'
+	},
+	{
+		id: 'anecdote_berry_phase_geometric',
+		priority: 4,
+		enabled: true,
+		addedDate: '2026-07-31',
+		scheduling: { type: 'anytime', dates: [] },
+		path: '/data/anecdotes/physique/berry_phase_geometric.js'
+	},
+	{
+		id: 'anecdote_ckm_matrix_cp_violation',
+		priority: 4,
+		enabled: true,
+		addedDate: '2026-07-31',
+		scheduling: { type: 'anytime', dates: [] },
+		path: '/data/anecdotes/physique/ckm_matrix_cp_violation.js'
+	},
+	{
+		id: 'anecdote_bekenstein_hawking_entropy',
+		priority: 4,
+		enabled: true,
+		addedDate: '2026-07-31',
+		scheduling: { type: 'anytime', dates: [] },
+		path: '/data/anecdotes/physique/bekenstein_hawking_entropy.js'
+	},
+	{
+		id: 'anecdote_shannon_gibbs_entropy',
+		priority: 4,
+		enabled: true,
+		addedDate: '2026-07-31',
+		scheduling: { type: 'anytime', dates: [] },
+		path: '/data/anecdotes/physique/shannon_gibbs_entropy.js'
+	},
+	{
+		id: 'anecdote_aharonov_bohm_topology',
+		priority: 4,
+		enabled: true,
+		addedDate: '2026-07-31',
+		scheduling: { type: 'anytime', dates: [] },
+		path: '/data/anecdotes/physique/aharonov_bohm_topology.js'
+	},
+	{
+		id: 'anecdote_alpher_bethe_gamow_paper',
+		priority: 5,
+		enabled: true,
+		addedDate: '2026-07-31',
+		scheduling: { type: 'annual', dates: ['04-01'] },
+		path: '/data/anecdotes/physique/alpher_bethe_gamow_paper.js'
+	},
+	{
+		id: 'anecdote_landauer_limit_maxwell_demon',
+		priority: 4,
+		enabled: true,
+		addedDate: '2026-07-31',
+		scheduling: { type: 'anytime', dates: [] },
+		path: '/data/anecdotes/physique/landauer_limit_maxwell_demon.js'
+	},
+	{
+		id: 'anecdote_banach_tarski_paradox',
+		priority: 4,
+		enabled: true,
+		addedDate: '2026-07-31',
+		scheduling: { type: 'anytime', dates: [] },
+		path: '/data/anecdotes/mathematiques/banach_tarski_paradox.js'
+	},
+	{
+		id: 'anecdote_turing_reaction_diffusion',
+		priority: 4,
+		enabled: true,
+		addedDate: '2026-07-31',
+		scheduling: { type: 'annual', dates: ['08-14'] },
+		path: '/data/anecdotes/physique/turing_reaction_diffusion.js'
 	}
 ];
