@@ -398,5 +398,181 @@ export default [
 		addedDate: '2026-07-31',
 		scheduling: { type: 'anytime', dates: [] },
 		path: '/data/anecdotes/physique/cmb_tv_static.js'
+	},
+	{
+		id: 'anecdote_math_point_nine_repeating',
+		priority: 4,
+		enabled: true,
+		addedDate: '2026-07-31',
+		scheduling: { type: 'anytime', dates: [] },
+		path: '/data/anecdotes/mathematiques/math_point_nine_repeating.js'
+	},
+	{
+		id: 'anecdote_banana_antimatter_positron',
+		priority: 4,
+		enabled: true,
+		addedDate: '2026-07-31',
+		scheduling: { type: 'anytime', dates: [] },
+		path: '/data/anecdotes/physique/banana_antimatter_positron.js'
+	},
+	{
+		id: 'anecdote_birthday_paradox',
+		priority: 4,
+		enabled: true,
+		addedDate: '2026-07-31',
+		scheduling: { type: 'anytime', dates: [] },
+		path: '/data/anecdotes/mathematiques/birthday_paradox.js'
+	},
+	{
+		id: 'anecdote_cherenkov_radiation',
+		priority: 4,
+		enabled: true,
+		addedDate: '2026-07-31',
+		scheduling: { type: 'anytime', dates: [] },
+		path: '/data/anecdotes/physique/cherenkov_radiation.js'
+	},
+	{
+		id: 'anecdote_newton_plague_calculus',
+		priority: 3,
+		enabled: true,
+		addedDate: '2026-07-31',
+		scheduling: { type: 'annual', dates: ['01-04'] },
+		path: '/data/anecdotes/histoire_sciences/newton_plague_calculus.js'
+	},
+	{
+		id: 'anecdote_water_density_anomaly',
+		priority: 4,
+		enabled: true,
+		addedDate: '2026-07-31',
+		scheduling: { type: 'anytime', dates: [] },
+		path: '/data/anecdotes/physique/water_density_anomaly.js'
+	},
+	{
+		id: 'anecdote_gabriels_horn',
+		priority: 4,
+		enabled: true,
+		addedDate: '2026-07-31',
+		scheduling: { type: 'anytime', dates: [] },
+		path: '/data/anecdotes/mathematiques/gabriels_horn.js'
+	},
+	{
+		id: 'anecdote_benfords_law',
+		priority: 4,
+		enabled: true,
+		addedDate: '2026-07-31',
+		scheduling: { type: 'anytime', dates: [] },
+		path: '/data/anecdotes/mathematiques/benfords_law.js'
+	},
+	{
+		id: 'anecdote_apollo15_galileo_drop',
+		priority: 3,
+		enabled: true,
+		addedDate: '2026-07-31',
+		scheduling: { type: 'annual', dates: ['08-02'] },
+		path: '/data/anecdotes/physique/apollo15_galileo_drop.js'
+	},
+	{
+		id: 'anecdote_eratosthenes_earth_circumference',
+		priority: 4,
+		enabled: true,
+		addedDate: '2026-07-31',
+		scheduling: { type: 'anytime', dates: [] },
+		path: '/data/anecdotes/physique/eratosthenes_earth_circumference.js'
+	},
+	{
+		id: 'anecdote_gallium_melting_hand',
+		priority: 4,
+		enabled: true,
+		addedDate: '2026-07-31',
+		scheduling: { type: 'anytime', dates: [] },
+		path: '/data/anecdotes/physique/gallium_melting_hand.js'
+	},
+	{
+		id: 'anecdote_gps_relativity_correction',
+		priority: 4,
+		enabled: true,
+		addedDate: '2026-07-31',
+		scheduling: { type: 'anytime', dates: [] },
+		path: '/data/anecdotes/physique/gps_relativity_correction.js'
+	},
+	{
+		id: 'anecdote_topology_4d_knots',
+		priority: 4,
+		enabled: true,
+		addedDate: '2026-07-31',
+		scheduling: { type: 'anytime', dates: [] },
+		path: '/data/anecdotes/mathematiques/topology_4d_knots.js'
+	},
+	{
+		id: 'anecdote_uranus_named_george',
+		priority: 3,
+		enabled: true,
+		addedDate: '2026-07-31',
+		scheduling: { type: 'annual', dates: ['03-13'] },
+		path: '/data/anecdotes/physique/uranus_named_george.js'
+	},
+	{
+		id: 'anecdote_einstein_nobel_photoelectric',
+		priority: 3,
+		enabled: true,
+		addedDate: '2026-07-31',
+		scheduling: { type: 'annual', dates: ['11-09'] },
+		path: '/data/anecdotes/physique/einstein_nobel_photoelectric.js'
+	},
+	{
+		id: 'anecdote_eulers_identity_math',
+		priority: 4,
+		enabled: true,
+		addedDate: '2026-07-31',
+		scheduling: { type: 'anytime', dates: [] },
+		path: '/data/anecdotes/mathematiques/eulers_identity_math.js'
+	},
+	{
+		id: 'anecdote_triple_point_water',
+		priority: 4,
+		enabled: true,
+		addedDate: '2026-07-31',
+		scheduling: { type: 'anytime', dates: [] },
+		path: '/data/anecdotes/physique/triple_point_water.js'
+	},
+	{
+		id: 'anecdote_osmium_density',
+		priority: 4,
+		enabled: true,
+		addedDate: '2026-07-31',
+		scheduling: { type: 'anytime', dates: [] },
+		path: '/data/anecdotes/physique/osmium_density.js'
+	},
+	{
+		id: 'anecdote_planets_earth_moon_distance',
+		priority: 4,
+		enabled: true,
+		addedDate: '2026-07-31',
+		scheduling: { type: 'anytime', dates: [] },
+		path: '/data/anecdotes/physique/planets_earth_moon_distance.js'
+	},
+	{
+		id: 'anecdote_foucault_pendulum_earth_rotation',
+		priority: 3,
+		enabled: true,
+		addedDate: '2026-07-31',
+		scheduling: { type: 'annual', dates: ['03-31'] },
+		path: '/data/anecdotes/physique/foucault_pendulum_earth_rotation.js'
+	},
+	{
+		id: 'anecdote_friendship_theorem_graph',
+		priority: 4,
+		enabled: true,
+		addedDate: '2026-07-31',
+		scheduling: { type: 'anytime', dates: [] },
+		path: '/data/anecdotes/mathematiques/friendship_theorem_graph.js'
+	},
+	{
+		id: 'anecdote_olbers_paradox_dark_sky',
+		priority: 4,
+		enabled: true,
+		addedDate: '2026-07-31',
+		scheduling: { type: 'anytime', dates: [] },
+		path: '/data/anecdotes/physique/olbers_paradox_dark_sky.js'
 	}
 ];

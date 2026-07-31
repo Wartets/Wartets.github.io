@@ -37,6 +37,28 @@ Ce fichier répertorie les anecdotes de `docs/anecdotes_list.md` déjà impléme
 | 33 | anecdote_larmor_precession_mri_spin | data/anecdotes/physique/larmor_precession_mri_spin.js |
 | 34 | anecdote_penrose_singularity_theorem | data/anecdotes/physique/penrose_singularity_theorem.js |
 | 36 | anecdote_cmb_tv_static | data/anecdotes/physique/cmb_tv_static.js |
+| 37 | anecdote_math_point_nine_repeating | data/anecdotes/mathematiques/math_point_nine_repeating.js |
+| 38 | anecdote_banana_antimatter_positron | data/anecdotes/physique/banana_antimatter_positron.js |
+| 39 | anecdote_birthday_paradox | data/anecdotes/mathematiques/birthday_paradox.js |
+| 40 | anecdote_cherenkov_radiation | data/anecdotes/physique/cherenkov_radiation.js |
+| 41 | anecdote_newton_plague_calculus | data/anecdotes/histoire_sciences/newton_plague_calculus.js |
+| 42 | anecdote_water_density_anomaly | data/anecdotes/physique/water_density_anomaly.js |
+| 43 | anecdote_gabriels_horn | data/anecdotes/mathematiques/gabriels_horn.js |
+| 44 | anecdote_benfords_law | data/anecdotes/mathematiques/benfords_law.js |
+| 45 | anecdote_apollo15_galileo_drop | data/anecdotes/physique/apollo15_galileo_drop.js |
+| 46 | anecdote_eratosthenes_earth_circumference | data/anecdotes/physique/eratosthenes_earth_circumference.js |
+| 47 | anecdote_gallium_melting_hand | data/anecdotes/physique/gallium_melting_hand.js |
+| 48 | anecdote_gps_relativity_correction | data/anecdotes/physique/gps_relativity_correction.js |
+| 49 | anecdote_topology_4d_knots | data/anecdotes/mathematiques/topology_4d_knots.js |
+| 50 | anecdote_uranus_named_george | data/anecdotes/physique/uranus_named_george.js |
+| 51 | anecdote_einstein_nobel_photoelectric | data/anecdotes/physique/einstein_nobel_photoelectric.js |
+| 52 | anecdote_eulers_identity_math | data/anecdotes/mathematiques/eulers_identity_math.js |
+| 53 | anecdote_triple_point_water | data/anecdotes/physique/triple_point_water.js |
+| 54 | anecdote_osmium_density | data/anecdotes/physique/osmium_density.js |
+| 55 | anecdote_planets_earth_moon_distance | data/anecdotes/physique/planets_earth_moon_distance.js |
+| 56 | anecdote_foucault_pendulum_earth_rotation | data/anecdotes/physique/foucault_pendulum_earth_rotation.js |
+| 57 | anecdote_friendship_theorem_graph | data/anecdotes/mathematiques/friendship_theorem_graph.js |
+| 58 | anecdote_olbers_paradox_dark_sky | data/anecdotes/physique/olbers_paradox_dark_sky.js |
 
 ## Anecdotes ignorées (doublons de contenu avec une anecdote déjà existante)
 
@@ -50,4 +72,4 @@ Ce fichier répertorie les anecdotes de `docs/anecdotes_list.md` déjà impléme
 
 ## Prochain lot à traiter
 
-À partir de l'anecdote #37 (`anecdote_math_point_nine_repeating`) dans `docs/anecdotes_list.md`.
+À partir de l'anecdote #59 (`anecdote_mpemba_effect_freezing`) dans `docs/anecdotes_list.md`.
