@@ -1,73 +1,3 @@
-### 1. Le Moment Magnétique Anormal de l'Électron (Correction de Schwinger)
-*   Identifiant : `anecdote_schwinger_magnetic_moment`
-*   Domaine : Électrodynamique Quantique (QED)
-*   Planification (`scheduling`) : `anytime` (Vivier général).
-*   Contenu de l'anecdote : L'équation de Dirac prédisait originellement un facteur de Landé (g) exactement égal à 2 pour l'électron. En 1948, Julian Schwinger a calculé la première correction radiative due aux fluctuations du vide quantique, prouvant que l'électron interagit avec son propre champ électromagnétique. Cette correction, gravée sur la pierre tombale de Schwinger, constitue l'un des triomphes les plus précis de la physique théorique moderne. L'accord entre la théorie et l'expérience actuelle atteint plus de 10 chiffres significatifs.
-*   Contextes associés (1) :
-    *   Titre : *Correction de vertex à une boucle et facteur de Landé*
-    *   Contenu (Markdown + LaTeX) : Explication du calcul de théorie des perturbations. Introduction du formalisme du vertex de Feynman. Utilisation du mode LaTeX en bloc pour afficher l'équation du moment magnétique anormal : `\[ a_e = \frac{g-2}{2} = \frac{\alpha}{2\pi} \approx 0,0011614 \]`. Explication de la constante de structure fine `\(\alpha\)` (mode en ligne) et mention du fait que les calculs actuels nécessitent la prise en compte de diagrammes de Feynman jusqu'à 5 boucles (plus de 12 000 diagrammes cinématiques).
-*   Sources associées (2) :
-    *   Source 1 : *On Quantum-Electrodynamics and the Magnetic Moment of the Electron* (J. Schwinger, Physical Review, 1948). URL : `https://journals.aps.org/pr/abstract/10.1103/PhysRev.73.416`
-    *   Source 2 : *The anomalous magnetic moment of the muon in the Standard Model* (Physics Reports, 2020). URL : `https://arxiv.org/abs/2006.04822`
-
-### 2. L'Analyse Dimensionnelle de G.I. Taylor (Essai Trinity)
-*   Identifiant : `anecdote_taylor_sedov_blast`
-*   Domaine : Mécanique des Fluides / Physique Nucléaire
-*   Planification (`scheduling`) : `annual`, date : `07-16` (Date de l'essai nucléaire Trinity en 1945).
-*   Contenu de l'anecdote : En exploitant des photographies déclassifiées du premier essai nucléaire Trinity publiées dans le magazine Life, le physicien britannique G.I. Taylor a pu déduire l'énergie exacte de l'explosion atomique, une donnée alors classée secret défense. *Variable dynamique :* Injection du nombre exact d'années écoulées depuis 1945 via la fonction temporelle (ex: "Il y a exactement [X] ans aujourd'hui...").
-*   Contextes associés (1) :
-    *   Titre : *Théorème de Buckingham et onde de choc de Sedov-Taylor*
-    *   Contenu (Markdown + LaTeX) : Démonstration par l'analyse dimensionnelle. Énumération des paramètres pertinents : le rayon du front de choc `\(R\)`, le temps `\(t\)`, la masse volumique de l'air non perturbé `\(\rho\)` et l'énergie libérée `\(E\)`. Démonstration en mode bloc LaTeX que la seule combinaison de ces variables ayant la dimension d'une longueur donne : `\[ R(t) = S(\gamma) \left( \frac{E t^2}{\rho} \right)^{\frac{1}{5}} \]`. Explication de l'estimation de la constante adimensionnelle `\(S(\gamma)\)` pour un gaz parfait diatomique.
-*   Sources associées (1) :
-    *   Source 1 : *The Formation of a Blast Wave by a Very Intense Explosion* (G.I. Taylor, Proceedings of the Royal Society of London, 1950). URL : `https://royalsocietypublishing.org/doi/10.1098/rspa.1950.0049`
-
-### 3. La Coïncidence du Monstre (Monstrous Moonshine)
-*   Identifiant : `anecdote_monstrous_moonshine`
-*   Domaine : Mathématiques Pures / Théorie des Groupes
-*   Planification (`scheduling`) : `anytime` (Vivier général).
-*   Contenu de l'anecdote : En 1978, le mathématicien John McKay remarque une coïncidence numérique frappante qui semblait impossible : le premier coefficient non trivial de la fonction modulaire j (196884) est exactement égal à la dimension de la plus petite représentation irréductible non triviale du groupe Monstre (le plus grand des groupes simples sporadiques) additionnée de 1. Cette observation, initialement rejetée comme un simple hasard ("moonshine" en anglais), a jeté les bases d'un pont fondamental entre la théorie des groupes finis, les formes modulaires et la théorie des cordes bosoniques.
-*   Contextes associés (1) :
-    *   Titre : *Développement en série de la fonction modulaire et algèbres vertex*
-    *   Contenu (Markdown + LaTeX) : Présentation du développement en série de Fourier du j-invariant de Klein `\(j(\tau)\)` en posant `\(q = e^{2i\pi\tau}\)`. Utilisation du LaTeX en bloc pour exprimer la série : `\[ j(\tau) = \frac{1}{q} + 744 + 196884q + 21493760q^2 + \dots \]`. Explication de la décomposition des dimensions des représentations du groupe Monstre (`\(r_1 = 1\)`, `\(r_2 = 196883\)`, `\(r_3 = 21296876\)`). Mention de la résolution de la conjecture par Richard Borcherds utilisant les algèbres d'opérateurs vertex (médaille Fields 1998).
-*   Sources associées (2) :
-    *   Source 1 : *Monstrous Moonshine* (J.H. Conway, S.P. Norton, Bulletin of the London Mathematical Society, 1979). URL : `https://londmathsoc.onlinelibrary.wiley.com/doi/abs/10.1112/blms/11.3.308`
-    *   Source 2 : *Monstrous moonshine and string theory* (Archive du portail de mathématiques de l'IAS). URL : `https://www.ias.edu/ideas/2012/duncan-monstrous-moonshine`
-
-### 4. Régularisation de la Fonction Zêta et Effet Casimir
-*   Identifiant : `anecdote_zeta_regularization_casimir`
-*   Domaine : Théorie Quantique des Champs (QFT)
-*   Planification (`scheduling`) : `anytime` (Vivier général).
-*   Contenu de l'anecdote : L'une des manipulations mathématiques les plus célèbres et contre-intuitives en physique quantique implique la somme de tous les entiers naturels, qui est associée de manière asymptotique à la valeur -1/12 via le prolongement analytique de la fonction zêta de Riemann. Loin d'être une simple curiosité formelle, cette régularisation est physiquement mesurable : elle justifie la force d'attraction existant entre deux plaques métalliques parfaitement conductrices et neutres placées dans le vide quantique, un phénomène connu sous le nom d'effet Casimir.
-*   Contextes associés (1) :
-    *   Titre : *Énergie du point zéro et prolongement analytique*
-    *   Contenu (Markdown + LaTeX) : Démonstration abrégée de la densité d'énergie du vide entre les plaques. Écriture de l'hamiltonien du champ électromagnétique quantifié. Apparition de la somme infinie divergente des énergies de point zéro `\( \sum \frac{1}{2}\hbar \omega \)`. Utilisation du prolongement de la fonction zêta en bloc : `\[ \zeta(s) = \sum_{n=1}^{\infty} \frac{1}{n^s} \implies \zeta(-1) = -\frac{1}{12} \]`. Dérivation de la force par unité de surface de Casimir : `\[ \frac{F}{A} = -\frac{\pi^2 \hbar c}{240 a^4} \]` où `\(a\)` est la distance entre les plaques.
-*   Sources associées (2) :
-    *   Source 1 : *On the attraction between two perfectly conducting plates* (H.B.G. Casimir, Proc. Kon. Ned. Akad. Wet., 1948). URL : `https://dwc.knaw.nl/DL/publications/PU00018547.pdf`
-    *   Source 2 : *The Casimir effect and its applications* (M. Bordag et al., Physics Reports, 2001). URL : `https://arxiv.org/abs/quant-ph/0106045`
-
-### 5. L'Invariance de Jauge et le Théorème de Noether
-*   Identifiant : `anecdote_noether_theorem_publication`
-*   Domaine : Physique Mathématique
-*   Planification (`scheduling`) : `annual`, date : `07-23` (Présentation originelle en 1918).
-*   Contenu de l'anecdote : Le théorème établi par Emmy Noether constitue l'un des piliers structurels de la physique moderne. Il démontre rigoureusement que toute symétrie continue de l'action d'un système physique correspond à une loi de conservation stricte. L'énergie découle de l'invariance par translation dans le temps, la quantité de mouvement de l'invariance par translation spatiale. *Variable dynamique :* Formatage de la date du jour via l'API d'internationalisation pour indiquer la date anniversaire exacte de sa présentation devant la Société mathématique de Göttingen en 1918.
-*   Contextes associés (1) :
-    *   Titre : *Formalisme lagrangien et courants conservés*
-    *   Contenu (Markdown + LaTeX) : Explication du principe de moindre action. Définition d'une transformation infinitésimale des coordonnées et des champs. Dérivation mathématique conduisant à l'équation de continuité. Utilisation du LaTeX en bloc pour exprimer la conservation du quadri-courant de Noether : `\[ \partial_\mu j^\mu = 0 \quad \text{avec} \quad j^\mu = \frac{\partial \mathcal{L}}{\partial (\partial_\mu \phi)} \delta \phi - \mathcal{J}^\mu \]`. Mention de l'extension de ce théorème aux théories de jauge locales (Yang-Mills) qui fondent le Modèle Standard de la physique des particules.
-*   Sources associées (1) :
-    *   Source 1 : *Invariante Variationsprobleme* (Emmy Noether, Nachrichten von der Gesellschaft der Wissenschaften zu Göttingen, 1918). Traduction anglaise académique. URL : `https://arxiv.org/abs/physics/0503066`
-
-### 6. Le Paradoxe de la Cohérence Quantique Aviaire
-*   Identifiant : `anecdote_avian_magnetoreception`
-*   Domaine : Biophysique Quantique
-*   Planification (`scheduling`) : `anytime` (Vivier général).
-*   Contenu de l'anecdote : Le rouge-gorge familier (Erithacus rubecula) s'oriente lors de ses migrations grâce à une boussole interne exploitant un phénomène de pure mécanique quantique : l'intrication de paires de radicaux. La réception du champ magnétique terrestre dépend de la dynamique de spin d'électrons photo-excités dans une protéine de leur rétine (le cryptochrome). Le paradoxe physique réside dans le fait que cette intrication est maintenue à température ambiante (et dans un milieu biologique bruyant) pendant des dizaines de microsecondes, une durée de cohérence que les physiciens peinent à reproduire en laboratoire dans des conditions cryogéniques.
-*   Contextes associés (1) :
-    *   Titre : *Dynamique de spin et mécanisme des paires de radicaux*
-    *   Contenu (Markdown + LaTeX) : Description du modèle du cryptochrome. Un photon incident crée une paire électron-trou spatialement séparée mais intriquée (état singulet initial). Évolution sous l'hamiltonien couplant l'interaction Zeeman (champ terrestre) et l'interaction hyperfine (noyaux atomiques locaux). LaTeX en bloc pour l'hamiltonien de spin : `\[ \hat{H} = \mu_B \vec{B}_0 \cdot (\mathbf{g}_1 \hat{S}_1 + \mathbf{g}_2 \hat{S}_2) + \hat{S}_1 \cdot \mathbf{A}_1 \cdot \hat{I}_1 + \dots \]`. Explication de la recombinaison asymétrique (singulet vs triplet) générant le signal biochimique directionnel.
-*   Sources associées (2) :
-    *   Source 1 : *Chemical magnetoreception in birds: The radical pair mechanism* (P. Hore et al., PNAS, 2016). URL : `https://www.pnas.org/doi/10.1073/pnas.1601564113`
-    *   Source 2 : *Quantum Biology* (Nature Physics Review, 2013). URL : `https://www.nature.com/articles/nphys2474`
-
 ### 7. Formule Asymptotique des Partitions de Ramanujan-Hardy
 *   Identifiant : `anecdote_ramanujan_hardy_partition`
 *   Domaine : Théorie Analytique des Nombres
@@ -92,7 +22,7 @@
 *   Sources associées (1) :
     *   Source 1 : *Observation of Gravitational Waves from a Binary Black Hole Merger* (LIGO Scientific Collaboration, Physical Review Letters, 2016). URL : `https://journals.aps.org/prl/abstract/10.1103/PhysRevLett.116.061102`
 
-### 9. La Phase de Berry et le Foucault Quantique
+### 9. La Phase de Berry et le Foucault Quantique+
 *   Identifiant : `anecdote_berry_phase_geometric`
 *   Domaine : Mécanique Quantique Fondamentale
 *   Planification (`scheduling`) : `anytime` (Vivier général).

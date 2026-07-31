@@ -150,5 +150,53 @@ export default [
 		addedDate: '2026-07-30',
 		scheduling: { type: 'anytime', dates: [] },
 		path: '/data/anecdotes/physique/limite_chandrasekhar.js'
+	},
+	{
+		id: 'anecdote_schwinger_magnetic_moment',
+		priority: 4,
+		enabled: true,
+		addedDate: '2026-07-31',
+		scheduling: { type: 'anytime', dates: [] },
+		path: '/data/anecdotes/physique/schwinger_magnetic_moment.js'
+	},
+	{
+		id: 'anecdote_taylor_sedov_blast',
+		priority: 4,
+		enabled: true,
+		addedDate: '2026-07-31',
+		scheduling: { type: 'annual', dates: ['07-16'] },
+		path: '/data/anecdotes/physique/taylor_sedov_blast.js'
+	},
+	{
+		id: 'anecdote_monstrous_moonshine',
+		priority: 4,
+		enabled: true,
+		addedDate: '2026-07-31',
+		scheduling: { type: 'anytime', dates: [] },
+		path: '/data/anecdotes/mathematiques/monstrous_moonshine.js'
+	},
+	{
+		id: 'anecdote_zeta_regularization_casimir',
+		priority: 4,
+		enabled: true,
+		addedDate: '2026-07-31',
+		scheduling: { type: 'anytime', dates: [] },
+		path: '/data/anecdotes/physique/zeta_regularization_casimir.js'
+	},
+	{
+		id: 'anecdote_noether_theorem_publication',
+		priority: 4,
+		enabled: true,
+		addedDate: '2026-07-31',
+		scheduling: { type: 'annual', dates: ['07-23'] },
+		path: '/data/anecdotes/mathematiques/noether_theorem_publication.js'
+	},
+	{
+		id: 'anecdote_avian_magnetoreception',
+		priority: 4,
+		enabled: true,
+		addedDate: '2026-07-31',
+		scheduling: { type: 'anytime', dates: [] },
+		path: '/data/anecdotes/physique/avian_magnetoreception.js'
 	}
 ];
