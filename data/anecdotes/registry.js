@@ -734,5 +734,141 @@ export default [
 		addedDate: '2026-08-01',
 		scheduling: { type: 'anytime', dates: [] },
 		path: '/data/anecdotes/mathematiques/dirichlet_pigeonhole_principle.js'
+	},
+	{
+		id: 'anecdote_potato_paradox_algebra',
+		priority: 4,
+		enabled: true,
+		addedDate: '2026-08-01',
+		scheduling: { type: 'anytime', dates: [] },
+		path: '/data/anecdotes/mathematiques/potato_paradox_algebra.js'
+	},
+	{
+		id: 'anecdote_roentgen_xray_discovery',
+		priority: 3,
+		enabled: true,
+		addedDate: '2026-08-01',
+		scheduling: { type: 'annual', dates: ['11-08'] },
+		path: '/data/anecdotes/physique/roentgen_xray_discovery.js'
+	},
+	{
+		id: 'anecdote_chadwick_neutron_discovery',
+		priority: 3,
+		enabled: true,
+		addedDate: '2026-08-01',
+		scheduling: { type: 'annual', dates: ['02-27'] },
+		path: '/data/anecdotes/physique/chadwick_neutron_discovery.js'
+	},
+	{
+		id: 'anecdote_rayleigh_scattering_sky',
+		priority: 4,
+		enabled: true,
+		addedDate: '2026-08-01',
+		scheduling: { type: 'anytime', dates: [] },
+		path: '/data/anecdotes/physique/rayleigh_scattering_sky.js'
+	},
+	{
+		id: 'anecdote_friendship_paradox_network',
+		priority: 4,
+		enabled: true,
+		addedDate: '2026-08-01',
+		scheduling: { type: 'anytime', dates: [] },
+		path: '/data/anecdotes/mathematiques/friendship_paradox_network.js'
+	},
+	{
+		id: 'anecdote_perfect_solar_eclipse_coincidence',
+		priority: 4,
+		enabled: true,
+		addedDate: '2026-08-01',
+		scheduling: { type: 'anytime', dates: [] },
+		path: '/data/anecdotes/physique/perfect_solar_eclipse_coincidence.js'
+	},
+	{
+		id: 'anecdote_leidenfrost_effect',
+		priority: 4,
+		enabled: true,
+		addedDate: '2026-08-01',
+		scheduling: { type: 'anytime', dates: [] },
+		path: '/data/anecdotes/physique/leidenfrost_effect.js'
+	},
+	{
+		id: 'anecdote_four_color_theorem_computer',
+		priority: 4,
+		enabled: true,
+		addedDate: '2026-08-01',
+		scheduling: { type: 'anytime', dates: [] },
+		path: '/data/anecdotes/mathematiques/four_color_theorem_computer.js'
+	},
+	{
+		id: 'anecdote_first_transistor_bardeen_brattain',
+		priority: 3,
+		enabled: true,
+		addedDate: '2026-08-01',
+		scheduling: { type: 'annual', dates: ['12-23'] },
+		path: '/data/anecdotes/physique/first_transistor_bardeen_brattain.js'
+	},
+	{
+		id: 'anecdote_ramanujan_constant_almost_integer',
+		priority: 4,
+		enabled: true,
+		addedDate: '2026-08-01',
+		scheduling: { type: 'anytime', dates: [] },
+		path: '/data/anecdotes/mathematiques/ramanujan_constant_almost_integer.js'
+	},
+	{
+		id: 'anecdote_earth_speed_cmb_dipole',
+		priority: 4,
+		enabled: true,
+		addedDate: '2026-08-01',
+		scheduling: { type: 'anytime', dates: [] },
+		path: '/data/anecdotes/physique/earth_speed_cmb_dipole.js'
+	},
+	{
+		id: 'anecdote_kakeya_needle_problem_area',
+		priority: 4,
+		enabled: true,
+		addedDate: '2026-08-01',
+		scheduling: { type: 'anytime', dates: [] },
+		path: '/data/anecdotes/mathematiques/kakeya_needle_problem_area.js'
+	},
+	{
+		id: 'anecdote_glass_transparency_quantum',
+		priority: 4,
+		enabled: true,
+		addedDate: '2026-08-01',
+		scheduling: { type: 'anytime', dates: [] },
+		path: '/data/anecdotes/physique/glass_transparency_quantum.js'
+	},
+	{
+		id: 'anecdote_brownian_motion_einstein_perrin',
+		priority: 3,
+		enabled: true,
+		addedDate: '2026-08-01',
+		scheduling: { type: 'annual', dates: ['05-11'] },
+		path: '/data/anecdotes/physique/brownian_motion_einstein_perrin.js'
+	},
+	{
+		id: 'anecdote_dirac_equation_antimatter',
+		priority: 4,
+		enabled: true,
+		addedDate: '2026-08-01',
+		scheduling: { type: 'anytime', dates: [] },
+		path: '/data/anecdotes/physique/dirac_equation_antimatter.js'
+	},
+	{
+		id: 'anecdote_space_temperature_cmb',
+		priority: 4,
+		enabled: true,
+		addedDate: '2026-08-01',
+		scheduling: { type: 'anytime', dates: [] },
+		path: '/data/anecdotes/physique/space_temperature_cmb.js'
+	},
+	{
+		id: 'anecdote_sunflower_fibonacci_golden_ratio',
+		priority: 4,
+		enabled: true,
+		addedDate: '2026-08-01',
+		scheduling: { type: 'anytime', dates: [] },
+		path: '/data/anecdotes/mathematiques/sunflower_fibonacci_golden_ratio.js'
 	}
 ];

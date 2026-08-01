@@ -1,101 +1,138 @@
-### 79. Le Paradoxe de la Pomme de Terre
-*   Identifiant : `anecdote_potato_paradox_algebra`
-*   Domaine : Mathématiques / Algèbre
-*   Planification (`scheduling`) : `anytime` (Vivier général).
-*   Contenu de l'anecdote : L'intuition humaine gère très mal les pourcentages, comme l'illustre ce paradoxe classique de l'algèbre. Vous possédez 100 kg de pommes de terre composées à 99 % d'eau. Vous les laissez sécher au soleil jusqu'à ce qu'elles ne soient plus composées qu'à 98 % d'eau. À la surprise générale, en perdant seulement "1 %" d'eau sur le papier, vos pommes de terre ne pèsent plus que 50 kg. Elles ont perdu la moitié de leur poids total.
-*   Contextes associés (1) :
-    *   Titre : *Invariance de la masse sèche*
-    *   Contenu (Markdown + LaTeX) : La résolution du paradoxe nécessite d'isoler la constante du système : la matière sèche (solide). Initialement, sur `\(100 \text{ kg}\)` de pommes de terre à `\(99\%\)` d'eau, la masse d'eau est de `\(99 \text{ kg}\)` et la masse sèche est de `\(1 \text{ kg}\)`. Lors de l'évaporation, seule l'eau disparaît. La masse sèche finale est toujours de `\(1 \text{ kg}\)`. Si les pommes de terre finales contiennent `\(98\%\)` d'eau, cela implique que la masse sèche représente `\(2\%\)` de la masse totale `\(M_f\)`. L'équation du premier degré s'écrit en bloc : `\[ 0,02 \times M_f = 1 \text{ kg} \implies M_f = \frac{1}{0,02} = 50 \text{ kg} \]`.
-*   Sources associées (1) :
-    *   Source 1 : *The Universal Book of Mathematics: From Abracadabra to Zeno's Paradoxes* (David Darling, John Wiley & Sons, 2004). URL : `https://books.google.com/books?id=QVQY1B334JMC`
+# Récapitulatif de toutes les anecdotes
 
-### 80. La Découverte Accidentelle des Rayons X
-*   Identifiant : `anecdote_roentgen_xray_discovery`
-*   Domaine : Physique Expérimentale
-*   Planification (`scheduling`) : `annual`, date : `11-08` (Découverte le 8 novembre 1895).
-*   Contenu de l'anecdote : Le 8 novembre 1895, le physicien allemand Wilhelm Röntgen étudiait le comportement des électrons (rayons cathodiques) dans un tube sous vide recouvert de carton noir opaque. Il remarqua avec stupéfaction qu'un écran fluorescent, situé à l'autre bout de la pièce, s'illuminait à chaque fois qu'il allumait son tube. Il venait de découvrir une forme de rayonnement électromagnétique inconnue capable de traverser la matière solide. Il la nomma "Rayons X", le X symbolisant l'inconnu en mathématiques.
-*   Contextes associés (1) :
-    *   Titre : *Rayonnement de freinage (Bremsstrahlung)*
-    *   Contenu (Markdown + LaTeX) : Les rayons X découverts par Röntgen ne proviennent pas du faisceau d'électrons lui-même, mais de l'interaction violente de ces électrons avec la paroi métallique de l'anode. Lorsqu'un électron de haute énergie est freiné par le champ coulombien d'un noyau atomique lourd, son énergie cinétique perdue est convertie en un photon très énergétique. L'énergie maximale du photon émis est donnée par la limite de Duane-Hunt en bloc KaTeX : `\[ E_{max} = h \nu_{max} = \frac{h c}{\lambda_{min}} = e U \]` (où `\(e\)` est la charge élémentaire et `\(U\)` la tension d'accélération du tube).
-*   Sources associées (1) :
-    *   Source 1 : *Ueber eine neue Art von Strahlen* (W.C. Röntgen, Sitzungsberichte der Würzburger Physik-medic. Gesellschaft, 1895). URL : `https://onlinelibrary.wiley.com/doi/abs/10.1002/andp.18983000102`
+Liste complète des anecdotes présentes dans `data/anecdotes/registry.js`, classées par domaine, avec un résumé en une ligne.
+## Mathématiques
 
-### 81. La Découverte du Neutron
-*   Identifiant : `anecdote_chadwick_neutron_discovery`
-*   Domaine : Physique Nucléaire
-*   Planification (`scheduling`) : `annual`, date : `02-27` (Publication de l'article en 1932).
-*   Contenu de l'anecdote : Jusqu'en 1932, les physiciens pensaient que le noyau d'un atome était uniquement composé de protons et d'électrons compactés. Cette théorie posait d'immenses problèmes de mécanique quantique (violation de la conservation du spin et du principe d'incertitude). En bombardant du béryllium avec des particules alpha, James Chadwick a prouvé l'existence d'une particule fantôme qui ne possède aucune charge électrique, mais qui a presque exactement la même masse qu'un proton : le neutron. Cette découverte a rendu possible la fission nucléaire contrôlée. *Variable dynamique :* Injection de la date anniversaire.
-*   Contextes associés (1) :
-    *   Titre : *Cinématique des collisions élastiques*
-    *   Contenu (Markdown + LaTeX) : Irène et Frédéric Joliot-Curie avaient observé ce rayonnement neutre mais pensaient qu'il s'agissait de rayons gamma très énergétiques. Chadwick a mesuré le recul des atomes (hydrogène et azote) frappés par ce rayonnement. En appliquant la conservation de l'énergie et de la quantité de mouvement non relativiste, la vitesse maximale `\(v_p\)` acquise par un noyau cible de masse `\(m\)` heurté par une particule incidente de masse `\(M\)` et de vitesse `\(V\)` est donnée en bloc LaTeX : `\[ v_p = \frac{2M}{M + m} V \]`. En comparant les reculs pour l'hydrogène et l'azote, Chadwick a calculé que `\(M\)` (la masse de la particule mystère) valait environ 1,006 fois la masse du proton, prouvant qu'il ne s'agissait pas de lumière (photons sans masse) mais d'une particule massive neutre.
-*   Sources associées (1) :
-    *   Source 1 : *Possible Existence of a Neutron* (J. Chadwick, Nature, 1932). URL : `https://www.nature.com/articles/129312a0`
+| Identifiant | Résumé |
+|---|---|
+| anecdote_annee_bissextile | Règle exacte des années bissextiles (divisible par 4, sauf par 100 sauf par 400). |
+| anecdote_probleme_de_bale | Euler résout en 1735 la somme des inverses des carrés = π²/6. |
+| anecdote_hypothese_riemann | La conjecture de Riemann sur les zéros non triviaux de ζ(s), toujours non résolue. |
+| anecdote_theoreme_incompletude_godel | Les deux théorèmes d'incomplétude de Gödel (1931). |
+| anecdote_dernier_theoreme_fermat | Wiles démontre en 1993/1995 le dernier théorème de Fermat. |
+| anecdote_jour_pi | Le 14 mars (3/14) rappelle les premières décimales de π. |
+| anecdote_theoreme_noether | Emmy Noether relie symétries continues et lois de conservation (1918). |
+| anecdote_monstrous_moonshine | Coïncidence numérique reliant fonction j et groupe Monstre. |
+| anecdote_noether_theorem_publication | Publication du 1er théorème de Noether devant la Société de Göttingen. |
+| anecdote_ramanujan_hardy_partition | Formule asymptotique de Hardy-Ramanujan pour les partitions d'entiers. |
+| anecdote_banach_tarski_paradox | Une sphère peut être découpée et réassemblée en deux sphères identiques. |
+| anecdote_galois_group_theory | Galois fonde la théorie des groupes la veille de son duel mortel. |
+| anecdote_gauss_theorema_egregium_curvature | La courbure de Gauss est une propriété intrinsèque des surfaces. |
+| anecdote_buffon_needle_pi | L'aiguille de Buffon permet d'estimer π par probabilité géométrique. |
+| anecdote_noether_second_theorem_gauge | Le second théorème de Noether, fondement des symétries de jauge. |
+| anecdote_math_point_nine_repeating | 0,999... est rigoureusement égal à 1. |
+| anecdote_birthday_paradox | 23 personnes suffisent pour 50% de chances d'anniversaire partagé. |
+| anecdote_water_density_anomaly | (physique, voir section Physique) |
+| anecdote_gabriels_horn | La Trompette de Gabriel : surface infinie, volume fini. |
+| anecdote_benfords_law | La loi de Benford et la distribution des premiers chiffres. |
+| anecdote_topology_4d_knots | Aucun nœud n'est possible dans un espace à 4 dimensions. |
+| anecdote_eulers_identity_math | L'identité d'Euler, e^(iπ)+1=0. |
+| anecdote_friendship_theorem_graph | Le théorème de l'amitié impose un « hôte » universel dans un graphe. |
+| anecdote_coastline_paradox_fractals | Le paradoxe du littoral et la dimension fractale des côtes. |
+| anecdote_zipfs_law_linguistics | La loi de Zipf sur la fréquence des mots dans les langues. |
+| anecdote_monty_hall_probability | Changer de porte double vos chances au jeu de Monty Hall. |
+| anecdote_euler_polyhedron_formula | S - A + F = 2 pour tout polyèdre convexe (Euler, 1758). |
+| anecdote_infinite_monkey_theorem | Un singe tapant infiniment finira presque sûrement par écrire Hamlet. |
+| anecdote_factorial_10_weeks | 10! secondes égalent exactement 6 semaines. |
+| anecdote_dirichlet_pigeonhole_principle | Le principe des tiroirs et son application aux cheveux humains. |
+| anecdote_potato_paradox_algebra | Le paradoxe de la pomme de terre : perdre 1% d'eau = perdre 50% du poids. |
+| anecdote_friendship_paradox_network | Vos amis ont statistiquement plus d'amis que vous. |
+| anecdote_four_color_theorem_computer | Théorème des quatre couleurs, première preuve par ordinateur (1976). |
+| anecdote_ramanujan_constant_almost_integer | e^(π√163) est presque un entier, à 12 neufs près. |
+| anecdote_kakeya_needle_problem_area | Un ensemble de Besicovitch permet de faire tourner une aiguille dans une aire nulle. |
+| anecdote_sunflower_fibonacci_golden_ratio | Les spirales du tournesol suivent la suite de Fibonacci et le nombre d'or. |
 
-### 82. Le Diffuseur de Rayleigh (Le Ciel Bleu)
-*   Identifiant : `anecdote_rayleigh_scattering_sky`
-*   Domaine : Optique Électromagnétique
-*   Planification (`scheduling`) : `anytime` (Vivier général).
-*   Contenu de l'anecdote : Contrairement à une idée très répandue, le ciel n'est pas bleu parce qu'il reflète la couleur des océans (c'est l'inverse). La couleur du ciel est une pure conséquence mathématique de la taille des molécules de l'atmosphère (diazote et dioxygène). Celles-ci agissent comme de minuscules antennes qui diffusent la lumière du Soleil dans toutes les directions. Cependant, les ondes courtes (le bleu) sont diffusées de manière exponentiellement plus forte que les ondes longues (le rouge), inondant l'atmosphère d'une lueur bleutée.
-*   Contextes associés (1) :
-    *   Titre : *Section efficace de Rayleigh*
-    *   Contenu (Markdown + LaTeX) : Le modèle de Lord Rayleigh (1871) s'applique lorsque la taille des particules diffusantes (environ 0,3 nm) est très inférieure à la longueur d'onde de la lumière visible (400 à 700 nm). Sous l'action du champ électrique oscillant de la lumière incidente, la molécule se comporte comme un dipôle oscillant. La puissance rayonnée par ce dipôle s'obtient via les équations de Maxwell. L'intensité diffusée `\(I\)` dépend inversement de la puissance quatrième de la longueur d'onde `\(\lambda\)`, exprimée en bloc KaTeX : `\[ I \propto \frac{1}{\lambda^4} \]`. Le violet (380 nm) est en réalité encore plus diffusé que le bleu (450 nm), mais l'œil humain est biologiquement beaucoup moins sensible au violet, notre perception nous offre donc un ciel bleu.
-*   Sources associées (1) :
-    *   Source 1 : *On the light from the sky, its polarization and colour* (Lord Rayleigh, The London, Edinburgh, and Dublin Philosophical Magazine and Journal of Science, 1871). URL : `https://www.tandfonline.com/doi/abs/10.1080/14786447108640454`
+## Physique
 
-### 83. Le Paradoxe de l'Amitié (Théorie des Graphes)
-*   Identifiant : `anecdote_friendship_paradox_network`
-*   Domaine : Théorie des Réseaux / Statistiques
-*   Planification (`scheduling`) : `anytime` (Vivier général).
-*   Contenu de l'anecdote : Vous avez probablement l'impression que vos amis ont une vie sociale plus riche que la vôtre. Ce n'est pas de la psychologie, c'est une loi mathématique universelle démontrée en 1991. Dans n'importe quel réseau social (réel ou numérique), la majorité des individus ont strictement moins d'amis que la moyenne du nombre d'amis de leurs propres amis. C'est un biais d'échantillonnage de la théorie des graphes : les personnes très populaires sont, par définition, présentes dans un très grand nombre de cercles sociaux, gonflant mathématiquement la moyenne.
-*   Contextes associés (1) :
-    *   Titre : *Variance et degré nodal attendu*
-    *   Contenu (Markdown + LaTeX) : Soit un graphe non orienté où les individus sont les nœuds et les amitiés les arêtes. Le nombre de connexions d'un nœud est son degré `\(d\)`. La moyenne de ce degré sur tout le réseau est `\(\mu\)`. Si l'on choisit une arête au hasard, la probabilité d'atteindre un nœud de degré `\(d\)` est proportionnelle à `\(d\)`. Le degré espéré d'un ami (le nœud adjacent) n'est pas `\(\mu\)`, mais nécessite d'intégrer la variance `\(\sigma^2\)` de la distribution des degrés, selon l'équation en bloc LaTeX : `\[ \text{Espérance(Amis d'un ami)} = \mu + \frac{\sigma^2}{\mu} \]`. Puisque la variance d'un réseau réel est strictement positive (`\(\sigma^2 > 0\)`), l'espérance est toujours mathématiquement supérieure à `\(\mu\)`.
-*   Sources associées (1) :
-    *   Source 1 : *Why Your Friends Have More Friends Than You Do* (Scott L. Feld, American Journal of Sociology, 1991). URL : `https://www.jstor.org/stable/2781907`
+| Identifiant | Résumé |
+|---|---|
+| anecdote_vitesse_lumiere | La vitesse de la lumière est exactement 299 792 458 m/s depuis 1983. |
+| anecdote_decouverte_neptune | Le Verrier prédit Neptune par le calcul avant son observation (1846). |
+| anecdote_experience_michelson_morley | L'expérience de 1887 qui ne détecte aucun éther luminifère. |
+| anecdote_hypothese_quantique_planck | Planck introduit la quantification de l'énergie E=hν (1900). |
+| anecdote_decouverte_electron | J.J. Thomson isole l'électron en 1897. |
+| anecdote_annee_miraculeuse_einstein | Les quatre articles révolutionnaires d'Einstein en 1905. |
+| anecdote_decouverte_boson_higgs | Découverte du boson de Higgs au CERN (2012). |
+| anecdote_premiere_detection_ondes_gravitationnelles | Première détection directe d'ondes gravitationnelles par LIGO (2016). |
+| anecdote_limite_chandrasekhar | La masse maximale d'une naine blanche, calculée à 19 ans. |
+| anecdote_schwinger_magnetic_moment | Schwinger calcule la première correction radiative du moment magnétique de l'électron. |
+| anecdote_taylor_sedov_blast | Taylor déduit l'énergie de l'essai Trinity par analyse dimensionnelle. |
+| anecdote_zeta_regularization_casimir | La somme des entiers = -1/12 explique l'effet Casimir. |
+| anecdote_avian_magnetoreception | Le rouge-gorge navigue grâce à l'intrication quantique de radicaux. |
+| anecdote_berry_phase_geometric | La phase géométrique de Berry en évolution adiabatique cyclique. |
+| anecdote_ckm_matrix_cp_violation | La matrice CKM et la violation CP expliquant l'asymétrie matière-antimatière. |
+| anecdote_bekenstein_hawking_entropy | L'entropie d'un trou noir est proportionnelle à l'aire de son horizon. |
+| anecdote_shannon_gibbs_entropy | L'entropie de Shannon est mathématiquement isomorphe à l'entropie de Gibbs. |
+| anecdote_aharonov_bohm_topology | L'effet Aharonov-Bohm prouve la réalité physique du potentiel vecteur. |
+| anecdote_alpher_bethe_gamow_paper | L'article Alpha-Beta-Gamma sur la nucléosynthèse primordiale. |
+| anecdote_landauer_limit_maxwell_demon | Effacer un bit dissipe nécessairement de la chaleur (principe de Landauer). |
+| anecdote_turing_reaction_diffusion | Turing explique les motifs animaux par réaction-diffusion (1952). |
+| anecdote_bell_theorem_chsh | Le théorème de Bell et la violation expérimentale du réalisme local. |
+| anecdote_chiral_anomaly_abj | L'anomalie chirale ABJ explique la désintégration du pion neutre. |
+| anecdote_poincare_brouwer_tokamak | Le théorème de la boule chevelue impose la forme torique des tokamaks. |
+| anecdote_hong_ou_mandel_interference | Deux photons identiques se groupent systématiquement (1987). |
+| anecdote_hamilton_quaternions | Hamilton grave les quaternions sur un pont de Dublin (1843). |
+| anecdote_unruh_effect_vacuum | Un observateur accéléré perçoit le vide quantique comme un bain thermique. |
+| anecdote_arago_poisson_spot | La tache de Poisson-Arago, preuve accidentelle de la nature ondulatoire de la lumière. |
+| anecdote_quantum_hall_effect_von_klitzing | La résistance de Hall quantifiée avec une précision extrême (1980). |
+| anecdote_larmor_precession_mri_spin | La précession de Larmor du spin, principe physique de l'IRM. |
+| anecdote_penrose_singularity_theorem | Penrose prouve l'inévitabilité des singularités d'effondrement gravitationnel. |
+| anecdote_cmb_tv_static | La « neige » de la télévision analogique contenait un écho du Big Bang. |
+| anecdote_banana_antimatter_positron | Une banane produit occasionnellement de l'antimatière (potassium-40). |
+| anecdote_cherenkov_radiation | Le rayonnement Tcherenkov, « bang supersonique » lumineux dans l'eau. |
+| anecdote_newton_plague_calculus | Newton invente le calcul infinitésimal confiné pendant la peste (1665-1666). |
+| anecdote_water_density_anomaly | L'eau atteint sa densité maximale à 4°C, expliquant le gel des lacs en surface. |
+| anecdote_apollo15_galileo_drop | Le marteau et la plume tombent ensemble sur la Lune (Apollo 15, 1971). |
+| anecdote_eratosthenes_earth_circumference | Ératosthène calcule la circonférence terrestre avec un simple bâton (240 av. J.-C.). |
+| anecdote_gallium_melting_hand | Le gallium fond dans la paume de la main (29,76°C). |
+| anecdote_gps_relativity_correction | Sans correction relativiste, le GPS dériverait de 11 km/jour. |
+| anecdote_uranus_named_george | Uranus s'appela un temps « l'Étoile de George » en hommage au roi d'Angleterre. |
+| anecdote_einstein_nobel_photoelectric | Le Nobel d'Einstein récompensa l'effet photoélectrique, pas la relativité. |
+| anecdote_triple_point_water | Le point triple de l'eau, où trois phases coexistent simultanément. |
+| anecdote_osmium_density | L'osmium, élément naturel le plus dense sur Terre. |
+| anecdote_planets_earth_moon_distance | Toutes les autres planètes tiendraient entre la Terre et la Lune. |
+| anecdote_foucault_pendulum_earth_rotation | Le pendule de Foucault prouve visuellement la rotation terrestre (1851). |
+| anecdote_olbers_paradox_dark_sky | Pourquoi le ciel est noir la nuit : preuve d'un univers non statique. |
+| anecdote_mpemba_effect_freezing | L'eau chaude peut geler plus vite que l'eau froide (effet Mpemba). |
+| anecdote_cosmic_rays_bit_flip | Les rayons cosmiques peuvent inverser un bit de mémoire RAM. |
+| anecdote_frog_magnetic_levitation | Andre Geim fait léviter une grenouille par diamagnétisme (1997). |
+| anecdote_glass_is_a_solid | Le mythe du verre médiéval « qui coule » démystifié thermodynamiquement. |
+| anecdote_pulsar_angular_momentum | La conservation du moment cinétique explique la rotation ultra-rapide des pulsars. |
+| anecdote_chirality_limonene_smell | Deux molécules miroirs sentent le citron ou l'orange selon leur chiralité. |
+| anecdote_dna_length_human_body | L'ADN humain déroulé atteindrait environ deux fois le diamètre du système solaire. |
+| anecdote_helium_superfluid_rollin_film | L'hélium superfluide grimpe le long des parois d'un verre (film de Rollin). |
+| anecdote_tidal_friction_moon_recession | La friction des marées éloigne la Lune de 3,8 cm par an. |
+| anecdote_mars_olympus_mons | Olympus Mons, volcan martien deux fois et demie plus haut que l'Everest. |
+| anecdote_solar_neutrino_flux | 100 milliards de neutrinos solaires traversent un ongle chaque seconde. |
+| anecdote_sonoluminescence_star_jar | La sonoluminescence crée un flash lumineux dans de l'eau bombardée d'ultrasons. |
+| anecdote_meter_definition_c | Depuis 1983, le mètre est défini par la vitesse de la lumière, non par un artefact. |
+| anecdote_naissance_marie_curie | Âge dynamique de Marie Curie née un 7 novembre 1867. |
+| anecdote_machine_de_turing | Turing publie « On Computable Numbers » et la machine universelle (1936). |
+| anecdote_decouverte_structure_adn | Watson et Crick annoncent la double hélice d'ADN (1953), grâce à la photo 51. |
+| anecdote_roentgen_xray_discovery | Röntgen découvre accidentellement les rayons X (1895). |
+| anecdote_chadwick_neutron_discovery | Chadwick prouve l'existence du neutron par cinématique de collision (1932). |
+| anecdote_rayleigh_scattering_sky | La diffusion de Rayleigh explique pourquoi le ciel est bleu. |
+| anecdote_perfect_solar_eclipse_coincidence | Coïncidence de taille apparente Soleil/Lune permettant les éclipses totales. |
+| anecdote_leidenfrost_effect | L'effet Leidenfrost fait léviter une goutte d'eau sur une plaque brûlante. |
+| anecdote_first_transistor_bardeen_brattain | Invention du premier transistor aux laboratoires Bell (1947). |
+| anecdote_earth_speed_cmb_dipole | Le dipôle du fond diffus cosmologique révèle la vitesse absolue du Système Solaire. |
+| anecdote_glass_transparency_quantum | Le grand gap optique de la silice explique la transparence du verre. |
+| anecdote_brownian_motion_einstein_perrin | Einstein explique mathématiquement le mouvement brownien (1905). |
+| anecdote_dirac_equation_antimatter | L'équation de Dirac prédit l'existence de l'antimatière (1928). |
+| anecdote_space_temperature_cmb | La température du vide spatial profond est de 2,725 K, écho du Big Bang. |
 
-### 84. L'Éclipse Solaire Parfaite (La coïncidence cosmique)
-*   Identifiant : `anecdote_perfect_solar_eclipse_coincidence`
-*   Domaine : Astronomie / Géométrie
-*   Planification (`scheduling`) : `anytime` (Vivier général).
-*   Contenu de l'anecdote : Les éclipses totales de Soleil telles que nous les voyons depuis la Terre sont une anomalie géométrique unique dans tout le système solaire. Le Soleil a un diamètre environ 400 fois plus grand que celui de notre Lune. Par une extraordinaire coïncidence spatiale, le Soleil se trouve également être environ 400 fois plus éloigné de la Terre que la Lune. Dans le ciel, leurs disques s'empilent donc de façon strictement identique, permettant à la Lune de masquer la sphère solaire tout en laissant admirer sa fine couronne atmosphérique.
-*   Contextes associés (1) :
-    *   Titre : *Diamètre apparent et approximation des petits angles*
-    *   Contenu (Markdown + LaTeX) : La taille visuelle d'un objet céleste est définie par son diamètre angulaire `\(\theta\)`. Pour un objet de diamètre physique `\(D\)` situé à une distance `\(d\)` (avec `\(d \gg D\)`), l'angle en radians est donné par l'approximation de l'arc en bloc KaTeX : `\[ \theta \approx \frac{D}{d} \]`. Pour le Soleil, `\(D_S \approx 1,39 \times 10^6 \text{ km}\)` et `\(d_S \approx 1,50 \times 10^8 \text{ km}\)`, soit `\(\theta_S \approx 0,0093 \text{ rad}\)` (environ 0,53°). Pour la Lune, `\(D_L \approx 3474 \text{ km}\)` et `\(d_L \approx 384\,400 \text{ km}\)`, soit `\(\theta_L \approx 0,0090 \text{ rad}\)`. Les deux valeurs sont presque égales. À cause du freinage par les marées, la Lune s'éloigne : cette époque d'éclipses parfaites est donc transitoire.
-*   Sources associées (1) :
-    *   Source 1 : *Solar Eclipses: Past and Future* (NASA Eclipse Web Site). URL : `https://eclipse.gsfc.nasa.gov/solar.html`
+## Histoire des Sciences
 
-### 85. La Lévitation de l'Eau (Effet Leidenfrost)
-*   Identifiant : `anecdote_leidenfrost_effect`
-*   Domaine : Thermodynamique / Transfert Thermique
-*   Planification (`scheduling`) : `anytime` (Vivier général).
-*   Contenu de l'anecdote : Si vous déposez une goutte d'eau sur une poêle chauffée à 100°C, elle bout et s'évapore rapidement. Mais si vous chauffez la poêle violemment jusqu'à 200°C, un phénomène magique se produit : la goutte d'eau refuse de bouillir. Elle se forme en perle et glisse sur la surface métallique comme sur une patinoire, survivant beaucoup plus longtemps. C'est l'effet Leidenfrost. La température est si élevée que la base de la goutte se vaporise instantanément, créant un coussin de gaz microscopique sur lequel la goutte lévite, ce gaz jouant le rôle d'un bouclier thermique isolant.
-*   Contextes associés (1) :
-    *   Titre : *Régime d'ébullition en film et conductivité*
-    *   Contenu (Markdown + LaTeX) : Le transfert de chaleur `\(q\)` entre la surface solide (température `\(T_s\)`) et le liquide (température de saturation `\(T_{sat}\)`) suit la loi de refroidissement de Newton. Au-delà du point de flux de chaleur critique (point de flux critique ou crise d'ébullition), on entre dans le régime d'ébullition en film (film boiling). La conductivité thermique de la vapeur d'eau (`\(\approx 0,025 \text{ W/m}\cdot\text{K}\)`) étant environ 24 fois plus faible que celle de l'eau liquide (`\(\approx 0,6 \text{ W/m}\cdot\text{K}\)`), le flux thermique s'effondre. La durée de vie de la goutte `\(\tau\)` augmente drastiquement en bloc LaTeX : `\[ q = h (T_s - T_{sat}) \quad \text{où } h \text{ (coefficient de transfert) diminue fortement.} \]`.
-*   Sources associées (1) :
-    *   Source 1 : *De aquae communis nonnullis qualitatibus tractatus* (J.G. Leidenfrost, 1756, traduit dans l'International Journal of Heat and Mass Transfer, 1966). URL : `https://www.sciencedirect.com/science/article/abs/pii/0017931066901116`
+| Identifiant | Résumé |
+|---|---|
+| anecdote_naissance_marie_curie | (voir section Physique) |
+| anecdote_machine_de_turing | (voir section Physique) |
+| anecdote_decouverte_structure_adn | (voir section Physique) |
+| anecdote_newton_plague_calculus | (voir section Physique) |
 
-### 86. Le Théorème des Quatre Couleurs (La Preuve par Machine)
-*   Identifiant : `anecdote_four_color_theorem_computer`
-*   Domaine : Topologie / Théorie des Graphes
-*   Planification (`scheduling`) : `anytime` (Vivier général).
-*   Contenu de l'anecdote : Tracez une carte imaginaire avec autant de pays que vous le souhaitez, de formes aussi tarabiscotées que possible. Il vous suffira de seulement 4 couleurs pour colorier l'intégralité de la carte sans que deux pays partageant une frontière aient la même couleur. Formulé en 1852, ce théorème a résisté aux plus grands mathématiciens pendant plus d'un siècle. En 1976, il a finalement été prouvé... mais par un ordinateur, qui a vérifié 1936 cas particuliers. Ce fut le premier théorème majeur prouvé par une machine, provoquant un séisme philosophique sur la définition même d'une "preuve" mathématique.
-*   Contextes associés (1) :
-    *   Titre : *Graphes planaires et réduction de configurations*
-    *   Contenu (Markdown + LaTeX) : Le problème revient à colorier les sommets d'un graphe planaire sans que deux sommets adjacents aient la même couleur. La preuve de Kenneth Appel et Wolfgang Haken repose sur la recherche d'un "ensemble inévitable de configurations réductibles". Ils ont prouvé par la logique de déchargement que toute carte planaire infinie contient au moins l'une de ces 1936 sous-structures. Puisque l'équation chromatique (le polynôme chromatique `\(P(G, k)\)`) du graphe complet garantit que `\(P(G, 4) > 0\)` si les sous-configurations le sont, la preuve nécessite la vérification exhaustive en bloc KaTeX de la réductibilité de chaque cas : `\[ \forall C \in \text{Ensemble Inévitable}, \quad C \text{ est coloriable à 4 couleurs} \]`.
-*   Sources associées (1) :
-    *   Source 1 : *Every Planar Map is Four Colorable* (K. Appel, W. Haken, Bulletin of the American Mathematical Society, 1976). URL : `https://projecteuclid.org/journals/bulletin-of-the-american-mathematical-society/volume-82/issue-5/Every-planar-map-is-four-colorable/bams/1183538215.full`
+---
 
-### 87. L'Invention du Transistor
-*   Identifiant : `anecdote_first_transistor_bardeen_brattain`
-*   Domaine : Physique des Semi-conducteurs
-*   Planification (`scheduling`) : `annual`, date : `12-23` (Démonstration du 23 décembre 1947).
-*   Contenu de l'anecdote : L'objet le plus fabriqué de l'histoire de l'humanité, moteur fondamental de tous les ordinateurs et téléphones, a été inventé la veille de Noël 1947 aux laboratoires Bell. Avant cette date, l'électronique reposait sur des tubes à vide en verre, encombrants, fragiles et brûlants. John Bardeen et Walter Brattain ont réussi à reproduire cet effet d'amplification du courant électrique à travers un minuscule cristal de germanium sur lequel ils avaient appliqué deux pointes d'or. Le premier transistor (à pointes) était né, changeant la civilisation à tout jamais.
-*   Contextes associés (1) :
-    *   Titre : *Niveaux d'énergie et bande interdite (Gap)*
-    *   Contenu (Markdown + LaTeX) : Contrairement à un métal classique où la bande de conduction recoupe la bande de valence, un semi-conducteur possède une bande interdite (gap `\(E_g\)`). Dans le germanium, `\(E_g \approx 0,67 \text{ eV}\)`. Le contact électrique des pointes d'or injecte des "trous" (charges positives) dans la surface de type N du cristal. L'équation de la concentration intrinsèque en porteurs de charge en bloc LaTeX s'écrit en fonction de la température `\(T\)` : `\[ n_i^2 = N_C N_V \exp\left(-\frac{E_g}{k_B T}\right) \]`. La modulation de ce nuage de charges minoritaires par le courant de l'émetteur contrôle proportionnellement le courant beaucoup plus puissant du collecteur.
-*   Sources associées (1) :
-    *   Source 1 : *The Transistor, A Semi-Conductor Triode* (J. Bardeen, W.H. Brattain, Physical Review, 1948). URL : `https://journals.aps.org/pr/abstract/10.1103/PhysRev.74.230`
+# Nouvelles anecdotes à ajouter
 
 ### 88. La Constante Presque Entière de Ramanujan
 *   Identifiant : `anecdote_ramanujan_constant_almost_integer`
