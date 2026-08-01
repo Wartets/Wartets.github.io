@@ -59,6 +59,26 @@ Ce fichier répertorie les anecdotes de `docs/anecdotes_list.md` déjà impléme
 | 56 | anecdote_foucault_pendulum_earth_rotation | data/anecdotes/physique/foucault_pendulum_earth_rotation.js |
 | 57 | anecdote_friendship_theorem_graph | data/anecdotes/mathematiques/friendship_theorem_graph.js |
 | 58 | anecdote_olbers_paradox_dark_sky | data/anecdotes/physique/olbers_paradox_dark_sky.js |
+| 59 | anecdote_mpemba_effect_freezing | data/anecdotes/physique/mpemba_effect_freezing.js |
+| 60 | anecdote_cosmic_rays_bit_flip | data/anecdotes/physique/cosmic_rays_bit_flip.js |
+| 61 | anecdote_frog_magnetic_levitation | data/anecdotes/physique/frog_magnetic_levitation.js |
+| 62 | anecdote_coastline_paradox_fractals | data/anecdotes/mathematiques/coastline_paradox_fractals.js |
+| 63 | anecdote_zipfs_law_linguistics | data/anecdotes/mathematiques/zipfs_law_linguistics.js |
+| 64 | anecdote_glass_is_a_solid | data/anecdotes/physique/glass_is_a_solid.js |
+| 65 | anecdote_pulsar_angular_momentum | data/anecdotes/physique/pulsar_angular_momentum.js |
+| 66 | anecdote_chirality_limonene_smell | data/anecdotes/physique/chirality_limonene_smell.js |
+| 67 | anecdote_dna_length_human_body | data/anecdotes/physique/dna_length_human_body.js |
+| 68 | anecdote_helium_superfluid_rollin_film | data/anecdotes/physique/helium_superfluid_rollin_film.js |
+| 69 | anecdote_tidal_friction_moon_recession | data/anecdotes/physique/tidal_friction_moon_recession.js |
+| 70 | anecdote_monty_hall_probability | data/anecdotes/mathematiques/monty_hall_probability.js |
+| 71 | anecdote_mars_olympus_mons | data/anecdotes/physique/mars_olympus_mons.js |
+| 72 | anecdote_solar_neutrino_flux | data/anecdotes/physique/solar_neutrino_flux.js |
+| 73 | anecdote_euler_polyhedron_formula | data/anecdotes/mathematiques/euler_polyhedron_formula.js |
+| 74 | anecdote_infinite_monkey_theorem | data/anecdotes/mathematiques/infinite_monkey_theorem.js |
+| 75 | anecdote_sonoluminescence_star_jar | data/anecdotes/physique/sonoluminescence_star_jar.js |
+| 76 | anecdote_factorial_10_weeks | data/anecdotes/mathematiques/factorial_10_weeks.js |
+| 77 | anecdote_meter_definition_c | data/anecdotes/physique/meter_definition_c.js |
+| 78 | anecdote_dirichlet_pigeonhole_principle | data/anecdotes/mathematiques/dirichlet_pigeonhole_principle.js |
 
 ## Anecdotes ignorées (doublons de contenu avec une anecdote déjà existante)
 
@@ -72,4 +92,4 @@ Ce fichier répertorie les anecdotes de `docs/anecdotes_list.md` déjà impléme
 
 ## Prochain lot à traiter
 
-À partir de l'anecdote #59 (`anecdote_mpemba_effect_freezing`) dans `docs/anecdotes_list.md`.
+À partir de l'anecdote #79 (`anecdote_roentgen_xray_discovery`) dans `docs/anecdotes_list.md`.

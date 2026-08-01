@@ -574,5 +574,165 @@ export default [
 		addedDate: '2026-07-31',
 		scheduling: { type: 'anytime', dates: [] },
 		path: '/data/anecdotes/physique/olbers_paradox_dark_sky.js'
+	},
+	{
+		id: 'anecdote_mpemba_effect_freezing',
+		priority: 4,
+		enabled: true,
+		addedDate: '2026-08-01',
+		scheduling: { type: 'anytime', dates: [] },
+		path: '/data/anecdotes/physique/mpemba_effect_freezing.js'
+	},
+	{
+		id: 'anecdote_cosmic_rays_bit_flip',
+		priority: 4,
+		enabled: true,
+		addedDate: '2026-08-01',
+		scheduling: { type: 'anytime', dates: [] },
+		path: '/data/anecdotes/physique/cosmic_rays_bit_flip.js'
+	},
+	{
+		id: 'anecdote_frog_magnetic_levitation',
+		priority: 4,
+		enabled: true,
+		addedDate: '2026-08-01',
+		scheduling: { type: 'anytime', dates: [] },
+		path: '/data/anecdotes/physique/frog_magnetic_levitation.js'
+	},
+	{
+		id: 'anecdote_coastline_paradox_fractals',
+		priority: 4,
+		enabled: true,
+		addedDate: '2026-08-01',
+		scheduling: { type: 'anytime', dates: [] },
+		path: '/data/anecdotes/mathematiques/coastline_paradox_fractals.js'
+	},
+	{
+		id: 'anecdote_zipfs_law_linguistics',
+		priority: 4,
+		enabled: true,
+		addedDate: '2026-08-01',
+		scheduling: { type: 'anytime', dates: [] },
+		path: '/data/anecdotes/mathematiques/zipfs_law_linguistics.js'
+	},
+	{
+		id: 'anecdote_glass_is_a_solid',
+		priority: 4,
+		enabled: true,
+		addedDate: '2026-08-01',
+		scheduling: { type: 'anytime', dates: [] },
+		path: '/data/anecdotes/physique/glass_is_a_solid.js'
+	},
+	{
+		id: 'anecdote_pulsar_angular_momentum',
+		priority: 4,
+		enabled: true,
+		addedDate: '2026-08-01',
+		scheduling: { type: 'anytime', dates: [] },
+		path: '/data/anecdotes/physique/pulsar_angular_momentum.js'
+	},
+	{
+		id: 'anecdote_chirality_limonene_smell',
+		priority: 4,
+		enabled: true,
+		addedDate: '2026-08-01',
+		scheduling: { type: 'anytime', dates: [] },
+		path: '/data/anecdotes/physique/chirality_limonene_smell.js'
+	},
+	{
+		id: 'anecdote_dna_length_human_body',
+		priority: 4,
+		enabled: true,
+		addedDate: '2026-08-01',
+		scheduling: { type: 'anytime', dates: [] },
+		path: '/data/anecdotes/physique/dna_length_human_body.js'
+	},
+	{
+		id: 'anecdote_helium_superfluid_rollin_film',
+		priority: 4,
+		enabled: true,
+		addedDate: '2026-08-01',
+		scheduling: { type: 'annual', dates: ['01-08'] },
+		path: '/data/anecdotes/physique/helium_superfluid_rollin_film.js'
+	},
+	{
+		id: 'anecdote_tidal_friction_moon_recession',
+		priority: 4,
+		enabled: true,
+		addedDate: '2026-08-01',
+		scheduling: { type: 'anytime', dates: [] },
+		path: '/data/anecdotes/physique/tidal_friction_moon_recession.js'
+	},
+	{
+		id: 'anecdote_monty_hall_probability',
+		priority: 4,
+		enabled: true,
+		addedDate: '2026-08-01',
+		scheduling: { type: 'anytime', dates: [] },
+		path: '/data/anecdotes/mathematiques/monty_hall_probability.js'
+	},
+	{
+		id: 'anecdote_mars_olympus_mons',
+		priority: 4,
+		enabled: true,
+		addedDate: '2026-08-01',
+		scheduling: { type: 'anytime', dates: [] },
+		path: '/data/anecdotes/physique/mars_olympus_mons.js'
+	},
+	{
+		id: 'anecdote_solar_neutrino_flux',
+		priority: 4,
+		enabled: true,
+		addedDate: '2026-08-01',
+		scheduling: { type: 'anytime', dates: [] },
+		path: '/data/anecdotes/physique/solar_neutrino_flux.js'
+	},
+	{
+		id: 'anecdote_euler_polyhedron_formula',
+		priority: 4,
+		enabled: true,
+		addedDate: '2026-08-01',
+		scheduling: { type: 'anytime', dates: [] },
+		path: '/data/anecdotes/mathematiques/euler_polyhedron_formula.js'
+	},
+	{
+		id: 'anecdote_infinite_monkey_theorem',
+		priority: 4,
+		enabled: true,
+		addedDate: '2026-08-01',
+		scheduling: { type: 'anytime', dates: [] },
+		path: '/data/anecdotes/mathematiques/infinite_monkey_theorem.js'
+	},
+	{
+		id: 'anecdote_sonoluminescence_star_jar',
+		priority: 4,
+		enabled: true,
+		addedDate: '2026-08-01',
+		scheduling: { type: 'anytime', dates: [] },
+		path: '/data/anecdotes/physique/sonoluminescence_star_jar.js'
+	},
+	{
+		id: 'anecdote_factorial_10_weeks',
+		priority: 4,
+		enabled: true,
+		addedDate: '2026-08-01',
+		scheduling: { type: 'anytime', dates: [] },
+		path: '/data/anecdotes/mathematiques/factorial_10_weeks.js'
+	},
+	{
+		id: 'anecdote_meter_definition_c',
+		priority: 4,
+		enabled: true,
+		addedDate: '2026-08-01',
+		scheduling: { type: 'annual', dates: ['10-21'] },
+		path: '/data/anecdotes/physique/meter_definition_c.js'
+	},
+	{
+		id: 'anecdote_dirichlet_pigeonhole_principle',
+		priority: 4,
+		enabled: true,
+		addedDate: '2026-08-01',
+		scheduling: { type: 'anytime', dates: [] },
+		path: '/data/anecdotes/mathematiques/dirichlet_pigeonhole_principle.js'
 	}
 ];
