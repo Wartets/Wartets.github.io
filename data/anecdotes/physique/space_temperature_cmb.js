@@ -11,8 +11,8 @@ export default {
 	},
 	sources: [
 		{
-			name: { fr: 'The Cosmic Microwave Background (Ruth Durrer, Cambridge University Press, 2008)', en: 'The Cosmic Microwave Background (Ruth Durrer, Cambridge University Press, 2008)' },
-			url: 'https://www.cambridge.org/core/books/cosmic-microwave-background/'
+			name: { fr: 'The Cosmic Microwave Background (Ruth Durrer, 2008)', en: 'The Cosmic Microwave Background (Ruth Durrer, 2008)' },
+			url: 'https://doi.org/10.48550/arXiv.1506.01907'
 		}
 	],
 	contexts: [

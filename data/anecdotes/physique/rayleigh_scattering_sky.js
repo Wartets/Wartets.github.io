@@ -11,8 +11,8 @@ export default {
 	},
 	sources: [
 		{
-			name: { fr: 'On the light from the sky, its polarization and colour (Lord Rayleigh, Philosophical Magazine and Journal of Science, 1871)', en: 'On the light from the sky, its polarization and colour (Lord Rayleigh, Philosophical Magazine and Journal of Science, 1871)' },
-			url: 'https://www.tandfonline.com/doi/abs/10.1080/14786447108640454'
+			name: { fr: 'On the light from the sky, its polarization and colour (2011)', en: 'On the light from the sky, its polarization and colour (2011)' },
+			url: 'https://doi.org/10.1017/CBO9780511703966.009'
 		}
 	],
 	contexts: [

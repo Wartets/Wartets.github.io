@@ -11,8 +11,8 @@ export default {
 	},
 	sources: [
 		{
-			name: { fr: 'The myth of flowing glass (E.D. Zanotto, American Journal of Physics, 1998)', en: 'The myth of flowing glass (E.D. Zanotto, American Journal of Physics, 1998)' },
-			url: 'https://aapt.scitation.org/doi/10.1119/1.19026'
+			name: { fr: 'Do cathedral glasses flow? (1998)', en: 'Do cathedral glasses flow? (1998)' },
+			url: 'https://doi.org/10.1119/1.19026'
 		}
 	],
 	contexts: [

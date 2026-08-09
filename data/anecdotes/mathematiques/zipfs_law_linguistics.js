@@ -12,7 +12,7 @@ export default {
 	sources: [
 		{
 			name: { fr: 'Human Behavior and the Principle of Least Effort (George K. Zipf, Addison-Wesley Press, 1949)', en: 'Human Behavior and the Principle of Least Effort (George K. Zipf, Addison-Wesley Press, 1949)' },
-			url: 'https://archive.org/details/humanbehaviorand00zipf'
+			url: 'https://archive.org/details/in.ernet.dli.2015.90211'
 		}
 	],
 	contexts: [

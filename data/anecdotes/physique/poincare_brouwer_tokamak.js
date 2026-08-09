@@ -12,7 +12,7 @@ export default {
 	sources: [
 		{
 			name: { fr: 'Sur les courbes définies par une équation différentielle (1885)', en: 'Sur les courbes définies par une équation différentielle (1885)' },
-			url: 'https://gallica.bnf.fr/ark:/12148/bpt6k164010'
+			url: 'https://eudml.org/doc/235596'
 		}
 	],
 	contexts: [

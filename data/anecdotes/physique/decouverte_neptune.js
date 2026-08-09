@@ -13,8 +13,8 @@ export default {
 	},
 	sources: [
 		{
-			name: { fr: 'Observatoire de Paris', en: 'Paris Observatory' },
-			url: 'https://www.observatoiredeparis.psl.eu/spip.php?rubrique240&lang=fr'
+			name: { fr: 'Comptes Rendus de l\'Académie des Sciences', en: 'Comptes Rendus de l\'Académie des Sciences' },
+			url: 'https://comptes-rendus.academie-sciences.fr/physique/item/10.1016/j.crhy.2017.10.011.pdf'
 		}
 	],
 	contexts: [

@@ -12,7 +12,7 @@ export default {
 	sources: [
 		{
 			name: { fr: 'Elementa doctrinae solidorum (L. Euler, Novi Commentarii academiae scientiarum Petropolitanae, 1758)', en: 'Elementa doctrinae solidorum (L. Euler, Novi Commentarii academiae scientiarum Petropolitanae, 1758)' },
-			url: 'https://math.dartmouth.edu/~euler/pages/E230.html'
+			url: 'https://scholarlycommons.pacific.edu/cgi/viewcontent.cgi?article=1229&context=euler-works'
 		}
 	],
 	contexts: [

@@ -12,7 +12,7 @@ export default {
 	sources: [
 		{
 			name: { fr: 'Knot Theory and Its Applications (K. Murasugi, Birkhäuser, 1996, Chapter 1)', en: 'Knot Theory and Its Applications (K. Murasugi, Birkhäuser, 1996, Chapter 1)' },
-			url: 'https://link.springer.com/book/10.1007/978-0-8176-4718-6'
+			url: 'https://www.sidalc.net/search/Record/KOHA-OAI-TEST:212470/Description'
 		}
 	],
 	contexts: [

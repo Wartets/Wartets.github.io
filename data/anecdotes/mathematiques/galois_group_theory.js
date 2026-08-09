@@ -14,7 +14,7 @@ export default {
 	sources: [
 		{
 			name: { fr: 'Œuvres mathématiques d\'Évariste Galois (1846)', en: 'Œuvres mathématiques d\'Évariste Galois (1846)' },
-			url: 'https://gallica.bnf.fr/ark:/12148/bpt6k16394s/f395.image'
+			url: 'https://www.numdam.org/item/JMPA_1846_1_11__381_0.pdf'
 		}
 	],
 	contexts: [

@@ -13,7 +13,7 @@ export default {
 	},
 	sources: [
 		{
-			name: { fr: 'Physical Review Letters (2016)', en: 'Physical Review Letters (2016)' },
+			name: { fr: 'Observation of Gravitational Waves from a Binary Black Hole Merger (2016)', en: 'Observation of Gravitational Waves from a Binary Black Hole Merger (2016)' },
 			url: 'https://journals.aps.org/prl/abstract/10.1103/PhysRevLett.116.061102'
 		}
 	],

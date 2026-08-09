@@ -11,8 +11,8 @@ export default {
 	},
 	sources: [
 		{
-			name: { fr: 'Definition of the kelvin (SI Brochure: The International System of Units) (BIPM, 2006)', en: 'Definition of the kelvin (SI Brochure: The International System of Units) (BIPM, 2006)' },
-			url: 'https://www.bipm.org/en/committees/cg/cgpm/26-2018/resolution-1'
+			name: { fr: 'SI base unit: kelvin (K)', en: 'SI base unit: kelvin (K)' },
+			url: 'https://www.bipm.org/en/si-base-units/kelvin'
 		}
 	],
 	contexts: [

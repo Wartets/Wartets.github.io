@@ -11,8 +11,8 @@ export default {
 	},
 	sources: [
 		{
-			name: { fr: 'Geology of Mars (M.H. Carr, Yale University Press, 2006)', en: 'Geology of Mars (M.H. Carr, Yale University Press, 2006)' },
-			url: 'https://yalebooks.yale.edu/book/9780300259835/the-surface-of-mars/'
+			name: { fr: 'The Surface of Mars (1982)', en: 'The Surface of Mars (1982)' },
+			url: 'https://doi.org/10.1093/astrogeo/72.2.537-a'
 		}
 	],
 	contexts: [

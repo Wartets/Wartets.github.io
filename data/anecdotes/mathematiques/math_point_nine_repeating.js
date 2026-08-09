@@ -12,7 +12,7 @@ export default {
 	sources: [
 		{
 			name: { fr: 'Principles of Mathematical Analysis, 3rd Edition (Walter Rudin, McGraw-Hill, 1976, p. 11)', en: 'Principles of Mathematical Analysis, 3rd Edition (Walter Rudin, McGraw-Hill, 1976, p. 11)' },
-			url: 'https://minds.wisconsin.edu/handle/1793/67009'
+			url: 'https://david92jackson.neocities.org/images/Principles_of_Mathematical_Analysis-Rudin.pdf'
 		}
 	],
 	contexts: [

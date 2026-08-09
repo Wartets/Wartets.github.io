@@ -12,7 +12,7 @@ export default {
 	sources: [
 		{
 			name: { fr: 'The Universal Book of Mathematics: From Abracadabra to Zeno\'s Paradoxes (David Darling, John Wiley & Sons, 2004)', en: 'The Universal Book of Mathematics: From Abracadabra to Zeno\'s Paradoxes (David Darling, John Wiley & Sons, 2004)' },
-			url: 'https://books.google.com/books?id=QVQY1B334JMC'
+			url: 'https://www.softouch.on.ca/kb/data/Universal%20Book%20of%20Mathematics%20%28The%29.pdf'
 		}
 	],
 	contexts: [

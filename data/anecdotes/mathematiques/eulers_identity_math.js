@@ -12,7 +12,7 @@ export default {
 	sources: [
 		{
 			name: { fr: 'Introductio in analysin infinitorum (L. Euler, Marcum-Michaelem Bousquet, 1748)', en: 'Introductio in analysin infinitorum (L. Euler, Marcum-Michaelem Bousquet, 1748)' },
-			url: 'https://math.dartmouth.edu/~euler/pages/E101.html'
+			url: 'https://archive.org/details/bub_gb_jQ1bAAAAQAAJ'
 		}
 	],
 	contexts: [

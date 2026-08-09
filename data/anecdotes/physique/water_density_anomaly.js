@@ -11,8 +11,8 @@ export default {
 	},
 	sources: [
 		{
-			name: { fr: 'The anomalous properties of water (Water Structure and Science, London South Bank University)', en: 'The anomalous properties of water (Water Structure and Science, London South Bank University)' },
-			url: 'https://water.lsbu.ac.uk/water/water_anomalies.html'
+			name: { fr: 'Water Structure and Science (2008)', en: 'Water Structure and Science (2008)' },
+			url: 'https://www.researchgate.net/publication/33373597_Water_Structure_and_Science'
 		}
 	],
 	contexts: [

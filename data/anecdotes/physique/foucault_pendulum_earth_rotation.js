@@ -13,8 +13,8 @@ export default {
 	},
 	sources: [
 		{
-			name: { fr: 'Démonstration physique du mouvement de rotation de la Terre au moyen du pendule (L. Foucault, Comptes rendus de l\'Académie des sciences, 1851)', en: 'Démonstration physique du mouvement de rotation de la Terre au moyen du pendule (L. Foucault, Comptes rendus de l\'Académie des sciences, 1851)' },
-			url: 'https://gallica.bnf.fr/ark:/12148/bpt6k29897'
+			name: { fr: 'The Comptes rendus de l\'Académie des sciences throughout history: Foucault and the rotation of the Earth (2017)', en: 'The Comptes rendus de l\'Académie des sciences throughout history: Foucault and the rotation of the Earth (2017)' },
+			url: 'https://doi.org/10.1016/j.crhy.2017.11.003'
 		}
 	],
 	contexts: [

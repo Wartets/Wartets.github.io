@@ -12,7 +12,7 @@ export default {
 	sources: [
 		{
 			name: { fr: 'On the Theory of the Magnetic Influence on Spectra (1897)', en: 'On the Theory of the Magnetic Influence on Spectra (1897)' },
-			url: 'https://zenodo.org/record/1431102'
+			url: 'https://doi.org/10.1080/14786449708621095'
 		}
 	],
 	contexts: [

@@ -12,7 +12,7 @@ export default {
 	sources: [
 		{
 			name: { fr: 'Sur deux questions de géométrie et de topologie (A.S. Besicovitch, Mathematische Annalen, 1919)', en: 'Sur deux questions de géométrie et de topologie (A.S. Besicovitch, Mathematische Annalen, 1919)' },
-			url: 'https://link.springer.com/article/10.1007/BF01458264'
+			url: ''
 		}
 	],
 	contexts: [

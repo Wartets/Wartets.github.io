@@ -1,6 +1,6 @@
 export default {
 	id: 'anecdote_monstrous_moonshine',
-	enabled: true,
+	enabled: false,
 	priority: 4,
 	addedDate: '2026-07-31',
 	domain: { fr: 'Mathématiques - Théorie des Groupes', en: 'Mathematics - Group Theory' },
@@ -13,10 +13,6 @@ export default {
 		{
 			name: { fr: 'Monstrous Moonshine (1979)', en: 'Monstrous Moonshine (1979)' },
 			url: 'https://londmathsoc.onlinelibrary.wiley.com/doi/abs/10.1112/blms/11.3.308'
-		},
-		{
-			name: { fr: 'Monstrous moonshine and string theory (IAS)', en: 'Monstrous moonshine and string theory (IAS)' },
-			url: 'https://www.ias.edu/ideas/2012/duncan-monstrous-moonshine'
 		}
 	],
 	contexts: [

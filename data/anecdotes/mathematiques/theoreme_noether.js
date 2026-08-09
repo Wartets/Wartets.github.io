@@ -19,7 +19,7 @@ export default {
 	sources: [
 		{
 			name: { fr: 'Nachrichten von der Gesellschaft der Wissenschaften zu Göttingen (1918)', en: 'Nachrichten von der Gesellschaft der Wissenschaften zu Göttingen (1918)' },
-			url: 'https://www.emmynoether.com/noether.pdf'
+			url: 'https://gdz.sub.uni-goettingen.de/id/PPN252457811_1918'
 		}
 	],
 	contexts: [

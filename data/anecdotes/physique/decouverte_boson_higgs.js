@@ -14,7 +14,7 @@ export default {
 	sources: [
 		{
 			name: { fr: 'CERN', en: 'CERN' },
-			url: 'https://home.cern/news/press-release/cern/cern-experiments-observe-particle-consistent-long-sought-higgs-boson'
+			url: 'https://home.cern/fr/science/physics/higgs-boson/'
 		}
 	],
 	contexts: [

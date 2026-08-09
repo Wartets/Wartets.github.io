@@ -14,7 +14,7 @@ export default {
 	sources: [
 		{
 			name: { fr: 'Gravitational Collapse and Space-Time Singularities (1965)', en: 'Gravitational Collapse and Space-Time Singularities (1965)' },
-			url: 'https://journals.aps.org/prl/abstract/10.1103/PhysRevLett.14.57'
+			url: 'https://doi.org/10.1103/PhysRevLett.14.57'
 		}
 	],
 	contexts: [

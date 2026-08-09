@@ -11,8 +11,8 @@ export default {
 	},
 	sources: [
 		{
-			name: { fr: 'Stereochemical effects in olfaction (L. Friedman, J.G. Miller, Science, 1971)', en: 'Stereochemical effects in olfaction (L. Friedman, J.G. Miller, Science, 1971)' },
-			url: 'https://www.science.org/doi/10.1126/science.172.3987.1044'
+			name: { fr: 'Odor Incongruity and Chirality (1971)', en: 'Odor Incongruity and Chirality (1971)' },
+			url: 'https://doi.org/10.1126/science.172.3987.1044'
 		}
 	],
 	contexts: [

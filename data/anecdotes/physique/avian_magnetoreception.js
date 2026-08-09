@@ -12,7 +12,7 @@ export default {
 	sources: [
 		{
 			name: { fr: 'Chemical magnetoreception in birds: The radical pair mechanism (2016)', en: 'Chemical magnetoreception in birds: The radical pair mechanism (2016)' },
-			url: 'https://www.pnas.org/doi/10.1073/pnas.1601564113'
+			url: 'https://www.pnas.org/doi/10.1073/pnas.0711968106'
 		},
 		{
 			name: { fr: 'Quantum Biology (Nature Physics, 2013)', en: 'Quantum Biology (Nature Physics, 2013)' },

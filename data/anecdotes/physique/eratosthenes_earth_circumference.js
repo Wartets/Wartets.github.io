@@ -12,7 +12,7 @@ export default {
 	sources: [
 		{
 			name: { fr: 'Astronomy Before the Telescope (C. Walker, British Museum Press, 1996)', en: 'Astronomy Before the Telescope (C. Walker, British Museum Press, 1996)' },
-			url: 'https://ui.adsabs.harvard.edu/abs/1996abt..book.....W/abstract'
+			url: 'https://ui.adsabs.harvard.edu/abs/1996abt..conf.....W/abstract'
 		}
 	],
 	contexts: [

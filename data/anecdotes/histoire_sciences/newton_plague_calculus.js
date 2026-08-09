@@ -12,7 +12,7 @@ export default {
 	sources: [
 		{
 			name: { fr: 'The Mathematical Papers of Isaac Newton (Éditées par D. T. Whiteside, Cambridge University Press, 1967)', en: 'The Mathematical Papers of Isaac Newton (Edited by D. T. Whiteside, Cambridge University Press, 1967)' },
-			url: 'https://www.cambridge.org/core/books/mathematical-papers-of-isaac-newton/'
+			url: 'https://assets.cambridge.org/97805210/45858/frontmatter/9780521045858_frontmatter.pdf/'
 		}
 	],
 	contexts: [

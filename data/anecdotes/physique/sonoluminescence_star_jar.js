@@ -11,8 +11,8 @@ export default {
 	},
 	sources: [
 		{
-			name: { fr: 'Observation of single-bubble sonoluminescence (D.F. Gaitan et al., The Journal of the Acoustical Society of America, 1992)', en: 'Observation of single-bubble sonoluminescence (D.F. Gaitan et al., The Journal of the Acoustical Society of America, 1992)' },
-			url: 'https://asa.scitation.org/doi/10.1121/1.402855'
+			name: { fr: 'Sonoluminescence and bubble dynamics for a single, stable, cavitation bubble (1992)', en: 'Sonoluminescence and bubble dynamics for a single, stable, cavitation bubble (1992)' },
+			url: 'https://doi.org/10.1121/1.402855'
 		}
 	],
 	contexts: [

@@ -11,8 +11,8 @@ export default {
 	},
 	sources: [
 		{
-			name: { fr: 'Tidal evolution of the Earth-Moon system (B.G. Bills, R.D. Ray, Geophysical Research Letters, 1999)', en: 'Tidal evolution of the Earth-Moon system (B.G. Bills, R.D. Ray, Geophysical Research Letters, 1999)' },
-			url: 'https://agupubs.onlinelibrary.wiley.com/doi/abs/10.1029/1999GL008348'
+			name: { fr: 'Lunar orbital evolution: A synthesis of recent results (B.G. Bills, R.D. Ray, Geophysical Research Letters, 1999)', en: 'Lunar orbital evolution: A synthesis of recent results (B.G. Bills, R.D. Ray, Geophysical Research Letters, 1999)' },
+			url: 'https://doi.org/10.1029/1999GL008348 '
 		}
 	],
 	contexts: [

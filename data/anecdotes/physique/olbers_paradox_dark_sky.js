@@ -12,7 +12,7 @@ export default {
 	sources: [
 		{
 			name: { fr: 'Cosmology: The Science of the Universe, 2nd Edition (Edward Harrison, Cambridge University Press, 2000)', en: 'Cosmology: The Science of the Universe, 2nd Edition (Edward Harrison, Cambridge University Press, 2000)' },
-			url: 'https://www.cambridge.org/core/books/cosmology/'
+			url: 'https://books.google.fr/books?id=eFchAwAAQBAJ&lpg=PR9&ots=Ga0SSHGW72&dq=Cosmology%3A%20The%20Science%20of%20the%20Universe%2C%202nd%20Edition%20(Edward%20Harrison&lr&hl=fr&pg=PR8#v=onepage&q&f=false'
 		}
 	],
 	contexts: [

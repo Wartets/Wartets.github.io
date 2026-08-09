@@ -12,7 +12,7 @@ export default {
 	sources: [
 		{
 			name: { fr: 'On a Problem of Graph Theory (P. Erdős, A. Rényi, V. T. Sós, Studia Sci. Math. Hungar., 1966)', en: 'On a Problem of Graph Theory (P. Erdős, A. Rényi, V. T. Sós, Studia Sci. Math. Hungar., 1966)' },
-			url: 'https://users.renyi.hu/~p_erdos/1966-06.pdf'
+			url: 'https://renyi.hu/~p_erdos/1966-06.pdf'
 		}
 	],
 	contexts: [

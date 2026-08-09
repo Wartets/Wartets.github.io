@@ -11,8 +11,8 @@ export default {
 	},
 	sources: [
 		{
-			name: { fr: 'Structure of Liquid Gallium from X-Ray Diffraction (A. Bizid et al., The Journal of Chemical Physics, 1980)', en: 'Structure of Liquid Gallium from X-Ray Diffraction (A. Bizid et al., The Journal of Chemical Physics, 1980)' },
-			url: 'https://aip.scitation.org/doi/abs/10.1063/1.440268'
+			name: { fr: 'X-Ray Diffraction Study On Liquid And Non Crystalline Solid Gallium, Bismuth And Mercury (1980)', en: 'X-Ray Diffraction Study On Liquid And Non Crystalline Solid Gallium, Bismuth And Mercury (1980)' },
+			url: 'https://hal.science/jpa-00220363v1/document'
 		}
 	],
 	contexts: [

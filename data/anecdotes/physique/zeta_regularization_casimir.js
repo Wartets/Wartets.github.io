@@ -15,7 +15,7 @@ export default {
 			url: 'https://dwc.knaw.nl/DL/publications/PU00018547.pdf'
 		},
 		{
-			name: { fr: 'The Casimir effect and its applications (2001)', en: 'The Casimir effect and its applications (2001)' },
+			name: { fr: 'New Developments in the Casimir Effect (2001)', en: 'New Developments in the Casimir Effect (2001)' },
 			url: 'https://arxiv.org/abs/quant-ph/0106045'
 		}
 	],

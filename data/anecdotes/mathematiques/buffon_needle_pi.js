@@ -12,7 +12,7 @@ export default {
 	sources: [
 		{
 			name: { fr: 'Essai d\'arithmétique morale (1777)', en: 'Essai d\'arithmétique morale (1777)' },
-			url: 'https://gallica.bnf.fr/ark:/12148/bpt6k2978x'
+			url: 'https://www.researchgate.net/publication/226040429_Georges-Louis_Leclerc_de_Buffon%27s_%27Essays_on_Moral_Arithmetic%27'
 		}
 	],
 	contexts: [

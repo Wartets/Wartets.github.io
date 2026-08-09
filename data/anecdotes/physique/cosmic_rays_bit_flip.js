@@ -11,8 +11,8 @@ export default {
 	},
 	sources: [
 		{
-			name: { fr: 'Cosmic Rays and Soft Errors (J.F. Ziegler, IBM Journal of Research and Development, 1996)', en: 'Cosmic Rays and Soft Errors (J.F. Ziegler, IBM Journal of Research and Development, 1996)' },
-			url: 'https://ieeexplore.ieee.org/document/5390035'
+			name: { fr: 'Field testing for cosmic ray soft errors in semiconductor memories (1996)', en: 'Field testing for cosmic ray soft errors in semiconductor memories (1996)' },
+			url: 'https://doi.org/10.1147/rd.401.004'
 		}
 	],
 	contexts: [

@@ -15,7 +15,7 @@ export default {
 			url: 'https://journals.aps.org/pr/abstract/10.1103/PhysRev.115.485'
 		},
 		{
-			name: { fr: 'Observation of Aharonov-Bohm Effect by Electron Holography (1986)', en: 'Observation of Aharonov-Bohm Effect by Electron Holography (1986)' },
+			name: { fr: 'Evidence for Aharonov-Bohm effect with magnetic field completely shielded from electron wave (1986)', en: 'Evidence for Aharonov-Bohm effect with magnetic field completely shielded from electron wave (1986)' },
 			url: 'https://journals.aps.org/prl/abstract/10.1103/PhysRevLett.56.792'
 		}
 	],

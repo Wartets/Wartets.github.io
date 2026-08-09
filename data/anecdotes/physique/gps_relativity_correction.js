@@ -11,8 +11,8 @@ export default {
 	},
 	sources: [
 		{
-			name: { fr: 'Relativity and the Global Positioning System (N. Ashby, Physics Today, 2002)', en: 'Relativity and the Global Positioning System (N. Ashby, Physics Today, 2002)' },
-			url: 'https://physicstoday.scitation.org/doi/10.1063/1.1485583'
+			name: { fr: 'Relativity and the Global Positioning System (N. Ashby, Physics Today, 2003)', en: 'Relativity and the Global Positioning System (N. Ashby, Physics Today, 2003)' },
+			url: 'https://doi.org/10.12942/lrr-2003-1'
 		}
 	],
 	contexts: [

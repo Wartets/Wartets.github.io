@@ -11,7 +11,7 @@ export default {
 	},
 	sources: [
 		{
-			name: { fr: 'The Densities of Osmium and Iridium (J.W. Arblaster, Platinum Metals Review, 1989)', en: 'The Densities of Osmium and Iridium (J.W. Arblaster, Platinum Metals Review, 1989)' },
+			name: { fr: 'Densities of Osmium and Iridium (J.W. Arblaster, Platinum Metals Review, 1989)', en: 'Densities of Osmium and Iridium (J.W. Arblaster, Platinum Metals Review, 1989)' },
 			url: 'https://technology.matthey.com/article/33/1/14-16/'
 		}
 	],

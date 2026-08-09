@@ -11,8 +11,8 @@ export default {
 	},
 	sources: [
 		{
-			name: { fr: 'De aquae communis nonnullis qualitatibus tractatus (J.G. Leidenfrost, 1756, traduit dans International Journal of Heat and Mass Transfer, 1966)', en: 'De aquae communis nonnullis qualitatibus tractatus (J.G. Leidenfrost, 1756, translated in International Journal of Heat and Mass Transfer, 1966)' },
-			url: 'https://www.sciencedirect.com/science/article/abs/pii/0017931066901116'
+			name: { fr: 'De aquae communis nonnullis qualitatibus tractatus (J.G. Leidenfrost, 1756)', en: 'De aquae communis nonnullis qualitatibus tractatus (J.G. Leidenfrost, 1756)' },
+			url: 'https://doi.org/10.13140/RG.2.1.1442.7045'
 		}
 	],
 	contexts: [

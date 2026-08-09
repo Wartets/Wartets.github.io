@@ -12,7 +12,7 @@ export default {
 	sources: [
 		{
 			name: { fr: 'The Monty Hall problem (S. Selvin, The American Statistician, 1975)', en: 'The Monty Hall problem (S. Selvin, The American Statistician, 1975)' },
-			url: 'https://amstat.tandfonline.com/doi/abs/10.1080/00031305.1975.10479121'
+			url: 'https://www.montyhallproblem.com/as.html'
 		}
 	],
 	contexts: [

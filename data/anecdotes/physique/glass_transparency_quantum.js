@@ -11,8 +11,8 @@ export default {
 	},
 	sources: [
 		{
-			name: { fr: 'Optical properties of glass (J. Tauc, Journal of Non-Crystalline Solids, 1970)', en: 'Optical properties of glass (J. Tauc, Journal of Non-Crystalline Solids, 1970)' },
-			url: 'https://www.sciencedirect.com/science/article/pii/0022309370901563'
+			name: { fr: 'Properties and structure of vitreous silica. I (1970)', en: 'Properties and structure of vitreous silica. I (1970)' },
+			url: 'https://scixplorer.org/link_gateway/1970JNCS....5..123B/doi:10.1016/0022-3093(70)90190-0'
 		}
 	],
 	contexts: [

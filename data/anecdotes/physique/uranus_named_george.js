@@ -11,8 +11,8 @@ export default {
 	},
 	sources: [
 		{
-			name: { fr: 'Account of a Comet (W. Herschel, Philosophical Transactions of the Royal Society of London, 1781)', en: 'Account of a Comet (W. Herschel, Philosophical Transactions of the Royal Society of London, 1781)' },
-			url: 'https://royalsocietypublishing.org/doi/10.1098/rstl.1781.0056'
+			name: { fr: 'Naming the Universe, American Scientist', en: 'Naming the Universe, American Scientist' },
+			url: 'https://www.jstor.org/stable/26910913'
 		}
 	],
 	contexts: [

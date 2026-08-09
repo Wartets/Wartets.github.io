@@ -12,7 +12,7 @@ export default {
 	sources: [
 		{
 			name: { fr: 'Mécanique Statistique et Irréversibilité (É. Borel, Journal de Physique Théorique et Appliquée, 1913)', en: 'Mécanique Statistique et Irréversibilité (É. Borel, Journal de Physique Théorique et Appliquée, 1913)' },
-			url: 'https://hal.archives-ouvertes.fr/jpa-00241857/document'
+			url: 'https://hal.science/jpa-00241832/document'
 		}
 	],
 	contexts: [

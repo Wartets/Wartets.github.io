@@ -10,10 +10,10 @@ export default {
 		en: `How many people need to be gathered in a room for there to be more than a 50% chance that two of them share the same birthday? Human intuition, accustomed to linear reasoning, often suggests a number close to 180 (half the days in a year). In reality, the mathematical laws of probability show that just 23 people suffice. With 70 people, the probability reaches 99.9%.`
 	},
 	sources: [
-		{
-			name: { fr: 'Understanding Probability, 3rd Edition (Henk Tijms, Cambridge University Press, 2012)', en: 'Understanding Probability, 3rd Edition (Henk Tijms, Cambridge University Press, 2012)' },
-			url: 'https://www.cambridge.org/highereducation/books/understanding-probability/'
-		}
+		// {
+		// 	name: { fr: 'Understanding Probability, 3rd Edition (Henk Tijms, Cambridge University Press, 2012)', en: 'Understanding Probability, 3rd Edition (Henk Tijms, Cambridge University Press, 2012)' },
+		// 	url: 'https://www.cambridge.org/highereducation/books/understanding-probability/'
+		// }
 	],
 	contexts: [
 		{

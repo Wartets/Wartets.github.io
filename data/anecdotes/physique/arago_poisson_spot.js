@@ -12,7 +12,7 @@ export default {
 	sources: [
 		{
 			name: { fr: 'Mémoire sur la diffraction de la lumière (1818)', en: 'Mémoire sur la diffraction de la lumière (1818)' },
-			url: 'https://gallica.bnf.fr/ark:/12148/bpt6k2991j'
+			url: 'https://doi.org/10.4000/bibnum.749'
 		}
 	],
 	contexts: [
