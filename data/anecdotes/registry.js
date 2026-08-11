@@ -1030,5 +1030,165 @@ export default [
 		addedDate: '2026-08-11',
 		scheduling: { type: 'anytime', dates: [] },
 		path: '/data/anecdotes/physique/magnus_effect_fluid.js'
+	},
+	{
+		id: 'anecdote_diffie_hellman_key_exchange',
+		priority: 4,
+		enabled: true,
+		addedDate: '2026-08-11',
+		scheduling: { type: 'anytime', dates: [] },
+		path: '/data/anecdotes/mathematiques/diffie_hellman_key_exchange.js'
+	},
+	{
+		id: 'anecdote_nash_equilibrium_game_theory',
+		priority: 4,
+		enabled: true,
+		addedDate: '2026-08-11',
+		scheduling: { type: 'anytime', dates: [] },
+		path: '/data/anecdotes/mathematiques/nash_equilibrium_game_theory.js'
+	},
+	{
+		id: 'anecdote_karman_vortex_street',
+		priority: 4,
+		enabled: true,
+		addedDate: '2026-08-11',
+		scheduling: { type: 'anytime', dates: [] },
+		path: '/data/anecdotes/physique/karman_vortex_street.js'
+	},
+	{
+		id: 'anecdote_collatz_conjecture_math',
+		priority: 4,
+		enabled: true,
+		addedDate: '2026-08-11',
+		scheduling: { type: 'anytime', dates: [] },
+		path: '/data/anecdotes/mathematiques/collatz_conjecture_math.js'
+	},
+	{
+		id: 'anecdote_carnot_cycle_thermodynamics',
+		priority: 4,
+		enabled: true,
+		addedDate: '2026-08-11',
+		scheduling: { type: 'anytime', dates: [] },
+		path: '/data/anecdotes/physique/carnot_cycle_thermodynamics.js'
+	},
+	{
+		id: 'anecdote_frame_dragging_lense_thirring',
+		priority: 4,
+		enabled: true,
+		addedDate: '2026-08-11',
+		scheduling: { type: 'anytime', dates: [] },
+		path: '/data/anecdotes/physique/frame_dragging_lense_thirring.js'
+	},
+	{
+		id: 'anecdote_quicksort_algorithm_hoare',
+		priority: 4,
+		enabled: true,
+		addedDate: '2026-08-11',
+		scheduling: { type: 'anytime', dates: [] },
+		path: '/data/anecdotes/mathematiques/quicksort_algorithm_hoare.js'
+	},
+	{
+		id: 'anecdote_runge_kutta_numerical_integration',
+		priority: 4,
+		enabled: true,
+		addedDate: '2026-08-11',
+		scheduling: { type: 'anytime', dates: [] },
+		path: '/data/anecdotes/mathematiques/runge_kutta_numerical_integration.js'
+	},
+	{
+		id: 'anecdote_penrose_process_black_hole',
+		priority: 4,
+		enabled: true,
+		addedDate: '2026-08-11',
+		scheduling: { type: 'anytime', dates: [] },
+		path: '/data/anecdotes/physique/penrose_process_black_hole.js'
+	},
+	{
+		id: 'anecdote_titius_bode_law_astronomy',
+		priority: 4,
+		enabled: true,
+		addedDate: '2026-08-11',
+		scheduling: { type: 'anytime', dates: [] },
+		path: '/data/anecdotes/physique/titius_bode_law_astronomy.js'
+	},
+	{
+		id: 'anecdote_kalman_filter_apollo',
+		priority: 4,
+		enabled: true,
+		addedDate: '2026-08-11',
+		scheduling: { type: 'anytime', dates: [] },
+		path: '/data/anecdotes/physique/kalman_filter_apollo.js'
+	},
+	{
+		id: 'anecdote_hawking_radiation_black_hole',
+		priority: 4,
+		enabled: true,
+		addedDate: '2026-08-11',
+		scheduling: { type: 'anytime', dates: [] },
+		path: '/data/anecdotes/physique/hawking_radiation_black_hole.js'
+	},
+	{
+		id: 'anecdote_poincare_conjecture_ricci_flow',
+		priority: 4,
+		enabled: true,
+		addedDate: '2026-08-11',
+		scheduling: { type: 'anytime', dates: [] },
+		path: '/data/anecdotes/mathematiques/poincare_conjecture_ricci_flow.js'
+	},
+	{
+		id: 'anecdote_no_cloning_theorem_quantum',
+		priority: 4,
+		enabled: true,
+		addedDate: '2026-08-11',
+		scheduling: { type: 'anytime', dates: [] },
+		path: '/data/anecdotes/physique/no_cloning_theorem_quantum.js'
+	},
+	{
+		id: 'anecdote_51_pegasi_b_exoplanet_radial',
+		priority: 4,
+		enabled: true,
+		addedDate: '2026-08-11',
+		scheduling: { type: 'annual', dates: ['10-06'] },
+		path: '/data/anecdotes/physique/51_pegasi_b_exoplanet_radial.js'
+	},
+	{
+		id: 'anecdote_bicycle_stability_caster_effect',
+		priority: 4,
+		enabled: true,
+		addedDate: '2026-08-11',
+		scheduling: { type: 'anytime', dates: [] },
+		path: '/data/anecdotes/physique/bicycle_stability_caster_effect.js'
+	},
+	{
+		id: 'anecdote_feynman_smoluchowski_ratchet_demon',
+		priority: 4,
+		enabled: true,
+		addedDate: '2026-08-11',
+		scheduling: { type: 'anytime', dates: [] },
+		path: '/data/anecdotes/physique/feynman_smoluchowski_ratchet_demon.js'
+	},
+	{
+		id: 'anecdote_astar_pathfinding_algorithm',
+		priority: 4,
+		enabled: true,
+		addedDate: '2026-08-11',
+		scheduling: { type: 'anytime', dates: [] },
+		path: '/data/anecdotes/mathematiques/astar_pathfinding_algorithm.js'
+	},
+	{
+		id: 'anecdote_coriolis_effect_rossby_waves',
+		priority: 4,
+		enabled: true,
+		addedDate: '2026-08-11',
+		scheduling: { type: 'anytime', dates: [] },
+		path: '/data/anecdotes/physique/coriolis_effect_rossby_waves.js'
+	},
+	{
+		id: 'anecdote_negative_refractive_index_metamaterials',
+		priority: 4,
+		enabled: true,
+		addedDate: '2026-08-11',
+		scheduling: { type: 'anytime', dates: [] },
+		path: '/data/anecdotes/physique/negative_refractive_index_metamaterials.js'
 	}
 ];
