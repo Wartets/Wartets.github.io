@@ -56,6 +56,17 @@ Liste complète des anecdotes présentes dans `data/anecdotes/registry.js`, clas
 | anecdote_topology_4d_knots | aucun nœud n'est possible dans un espace à 4 dimensions. |
 | anecdote_water_density_anomaly | (physique, voir section physique) |
 | anecdote_zipfs_law_linguistics | la loi de zipf sur la fréquence des mots dans les langues. |
+| anecdote_bayes_theorem_probability | le théorème de bayes, publié à titre posthume en 1763, fonde l'inférence bayésienne. |
+| anecdote_cantor_diagonalization_infinity | l'argument de la diagonale de cantor prouve l'existence de plusieurs tailles d'infini. |
+| anecdote_euler_totient_function_rsa_crypto | l'indicatrice d'euler (1763) fonde le chiffrement rsa moderne (1978). |
+| anecdote_hilbert_hotel_infinity | le paradoxe de l'hôtel de hilbert illustre les propriétés contre-intuitives de l'infini dénombrable. |
+| anecdote_huffman_coding_compression | l'algorithme de huffman (1952) atteint la limite théorique de compression sans perte. |
+| anecdote_kolmogorov_complexity_information | la complexité de kolmogorov mesure l'information par la longueur du plus court programme générateur. |
+| anecdote_navier_stokes_millennium_smoothness | la régularité globale des équations de navier-stokes, problème du prix du millénaire toujours ouvert. |
+| anecdote_p_vs_np_problem | le problème p contre np, question ouverte fondamentale de l'informatique théorique. |
+| anecdote_poincare_n_body_problem_chaos | poincaré découvre le chaos déterministe en étudiant le problème des trois corps (1889). |
+| anecdote_turing_bombe_enigma_crypto | turing et la bombe de bletchley park cassent le chiffrement enigma. |
+| anecdote_weierstrass_nowhere_differentiable | la fonction de weierstrass (1872), continue partout mais dérivable nulle part. |
 
 ## Physique
 
@@ -160,22 +171,31 @@ Liste complète des anecdotes présentes dans `data/anecdotes/registry.js`, clas
 | anecdote_vitesse_lumiere | la vitesse de la lumière est exactement 299 792 458 m/s depuis 1983. |
 | anecdote_water_density_anomaly | l'eau atteint sa densité maximale à 4°c, expliquant le gel des lacs en surface. |
 | anecdote_zeta_regularization_casimir | la somme des entiers = -1/12 explique l'effet casimir. |
+| anecdote_gravitational_lensing_einstein_ring | les lentilles gravitationnelles et l'anneau d'einstein prédits par la relativité générale. |
+| anecdote_lorenz_butterfly_effect_chaos | lorenz découvre la sensibilité aux conditions initiales en météorologie (1963). |
+| anecdote_maxwell_equations_unification | maxwell unifie électricité, magnétisme et optique (1865). |
+| anecdote_perpetual_motion_thermodynamics | l'impossibilité du mouvement perpétuel découle de la symétrie temporelle (noether, 1918). |
+| anecdote_planck_units_natural_scale | les unités de planck (1899), un système de mesure fondé sur les constantes universelles. |
+| anecdote_quantum_zeno_effect_observation | l'effet zénon quantique : observer fréquemment un système gèle son évolution. |
+| anecdote_tolman_oppenheimer_volkoff_limit_neutron | la limite de tolman-oppenheimer-volkoff fixe la masse maximale d'une étoile à neutrons (1939). |
 
 ## Histoire des Sciences
 
 | Identifiant | Résumé |
 |---|---|
-| anecdote_ada_lovelace_first_algorithm | résumé manquant |
-| anecdote_antikythera_mechanism_analog | résumé manquant |
-| anecdote_decouverte_structure_adn | résumé manquant |
-| anecdote_machine_de_turing | résumé manquant |
-| anecdote_naissance_marie_curie | résumé manquant |
-| anecdote_newton_plague_calculus | résumé manquant |
-| anecdote_pascaline_sautoir_mechanism | résumé manquant |
+| anecdote_ada_lovelace_first_algorithm | ada lovelace écrit le premier programme informatique de l'histoire (1843). |
+| anecdote_antikythera_mechanism_analog | la machine d'anticythère, plus ancien calculateur analogique connu (150 av. j.-c.). |
+| anecdote_decouverte_structure_adn | watson et crick annoncent la double hélice d'adn (1953), grâce à la photo 51. |
+| anecdote_erdos_number_collaboration | paul erdős, mathématicien le plus prolifique du xxe siècle, et la distance de collaboration qui porte son nom. |
+| anecdote_machine_de_turing | turing publie « on computable numbers » et la machine universelle (1936). |
+| anecdote_naissance_marie_curie | âge dynamique de marie curie née un 7 novembre 1867. |
+| anecdote_newton_plague_calculus | newton invente le calcul infinitésimal confiné pendant la peste (1665-1666). |
+| anecdote_pascaline_sautoir_mechanism | le sautoir de pascal résout la propagation de la retenue mécanique (1642). |
+| anecdote_von_neumann_architecture | von neumann décrit l'architecture à programme enregistré encore utilisée aujourd'hui (1945). |
 
 ---
 
-# Nouvelles anecdotes à ajouter
+# Nouvelles anecdotes à ajouter (en réalité ces anecdotes ont déjà été ajoutées dans le registre, elles sont gardées pour avoir le style de mise en page pour de nouvelles anecdotes)
 
 ### 136. Le Codage de Huffman (La théorie de la compression)
 *   Identifiant : `anecdote_huffman_coding_compression`

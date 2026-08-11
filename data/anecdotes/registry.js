@@ -1190,5 +1190,165 @@ export default [
 		addedDate: '2026-08-11',
 		scheduling: { type: 'anytime', dates: [] },
 		path: '/data/anecdotes/physique/negative_refractive_index_metamaterials.js'
+	},
+	{
+		id: 'anecdote_huffman_coding_compression',
+		priority: 4,
+		enabled: true,
+		addedDate: '2026-08-11',
+		scheduling: { type: 'anytime', dates: [] },
+		path: '/data/anecdotes/mathematiques/huffman_coding_compression.js'
+	},
+	{
+		id: 'anecdote_cantor_diagonalization_infinity',
+		priority: 4,
+		enabled: true,
+		addedDate: '2026-08-11',
+		scheduling: { type: 'anytime', dates: [] },
+		path: '/data/anecdotes/mathematiques/cantor_diagonalization_infinity.js'
+	},
+	{
+		id: 'anecdote_tolman_oppenheimer_volkoff_limit_neutron',
+		priority: 4,
+		enabled: true,
+		addedDate: '2026-08-11',
+		scheduling: { type: 'anytime', dates: [] },
+		path: '/data/anecdotes/physique/tolman_oppenheimer_volkoff_limit_neutron.js'
+	},
+	{
+		id: 'anecdote_turing_bombe_enigma_crypto',
+		priority: 4,
+		enabled: true,
+		addedDate: '2026-08-11',
+		scheduling: { type: 'anytime', dates: [] },
+		path: '/data/anecdotes/mathematiques/turing_bombe_enigma_crypto.js'
+	},
+	{
+		id: 'anecdote_navier_stokes_millennium_smoothness',
+		priority: 4,
+		enabled: true,
+		addedDate: '2026-08-11',
+		scheduling: { type: 'anytime', dates: [] },
+		path: '/data/anecdotes/mathematiques/navier_stokes_millennium_smoothness.js'
+	},
+	{
+		id: 'anecdote_gravitational_lensing_einstein_ring',
+		priority: 4,
+		enabled: true,
+		addedDate: '2026-08-11',
+		scheduling: { type: 'anytime', dates: [] },
+		path: '/data/anecdotes/physique/gravitational_lensing_einstein_ring.js'
+	},
+	{
+		id: 'anecdote_perpetual_motion_thermodynamics',
+		priority: 4,
+		enabled: true,
+		addedDate: '2026-08-11',
+		scheduling: { type: 'anytime', dates: [] },
+		path: '/data/anecdotes/physique/perpetual_motion_thermodynamics.js'
+	},
+	{
+		id: 'anecdote_poincare_n_body_problem_chaos',
+		priority: 4,
+		enabled: true,
+		addedDate: '2026-08-11',
+		scheduling: { type: 'anytime', dates: [] },
+		path: '/data/anecdotes/mathematiques/poincare_n_body_problem_chaos.js'
+	},
+	{
+		id: 'anecdote_euler_totient_function_rsa_crypto',
+		priority: 4,
+		enabled: true,
+		addedDate: '2026-08-11',
+		scheduling: { type: 'anytime', dates: [] },
+		path: '/data/anecdotes/mathematiques/euler_totient_function_rsa_crypto.js'
+	},
+	{
+		id: 'anecdote_quantum_zeno_effect_observation',
+		priority: 4,
+		enabled: true,
+		addedDate: '2026-08-11',
+		scheduling: { type: 'anytime', dates: [] },
+		path: '/data/anecdotes/physique/quantum_zeno_effect_observation.js'
+	},
+	{
+		id: 'anecdote_lorenz_butterfly_effect_chaos',
+		priority: 4,
+		enabled: true,
+		addedDate: '2026-08-11',
+		scheduling: { type: 'anytime', dates: [] },
+		path: '/data/anecdotes/physique/lorenz_butterfly_effect_chaos.js'
+	},
+	{
+		id: 'anecdote_maxwell_equations_unification',
+		priority: 4,
+		enabled: true,
+		addedDate: '2026-08-11',
+		scheduling: { type: 'anytime', dates: [] },
+		path: '/data/anecdotes/physique/maxwell_equations_unification.js'
+	},
+	{
+		id: 'anecdote_bayes_theorem_probability',
+		priority: 4,
+		enabled: true,
+		addedDate: '2026-08-11',
+		scheduling: { type: 'anytime', dates: [] },
+		path: '/data/anecdotes/mathematiques/bayes_theorem_probability.js'
+	},
+	{
+		id: 'anecdote_p_vs_np_problem',
+		priority: 4,
+		enabled: true,
+		addedDate: '2026-08-11',
+		scheduling: { type: 'anytime', dates: [] },
+		path: '/data/anecdotes/mathematiques/p_vs_np_problem.js'
+	},
+	{
+		id: 'anecdote_erdos_number_collaboration',
+		priority: 4,
+		enabled: true,
+		addedDate: '2026-08-11',
+		scheduling: { type: 'anytime', dates: [] },
+		path: '/data/anecdotes/histoire_sciences/erdos_number_collaboration.js'
+	},
+	{
+		id: 'anecdote_von_neumann_architecture',
+		priority: 4,
+		enabled: true,
+		addedDate: '2026-08-11',
+		scheduling: { type: 'anytime', dates: [] },
+		path: '/data/anecdotes/histoire_sciences/von_neumann_architecture.js'
+	},
+	{
+		id: 'anecdote_hilbert_hotel_infinity',
+		priority: 4,
+		enabled: true,
+		addedDate: '2026-08-11',
+		scheduling: { type: 'anytime', dates: [] },
+		path: '/data/anecdotes/mathematiques/hilbert_hotel_infinity.js'
+	},
+	{
+		id: 'anecdote_weierstrass_nowhere_differentiable',
+		priority: 4,
+		enabled: true,
+		addedDate: '2026-08-11',
+		scheduling: { type: 'anytime', dates: [] },
+		path: '/data/anecdotes/mathematiques/weierstrass_nowhere_differentiable.js'
+	},
+	{
+		id: 'anecdote_planck_units_natural_scale',
+		priority: 4,
+		enabled: true,
+		addedDate: '2026-08-11',
+		scheduling: { type: 'anytime', dates: [] },
+		path: '/data/anecdotes/physique/planck_units_natural_scale.js'
+	},
+	{
+		id: 'anecdote_kolmogorov_complexity_information',
+		priority: 4,
+		enabled: true,
+		addedDate: '2026-08-11',
+		scheduling: { type: 'anytime', dates: [] },
+		path: '/data/anecdotes/mathematiques/kolmogorov_complexity_information.js'
 	}
 ];
