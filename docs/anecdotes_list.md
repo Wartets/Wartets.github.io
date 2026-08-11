@@ -5,361 +5,157 @@ Liste complète des anecdotes présentes dans `data/anecdotes/registry.js`, clas
 
 | Identifiant | Résumé |
 |---|---|
-| anecdote_annee_bissextile | Règle exacte des années bissextiles (divisible par 4, sauf par 100 sauf par 400). |
-| anecdote_probleme_de_bale | Euler résout en 1735 la somme des inverses des carrés = π²/6. |
-| anecdote_hypothese_riemann | La conjecture de Riemann sur les zéros non triviaux de ζ(s), toujours non résolue. |
-| anecdote_theoreme_incompletude_godel | Les deux théorèmes d'incomplétude de Gödel (1931). |
-| anecdote_dernier_theoreme_fermat | Wiles démontre en 1993/1995 le dernier théorème de Fermat. |
-| anecdote_jour_pi | Le 14 mars (3/14) rappelle les premières décimales de π. |
-| anecdote_theoreme_noether | Emmy Noether relie symétries continues et lois de conservation (1918). |
-| anecdote_monstrous_moonshine | Coïncidence numérique reliant fonction j et groupe Monstre. |
-| anecdote_noether_theorem_publication | Publication du 1er théorème de Noether devant la Société de Göttingen. |
-| anecdote_ramanujan_hardy_partition | Formule asymptotique de Hardy-Ramanujan pour les partitions d'entiers. |
-| anecdote_banach_tarski_paradox | Une sphère peut être découpée et réassemblée en deux sphères identiques. |
-| anecdote_galois_group_theory | Galois fonde la théorie des groupes la veille de son duel mortel. |
-| anecdote_gauss_theorema_egregium_curvature | La courbure de Gauss est une propriété intrinsèque des surfaces. |
-| anecdote_buffon_needle_pi | L'aiguille de Buffon permet d'estimer π par probabilité géométrique. |
-| anecdote_noether_second_theorem_gauge | Le second théorème de Noether, fondement des symétries de jauge. |
-| anecdote_math_point_nine_repeating | 0,999... est rigoureusement égal à 1. |
+| anecdote_annee_bissextile | règle exacte des années bissextiles (divisible par 4, sauf par 100 sauf par 400). |
+| anecdote_banach_tarski_paradox | une sphère peut être découpée et réassemblée en deux sphères identiques. |
+| anecdote_benfords_law | la loi de benford et la distribution des premiers chiffres. |
 | anecdote_birthday_paradox | 23 personnes suffisent pour 50% de chances d'anniversaire partagé. |
-| anecdote_water_density_anomaly | (physique, voir section Physique) |
-| anecdote_gabriels_horn | La Trompette de Gabriel : surface infinie, volume fini. |
-| anecdote_benfords_law | La loi de Benford et la distribution des premiers chiffres. |
-| anecdote_topology_4d_knots | Aucun nœud n'est possible dans un espace à 4 dimensions. |
-| anecdote_eulers_identity_math | L'identité d'Euler, e^(iπ)+1=0. |
-| anecdote_friendship_theorem_graph | Le théorème de l'amitié impose un « hôte » universel dans un graphe. |
-| anecdote_coastline_paradox_fractals | Le paradoxe du littoral et la dimension fractale des côtes. |
-| anecdote_zipfs_law_linguistics | La loi de Zipf sur la fréquence des mots dans les langues. |
-| anecdote_monty_hall_probability | Changer de porte double vos chances au jeu de Monty Hall. |
-| anecdote_euler_polyhedron_formula | S - A + F = 2 pour tout polyèdre convexe (Euler, 1758). |
-| anecdote_infinite_monkey_theorem | Un singe tapant infiniment finira presque sûrement par écrire Hamlet. |
+| anecdote_buffon_needle_pi | l'aiguille de buffon permet d'estimer π par probabilité géométrique. |
+| anecdote_coastline_paradox_fractals | le paradoxe du littoral et la dimension fractale des côtes. |
+| anecdote_conway_game_of_life_cellular | le jeu de la vie de conway est turing-complet malgré 4 règles simples. |
+| anecdote_cooley_tukey_fft_algorithm | la fft de cooley-tukey réduit le calcul de fourier à o(n log n). |
+| anecdote_cordic_trigonometry_algorithm | l'algorithme cordic calcule sinus/cosinus par additions et décalages de bits. |
+| anecdote_dernier_theoreme_fermat | wiles démontre en 1993/1995 le dernier théorème de fermat. |
+| anecdote_dijkstra_shortest_path_graph | dijkstra conçoit son algorithme de plus court chemin en 20 minutes (1956). |
+| anecdote_dirichlet_pigeonhole_principle | le principe des tiroirs et son application aux cheveux humains. |
+| anecdote_euler_polyhedron_formula | s - a + f = 2 pour tout polyèdre convexe (euler, 1758). |
+| anecdote_eulers_identity_math | l'identité d'euler, e^(iπ)+1=0. |
 | anecdote_factorial_10_weeks | 10! secondes égalent exactement 6 semaines. |
-| anecdote_dirichlet_pigeonhole_principle | Le principe des tiroirs et son application aux cheveux humains. |
-| anecdote_potato_paradox_algebra | Le paradoxe de la pomme de terre : perdre 1% d'eau = perdre 50% du poids. |
-| anecdote_friendship_paradox_network | Vos amis ont statistiquement plus d'amis que vous. |
-| anecdote_four_color_theorem_computer | Théorème des quatre couleurs, première preuve par ordinateur (1976). |
+| anecdote_fast_inverse_square_root_quake | la constante magique 0x5f3759df de quake iii pour la racine carrée inverse. |
+| anecdote_four_color_theorem_computer | théorème des quatre couleurs, première preuve par ordinateur (1976). |
+| anecdote_friendship_paradox_network | vos amis ont statistiquement plus d'amis que vous. |
+| anecdote_friendship_theorem_graph | le théorème de l'amitié impose un « hôte » universel dans un graphe. |
+| anecdote_gabriels_horn | la trompette de gabriel : surface infinie, volume fini. |
+| anecdote_galois_group_theory | galois fonde la théorie des groupes la veille de son duel mortel. |
+| anecdote_gauss_theorema_egregium_curvature | la courbure de gauss est une propriété intrinsèque des surfaces. |
+| anecdote_hypothese_riemann | la conjecture de riemann sur les zéros non triviaux de ζ(s), toujours non résolue. |
+| anecdote_infinite_monkey_theorem | un singe tapant infiniment finira presque sûrement par écrire hamlet. |
+| anecdote_jour_pi | le 14 mars (3/14) rappelle les premières décimales de π. |
+| anecdote_kakeya_needle_problem_area | un ensemble de besicovitch permet de faire tourner une aiguille dans une aire nulle. |
+| anecdote_konigsberg_bridges_euler | euler prouve l'impossibilité du parcours des sept ponts de königsberg (1736). |
+| anecdote_math_point_nine_repeating | 0,999... est rigoureusement égal à 1. |
+| anecdote_monstrous_moonshine | coïncidence numérique reliant fonction j et groupe monstre. |
+| anecdote_monty_hall_probability | changer de porte double vos chances au jeu de monty hall. |
+| anecdote_noether_second_theorem_gauge | le second théorème de noether, fondement des symétries de jauge. |
+| anecdote_noether_theorem_publication | publication du 1er théorème de noether devant la société de göttingen. |
+| anecdote_pagerank_algorithm_markov | le pagerank de google simule un internaute aléatoire via une chaîne de markov. |
+| anecdote_potato_paradox_algebra | le paradoxe de la pomme de terre : perdre 1% d'eau = perdre 50% du poids. |
+| anecdote_probleme_de_bale | euler résout en 1735 la somme des inverses des carrés = π²/6. |
 | anecdote_ramanujan_constant_almost_integer | e^(π√163) est presque un entier, à 12 neufs près. |
-| anecdote_kakeya_needle_problem_area | Un ensemble de Besicovitch permet de faire tourner une aiguille dans une aire nulle. |
-| anecdote_sunflower_fibonacci_golden_ratio | Les spirales du tournesol suivent la suite de Fibonacci et le nombre d'or. |
+| anecdote_ramanujan_hardy_partition | formule asymptotique de hardy-ramanujan pour les partitions d'entiers. |
+| anecdote_shor_algorithm_quantum_factorization | l'algorithme de shor factorise exponentiellement plus vite sur ordinateur quantique. |
+| anecdote_sunflower_fibonacci_golden_ratio | les spirales du tournesol suivent la suite de fibonacci et le nombre d'or. |
+| anecdote_theoreme_incompletude_godel | les deux théorèmes d'incomplétude de gödel (1931). |
+| anecdote_theoreme_noether | emmy noether relie symétries continues et lois de conservation (1918). |
+| anecdote_topology_4d_knots | aucun nœud n'est possible dans un espace à 4 dimensions. |
+| anecdote_water_density_anomaly | (physique, voir section physique) |
+| anecdote_zipfs_law_linguistics | la loi de zipf sur la fréquence des mots dans les langues. |
 
 ## Physique
 
 | Identifiant | Résumé |
 |---|---|
-| anecdote_vitesse_lumiere | La vitesse de la lumière est exactement 299 792 458 m/s depuis 1983. |
-| anecdote_decouverte_neptune | Le Verrier prédit Neptune par le calcul avant son observation (1846). |
-| anecdote_experience_michelson_morley | L'expérience de 1887 qui ne détecte aucun éther luminifère. |
-| anecdote_hypothese_quantique_planck | Planck introduit la quantification de l'énergie E=hν (1900). |
-| anecdote_decouverte_electron | J.J. Thomson isole l'électron en 1897. |
-| anecdote_annee_miraculeuse_einstein | Les quatre articles révolutionnaires d'Einstein en 1905. |
-| anecdote_decouverte_boson_higgs | Découverte du boson de Higgs au CERN (2012). |
-| anecdote_premiere_detection_ondes_gravitationnelles | Première détection directe d'ondes gravitationnelles par LIGO (2016). |
-| anecdote_limite_chandrasekhar | La masse maximale d'une naine blanche, calculée à 19 ans. |
-| anecdote_schwinger_magnetic_moment | Schwinger calcule la première correction radiative du moment magnétique de l'électron. |
-| anecdote_taylor_sedov_blast | Taylor déduit l'énergie de l'essai Trinity par analyse dimensionnelle. |
-| anecdote_zeta_regularization_casimir | La somme des entiers = -1/12 explique l'effet Casimir. |
-| anecdote_avian_magnetoreception | Le rouge-gorge navigue grâce à l'intrication quantique de radicaux. |
-| anecdote_berry_phase_geometric | La phase géométrique de Berry en évolution adiabatique cyclique. |
-| anecdote_ckm_matrix_cp_violation | La matrice CKM et la violation CP expliquant l'asymétrie matière-antimatière. |
-| anecdote_bekenstein_hawking_entropy | L'entropie d'un trou noir est proportionnelle à l'aire de son horizon. |
-| anecdote_shannon_gibbs_entropy | L'entropie de Shannon est mathématiquement isomorphe à l'entropie de Gibbs. |
-| anecdote_aharonov_bohm_topology | L'effet Aharonov-Bohm prouve la réalité physique du potentiel vecteur. |
-| anecdote_alpher_bethe_gamow_paper | L'article Alpha-Beta-Gamma sur la nucléosynthèse primordiale. |
-| anecdote_landauer_limit_maxwell_demon | Effacer un bit dissipe nécessairement de la chaleur (principe de Landauer). |
-| anecdote_turing_reaction_diffusion | Turing explique les motifs animaux par réaction-diffusion (1952). |
-| anecdote_bell_theorem_chsh | Le théorème de Bell et la violation expérimentale du réalisme local. |
-| anecdote_chiral_anomaly_abj | L'anomalie chirale ABJ explique la désintégration du pion neutre. |
-| anecdote_poincare_brouwer_tokamak | Le théorème de la boule chevelue impose la forme torique des tokamaks. |
-| anecdote_hong_ou_mandel_interference | Deux photons identiques se groupent systématiquement (1987). |
-| anecdote_hamilton_quaternions | Hamilton grave les quaternions sur un pont de Dublin (1843). |
-| anecdote_unruh_effect_vacuum | Un observateur accéléré perçoit le vide quantique comme un bain thermique. |
-| anecdote_arago_poisson_spot | La tache de Poisson-Arago, preuve accidentelle de la nature ondulatoire de la lumière. |
-| anecdote_quantum_hall_effect_von_klitzing | La résistance de Hall quantifiée avec une précision extrême (1980). |
-| anecdote_larmor_precession_mri_spin | La précession de Larmor du spin, principe physique de l'IRM. |
-| anecdote_penrose_singularity_theorem | Penrose prouve l'inévitabilité des singularités d'effondrement gravitationnel. |
-| anecdote_cmb_tv_static | La « neige » de la télévision analogique contenait un écho du Big Bang. |
-| anecdote_banana_antimatter_positron | Une banane produit occasionnellement de l'antimatière (potassium-40). |
-| anecdote_cherenkov_radiation | Le rayonnement Tcherenkov, « bang supersonique » lumineux dans l'eau. |
-| anecdote_newton_plague_calculus | Newton invente le calcul infinitésimal confiné pendant la peste (1665-1666). |
-| anecdote_water_density_anomaly | L'eau atteint sa densité maximale à 4°C, expliquant le gel des lacs en surface. |
-| anecdote_apollo15_galileo_drop | Le marteau et la plume tombent ensemble sur la Lune (Apollo 15, 1971). |
-| anecdote_eratosthenes_earth_circumference | Ératosthène calcule la circonférence terrestre avec un simple bâton (240 av. J.-C.). |
-| anecdote_gallium_melting_hand | Le gallium fond dans la paume de la main (29,76°C). |
-| anecdote_gps_relativity_correction | Sans correction relativiste, le GPS dériverait de 11 km/jour. |
-| anecdote_uranus_named_george | Uranus s'appela un temps « l'Étoile de George » en hommage au roi d'Angleterre. |
-| anecdote_einstein_nobel_photoelectric | Le Nobel d'Einstein récompensa l'effet photoélectrique, pas la relativité. |
-| anecdote_triple_point_water | Le point triple de l'eau, où trois phases coexistent simultanément. |
-| anecdote_osmium_density | L'osmium, élément naturel le plus dense sur Terre. |
-| anecdote_planets_earth_moon_distance | Toutes les autres planètes tiendraient entre la Terre et la Lune. |
-| anecdote_foucault_pendulum_earth_rotation | Le pendule de Foucault prouve visuellement la rotation terrestre (1851). |
-| anecdote_olbers_paradox_dark_sky | Pourquoi le ciel est noir la nuit : preuve d'un univers non statique. |
-| anecdote_mpemba_effect_freezing | L'eau chaude peut geler plus vite que l'eau froide (effet Mpemba). |
-| anecdote_cosmic_rays_bit_flip | Les rayons cosmiques peuvent inverser un bit de mémoire RAM. |
-| anecdote_frog_magnetic_levitation | Andre Geim fait léviter une grenouille par diamagnétisme (1997). |
-| anecdote_glass_is_a_solid | Le mythe du verre médiéval « qui coule » démystifié thermodynamiquement. |
-| anecdote_pulsar_angular_momentum | La conservation du moment cinétique explique la rotation ultra-rapide des pulsars. |
-| anecdote_chirality_limonene_smell | Deux molécules miroirs sentent le citron ou l'orange selon leur chiralité. |
-| anecdote_dna_length_human_body | L'ADN humain déroulé atteindrait environ deux fois le diamètre du système solaire. |
-| anecdote_helium_superfluid_rollin_film | L'hélium superfluide grimpe le long des parois d'un verre (film de Rollin). |
-| anecdote_tidal_friction_moon_recession | La friction des marées éloigne la Lune de 3,8 cm par an. |
-| anecdote_mars_olympus_mons | Olympus Mons, volcan martien deux fois et demie plus haut que l'Everest. |
+| anecdote_ada_lovelace_first_algorithm | ada lovelace écrit le premier programme informatique de l'histoire (1843). |
+| anecdote_aharonov_bohm_topology | l'effet aharonov-bohm prouve la réalité physique du potentiel vecteur. |
+| anecdote_alpher_bethe_gamow_paper | l'article alpha-beta-gamma sur la nucléosynthèse primordiale. |
+| anecdote_annee_miraculeuse_einstein | les quatre articles révolutionnaires d'einstein en 1905. |
+| anecdote_antikythera_mechanism_analog | la machine d'anticythère, plus ancien calculateur analogique connu (150 av. j.-c.). |
+| anecdote_apollo15_galileo_drop | le marteau et la plume tombent ensemble sur la lune (apollo 15, 1971). |
+| anecdote_arago_poisson_spot | la tache de poisson-arago, preuve accidentelle de la nature ondulatoire de la lumière. |
+| anecdote_avian_magnetoreception | le rouge-gorge navigue grâce à l'intrication quantique de radicaux. |
+| anecdote_banana_antimatter_positron | une banane produit occasionnellement de l'antimatière (potassium-40). |
+| anecdote_bekenstein_hawking_entropy | l'entropie d'un trou noir est proportionnelle à l'aire de son horizon. |
+| anecdote_bell_theorem_chsh | le théorème de bell et la violation expérimentale du réalisme local. |
+| anecdote_berry_phase_geometric | la phase géométrique de berry en évolution adiabatique cyclique. |
+| anecdote_bose_einstein_condensate | le condensat de bose-einstein, un état de la matière créé en 1995. |
+| anecdote_brownian_motion_einstein_perrin | einstein explique mathématiquement le mouvement brownien (1905). |
+| anecdote_cavendish_earth_weighing | cavendish pèse la terre avec une balance de torsion (1798). |
+| anecdote_chadwick_neutron_discovery | chadwick prouve l'existence du neutron par cinématique de collision (1932). |
+| anecdote_cherenkov_radiation | le rayonnement tcherenkov, « bang supersonique » lumineux dans l'eau. |
+| anecdote_chiral_anomaly_abj | l'anomalie chirale abj explique la désintégration du pion neutre. |
+| anecdote_chirality_limonene_smell | deux molécules miroirs sentent le citron ou l'orange selon leur chiralité. |
+| anecdote_ckm_matrix_cp_violation | la matrice ckm et la violation cp expliquant l'asymétrie matière-antimatière. |
+| anecdote_cmb_tv_static | la « neige » de la télévision analogique contenait un écho du big bang. |
+| anecdote_cosmic_rays_bit_flip | les rayons cosmiques peuvent inverser un bit de mémoire ram. |
+| anecdote_decouverte_boson_higgs | découverte du boson de higgs au cern (2012). |
+| anecdote_decouverte_electron | j.j. thomson isole l'électron en 1897. |
+| anecdote_decouverte_neptune | le verrier prédit neptune par le calcul avant son observation (1846). |
+| anecdote_decouverte_structure_adn | watson et crick annoncent la double hélice d'adn (1953), grâce à la photo 51. |
+| anecdote_dirac_equation_antimatter | l'équation de dirac prédit l'existence de l'antimatière (1928). |
+| anecdote_dna_length_human_body | l'adn humain déroulé atteindrait environ deux fois le diamètre du système solaire. |
+| anecdote_earth_speed_cmb_dipole | le dipôle du fond diffus cosmologique révèle la vitesse absolue du système solaire. |
+| anecdote_einstein_nobel_photoelectric | le nobel d'einstein récompensa l'effet photoélectrique, pas la relativité. |
+| anecdote_eratosthenes_earth_circumference | ératosthène calcule la circonférence terrestre avec un simple bâton (240 av. j.-c.). |
+| anecdote_experience_michelson_morley | l'expérience de 1887 qui ne détecte aucun éther luminifère. |
+| anecdote_first_transistor_bardeen_brattain | invention du premier transistor aux laboratoires bell (1947). |
+| anecdote_foucault_pendulum_earth_rotation | le pendule de foucault prouve visuellement la rotation terrestre (1851). |
+| anecdote_frog_magnetic_levitation | andre geim fait léviter une grenouille par diamagnétisme (1997). |
+| anecdote_gallium_melting_hand | le gallium fond dans la paume de la main (29,76°c). |
+| anecdote_glass_is_a_solid | le mythe du verre médiéval « qui coule » démystifié thermodynamiquement. |
+| anecdote_glass_transparency_quantum | le grand gap optique de la silice explique la transparence du verre. |
+| anecdote_gps_relativity_correction | sans correction relativiste, le gps dériverait de 11 km/jour. |
+| anecdote_hamilton_quaternions | hamilton grave les quaternions sur un pont de dublin (1843). |
+| anecdote_helium_superfluid_rollin_film | l'hélium superfluide grimpe le long des parois d'un verre (film de rollin). |
+| anecdote_hong_ou_mandel_interference | deux photons identiques se groupent systématiquement (1987). |
+| anecdote_hypothese_quantique_planck | planck introduit la quantification de l'énergie e=hν (1900). |
+| anecdote_ising_model_phase_transition | onsager résout le modèle d'ising 2d, expliquant les transitions de phase magnétiques. |
+| anecdote_landauer_limit_maxwell_demon | effacer un bit dissipe nécessairement de la chaleur (principe de landauer). |
+| anecdote_larmor_precession_mri_spin | la précession de larmor du spin, principe physique de l'irm. |
+| anecdote_least_action_principle | le principe de moindre action de lagrange et les équations d'euler-lagrange. |
+| anecdote_leidenfrost_effect | l'effet leidenfrost fait léviter une goutte d'eau sur une plaque brûlante. |
+| anecdote_limite_chandrasekhar | la masse maximale d'une naine blanche, calculée à 19 ans. |
+| anecdote_machine_de_turing | turing publie « on computable numbers » et la machine universelle (1936). |
+| anecdote_magnus_effect_fluid | l'effet magnus courbe la trajectoire d'une balle avec effet. |
+| anecdote_mars_olympus_mons | olympus mons, volcan martien deux fois et demie plus haut que l'everest. |
+| anecdote_meter_definition_c | depuis 1983, le mètre est défini par la vitesse de la lumière, non par un artefact. |
+| anecdote_monte_carlo_method_simulation | ulam invente la méthode de monte-carlo en jouant au solitaire (années 1940). |
+| anecdote_mpemba_effect_freezing | l'eau chaude peut geler plus vite que l'eau froide (effet mpemba). |
+| anecdote_naissance_marie_curie | âge dynamique de marie curie née un 7 novembre 1867. |
+| anecdote_newton_plague_calculus | newton invente le calcul infinitésimal confiné pendant la peste (1665-1666). |
+| anecdote_olbers_paradox_dark_sky | pourquoi le ciel est noir la nuit : preuve d'un univers non statique. |
+| anecdote_osmium_density | l'osmium, élément naturel le plus dense sur terre. |
+| anecdote_pascaline_sautoir_mechanism | le sautoir de pascal résout la propagation de la retenue mécanique (1642). |
+| anecdote_penrose_singularity_theorem | penrose prouve l'inévitabilité des singularités d'effondrement gravitationnel. |
+| anecdote_perfect_solar_eclipse_coincidence | coïncidence de taille apparente soleil/lune permettant les éclipses totales. |
+| anecdote_pid_controller_feedback | le régulateur pid de minorsky (1922), fondement de l'automatique moderne. |
+| anecdote_planets_earth_moon_distance | toutes les autres planètes tiendraient entre la terre et la lune. |
+| anecdote_poincare_brouwer_tokamak | le théorème de la boule chevelue impose la forme torique des tokamaks. |
+| anecdote_premiere_detection_ondes_gravitationnelles | première détection directe d'ondes gravitationnelles par ligo (2016). |
+| anecdote_pulsar_angular_momentum | la conservation du moment cinétique explique la rotation ultra-rapide des pulsars. |
+| anecdote_quantum_hall_effect_von_klitzing | la résistance de hall quantifiée avec une précision extrême (1980). |
+| anecdote_quantum_tunneling_sun | l'effet tunnel quantique permet la fusion nucléaire au cœur du soleil. |
+| anecdote_rayleigh_scattering_sky | la diffusion de rayleigh explique pourquoi le ciel est bleu. |
+| anecdote_roche_limit_tidal | la limite de roche explique pourquoi saturne a des anneaux plutôt qu'une lune. |
+| anecdote_roentgen_xray_discovery | röntgen découvre accidentellement les rayons x (1895). |
+| anecdote_schwinger_magnetic_moment | schwinger calcule la première correction radiative du moment magnétique de l'électron. |
+| anecdote_shannon_gibbs_entropy | l'entropie de shannon est mathématiquement isomorphe à l'entropie de gibbs. |
 | anecdote_solar_neutrino_flux | 100 milliards de neutrinos solaires traversent un ongle chaque seconde. |
-| anecdote_sonoluminescence_star_jar | La sonoluminescence crée un flash lumineux dans de l'eau bombardée d'ultrasons. |
-| anecdote_meter_definition_c | Depuis 1983, le mètre est défini par la vitesse de la lumière, non par un artefact. |
-| anecdote_naissance_marie_curie | Âge dynamique de Marie Curie née un 7 novembre 1867. |
-| anecdote_machine_de_turing | Turing publie « On Computable Numbers » et la machine universelle (1936). |
-| anecdote_decouverte_structure_adn | Watson et Crick annoncent la double hélice d'ADN (1953), grâce à la photo 51. |
-| anecdote_roentgen_xray_discovery | Röntgen découvre accidentellement les rayons X (1895). |
-| anecdote_chadwick_neutron_discovery | Chadwick prouve l'existence du neutron par cinématique de collision (1932). |
-| anecdote_rayleigh_scattering_sky | La diffusion de Rayleigh explique pourquoi le ciel est bleu. |
-| anecdote_perfect_solar_eclipse_coincidence | Coïncidence de taille apparente Soleil/Lune permettant les éclipses totales. |
-| anecdote_leidenfrost_effect | L'effet Leidenfrost fait léviter une goutte d'eau sur une plaque brûlante. |
-| anecdote_first_transistor_bardeen_brattain | Invention du premier transistor aux laboratoires Bell (1947). |
-| anecdote_earth_speed_cmb_dipole | Le dipôle du fond diffus cosmologique révèle la vitesse absolue du Système Solaire. |
-| anecdote_glass_transparency_quantum | Le grand gap optique de la silice explique la transparence du verre. |
-| anecdote_brownian_motion_einstein_perrin | Einstein explique mathématiquement le mouvement brownien (1905). |
-| anecdote_dirac_equation_antimatter | L'équation de Dirac prédit l'existence de l'antimatière (1928). |
-| anecdote_space_temperature_cmb | La température du vide spatial profond est de 2,725 K, écho du Big Bang. |
+| anecdote_sonoluminescence_star_jar | la sonoluminescence crée un flash lumineux dans de l'eau bombardée d'ultrasons. |
+| anecdote_space_temperature_cmb | la température du vide spatial profond est de 2,725 k, écho du big bang. |
+| anecdote_taylor_sedov_blast | taylor déduit l'énergie de l'essai trinity par analyse dimensionnelle. |
+| anecdote_tidal_friction_moon_recession | la friction des marées éloigne la lune de 3,8 cm par an. |
+| anecdote_triple_point_water | le point triple de l'eau, où trois phases coexistent simultanément. |
+| anecdote_turing_reaction_diffusion | turing explique les motifs animaux par réaction-diffusion (1952). |
+| anecdote_unruh_effect_vacuum | un observateur accéléré perçoit le vide quantique comme un bain thermique. |
+| anecdote_uranus_named_george | uranus s'appela un temps « l'étoile de george » en hommage au roi d'angleterre. |
+| anecdote_vitesse_lumiere | la vitesse de la lumière est exactement 299 792 458 m/s depuis 1983. |
+| anecdote_water_density_anomaly | l'eau atteint sa densité maximale à 4°c, expliquant le gel des lacs en surface. |
+| anecdote_zeta_regularization_casimir | la somme des entiers = -1/12 explique l'effet casimir. |
 
 ## Histoire des Sciences
 
 | Identifiant | Résumé |
 |---|---|
-| anecdote_naissance_marie_curie | (voir section Physique) |
-| anecdote_machine_de_turing | (voir section Physique) |
-| anecdote_decouverte_structure_adn | (voir section Physique) |
-| anecdote_newton_plague_calculus | (voir section Physique) |
+| anecdote_ada_lovelace_first_algorithm | résumé manquant |
+| anecdote_antikythera_mechanism_analog | résumé manquant |
+| anecdote_decouverte_structure_adn | résumé manquant |
+| anecdote_machine_de_turing | résumé manquant |
+| anecdote_naissance_marie_curie | résumé manquant |
+| anecdote_newton_plague_calculus | résumé manquant |
+| anecdote_pascaline_sautoir_mechanism | résumé manquant |
 
 ---
 
 # Nouvelles anecdotes à ajouter
-
-### 96. Le Sautoir de la Pascaline
-*   Identifiant : `anecdote_pascaline_sautoir_mechanism`
-*   Domaine : Histoire de l'Informatique / Mécanique
-*   Planification (`scheduling`) : `anytime` (Vivier général).
-*   Contenu de l'anecdote : En 1642, Blaise Pascal, alors âgé de 19 ans, conçoit la première machine à calculer mécanique fonctionnelle pour aider son père, surintendant des impôts. Le véritable défi de cette "Pascaline" n'était pas l'addition des unités, mais la transmission de la retenue entre les roues dentées, sans que les frictions ne bloquent la machine. Pascal invente alors le "sautoir", une pièce mécanique indépendante qui accumule l'énergie gravitationnelle (en s'élevant lentement) lors du passage de 0 à 9 d'une roue, puis retombe brusquement par son propre poids pour faire avancer la roue suivante d'un cran. Cette séparation de l'effort physique a permis à la Pascaline d'opérer sur plusieurs dizaines de chiffres sans bloquer.
-*   Contextes associés (2) :
-    *   Titre : *Le problème de la propagation de la retenue*
-    *   Contenu (Markdown + LaTeX) : Dans un système de numération de base 10, l'addition de deux nombres nécessite de gérer la retenue `\(c_i\)` à chaque position `\(i\)`. Mathématiquement, l'addition de `\(a_i\)` et `\(b_i\)` donne une somme `\(s_i\)` et une retenue définie en bloc LaTeX par : `\[ c_{i+1} = \lfloor \frac{a_i + b_i + c_i}{10} \rfloor \quad \text{et} \quad s_i = (a_i + b_i + c_i) \bmod 10 \]`. Dans les calculateurs mécaniques rudimentaires, si 9999 devenait 10000, la première roue devait physiquement fournir l'énergie cinétique pour faire tourner toutes les autres roues simultanément. Le sautoir de Pascal a résolu ce problème de couple résistant exponentiel en utilisant l'énergie potentielle accumulée localement par chaque chiffre de manière découplée.
-    *   Titre : *Complément à 9 et soustraction mécanique*
-    *   Contenu (Markdown + LaTeX) : La Pascaline ne savait mécaniquement que tourner dans un seul sens (l'addition). Pour effectuer des soustractions, Pascal a utilisé une propriété arithmétique astucieuse : la méthode du complément à 9. Chaque cylindre affichait deux nombres opposés. Soustraire un nombre `\(B\)` d'un nombre `\(A\)` revenait à additionner le complément de `\(B\)` (soit `\(10^n - 1 - B\)`), puis à ajuster le résultat, remplaçant ainsi un mécanisme d'engrenage réversible complexe par une simple astuce de théorie des nombres.
-*   Sources associées (1) :
-    *   Source 1 : *Œuvres de Blaise Pascal : Lettre dédicatoire sur le sujet de la machine nouvellement inventée* (Texte original, Wikisource / Gallica). URL : `https://fr.wikisource.org/wiki/%C5%92uvres_de_Blaise_Pascal/Machine_arithm%C3%A9tique/Lettre_d%C3%A9dicatoire`
-
-### 97. L'Algorithme CORDIC (Le Secret des Calculatrices)
-*   Identifiant : `anecdote_cordic_trigonometry_algorithm`
-*   Domaine : Algorithmique Numérique
-*   Planification (`scheduling`) : `anytime` (Vivier général).
-*   Contenu de l'anecdote : Lorsque vous demandez à une calculatrice de trouver le cosinus ou le sinus d'un angle, elle n'utilise pas les séries de Taylor apprises en analyse mathématique, car celles-ci nécessitent des multiplications et des divisions trop coûteuses en ressources matérielles. Les puces électroniques utilisent l'algorithme CORDIC (Coordinate Rotation Digital Computer), inventé en 1959 pour la navigation aérienne. CORDIC calcule les fonctions trigonométriques uniquement en utilisant des additions, des soustractions et des décalages de bits, en "tournant" un vecteur par approximations successives grâce à une petite table de constantes pré-enregistrées.
-*   Contextes associés (1) :
-    *   Titre : *Formalisme matriciel des pseudo-rotations*
-    *   Contenu (Markdown + LaTeX) : Une rotation d'un vecteur `\((x, y)\)` d'un angle `\(\theta\)` s'écrit classiquement avec une matrice de rotation. L'astuce de Jack Volder est de factoriser `\(\cos(\theta)\)` et de décomposer l'angle cible en une somme d'angles spécifiques `\(\alpha_i\)` tels que `\(\tan(\alpha_i) = 2^{-i}\)`. La multiplication par une puissance de 2 en informatique binaire n'est qu'un simple décalage de bits (shift) ne coûtant aucun cycle d'horloge. L'itération s'écrit en bloc KaTeX : `\[ \begin{pmatrix} x_{i+1} \\ y_{i+1} \end{pmatrix} = \cos(\alpha_i) \begin{pmatrix} 1 & -d_i 2^{-i} \\ d_i 2^{-i} & 1 \end{pmatrix} \begin{pmatrix} x_i \\ y_i \end{pmatrix} \]` où `\(d_i \in \{-1, 1\}\)` détermine le sens de rotation. Le produit des `\(\cos(\alpha_i)\)` converge vers une constante universelle `\(K \approx 0,607252\)`, appliquée à la toute fin du processus.
-*   Sources associées (1) :
-    *   Source 1 : *The CORDIC Trigonometric Computing Technique* (J. E. Volder, IRE Transactions on Electronic Computers, 1959). URL : `https://ieeexplore.ieee.org/document/5222693`
-
-### 98. La Racine Carrée Inverse Rapide
-*   Identifiant : `anecdote_fast_inverse_square_root_quake`
-*   Domaine : Informatique / Analyse Numérique
-*   Planification (`scheduling`) : `anytime` (Vivier général).
-*   Contenu de l'anecdote : En 1999, le code source du moteur 3D du jeu *Quake III Arena* contenait une fonction mathématique obscure mais vitale, permettant de calculer extrêmement rapidement l'inverse d'une racine carrée (1/√x), indispensable pour le calcul des reflets de lumière sur les polygones. Au lieu d'utiliser une division matérielle lente, l'algorithme manipule directement la représentation binaire du nombre décimal (comme s'il s'agissait d'un entier) et le soustrait à une constante magique et incompréhensible codée en hexadécimal : `0x5f3759df`. Cette manipulation produit instantanément une approximation presque parfaite du résultat, affinée ensuite par une méthode de Newton.
-*   Contextes associés (2) :
-    *   Titre : *Astuce logarithmique et norme IEEE 754*
-    *   Contenu (Markdown + LaTeX) : Le format à virgule flottante IEEE 754 stocke un nombre `\(x\)` sous la forme `\(x = (1 + m) \times 2^e\)`. L'astuce repose sur le fait que lire ce binaire comme un entier `\(I_x\)` équivaut mathématiquement à évaluer une approximation affine du logarithme de `\(x\)`. Or, calculer `\(y = \frac{1}{\sqrt{x}}\)` équivaut, en passant au logarithme base 2, à `\(\log_2(y) = -\frac{1}{2}\log_2(x)\)`. En transposant cela sur les entiers générés par la norme IEEE 754, on obtient l'équation de bit-shifting : `\(I_y \approx R - (I_x \gg 1)\)`, où `\(R\)` est la fameuse constante magique `0x5f3759df` calculée pour minimiser l'erreur relative maximale.
-    *   Titre : *Affinement par la méthode de Newton-Raphson*
-    *   Contenu (Markdown + LaTeX) : Après l'estimation binaire grossière `\(y_0\)`, l'algorithme applique une unique itération de la méthode de Newton pour trouver la racine de la fonction `\(f(y) = \frac{1}{y^2} - x = 0\)`. La formule itérative `\(y_{n+1} = y_n - \frac{f(y_n)}{f'(y_n)}\)` se simplifie remarquablement sans aucune division, donnant en bloc LaTeX : `\[ y_1 = y_0 \left(1,5 - 0,5 \cdot x \cdot y_0^2\right) \]` Cette seule itération suffit pour obtenir une précision suffisante pour le calcul des normales vectorielles de l'éclairage 3D.
-*   Sources associées (1) :
-    *   Source 1 : *Fast Inverse Square Root* (C. Lomont, Math Department Purdue University, 2003). URL : `http://www.lomont.org/papers/2003/InvSqrt.pdf`
-
-### 99. La Machine d'Anticythère 
-*   Identifiant : `anecdote_antikythera_mechanism_analog`
-*   Domaine : Histoire des Sciences / Astronomie
-*   Planification (`scheduling`) : `anytime` (Vivier général).
-*   Contenu de l'anecdote : Découverte en 1901 dans l'épave d'un navire antique au large de la Grèce, la machine d'Anticythère est datée d'environ 150 avant J.-C. Il s'agit du plus ancien calculateur analogique connu de l'humanité. Composé d'un réseau complexe d'engrenages en bronze, ce mécanisme reproduisait le mouvement des planètes, prédisait les éclipses solaires et lunaires, et synchronisait différents calendriers. Le niveau technologique de cette ingénierie, impliquant des engrenages différentiels épicycloïdaux, a été mystérieusement perdu pendant plus d'un millénaire, n'étant réinventé qu'en Europe lors de la création des horloges astronomiques à la Renaissance.
-*   Contextes associés (1) :
-    *   Titre : *Modélisation géométrique des orbites elliptiques*
-    *   Contenu (Markdown + LaTeX) : Bien que les Grecs fussent attachés au modèle géocentrique, ils avaient remarqué que la Lune ne se déplaçait pas à une vitesse constante dans le ciel (première anomalie lunaire, expliquée aujourd'hui par la deuxième loi de Kepler sur une orbite elliptique). La machine modélise cette variation de vitesse grâce à un mécanisme de goupille et d'encoche reliant deux engrenages légèrement désaxés. Mathématiquement, la position angulaire `\(\theta\)` de l'axe de sortie par rapport à l'axe d'entrée `\(\phi\)` (tournant à vitesse constante `\(\omega\)`), décalé d'une distance `\(e\)`, produit une approximation de l'équation du centre : `\[ \theta \approx \phi + \frac{e}{R} \sin(\phi) \]` Cela reproduisait mécaniquement les coefficients de Fourier de l'anomalie orbitale.
-*   Sources associées (1) :
-    *   Source 1 : *Decoding the ancient Greek astronomical calculator known as the Antikythera Mechanism* (T. Freeth et al., Nature 444, 2006). URL : `https://www.nature.com/articles/nature05357`
-
-### 100. Le Premier Algorithme de l'Histoire (Ada Lovelace)
-*   Identifiant : `anecdote_ada_lovelace_first_algorithm`
-*   Domaine : Histoire de l'Informatique / Mathématiques
-*   Planification (`scheduling`) : `anytime` (Vivier général).
-*   Contenu de l'anecdote : En 1843, la mathématicienne britannique Ada Lovelace traduit et annote un article sur le projet de la Machine Analytique de Charles Babbage. Dans sa "Note G", elle ne se contente pas de décrire la machine matérielle : elle écrit une suite d'instructions détaillant pas à pas comment utiliser la machine pour calculer une séquence complexe de nombres rationnels (les nombres de Bernoulli). Ce diagramme de flux abstrait, comportant des variables de travail et des boucles conditionnelles, est aujourd'hui reconnu comme le tout premier programme informatique publié de l'histoire, un siècle avant l'invention de l'ordinateur électronique.
-*   Contextes associés (1) :
-    *   Titre : *Génération itérative des Nombres de Bernoulli*
-    *   Contenu (Markdown + LaTeX) : Le programme de Lovelace s'attaquait au calcul des nombres de Bernoulli `\(B_n\)`, fondamentaux en analyse (notamment pour le développement en série de Taylor de la fonction tangente). Ils peuvent être définis implicitement par l'équation génératrice en bloc LaTeX : `\[ \frac{x}{e^x - 1} = \sum_{n=0}^{\infty} B_n \frac{x^n}{n!} \]` Afin d'être calculable par la machine à cartes perforées de Babbage, Lovelace a utilisé une relation de récurrence stricte n'exigeant que de l'arithmétique élémentaire, dérivée de `\(\sum_{k=0}^{n} \binom{n+1}{k} B_k = 0\)`. Elle a explicitement documenté l'état des "moulins" (les registres CPU actuels) et du "magasin" (la mémoire RAM) à chaque étape de la boucle.
-*   Sources associées (1) :
-    *   Source 1 : *Sketch of the Analytical Engine Invented by Charles Babbage, with notes by A.A.L.* (Taylor's Scientific Memoirs, 1843). URL : `https://www.fourmilab.ch/babbage/sketch.html`
-
-### 101. L'Intégration par la méthode de Monte-Carlo
-*   Identifiant : `anecdote_monte_carlo_method_simulation`
-*   Domaine : Physique Statistique / Simulation
-*   Planification (`scheduling`) : `anytime` (Vivier général).
-*   Contenu de l'anecdote : À la fin des années 1940, lors du projet Manhattan, le mathématicien Stanislaw Ulam se remettait d'une maladie en jouant au solitaire. Il se demanda quelle était la probabilité mathématique exacte de réussir son jeu. Constatant que l'approche analytique combinatoire était presque impossible à résoudre, il réalisa qu'il suffisait de jouer des centaines de parties virtuellement et d'en faire la moyenne. Avec John von Neumann et Nicholas Metropolis, il formalisa cette idée : utiliser des nombres aléatoires pour résoudre des équations déterministes. Nommée "Méthode de Monte-Carlo" (en référence aux casinos), cette technique est aujourd'hui le socle des simulations en physique nucléaire, de la dynamique des fluides et des mathématiques financières.
-*   Contextes associés (1) :
-    *   Titre : *Théorème central limite et intégration stochastique*
-    *   Contenu (Markdown + LaTeX) : En analyse numérique classique (comme la méthode des trapèzes), l'intégration d'une fonction à `\(d\)` dimensions souffre de la "malédiction de la dimensionnalité", l'erreur décroissant en `\(O(N^{-2/d})\)`. L'approche de Monte-Carlo transforme l'intégrale en une espérance mathématique en tirant `\(N\)` variables aléatoires `\(X_i\)` uniformément réparties. En bloc KaTeX : `\[ \int_V f(x) dx \approx \frac{V}{N} \sum_{i=1}^N f(X_i) \]` Selon le Théorème Central Limite, la variance de cette estimation est proportionnelle à `\(1/N\)`. L'erreur statistique décroît donc toujours en `\(O(1/\sqrt{N})\)`, de manière totalement indépendante du nombre de dimensions du problème physique étudié.
-*   Sources associées (1) :
-    *   Source 1 : *The Monte Carlo Method* (N. Metropolis, S. Ulam, Journal of the American Statistical Association, 1949). URL : `https://www.tandfonline.com/doi/abs/10.1080/01621459.1949.10483310`
-
-### 102. L'Algorithme de Shor et la Cryptographie
-*   Identifiant : `anecdote_shor_algorithm_quantum_factorization`
-*   Domaine : Informatique Quantique / Algèbre
-*   Planification (`scheduling`) : `anytime` (Vivier général).
-*   Contenu de l'anecdote : La sécurité de presque toutes les transactions bancaires et communications en ligne repose sur le chiffrement RSA. Ce système protège vos données grâce à un postulat mathématique simple : il est facile de multiplier deux très grands nombres premiers entre eux, mais il est pratiquement impossible pour un ordinateur classique de retrouver ces deux nombres à partir du résultat. En 1994, Peter Shor a bouleversé ce postulat en écrivant un algorithme théorique pour ordinateur quantique. En utilisant les propriétés de superposition et d'interférence quantique, l'algorithme de Shor est capable de factoriser ces nombres de manière exponentiellement plus rapide, forçant le monde entier à développer une nouvelle "cryptographie post-quantique".
-*   Contextes associés (1) :
-    *   Titre : *Recherche de période par Transformée de Fourier Quantique (QFT)*
-    *   Contenu (Markdown + LaTeX) : La factorisation d'un grand entier `\(N\)` se réduit mathématiquement à la recherche de la période `\(r\)` de la fonction d'exponentiation modulaire `\(f(x) = a^x \bmod N\)`. Classiquement, ce problème est intraitable (temps exponentiel). L'ordinateur quantique prépare un état superposé de toutes les valeurs de `\(x\)`, calcule `\(f(x)\)` via une porte quantique en une seule étape, puis applique une Transformée de Fourier Quantique (QFT). La QFT agit sur les amplitudes de probabilité en créant des interférences constructives uniquement pour les états correspondant à l'inverse de la période. La complexité temporelle s'effondre en bloc LaTeX : `\[ \mathcal{O}((\log N)^3) \quad \text{au lieu de} \quad \mathcal{O}\left(\exp\left(c \sqrt[3]{\log N (\log \log N)^2}\right)\right) \]` Si la période `\(r\)` trouvée est paire, les facteurs de `\(N\)` sont obtenus classiquement par `\(\gcd(a^{r/2} \pm 1, N)\)`.
-*   Sources associées (1) :
-    *   Source 1 : *Algorithms for quantum computation: discrete logarithms and factoring* (P. W. Shor, Proceedings 35th Annual Symposium on Foundations of Computer Science, 1994). URL : `https://ieeexplore.ieee.org/document/365700`
-
-### 103. La Transformée de Fourier Rapide (FFT)
-*   Identifiant : `anecdote_cooley_tukey_fft_algorithm`
-*   Domaine : Traitement du Signal / Mathématiques
-*   Planification (`scheduling`) : `anytime` (Vivier général).
-*   Contenu de l'anecdote : En 1965, James Cooley et John Tukey publient un article de seulement quatre pages qui va façonner l'ère numérique moderne : la Transformée de Fourier Rapide (FFT). Ils ont conçu une méthode permettant de décomposer instantanément n'importe quel signal complexe (comme le son d'une voix) en ses fréquences fondamentales de base. Sans la réorganisation mathématique géniale de la FFT, le traitement de données serait des milliers de fois plus lent. Des technologies comme les réseaux Wi-Fi, l'imagerie médicale IRM, ou la compression des images JPEG et de la musique MP3, ne pourraient techniquement pas fonctionner en temps réel aujourd'hui sans cet algorithme.
-*   Contextes associés (1) :
-    *   Titre : *Le paradigme Diviser pour Régner (Divide and Conquer)*
-    *   Contenu (Markdown + LaTeX) : La Transformée de Fourier Discrète (DFT) directe d'un signal de `\(N\)` échantillons est définie par `\(X_k = \sum_{n=0}^{N-1} x_n W_N^{kn}\)` (avec `\(W_N = e^{-i 2\pi / N}\)`). Son calcul naïf requiert une complexité algorithmique de `\(\mathcal{O}(N^2)\)`, limitant drastiquement la taille des signaux traitables. L'algorithme de Cooley-Tukey (reposant sur le lemme de Danielson-Lanczos) sépare la somme en indices pairs et impairs. L'équation de récurrence en bloc KaTeX s'écrit : `\[ X_k = \sum_{m=0}^{N/2-1} x_{2m} W_{N/2}^{km} + W_N^k \sum_{m=0}^{N/2-1} x_{2m+1} W_{N/2}^{km} \]` Cette subdivision récursive (arbre binaire) réduit drastiquement le nombre de multiplications nécessaires, faisant chuter la complexité à `\(\mathcal{O}(N \log N)\)`. Pour `\(N=10^6\)`, l'algorithme est environ 50 000 fois plus rapide que la méthode matricielle classique.
-*   Sources associées (1) :
-    *   Source 1 : *An algorithm for the machine calculation of complex Fourier series* (J. W. Cooley, J. W. Tukey, Mathematics of Computation, 1965). URL : `https://www.ams.org/journals/mcom/1965-19-090/S0025-5718-1965-0178586-1/`
-
-### 104. L'Algorithme de Routage de Dijkstra
-*   Identifiant : `anecdote_dijkstra_shortest_path_graph`
-*   Domaine : Théorie des Graphes / Informatique
-*   Planification (`scheduling`) : `anytime` (Vivier général).
-*   Contenu de l'anecdote : En 1956, le jeune informaticien néerlandais Edsger W. Dijkstra cherche à démontrer les capacités d'un nouvel ordinateur. En prenant un café avec sa fiancée à Amsterdam, il conçoit mentalement et en seulement vingt minutes une méthode systématique pour trouver le trajet le plus court entre deux villes quelconques sur une carte géographique. L'algorithme de Dijkstra explore les nœuds d'un réseau en s'assurant mathématiquement de toujours valider le chemin le moins coûteux avant d'aller plus loin. Aujourd'hui, près de soixante-dix ans plus tard, c'est toujours le principe conceptuel central utilisé par les protocoles de routage d'Internet et les applications de navigation GPS.
-*   Contextes associés (1) :
-    *   Titre : *Relaxation des arêtes et optimisation par tas*
-    *   Contenu (Markdown + LaTeX) : Dans un graphe pondéré `\(G = (V, E)\)` où le poids des arêtes est positif `\(w(u, v) \ge 0\)`, l'algorithme maintient un ensemble de sommets dont la distance minimale depuis la source est connue. L'étape cruciale est le processus de "relaxation" d'une arête : si le chemin passant par le nœud `\(u\)` pour atteindre `\(v\)` est plus court que la distance actuelle connue pour `\(v\)`, on met à jour cette distance. En bloc LaTeX : `\[ \text{si } d(u) + w(u, v) < d(v) \implies d(v) := d(u) + w(u, v) \]` Initialement conçu avec une complexité en `\(\mathcal{O}(|V|^2)\)`, l'implémentation moderne utilisant des structures de données avancées comme le Tas de Fibonacci (Fibonacci Heap) permet de réduire cette borne supérieure temporelle à `\(\mathcal{O}(|E| + |V| \log |V|)\)`, rendant le traitement des graphes massifs comme le réseau routier mondial computationnellement viable.
-*   Sources associées (1) :
-    *   Source 1 : *A note on two problems in connexion with graphs* (E. W. Dijkstra, Numerische Mathematik, 1959). URL : `https://link.springer.com/article/10.1007/BF01386390`
-
-### 105. Le Jeu de la Vie (La complexité émergente)
-*   Identifiant : `anecdote_conway_game_of_life_cellular`
-*   Domaine : Systèmes Complexes / Automates Cellulaires
-*   Planification (`scheduling`) : `anytime` (Vivier général).
-*   Contenu de l'anecdote : En 1970, le mathématicien John Horton Conway invente un "jeu" sans aucun joueur, se déroulant sur une grille de cases pixelisées (des cellules mortes ou vivantes). Son évolution ne dépend que de quatre règles simplissimes : une cellule survit si elle a 2 ou 3 voisines, meurt de solitude ou d'étouffement sinon, et naît d'une case vide si elle a exactement 3 voisines. Contre toute attente, cette simplicité déterministe génère des comportements extraordinairement chaotiques et organiques. Les passionnés y ont découvert des "vaisseaux" qui se déplacent, des "canons" qui tirent, et il a même été prouvé que cet automate est "Turing-complet" : en agençant bien les cases de départ, le Jeu de la Vie possède la capacité théorique de simuler n'importe quel programme informatique, voire de simuler une version de lui-même.
-*   Contextes associés (1) :
-    *   Titre : *Fonctions de transition et complétude de Turing*
-    *   Contenu (Markdown + LaTeX) : Le Jeu de la Vie est un automate cellulaire de voisinage de Moore (les 8 cellules environnantes). L'état d'une cellule `\(S_{i,j}\)` à l'itération discrète `\(t+1\)` est dicté par une fonction booléenne non linéaire de l'état de son voisinage matériel au temps `\(t\)`. En notant `\(N\)` la somme des états des voisines, l'évolution se formalise symboliquement en bloc KaTeX : `\[ S_{i,j}^{t+1} = \begin{cases} 1 & \text{si } N = 3 \\ 1 & \text{si } S_{i,j}^t = 1 \text{ et } N = 2 \\ 0 & \text{sinon} \end{cases} \]` La preuve rigoureuse de sa complétude de Turing repose sur la construction de portes logiques (AND, OR, NOT) utilisant des flux de "planeurs" (gliders) comme signaux électriques. En configurant les collisions entre les planeurs de telle sorte qu'ils s'annihilent ou dévient pour reproduire des tables de vérité logiques, il est mathématiquement possible de construire une machine de Turing universelle intégrale uniquement avec ces règles de survie.
-*   Sources associées (1) :
-    *   Source 1 : *Mathematical Games: The fantastic combinations of John Conway's new solitaire game "life"* (M. Gardner, Scientific American, 1970). URL : `https://www.scientificamerican.com/article/mathematical-games-1970-10/`
-
-### 106. L'Expérience de Cavendish (Peser la Terre)
-*   Identifiant : `anecdote_cavendish_earth_weighing`
-*   Domaine : Physique Expérimentale / Mécanique
-*   Planification (`scheduling`) : `anytime` (Vivier général).
-*   Contenu de l'anecdote : En 1798, le scientifique Henry Cavendish réussit l'exploit expérimental de déterminer la masse de la Terre entière à l'aide d'un instrument de laboratoire extrêmement délicat : une balance de torsion. En suspendant un balancier équipé de deux petites sphères de plomb près de deux énormes sphères de plomb fixes, il a pu mesurer l'attraction gravitationnelle infime s'exerçant entre ces masses. Pour éviter que la simple chaleur de son corps ne crée des courants d'air faussant l'expérience, Cavendish observait les microscopiques oscillations du mécanisme à distance, à travers un trou dans le mur de sa grange, avec un télescope.
-*   Contextes associés (1) :
-    *   Titre : *Balance de torsion et détermination de la constante G*
-    *   Contenu (Markdown + LaTeX) : Le dispositif de Cavendish repose sur l'équilibre entre le moment de force gravitationnelle et le couple de rappel du fil de torsion. La force d'attraction entre une petite masse `\(m\)` et une grande masse `\(M\)` distantes de `\(r\)` est `\(F = G \frac{mM}{r^2}\)`. L'attraction engendre une rotation du balancier de longueur `\(L\)`, arrêtée par la rigidité du fil, caractérisée par sa constante de torsion `\(\kappa\)`. À l'équilibre, le couple satisfait en bloc LaTeX : `\[ \kappa \theta = 2 G \frac{mM}{r^2} \frac{L}{2} \]` En mesurant l'angle de déviation `\(\theta\)` et en déduisant `\(\kappa\)` via la période d'oscillation naturelle du pendule, Cavendish a pu déduire la constante gravitationnelle `\(G\)` (indirectement, car il calculait formellement la densité de la Terre), avec une erreur inférieure à 1% par rapport aux mesures modernes.
-*   Sources associées (1) :
-    *   Source 1 : *Experiments to Determine the Density of the Earth* (H. Cavendish, Philosophical Transactions of the Royal Society, 1798). URL : `https://doi.org/10.1098/rstl.1798.0022`
-
-### 107. Le Principe de Moindre Action
-*   Identifiant : `anecdote_least_action_principle`
-*   Domaine : Mécanique Analytique
-*   Planification (`scheduling`) : `anytime` (Vivier général).
-*   Contenu de l'anecdote : En mécanique classique, on utilise souvent les forces de Newton pour calculer la trajectoire d'un objet. Toutefois, le mathématicien Joseph-Louis Lagrange a reformulé la physique autour d'un concept plus profond : la nature est économe. Un rayon de lumière ou une balle de tennis lancée en l'air suit toujours la trajectoire exacte qui minimise (ou rend stationnaire) une grandeur mathématique abstraite appelée "l'Action". Plutôt que de calculer des causes instantanées (les forces), cette approche déduit le mouvement de manière globale en comparant tous les chemins possibles entre un point de départ et un point d'arrivée.
-*   Contextes associés (1) :
-    *   Titre : *Le formalisme Lagrangien et le Calcul des Variations*
-    *   Contenu (Markdown + LaTeX) : Le Lagrangien `\(\mathcal{L}\)` d'un système correspond à la différence entre son énergie cinétique `\(T\)` et son énergie potentielle `\(V\)` (`\(\mathcal{L} = T - V\)`). L'Action `\(S\)` est l'intégrale temporelle de ce Lagrangien le long d'un chemin défini. Le principe de Hamilton postule que la trajectoire physique réelle `\(q(t)\)` est celle qui rend la variation de l'action nulle (`\(\delta S = 0\)`). En appliquant le calcul des variations, on obtient les équations d'Euler-Lagrange en bloc KaTeX : `\[ \frac{d}{dt} \left( \frac{\partial \mathcal{L}}{\partial \dot{q}_i} \right) - \frac{\partial \mathcal{L}}{\partial q_i} = 0 \]` Ce formalisme puissant ne dépend d'aucun système de coordonnées particulier et s'étend naturellement à la relativité générale et à la théorie quantique des champs.
-*   Sources associées (1) :
-    *   Source 1 : *Mécanique analytique* (J.-L. Lagrange, 1788, Éditions originales / Gallica). URL : `https://gallica.bnf.fr/ark:/12148/bpt6k229224j`
-
-### 108. L'Effet Tunnel au Cœur du Soleil
-*   Identifiant : `anecdote_quantum_tunneling_sun`
-*   Domaine : Physique Quantique / Astrophysique
-*   Planification (`scheduling`) : `anytime` (Vivier général).
-*   Contenu de l'anecdote : Selon les lois de la thermodynamique classique, le cœur du Soleil n'est pas assez chaud pour briller. La température d'environ 15 millions de degrés ne fournit pas une énergie cinétique suffisante aux protons pour qu'ils puissent vaincre leur répulsion électromagnétique mutuelle et fusionner. Si le Soleil parvient tout de même à s'allumer, c'est grâce à la mécanique quantique. Les protons se comportant comme des ondes de probabilité, il existe une chance infinitésimale mais non nulle qu'ils se "téléportent" littéralement de l'autre côté de la barrière de répulsion. Ce phénomène, appelé "effet tunnel", se produit assez souvent sur l'énorme quantité de matière solaire pour maintenir l'étoile en vie.
-*   Contextes associés (1) :
-    *   Titre : *Barrière Coulombienne et Pic de Gamow*
-    *   Contenu (Markdown + LaTeX) : L'énergie thermique moyenne d'un proton au centre du Soleil est de l'ordre de `\(1 \text{ keV}\)`, tandis que la barrière de potentiel Coulombien requiert environ `\(1 \text{ MeV}\)`. Le coefficient de transmission quantique à travers une barrière de potentiel `\(V(r)\)` est calculable via l'approximation WKB. La probabilité de pénétration est proportionnelle à `\(\exp(-2\pi\eta)\)`, où `\(\eta\)` est le paramètre de Sommerfeld défini en bloc LaTeX par : `\[ \eta = \frac{Z_1 Z_2 e^2}{4\pi\epsilon_0 \hbar v} \]` Le taux de fusion thermonucléaire dépend du produit de cette probabilité de transmission (croissante avec l'énergie) et de la distribution de Maxwell-Boltzmann (décroissante avec l'énergie). Le croisement de ces deux exponentielles crée une étroite fenêtre d'énergie efficace appelée "Pic de Gamow", où se produisent la quasi-totalité des réactions de fusion.
-*   Sources associées (1) :
-    *   Source 1 : *Zur Frage des Aufbaus der Elemente im Sterninnern* (R. d'E. Atkinson, F. G. Houtermans, Zeitschrift für Physik, 1929). URL : `https://doi.org/10.1007/BF01340658`
-
-### 109. Le Modèle d'Ising et les Transitions de Phase
-*   Identifiant : `anecdote_ising_model_phase_transition`
-*   Domaine : Physique Statistique
-*   Planification (`scheduling`) : `anytime` (Vivier général).
-*   Contenu de l'anecdote : Pourquoi un aimant perd-il soudainement sa capacité de magnétisation au-delà d'une certaine température de chauffe (le point de Curie) ? En 1924, Ernst Ising tente de modéliser ce phénomène en considérant les atomes du métal comme de petits aimants (des spins) pouvant pointer vers le "haut" ou vers le "bas", disposés sur une ligne. Ising démontra que sur une simple ligne (à une dimension), le métal ne pouvait pas devenir magnétique. Il fallut attendre vingt ans pour que le physicien Lars Onsager réussisse l'exploit de résoudre ce modèle sur une grille à deux dimensions, prouvant mathématiquement pour la première fois comment le chaos thermique parvient à détruire un ordre microscopique local.
-*   Contextes associés (1) :
-    *   Titre : *Hamiltonien du Modèle d'Ising et Température Critique*
-    *   Contenu (Markdown + LaTeX) : Le modèle associe à chaque site du réseau une variable de spin discrète `\(\sigma_i \in \{-1, +1\}\)`. L'interaction se limite souvent aux plus proches voisins (noté `\(\langle i, j \rangle\)`). En l'absence de champ magnétique externe, l'énergie (l'Hamiltonien) de la configuration s'écrit en bloc KaTeX : `\[ \mathcal{H} = -J \sum_{\langle i,j \rangle} \sigma_i \sigma_j \]` où `\(J\)` est la constante de couplage d'échange. Si `\(J > 0\)`, le système est ferromagnétique. L'aimantation spontanée émerge lorsque la température passe sous un seuil critique `\(T_c\)`. En 1944, Onsager a obtenu la solution analytique exacte de la fonction de partition pour un réseau carré 2D infini, prouvant que la transition de phase a lieu très exactement à la température répondant à la condition `\(\sinh\left(\frac{2J}{k_B T_c}\right) = 1\)`.
-*   Sources associées (1) :
-    *   Source 1 : *Crystal Statistics. I. A Two-Dimensional Model with an Order-Disorder Transition* (L. Onsager, Physical Review, 1944). URL : `https://doi.org/10.1103/PhysRev.65.117`
-
-### 110. Le Problème des 7 Ponts de Königsberg
-*   Identifiant : `anecdote_konigsberg_bridges_euler`
-*   Domaine : Mathématiques / Théorie des Graphes
-*   Planification (`scheduling`) : `anytime` (Vivier général).
-*   Contenu de l'anecdote : Au XVIIIe siècle, les habitants de la ville de Königsberg (aujourd'hui Kaliningrad) aimaient se lancer un défi lors de leurs promenades : était-il possible de traverser les sept ponts de la ville, répartis sur deux îles et deux berges, en ne passant qu'une seule et unique fois par chaque pont ? En 1736, le mathématicien Leonhard Euler résolut le problème de manière analytique. Plutôt que d'essayer tous les chemins, il abstraisit la ville en un schéma de points et de lignes. Il démontra que la topologie même du parcours rendait ce défi mathématiquement impossible, posant par là même les fondations d'une toute nouvelle branche des mathématiques : la théorie des graphes.
-*   Contextes associés (1) :
-    *   Titre : *Le degré des sommets et les chemins Eulériens*
-    *   Contenu (Markdown + LaTeX) : Euler a converti les masses terrestres en "sommets" (nœuds) et les ponts en "arêtes" (liens). Il a identifié que pour entrer et ressortir d'un sommet sans réutiliser un pont, le sommet doit nécessairement posséder un nombre pair d'arêtes connectées (son "degré"). Le théorème fondamental des graphes eulériens énonce qu'un graphe connexe admet un chemin eulérien (parcourant chaque arête exactement une fois) si et seulement si le nombre de sommets de degré impair est exactement zéro ou deux (ces deux sommets étant alors les points de départ et d'arrivée). Dans la modélisation de Königsberg par Euler, représentée par les ensembles d'arêtes, les 4 masses terrestres possédaient toutes un nombre impair de ponts (degrés 3, 3, 3 et 5). La condition n'étant pas remplie, le parcours est rigoureusement impossible.
-*   Sources associées (1) :
-    *   Source 1 : *Solutio problematis ad geometriam situs pertinentis* (L. Euler, Commentarii academiae scientiarum Petropolitanae, 1741). URL : `https://scholarlycommons.pacific.edu/euler-works/53/`
-
-### 111. Le Condensat de Bose-Einstein
-*   Identifiant : `anecdote_bose_einstein_condensate`
-*   Domaine : Physique Quantique / Matière Condensée
-*   Planification (`scheduling`) : `anytime` (Vivier général).
-*   Contenu de l'anecdote : La matière se présente habituellement sous trois états : solide, liquide et gaz. Mais en 1924, Satyendra Nath Bose et Albert Einstein prédisent théoriquement l'existence d'un nouvel état. Si l'on refroidit un gaz de certains atomes à une température extrêmement proche du zéro absolu (à peine quelques milliardièmes de degré au-dessus de -273,15°C), les atomes ralentissent au point de perdre leur individualité physique. Leurs ondes quantiques s'étalent, se chevauchent, puis fusionnent pour former une seule "super-onde" macroscopique. Le gaz entier se comporte alors physiquement comme s'il n'était plus qu'un seul et unique atome géant. Cet état n'a pu être créé en laboratoire pour la première fois qu'en 1995.
-*   Contextes associés (1) :
-    *   Titre : *Longueur d'onde thermique et occupation de l'état fondamental*
-    *   Contenu (Markdown + LaTeX) : D'après la dualité onde-corpuscule, la longueur d'onde de de Broglie thermique d'une particule massive dépend de l'agitation thermique `\(T\)`. Elle est donnée par `\(\lambda_{dB} = \frac{h}{\sqrt{2\pi m k_B T}}\)`. À température ambiante, `\(\lambda_{dB}\)` est négligeable par rapport à la distance interatomique `\(d\)`. Cependant, lorsque `\(T \rightarrow 0\)`, la longueur d'onde s'étend jusqu'à vérifier la condition `\(\lambda_{dB} > d\)`. Les fonctions d'onde des atomes (des bosons de spin entier) se recouvrent spatialement. La statistique de distribution de Bose-Einstein en bloc LaTeX montre l'effondrement des particules dans le niveau d'énergie le plus bas `\(E_0\)` : `\[ \langle n_i \rangle = \frac{1}{\exp\left(\frac{E_i - \mu}{k_B T}\right) - 1} \]` Lorsque le potentiel chimique `\(\mu \rightarrow E_0\)`, l'occupation de l'état fondamental `\(n_0\)` devient macroscopique, constituant la transition de phase du condensat.
-*   Sources associées (1) :
-    *   Source 1 : *Observation of Bose-Einstein Condensation in a Dilute Atomic Vapor* (M. H. Anderson et al., Science, 1995). URL : `https://doi.org/10.1126/science.269.5221.198`
-
-### 112. La Limite de Roche (Les anneaux de Saturne)
-*   Identifiant : `anecdote_roche_limit_tidal`
-*   Domaine : Mécanique Céleste / Astrophysique
-*   Planification (`scheduling`) : `anytime` (Vivier général).
-*   Contenu de l'anecdote : Pourquoi Saturne possède-t-elle un majestueux système d'anneaux de poussière et de glace plutôt qu'une grande lune sphérique en orbite proche ? L'explication a été formulée en 1848 par l'astronome français Édouard Roche. Il a mathématiquement défini une distance critique de sécurité autour d'une planète. Si une lune s'approche en deçà de cette orbite (la limite de Roche), la force gravitationnelle que la planète exerce sur la face avant de la lune devient si supérieure à celle exercée sur sa face arrière que cette différence (la force de marée) surpasse la gravité interne qui maintient la lune solidaire. La lune est alors littéralement déchiquetée, ses débris s'étalant pour former des anneaux.
-*   Contextes associés (1) :
-    *   Titre : *Gradient gravitationnel et équation d'équilibre*
-    *   Contenu (Markdown + LaTeX) : La limite de Roche évalue le point de rupture où la force de marée différentielle `\(F_t\)` exercée par un corps primaire (masse `\(M\)`, rayon `\(R\)`) sur un satellite fluide (masse `\(m\)`, rayon `\(r\)`) compense très exactement l'auto-gravité de confinement `\(F_g\)` de ce dernier. Le gradient de la force de Newton sur le diamètre du satellite permet d'exprimer la force d'étirement en bloc KaTeX : `\[ F_t \approx \frac{2 G M m r}{d^3} \quad \text{contre} \quad F_g = \frac{G m^2}{r^2} \]` En égalisant ces deux forces et en exprimant les masses en fonction des densités volumiques respectives (`\(\rho_M\)` et `\(\rho_m\)`), on obtient la distance d'orbite critique `\(d\)`. Pour un satellite dit "fluide" (maintenu uniquement par sa propre gravité), le calcul rigoureux de Roche donne la limite absolue : `\[ d \approx 2,423 R \left( \frac{\rho_M}{\rho_m} \right)^{1/3} \]`
-*   Sources associées (1) :
-    *   Source 1 : *La figure d'une masse fluide soumise à l'attraction d'un point éloigné* (É. Roche, Académie des sciences de Montpellier, 1848). URL : `https://gallica.bnf.fr/ark:/12148/bpt6k5828456h`
-
-### 113. L'Algorithme PageRank
-*   Identifiant : `anecdote_pagerank_algorithm_markov`
-*   Domaine : Algorithmique Numérique / Graphes
-*   Planification (`scheduling`) : `anytime` (Vivier général).
-*   Contenu de l'anecdote : Le succès fulgurant du premier moteur de recherche Google à la fin des années 1990 ne reposait pas sur l'analyse linguistique complexe du texte des sites, mais sur un emprunt à la sociologie des publications scientifiques. Sergey Brin et Larry Page ont conçu le "PageRank" sur l'idée qu'une page web est jugée pertinente si de nombreuses autres pages pertinentes contiennent un lien vers elle. Le réseau internet entier est modélisé comme un graphe géant. Le PageRank simule le comportement probabiliste d'un internaute aléatoire (un *random surfer*) cliquant indéfiniment de lien en lien, la pertinence d'une page devenant simplement sa probabilité mathématique d'y atterrir au terme de ce surf infini.
-*   Contextes associés (1) :
-    *   Titre : *Modélisation par Chaîne de Markov et Vecteur Propre*
-    *   Contenu (Markdown + LaTeX) : Soit `\(N\)` le nombre de pages totales. La matrice d'adjacence pondérée du Web construit une matrice de transition stochastique. L'algorithme résout le score de PageRank `\(PR(u)\)` d'une page `\(u\)` de manière itérative, en considérant l'ensemble `\(B_u\)` des pages `\(v\)` pointant vers `\(u\)`, et `\(L(v)\)` le nombre de liens sortants de `\(v\)`. Pour éviter le piégeage probabiliste dans des nœuds sans lien sortant (sink holes), un facteur d'amortissement `\(d\)` (historiquement `\(d = 0,85\)`) est introduit (probabilité de téléportation arbitraire). L'équation centrale s'écrit en bloc LaTeX : `\[ PR(u) = \frac{1-d}{N} + d \sum_{v \in B_u} \frac{PR(v)}{L(v)} \]` Mathématiquement, ce calcul revient à utiliser la méthode des puissances pour extraire le vecteur propre principal associé à la valeur propre `\(\lambda = 1\)` de la matrice de transition modifiée de Google, garantie convergente par le théorème de Perron-Frobenius.
-*   Sources associées (1) :
-    *   Source 1 : *The Anatomy of a Large-Scale Hypertextual Web Search Engine* (S. Brin, L. Page, Computer Networks and ISDN Systems, 1998). URL : `http://ilpubs.stanford.edu:8090/361/`
-
-### 114. Le Régulateur PID (L'art de l'automatique)
-*   Identifiant : `anecdote_pid_controller_feedback`
-*   Domaine : Ingénierie / Automatique
-*   Planification (`scheduling`) : `anytime` (Vivier général).
-*   Contenu de l'anecdote : Qu'il s'agisse de maintenir l'altitude stationnaire d'un drone, la température d'un four industriel, ou le régulateur de vitesse d'une voiture, l'industrie moderne repose presque universellement sur l'algorithme "PID" (Proportionnel, Intégral, Dérivé). Formalisé en 1922 par Nicolas Minorsky pour automatiser le maintien du cap des navires militaires, ce contrôleur analyse en permanence l'erreur entre la position voulue et la position réelle en évaluant simultanément trois aspects du temps. Il regarde le présent (l'erreur actuelle), accumule le passé (les erreurs résiduelles), et anticipe le futur (la vitesse à laquelle l'erreur varie). Ce triptyque assure un ajustement électronique doux, stable et sans oscillation brusque.
-*   Contextes associés (1) :
-    *   Titre : *Équation de transfert du correcteur PID continu*
-    *   Contenu (Markdown + LaTeX) : Dans une boucle d'asservissement fermée, le régulateur PID calcule la commande `\(u(t)\)` à envoyer à l'actionneur (par exemple la puissance d'un moteur) en fonction de la fonction d'erreur `\(e(t) = c(t) - y(t)\)` (la consigne moins la mesure). Le signal de commande est la combinaison linéaire de trois termes mathématiques. En bloc KaTeX : `\[ u(t) = K_p e(t) + K_i \int_{0}^{t} e(\tau) d\tau + K_d \frac{de(t)}{dt} \]` 
-        - L'action **P**roportionnelle (`\(K_p\)`) réagit instantanément à l'écart, mais laisse toujours une erreur statique résiduelle permanente.
-        - L'action **I**ntégrale (`\(K_i\)`) annule cette erreur statique en intégrant l'historique de l'écart au fil du temps.
-        - L'action **D**érivée (`\(K_d\)`) freine les variations brusques en évaluant la pente de l'erreur, apportant une stabilité d'amortissement pour éviter le dépassement (overshoot) du point de consigne.
-*   Sources associées (1) :
-    *   Source 1 : *Directional Stability of Automatically Steered Bodies* (N. Minorsky, Journal of the American Society for Naval Engineers, 1922). URL : `https://doi.org/10.1111/j.1559-3584.1922.tb04958.x`
-
-### 115. L'Effet Magnus
-*   Identifiant : `anecdote_magnus_effect_fluid`
-*   Domaine : Mécanique des Fluides
-*   Planification (`scheduling`) : `anytime` (Vivier général).
-*   Contenu de l'anecdote : Lorsqu'un joueur de football ou de tennis frappe une balle en lui appliquant un effet brossé (une rotation rapide sur elle-même), la balle adopte une trajectoire asymétrique spectaculaire, plongeant ou s'incurvant latéralement dans l'air. Ce phénomène est dû à l'Effet Magnus. La rotation de la balle entraîne une fine couche d'air avec elle par friction visqueuse. D'un côté de la balle, ce mouvement s'additionne au vent de la course, accélérant l'air ; de l'autre côté, il s'y oppose, le ralentissant. Cette différence de vitesse crée, selon le principe physique de Bernoulli, une différence de pression atmosphérique qui "aspire" littéralement le projectile de son côté le plus rapide.
-*   Contextes associés (1) :
-    *   Titre : *Le Théorème de Kutta-Joukowski et la Portance*
-    *   Contenu (Markdown + LaTeX) : Dans le cadre de l'aérodynamique des écoulements potentiels (fluides parfaits incompressibles irrotationnels), l'effet Magnus peut être rigoureusement calculé par la superposition d'un écoulement uniforme de vitesse libre `\(U\)` et d'un vortex de circulation `\(\Gamma\)`. La rotation du cylindre ou de la sphère modifie le champ de lignes de courant, déplaçant les points d'arrêt (où la vitesse est nulle). La force aérodynamique de portance (lift) perpendiculaire à l'axe de progression et à l'axe de rotation est quantifiée par le théorème de Kutta-Joukowski. Pour un cylindre de longueur `\(L\)`, la force en bloc LaTeX s'écrit : `\[ \mathbf{F} = \rho L (\mathbf{V} \times \mathbf{\Gamma}) \quad \implies \quad F_L = \rho U \Gamma L \]` où `\(\rho\)` est la densité du fluide, et la circulation `\(\Gamma = \oint \mathbf{v} \cdot d\mathbf{l}\)` quantifie l'intensité du tourbillon imposé par la condition d'adhérence visqueuse du fluide à la surface en rotation.
-*   Sources associées (1) :
-    *   Source 1 : *Über die Abweichung der Geschosse* (H. G. Magnus, Annalen der Physik und Chemie, 1853). URL : `https://doi.org/10.1002/andp.18531640102`
 
 ### 116. L'Échange de Clés Diffie-Hellman
 *   Identifiant : `anecdote_diffie_hellman_key_exchange`

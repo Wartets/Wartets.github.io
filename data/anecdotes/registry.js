@@ -870,5 +870,165 @@ export default [
 		addedDate: '2026-08-01',
 		scheduling: { type: 'anytime', dates: [] },
 		path: '/data/anecdotes/mathematiques/sunflower_fibonacci_golden_ratio.js'
+	},
+	{
+		id: 'anecdote_pascaline_sautoir_mechanism',
+		priority: 4,
+		enabled: true,
+		addedDate: '2026-08-11',
+		scheduling: { type: 'anytime', dates: [] },
+		path: '/data/anecdotes/histoire_sciences/pascaline_sautoir_mechanism.js'
+	},
+	{
+		id: 'anecdote_cordic_trigonometry_algorithm',
+		priority: 4,
+		enabled: true,
+		addedDate: '2026-08-11',
+		scheduling: { type: 'anytime', dates: [] },
+		path: '/data/anecdotes/mathematiques/cordic_trigonometry_algorithm.js'
+	},
+	{
+		id: 'anecdote_fast_inverse_square_root_quake',
+		priority: 4,
+		enabled: true,
+		addedDate: '2026-08-11',
+		scheduling: { type: 'anytime', dates: [] },
+		path: '/data/anecdotes/mathematiques/fast_inverse_square_root_quake.js'
+	},
+	{
+		id: 'anecdote_antikythera_mechanism_analog',
+		priority: 4,
+		enabled: true,
+		addedDate: '2026-08-11',
+		scheduling: { type: 'anytime', dates: [] },
+		path: '/data/anecdotes/histoire_sciences/antikythera_mechanism_analog.js'
+	},
+	{
+		id: 'anecdote_ada_lovelace_first_algorithm',
+		priority: 4,
+		enabled: true,
+		addedDate: '2026-08-11',
+		scheduling: { type: 'anytime', dates: [] },
+		path: '/data/anecdotes/histoire_sciences/ada_lovelace_first_algorithm.js'
+	},
+	{
+		id: 'anecdote_monte_carlo_method_simulation',
+		priority: 4,
+		enabled: true,
+		addedDate: '2026-08-11',
+		scheduling: { type: 'anytime', dates: [] },
+		path: '/data/anecdotes/physique/monte_carlo_method_simulation.js'
+	},
+	{
+		id: 'anecdote_shor_algorithm_quantum_factorization',
+		priority: 4,
+		enabled: true,
+		addedDate: '2026-08-11',
+		scheduling: { type: 'anytime', dates: [] },
+		path: '/data/anecdotes/mathematiques/shor_algorithm_quantum_factorization.js'
+	},
+	{
+		id: 'anecdote_cooley_tukey_fft_algorithm',
+		priority: 4,
+		enabled: true,
+		addedDate: '2026-08-11',
+		scheduling: { type: 'anytime', dates: [] },
+		path: '/data/anecdotes/mathematiques/cooley_tukey_fft_algorithm.js'
+	},
+	{
+		id: 'anecdote_dijkstra_shortest_path_graph',
+		priority: 4,
+		enabled: true,
+		addedDate: '2026-08-11',
+		scheduling: { type: 'anytime', dates: [] },
+		path: '/data/anecdotes/mathematiques/dijkstra_shortest_path_graph.js'
+	},
+	{
+		id: 'anecdote_conway_game_of_life_cellular',
+		priority: 4,
+		enabled: true,
+		addedDate: '2026-08-11',
+		scheduling: { type: 'anytime', dates: [] },
+		path: '/data/anecdotes/mathematiques/conway_game_of_life_cellular.js'
+	},
+	{
+		id: 'anecdote_cavendish_earth_weighing',
+		priority: 4,
+		enabled: true,
+		addedDate: '2026-08-11',
+		scheduling: { type: 'anytime', dates: [] },
+		path: '/data/anecdotes/physique/cavendish_earth_weighing.js'
+	},
+	{
+		id: 'anecdote_least_action_principle',
+		priority: 4,
+		enabled: true,
+		addedDate: '2026-08-11',
+		scheduling: { type: 'anytime', dates: [] },
+		path: '/data/anecdotes/physique/least_action_principle.js'
+	},
+	{
+		id: 'anecdote_quantum_tunneling_sun',
+		priority: 4,
+		enabled: true,
+		addedDate: '2026-08-11',
+		scheduling: { type: 'anytime', dates: [] },
+		path: '/data/anecdotes/physique/quantum_tunneling_sun.js'
+	},
+	{
+		id: 'anecdote_ising_model_phase_transition',
+		priority: 4,
+		enabled: true,
+		addedDate: '2026-08-11',
+		scheduling: { type: 'anytime', dates: [] },
+		path: '/data/anecdotes/physique/ising_model_phase_transition.js'
+	},
+	{
+		id: 'anecdote_konigsberg_bridges_euler',
+		priority: 4,
+		enabled: true,
+		addedDate: '2026-08-11',
+		scheduling: { type: 'anytime', dates: [] },
+		path: '/data/anecdotes/mathematiques/konigsberg_bridges_euler.js'
+	},
+	{
+		id: 'anecdote_bose_einstein_condensate',
+		priority: 4,
+		enabled: true,
+		addedDate: '2026-08-11',
+		scheduling: { type: 'anytime', dates: [] },
+		path: '/data/anecdotes/physique/bose_einstein_condensate.js'
+	},
+	{
+		id: 'anecdote_roche_limit_tidal',
+		priority: 4,
+		enabled: true,
+		addedDate: '2026-08-11',
+		scheduling: { type: 'anytime', dates: [] },
+		path: '/data/anecdotes/physique/roche_limit_tidal.js'
+	},
+	{
+		id: 'anecdote_pagerank_algorithm_markov',
+		priority: 4,
+		enabled: true,
+		addedDate: '2026-08-11',
+		scheduling: { type: 'anytime', dates: [] },
+		path: '/data/anecdotes/mathematiques/pagerank_algorithm_markov.js'
+	},
+	{
+		id: 'anecdote_pid_controller_feedback',
+		priority: 4,
+		enabled: true,
+		addedDate: '2026-08-11',
+		scheduling: { type: 'anytime', dates: [] },
+		path: '/data/anecdotes/physique/pid_controller_feedback.js'
+	},
+	{
+		id: 'anecdote_magnus_effect_fluid',
+		priority: 4,
+		enabled: true,
+		addedDate: '2026-08-11',
+		scheduling: { type: 'anytime', dates: [] },
+		path: '/data/anecdotes/physique/magnus_effect_fluid.js'
 	}
 ];
