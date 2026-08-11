@@ -193,6 +193,38 @@ Liste complète des anecdotes présentes dans `data/anecdotes/registry.js`, clas
 | anecdote_pascaline_sautoir_mechanism | le sautoir de pascal résout la propagation de la retenue mécanique (1642). |
 | anecdote_von_neumann_architecture | von neumann décrit l'architecture à programme enregistré encore utilisée aujourd'hui (1945). |
 
+## Anecdotes Périodiques
+
+Anecdotes avec un `scheduling` de type `period`, n'apparaissant que durant une fenêtre calendaire précise.
+
+| Identifiant | Résumé |
+|---|---|
+| anecdote_kepler_snowflake_conjecture | kepler pose en 1611, en cadeau du nouvel an, la conjecture de l'empilement optimal de sphères via la symétrie des flocons. |
+| anecdote_christmas_lights_circuits | pourquoi une ampoule grillée éteignait toute une guirlande de noël en série (lois de kirchhoff). |
+| anecdote_twelve_days_christmas_triangular_numbers | la somme des cadeaux des douze jours de noël vaut 364, un nombre tétraédrique. |
+| anecdote_star_of_bethlehem_astronomy | l'hypothèse de kepler d'une conjonction planétaire triple pour expliquer l'étoile de bethléem. |
+| anecdote_santa_claus_speed_physics | estimation façon « problème de fermi » de la vitesse nécessaire au père noël. |
+| anecdote_leap_second_new_year | la seconde intercalaire ajoutée certains réveillons pour synchroniser tai et rotation terrestre. |
+| anecdote_gregorian_calendar_reform | la réforme grégorienne de 1582 corrigea dix jours de dérive du calendrier julien. |
+| anecdote_champagne_cork_physics | détente adiabatique du co2 et nuage de condensation à l'ouverture du champagne. |
+| anecdote_fireworks_flame_emission_colors | spectroscopie atomique des sels métalliques donnant leurs couleurs aux feux d'artifice. |
+| anecdote_cesium_second_definition | depuis 1967 la seconde est définie par la transition hyperfine du césium 133. |
+| anecdote_computus_gauss_easter_algorithm | l'algorithme modulaire de gauss (1800) calcule la date de pâques sans observation astronomique. |
+| anecdote_cardioid_valentine_heart_curve | la cardioïde, courbe mathématique du cœur de la saint-valentin, et sa caustique optique. |
+| anecdote_analemma_equation_of_time | l'analemme en huit et l'équation du temps, due à l'obliquité et l'excentricité terrestres. |
+| anecdote_bastille_day_fireworks_shell_physics | balistique et combustion des étoiles pyrotechniques du feu d'artifice du 14 juillet. |
+| anecdote_winter_solstice_christmas_origins | le lien entre le solstice d'hiver julien et la fixation historique de la date de noël. |
+| anecdote_perseid_meteor_shower_physics | les perséides d'août, débris de la comète swift-tuttle vaporisés dans l'atmosphère. |
+| anecdote_nobel_prize_ceremony_december | la cérémonie du prix nobel du 10 décembre et son financement par le brevet de la dynamite. |
+| anecdote_ice_skating_friction_physics | pourquoi la glace est glissante : frottement cinétique plutôt que simple fusion par pression. |
+| anecdote_sledding_friction_physics | le frottement variable d'une luge sur la neige selon la température et le fartage. |
+| anecdote_metonic_cycle_lunar_calendar | le cycle métonique de 19 ans reliant années solaires et mois lunaires (nouvel an chinois). |
+| anecdote_snow_albedo_radiative_physics | l'albédo élevé de la neige fraîche et la rétroaction glace-albédo. |
+| anecdote_winter_halo_ice_optics | le halo à 22° autour du soleil hivernal, réfraction à travers des prismes de glace hexagonaux. |
+| anecdote_aurora_borealis_physics | excitation collisionnelle de l'oxygène et de l'azote à l'origine des couleurs de l'aurore boréale. |
+| anecdote_poinsettia_photoperiodism | le photopériodisme du poinsettia et le système phytochrome déclenchant sa coloration rouge. |
+| anecdote_international_date_line_new_year | la ligne de changement de date et les 26 heures que dure le passage mondial au nouvel an. |
+
 ---
 
 # Nouvelles anecdotes à ajouter (en réalité ces anecdotes ont déjà été ajoutées dans le registre, elles sont gardées pour avoir le style de mise en page pour de nouvelles anecdotes)
