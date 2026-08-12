@@ -1357,7 +1357,7 @@ export default [
 		enabled: true,
 		addedDate: '2026-08-11',
 		scheduling: { type: 'period', dates: ['12-10', '01-06'] },
-		path: '/data/anecdotes/periodes/mathematiques/kepler_snowflake_conjecture.js'
+		path: '/data/anecdotes/mathematiques/kepler_snowflake_conjecture.js'
 	},
 	{
 		id: 'anecdote_christmas_lights_circuits',
@@ -1365,7 +1365,7 @@ export default [
 		enabled: true,
 		addedDate: '2026-08-11',
 		scheduling: { type: 'period', dates: ['12-05', '12-26'] },
-		path: '/data/anecdotes/periodes/physique/christmas_lights_circuits.js'
+		path: '/data/anecdotes/physique/christmas_lights_circuits.js'
 	},
 	{
 		id: 'anecdote_twelve_days_christmas_triangular_numbers',
@@ -1373,7 +1373,7 @@ export default [
 		enabled: true,
 		addedDate: '2026-08-11',
 		scheduling: { type: 'period', dates: ['12-25', '01-06'] },
-		path: '/data/anecdotes/periodes/mathematiques/twelve_days_christmas_triangular_numbers.js'
+		path: '/data/anecdotes/mathematiques/twelve_days_christmas_triangular_numbers.js'
 	},
 	{
 		id: 'anecdote_star_of_bethlehem_astronomy',
@@ -1381,7 +1381,7 @@ export default [
 		enabled: true,
 		addedDate: '2026-08-11',
 		scheduling: { type: 'period', dates: ['12-18', '12-25'] },
-		path: '/data/anecdotes/periodes/histoire_sciences/star_of_bethlehem_astronomy.js'
+		path: '/data/anecdotes/histoire_sciences/star_of_bethlehem_astronomy.js'
 	},
 	{
 		id: 'anecdote_santa_claus_speed_physics',
@@ -1389,7 +1389,7 @@ export default [
 		enabled: true,
 		addedDate: '2026-08-11',
 		scheduling: { type: 'period', dates: ['12-20', '12-25'] },
-		path: '/data/anecdotes/periodes/physique/santa_claus_speed_physics.js'
+		path: '/data/anecdotes/physique/santa_claus_speed_physics.js'
 	},
 	{
 		id: 'anecdote_leap_second_new_year',
@@ -1397,7 +1397,7 @@ export default [
 		enabled: true,
 		addedDate: '2026-08-11',
 		scheduling: { type: 'period', dates: ['12-28', '01-02'] },
-		path: '/data/anecdotes/periodes/physique/leap_second_new_year.js'
+		path: '/data/anecdotes/physique/leap_second_new_year.js'
 	},
 	{
 		id: 'anecdote_gregorian_calendar_reform',
@@ -1405,7 +1405,7 @@ export default [
 		enabled: true,
 		addedDate: '2026-08-11',
 		scheduling: { type: 'period', dates: ['12-29', '01-03'] },
-		path: '/data/anecdotes/periodes/histoire_sciences/gregorian_calendar_reform.js'
+		path: '/data/anecdotes/histoire_sciences/gregorian_calendar_reform.js'
 	},
 	{
 		id: 'anecdote_champagne_cork_physics',
@@ -1413,7 +1413,7 @@ export default [
 		enabled: true,
 		addedDate: '2026-08-11',
 		scheduling: { type: 'period', dates: ['12-29', '01-02'] },
-		path: '/data/anecdotes/periodes/physique/champagne_cork_physics.js'
+		path: '/data/anecdotes/physique/champagne_cork_physics.js'
 	},
 	{
 		id: 'anecdote_fireworks_flame_emission_colors',
@@ -1421,7 +1421,7 @@ export default [
 		enabled: true,
 		addedDate: '2026-08-11',
 		scheduling: { type: 'period', dates: ['12-29', '01-02'] },
-		path: '/data/anecdotes/periodes/physique/fireworks_flame_emission_colors.js'
+		path: '/data/anecdotes/physique/fireworks_flame_emission_colors.js'
 	},
 	{
 		id: 'anecdote_cesium_second_definition',
@@ -1429,7 +1429,7 @@ export default [
 		enabled: true,
 		addedDate: '2026-08-11',
 		scheduling: { type: 'period', dates: ['12-30', '01-01'] },
-		path: '/data/anecdotes/periodes/physique/cesium_second_definition.js'
+		path: '/data/anecdotes/physique/cesium_second_definition.js'
 	},
 	{
 		id: 'anecdote_computus_gauss_easter_algorithm',
@@ -1437,7 +1437,7 @@ export default [
 		enabled: true,
 		addedDate: '2026-08-11',
 		scheduling: { type: 'period', dates: ['03-15', '04-25'] },
-		path: '/data/anecdotes/periodes/mathematiques/computus_gauss_easter_algorithm.js'
+		path: '/data/anecdotes/mathematiques/computus_gauss_easter_algorithm.js'
 	},
 	{
 		id: 'anecdote_cardioid_valentine_heart_curve',
@@ -1445,7 +1445,7 @@ export default [
 		enabled: true,
 		addedDate: '2026-08-11',
 		scheduling: { type: 'period', dates: ['02-10', '02-16'] },
-		path: '/data/anecdotes/periodes/mathematiques/cardioid_valentine_heart_curve.js'
+		path: '/data/anecdotes/mathematiques/cardioid_valentine_heart_curve.js'
 	},
 	{
 		id: 'anecdote_analemma_equation_of_time',
@@ -1453,7 +1453,7 @@ export default [
 		enabled: true,
 		addedDate: '2026-08-11',
 		scheduling: { type: 'period', dates: ['06-15', '06-24'] },
-		path: '/data/anecdotes/periodes/physique/analemma_equation_of_time.js'
+		path: '/data/anecdotes/physique/analemma_equation_of_time.js'
 	},
 	{
 		id: 'anecdote_bastille_day_fireworks_shell_physics',
@@ -1461,7 +1461,7 @@ export default [
 		enabled: true,
 		addedDate: '2026-08-11',
 		scheduling: { type: 'period', dates: ['07-10', '07-15'] },
-		path: '/data/anecdotes/periodes/physique/bastille_day_fireworks_shell_physics.js'
+		path: '/data/anecdotes/physique/bastille_day_fireworks_shell_physics.js'
 	},
 	{
 		id: 'anecdote_winter_solstice_christmas_origins',
@@ -1469,7 +1469,7 @@ export default [
 		enabled: true,
 		addedDate: '2026-08-11',
 		scheduling: { type: 'period', dates: ['12-18', '12-24'] },
-		path: '/data/anecdotes/periodes/histoire_sciences/winter_solstice_christmas_origins.js'
+		path: '/data/anecdotes/histoire_sciences/winter_solstice_christmas_origins.js'
 	},
 	{
 		id: 'anecdote_perseid_meteor_shower_physics',
@@ -1477,7 +1477,7 @@ export default [
 		enabled: true,
 		addedDate: '2026-08-11',
 		scheduling: { type: 'period', dates: ['08-09', '08-16'] },
-		path: '/data/anecdotes/periodes/physique/perseid_meteor_shower_physics.js'
+		path: '/data/anecdotes/physique/perseid_meteor_shower_physics.js'
 	},
 	{
 		id: 'anecdote_nobel_prize_ceremony_december',
@@ -1485,7 +1485,7 @@ export default [
 		enabled: true,
 		addedDate: '2026-08-11',
 		scheduling: { type: 'period', dates: ['12-08', '12-11'] },
-		path: '/data/anecdotes/periodes/histoire_sciences/nobel_prize_ceremony_december.js'
+		path: '/data/anecdotes/histoire_sciences/nobel_prize_ceremony_december.js'
 	},
 	{
 		id: 'anecdote_ice_skating_friction_physics',
@@ -1493,7 +1493,7 @@ export default [
 		enabled: true,
 		addedDate: '2026-08-11',
 		scheduling: { type: 'period', dates: ['12-15', '01-15'] },
-		path: '/data/anecdotes/periodes/physique/ice_skating_friction_physics.js'
+		path: '/data/anecdotes/physique/ice_skating_friction_physics.js'
 	},
 	{
 		id: 'anecdote_sledding_friction_physics',
@@ -1501,7 +1501,7 @@ export default [
 		enabled: true,
 		addedDate: '2026-08-11',
 		scheduling: { type: 'period', dates: ['12-20', '01-10'] },
-		path: '/data/anecdotes/periodes/physique/sledding_friction_physics.js'
+		path: '/data/anecdotes/physique/sledding_friction_physics.js'
 	},
 	{
 		id: 'anecdote_metonic_cycle_lunar_calendar',
@@ -1509,7 +1509,7 @@ export default [
 		enabled: true,
 		addedDate: '2026-08-11',
 		scheduling: { type: 'period', dates: ['01-15', '02-20'] },
-		path: '/data/anecdotes/periodes/mathematiques/metonic_cycle_lunar_calendar.js'
+		path: '/data/anecdotes/mathematiques/metonic_cycle_lunar_calendar.js'
 	},
 	{
 		id: 'anecdote_snow_albedo_radiative_physics',
@@ -1517,7 +1517,7 @@ export default [
 		enabled: true,
 		addedDate: '2026-08-11',
 		scheduling: { type: 'period', dates: ['12-15', '01-10'] },
-		path: '/data/anecdotes/periodes/physique/snow_albedo_radiative_physics.js'
+		path: '/data/anecdotes/physique/snow_albedo_radiative_physics.js'
 	},
 	{
 		id: 'anecdote_winter_halo_ice_optics',
@@ -1525,7 +1525,7 @@ export default [
 		enabled: true,
 		addedDate: '2026-08-11',
 		scheduling: { type: 'period', dates: ['12-15', '01-15'] },
-		path: '/data/anecdotes/periodes/physique/winter_halo_ice_optics.js'
+		path: '/data/anecdotes/physique/winter_halo_ice_optics.js'
 	},
 	{
 		id: 'anecdote_aurora_borealis_physics',
@@ -1533,7 +1533,7 @@ export default [
 		enabled: true,
 		addedDate: '2026-08-11',
 		scheduling: { type: 'period', dates: ['12-15', '01-05'] },
-		path: '/data/anecdotes/periodes/physique/aurora_borealis_physics.js'
+		path: '/data/anecdotes/physique/aurora_borealis_physics.js'
 	},
 	{
 		id: 'anecdote_poinsettia_photoperiodism',
@@ -1541,7 +1541,7 @@ export default [
 		enabled: true,
 		addedDate: '2026-08-11',
 		scheduling: { type: 'period', dates: ['12-01', '12-25'] },
-		path: '/data/anecdotes/periodes/physique/poinsettia_photoperiodism.js'
+		path: '/data/anecdotes/physique/poinsettia_photoperiodism.js'
 	},
 	{
 		id: 'anecdote_international_date_line_new_year',
@@ -1549,6 +1549,6 @@ export default [
 		enabled: true,
 		addedDate: '2026-08-11',
 		scheduling: { type: 'period', dates: ['12-30', '01-02'] },
-		path: '/data/anecdotes/periodes/physique/international_date_line_new_year.js'
+		path: '/data/anecdotes/physique/international_date_line_new_year.js'
 	}
 ];
