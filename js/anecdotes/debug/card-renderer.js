@@ -45,16 +45,16 @@ function formatISODateLabel(iso, lang) {
 }
 
 function formatSchedulingSummary(scheduling, lang) {
-	if (!scheduling) return '—';
+	if (!scheduling) return '-';
 	if (scheduling.type === 'anytime') return label('anytime', lang);
 	if (scheduling.type === 'annual') {
-		return `${label('annual', lang)} — ${scheduling.dates.map(date => formatMMDDLabel(date, lang)).join(', ')}`;
+		return `${label('annual', lang)} - ${scheduling.dates.map(date => formatMMDDLabel(date, lang)).join(', ')}`;
 	}
 	if (scheduling.type === 'specific_date') {
-		return `${label('specificDate', lang)} — ${scheduling.dates.map(date => formatISODateLabel(date, lang)).join(', ')}`;
+		return `${label('specificDate', lang)} - ${scheduling.dates.map(date => formatISODateLabel(date, lang)).join(', ')}`;
 	}
 	if (scheduling.type === 'period' && scheduling.dates.length === 2) {
-		return `${label('period', lang)} — ${formatMMDDLabel(scheduling.dates[0], lang)} → ${formatMMDDLabel(scheduling.dates[1], lang)}`;
+		return `${label('period', lang)} - ${formatMMDDLabel(scheduling.dates[0], lang)} → ${formatMMDDLabel(scheduling.dates[1], lang)}`;
 	}
 	return scheduling.type;
 }
@@ -166,7 +166,18 @@ export function buildDetailedCard({ registryEntry, fullEntry, lang, contextDate,
 	const card = document.createElement('article');
 	card.className = 'debug-anecdote-card';
 
-	const isLoadFailed = fullEntry.__loadFailed === true;
+	const safeEntry = fullEntry || {
+		id: registryEntry.id,
+		domain: { fr: 'Erreur de chargement', en: 'Loading error' },
+		content: { fr: '', en: '' },
+		sources: [],
+		contexts: [],
+		__loadFailed: true,
+		__attemptedPath: registryEntry.path,
+		__errorMessage: 'Unknown error'
+	};
+
+	const isLoadFailed = safeEntry.__loadFailed === true;
 	if (isLoadFailed) card.classList.add('debug-anecdote-card-error');
 
 	const header = document.createElement('div');
@@ -185,7 +196,7 @@ export function buildDetailedCard({ registryEntry, fullEntry, lang, contextDate,
 
 	const priorityBadge = document.createElement('span');
 	priorityBadge.className = 'debug-badge debug-badge-priority';
-	priorityBadge.textContent = `${label('priority', lang)} ${registryEntry.priority ?? '—'}`;
+	priorityBadge.textContent = `${label('priority', lang)} ${registryEntry.priority ?? '-'}`;
 	header.appendChild(priorityBadge);
 
 	if (isSpecial === true || isSpecial === false) {
@@ -206,7 +217,7 @@ export function buildDetailedCard({ registryEntry, fullEntry, lang, contextDate,
 
 	const domainEl = document.createElement('p');
 	domainEl.className = 'anecdote-domain debug-card-domain';
-	domainEl.textContent = window.resolveWithFallback(fullEntry.domain, lang);
+	domainEl.textContent = window.resolveWithFallback(safeEntry.domain, lang);
 	card.appendChild(domainEl);
 
 	const metaList = document.createElement('dl');
@@ -223,8 +234,8 @@ export function buildDetailedCard({ registryEntry, fullEntry, lang, contextDate,
 	addMetaRow('addedDate', registryEntry.addedDate ? formatISODateLabel(registryEntry.addedDate, lang) : '—');
 	addMetaRow('scheduling', formatSchedulingSummary(registryEntry.scheduling, lang));
 	addMetaRow('path', registryEntry.path);
-	if (isLoadFailed && fullEntry.__errorMessage) {
-		addMetaRow('errorDetail', fullEntry.__errorMessage);
+	if (isLoadFailed && safeEntry.__errorMessage) {
+		addMetaRow('errorDetail', safeEntry.__errorMessage);
 	}
 
 	card.appendChild(metaList);
@@ -233,19 +244,19 @@ export function buildDetailedCard({ registryEntry, fullEntry, lang, contextDate,
 	contentEl.className = 'anecdote-content debug-card-content';
 	let contentText = '';
 	try {
-		contentText = typeof fullEntry.content === 'function'
-			? fullEntry.content(lang, contextDate.getUTCFullYear(), contextDate)
-			: window.resolveWithFallback(fullEntry.content, lang);
+		contentText = typeof safeEntry.content === 'function'
+			? safeEntry.content(lang, contextDate.getUTCFullYear(), contextDate)
+			: window.resolveWithFallback(safeEntry.content, lang);
 	} catch (error) {
 		contentText = window.resolveWithFallback({ fr: 'Erreur lors du rendu du contenu.', en: 'Error rendering content.' }, lang);
 	}
 	contentEl.textContent = applyLanguageTypography(contentText, lang);
 	card.appendChild(contentEl);
 
-	if (typeof fullEntry.tooltip === 'function') {
+	if (typeof safeEntry.tooltip === 'function') {
 		let tooltipText = '';
 		try {
-			tooltipText = fullEntry.tooltip(lang, preciseDate);
+			tooltipText = safeEntry.tooltip(lang, preciseDate);
 		} catch (error) {
 			tooltipText = '';
 		}
@@ -257,7 +268,7 @@ export function buildDetailedCard({ registryEntry, fullEntry, lang, contextDate,
 		}
 	}
 
-	const linksRow = buildLinksRow(fullEntry, lang);
+	const linksRow = buildLinksRow(safeEntry, lang);
 	if (linksRow.children.length > 0) card.appendChild(linksRow);
 
 	return card;

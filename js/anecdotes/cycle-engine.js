@@ -58,11 +58,35 @@ function eligibleAnytimePool(registryEntries, cutoffISODate) {
 		.sort((a, b) => a.id.localeCompare(b.id));
 }
 
-function weightedOrder(ids, seed) {
-	return [...ids]
+const ANTI_REPEAT_WINDOW = 18;
+
+function weightedOrder(ids, seed, forbiddenTailIds = []) {
+	const order = [...ids]
 		.map(id => ({ id, weight: mulberry32(combinedSeed(String(seed), id))() }))
 		.sort((a, b) => a.weight - b.weight)
 		.map(item => item.id);
+
+	if (!forbiddenTailIds.length || order.length <= forbiddenTailIds.length) return order;
+
+	const forbidden = new Set(forbiddenTailIds);
+	const headLimit = Math.min(ANTI_REPEAT_WINDOW, order.length);
+
+	for (let i = 0; i < headLimit; i++) {
+		if (!forbidden.has(order[i])) continue;
+		let swapIndex = -1;
+		for (let j = headLimit; j < order.length; j++) {
+			if (!forbidden.has(order[j])) {
+				swapIndex = j;
+				break;
+			}
+		}
+		if (swapIndex === -1) break;
+		const tmp = order[i];
+		order[i] = order[swapIndex];
+		order[swapIndex] = tmp;
+	}
+
+	return order;
 }
 
 const counterCheckpoints = new Map();
@@ -133,6 +157,7 @@ export function pickGeneralEntry(registryEntries, generalDaysCounter, todayISODa
 	let lockedIds = eligibleAnytimePool(registryEntries, toISODate(new Date(EPOCH_UTC_MS))).map(entry => entry.id);
 	if (lockedIds.length === 0) lockedIds = fullPool.map(entry => entry.id);
 
+	let order = weightedOrder(lockedIds, cycleNumber);
 	let remainder = generalDaysCounter - cycleStartCounter;
 
 	while (remainder >= lockedIds.length) {
@@ -141,10 +166,11 @@ export function pickGeneralEntry(registryEntries, generalDaysCounter, todayISODa
 		const cutoffISODate = isoDateAtGeneralCounter(cycleStartCounter, registryEntries);
 		lockedIds = eligibleAnytimePool(registryEntries, cutoffISODate).map(entry => entry.id);
 		if (lockedIds.length === 0) lockedIds = fullPool.map(entry => entry.id);
+		const forbiddenTail = order.slice(-ANTI_REPEAT_WINDOW);
+		order = weightedOrder(lockedIds, cycleNumber, forbiddenTail);
 		remainder = generalDaysCounter - cycleStartCounter;
 	}
 
-	const order = weightedOrder(lockedIds, cycleNumber);
 	const selectedId = order[remainder];
 	return registryEntries.find(entry => entry.id === selectedId) || fullPool[0];
 }

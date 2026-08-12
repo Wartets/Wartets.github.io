@@ -301,6 +301,13 @@
 	gap: 1.5rem;
 }
 
+.debug-random-actions {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 1rem;
+	justify-content: center;
+}
+
 .debug-random-button {
 	display: inline-flex;
 	align-items: center;

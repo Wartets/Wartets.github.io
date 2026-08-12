@@ -83,11 +83,18 @@
 			</div>
 
 			<div class="debug-random-block">
-				<button type="button" id="debug-random-button" class="debug-random-button">
-					<i class="fa-solid fa-dice" aria-hidden="true"></i>
-					<span data-i18n="anecdote_debug.random_button">Show a random anecdote</span>
-				</button>
+				<div class="debug-random-actions">
+					<button type="button" id="debug-random-button" class="debug-random-button">
+						<i class="fa-solid fa-dice" aria-hidden="true"></i>
+						<span data-i18n="anecdote_debug.random_button">Show a random anecdote</span>
+					</button>
+					<button type="button" id="debug-invalid-button" class="debug-random-button">
+						<i class="fa-solid fa-triangle-exclamation" aria-hidden="true"></i>
+						<span data-i18n="anecdote_debug.invalid_button">Show problematic anecdotes</span>
+					</button>
+				</div>
 				<div id="debug-random-result" class="debug-random-result"></div>
+				<div id="debug-random-pagination" class="debug-pagination"></div>
 			</div>
 		</section>
 

@@ -37,6 +37,9 @@ export async function loadAnecdoteModule(registryEntry, lang) {
 	while (attempt < MAX_ATTEMPTS) {
 		try {
 			const module = await import(registryEntry.path);
+			if (!module || !module.default) {
+				throw new Error(`Module at ${registryEntry.path} has no default export`);
+			}
 			return module.default;
 		} catch (error) {
 			lastError = error;

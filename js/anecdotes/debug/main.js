@@ -4,10 +4,11 @@ import { resolveEntryForDate } from './engine.js';
 import { getFullEntry } from './entry-cache.js';
 import { buildDetailedCard } from './card-renderer.js';
 import { buildCalendar } from './calendar.js';
-import { buildSearchIndex, searchIndex } from './search.js';
+import { buildSearchIndex, searchIndex, resolveFullEntry } from './search.js';
 import { initScrollProgressBar, initBackToTop } from './chrome.js';
 
 const RESULTS_PER_PAGE = 10;
+const INVALID_PER_PAGE = 6;
 
 let registryEntries = [];
 let todayDateUTC = null;
@@ -16,11 +17,15 @@ let preciseNow = null;
 let calendarWidget = null;
 let searchIndexPromise = null;
 let searchIndexItems = [];
+let searchIndexInvalidItems = [];
+let searchIndexReady = false;
 let currentSearchResults = [];
 let currentSearchPage = 1;
 let lastRandomItem = null;
 let lastIndexValidCount = 0;
 let lastIndexInvalidCount = 0;
+let activeResultMode = null;
+let invalidCurrentPage = 1;
 
 function currentLang() {
 	return window.currentSiteLang || document.documentElement.lang || (window.I18N_DEFAULT_LANGUAGE || 'en');
@@ -46,8 +51,10 @@ function renderSearchCountBadge() {
 
 function applySearchIndexResult(result) {
 	searchIndexItems = result.items;
+	searchIndexInvalidItems = result.invalidItems;
 	lastIndexValidCount = result.validCount;
 	lastIndexInvalidCount = result.invalidCount;
+	searchIndexReady = true;
 	renderSearchCountBadge();
 }
 
@@ -69,10 +76,10 @@ function buildLoadingPlaceholder() {
 	return el;
 }
 
-function buildEmptyState() {
+function buildEmptyState(text) {
 	const el = document.createElement('div');
 	el.className = 'debug-empty-state';
-	el.textContent = translate('anecdote_debug.none_available', 'No anecdote available.');
+	el.textContent = text || translate('anecdote_debug.none_available', 'No anecdote available.');
 	return el;
 }
 
@@ -131,8 +138,15 @@ function shiftDay(offset) {
 	renderDayView(next);
 }
 
+function clearResultPagination() {
+	const paginationContainer = document.getElementById('debug-random-pagination');
+	if (paginationContainer) paginationContainer.innerHTML = '';
+}
+
 async function renderRandomAnecdote() {
 	if (registryEntries.length === 0) return;
+	activeResultMode = 'random';
+	clearResultPagination();
 	const resultContainer = document.getElementById('debug-random-result');
 	resultContainer.innerHTML = '';
 	resultContainer.appendChild(buildLoadingPlaceholder());
@@ -141,6 +155,8 @@ async function renderRandomAnecdote() {
 	const fullEntry = await getFullEntry(randomEntry, currentLang());
 
 	lastRandomItem = { registryEntry: randomEntry, fullEntry };
+
+	if (activeResultMode !== 'random') return;
 
 	resultContainer.innerHTML = '';
 	resultContainer.appendChild(buildDetailedCard({
@@ -153,7 +169,76 @@ async function renderRandomAnecdote() {
 	}));
 }
 
-function renderSearchResults() {
+function renderInvalidPagination(totalPages) {
+	const paginationContainer = document.getElementById('debug-random-pagination');
+	if (!paginationContainer) return;
+	paginationContainer.innerHTML = '';
+	if (totalPages <= 1) return;
+
+	const prevBtn = document.createElement('button');
+	prevBtn.type = 'button';
+	prevBtn.className = 'debug-pagination-btn';
+	prevBtn.innerHTML = '<i class="fa-solid fa-chevron-left" aria-hidden="true"></i>';
+	prevBtn.disabled = invalidCurrentPage <= 1;
+	prevBtn.addEventListener('click', () => renderInvalidAnecdotesList(invalidCurrentPage - 1));
+
+	const pageLabel = document.createElement('span');
+	pageLabel.className = 'debug-pagination-label';
+	pageLabel.textContent = `${invalidCurrentPage} / ${totalPages}`;
+
+	const nextBtn = document.createElement('button');
+	nextBtn.type = 'button';
+	nextBtn.className = 'debug-pagination-btn';
+	nextBtn.innerHTML = '<i class="fa-solid fa-chevron-right" aria-hidden="true"></i>';
+	nextBtn.disabled = invalidCurrentPage >= totalPages;
+	nextBtn.addEventListener('click', () => renderInvalidAnecdotesList(invalidCurrentPage + 1));
+
+	paginationContainer.append(prevBtn, pageLabel, nextBtn);
+}
+
+async function renderInvalidAnecdotesList(page) {
+	activeResultMode = 'invalid';
+	const resultContainer = document.getElementById('debug-random-result');
+	resultContainer.innerHTML = '';
+	resultContainer.appendChild(buildLoadingPlaceholder());
+	clearResultPagination();
+
+	if (!searchIndexReady) {
+		applySearchIndexResult(await searchIndexPromise);
+	}
+
+	if (activeResultMode !== 'invalid') return;
+
+	if (searchIndexInvalidItems.length === 0) {
+		resultContainer.innerHTML = '';
+		resultContainer.appendChild(buildEmptyState(translate('anecdote_debug.no_invalid', 'No problematic anecdote detected.')));
+		return;
+	}
+
+	const totalPages = Math.max(1, Math.ceil(searchIndexInvalidItems.length / INVALID_PER_PAGE));
+	invalidCurrentPage = Math.min(Math.max(1, page || 1), totalPages);
+	const startIndex = (invalidCurrentPage - 1) * INVALID_PER_PAGE;
+	const pageItems = searchIndexInvalidItems.slice(startIndex, startIndex + INVALID_PER_PAGE);
+
+	resultContainer.innerHTML = '';
+	pageItems.forEach((item, index) => {
+		const card = buildDetailedCard({
+			registryEntry: item.registryEntry,
+			fullEntry: item.fullEntry,
+			lang: currentLang(),
+			contextDate: todayDateUTC,
+			preciseDate: preciseNow,
+			isSpecial: null
+		});
+		card.classList.add('debug-search-result-card');
+		card.style.animationDelay = `${index * 40}ms`;
+		resultContainer.appendChild(card);
+	});
+
+	renderInvalidPagination(totalPages);
+}
+
+async function renderSearchResults() {
 	const resultsContainer = document.getElementById('debug-search-results');
 	const paginationContainer = document.getElementById('debug-search-pagination');
 	const statusEl = document.getElementById('debug-search-status');
@@ -163,7 +248,7 @@ function renderSearchResults() {
 	paginationContainer.innerHTML = '';
 
 	if (currentSearchResults.length === 0) {
-		statusEl.textContent = query ? translate('anecdote_debug.search_no_results', 'Aucun résultat.', 'No results.') : '';
+		statusEl.textContent = query ? translate('anecdote_debug.search_no_results', 'No results.') : '';
 		return;
 	}
 
@@ -174,11 +259,15 @@ function renderSearchResults() {
 
 	statusEl.textContent = `${currentSearchResults.length} ${translate('anecdote_debug.results_label', 'result(s)')}`;
 
+	const langCode = currentLang();
+	const resolvedEntries = await Promise.all(pageItems.map(item => resolveFullEntry(item, langCode)));
+
+	resultsContainer.innerHTML = '';
 	pageItems.forEach((item, index) => {
 		const card = buildDetailedCard({
 			registryEntry: item.registryEntry,
-			fullEntry: item.fullEntry,
-			lang: currentLang(),
+			fullEntry: resolvedEntries[index],
+			lang: langCode,
 			contextDate: todayDateUTC,
 			preciseDate: preciseNow,
 			isSpecial: null
@@ -232,11 +321,11 @@ function handleSearchInput(event) {
 			return;
 		}
 		const statusEl = document.getElementById('debug-search-status');
-		if (!searchIndexItems.length) {
+		if (!searchIndexReady) {
 			statusEl.textContent = translate('anecdote_debug.search_indexing', 'Indexing...');
 			applySearchIndexResult(await searchIndexPromise);
 		}
-		currentSearchResults = searchIndex(searchIndexItems, query, todayDateUTC);
+		currentSearchResults = searchIndex(searchIndexItems, query);
 		currentSearchPage = 1;
 		renderSearchResults();
 	}, 250);
@@ -245,7 +334,10 @@ function handleSearchInput(event) {
 async function handleLanguageChange() {
 	if (selectedDateUTC) await renderDayView(selectedDateUTC);
 	if (calendarWidget) calendarWidget.refresh();
-	if (lastRandomItem) {
+
+	if (activeResultMode === 'invalid') {
+		renderInvalidAnecdotesList(invalidCurrentPage);
+	} else if (lastRandomItem) {
 		const resultContainer = document.getElementById('debug-random-result');
 		resultContainer.innerHTML = '';
 		resultContainer.appendChild(buildDetailedCard({
@@ -257,8 +349,19 @@ async function handleLanguageChange() {
 			isSpecial: null
 		}));
 	}
+
 	if (currentSearchResults.length) renderSearchResults();
 	renderSearchCountBadge();
+}
+
+function setupSearchHeadingAnchor() {
+	const heading = document.getElementById('debug-search-heading');
+	const section = document.getElementById('debug-search-section');
+	if (!heading || !section || !section.id) return;
+	heading.addEventListener('click', () => {
+		history.pushState(null, null, `#${section.id}`);
+		section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+	});
 }
 
 async function init() {
@@ -269,7 +372,14 @@ async function init() {
 	preciseNow = await getAuthoritativeUTCDate();
 	todayDateUTC = toUTCDateOnly(preciseNow);
 
-	searchIndexPromise = buildSearchIndex(registryEntries, currentLang());
+	const countEl = document.getElementById('debug-search-count');
+	if (countEl) countEl.textContent = '…';
+
+	searchIndexPromise = buildSearchIndex(registryEntries, currentLang(), todayDateUTC, (progress) => {
+		lastIndexValidCount = progress.validCount;
+		lastIndexInvalidCount = progress.invalidCount;
+		renderSearchCountBadge();
+	});
 
 	await renderDayView(todayDateUTC);
 
@@ -282,7 +392,10 @@ async function init() {
 	document.getElementById('debug-prev-day').addEventListener('click', () => shiftDay(-1));
 	document.getElementById('debug-next-day').addEventListener('click', () => shiftDay(1));
 	document.getElementById('debug-random-button').addEventListener('click', renderRandomAnecdote);
+	document.getElementById('debug-invalid-button').addEventListener('click', () => renderInvalidAnecdotesList(1));
 	document.getElementById('debug-search-input').addEventListener('input', handleSearchInput);
+
+	setupSearchHeadingAnchor();
 
 	document.addEventListener('i18nReady', handleLanguageChange);
 

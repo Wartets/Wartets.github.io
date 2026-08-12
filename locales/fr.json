@@ -364,6 +364,8 @@
 		"prev_day": "Jour précédent",
 		"next_day": "Jour suivant",
 		"random_button": "Afficher une anecdote au hasard",
+		"invalid_button": "Afficher les anecdotes problématiques",
+		"no_invalid": "Aucune anecdote problématique détectée.",
 		"search_heading": "Rechercher des anecdotes",
 		"search_placeholder": "Rechercher par id ou mot-clef...",
 		"search_indexing": "Indexation en cours...",

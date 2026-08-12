@@ -27,6 +27,39 @@ function isWithinPeriod(mmdd, start, end) {
 	return value >= startValue || value <= endValue;
 }
 
+const DAY_MS = 86400000;
+
+function periodInstanceStartYear(scheduling, dateUTC) {
+	const [start, end] = scheduling.dates;
+	const startValue = mmddValue(start);
+	const endValue = mmddValue(end);
+	const year = dateUTC.getUTCFullYear();
+	const value = mmddValue(toMMDD(dateUTC));
+	if (startValue <= endValue) return year;
+	return value >= startValue ? year : year - 1;
+}
+
+function periodDateRangeMs(scheduling, instanceStartYear) {
+	const [start, end] = scheduling.dates;
+	const [sm, sd] = start.split('-').map(Number);
+	const [em, ed] = end.split('-').map(Number);
+	const startValue = mmddValue(start);
+	const endValue = mmddValue(end);
+	const startMs = Date.UTC(instanceStartYear, sm - 1, sd);
+	const endYear = startValue > endValue ? instanceStartYear + 1 : instanceStartYear;
+	const endMs = Date.UTC(endYear, em - 1, ed);
+	return { startMs, endMs };
+}
+
+function resolvePeriodTargetMs(entry, instanceStartYear) {
+	const { startMs, endMs } = periodDateRangeMs(entry.scheduling, instanceStartYear);
+	const dayCount = Math.round((endMs - startMs) / DAY_MS) + 1;
+	const seed = combinedSeed(entry.id, String(instanceStartYear));
+	const rng = mulberry32(seed);
+	const offset = Math.floor(rng() * dayCount);
+	return startMs + offset * DAY_MS;
+}
+
 const TIER_BY_TYPE = { specific_date: 3, annual: 2, period: 1 };
 
 export function resolveSpecialEntry(registryEntries, dateUTC) {
@@ -48,7 +81,12 @@ export function resolveSpecialEntry(registryEntries, dateUTC) {
 				if (d === mmdd) candidates.push(entry);
 			});
 		} else if (scheduling.type === 'period' && scheduling.dates.length === 2) {
-			if (isWithinPeriod(mmdd, scheduling.dates[0], scheduling.dates[1])) candidates.push(entry);
+			if (isWithinPeriod(mmdd, scheduling.dates[0], scheduling.dates[1])) {
+				const instanceStartYear = periodInstanceStartYear(scheduling, dateUTC);
+				const targetMs = resolvePeriodTargetMs(entry, instanceStartYear);
+				const dateMs = Date.UTC(year, dateUTC.getUTCMonth(), dateUTC.getUTCDate());
+				if (dateMs === targetMs) candidates.push(entry);
+			}
 		}
 	});
 
