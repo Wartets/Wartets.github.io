@@ -286,8 +286,8 @@ async function init() {
 
 	document.addEventListener('i18nReady', handleLanguageChange);
 
-	searchIndexPromise.then(items => {
-		searchIndexItems = items;
+	searchIndexPromise.then(result => {
+		applySearchIndexResult(result);
 	});
 }
 

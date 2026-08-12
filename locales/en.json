@@ -346,7 +346,13 @@
 		"unavailable": "Anecdote temporarily unavailable.",
 		"none_available": "No anecdote available.",
 		"close": "Close",
-		"context_unavailable": "Content unavailable."
+		"context_unavailable": "Content unavailable.",
+		"load_error_title": "Loading error",
+		"load_error_message": "This anecdote could not be loaded.",
+		"load_error_path": "Path",
+		"load_error_detail": "Detail",
+		"source_generic_label": "Source",
+		"context_generic_label": "Context"
 	},
 	"anecdote_debug": {
 		"page_title": "Anecdotes Debug",
@@ -362,6 +368,8 @@
 		"search_placeholder": "Search by id or keyword...",
 		"search_indexing": "Indexing anecdotes...",
 		"search_no_results": "No matching anecdote.",
-		"results_label": "result(s)"
+		"results_label": "result(s)",
+		"valid_label": "valid",
+		"invalid_label": "invalid"
 	}
 }

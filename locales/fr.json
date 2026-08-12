@@ -346,7 +346,13 @@
 		"unavailable": "Anecdote indisponible pour le moment.",
 		"none_available": "Aucune anecdote disponible.",
 		"close": "Fermer",
-		"context_unavailable": "Contenu indisponible."
+		"context_unavailable": "Contenu indisponible.",
+		"load_error_title": "Erreur de chargement",
+		"load_error_message": "Cette anecdote n'a pas pu être chargée.",
+		"load_error_path": "Chemin",
+		"load_error_detail": "Détail",
+		"source_generic_label": "Source",
+		"context_generic_label": "Contexte"
 	},
 	"anecdote_debug": {
 		"page_title": "Debug des Anecdotes",
@@ -362,6 +368,8 @@
 		"search_placeholder": "Rechercher par id ou mot-clef...",
 		"search_indexing": "Indexation en cours...",
 		"search_no_results": "Aucun résultat.",
-		"results_label": "résultat(s)"
+		"results_label": "résultat(s)",
+		"valid_label": "valides",
+		"invalid_label": "invalides"
 	}
 }
