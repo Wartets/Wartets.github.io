@@ -1,5 +1,31 @@
-const defaultLang = 'en';
-let currentLang = localStorage.getItem('site_lang') || defaultLang;
+window.I18N_LANGUAGES = {
+	en: { intlTag: 'en-US', nativeLabel: 'English', fallbackChain: ['en'] },
+	fr: { intlTag: 'fr-FR', nativeLabel: 'Français', fallbackChain: ['fr', 'en'] }
+};
+window.I18N_DEFAULT_LANGUAGE = 'en';
+
+window.getLanguageMeta = function(code) {
+	return window.I18N_LANGUAGES[code] || window.I18N_LANGUAGES[window.I18N_DEFAULT_LANGUAGE];
+};
+window.getIntlTag = function(code) {
+	return window.getLanguageMeta(code).intlTag;
+};
+window.getNativeLabel = function(code) {
+	return window.getLanguageMeta(code).nativeLabel;
+};
+window.resolveWithFallback = function(fieldObject, code) {
+	if (!fieldObject) return '';
+	const chain = window.getLanguageMeta(code).fallbackChain;
+	for (let i = 0; i < chain.length; i++) {
+		if (fieldObject[chain[i]]) return fieldObject[chain[i]];
+	}
+	const keys = Object.keys(fieldObject);
+	return keys.length ? fieldObject[keys[0]] : '';
+};
+
+const defaultLang = window.I18N_DEFAULT_LANGUAGE;
+const storedLang = localStorage.getItem('site_lang');
+let currentLang = (storedLang && window.I18N_LANGUAGES[storedLang]) ? storedLang : defaultLang;
 window.translations = {};
 window.SITE_ROOT = window.SITE_ROOT || '';
 window.currentSiteLang = currentLang;
@@ -82,12 +108,13 @@ function applyLanguageData(lang, data) {
 
 	const langCurrent = document.getElementById('langCurrent');
 	if (langCurrent) {
-		langCurrent.textContent = lang === 'fr' ? 'Français' : 'English';
+		langCurrent.textContent = window.getNativeLabel(lang);
 	}
 
 	const announcer = document.getElementById('aria-status-announcer');
 	if (announcer) {
-		announcer.textContent = lang === 'fr' ? 'Langue changée en français.' : 'Language changed to English.';
+		const fallbackMessage = `Language changed to ${window.getNativeLabel(lang)}.`;
+		announcer.textContent = (data.a11y && data.a11y.language_changed) || fallbackMessage;
 	}
 
 	const event = new CustomEvent('i18nReady', { detail: { lang } });
@@ -127,7 +154,7 @@ function loadLanguage(lang) {
 		})
 		.catch(error => {
 			console.error('Error loading language file:', error);
-			if (lang !== 'en' && !cachedRaw) loadLanguage('en');
+			if (lang !== window.I18N_DEFAULT_LANGUAGE && !cachedRaw) loadLanguage(window.I18N_DEFAULT_LANGUAGE);
 		});
 }
 
@@ -141,7 +168,19 @@ document.addEventListener("DOMContentLoaded", () => {
 
 	if (customLangSelector) {
 		const trigger = customLangSelector.querySelector('.lang-trigger');
-		const options = customLangSelector.querySelectorAll('.lang-options li');
+		const optionsList = customLangSelector.querySelector('.lang-options');
+
+		if (optionsList) {
+			optionsList.innerHTML = '';
+			Object.keys(window.I18N_LANGUAGES).forEach(code => {
+				const item = document.createElement('li');
+				item.setAttribute('data-lang', code);
+				item.setAttribute('role', 'option');
+				item.tabIndex = 0;
+				item.textContent = window.I18N_LANGUAGES[code].nativeLabel;
+				optionsList.appendChild(item);
+			});
+		}
 
 		const toggleDropdown = (open) => {
 			const isOpened = open !== undefined ? open : !customLangSelector.classList.contains('open');
@@ -156,21 +195,29 @@ document.addEventListener("DOMContentLoaded", () => {
 			});
 		}
 
-		options.forEach(opt => {
-			const selectLang = (e) => {
-				const selectedLang = e.currentTarget.getAttribute('data-lang');
+		if (optionsList) {
+			const selectLang = (target) => {
+				const selectedLang = target.getAttribute('data-lang');
+				if (!selectedLang) return;
 				window.switchLanguage(selectedLang);
 				toggleDropdown(false);
 			};
 
-			opt.addEventListener('click', selectLang);
-			opt.addEventListener('keydown', (e) => {
+			optionsList.addEventListener('click', (e) => {
+				const item = e.target.closest('li[data-lang]');
+				if (item) selectLang(item);
+			});
+
+			optionsList.addEventListener('keydown', (e) => {
 				if (e.key === 'Enter' || e.key === ' ') {
-					e.preventDefault();
-					selectLang(e);
+					const item = e.target.closest('li[data-lang]');
+					if (item) {
+						e.preventDefault();
+						selectLang(item);
+					}
 				}
 			});
-		});
+		}
 
 		document.addEventListener('click', () => {
 			toggleDropdown(false);

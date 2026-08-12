@@ -65,13 +65,58 @@ function weightedOrder(ids, seed) {
 		.map(item => item.id);
 }
 
+const counterCheckpoints = new Map();
+const sortedCounterCheckpointKeys = [];
+
+function recordCounterCheckpoint(counter, ms) {
+	if (counterCheckpoints.has(counter)) return;
+	counterCheckpoints.set(counter, ms);
+	let low = 0;
+	let high = sortedCounterCheckpointKeys.length;
+	while (low < high) {
+		const mid = (low + high) >>> 1;
+		if (sortedCounterCheckpointKeys[mid] < counter) low = mid + 1;
+		else high = mid;
+	}
+	sortedCounterCheckpointKeys.splice(low, 0, counter);
+}
+
+function nearestCounterCheckpointAtMost(targetCounter) {
+	let low = 0;
+	let high = sortedCounterCheckpointKeys.length - 1;
+	let result = -1;
+	while (low <= high) {
+		const mid = (low + high) >>> 1;
+		if (sortedCounterCheckpointKeys[mid] <= targetCounter) {
+			result = mid;
+			low = mid + 1;
+		} else {
+			high = mid - 1;
+		}
+	}
+	if (result === -1) return null;
+	const counter = sortedCounterCheckpointKeys[result];
+	return { counter, ms: counterCheckpoints.get(counter) };
+}
+
 function isoDateAtGeneralCounter(targetCounter, registryEntries) {
 	if (targetCounter <= 0) return toISODate(new Date(EPOCH_UTC_MS));
+
+	const exactMs = counterCheckpoints.get(targetCounter);
+	if (exactMs !== undefined) return toISODate(new Date(exactMs));
+
+	const nearest = nearestCounterCheckpointAtMost(targetCounter);
 	let cursor = EPOCH_UTC_MS;
 	let counter = 0;
+	if (nearest) {
+		counter = nearest.counter;
+		cursor = addDays(nearest.ms, 1);
+	}
+
 	while (counter < targetCounter) {
 		if (!isDateSpecial(registryEntries, new Date(cursor))) {
 			counter += 1;
+			recordCounterCheckpoint(counter, cursor);
 			if (counter === targetCounter) return toISODate(new Date(cursor));
 		}
 		cursor = addDays(cursor, 1);

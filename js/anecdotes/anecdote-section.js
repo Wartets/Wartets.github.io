@@ -4,7 +4,7 @@ import { computeGeneralDaysCounter, pickGeneralEntry } from './cycle-engine.js';
 import { getAuthoritativeUTCDate, toUTCDateOnly, getCachedUTCDateNowSync } from './time-sync.js';
 import { ensureMarkdownAssets, renderMarkdownWithMath, containsMath } from './markdown-render.js';
 import { openModal, closeModal } from './modal.js';
-import { frenchTypography } from './format.js';
+import { applyLanguageTypography } from './format.js';
 
 const preciseTooltipRegistry = new Map();
 let preciseTooltipElement = null;
@@ -52,10 +52,10 @@ document.addEventListener('mouseout', (event) => {
 	}
 });
 
-function translate(key, lang, fallbackFr, fallbackEn) {
+function translate(key, fallback) {
 	const translated = window.t ? window.t(key) : key;
 	if (translated && translated !== key) return translated;
-	return lang === 'fr' ? fallbackFr : fallbackEn;
+	return fallback;
 }
 
 const CONTAINER_ID = 'anecdote-container';
@@ -63,7 +63,7 @@ let renderedDateISO = null;
 let currentRegistry = null;
 
 function currentLang() {
-	return window.currentSiteLang || document.documentElement.lang || 'en';
+	return window.currentSiteLang || document.documentElement.lang || (window.I18N_DEFAULT_LANGUAGE || 'en');
 }
 
 function buildSkeleton(container) {
@@ -88,7 +88,7 @@ function ensureModalSkeleton() {
 	overlay.tabIndex = -1;
 	overlay.innerHTML = `
 		<div class="anecdote-modal-container">
-			<button type="button" class="anecdote-modal-close" aria-label="${translate('anecdote.close', currentLang(), 'Fermer', 'Close')}">&times;</button>
+			<button type="button" class="anecdote-modal-close" aria-label="${translate('anecdote.close', 'Close')}">&times;</button>
 			<h3 id="anecdote-context-modal-title" class="anecdote-modal-title"></h3>
 			<div id="anecdote-context-modal-body" class="anecdote-modal-body"></div>
 		</div>
@@ -119,7 +119,7 @@ async function openContextModal(context, triggerElement, langCode) {
 	const modalTitle = document.getElementById('anecdote-context-modal-title');
 	const modalBody = document.getElementById('anecdote-context-modal-body');
 
-	modalTitle.textContent = (context.title && (context.title[langCode] || context.title.en)) || '';
+	modalTitle.textContent = window.resolveWithFallback(context.title, langCode);
 	modalBody.innerHTML = '';
 	modalBody.classList.add('anecdote-markdown-body');
 
@@ -127,15 +127,15 @@ async function openContextModal(context, triggerElement, langCode) {
 		try {
 			const resolvedExternalPath = typeof context.externalPath === 'string'
 				? context.externalPath
-				: (context.externalPath[langCode] || context.externalPath.en || context.externalPath.fr);
+				: window.resolveWithFallback(context.externalPath, langCode);
 			const rawMarkdown = await fetchExternalContextMarkdown(resolvedExternalPath);
 			await ensureMarkdownAssets();
 			modalBody.innerHTML = await renderMarkdownWithMath(rawMarkdown);
 		} catch (error) {
-			modalBody.textContent = translate('anecdote.context_unavailable', langCode, 'Contenu indisponible.', 'Content unavailable.');
+			modalBody.textContent = translate('anecdote.context_unavailable', 'Content unavailable.');
 		}
 	} else {
-		const rawBody = (context.body && (context.body[langCode] || context.body.en)) || '';
+		const rawBody = window.resolveWithFallback(context.body, langCode);
 		if (containsMath(rawBody) || /[*_#>-]/.test(rawBody)) {
 			await ensureMarkdownAssets();
 			modalBody.innerHTML = await renderMarkdownWithMath(rawBody);
@@ -158,7 +158,8 @@ function renderLinksRow(entry, langCode) {
 		link.href = source.url;
 		link.target = '_blank';
 		link.rel = 'noopener noreferrer';
-		link.textContent = (source.name && (source.name[langCode] || source.name.en)) || `Source ${index + 1}`;
+		const resolvedName = window.resolveWithFallback(source.name, langCode);
+		link.textContent = resolvedName || `${translate('anecdote.source_generic_label', 'Source')} ${index + 1}`;
 		row.appendChild(link);
 	});
 
@@ -166,7 +167,8 @@ function renderLinksRow(entry, langCode) {
 		const trigger = document.createElement('button');
 		trigger.type = 'button';
 		trigger.className = 'anecdote-link anecdote-context-trigger';
-		trigger.textContent = (context.title && (context.title[langCode] || context.title.en)) || (langCode === 'fr' ? `Contexte ${index + 1}` : `Context ${index + 1}`);
+		const resolvedTitle = window.resolveWithFallback(context.title, langCode);
+		trigger.textContent = resolvedTitle || `${translate('anecdote.context_generic_label', 'Context')} ${index + 1}`;
 		trigger.setAttribute('aria-haspopup', 'dialog');
 		trigger.setAttribute('aria-expanded', 'false');
 		trigger.setAttribute('aria-controls', 'anecdote-context-modal');
@@ -179,18 +181,48 @@ function renderLinksRow(entry, langCode) {
 
 async function renderAnecdote(container, entry, today, preciseNow) {
 	const langCode = currentLang();
-	const fullEntry = await loadAnecdoteModule(entry.path, langCode);
-
-	const domainText = (fullEntry.domain && (fullEntry.domain[langCode] || fullEntry.domain.en)) || '';
-	const rawContent = typeof fullEntry.content === 'function'
-		? fullEntry.content(langCode, today.getUTCFullYear(), today)
-		: (fullEntry.content && (fullEntry.content[langCode] || fullEntry.content.en)) || '';
-	const contentText = frenchTypography(rawContent, langCode);
+	const fullEntry = await loadAnecdoteModule(entry, langCode);
 
 	container.innerHTML = '';
 
 	const card = document.createElement('div');
 	card.className = 'anecdote-card';
+
+	if (fullEntry.__loadFailed) {
+		card.classList.add('anecdote-card-error');
+
+		const domainEl = document.createElement('p');
+		domainEl.className = 'anecdote-domain';
+		domainEl.textContent = translate('anecdote.load_error_title', 'Loading error');
+
+		const contentEl = document.createElement('p');
+		contentEl.className = 'anecdote-content';
+		contentEl.textContent = translate('anecdote.load_error_message', 'This anecdote could not be loaded.');
+
+		const metaEl = document.createElement('dl');
+		metaEl.className = 'anecdote-error-meta';
+		const addRow = (labelText, value) => {
+			const dt = document.createElement('dt');
+			dt.textContent = labelText;
+			const dd = document.createElement('dd');
+			dd.textContent = value;
+			metaEl.append(dt, dd);
+		};
+		addRow('ID', fullEntry.id);
+		addRow(translate('anecdote.load_error_path', 'Path'), fullEntry.__attemptedPath);
+		addRow(translate('anecdote.load_error_detail', 'Detail'), fullEntry.__errorMessage);
+
+		card.append(domainEl, contentEl, metaEl);
+		container.appendChild(card);
+		container.style.minHeight = '';
+		return;
+	}
+
+	const domainText = window.resolveWithFallback(fullEntry.domain, langCode);
+	const rawContent = typeof fullEntry.content === 'function'
+		? fullEntry.content(langCode, today.getUTCFullYear(), today)
+		: window.resolveWithFallback(fullEntry.content, langCode);
+	const contentText = applyLanguageTypography(rawContent, langCode);
 
 	const domainEl = document.createElement('p');
 	domainEl.className = 'anecdote-domain';
@@ -238,8 +270,7 @@ async function loadAndRenderToday(container) {
 	const generalEntry = pickGeneralEntry(currentRegistry, counterBeforeToday, todayISODate);
 
 	if (!generalEntry) {
-		const langCode = currentLang();
-		container.innerHTML = `<div class="anecdote-card"><p class="anecdote-content">${translate('anecdote.none_available', langCode, 'Aucune anecdote disponible.', 'No anecdote available.')}</p></div>`;
+		container.innerHTML = `<div class="anecdote-card"><p class="anecdote-content">${translate('anecdote.none_available', 'No anecdote available.')}</p></div>`;
 		return;
 	}
 

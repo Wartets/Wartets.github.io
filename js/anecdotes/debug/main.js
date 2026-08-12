@@ -19,15 +19,36 @@ let searchIndexItems = [];
 let currentSearchResults = [];
 let currentSearchPage = 1;
 let lastRandomItem = null;
+let lastIndexValidCount = 0;
+let lastIndexInvalidCount = 0;
 
 function currentLang() {
-	return window.currentSiteLang || document.documentElement.lang || 'en';
+	return window.currentSiteLang || document.documentElement.lang || (window.I18N_DEFAULT_LANGUAGE || 'en');
 }
 
-function translate(key, fallbackFr, fallbackEn) {
+function translate(key, fallback) {
 	const translated = window.t ? window.t(key) : key;
 	if (translated && translated !== key) return translated;
-	return currentLang() === 'fr' ? fallbackFr : fallbackEn;
+	return fallback;
+}
+
+function renderSearchCountBadge() {
+	const el = document.getElementById('debug-search-count');
+	if (!el) return;
+	if (lastIndexInvalidCount > 0) {
+		el.innerHTML = `(${lastIndexValidCount} / <span class="invalid-count">${lastIndexInvalidCount}</span>)`;
+		el.setAttribute('aria-label', `${lastIndexValidCount} ${translate('anecdote_debug.valid_label', 'valid')}, ${lastIndexInvalidCount} ${translate('anecdote_debug.invalid_label', 'invalid')}`);
+	} else {
+		el.textContent = `(${lastIndexValidCount})`;
+		el.removeAttribute('aria-label');
+	}
+}
+
+function applySearchIndexResult(result) {
+	searchIndexItems = result.items;
+	lastIndexValidCount = result.validCount;
+	lastIndexInvalidCount = result.invalidCount;
+	renderSearchCountBadge();
 }
 
 function isSameUTCDate(a, b) {
@@ -35,7 +56,8 @@ function isSameUTCDate(a, b) {
 }
 
 function formatSelectedDate(dateUTC) {
-	return new Intl.DateTimeFormat(currentLang() === 'fr' ? 'fr-FR' : 'en-US', {
+	const locale = window.getIntlTag ? window.getIntlTag(currentLang()) : 'en-US';
+	return new Intl.DateTimeFormat(locale, {
 		weekday: 'long', day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC'
 	}).format(dateUTC);
 }
@@ -43,14 +65,14 @@ function formatSelectedDate(dateUTC) {
 function buildLoadingPlaceholder() {
 	const el = document.createElement('div');
 	el.className = 'debug-loading-placeholder';
-	el.textContent = translate('anecdote_debug.loading', 'Chargement...', 'Loading...');
+	el.textContent = translate('anecdote_debug.loading', 'Loading...');
 	return el;
 }
 
 function buildEmptyState() {
 	const el = document.createElement('div');
 	el.className = 'debug-empty-state';
-	el.textContent = translate('anecdote_debug.none_available', 'Aucune anecdote disponible.', 'No anecdote available.');
+	el.textContent = translate('anecdote_debug.none_available', 'No anecdote available.');
 	return el;
 }
 
@@ -70,7 +92,7 @@ async function renderDayView(dateUTC) {
 
 	const dateLabel = document.getElementById('debug-date-label');
 	const todaySuffix = isSameUTCDate(dateUTC, todayDateUTC)
-		? ` (${translate('anecdote_debug.today_suffix', "aujourd'hui", 'today')})`
+		? ` (${translate('anecdote_debug.today_suffix', 'today')})`
 		: '';
 	dateLabel.textContent = `${formatSelectedDate(dateUTC)}${todaySuffix}`;
 
@@ -87,7 +109,7 @@ async function renderDayView(dateUTC) {
 		return;
 	}
 
-	const fullEntry = await getFullEntry(registryEntry.path, currentLang());
+	const fullEntry = await getFullEntry(registryEntry, currentLang());
 
 	if (selectedDateUTC !== dateUTC) return;
 
@@ -116,7 +138,7 @@ async function renderRandomAnecdote() {
 	resultContainer.appendChild(buildLoadingPlaceholder());
 
 	const randomEntry = registryEntries[Math.floor(Math.random() * registryEntries.length)];
-	const fullEntry = await getFullEntry(randomEntry.path, currentLang());
+	const fullEntry = await getFullEntry(randomEntry, currentLang());
 
 	lastRandomItem = { registryEntry: randomEntry, fullEntry };
 
@@ -150,7 +172,7 @@ function renderSearchResults() {
 	const startIndex = (currentSearchPage - 1) * RESULTS_PER_PAGE;
 	const pageItems = currentSearchResults.slice(startIndex, startIndex + RESULTS_PER_PAGE);
 
-	statusEl.textContent = `${currentSearchResults.length} ${translate('anecdote_debug.results_label', 'résultat(s)', 'result(s)')}`;
+	statusEl.textContent = `${currentSearchResults.length} ${translate('anecdote_debug.results_label', 'result(s)')}`;
 
 	pageItems.forEach((item, index) => {
 		const card = buildDetailedCard({
@@ -211,8 +233,8 @@ function handleSearchInput(event) {
 		}
 		const statusEl = document.getElementById('debug-search-status');
 		if (!searchIndexItems.length) {
-			statusEl.textContent = translate('anecdote_debug.search_indexing', 'Indexation en cours...', 'Indexing...');
-			searchIndexItems = await searchIndexPromise;
+			statusEl.textContent = translate('anecdote_debug.search_indexing', 'Indexing...');
+			applySearchIndexResult(await searchIndexPromise);
 		}
 		currentSearchResults = searchIndex(searchIndexItems, query, todayDateUTC);
 		currentSearchPage = 1;
@@ -236,6 +258,7 @@ async function handleLanguageChange() {
 		}));
 	}
 	if (currentSearchResults.length) renderSearchResults();
+	renderSearchCountBadge();
 }
 
 async function init() {

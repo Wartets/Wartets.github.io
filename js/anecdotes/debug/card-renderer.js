@@ -1,4 +1,4 @@
-import { frenchTypography } from '../format.js';
+import { applyLanguageTypography } from '../format.js';
 import { ensureMarkdownAssets, renderMarkdownWithMath, containsMath } from '../markdown-render.js';
 import { openModal, closeModal } from '../modal.js';
 
@@ -15,24 +15,33 @@ const LABELS = {
 	anytime: { fr: 'À tout moment (vivier général)', en: 'Anytime (general pool)' },
 	annual: { fr: 'Annuel', en: 'Annual' },
 	specificDate: { fr: 'Date précise', en: 'Specific date' },
-	period: { fr: 'Période', en: 'Period' }
+	period: { fr: 'Période', en: 'Period' },
+	loadError: { fr: 'Échec du chargement', en: 'Load failed' },
+	errorDetail: { fr: "Détail de l'erreur", en: 'Error detail' },
+	sourceGeneric: { fr: 'Source', en: 'Source' },
+	contextGeneric: { fr: 'Contexte', en: 'Context' },
+	closeModal: { fr: 'Fermer', en: 'Close' }
 };
 
 function label(key, lang) {
 	const entry = LABELS[key];
-	return entry ? (entry[lang] || entry.en) : key;
+	if (!entry) return key;
+	if (window.resolveWithFallback) return window.resolveWithFallback(entry, lang) || key;
+	return entry.en || key;
 }
 
 function formatMMDDLabel(mmdd, lang) {
 	const [month, day] = mmdd.split('-').map(Number);
 	const reference = new Date(Date.UTC(2024, month - 1, day));
-	return new Intl.DateTimeFormat(lang === 'fr' ? 'fr-FR' : 'en-US', { day: 'numeric', month: 'long', timeZone: 'UTC' }).format(reference);
+	const locale = window.getIntlTag ? window.getIntlTag(lang) : 'en-US';
+	return new Intl.DateTimeFormat(locale, { day: 'numeric', month: 'long', timeZone: 'UTC' }).format(reference);
 }
 
 function formatISODateLabel(iso, lang) {
 	const [year, month, day] = iso.split('-').map(Number);
 	const reference = new Date(Date.UTC(year, month - 1, day));
-	return new Intl.DateTimeFormat(lang === 'fr' ? 'fr-FR' : 'en-US', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' }).format(reference);
+	const locale = window.getIntlTag ? window.getIntlTag(lang) : 'en-US';
+	return new Intl.DateTimeFormat(locale, { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' }).format(reference);
 }
 
 function formatSchedulingSummary(scheduling, lang) {
@@ -50,7 +59,7 @@ function formatSchedulingSummary(scheduling, lang) {
 	return scheduling.type;
 }
 
-function ensureDebugModal() {
+function ensureDebugModal(lang) {
 	let overlay = document.getElementById('debug-context-modal');
 	if (overlay) return overlay;
 	overlay = document.createElement('div');
@@ -63,7 +72,7 @@ function ensureDebugModal() {
 	overlay.tabIndex = -1;
 	overlay.innerHTML = `
 		<div class="anecdote-modal-container">
-			<button type="button" class="anecdote-modal-close" aria-label="Close">&times;</button>
+			<button type="button" class="anecdote-modal-close" aria-label="${label('closeModal', lang)}">&times;</button>
 			<h3 id="debug-context-modal-title" class="anecdote-modal-title"></h3>
 			<div id="debug-context-modal-body" class="anecdote-modal-body"></div>
 		</div>
@@ -89,11 +98,11 @@ async function fetchExternalContextMarkdown(path) {
 }
 
 async function openDebugContextModal(context, triggerElement, langCode) {
-	const overlay = ensureDebugModal();
+	const overlay = ensureDebugModal(langCode);
 	const modalTitle = document.getElementById('debug-context-modal-title');
 	const modalBody = document.getElementById('debug-context-modal-body');
 
-	modalTitle.textContent = (context.title && (context.title[langCode] || context.title.en)) || '';
+	modalTitle.textContent = window.resolveWithFallback(context.title, langCode);
 	modalBody.innerHTML = '';
 	modalBody.classList.add('anecdote-markdown-body');
 
@@ -101,15 +110,15 @@ async function openDebugContextModal(context, triggerElement, langCode) {
 		try {
 			const resolvedExternalPath = typeof context.externalPath === 'string'
 				? context.externalPath
-				: (context.externalPath[langCode] || context.externalPath.en || context.externalPath.fr);
+				: window.resolveWithFallback(context.externalPath, langCode);
 			const rawMarkdown = await fetchExternalContextMarkdown(resolvedExternalPath);
 			await ensureMarkdownAssets();
 			modalBody.innerHTML = await renderMarkdownWithMath(rawMarkdown);
 		} catch (error) {
-			modalBody.textContent = langCode === 'fr' ? 'Contenu indisponible.' : 'Content unavailable.';
+			modalBody.textContent = window.resolveWithFallback({ fr: 'Contenu indisponible.', en: 'Content unavailable.' }, langCode);
 		}
 	} else {
-		const rawBody = (context.body && (context.body[langCode] || context.body.en)) || '';
+		const rawBody = window.resolveWithFallback(context.body, langCode);
 		if (containsMath(rawBody) || /[*_#>-]/.test(rawBody)) {
 			await ensureMarkdownAssets();
 			modalBody.innerHTML = await renderMarkdownWithMath(rawBody);
@@ -132,7 +141,8 @@ function buildLinksRow(entry, langCode) {
 		link.href = source.url;
 		link.target = '_blank';
 		link.rel = 'noopener noreferrer';
-		link.textContent = (source.name && (source.name[langCode] || source.name.en)) || `Source ${index + 1}`;
+		const resolvedName = window.resolveWithFallback(source.name, langCode);
+		link.textContent = resolvedName || `${label('sourceGeneric', langCode)} ${index + 1}`;
 		row.appendChild(link);
 	});
 
@@ -140,7 +150,8 @@ function buildLinksRow(entry, langCode) {
 		const trigger = document.createElement('button');
 		trigger.type = 'button';
 		trigger.className = 'anecdote-link anecdote-context-trigger';
-		trigger.textContent = (context.title && (context.title[langCode] || context.title.en)) || (langCode === 'fr' ? `Contexte ${index + 1}` : `Context ${index + 1}`);
+		const resolvedTitle = window.resolveWithFallback(context.title, langCode);
+		trigger.textContent = resolvedTitle || `${label('contextGeneric', langCode)} ${index + 1}`;
 		trigger.setAttribute('aria-haspopup', 'dialog');
 		trigger.setAttribute('aria-expanded', 'false');
 		trigger.setAttribute('aria-controls', 'debug-context-modal');
@@ -154,6 +165,9 @@ function buildLinksRow(entry, langCode) {
 export function buildDetailedCard({ registryEntry, fullEntry, lang, contextDate, preciseDate, isSpecial }) {
 	const card = document.createElement('article');
 	card.className = 'debug-anecdote-card';
+
+	const isLoadFailed = fullEntry.__loadFailed === true;
+	if (isLoadFailed) card.classList.add('debug-anecdote-card-error');
 
 	const header = document.createElement('div');
 	header.className = 'debug-card-header';
@@ -181,11 +195,18 @@ export function buildDetailedCard({ registryEntry, fullEntry, lang, contextDate,
 		header.appendChild(typeBadge);
 	}
 
+	if (isLoadFailed) {
+		const errorBadge = document.createElement('span');
+		errorBadge.className = 'debug-badge debug-badge-error';
+		errorBadge.textContent = label('loadError', lang);
+		header.appendChild(errorBadge);
+	}
+
 	card.appendChild(header);
 
 	const domainEl = document.createElement('p');
 	domainEl.className = 'anecdote-domain debug-card-domain';
-	domainEl.textContent = (fullEntry.domain && (fullEntry.domain[lang] || fullEntry.domain.en)) || '';
+	domainEl.textContent = window.resolveWithFallback(fullEntry.domain, lang);
 	card.appendChild(domainEl);
 
 	const metaList = document.createElement('dl');
@@ -202,6 +223,9 @@ export function buildDetailedCard({ registryEntry, fullEntry, lang, contextDate,
 	addMetaRow('addedDate', registryEntry.addedDate ? formatISODateLabel(registryEntry.addedDate, lang) : '—');
 	addMetaRow('scheduling', formatSchedulingSummary(registryEntry.scheduling, lang));
 	addMetaRow('path', registryEntry.path);
+	if (isLoadFailed && fullEntry.__errorMessage) {
+		addMetaRow('errorDetail', fullEntry.__errorMessage);
+	}
 
 	card.appendChild(metaList);
 
@@ -211,11 +235,11 @@ export function buildDetailedCard({ registryEntry, fullEntry, lang, contextDate,
 	try {
 		contentText = typeof fullEntry.content === 'function'
 			? fullEntry.content(lang, contextDate.getUTCFullYear(), contextDate)
-			: (fullEntry.content && (fullEntry.content[lang] || fullEntry.content.en)) || '';
+			: window.resolveWithFallback(fullEntry.content, lang);
 	} catch (error) {
-		contentText = lang === 'fr' ? 'Erreur lors du rendu du contenu.' : 'Error rendering content.';
+		contentText = window.resolveWithFallback({ fr: 'Erreur lors du rendu du contenu.', en: 'Error rendering content.' }, lang);
 	}
-	contentEl.textContent = frenchTypography(contentText, lang);
+	contentEl.textContent = applyLanguageTypography(contentText, lang);
 	card.appendChild(contentEl);
 
 	if (typeof fullEntry.tooltip === 'function') {

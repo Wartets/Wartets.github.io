@@ -17,13 +17,13 @@ function loadScriptOnce(src) {
 
 document.addEventListener('DOMContentLoaded', () => {
 	const internalPages = [
-		{ name: 'Home', url: 'https://wartets.github.io/' },
-		{ name: 'Projects', url: 'https://wartets.github.io/projects/' },
-		{ name: 'Library', url: 'https://wartets.github.io/library/' },
-		{ name: "Thought's Library", url: 'https://wartets.github.io/poetry/' },
-		{ name: 'Music', url: 'https://wartets.github.io/music/' },
-		{ name: 'Desk', url: 'https://wartets.github.io/desk/' },
-		{ name: 'Anecdotes', url: 'https://wartets.github.io/anecdotes/' }
+		{ name: 'Home', url: '../' },
+		{ name: 'Projects', url: '../projects/' },
+		{ name: 'Library', url: '../library/' },
+		{ name: "Thought's Library", url: '../poetry/' },
+		{ name: 'Music', url: '../music/' },
+		{ name: 'Desk', url: '../desk/' },
+		{ name: 'Anecdotes', url: '../anecdote/' }
 	];
 
 	const socialLinks = [

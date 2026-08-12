@@ -64,7 +64,7 @@ export function resolveSpecialEntry(registryEntries, dateUTC) {
 
 	const sortedById = [...tierCandidates].sort((a, b) => a.id.localeCompare(b.id));
 	const asciiSum = sortedById.reduce((sum, c) => sum + c.id.split('').reduce((s, ch) => s + ch.charCodeAt(0), 0), 0);
-	const seed = combinedSeed(String(year), String(asciiSum));
+	const seed = combinedSeed(isoDate, String(asciiSum));
 	const rng = mulberry32(seed);
 	const index = Math.floor(rng() * sortedById.length);
 	return sortedById[index];

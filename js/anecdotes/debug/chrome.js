@@ -18,11 +18,25 @@ export function initScrollProgressBar() {
 
 export function initBackToTop() {
 	const btn = document.getElementById('backToTop');
+	const footer = document.querySelector('.site-footer');
 	if (!btn) return;
 
 	window.addEventListener('scroll', () => {
-		if (window.scrollY > 400) btn.classList.add('visible');
-		else btn.classList.remove('visible');
+		if (window.scrollY > 400) {
+			btn.classList.add('visible');
+			if (footer) {
+				const footerRect = footer.getBoundingClientRect();
+				const windowHeight = window.innerHeight;
+				if (footerRect.top < windowHeight) {
+					const overlap = windowHeight - footerRect.top;
+					btn.style.bottom = `${overlap + 30}px`;
+				} else {
+					btn.style.bottom = '30px';
+				}
+			}
+		} else {
+			btn.classList.remove('visible');
+		}
 	}, { passive: true });
 
 	btn.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));

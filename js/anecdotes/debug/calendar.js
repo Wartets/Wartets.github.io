@@ -1,3 +1,17 @@
+const NAV_LABELS = {
+	prevYear: { fr: 'Année précédente', en: 'Previous year' },
+	prevMonth: { fr: 'Mois précédent', en: 'Previous month' },
+	nextMonth: { fr: 'Mois suivant', en: 'Next month' },
+	nextYear: { fr: 'Année suivante', en: 'Next year' }
+};
+
+function navLabel(key, lang) {
+	const entry = NAV_LABELS[key];
+	if (!entry) return key;
+	if (window.resolveWithFallback) return window.resolveWithFallback(entry, lang) || key;
+	return entry.en || key;
+}
+
 function isSameUTCDate(a, b) {
 	return a.getUTCFullYear() === b.getUTCFullYear() && a.getUTCMonth() === b.getUTCMonth() && a.getUTCDate() === b.getUTCDate();
 }
@@ -8,7 +22,7 @@ function daysInMonth(year, month) {
 
 function weekdayLabels(lang) {
 	const labels = [];
-	const locale = lang === 'fr' ? 'fr-FR' : 'en-US';
+	const locale = window.getIntlTag ? window.getIntlTag(lang) : 'en-US';
 	for (let i = 1; i <= 7; i++) {
 		const reference = new Date(Date.UTC(2024, 0, i));
 		labels.push(new Intl.DateTimeFormat(locale, { weekday: 'short', timeZone: 'UTC' }).format(reference));
@@ -37,7 +51,7 @@ export function buildCalendar(container, options) {
 		const prevYearBtn = document.createElement('button');
 		prevYearBtn.type = 'button';
 		prevYearBtn.className = 'debug-calendar-nav';
-		prevYearBtn.setAttribute('aria-label', lang === 'fr' ? 'Année précédente' : 'Previous year');
+		prevYearBtn.setAttribute('aria-label', navLabel('prevYear', lang));
 		prevYearBtn.innerHTML = '<i class="fa-solid fa-angles-left" aria-hidden="true"></i>';
 		prevYearBtn.addEventListener('click', () => {
 			viewYear -= 1;
@@ -47,7 +61,7 @@ export function buildCalendar(container, options) {
 		const prevMonthBtn = document.createElement('button');
 		prevMonthBtn.type = 'button';
 		prevMonthBtn.className = 'debug-calendar-nav';
-		prevMonthBtn.setAttribute('aria-label', lang === 'fr' ? 'Mois précédent' : 'Previous month');
+		prevMonthBtn.setAttribute('aria-label', navLabel('prevMonth', lang));
 		prevMonthBtn.innerHTML = '<i class="fa-solid fa-chevron-left" aria-hidden="true"></i>';
 		prevMonthBtn.addEventListener('click', () => {
 			viewMonth -= 1;
@@ -65,7 +79,7 @@ export function buildCalendar(container, options) {
 		const nextMonthBtn = document.createElement('button');
 		nextMonthBtn.type = 'button';
 		nextMonthBtn.className = 'debug-calendar-nav';
-		nextMonthBtn.setAttribute('aria-label', lang === 'fr' ? 'Mois suivant' : 'Next month');
+		nextMonthBtn.setAttribute('aria-label', navLabel('nextMonth', lang));
 		nextMonthBtn.innerHTML = '<i class="fa-solid fa-chevron-right" aria-hidden="true"></i>';
 		nextMonthBtn.addEventListener('click', () => {
 			viewMonth += 1;
@@ -79,7 +93,7 @@ export function buildCalendar(container, options) {
 		const nextYearBtn = document.createElement('button');
 		nextYearBtn.type = 'button';
 		nextYearBtn.className = 'debug-calendar-nav';
-		nextYearBtn.setAttribute('aria-label', lang === 'fr' ? 'Année suivante' : 'Next year');
+		nextYearBtn.setAttribute('aria-label', navLabel('nextYear', lang));
 		nextYearBtn.innerHTML = '<i class="fa-solid fa-angles-right" aria-hidden="true"></i>';
 		nextYearBtn.addEventListener('click', () => {
 			viewYear += 1;
