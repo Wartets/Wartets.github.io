@@ -22,7 +22,8 @@ document.addEventListener('DOMContentLoaded', () => {
 		{ name: 'Library', url: 'https://wartets.github.io/library/' },
 		{ name: "Thought's Library", url: 'https://wartets.github.io/poetry/' },
 		{ name: 'Music', url: 'https://wartets.github.io/music/' },
-		{ name: 'Desk', url: 'https://wartets.github.io/desk/' }
+		{ name: 'Desk', url: 'https://wartets.github.io/desk/' },
+		{ name: 'Anecdotes', url: 'https://wartets.github.io/anecdotes/' }
 	];
 
 	const socialLinks = [

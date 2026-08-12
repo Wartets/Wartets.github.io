@@ -347,5 +347,21 @@
 		"none_available": "Aucune anecdote disponible.",
 		"close": "Fermer",
 		"context_unavailable": "Contenu indisponible."
+	},
+	"anecdote_debug": {
+		"page_title": "Debug des Anecdotes",
+		"page_heading": "Debug des Anecdotes",
+		"page_subtitle": "Parcourir, prévisualiser et rechercher toutes les anecdotes planifiées sur le site.",
+		"today_suffix": "aujourd'hui",
+		"loading": "Chargement...",
+		"none_available": "Aucune anecdote disponible pour cette date.",
+		"prev_day": "Jour précédent",
+		"next_day": "Jour suivant",
+		"random_button": "Afficher une anecdote au hasard",
+		"search_heading": "Rechercher des anecdotes",
+		"search_placeholder": "Rechercher par id ou mot-clef...",
+		"search_indexing": "Indexation en cours...",
+		"search_no_results": "Aucun résultat.",
+		"results_label": "résultat(s)"
 	}
 }

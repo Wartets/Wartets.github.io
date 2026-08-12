@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=0.9">
+	<title data-i18n="anecdote_debug.page_title">Anecdotes Debug</title>
+	<link rel="canonical" href="https://wartets.github.io/anecdotes-debug/">
+	<link rel="icon" href="../assets/images/browser-icon.png">
+	<meta name="description" content="Debug tool to preview and forecast every anecdote of the day on the site." data-i18n="anecdote_debug.page_subtitle">
+	<meta name="robots" content="noindex, nofollow">
+	<meta name="theme-color" content="#050505">
+
+	<link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+	<link rel="dns-prefetch" href="https://cdnjs.cloudflare.com">
+
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+	<link rel="stylesheet" href="../css/project.css">
+	<link rel="stylesheet" href="../css/home.css">
+	<link rel="stylesheet" href="../css/anecdotes.css">
+	<link rel="stylesheet" href="../css/anecdotes-debug.css">
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.css">
+
+	<script>window.SITE_ROOT = '../';</script>
+	<script src="../js/site-commons.js" defer></script>
+</head>
+<body>
+	<a href="#main-content" class="skip-link">Skip to main content</a>
+	<div id="scroll-progress-bar" class="scroll-progress-bar" role="progressbar" aria-label="Scroll progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"></div>
+	<div class="bg-gradient"></div>
+	<div class="bg-noise"></div>
+
+	<nav class="main-nav" aria-label="Main navigation">
+		<div class="nav-row-primary">
+			<a href="../" class="nav-brand">Colin Bossu Réaubourg</a>
+			<div class="nav-links">
+				<a href="../" class="nav-link" data-i18n="nav.home">Home</a>
+				<a href="../projects/" class="nav-link" data-i18n="nav.projects">Projects</a>
+				<a href="../library/" class="nav-link" data-i18n="nav.library">Library</a>
+				<a href="../music/" class="nav-link" data-i18n="nav.music">Music</a>
+				<div class="custom-lang-selector" id="customLangSelector">
+					<button type="button" class="lang-trigger" id="langTrigger" aria-haspopup="listbox" aria-expanded="false" data-i18n-aria-label="nav.change_language" aria-label="Change language">
+						<i class="fa-solid fa-globe lang-icon" aria-hidden="true"></i>
+						<span id="langCurrent">English</span>
+						<i class="fa-solid fa-chevron-down lang-chevron" aria-hidden="true"></i>
+					</button>
+					<ul class="lang-options" id="langOptions" role="listbox" aria-labelledby="langTrigger">
+						<li data-lang="en" role="option" tabindex="0">English</li>
+						<li data-lang="fr" role="option" tabindex="0">Français</li>
+					</ul>
+				</div>
+			</div>
+		</div>
+	</nav>
+
+	<noscript>
+		<div class="noscript-banner">
+			<p>JavaScript is disabled in your browser. This debug tool requires JavaScript to function.</p>
+		</div>
+	</noscript>
+
+	<main id="main-content" tabindex="-1">
+		<div id="aria-status-announcer" class="sr-only" role="status" aria-live="polite" aria-atomic="true"></div>
+
+		<header class="debug-page-header">
+			<h1 data-i18n="anecdote_debug.page_heading">Anecdotes Debug</h1>
+			<p data-i18n="anecdote_debug.page_subtitle">Browse, forecast, and search every anecdote scheduled on the site.</p>
+		</header>
+
+		<section class="debug-day-section" aria-labelledby="debug-date-label">
+			<p id="debug-date-label" class="debug-date-label"></p>
+
+			<div class="debug-day-viewer">
+				<div id="debug-anecdote-container" class="debug-anecdote-container" aria-live="polite"></div>
+				<div class="debug-day-arrows">
+					<button type="button" id="debug-prev-day" class="debug-day-arrow debug-day-arrow-prev" data-i18n-aria-label="anecdote_debug.prev_day" aria-label="Previous day">
+						<i class="fa-solid fa-chevron-left" aria-hidden="true"></i>
+					</button>
+					<button type="button" id="debug-next-day" class="debug-day-arrow debug-day-arrow-next" data-i18n-aria-label="anecdote_debug.next_day" aria-label="Next day">
+						<i class="fa-solid fa-chevron-right" aria-hidden="true"></i>
+					</button>
+				</div>
+			</div>
+
+			<div id="debug-calendar" class="debug-calendar" role="group" aria-label="Calendar"></div>
+
+			<div class="debug-random-block">
+				<button type="button" id="debug-random-button" class="debug-random-button">
+					<i class="fa-solid fa-dice" aria-hidden="true"></i>
+					<span data-i18n="anecdote_debug.random_button">Show a random anecdote</span>
+				</button>
+				<div id="debug-random-result" class="debug-random-result"></div>
+			</div>
+		</section>
+
+		<section id="debug-search-section" class="debug-search-section" aria-labelledby="debug-search-heading">
+			<h2 id="debug-search-heading" class="section-title" data-i18n="anecdote_debug.search_heading">Search anecdotes</h2>
+			<div class="debug-search-bar">
+				<i class="fa-solid fa-magnifying-glass debug-search-icon" aria-hidden="true"></i>
+				<input type="text" id="debug-search-input" class="debug-search-input" data-i18n-placeholder="anecdote_debug.search_placeholder" placeholder="Search by id or keyword...">
+			</div>
+			<p id="debug-search-status" class="debug-search-status" aria-live="polite"></p>
+			<div id="debug-search-results" class="debug-search-results"></div>
+			<div id="debug-search-pagination" class="debug-pagination"></div>
+		</section>
+	</main>
+
+	<footer class="site-footer custom-footer-margin">
+		<div class="footer-content">
+			<p class="copyright">
+				© <span id="current-year">2026</span>. <span data-i18n="footer.rights">All rights reserved.</span> <a href="https://github.com/Wartets/Wartets.github.io/blob/main/LICENSE" target="_blank" rel="noopener noreferrer" class="footer-link" data-i18n="footer.license">MIT License</a> •<a href="https://svs.gsfc.nasa.gov/vis/" target="_blank" rel="noopener noreferrer" class="footer-link" data-i18n="footer.nasa_credit">Lunar imagery: NASA SVS</a>
+			</p>
+			<nav class="footer-nav">
+				<span><span data-i18n="footer.designed_by">Designed by</span> <a href="https://wartets.github.io/" class="footer-link">Wartets <i class="fa-solid fa-arrow-up-right-from-square"></i></a></span>
+				<span class="divider"></span>
+				<span><span data-i18n="footer.github_text">Source code available at</span> <a href="https://github.com/wartets/wartets.github.io" target="_blank" rel="noopener noreferrer" class="footer-link">GitHub <i class="fa-brands fa-github"></i></a></span>
+			</nav>
+		</div>
+	</footer>
+
+	<button id="backToTop" class="back-to-top" data-i18n-aria-label="controls.back_to_top" aria-label="Back to top">
+		<i class="fa-solid fa-arrow-up"></i>
+	</button>
+
+	<script src="../js/i18n.js"></script>
+	<script type="module" src="../js/anecdotes/debug/main.js" defer></script>
+</body>
+</html>

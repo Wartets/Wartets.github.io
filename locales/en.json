@@ -347,5 +347,21 @@
 		"none_available": "No anecdote available.",
 		"close": "Close",
 		"context_unavailable": "Content unavailable."
+	},
+	"anecdote_debug": {
+		"page_title": "Anecdotes Debug",
+		"page_heading": "Anecdotes Debug",
+		"page_subtitle": "Browse, forecast, and search every anecdote scheduled on the site.",
+		"today_suffix": "today",
+		"loading": "Loading...",
+		"none_available": "No anecdote available for this date.",
+		"prev_day": "Previous day",
+		"next_day": "Next day",
+		"random_button": "Show a random anecdote",
+		"search_heading": "Search anecdotes",
+		"search_placeholder": "Search by id or keyword...",
+		"search_indexing": "Indexing anecdotes...",
+		"search_no_results": "No matching anecdote.",
+		"results_label": "result(s)"
 	}
 }
