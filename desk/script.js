@@ -1658,7 +1658,7 @@ function setupStartButton() {
 				alert('Log Off is not available in the guest session.');
 			} else if (action === 'help') {
 				toggleStartMenu(true);
-				window.open('https://github.com/wartets/Wartets', '_blank');
+				window.open('https://github.com/wartets/Wartets.github.io', '_blank');
 			}
 		}
 	});
