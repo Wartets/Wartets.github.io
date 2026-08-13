@@ -982,6 +982,7 @@ body {
 
 .footer-link:hover {
 	color: var(--color-accent);
+	text-decoration: underline;
 }
 
 .footer-link:hover i {

@@ -1232,10 +1232,11 @@
 	width: 16px;
 	height: 16px;
 	filter: grayscale(100%);
-	transition: filter 0.3s;
+	transition: filter 0.3s, transform 0.3s ease;
 }
 
 .secret-desk-icon:hover {
+	transform: translate(2px, -2px);
 	opacity: 1;
 }
 
