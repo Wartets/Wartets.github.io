@@ -328,6 +328,10 @@
 	transform: translateY(-2px);
 }
 
+.debug-random-button.is-hidden {
+	display: none;
+}
+
 .debug-random-result {
 	width: 100%;
 }

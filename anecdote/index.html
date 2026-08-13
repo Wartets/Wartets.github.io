@@ -2,13 +2,19 @@
 <html lang="en">
 <head>
 	<meta charset="UTF-8">
-	<meta name="viewport" content="width=device-width, initial-scale=0.9">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 	<title data-i18n="anecdote_debug.page_title">Anecdotes Debug</title>
 	<link rel="canonical" href="https://wartets.github.io/anecdotes-debug/">
 	<link rel="icon" href="../assets/images/browser-icon.png">
 	<meta name="description" content="Debug tool to preview and forecast every anecdote of the day on the site." data-i18n="anecdote_debug.page_subtitle">
 	<meta name="robots" content="noindex, nofollow">
 	<meta name="theme-color" content="#050505">
+	<link rel="manifest" href="/manifest.json">
+	<meta name="mobile-web-app-capable" content="yes">
+	<meta name="apple-mobile-web-app-capable" content="yes">
+	<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+	<meta name="apple-mobile-web-app-title" content="Wartets">
+	<link rel="apple-touch-icon" href="../assets/images/app-icon.jpg">
 
 	<link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
 	<link rel="dns-prefetch" href="https://cdnjs.cloudflare.com">
@@ -88,7 +94,7 @@
 						<i class="fa-solid fa-dice" aria-hidden="true"></i>
 						<span data-i18n="anecdote_debug.random_button">Show a random anecdote</span>
 					</button>
-					<button type="button" id="debug-invalid-button" class="debug-random-button">
+					<button type="button" id="debug-invalid-button" class="debug-random-button is-hidden">
 						<i class="fa-solid fa-triangle-exclamation" aria-hidden="true"></i>
 						<span data-i18n="anecdote_debug.invalid_button">Show problematic anecdotes</span>
 					</button>

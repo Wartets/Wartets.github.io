@@ -37,7 +37,14 @@ function translate(key, fallback) {
 	return fallback;
 }
 
+function updateInvalidButtonVisibility() {
+	const button = document.getElementById('debug-invalid-button');
+	if (!button) return;
+	button.classList.toggle('is-hidden', lastIndexInvalidCount === 0);
+}
+
 function renderSearchCountBadge() {
+	updateInvalidButtonVisibility();
 	const el = document.getElementById('debug-search-count');
 	if (!el) return;
 	if (lastIndexInvalidCount > 0) {

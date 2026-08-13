@@ -26,6 +26,7 @@ html {
 	scrollbar-color: #444 #050505;
 	-webkit-text-size-adjust: 100%;
 	scrollbar-gutter: stable;
+	touch-action: pan-x pan-y;
 }
 
 * {

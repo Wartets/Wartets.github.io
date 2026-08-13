@@ -1,0 +1,106 @@
+{
+    "name": "Colin Bossu Réaubourg - Wartets",
+    "short_name": "Wartets",
+    "description": "Portfolio and digital workspace of Colin Bossu Réaubourg (Wartets), featuring interactive simulations, physics, mathematics, software projects, scientific documents, and digital creations.",
+
+    "start_url": "/",
+    "scope": "/",
+    "id": "/",
+
+    "display": "standalone",
+    "display_override": [
+        "window-controls-overlay",
+        "standalone",
+        "browser"
+    ],
+
+    "orientation": "any",
+
+    "background_color": "#050505",
+    "theme_color": "#050505",
+
+    "lang": "en",
+    "dir": "ltr",
+
+    "categories": [
+        "education",
+        "science",
+        "productivity"
+    ],
+
+    "icons": [
+        {
+            "src": "/assets/images/app-icon-192.png",
+            "sizes": "192x192",
+            "type": "image/png",
+            "purpose": "any"
+        },
+        {
+            "src": "/assets/images/app-icon-512.png",
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "any"
+        },
+        {
+            "src": "/assets/images/app-icon-192-maskable.png",
+            "sizes": "192x192",
+            "type": "image/png",
+            "purpose": "maskable"
+        },
+        {
+            "src": "/assets/images/app-icon-512-maskable.png",
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "maskable"
+        }
+    ],
+
+    "screenshots": [
+        {
+            "src": "/assets/images/screenshots/home.png",
+            "sizes": "1910x1080",
+            "type": "image/png",
+            "form_factor": "wide",
+            "label": "Wartets portfolio homepage"
+        },
+        {
+            "src": "/assets/images/screenshots/projects.png",
+            "sizes": "1910x907",
+            "type": "image/png",
+            "form_factor": "wide",
+            "label": "Interactive simulations and projects"
+        },
+        {
+            "src": "/assets/images/screenshots/library.png",
+            "sizes": "1910x907",
+            "type": "image/png",
+            "form_factor": "wide",
+            "label": "Scientific document library"
+        }
+    ],
+
+    "launch_handler": {
+        "client_mode": "navigate-existing"
+    },
+
+    "shortcuts": [
+        {
+            "name": "Projects",
+            "short_name": "Projects",
+            "url": "/projects/",
+            "description": "Browse interactive simulations and creations."
+        },
+        {
+            "name": "Library",
+            "short_name": "Library",
+            "url": "/library/",
+            "description": "Browse the document library."
+        },
+        {
+            "name": "Music",
+            "short_name": "Music",
+            "url": "/music/",
+            "description": "Listen to featured compositions."
+        }
+    ]
+}

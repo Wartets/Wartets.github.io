@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+	<title>Offline — Wartets</title>
+	<meta name="robots" content="noindex, nofollow">
+	<meta name="theme-color" content="#050505">
+	<style>
+		html, body {
+			height: 100%;
+			margin: 0;
+			background-color: #050505;
+			color: #d0d0d0;
+			font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+		}
+		.offline-wrapper {
+			min-height: 100%;
+			display: flex;
+			flex-direction: column;
+			align-items: center;
+			justify-content: center;
+			text-align: center;
+			padding: 2rem;
+			box-sizing: border-box;
+		}
+		h1 {
+			font-weight: 300;
+			font-size: 1.8rem;
+			letter-spacing: 0.08em;
+			text-transform: uppercase;
+			margin-bottom: 0.75rem;
+			color: #ffffff;
+		}
+		p {
+			color: #a0a0a0;
+			font-size: 1rem;
+			max-width: 420px;
+			line-height: 1.6;
+			margin-bottom: 1.5rem;
+		}
+		button {
+			background: rgba(255, 255, 255, 0.08);
+			border: 1px solid rgba(255, 255, 255, 0.15);
+			color: #ffffff;
+			padding: 10px 24px;
+			border-radius: 20px;
+			font-size: 0.9rem;
+			cursor: pointer;
+			font-family: inherit;
+		}
+		button:hover {
+			background: rgba(255, 255, 255, 0.15);
+		}
+	</style>
+</head>
+<body>
+	<div class="offline-wrapper">
+		<h1>You are offline</h1>
+		<p>This page has not been cached yet. Reconnect to the internet and try again, or return to a page you have already visited.</p>
+		<button type="button" onclick="window.location.reload()">Retry</button>
+	</div>
+</body>
+</html>

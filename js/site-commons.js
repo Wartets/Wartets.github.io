@@ -184,9 +184,17 @@ function initSitePreload() {
 	}, { timeout: 3000 });
 }
 
+function registerServiceWorker() {
+	if (!('serviceWorker' in navigator)) return;
+	window.addEventListener('load', () => {
+		navigator.serviceWorker.register('/sw.js').catch(() => {});
+	});
+}
+
 document.addEventListener('DOMContentLoaded', () => {
 	updateFaviconToMoonPhase();
 	updateFooterYear();
 	initNavTools();
 	initSitePreload();
+	registerServiceWorker();
 });
