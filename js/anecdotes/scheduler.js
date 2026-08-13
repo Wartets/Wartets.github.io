@@ -60,7 +60,7 @@ function resolvePeriodTargetMs(entry, instanceStartYear) {
 	return startMs + offset * DAY_MS;
 }
 
-const TIER_BY_TYPE = { specific_date: 3, annual: 2, period: 1 };
+const TIER_BY_TYPE = { specific_date: 4, annual: 3, formula: 2, period: 1 };
 
 export function resolveSpecialEntry(registryEntries, dateUTC) {
 	const year = dateUTC.getUTCFullYear();
@@ -86,6 +86,10 @@ export function resolveSpecialEntry(registryEntries, dateUTC) {
 				const targetMs = resolvePeriodTargetMs(entry, instanceStartYear);
 				const dateMs = Date.UTC(year, dateUTC.getUTCMonth(), dateUTC.getUTCDate());
 				if (dateMs === targetMs) candidates.push(entry);
+			}
+		} else if (scheduling.type === 'formula') {
+			if (typeof scheduling.predicate === 'function' && scheduling.predicate(dateUTC)) {
+				candidates.push(entry);
 			}
 		}
 	});

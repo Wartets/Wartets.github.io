@@ -183,6 +183,7 @@ Liste complète des anecdotes présentes dans `data/anecdotes/registry.js`, clas
 | anecdote_vitesse_lumiere | la vitesse de la lumière est exactement 299 792 458 m/s depuis 1983. |
 | anecdote_water_density_anomaly | l'eau atteint sa densité maximale à 4°c, expliquant le gel des lacs en surface. |
 | anecdote_zeta_regularization_casimir | la somme des entiers = -1/12 explique l'effet casimir. |
+| anecdote_full_moon_tidal_lock | la lune est en rotation synchrone, toujours la même face vers la terre. |
 
 ## Histoire des Sciences
 

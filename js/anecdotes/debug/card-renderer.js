@@ -16,6 +16,7 @@ const LABELS = {
 	annual: { fr: 'Annuel', en: 'Annual' },
 	specificDate: { fr: 'Date précise', en: 'Specific date' },
 	period: { fr: 'Période', en: 'Period' },
+	formula: { fr: 'Formule dynamique', en: 'Dynamic formula' },
 	loadError: { fr: 'Échec du chargement', en: 'Load failed' },
 	errorDetail: { fr: "Détail de l'erreur", en: 'Error detail' },
 	sourceGeneric: { fr: 'Source', en: 'Source' },
@@ -55,6 +56,10 @@ function formatSchedulingSummary(scheduling, lang) {
 	}
 	if (scheduling.type === 'period' && scheduling.dates.length === 2) {
 		return `${label('period', lang)} - ${formatMMDDLabel(scheduling.dates[0], lang)} → ${formatMMDDLabel(scheduling.dates[1], lang)}`;
+	}
+	if (scheduling.type === 'formula') {
+		const description = scheduling.description ? window.resolveWithFallback(scheduling.description, lang) : '';
+		return description ? `${label('formula', lang)} - ${description}` : label('formula', lang);
 	}
 	return scheduling.type;
 }

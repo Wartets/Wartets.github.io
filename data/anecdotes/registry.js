@@ -1,3 +1,5 @@
+import { moonPhase } from '/js/anecdotes/conditions.js';
+
 export default [
 	{
 		id: 'anecdote_vitesse_lumiere',
@@ -1582,5 +1584,18 @@ export default [
 		addedDate: '2026-08-13',
 		scheduling: { type: 'anytime', dates: [] },
 		path: '/data/anecdotes/physique/negative_absolute_temperature_spin.js'
+	},
+	{
+		id: 'anecdote_full_moon_tidal_lock',
+		priority: 4,
+		enabled: true,
+		addedDate: '2026-08-13',
+		scheduling: {
+			type: 'formula',
+			dates: [],
+			predicate: moonPhase('full', 0.5),
+			description: { fr: 'Pleine lune (± 12h)', en: 'Full moon (± 12h)' }
+		},
+		path: '/data/anecdotes/physique/full_moon_tidal_lock.js'
 	}
 ];
