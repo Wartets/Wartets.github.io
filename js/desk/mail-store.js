@@ -48,7 +48,7 @@
 			subject: email.subject,
 			date: email.date,
 			body: email.body,
-			read: false,
+			read: typeof email.read === "boolean" ? email.read : false,
 			kind: "fixed"
 		}));
 	}

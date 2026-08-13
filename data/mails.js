@@ -16,6 +16,7 @@ window.mailData = {
 			fromAddress: "notifications@github.com",
 			subject: "Welcome to your portfolio!",
 			date: "2026-08-13 10:00",
+			read: false,
 			body: `
 				<p>Hello Wartets,</p>
 				<p>Welcome to your interactive Windows XP portfolio. This is a demonstration of the Outlook Express application.</p>
@@ -30,6 +31,7 @@ window.mailData = {
 			fromAddress: "admin@wartets-security.local",
 			subject: "Security Alert: New Login",
 			date: "2024-05-19 15:30",
+			read: true,
 			body: "<p>A new device has logged into your account. If this was not you, please secure your account immediately.</p>"
 		},
 		{
@@ -39,6 +41,7 @@ window.mailData = {
 			fromAddress: "no-reply@soundcloud.com",
 			subject: "Your weekly stats are here",
 			date: "2024-05-18 08:45",
+			read: true,
 			body: "<p>You got 1,234 plays this week! Keep up the great work.</p>"
 		},
 		{
@@ -48,6 +51,7 @@ window.mailData = {
 			fromAddress: "scolarite@u-paris.fr",
 			subject: "Confirmation d'inscription pédagogique",
 			date: "2026-07-02 09:15",
+			read: true,
 			body: `
 				<p>Bonjour Colin Bossu Réaubourg,</p>
 				<p>Votre inscription pédagogique pour l'année universitaire à venir a bien été enregistrée par les services de scolarité.</p>
@@ -62,6 +66,7 @@ window.mailData = {
 			fromAddress: "notifications@overleaf.com",
 			subject: "Vous avez été invité à collaborer sur un projet",
 			date: "2026-06-11 17:42",
+			read: false,
 			body: `
 				<p>Un collaborateur vous a ajouté au projet Overleaf "Rapport de stage MPQ-QITE".</p>
 				<p>Vous pouvez désormais éditer ce document en temps réel avec les autres membres du projet.</p>
@@ -75,6 +80,7 @@ window.mailData = {
 			fromAddress: "newsletter@milfeuille.com",
 			subject: "Rencontrez votre douceur parfaite",
 			date: "2026-02-19 09:12",
+			read: true,
 			body: `
 				<div style="font-family: sans-serif; color: #333;">
 					<h2 style="color: #d63384; margin: 0 0 8px 0;">Salut beauté,</h2>
@@ -639,6 +645,217 @@ window.mailData = {
 							paragraphs: [
 								fill("Voici un résumé des points abordés lors de <strong>{event}</strong>.", { event }),
 								"Le compte-rendu complet est disponible sur le drive partagé de l'association."
+							]
+						};
+					}
+				]
+			},
+			{
+				id: "banking",
+				senders: [
+					{ name: "Société Générale", address: "no-reply@societegenerale.fr" },
+					{ name: "Boursorama Banque", address: "notifications@boursorama.com" },
+					{ name: "Revolut", address: "noreply@revolut.com" },
+					{ name: "PayPal", address: "service@paypal.com" }
+				],
+				closings: [
+					"Ceci est un message automatique, merci de ne pas y répondre directement.",
+					"Vous pouvez consulter le détail de cette opération depuis votre espace client.",
+					"Pour toute question, contactez notre service client depuis l'application."
+				],
+				scenarios: [
+					(rng) => {
+						const amount = (pickInt(5, 480, rng) + rng()).toFixed(2);
+						const merchant = pick(["Amazon", "SNCF Connect", "Uber", "Fnac", "Decathlon", "Steam"], rng);
+						return {
+							subject: fill("Nouvelle transaction : {amount} € chez {merchant}", { amount, merchant }),
+							paragraphs: [
+								fill("Une transaction de <strong>{amount} €</strong> a été effectuée chez <strong>{merchant}</strong>.", { amount, merchant }),
+								"Si vous ne reconnaissez pas cette opération, faites opposition immédiatement depuis l'application."
+							]
+						};
+					},
+					(rng) => {
+						const balance = pickInt(120, 4200, rng);
+						return {
+							subject: "Votre relevé mensuel est disponible",
+							paragraphs: [
+								fill("Votre relevé de compte du mois est désormais consultable. Solde actuel : <strong>{balance} €</strong>.", { balance }),
+								"Téléchargez le PDF depuis la rubrique Documents de votre espace client."
+							]
+						};
+					},
+					(rng) => {
+						return {
+							subject: "Confirmation de virement",
+							paragraphs: [
+								"Votre virement a bien été traité et sera crédité sous 1 à 2 jours ouvrés.",
+								"Aucune action supplémentaire n'est requise de votre part."
+							]
+						};
+					}
+				]
+			},
+			{
+				id: "travel",
+				senders: [
+					{ name: "SNCF Connect", address: "no-reply@sncf-connect.com" },
+					{ name: "Air France", address: "noreply@airfrance.fr" },
+					{ name: "Booking.com", address: "no-reply@booking.com" },
+					{ name: "BlaBlaCar", address: "notifications@blablacar.fr" }
+				],
+				closings: [
+					"Bon voyage !",
+					"Retrouvez tous les détails de votre réservation dans votre espace personnel.",
+					"Ce message confirme votre réservation, conservez-le pour vos démarches."
+				],
+				scenarios: [
+					(rng) => {
+						const city = pick(["Lyon", "Marseille", "Bordeaux", "Lille", "Strasbourg", "Nantes"], rng);
+						const trainNumber = pickInt(6100, 8999, rng);
+						return {
+							subject: fill("Votre billet Paris - {city} est confirmé", { city }),
+							paragraphs: [
+								fill("Votre trajet Paris - <strong>{city}</strong> à bord du train n°{trainNumber} est confirmé.", { city, trainNumber }),
+								"Présentez votre billet électronique ou votre carte de fidélité à bord."
+							]
+						};
+					},
+					(rng) => {
+						const nights = pickInt(1, 6, rng);
+						const city = pick(["Rome", "Lisbonne", "Barcelone", "Amsterdam", "Prague"], rng);
+						return {
+							subject: fill("Confirmation de votre séjour à {city}", { city }),
+							paragraphs: [
+								fill("Votre réservation pour {nights} nuit(s) à <strong>{city}</strong> est confirmée.", { nights, city }),
+								"L'hôte vous contactera prochainement avec les instructions d'arrivée."
+							]
+						};
+					},
+					(rng) => {
+						const departure = pick(["Paris", "Lyon", "Toulouse"], rng);
+						const arrival = pick(["Bruxelles", "Genève", "Barcelone"], rng);
+						return {
+							subject: fill("Trajet {departure} - {arrival} : votre conducteur a confirmé", { departure, arrival }),
+							paragraphs: [
+								fill("Votre conducteur pour le trajet <strong>{departure} → {arrival}</strong> a confirmé votre réservation.", { departure, arrival }),
+								"Vous recevrez le point de rendez-vous exact la veille du départ."
+							]
+						};
+					}
+				]
+			},
+			{
+				id: "shopping",
+				senders: [
+					{ name: "Amazon", address: "expedition@amazon.fr" },
+					{ name: "Fnac", address: "commande@fnac.com" },
+					{ name: "Decathlon", address: "no-reply@decathlon.fr" },
+					{ name: "Steam", address: "noreply@steampowered.com" }
+				],
+				closings: [
+					"Merci pour votre commande.",
+					"Vous pouvez suivre votre colis depuis votre compte.",
+					"À bientôt sur notre boutique."
+				],
+				scenarios: [
+					(rng) => {
+						const item = pick(["un casque audio", "une carte graphique", "un livre de physique", "des chaussures de randonnée", "un microphone USB"], rng);
+						return {
+							subject: "Votre commande a été expédiée",
+							paragraphs: [
+								fill("Votre commande contenant <strong>{item}</strong> a été expédiée et arrivera sous 2 à 4 jours ouvrés.", { item }),
+								"Vous pouvez suivre l'acheminement du colis en temps réel."
+							]
+						};
+					},
+					(rng) => {
+						const discount = pickInt(10, 40, rng);
+						return {
+							subject: fill("-{discount}% sur une sélection d'articles", { discount }),
+							paragraphs: [
+								fill("Profitez de <strong>-{discount}%</strong> sur une sélection d'articles jusqu'à dimanche minuit.", { discount }),
+								"L'offre est automatiquement appliquée au moment du paiement."
+							]
+						};
+					},
+					(rng) => {
+						const game = pick(["Factorio", "Cities: Skylines II", "Kerbal Space Program", "Portal 2", "Hades II"], rng);
+						return {
+							subject: fill("{game} est maintenant disponible dans votre bibliothèque", { game }),
+							paragraphs: [
+								fill("<strong>{game}</strong> a été ajouté à votre bibliothèque suite à votre achat.", { game }),
+								"Lancez le client pour commencer le téléchargement."
+							]
+						};
+					}
+				]
+			},
+			{
+				id: "recruiting",
+				senders: [
+					{ name: "LinkedIn", address: "jobs-noreply@linkedin.com" },
+					{ name: "Indeed", address: "noreply@indeed.com" },
+					{ name: "WelcomeToTheJungle", address: "hello@welcometothejungle.com" }
+				],
+				closings: [
+					"Cette offre correspond à votre profil et vos recherches récentes.",
+					"Vous pouvez postuler directement en un clic depuis l'application.",
+					"Modifiez vos préférences de recherche à tout moment depuis votre profil."
+				],
+				scenarios: [
+					(rng) => {
+						const role = pick(["Ingénieur Simulation Numérique", "Développeur Python Scientifique", "Data Scientist Junior", "Ingénieur Recherche & Développement"], rng);
+						const company = pick(["CNES", "CEA", "Thales", "Dassault Systèmes", "Onera"], rng);
+						return {
+							subject: fill("Nouvelle offre : {role} chez {company}", { role, company }),
+							paragraphs: [
+								fill("Une nouvelle offre correspondant à votre profil vient d'être publiée : <strong>{role}</strong> chez {company}.", { role, company }),
+								"Consultez la fiche de poste complète et postulez directement en ligne."
+							]
+						};
+					},
+					(rng) => {
+						const views = pickInt(3, 28, rng);
+						return {
+							subject: "Votre profil a été consulté récemment",
+							paragraphs: [
+								fill("Votre profil a été consulté {views} fois cette semaine par des recruteurs.", { views }),
+								"Mettez à jour vos compétences pour augmenter votre visibilité."
+							]
+						};
+					}
+				]
+			},
+			{
+				id: "cloudQuota",
+				senders: [
+					{ name: "Google One", address: "no-reply@google.com" },
+					{ name: "iCloud", address: "no_reply@email.apple.com" },
+					{ name: "Proton Mail", address: "no-reply@proton.me" }
+				],
+				closings: [
+					"Gérez votre stockage à tout moment depuis les paramètres de votre compte.",
+					"Ce message est envoyé automatiquement lorsque le seuil est atteint.",
+					"Passez à un forfait supérieur pour éviter toute interruption de service."
+				],
+				scenarios: [
+					(rng) => {
+						const percent = pickInt(80, 98, rng);
+						return {
+							subject: fill("Votre espace de stockage est utilisé à {percent}%", { percent }),
+							paragraphs: [
+								fill("Votre espace de stockage est actuellement utilisé à <strong>{percent}%</strong> de sa capacité.", { percent }),
+								"Libérez de l'espace ou augmentez votre quota pour continuer à recevoir des messages et sauvegarder vos fichiers."
+							]
+						};
+					},
+					(rng) => {
+						return {
+							subject: "Votre sauvegarde automatique a échoué",
+							paragraphs: [
+								"La dernière tentative de sauvegarde automatique n'a pas pu être réalisée par manque d'espace disponible.",
+								"Une nouvelle tentative sera effectuée automatiquement dans 24 heures."
 							]
 						};
 					}

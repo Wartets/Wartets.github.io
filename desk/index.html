@@ -190,11 +190,17 @@
 		<div class="quick-launch">
 			<img src="../assets/images/desk/XPIcon.png" alt="Show Desktop" title="Show Desktop" class="quick-launch-icon" id="show-desktop-icon">
 			<img src="../assets/images/desk/internet-explorer.png" alt="Internet Explorer" title="Internet Explorer" class="quick-launch-icon">
-			<img src="../assets/images/desk/OE2001.webp" alt="Outlook Express" title="Outlook Express" class="quick-launch-icon">
+			<div class="quick-launch-icon-wrapper">
+				<img src="../assets/images/desk/OE2001.webp" alt="Outlook Express" title="Outlook Express" class="quick-launch-icon">
+				<span id="outlook-unread-badge" class="quick-launch-badge hidden"></span>
+			</div>
 			<img src="https://upload.wikimedia.org/wikipedia/commons/thumb/0/0d/Winamp-logo.svg/960px-Winamp-logo.svg.png" alt="Winamp" title="Winamp" class="quick-launch-icon">
 			<img src="../assets/images/desk/mine.webp" alt="Minesweeper" title="Minesweeper" class="quick-launch-icon">
 		</div>
 		<div id="taskbar-windows">
+		</div>
+		<div id="clippy-taskbar-icon" class="clippy-taskbar-icon" title="Clippy">
+			<img src="../assets/images/desk/clippy/idle.png" alt="Clippy" id="clippy-taskbar-img">
 		</div>
 		<div id="taskbar-clock"></div>
 	</div>
@@ -206,6 +212,7 @@
 	<div id="context-menu" class="xp-window hidden">
 		<ul>
 			<li data-action="open" class="hidden">Open</li>
+			<li data-action="info" class="hidden">Info</li>
 			<li data-action="cut" class="hidden">Cut</li>
 			<li data-action="copy" class="hidden">Copy</li>
 			<li data-action="paste" class="hidden">Paste</li>
@@ -214,6 +221,7 @@
 			<li class="separator"></li>
 			<li data-action="arrange-icons-name">Arrange Icons by Name</li>
 			<li data-action="arrange-icons-date">Arrange Icons by Date</li>
+			<li data-action="arrange-icons-type">Arrange Icons by Type</li>
 			<li data-action="line-up-icons">Line up Icons</li>
 			<li class="separator"></li>
 			<li data-action="toggle-hidden">Show Hidden Items</li>
@@ -267,6 +275,7 @@
 	<script src="../data/poetry.js"></script>
 	<script src="../data/mails.js"></script>
 	<script src="../js/desk/mail-store.js"></script>
+	<script src="../js/desk/clippy.js"></script>
 
 	<div id="scanlines-overlay" aria-hidden="true"></div>
 

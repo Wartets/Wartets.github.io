@@ -482,6 +482,30 @@ let currentCalendarDate = new Date();
 let isContextMenuVisible = false;
 let customIcons = JSON.parse(localStorage.getItem('customIcons')) || [];
 let webampInstance = null;
+let lastClickedIconForRange = null;
+
+window.DeskAPI = {
+	getUnreadMailCount: () => {
+		if (!window.MailStore) return 0;
+		window.MailStore.init();
+		return window.MailStore.getFolders().reduce((sum, folder) => sum + window.MailStore.getMessages(folder.id).filter(m => !m.read).length, 0);
+	},
+	getDesktopItemCount: () => (typeof fs !== 'undefined' && fs) ? fs.root.listContent().filter(el => !el.hidden).length : 0,
+	getOpenWindowCount: () => (typeof openWindows !== 'undefined') ? Object.keys(openWindows).length : 0,
+	getRandomProject: () => {
+		if (typeof projects === 'undefined') return null;
+		const list = projects.flat().filter(p => p && typeof p === 'object' && p.show !== false);
+		if (list.length === 0) return null;
+		return list[Math.floor(Math.random() * list.length)];
+	},
+	openMailApp: () => openOutlookExpress(),
+	openProjectsFolder: () => openAllProjectsFolder(),
+	openRecycleBin: () => openRecycleBinWindow(),
+	openMinesweeperGame: () => openMinesweeper(),
+	openWinampPlayer: () => openWinamp(),
+	getMoonPhaseDay: () => (typeof getMoonPhaseDayNumber === 'function') ? getMoonPhaseDayNumber() : null,
+	getRecycleBinCount: () => (typeof fs !== 'undefined' && fs) ? fs.loadRecycleBinItems().length : 0
+};
 
 document.addEventListener('DOMContentLoaded', () => {
 	initializeFileSystem();
@@ -501,6 +525,10 @@ document.addEventListener('DOMContentLoaded', () => {
 	setupDesktopDropzone();
 	setupDesktopSelection();
 	setupKeyboardNavigation();
+	setupGlobalKeyboardShortcuts();
+	updateOutlookUnreadBadge();
+	setInterval(updateOutlookUnreadBadge, 60000);
+	if (window.ClippyAgent) window.ClippyAgent.init();
 
 	const bootScreen = document.getElementById('boot-screen');
 	const welcomeScreen = document.getElementById('welcome-screen');
@@ -1032,11 +1060,33 @@ function handleIconContextMenu(e, icon, project) {
 
 function handleIconClick(e, icon) {
 	const win = icon.closest('.xp-window');
-	const isCtrl = e.ctrlKey;
+	const isCtrl = e.ctrlKey || e.metaKey;
+	const isShift = e.shiftKey;
+	const container = icon.parentElement;
+
+	if (isShift && lastClickedIconForRange && lastClickedIconForRange.parentElement === container) {
+		const icons = Array.from(container.querySelectorAll('.project-icon'));
+		const startIndex = icons.indexOf(lastClickedIconForRange);
+		const endIndex = icons.indexOf(icon);
+		if (startIndex !== -1 && endIndex !== -1) {
+			if (!isCtrl) {
+				icons.forEach(i => i.classList.remove('selected'));
+				selectedIcons.clear();
+			}
+			const from = Math.min(startIndex, endIndex);
+			const to = Math.max(startIndex, endIndex);
+			for (let i = from; i <= to; i++) {
+				icons[i].classList.add('selected');
+				selectedIcons.add(icons[i]);
+			}
+			if (win && win.classList.contains('project-window')) updateFolderUISelection(win);
+			return;
+		}
+	}
+
 	const isSelected = icon.classList.contains('selected');
 
 	if (!isCtrl) {
-		const container = icon.parentElement;
 		container.querySelectorAll('.project-icon.selected').forEach(i => i.classList.remove('selected'));
 		clearIconSelections();
 	}
@@ -1048,6 +1098,8 @@ function handleIconClick(e, icon) {
 		icon.classList.add('selected');
 		selectedIcons.add(icon);
 	}
+
+	lastClickedIconForRange = icon;
 
 	if (win && win.classList.contains('project-window')) {
 		updateFolderUISelection(win);
@@ -1460,6 +1512,285 @@ function setupKeyboardNavigation() {
 			}
 		}
 	});
+}
+
+function getActiveIconContainer() {
+	if (activeWindow && activeWindow.classList.contains('project-window')) {
+		return activeWindow.querySelector('.folder-content');
+	}
+	if (!activeWindow) {
+		return document.getElementById('project-icons-container');
+	}
+	return null;
+}
+
+function getActiveContainerDestPath() {
+	if (activeWindow && activeWindow.classList.contains('project-window')) {
+		const content = activeWindow.querySelector('.folder-content');
+		return content ? content.dataset.path : '/';
+	}
+	return '/';
+}
+
+function setupGlobalKeyboardShortcuts() {
+	document.addEventListener('keydown', (e) => {
+		const boot = document.getElementById('boot-screen');
+		const welcome = document.getElementById('welcome-screen');
+		if ((boot && boot.style.display !== 'none') || (welcome && welcome.style.display !== 'none' && !welcome.classList.contains('hidden'))) return;
+
+		const isEditable = e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.isContentEditable;
+		const ctrlOrMeta = e.ctrlKey || e.metaKey;
+
+		if (e.altKey && e.key === 'F4') {
+			e.preventDefault();
+			if (activeWindow) closeWindow(activeWindow, activeWindow.id);
+			return;
+		}
+
+		if (e.altKey && e.key === 'Tab') {
+			e.preventDefault();
+			const windowIds = Object.keys(openWindows).filter(id => !document.getElementById(id).classList.contains('minimized'));
+			if (windowIds.length === 0) return;
+			const currentId = activeWindow ? activeWindow.id : null;
+			let index = currentId ? windowIds.indexOf(currentId) : -1;
+			if (e.shiftKey) {
+				index = index <= 0 ? windowIds.length - 1 : index - 1;
+			} else {
+				index = index >= windowIds.length - 1 ? 0 : index + 1;
+			}
+			const nextWindow = document.getElementById(windowIds[index]);
+			if (nextWindow) bringWindowToFront(nextWindow);
+			return;
+		}
+
+		if (!ctrlOrMeta) return;
+
+		const outlookWindow = document.getElementById('window-outlook-express');
+		const outlookIsActive = activeWindow === outlookWindow;
+		const key = e.key.toLowerCase();
+
+		if (key === 'n' && !isEditable) {
+			if (outlookIsActive) {
+				e.preventDefault();
+				const newBtn = outlookWindow.querySelector('.outlook-tool-btn[data-action="new"]');
+				if (newBtn) newBtn.click();
+				return;
+			}
+			const container = getActiveIconContainer();
+			if (container) {
+				e.preventDefault();
+				try {
+					fs.create('File', getActiveContainerDestPath(), 'New Text Document.txt');
+					refreshUI();
+				} catch (error) {
+					showXPDialog('Error', error.message, 'error');
+				}
+			}
+			return;
+		}
+
+		if (key === 'a' && !isEditable) {
+			const container = getActiveIconContainer();
+			if (container) {
+				e.preventDefault();
+				const icons = Array.from(container.querySelectorAll('.project-icon'));
+				icons.forEach(icon => {
+					icon.classList.add('selected');
+					selectedIcons.add(icon);
+				});
+				if (activeWindow) updateFolderUISelection(activeWindow);
+			}
+			return;
+		}
+
+		if ((key === 'c' || key === 'x') && !isEditable) {
+			if (selectedIcons.size === 0) return;
+			const icon = selectedIcons.values().next().value;
+			const path = icon.dataset.path;
+			if (!path || path.startsWith('app://')) return;
+			e.preventDefault();
+			fs.clipboard.mode = key === 'x' ? 'cut' : 'copy';
+			fs.clipboard.element = fs.findByPath(path);
+			return;
+		}
+
+		if (key === 'v' && !isEditable) {
+			if (!fs.clipboard.element) return;
+			const container = getActiveIconContainer();
+			if (!container) return;
+			e.preventDefault();
+			const destPath = getActiveContainerDestPath();
+			try {
+				const sourcePath = fs.clipboard.element.getFullPath();
+				if (fs.clipboard.mode === 'cut') {
+					fs.move(sourcePath, destPath);
+					fs.clipboard.mode = null;
+					fs.clipboard.element = null;
+				} else if (fs.clipboard.mode === 'copy') {
+					fs.copy(sourcePath, destPath);
+				}
+				refreshUI();
+			} catch (error) {
+				showXPDialog('Error', error.message, 'error');
+			}
+			return;
+		}
+
+		if (key === 'o' && !isEditable) {
+			if (selectedIcons.size !== 1) return;
+			e.preventDefault();
+			const icon = selectedIcons.values().next().value;
+			const path = icon.dataset.path;
+			if (path && !path.startsWith('app://')) {
+				const element = fs.findByPath(path);
+				if (element) openFileSystemElement(element, activeWindow);
+			}
+			return;
+		}
+
+		if (key === 's') {
+			e.preventDefault();
+			if (outlookIsActive) return;
+			if (activeWindow) {
+				fs.save();
+				showXPDialog('Save', 'All changes have been saved.', 'info');
+			}
+			return;
+		}
+	});
+}
+
+function formatBytes(bytes) {
+	if (!bytes) return '0 B';
+	const units = ['B', 'KB', 'MB'];
+	let value = bytes;
+	let unitIndex = 0;
+	while (value >= 1024 && unitIndex < units.length - 1) {
+		value /= 1024;
+		unitIndex++;
+	}
+	return `${value.toFixed(unitIndex === 0 ? 0 : 1)} ${units[unitIndex]}`;
+}
+
+function formatFullDate(date) {
+	return date.toLocaleString('en-US', { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+}
+
+function buildInfoRow(label, value) {
+	return `<div class="info-row"><span class="info-label">${label}</span><span class="info-value">${value}</span></div>`;
+}
+
+function openElementInfoWindow(element) {
+	if (!element) return;
+
+	let type = 'File';
+	if (element instanceof Folder) type = 'Folder';
+	else if (element instanceof Shortcut) type = 'Shortcut';
+	else if (element instanceof ProjectFile) type = 'Project';
+
+	const id = `window-info-${element.getFullPath().replace(/[^\w-]/g, '_')}`;
+	const existingWindow = document.getElementById(id);
+	if (existingWindow) {
+		bringWindowToFront(existingWindow);
+		return;
+	}
+
+	let previewHtml = '';
+	let extraRows = '';
+
+	if (type === 'Folder') {
+		extraRows += buildInfoRow('Items', String(element.listContent().length));
+	} else if (type === 'File') {
+		extraRows += buildInfoRow('Size', formatBytes(element.size));
+		extraRows += buildInfoRow('Read-only', element.readOnly ? 'Yes' : 'No');
+		if (!element.readOnly) {
+			const preview = (element.content || '').replace(/<[^>]*>/g, ' ').trim().slice(0, 240);
+			if (preview) previewHtml = `<div class="info-preview">${preview}${element.content.length > 240 ? '…' : ''}</div>`;
+		}
+	} else if (type === 'Shortcut') {
+		extraRows += buildInfoRow('Target', element.targetPath);
+	} else if (type === 'Project') {
+		const project = element.projectData || {};
+		extraRows += buildInfoRow('Category', (project.keywords || []).join(', ') || 'N/A');
+		if (project.languages && project.languages.length) {
+			extraRows += buildInfoRow('Languages', project.languages.join(', '));
+		}
+		if (project.link) extraRows += buildInfoRow('Link', `<a href="${project.link}" target="_blank">${project.link}</a>`);
+		if (project.github) extraRows += buildInfoRow('GitHub', `<a href="${project.github}" target="_blank">${project.github}</a>`);
+		const description = project.description || project.longDescription || project.longDescrition || '';
+		if (project.icon) previewHtml += `<img src="${project.icon}" class="info-thumbnail" alt="${element.name}">`;
+		if (description) previewHtml += `<div class="info-preview">${description}</div>`;
+	}
+
+	const contentHTML = `
+		<div class="info-window-body">
+			<div class="info-header">
+				<img src="${element.icon}" alt="${element.name}" class="info-icon">
+				<div class="info-title">${element.name}</div>
+			</div>
+			${previewHtml}
+			<div class="info-rows">
+				${buildInfoRow('Type', type)}
+				${buildInfoRow('Location', element.parent ? element.parent.getFullPath() : '/')}
+				${buildInfoRow('Created', formatFullDate(element.createdAt))}
+				${buildInfoRow('Modified', formatFullDate(element.modifiedAt))}
+				${extraRows}
+			</div>
+		</div>
+	`;
+
+	const win = createXPWindow(id, `${element.name} Properties`, contentHTML, 380, 420, {
+		iconSrc: element.icon,
+		resizable: false
+	});
+	win.querySelector('.xp-window-content').style.padding = '0';
+}
+
+function openMailInfoWindow(message) {
+	const id = `window-mailinfo-${message.id}`;
+	const existingWindow = document.getElementById(id);
+	if (existingWindow) {
+		bringWindowToFront(existingWindow);
+		return;
+	}
+	const folder = MailStore.getFolderById(message.folderId);
+	const bodyPreview = (message.body || '').replace(/<[^>]*>/g, ' ').trim().slice(0, 240);
+	const contentHTML = `
+		<div class="info-window-body">
+			<div class="info-header">
+				<img src="https://api.iconify.design/mdi/email-outline.svg" alt="${message.subject}" class="info-icon">
+				<div class="info-title">${message.subject || '(No subject)'}</div>
+			</div>
+			${bodyPreview ? `<div class="info-preview">${bodyPreview}${(message.body || '').length > 240 ? '…' : ''}</div>` : ''}
+			<div class="info-rows">
+				${buildInfoRow('From', `${message.from} &lt;${message.fromAddress || 'unknown'}&gt;`)}
+				${message.to ? buildInfoRow('To', message.to) : ''}
+				${buildInfoRow('Folder', folder ? folder.name : message.folderId)}
+				${buildInfoRow('Date', formatFullDate(new Date(message.date)))}
+				${buildInfoRow('Status', message.read ? 'Read' : 'Unread')}
+				${buildInfoRow('Size', formatBytes(new TextEncoder().encode(message.body || '').length))}
+			</div>
+		</div>
+	`;
+	const win = createXPWindow(id, `${message.subject || '(No subject)'} - Properties`, contentHTML, 380, 400, {
+		iconSrc: 'https://api.iconify.design/mdi/email-outline.svg',
+		resizable: false
+	});
+	win.querySelector('.xp-window-content').style.padding = '0';
+}
+
+function updateOutlookUnreadBadge() {
+	if (!window.MailStore) return;
+	window.MailStore.init();
+	const badge = document.getElementById('outlook-unread-badge');
+	if (!badge) return;
+	const unreadCount = window.MailStore.getFolders().reduce((sum, folder) => sum + window.MailStore.getMessages(folder.id).filter(m => !m.read).length, 0);
+	if (unreadCount > 0) {
+		badge.textContent = unreadCount > 5 ? '5+' : String(unreadCount);
+		badge.classList.remove('hidden');
+	} else {
+		badge.classList.add('hidden');
+	}
 }
 
 function setActiveWindow(win) {
@@ -2456,7 +2787,14 @@ function setupDesktopContextMenu() {
 
 	const submenuTrigger = contextMenu.querySelector('.has-submenu');
 	const submenu = submenuTrigger.querySelector('.submenu');
-	submenuTrigger.addEventListener('mouseenter', () => submenu.classList.remove('hidden'));
+	submenuTrigger.addEventListener('mouseenter', () => {
+		submenu.classList.remove('hidden');
+		submenu.classList.remove('submenu-flip');
+		const rect = submenu.getBoundingClientRect();
+		if (rect.right > window.innerWidth) {
+			submenu.classList.add('submenu-flip');
+		}
+	});
 	submenuTrigger.addEventListener('mouseleave', (e) => {
 		if (!submenuTrigger.contains(e.relatedTarget)) {
 			submenu.classList.add('hidden');
@@ -2506,27 +2844,27 @@ function setupTaskbarContextMenu() {
 	});
 }
 
+function positionFloatingMenu(menu, x, y) {
+	const rect = menu.getBoundingClientRect();
+	let posX = x;
+	let posY = y;
+	if (posX + rect.width > window.innerWidth) posX = Math.max(4, window.innerWidth - rect.width - 4);
+	if (posY + rect.height > window.innerHeight - 40) posY = Math.max(4, window.innerHeight - 40 - rect.height);
+	if (posX < 4) posX = 4;
+	if (posY < 4) posY = 4;
+	menu.style.left = `${posX}px`;
+	menu.style.top = `${posY}px`;
+}
+
 function showContextMenu(e) {
 	const contextMenu = document.getElementById('context-menu');
-	let posX = e.clientX;
-	let posY = e.clientY;
-
-	const menuWidth = contextMenu.offsetWidth;
-	const menuHeight = contextMenu.offsetHeight;
-	const viewportWidth = window.innerWidth;
-	const viewportHeight = window.innerHeight;
-
-	if (posX + menuWidth > viewportWidth) {
-		posX = viewportWidth - menuWidth;
-	}
-	if (posY + menuHeight > viewportHeight - 40) {
-		posY = viewportHeight - 40 - menuHeight;
-	}
-
-	contextMenu.style.left = `${posX}px`;
-	contextMenu.style.top = `${posY}px`;
-	contextMenu.style.zIndex = ++zIndexCounter;
 	contextMenu.classList.remove('hidden');
+	contextMenu.style.left = '0px';
+	contextMenu.style.top = '0px';
+	contextMenu.querySelectorAll('.submenu').forEach(sm => sm.classList.add('hidden', 'submenu-flip'));
+
+	positionFloatingMenu(contextMenu, e.clientX, e.clientY);
+	contextMenu.style.zIndex = ++zIndexCounter;
 	isContextMenuVisible = true;
 }
 
@@ -2557,6 +2895,7 @@ function updateContextMenuItems() {
 	};
 
 	setItemState('open', selectedIcons.size !== 1);
+	setItemState('info', !(anyFileSystemElementSelected && selectedIcons.size === 1));
 	setItemState('cut', !anyFileSystemElementSelected);
 	setItemState('copy', !anyFileSystemElementSelected);
 	setItemState('delete', !anyFileSystemElementSelected);
@@ -2696,6 +3035,15 @@ function handleContextMenuAction(action) {
 					}
 				}
 				break;
+			case 'info':
+				if (targetElement) {
+					const path = targetElement.dataset.path;
+					if (path && !path.startsWith('app://')) {
+						const element = fs.findByPath(path);
+						if (element) openElementInfoWindow(element);
+					}
+				}
+				break;
 			case 'refresh':
 				refreshUI();
 				break;
@@ -2710,6 +3058,9 @@ function handleContextMenuAction(action) {
 				break;
 			case 'line-up-icons':
 				arrangeIcons('none');
+				break;
+			case 'arrange-icons-type':
+				arrangeIcons('type');
 				break;
 			case 'new-folder':
 				fs.create('Folder', destPath, 'New Folder');
@@ -3161,6 +3512,11 @@ function arrangeIcons(sortBy) {
 			return elementA.name.localeCompare(elementB.name);
 		} else if (sortBy === 'date') {
 			return new Date(elementB.createdAt) - new Date(elementA.createdAt);
+		} else if (sortBy === 'type') {
+			const typeRank = { folder: 0, project: 1, shortcut: 2, file: 3, application: 4 };
+			const rankA = typeRank[a.dataset.type] ?? 5;
+			const rankB = typeRank[b.dataset.type] ?? 5;
+			return (rankA - rankB) || elementA.name.localeCompare(elementB.name);
 		}
 		return 0;
 	});
@@ -3606,8 +3962,6 @@ function renderRecycleBinContent(win) {
 			const menu = document.createElement('div');
 			menu.className = 'xp-window';
 			menu.style.position = 'fixed';
-			menu.style.left = `${e.clientX}px`;
-			menu.style.top = `${e.clientY}px`;
 			menu.style.zIndex = String(++zIndexCounter);
 			menu.style.minWidth = '150px';
 			menu.style.padding = '2px';
@@ -3618,6 +3972,7 @@ function renderRecycleBinContent(win) {
 				</ul>
 			`;
 			document.body.appendChild(menu);
+			positionFloatingMenu(menu, e.clientX, e.clientY);
 
 			const removeMenu = () => {
 				menu.remove();
@@ -3908,6 +4263,70 @@ function showDesktop() {
 	});
 }
 
+const IE_EASTER_EGG_HOSTS = {
+	'geocities.wartets': () => `<!DOCTYPE html><html><head><meta charset="utf-8"><title>Colin's Homepage</title><style>
+		body{background:#000080;color:#00ff00;font-family:'Comic Sans MS',cursive;text-align:center;padding:30px;}
+		h1{color:#ffff00;text-shadow:2px 2px #ff00ff;}
+		marquee{color:#ff0000;font-weight:bold;}
+		.badge{display:inline-block;margin:4px;padding:4px 8px;background:#fff;color:#000;border:2px outset #ccc;font-size:11px;}
+	</style></head><body>
+		<h1>Welcome to Colin's Homepage!</h1>
+		<marquee>Under construction since 1999! Best viewed at 800x600!</marquee>
+		<p>Hit counter: 005627</p>
+		<div class="badge">Netscape Now!</div>
+		<div class="badge">Made with Notepad</div>
+		<p>Sign my guestbook!</p>
+	</body></html>`,
+	'wartex.search': () => buildIESearchPage('')
+};
+
+function normalizeIEHost(input) {
+	let value = input.trim();
+	if (!value.startsWith('http://') && !value.startsWith('https://') && !value.startsWith('about:')) {
+		value = 'https://' + value;
+	}
+	try {
+		return new URL(value).hostname.replace(/^www\./, '');
+	} catch (error) {
+		return null;
+	}
+}
+
+function buildIEErrorPage(url) {
+	return `<!DOCTYPE html><html><head><meta charset="utf-8"><style>body{font-family:Verdana,sans-serif;background:#fff;color:#000;padding:40px;} h1{font-size:20px;} .url{color:#0000cc;} hr{margin:20px 0;}</style></head><body>
+		<h1>The page cannot be displayed</h1>
+		<p>The page you are looking for is currently unavailable. The web site might be experiencing technical difficulties, or you may need to adjust your browser settings.</p>
+		<p class="url">${url}</p>
+		<hr>
+		<p>Please try the following:</p>
+		<ul>
+			<li>Open the <b>geocities.wartets</b> home page, and then look for links to the information you want.</li>
+			<li>Click the Refresh button, or try again later.</li>
+		</ul>
+		<p><i>Cannot find server or DNS Error</i><br>Internet Explorer</p>
+	</body></html>`;
+}
+
+function buildIESearchPage(query) {
+	const escaped = (query || '').replace(/</g, '&lt;');
+	return `<!DOCTYPE html><html><head><meta charset="utf-8"><style>
+		body{font-family:Arial,sans-serif;background:#fff;color:#000;padding:20px;}
+		.logo{font-size:32px;font-weight:bold;color:#3b88fd;margin-bottom:20px;}
+		.logo span{color:#245edc;}
+		.result{margin-bottom:16px;}
+		.result a{color:#0000cc;font-size:14px;text-decoration:none;}
+		.result a:hover{text-decoration:underline;}
+		.result .desc{color:#333;font-size:12px;}
+		.result .link-url{color:#009933;font-size:11px;}
+	</style></head><body>
+		<div class="logo">Wart<span>ex</span></div>
+		<p>Results for "<b>${escaped}</b>"</p>
+		<div class="result"><a href="#">Wartets - Personal Portfolio</a><div class="link-url">wartets.github.io</div><div class="desc">Interactive simulations, physics research, software engineering, and digital creations.</div></div>
+		<div class="result"><a href="#">Why can't I access the real internet?</a><div class="link-url">wartex.help/sandbox</div><div class="desc">This browser is a sandboxed recreation running inside a portfolio site. External sites cannot be reached.</div></div>
+		<div class="result"><a href="#">GeoCities Revival - Personal Homepages</a><div class="link-url">geocities.wartets</div><div class="desc">Browse the archive of retro personal home pages.</div></div>
+	</body></html>`;
+}
+
 function openInternetExplorer() {
 	const id = 'window-internet-explorer';
 	if (document.getElementById(id)) {
@@ -3928,6 +4347,10 @@ function openInternetExplorer() {
 				<span>Address</span>
 				<input type="text" id="ie-address-bar" value="about:home">
 				<button id="ie-go-btn">Go</button>
+			</div>
+			<div class="ie-favorites-bar">
+				<button type="button" class="ie-fav-btn" data-fav="geocities.wartets">GeoCities Archive</button>
+				<button type="button" class="ie-fav-btn" data-fav="wartex.search">Wartex Search</button>
 			</div>
 			<div class="ie-content-area">
 				<iframe id="ie-iframe" src="about:blank" sandbox="allow-scripts allow-same-origin allow-forms"></iframe>
@@ -3957,15 +4380,29 @@ function openInternetExplorer() {
 	function navigateTo(url) {
 		homePage.style.display = 'none';
 		iframe.style.display = 'block';
-		if (!url.startsWith('http://') && !url.startsWith('https://') && !url.startsWith('about:')) {
-			url = 'https://' + url;
+
+		if (url === 'about:home') {
+			showHome();
+			return;
 		}
-		try {
-			iframe.src = url;
-			addressBar.value = url;
-		} catch (e) {
-			iframe.src = `data:text/html, <h1>Navigation blocked</h1><p>Could not navigate to the specified page due to security restrictions.</p>`;
+
+		const rawQuery = url.trim();
+		const host = normalizeIEHost(rawQuery);
+
+		if (host && IE_EASTER_EGG_HOSTS[host]) {
+			iframe.src = 'data:text/html;charset=utf-8,' + encodeURIComponent(IE_EASTER_EGG_HOSTS[host]());
+			addressBar.value = `http://${host}/`;
+			return;
 		}
+
+		if (!rawQuery.includes('.') || rawQuery.includes(' ')) {
+			iframe.src = 'data:text/html;charset=utf-8,' + encodeURIComponent(buildIESearchPage(rawQuery));
+			addressBar.value = `http://wartex.search/?q=${encodeURIComponent(rawQuery)}`;
+			return;
+		}
+
+		iframe.src = 'data:text/html;charset=utf-8,' + encodeURIComponent(buildIEErrorPage(host ? `http://${host}/` : rawQuery));
+		addressBar.value = host ? `http://${host}/` : rawQuery;
 	}
 
 	function showHome() {
@@ -3978,6 +4415,10 @@ function openInternetExplorer() {
 	goBtn.addEventListener('click', () => navigateTo(addressBar.value));
 	addressBar.addEventListener('keydown', (e) => {
 		if (e.key === 'Enter') navigateTo(addressBar.value);
+	});
+
+	ieWindow.querySelectorAll('.ie-fav-btn').forEach(btn => {
+		btn.addEventListener('click', () => navigateTo(btn.dataset.fav));
 	});
 
 	backBtn.addEventListener('click', () => iframe.contentWindow.history.back());
@@ -4072,6 +4513,15 @@ async function openOutlookExpress() {
 
 	if (foldersPane) foldersPane.style.width = foldersPane.style.width || '200px';
 
+	if (foldersPane) {
+		foldersPane.addEventListener('contextmenu', (e) => {
+			e.preventDefault();
+			showGenericContextMenu(e.clientX, e.clientY, [
+				{ label: 'New Folder', action: promptNewFolder }
+			]);
+		});
+	}
+
 	if (collapseBtn && foldersPane) {
 		collapseBtn.addEventListener('click', () => {
 			const isCollapsed = foldersPane.classList.toggle('collapsed');
@@ -4142,32 +4592,19 @@ async function openOutlookExpress() {
 		closeContextMenu();
 		const menu = document.createElement('div');
 		menu.id = 'oe-context-menu';
-		menu.className = 'xp-window';
-		menu.style.position = 'fixed';
-		menu.style.left = `${x}px`;
-		menu.style.top = `${y}px`;
+		menu.className = 'oe-context-menu';
 		menu.style.zIndex = String(++zIndexCounter);
-		menu.style.minWidth = '160px';
-		menu.style.padding = '2px';
 		const list = document.createElement('ul');
-		list.style.listStyle = 'none';
-		list.style.margin = '0';
-		list.style.padding = '0';
 		items.forEach(item => {
 			if (item.separator) {
 				const sep = document.createElement('li');
-				sep.style.height = '1px';
-				sep.style.margin = '4px 2px';
-				sep.style.background = 'rgba(0,0,0,0.15)';
+				sep.className = 'oe-context-menu-separator';
 				list.appendChild(sep);
 				return;
 			}
 			const li = document.createElement('li');
+			li.className = 'oe-context-menu-item';
 			li.textContent = item.label;
-			li.style.padding = '6px 15px';
-			li.style.cursor = 'pointer';
-			li.addEventListener('mouseenter', () => { li.style.background = 'var(--xp-selection-blue)'; li.style.color = '#fff'; });
-			li.addEventListener('mouseleave', () => { li.style.background = ''; li.style.color = ''; });
 			li.addEventListener('click', () => {
 				closeContextMenu();
 				item.action();
@@ -4176,6 +4613,7 @@ async function openOutlookExpress() {
 		});
 		menu.appendChild(list);
 		document.body.appendChild(menu);
+		positionFloatingMenu(menu, x, y);
 
 		const outsideHandler = (ev) => {
 			if (!menu.contains(ev.target)) {
@@ -4246,6 +4684,7 @@ async function openOutlookExpress() {
 
 			folderListEl.appendChild(li);
 		});
+		updateOutlookUnreadBadge();
 	}
 
 	function promptNewFolder() {
@@ -4395,7 +4834,9 @@ async function openOutlookExpress() {
 						renderMessageList();
 						renderFolderList();
 						clearPreview();
-					} }
+					} },
+					{ separator: true },
+					{ label: 'Properties', action: () => openMailInfoWindow(message) }
 				]);
 			});
 
