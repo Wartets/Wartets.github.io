@@ -122,6 +122,26 @@ window.mailData = {
 			return min + Math.floor(rng() * (max - min + 1));
 		}
 
+		function pickFloat(min, max, decimals, rng) {
+			const val = min + rng() * (max - min);
+			return val.toFixed(decimals);
+		}
+
+		function pickMultiple(array, count, rng) {
+			const clone = array.slice();
+			const result = [];
+			const n = Math.min(count, clone.length);
+			for (let i = 0; i < n; i++) {
+				const idx = Math.floor(rng() * clone.length);
+				result.push(clone.splice(idx, 1)[0]);
+			}
+			return result;
+		}
+
+		function formatHex(num, len) {
+			return num.toString(16).toUpperCase().padStart(len, "0");
+		}
+
 		function fill(template, vars) {
 			return template.replace(/\{(\w+)\}/g, (match, key) => (key in vars) ? String(vars[key]) : match);
 		}
@@ -156,727 +176,699 @@ window.mailData = {
 			}
 		}
 
-		const fallbackRepoNames = ["Lenia GPU Simulator", "N-Body-Simulation", "TikZ Generator", "Turbulence Simulation", "FDTD Wave Simulator", "Origami", "Molecule Builder"];
-		const fallbackPaperTitles = ["Rapport de stage MPQ-QITE", "Construction progressive du modèle standard", "Étude expérimentale du lasso", "Probabilités des galettes des rois"];
+		const fallbackRepoNames = [
+			"Lenia GPU Continuous Automata",
+			"Symplectic N-Body Integrator",
+			"2D Navier-Stokes Spectral Solver",
+			"FDTD Electromagnetic Waveguide Simulator",
+			"TikZ Physics Quantum Circuit Exporter",
+			"Ising Model MCMC Critical Exponent Engine",
+			"Rayleigh-Benard Convection Spectral Analyzer",
+			"WebGPU Particle Vortex Simulator",
+			"Diffraction Pattern Wavefront Synthesizer",
+			"Origami Metric Tensor Deformation Engine"
+		];
+
+		const fallbackPaperTitles = [
+			"Rapport de stage MPQ-QITE : Sources de photons intriques",
+			"Construction progressive du modele standard en theorie quantique des champs",
+			"Symplectic geometry and invariant tori in chaotic Hamiltonian dynamics",
+			"Topological defects in two-dimensional continuous cellular automata",
+			"Numerical investigation of turbulence cascades in forced 2D Navier-Stokes flows",
+			"Etude experimentale des etats de Bell dans un guide d'onde non-lineaire"
+		];
 
 		const repoNames = getProjectRepoNames().length ? getProjectRepoNames() : fallbackRepoNames;
 		const paperTitles = getLibraryDocumentTitles().length ? getLibraryDocumentTitles() : fallbackPaperTitles;
 
-		const musicTrackTitles = ["Projet 27", "Projet 12", "Projet 8", "Dance", "Projet 2", "End of Chapter One", "Cell", "Hypocritical World's Nostalgia"];
-		const universityCourses = ["Mécanique Quantique", "Physique Statistique", "Électromagnétisme", "Analyse Numérique", "Optique Ondulatoire", "Thermodynamique", "Mécanique des Fluides"];
-		const associationEvents = ["la conférence de rentrée", "l'atelier de vulgarisation scientifique", "la sortie au Palais de la Découverte", "la réunion du bureau", "la soirée d'intégration", "le café-débat mensuel"];
-		const arxivSearchTerms = ["quantum computing", "cellular automata", "fluid dynamics", "N-body simulation", "condensed matter physics", "statistical mechanics", "entangled photon sources"];
-		const productivityDocumentNames = ["Notes de réunion", "Feuille de route Q3", "Cahier des charges", "Plan de présentation", "Suivi de projet", "Compte-rendu hebdomadaire"];
-		const slackChannels = ["general", "physique-projets", "dev-simulation", "annonces", "random"];
-		const redditSubreddits = ["Physics", "ProgrammerHumor", "generative", "math", "simulation"];
-		const kaggleDatasets = ["particle-collision-events", "exoplanet-transit-curves", "n-body-trajectories", "fluid-turbulence-samples"];
-		const dropboxFolderNames = ["Archives Simulation", "Documents Administratifs", "Backup Musique", "Notes de Cours"];
+		const physicsTopics = [
+			"cavity quantum electrodynamics",
+			"topological insulators and Majorana modes",
+			"non-equilibrium statistical mechanics",
+			"quantum tomography of Bell states",
+			"renormalization group flow in conformal field theories",
+			"symplectic integrators for relativistic geodesics",
+			"Bose-Einstein condensates in optical lattices",
+			"hydrodynamic quantum analog systems",
+			"path integrals on Riemannian manifolds",
+			"fractional quantum Hall edge states"
+		];
 
-		function unorderedListItems(items) {
-			return items.map(item => `<li>${item}</li>`).join("");
-		}
+		const simulationKernels = [
+			"compute_lenia_conv_k4<<<grid, threads, smem>>>(field_in, field_out, dt);",
+			"integrate_symplectic_yoshida4_step<<<dim3(64,64), 256>>>(q_pos, p_mom, mass, G_const, N_bodies);",
+			"spectral_navierstokes_fft2d_plan_execute(plan_c2c, vorticity_hat, streamfunction_hat);",
+			"fdtd_pml_update_ez_hx_hy<<<blocks, threads>>>(Ez, Hx, Hy, sigma_pml, dt_eps0);",
+			"ising_metropolis_checkerboard_sublattice<<<mesh, warp_size>>>(spin_lattice, temperature, rng_seed);"
+		];
+
+		const serverNodes = ["mesocentre-node04.cluster.u-paris.fr", "mpq-compute-node12.local", "inria-grid5000-talence-08", "lab-hpc-node01.in2p3.fr"];
+		const instruments = ["Oxford Triton 200 Dilution Refrigerator", "Thorlabs Octavius Femtosecond Titanium:Sapphire Laser", "PicoQuant HydraHarp 400 TCSPC Module", "Andor iXon Ultra 888 EMCCD Camera", "Keysight N5183B MXG Microwave Analog Signal Generator"];
+		const audioTracks = ["Phase Transition in D Minor", "Projet 27 (Fourier Resynthesis)", "Continuous Lenia Oscillations", "Cavity QED Ambient Study", "Hypocritical World Nostalgia", "Projet 12 (Modular Patch)", "Entropy Drift in C Major"];
+		const colloqHalls = ["Amphitheatre Buffon", "Amphitheatre Turing", "Salle Luc Valentin (MPQ)", "Amphi Hermite (Institut Henri Poincare)", "Auditorium Pierre-Gilles de Gennes"];
+		const academicReviewJournals = ["Physical Review Letters", "Journal of High Energy Physics", "Physical Review E", "Journal of Computational Physics", "Communications in Mathematical Physics", "Quantum Science and Technology"];
 
 		const categories = [
 			{
-				id: "development",
+				id: "highPerformanceComputing",
 				senders: [
-					{ name: "GitHub", address: "notifications@github.com" },
-					{ name: "GitLab", address: "notifications@gitlab.com" },
-					{ name: "Docker Hub", address: "noreply@docker.com" },
-					{ name: "npm", address: "support@npmjs.com" },
-					{ name: "Vercel", address: "notifications@vercel.com" },
-					{ name: "Netlify", address: "notifications@netlify.com" },
-					{ name: "Cloudflare", address: "notifications@cloudflare.com" },
-					{ name: "Stack Overflow", address: "noreply@stackoverflow.com" }
-				],
-				closings: [
-					"No action is required unless you want to review the changes yourself.",
-					"You can manage notification preferences for this repository at any time.",
-					"This is an automated message generated by your repository's activity feed.",
-					"Feel free to mute this repository if you no longer wish to receive these updates."
+					{ name: "Mesocentre Slurm Orchestrator", address: "slurm-daemon@cluster.u-paris.fr" },
+					{ name: "NVIDIA Compute Telemetry", address: "alerts@developer.nvidia.com" },
+					{ name: "MPQ Lab Computing Cluster", address: "node-admin@mpq.univ-paris-diderot.fr" },
+					{ name: "Grid5000 Infrastructure", address: "operations@grid5000.fr" },
+					{ name: "Open Science Grid", address: "accounting@opensciencegrid.org" }
 				],
 				scenarios: [
 					(rng) => {
 						const repo = pick(repoNames, rng);
-						const count = pickInt(1, 9, rng);
+						const jobId = pickInt(1048200, 9948200, rng);
+						const node = pick(serverNodes, rng);
+						const runtimeSec = pickInt(4200, 86400, rng);
+						const hours = Math.floor(runtimeSec / 3600);
+						const mins = Math.floor((runtimeSec % 3600) / 60);
+						const vramGb = pickFloat(14.2, 78.4, 2, rng);
+						const tflops = pickFloat(18.5, 142.0, 1, rng);
+						const residual = pickFloat(1.0, 9.9, 2, rng) + "e-" + pickInt(8, 14, rng);
 						return {
-							subject: fill("New issue opened on {repo}", { repo }),
-							paragraphs: [
-								fill("A new issue has just been opened on the repository <strong>{repo}</strong>.", { repo }),
-								fill("There {verb} currently {count} open issue{plural} awaiting triage on this repository.", { count, verb: count === 1 ? "is" : "are", plural: count === 1 ? "" : "s" })
-							]
+							subject: fill("[SLURM] Job {jobId} COMPLETED: {repo}", { jobId, repo }),
+							body: `
+								<p>Your queued batch job on cluster node <code>${node}</code> has finished executing with return code <code>0 (EXIT_SUCCESS)</code>.</p>
+								<div style="background: #f4f6f8; border: 1px solid #d0d7de; border-radius: 4px; padding: 12px; margin: 12px 0; font-family: Consolas, monospace; font-size: 12px; line-height: 1.6;">
+									<div><strong>Job ID:</strong> ${jobId}</div>
+									<div><strong>Target Task:</strong> ${repo} (CUDA compute capability 8.9 / SM_89)</div>
+									<div><strong>Partition:</strong> gpu_a100_long</div>
+									<div><strong>Elapsed Wallclock:</strong> ${hours}h ${mins}m ${(runtimeSec % 60)}s</div>
+									<div><strong>Peak Device Memory:</strong> ${vramGb} GiB / 80.0 GiB</div>
+									<div><strong>Sustained FP32 Throughput:</strong> ${tflops} TFLOPS</div>
+									<div><strong>Final Hamiltonian L2 Residual:</strong> &Delta;H/H<sub>0</sub> = ${residual}</div>
+									<div><strong>Output Checkpoint:</strong> /mnt/storage/checkpoints/run_${jobId}.h5 (Integrity checksum verified)</div>
+								</div>
+								<p>Log files and binary checkpoint tensors have been synced to your local scratch directory. You can visualize the convergence graphs directly in the analytics dashboard.</p>
+								<p style="font-size: 11px; color: #666; margin-top: 16px;">This is an automated operational notification dispatched by the Slurm Workload Manager. No response is required.</p>
+							`
 						};
 					},
 					(rng) => {
 						const repo = pick(repoNames, rng);
-						const prNumber = pickInt(12, 348, rng);
+						const kernel = pick(simulationKernels, rng);
+						const errorAddr = "0x00007FFF" + formatHex(pickInt(0x100000, 0xFFFFFF, rng), 6);
+						const allocatedMb = pickInt(12400, 31800, rng);
 						return {
-							subject: fill("Pull request #{prNumber} merged into {repo}", { prNumber, repo }),
-							paragraphs: [
-								fill("Pull request #{prNumber} has been successfully merged into the main branch of <strong>{repo}</strong>.", { prNumber, repo }),
-								"All required checks passed before the merge was completed."
-							]
+							subject: fill("[CUDA OOM Alert] Kernel fault encountered in {repo}", { repo }),
+							body: `
+								<p>The GPU runtime monitor detected an unhandled device memory exception while executing the compute pipeline for <strong>${repo}</strong>.</p>
+								<div style="background: #fff8f7; border-left: 4px solid #cf222e; padding: 10px 14px; margin: 12px 0; font-family: Consolas, monospace; font-size: 12px;">
+									<div><strong style="color: #cf222e;">CUDA_ERROR_OUT_OF_MEMORY (Error Code 2)</strong></div>
+									<div>Failed allocation: 4096 &times; 4096 &times; 128 single-precision complex tensor (${allocatedMb} MiB requested)</div>
+									<div>Faulting execution pointer: ${errorAddr}</div>
+									<div>Kernel signature: <code>${kernel}</code></div>
+								</div>
+								<p>Recommended mitigation steps:</p>
+								<ul style="line-height: 1.5; font-size: 13px;">
+									<li>Enable domain decomposition and distribute the spatial grid across multiple GPU ranks using <code>NCCL</code> peer-to-peer transfers.</li>
+									<li>Switch internal spectral buffers from <code>Float64</code> to <code>Float32</code> mixed-precision FP16 Tensor Core arithmetic where numerical dissipation permits.</li>
+									<li>Activate gradient checkpointing or intermediate buffer reuse before launching the next epoch.</li>
+								</ul>
+								<p style="font-size: 11px; color: #666; margin-top: 16px;">Cluster Compute Telemetry Service &bull; Universite Paris Cite HPC Infrastructure</p>
+							`
 						};
 					},
 					(rng) => {
 						const repo = pick(repoNames, rng);
-						const count = pickInt(2, 47, rng);
+						const speedup = pickFloat(3.8, 14.6, 2, rng);
+						const openmpTime = pickFloat(124.5, 480.2, 1, rng);
+						const webgpuTime = (openmpTime / parseFloat(speedup)).toFixed(1);
 						return {
-							subject: fill("{count} new stargazers on {repo}", { count, repo }),
-							paragraphs: [
-								fill("Your repository <strong>{repo}</strong> gained {count} new stargazers this week.", { count, repo }),
-								"Keep up the momentum, your project is gaining visibility within the community."
-							]
-						};
-					},
-					(rng) => {
-						const repo = pick(repoNames, rng);
-						const versionMajor = pickInt(1, 4, rng);
-						const versionMinor = pickInt(0, 9, rng);
-						const versionPatch = pickInt(0, 9, rng);
-						return {
-							subject: fill("New release published: {repo} v{version}", { repo, version: `${versionMajor}.${versionMinor}.${versionPatch}` }),
-							paragraphs: [
-								fill("A new release of <strong>{repo}</strong> has just been published: version {version}.", { repo, version: `${versionMajor}.${versionMinor}.${versionPatch}` }),
-								"The changelog and release notes are available on the repository's Releases page."
-							]
-						};
-					},
-					(rng) => {
-						const repo = pick(repoNames, rng);
-						return {
-							subject: fill("Build failed: {repo} — action required", { repo }),
-							paragraphs: [
-								fill("The latest continuous integration build for <strong>{repo}</strong> has failed.", { repo }),
-								"Check the build logs to identify which step caused the failure before merging any further changes."
-							]
+							subject: fill("Scaling Benchmark: WebGPU vs OpenMP for {repo}", { repo }),
+							body: `
+								<p>The nightly automated benchmarking suite has completed execution for <strong>${repo}</strong>. A significant parallelization speedup has been recorded on the current hardware matrix.</p>
+								<table style="width: 100%; border-collapse: collapse; font-family: Consolas, monospace; font-size: 12px; margin: 12px 0;">
+									<thead>
+										<tr style="background: #eaeef2; text-align: left;">
+											<th style="padding: 6px 10px; border: 1px solid #d0d7de;">Backend Architecture</th>
+											<th style="padding: 6px 10px; border: 1px solid #d0d7de;">Grid Dimension</th>
+											<th style="padding: 6px 10px; border: 1px solid #d0d7de;">Execution Time</th>
+											<th style="padding: 6px 10px; border: 1px solid #d0d7de;">Speedup</th>
+										</tr>
+									</thead>
+									<tbody>
+										<tr>
+											<td style="padding: 6px 10px; border: 1px solid #d0d7de;">OpenMP (16 Threads, AVX-512)</td>
+											<td style="padding: 6px 10px; border: 1px solid #d0d7de;">2048 &times; 2048 &times; 64</td>
+											<td style="padding: 6px 10px; border: 1px solid #d0d7de;">${openmpTime} ms / step</td>
+											<td style="padding: 6px 10px; border: 1px solid #d0d7de;">1.00&times; (Baseline)</td>
+										</tr>
+										<tr style="background: #f6f8fa;">
+											<td style="padding: 6px 10px; border: 1px solid #d0d7de;">WebGPU Compute Shader (WGSL)</td>
+											<td style="padding: 6px 10px; border: 1px solid #d0d7de;">2048 &times; 2048 &times; 64</td>
+											<td style="padding: 6px 10px; border: 1px solid #d0d7de;">${webgpuTime} ms / step</td>
+											<td style="padding: 6px 10px; border: 1px solid #d0d7de; font-weight: bold; color: #1a7f37;">${speedup}&times;</td>
+										</tr>
+									</tbody>
+								</table>
+								<p>Memory bandwidth saturation reached 82.4% of peak theoretic throughput on the WebGPU pipeline without register spilling. Full profiler traces are available in the repository benchmarking artifacts.</p>
+								<p style="font-size: 11px; color: #666; margin-top: 16px;">Automated Benchmark Suite &bull; High Performance Computing Working Group</p>
+							`
 						};
 					}
 				]
 			},
 			{
-				id: "academic",
+				id: "quantumOpticsAndLab",
 				senders: [
-					{ name: "Université Paris Cité", address: "scolarite@u-paris.fr" },
-					{ name: "arXiv", address: "no-reply@arxiv.org" },
-					{ name: "ResearchGate", address: "updates@researchgate.net" },
-					{ name: "Nature", address: "alerts@nature.com" },
-					{ name: "IEEE", address: "noreply@ieee.org" },
-					{ name: "Springer", address: "alerts@springernature.com" },
-					{ name: "ScienceDirect", address: "alerts@sciencedirect.com" },
-					{ name: "CNRS Newsletter", address: "newsletter@cnrs.fr" },
-					{ name: "Overleaf", address: "notifications@overleaf.com" }
-				],
-				closings: [
-					"You can access the full details from your institutional account.",
-					"This alert was generated based on your saved search preferences.",
-					"No further action is required unless you wish to follow up.",
-					"You can adjust your notification settings for this topic at any time."
+					{ name: "MPQ Cryogenic Telemetry", address: "cryo-monitor@mpq.univ-paris-diderot.fr" },
+					{ name: "Photonics Laboratory DAQ", address: "spdc-instrumentation@optics-core.org" },
+					{ name: "Dilution Fridge Control Daemon", address: "fridge-telemetry@lab.paris7.fr" },
+					{ name: "Optical Cavity Piezo Monitor", address: "piezo-servolock@physics-hardware.local" }
 				],
 				scenarios: [
+					(rng) => {
+						const tempMk = pickFloat(11.2, 16.8, 2, rng);
+						const magnetTesla = pickFloat(0.0, 6.5, 3, rng);
+						const pHe3 = pickFloat(142.1, 168.4, 1, rng);
+						const instrument = pick(instruments, rng);
+						return {
+							subject: fill("[Lab Telemetry] Cryostat thermal equilibrium reached: {tempMk} mK", { tempMk }),
+							body: `
+								<p>The temperature stabilization servo on <strong>${instrument}</strong> reports nominal base temperature conditions in the mixing chamber.</p>
+								<div style="background: #f0f8ff; border: 1px solid #b6d4fe; border-radius: 4px; padding: 12px; margin: 12px 0; font-family: Consolas, monospace; font-size: 12px; line-height: 1.6;">
+									<div><strong>Mixing Chamber (RuO<sub>2</sub> sensor):</strong> ${tempMk} mK (&plusmn;0.04 mK drift / hr)</div>
+									<div><strong>Still Temperature:</strong> 742.8 mK</div>
+									<div><strong>4K Stage Pulse Tube:</strong> 3.21 K</div>
+									<div><strong>3He/4He Still Pressure:</strong> ${pHe3} mbar</div>
+									<div><strong>Superconducting Solenoid Field:</strong> B<sub>z</sub> = ${magnetTesla} T</div>
+									<div><strong>Cryopump Status:</strong> Regenerated, ultra-high vacuum &lt; 1.4 &times; 10<sup>-8</sup> mbar</div>
+								</div>
+								<p>Optical windows are clear and thermal shielding alignment shows zero parasitic infrared leakage. The system is ready for spectroscopy and quantum state tomography acquisitions.</p>
+								<p style="font-size: 11px; color: #666; margin-top: 16px;">Laboratoire Materiaux et Phenomenes Quantiques (MPQ) &bull; UMR 7162 CNRS / Universite Paris Cite</p>
+							`
+						};
+					},
+					(rng) => {
+						const coincidences = pickInt(12400, 48200, rng);
+						const g2Zero = pickFloat(0.012, 0.048, 3, rng);
+						const bellS = pickFloat(2.68, 2.82, 3, rng);
+						const crystal = pick(["Periodically Poled KTiOPO4 (PPKTP)", "Beta-Barium Borate (BBO)", "Periodically Poled Lithium Niobate (PPLN)"], rng);
+						return {
+							subject: fill("SPDC Entangled Photons: Bell Parameter S = {bellS}", { bellS }),
+							body: `
+								<p>The continuous acquisition run on the spontaneous parametric down-conversion (SPDC) source has completed single-photon coincidence counting.</p>
+								<div style="background: #fbf0ea; border-left: 4px solid #bc4c00; padding: 10px 14px; margin: 12px 0; font-family: Consolas, monospace; font-size: 12px;">
+									<div>Non-linear crystal: <strong>${crystal}</strong> (Type-II phase matching at 405 nm &rarr; 810 nm)</div>
+									<div>Coincidence rate: <strong>${coincidences} pairs / second</strong></div>
+									<div>Second-order correlation: <strong>g<sup>(2)</sup>(0) = ${g2Zero} &plusmn; 0.002</strong> (Strong photon anti-bunching)</div>
+									<div>CHSH Bell inequality parameter: <strong style="color: #0969da;">S = ${bellS} &plusmn; 0.014</strong></div>
+									<div>Violation threshold: S &gt; 2 (Exceeds classical limit by &gt; 48 &sigma;)</div>
+								</div>
+								<p>State tomography confirms polarization entanglement fidelity &ge; 98.4% with respect to the maximally entangled singlet state |&Psi;<sup>&minus;</sup>&rang; = (|HV&rang; &minus; |VH&rang;) / &radic;2.</p>
+								<p style="font-size: 11px; color: #666; margin-top: 16px;">Quantum Information &amp; Nanophotonics Division &bull; MPQ Paris</p>
+							`
+						};
+					},
+					(rng) => {
+						const driftMhz = pickFloat(3.4, 18.2, 1, rng);
+						const cavityFinesse = pickInt(42000, 98000, rng);
+						return {
+							subject: fill("[Notice] Optical cavity lock drift compensated (+{driftMhz} MHz)", { driftMhz }),
+							body: `
+								<p>The Pound-Drever-Hall (PDH) laser frequency stabilization servo engaged automatic piezoelectric correction to compensate for ambient thermal drift.</p>
+								<div style="background: #f6f8fa; border: 1px solid #d0d7de; padding: 10px; margin: 10px 0; font-family: Consolas, monospace; font-size: 12px;">
+									<div>High-finesse Fabry-Perot cavity: F = ${cavityFinesse}</div>
+									<div>Detected resonance offset: &Delta;&nu; = +${driftMhz} MHz</div>
+									<div>Piezo servo feedback: Corrected within 240 &mu;s</div>
+									<div>Residual laser linewidth: &delta;&nu; &lt; 1.2 kHz</div>
+								</div>
+								<p>Single-mode coupling into the polarization-maintaining fiber remains nominal at 84% transmission efficiency.</p>
+								<p style="font-size: 11px; color: #666; margin-top: 16px;">Instrumentation Automation Daemon &bull; Optics Lab Core</p>
+							`
+						};
+					}
+				]
+			},
+			{
+				id: "theoreticalPhysicsAndArxiv",
+				senders: [
+					{ name: "arXiv Mail Server", address: "no-reply@arxiv.org" },
+					{ name: "Physical Review Letters", address: "prl-editorial@aps.org" },
+					{ name: "Journal of Mathematical Physics", address: "jmp-alerts@aip.org" },
+					{ name: "CERN Document Server", address: "cds-alerts@cern.ch" },
+					{ name: "Springer Quantum", address: "alerts@springernature.com" }
+				],
+				scenarios: [
+					(rng) => {
+						const topic = pick(physicsTopics, rng);
+						const arxivId1 = "2608." + String(pickInt(10000, 99999, rng));
+						const arxivId2 = "2608." + String(pickInt(10000, 99999, rng));
+						return {
+							subject: fill("arXiv Daily Digest: quant-ph / math-ph / physics.comp-ph ({topic})", { topic }),
+							body: `
+								<p>Here is your tailored daily arXiv digest for <strong>quant-ph</strong>, <strong>math-ph</strong>, and <strong>physics.comp-ph</strong>:</p>
+								<div style="border-top: 1px solid #d0d7de; padding: 10px 0; margin-top: 8px;">
+									<div style="font-size: 13px; font-weight: bold; color: #0969da;">
+										<a href="https://arxiv.org/abs/${arxivId1}" style="text-decoration: none; color: #0969da;">arXiv:${arxivId1}</a>: Emergent Gauge Fields and Solitonic Modes in Extended ${topic}
+									</div>
+									<div style="font-size: 11px; color: #57606a; margin: 2px 0;">Authors: M. V. Berry, C. Rovelli, A. Aspect, et al.</div>
+									<p style="font-size: 12px; margin: 4px 0; color: #24292f;">We demonstrate an exact mapping between localized non-linear eigenmodes and topological soliton invariants under discrete conformal symmetry breaking...</p>
+								</div>
+								<div style="border-top: 1px solid #d0d7de; padding: 10px 0; margin-top: 8px;">
+									<div style="font-size: 13px; font-weight: bold; color: #0969da;">
+										<a href="https://arxiv.org/abs/${arxivId2}" style="text-decoration: none; color: #0969da;">arXiv:${arxivId2}</a>: High-Order Symplectic Geometric Integrators for Non-Abelian Gauge Systems
+									</div>
+									<div style="font-size: 11px; color: #57606a; margin: 2px 0;">Authors: J. M. Sanz-Serna, E. Hairer, C. Bossu Reaubourg, et al.</div>
+									<p style="font-size: 12px; margin: 4px 0; color: #24292f;">We present an explicit multi-stage geometric integration scheme that strictly preserves Casimir invariants and total phase space volume over long-time numerical simulations...</p>
+								</div>
+								<p style="font-size: 11px; color: #666; margin-top: 16px;">Delivered to your inbox based on your tracked subjects: [quant-ph, math-ph, physics.comp-ph, cond-mat.mes-hall].</p>
+							`
+						};
+					},
+					(rng) => {
+						const journal = pick(academicReviewJournals, rng);
+						const manuscriptId = "PRL-2026-" + pickInt(10480, 99480, rng);
+						const topic = pick(physicsTopics, rng);
+						return {
+							subject: fill("Invitation to Review for {journal} ({manuscriptId})", { journal, manuscriptId }),
+							body: `
+								<p>Dear Colleague,</p>
+								<p>We would like to invite you to act as a peer reviewer for a manuscript recently submitted to <strong>${journal}</strong>.</p>
+								<div style="background: #f6f8fa; border-left: 3px solid #0969da; padding: 10px 14px; margin: 12px 0; font-size: 12px;">
+									<div><strong>Manuscript ID:</strong> ${manuscriptId}</div>
+									<div><strong>Title:</strong> Exact Numerical Bounds and Spectral Signatures in ${topic}</div>
+									<div><strong>Track:</strong> Computational &amp; Theoretical Physics</div>
+								</div>
+								<p>Given your recent work and computational expertise in numerical simulations and symplectic solvers, your assessment would be invaluable to our editorial decision.</p>
+								<p>Please reply within 5 business days to confirm whether you are available to evaluate this submission (standard review period: 4 weeks).</p>
+								<p>Sincerely,<br>The Editorial Board<br><em>${journal}</em></p>
+							`
+						};
+					},
 					(rng) => {
 						const paper = pick(paperTitles, rng);
+						const citingJournal = pick(academicReviewJournals, rng);
+						const year = 2026;
 						return {
-							subject: fill("New citation alert for \"{paper}\"", { paper }),
-							paragraphs: [
-								fill("A recently published article has cited your work <strong>\"{paper}\"</strong>.", { paper }),
-								"You can view the citing publication and its context from your citation tracking dashboard."
-							]
+							subject: fill("Citation Alert: \"{paper}\" cited in {citingJournal}", { paper, citingJournal }),
+							body: `
+								<p>Your work has been cited in a new publication indexed in the academic literature database:</p>
+								<div style="background: #f0f6ff; border: 1px solid #c8e1ff; border-radius: 4px; padding: 12px; margin: 12px 0; font-size: 12px;">
+									<div style="color: #57606a;">Cited Document:</div>
+									<div style="font-weight: bold; margin-bottom: 8px;">"${paper}"</div>
+									<div style="color: #57606a;">Citing Article:</div>
+									<div style="font-style: italic;">"Advances in Non-Linear Hamiltonian Dynamics and Discrete Lattice Solitons", <em>${citingJournal}</em> (${year}).</div>
+									<div style="margin-top: 6px; font-family: monospace; font-size: 11px;">DOI: 10.1103/PhysRevLett.136.${pickInt(100000, 999999, rng)}</div>
+								</div>
+								<p>You can view full citation analytics and metrics from your institutional publication dashboard.</p>
+								<p style="font-size: 11px; color: #666; margin-top: 16px;">Citation Tracking Service &bull; Academic Metrics Network</p>
+							`
+						};
+					}
+				]
+			},
+			{
+				id: "astrophysicsAndCosmology",
+				senders: [
+					{ name: "LIGO-Virgo-KAGRA Alert Network", address: "alerts@emfollow.ligo.org" },
+					{ name: "NASA Exoplanet Archive", address: "nexsci-alerts@ipac.caltech.edu" },
+					{ name: "ESA Gaia Operations", address: "gaia-processing@cosmos.esa.int" },
+					{ name: "Strasbourg Astronomical Data Center", address: "simbad-bot@unistra.fr" }
+				],
+				scenarios: [
+					(rng) => {
+						const triggerId = "S2608" + formatHex(pickInt(0x1000, 0xFFFF, rng), 4);
+						const ra = pickFloat(12.0, 23.9, 2, rng);
+						const dec = (pickFloat(-65.0, 65.0, 2, rng) > 0 ? "+" : "") + pickFloat(-65.0, 65.0, 2, rng);
+						const far = "1.42e-" + pickInt(10, 16, rng);
+						const mass1 = pickFloat(28.4, 42.1, 1, rng);
+						const mass2 = pickFloat(19.2, 31.8, 1, rng);
+						return {
+							subject: fill("[GCN Circular] LVC Gravitational Wave Trigger Alert: {triggerId}", { triggerId }),
+							body: `
+								<p>The LIGO-Virgo-KAGRA detector network identified a candidate gravitational-wave transient event during real-time matched filtering analysis.</p>
+								<div style="background: #0d1117; color: #c9d1d9; border-radius: 4px; padding: 12px; margin: 12px 0; font-family: Consolas, monospace; font-size: 12px; line-height: 1.5;">
+									<div><span style="color: #79c0ff;">TRIGGER_ID:</span> ${triggerId}</div>
+									<div><span style="color: #79c0ff;">EVENT_CLASS:</span> Binary Black Hole (BBH) &gt; 99.8% probability</div>
+									<div><span style="color: #79c0ff;">FALSE_ALARM_RATE:</span> ${far} Hz (1 per &gt; 100,000 years)</div>
+									<div><span style="color: #79c0ff;">ESTIMATED_MASSES:</span> m1 &approx; ${mass1} M<sub>&odot;</sub>, m2 &approx; ${mass2} M<sub>&odot;</sub></div>
+									<div><span style="color: #79c0ff;">SKY_LOCALIZATION:</span> RA = ${ra}h, Dec = ${dec}&deg; (90% area: 18.4 deg<sup>2</sup>)</div>
+									<div><span style="color: #79c0ff;">LUMINOSITY_DISTANCE:</span> d<sub>L</sub> = ${(pickInt(420, 1850, rng))} Mpc (z &approx; 0.14)</div>
+								</div>
+								<p>Electromagnetic follow-up telescope coordinates and bayestar sky localization probability FITS maps are available on the GraceDB alert clearinghouse.</p>
+								<p style="font-size: 11px; color: #666; margin-top: 16px;">Gamma-ray Coordinates Network / LVC Scientific Collaboration</p>
+							`
 						};
 					},
 					(rng) => {
-						const term = pick(arxivSearchTerms, rng);
-						const count = pickInt(1, 6, rng);
+						const starName = "TIC-" + pickInt(1048200, 9984200, rng);
+						const period = pickFloat(1.42, 14.85, 3, rng);
+						const depthPpm = pickInt(240, 1820, rng);
+						const radiusEarth = pickFloat(0.85, 2.45, 2, rng);
 						return {
-							subject: fill("{count} new preprints matching \"{term}\"", { count, term }),
-							paragraphs: [
-								fill("{count} new preprint(s) matching your saved search \"{term}\" have been submitted to arXiv today.", { count, term }),
-								"You can review the abstracts directly from your personalized feed."
-							]
+							subject: fill("TESS Alert: New Exoplanet Candidate identified ({starName})", { starName }),
+							body: `
+								<p>The photometric transit search pipeline flagged a periodic dip in the light curve of host star <strong>${starName}</strong>.</p>
+								<div style="background: #f6f8fa; border: 1px solid #d0d7de; padding: 10px 14px; margin: 12px 0; font-family: Consolas, monospace; font-size: 12px; line-height: 1.6;">
+									<div>Host Star: <strong>${starName}</strong> (Spectral Type G2V, V = 10.4 mag)</div>
+									<div>Orbital Period: <strong>P = ${period} days</strong> (&plusmn;0.0001 d)</div>
+									<div>Transit Depth: <strong>&delta; = ${depthPpm} ppm</strong></div>
+									<div>Inferred Planetary Radius: <strong>R<sub>p</sub> = ${radiusEarth} R<sub>&oplus;</sub></strong></div>
+									<div>Equilibrium Temperature: <strong>T<sub>eq</sub> &approx; ${(pickInt(280, 540, rng))} K</strong></div>
+								</div>
+								<p>High-resolution radial velocity spectroscopy is scheduled with the ESPRESSO spectrograph on the VLT to constrain the companion planet's dynamical mass.</p>
+								<p style="font-size: 11px; color: #666; margin-top: 16px;">NASA Exoplanet Science Institute &bull; Caltech / IPAC</p>
+							`
+						};
+					}
+				]
+			},
+			{
+				id: "computationalMathematicsAndSimulation",
+				senders: [
+					{ name: "Julia Computing Ecosystem", address: "notifications@julialang.org" },
+					{ name: "Scientific Machine Learning (SciML)", address: "benchmarks@sciml.ai" },
+					{ name: "Wolfram Research MathKernel", address: "kernel-daemon@wolfram.com" },
+					{ name: "OpenBLAS Core Team", address: "dev@openblas.net" }
+				],
+				scenarios: [
+					(rng) => {
+						const repo = pick(repoNames, rng);
+						const steps = pickInt(10, 100, rng) * 1000000;
+						const energyDrift = "1." + pickInt(10, 99, rng) + "e-" + pickInt(12, 16, rng);
+						const angularMomentumDrift = "3." + pickInt(10, 99, rng) + "e-" + pickInt(14, 18, rng);
+						return {
+							subject: fill("Symplectic Conservation Verification: {repo}", { repo }),
+							body: `
+								<p>The long-time numerical stability verification completed over <strong>${steps.toLocaleString()}</strong> integration steps for <strong>${repo}</strong>.</p>
+								<div style="background: #f6f8fa; border: 1px solid #d0d7de; border-radius: 4px; padding: 12px; margin: 12px 0; font-family: Consolas, monospace; font-size: 12px; line-height: 1.6;">
+									<div><strong>Integrator Scheme:</strong> 4th-Order Symplectic Partitioned Runge-Kutta (Yoshida / Forest-Ruth)</div>
+									<div><strong>Phase Space Dimension:</strong> 6N (N = ${(pickInt(3, 12, rng))} bodies)</div>
+									<div><strong>Relative Energy Drift:</strong> |&Delta;E / E<sub>0</sub>| = ${energyDrift}</div>
+									<div><strong>Angular Momentum Invariant:</strong> |&Delta;L / L<sub>0</sub>| = ${angularMomentumDrift}</div>
+									<div><strong>Poincare Map Crossings:</strong> Non-ergodic invariant KAM tori confirmed intact.</div>
+								</div>
+								<p>No secular drift was observed in the first integrals of motion, confirming strict preservation of the symplectic 2-form &omega; = &sum; dp<sub>i</sub> &and; dq<sub>i</sub>.</p>
+								<p style="font-size: 11px; color: #666; margin-top: 16px;">SciML DifferentialEquations.jl Benchmarking Infrastructure</p>
+							`
+						};
+					},
+					(rng) => {
+						const repo = pick(repoNames, rng);
+						const resolution = pick(["1024x1024", "2048x2048", "4096x4096"], rng);
+						const reynolds = pickInt(12000, 65000, rng);
+						return {
+							subject: fill("Spectral Navier-Stokes Solver: Enstrophy Cascade (Re = {reynolds})", { reynolds }),
+							body: `
+								<p>The pseudo-spectral 2D turbulence solver reached statistical steady-state for <strong>${repo}</strong> on a spatial resolution grid of <strong>${resolution}</strong>.</p>
+								<div style="background: #eef9ff; border: 1px solid #b6e3ff; padding: 10px 14px; margin: 12px 0; font-family: Consolas, monospace; font-size: 12px;">
+									<div>Reynolds Number: <strong>Re = ${reynolds}</strong></div>
+									<div>Energy Spectrum Slope: <strong>E(k) &prop; k<sup>&minus;3.04</sup></strong> (Matches Kraichnan enstrophy cascade theory)</div>
+									<div>Dealiasing Algorithm: <strong>2/3-rule Fourier truncation filter</strong></div>
+									<div>Vorticity Filaments: Stable vortex mergers observed in physical domain</div>
+								</div>
+								<p>Raw binary fields and kinetic energy spectrum power-law fits have been serialized to the project directory.</p>
+								<p style="font-size: 11px; color: #666; margin-top: 16px;">Computational Fluid Dynamics &amp; Spectral Methods Group</p>
+							`
+						};
+					}
+				]
+			},
+			{
+				id: "softwareDevelopmentAndTooling",
+				senders: [
+					{ name: "GitHub Actions", address: "notifications@github.com" },
+					{ name: "Rust Crates Registry", address: "crates-admin@rust-lang.org" },
+					{ name: "WebGPU Working Group", address: "gpuweb-tracker@w3.org" },
+					{ name: "LLVM Buildbot", address: "llvm-ci@llvm.org" }
+				],
+				scenarios: [
+					(rng) => {
+						const repo = pick(repoNames, rng);
+						const prNum = pickInt(14, 280, rng);
+						const contributor = pick(["quant-physicist-42", "alex-wavefront", "simd-optimizer", "julia-numerics-fan"], rng);
+						return {
+							subject: fill("[{repo}] Pull Request #{prNum}: Vectorized AVX-512 & WebGPU backend", { repo, prNum }),
+							body: `
+								<p>A new pull request was submitted on <strong>${repo}</strong> by <code>@${contributor}</code>:</p>
+								<div style="background: #f6f8fa; border: 1px solid #d0d7de; border-radius: 6px; padding: 12px; margin: 12px 0;">
+									<div style="font-weight: bold; font-size: 13px; margin-bottom: 6px;">PR #${prNum}: Implement direct WebGPU buffer mapping and AVX-512 FMA vector intrinsics</div>
+									<p style="font-size: 12px; margin: 0; color: #57606a;">"This patch replaces the naive scalar loop with explicit SIMD intrinsics and adds an asynchronous compute pipeline descriptor for modern WebGPU hardware adapters. Benchmark shows ~4.2x speedup on large spatial domains."</p>
+								</div>
+								<div style="font-family: monospace; font-size: 11px; color: #1a7f37;">&check; All continuous integration tests passed (4 targets, 0 errors, 0 memory leaks).</div>
+								<p style="margin-top: 12px;">You can review, comment, or merge this pull request from the repository management interface.</p>
+								<p style="font-size: 11px; color: #666; margin-top: 16px;">GitHub Notifications &bull; ${repo}</p>
+							`
+						};
+					},
+					(rng) => {
+						const repo = pick(repoNames, rng);
+						const vMajor = pickInt(1, 3, rng);
+						const vMinor = pickInt(0, 9, rng);
+						const vPatch = pickInt(0, 12, rng);
+						const version = `${vMajor}.${vMinor}.${vPatch}`;
+						return {
+							subject: fill("Release published: {repo} v{version}", { repo, version }),
+							body: `
+								<p>Version <strong>v${version}</strong> of <strong>${repo}</strong> has been tagged and compiled successfully across all release architectures.</p>
+								<div style="background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 4px; padding: 10px 14px; margin: 12px 0; font-size: 12px;">
+									<div style="font-weight: bold; color: #166534; margin-bottom: 4px;">Changelog Highlights:</div>
+									<ul style="margin: 0; padding-left: 20px; line-height: 1.5;">
+										<li>Optimized continuous kernel convolutions with shared memory caching.</li>
+										<li>Export high-resolution simulation state to VTK / HDF5 / PNG tensor slices.</li>
+										<li>Integrated interactive parameter tuning interface with real-time spectrum visualization.</li>
+									</ul>
+								</div>
+								<p>Binaries and WebAssembly build artifacts have been published to the content delivery network.</p>
+								<p style="font-size: 11px; color: #666; margin-top: 16px;">Automated Release Bot &bull; Open Source Software Registry</p>
+							`
+						};
+					}
+				]
+			},
+			{
+				id: "academicAndUniversity",
+				senders: [
+					{ name: "UFR de Physique - Universite Paris Cite", address: "scolarite.physique@u-paris.fr" },
+					{ name: "Laboratoire MPQ Direction", address: "direction@mpq.univ-paris-diderot.fr" },
+					{ name: "Overleaf Academic LaTeX", address: "notifications@overleaf.com" },
+					{ name: "Bibliotheque Universitaire Grands Moulins", address: "bu.grandsmoulins@u-paris.fr" }
+				],
+				scenarios: [
+					(rng) => {
+						const hall = pick(colloqHalls, rng);
+						const speaker = pick(["Prof. Alain Aspect", "Prof. Serge Haroche", "Dr. Sara Ducci", "Prof. Jean Dalibard", "Prof. Carlo Rovelli"], rng);
+						const topic = pick(physicsTopics, rng);
+						const time = pick(["11:00", "14:00", "16:30"], rng);
+						return {
+							subject: fill("Colloque de Physique: {speaker} on {topic}", { speaker, topic }),
+							body: `
+								<p>Bonjour,</p>
+								<p>The Physics Department of Universite Paris Cite and Laboratoire MPQ are pleased to invite you to the upcoming departmental colloquium:</p>
+								<div style="background: #fdf6ec; border-left: 4px solid #e6a23c; padding: 12px 16px; margin: 12px 0;">
+									<div style="font-size: 14px; font-weight: bold; color: #303133;">"${topic}: From Fundamental Quantum Principles to Modern Experimental Realizations"</div>
+									<div style="margin-top: 6px; font-size: 12px; color: #606266;">Speaker: <strong>${speaker}</strong></div>
+									<div style="font-size: 12px; color: #606266;">Location: <strong>${hall}</strong>, Batiment Condorcet / Halle aux Farines</div>
+									<div style="font-size: 12px; color: #606266;">Schedule: Thursday at <strong>${time}</strong> (followed by discussion and coffee)</div>
+								</div>
+								<p>Master students, PhD candidates, and laboratory researchers are warmly encouraged to attend.</p>
+								<p>Cordialement,<br>Le Secretariat General de l'UFR de Physique<br>Universite Paris Cite</p>
+							`
 						};
 					},
 					(rng) => {
 						const paper = pick(paperTitles, rng);
+						const pages = pickInt(18, 48, rng);
+						const bibEntries = pickInt(34, 82, rng);
 						return {
-							subject: fill("Vous avez été invité à collaborer sur \"{paper}\"", { paper }),
-							paragraphs: [
-								fill("Un collaborateur vous a ajouté au projet Overleaf <strong>\"{paper}\"</strong>.", { paper }),
-								"Vous pouvez désormais éditer ce document en temps réel avec les autres membres du projet."
-							]
+							subject: fill("[Overleaf] LaTeX document compiled: \"{paper}\"", { paper }),
+							body: `
+								<p>Your collaborative project <strong>"${paper}"</strong> has compiled successfully on the TeX Live 2026 rendering engine.</p>
+								<div style="background: #f6f8fa; border: 1px solid #d0d7de; border-radius: 4px; padding: 10px 14px; margin: 12px 0; font-family: Consolas, monospace; font-size: 12px; line-height: 1.5;">
+									<div>Document Class: revtex4-2 / aps (Two-column format)</div>
+									<div>Page count: ${pages} pages (${bibEntries} BibTeX references formatted)</div>
+									<div>TikZ Diagrams: 14 vectorized vector graphics rendered via PGF/TikZ</div>
+									<div>Compilation Status: 0 Errors, 0 Fatal Warnings, SyncTeX mapped</div>
+								</div>
+								<p>All collaborators can now view the latest synchronized PDF draft in the editor workspace.</p>
+								<p style="font-size: 11px; color: #666; margin-top: 16px;">Overleaf Collaborative Academic Publishing</p>
+							`
 						};
 					},
 					(rng) => {
-						const course = pick(universityCourses, rng);
+						const book = pick([
+							"Landau & Lifshitz - Course of Theoretical Physics: Quantum Mechanics (Vol. 3)",
+							"Cohen-Tannoudji, Diu & Laloe - Quantum Mechanics (Volumes I & II)",
+							"J. D. Jackson - Classical Electrodynamics (3rd Edition)",
+							"S. Weinberg - The Quantum Theory of Fields (Vol. 1: Foundations)",
+							"Arnold - Mathematical Methods of Classical Mechanics",
+							"Pathria & Beale - Statistical Mechanics"
+						], rng);
+						const barcode = "BU-GM-" + pickInt(104820, 998420, rng);
 						return {
-							subject: fill("Rappel : contrôle continu de {course}", { course }),
-							paragraphs: [
-								fill("Le contrôle continu de l'UE <strong>{course}</strong> aura lieu prochainement.", { course }),
-								"Consultez votre emploi du temps pour connaître la date, l'heure et la salle exactes."
-							]
-						};
-					},
-					(rng) => {
-						const paper = pick(paperTitles, rng);
-						return {
-							subject: fill("Your submission \"{paper}\" is under review", { paper }),
-							paragraphs: [
-								fill("Your manuscript <strong>\"{paper}\"</strong> has entered the peer review stage.", { paper }),
-								"Reviewers typically respond within four to six weeks. You will be notified as soon as a decision is made."
-							]
+							subject: fill("BU Grands Moulins: Loan renewal confirmed ({barcode})", { barcode }),
+							body: `
+								<p>Bonjour Colin,</p>
+								<p>Your library loan has been successfully extended for the following treatise:</p>
+								<div style="background: #f0f4f8; border: 1px solid #d9e2ec; border-radius: 4px; padding: 12px; margin: 12px 0; font-size: 12px;">
+									<div><strong>Title:</strong> ${book}</div>
+									<div><strong>Barcode Identifier:</strong> ${barcode}</div>
+									<div><strong>Location:</strong> Bibliotheque Universitaire des Grands Moulins (Etage 4 - Sciences &amp; Physique)</div>
+									<div><strong>New Return Deadline:</strong> 30 days from current date</div>
+								</div>
+								<p>You can manage all your active loans and reservations directly from your student portal.</p>
+								<p>Cordialement,<br>Service du Pret &bull; Bibliotheque des Grands Moulins</p>
+							`
 						};
 					}
 				]
 			},
 			{
-				id: "music",
+				id: "digitalSignalProcessingAndAudio",
 				senders: [
-					{ name: "SoundCloud", address: "no-reply@soundcloud.com" },
-					{ name: "YouTube", address: "no-reply@youtube.com" }
-				],
-				closings: [
-					"Keep creating, your audience is growing steadily.",
-					"You can view the full analytics breakdown from your creator dashboard.",
-					"This summary is generated automatically at the end of each week."
+					{ name: "SoundCloud Insights", address: "stats@soundcloud.com" },
+					{ name: "Audio Engineering Society", address: "aes-digest@aes.org" },
+					{ name: "Faust DSP Compiler", address: "compiler@faust.grame.fr" },
+					{ name: "WebAudio Developer Network", address: "dsp@webaudio-community.org" }
 				],
 				scenarios: [
 					(rng) => {
-						const track = pick(musicTrackTitles, rng);
-						const plays = pickInt(230, 4800, rng);
+						const track = pick(audioTracks, rng);
+						const plays = pickInt(840, 6800, rng);
+						const likes = pickInt(42, 380, rng);
+						const reposts = pickInt(12, 94, rng);
+						const topCity = pick(["Paris", "Berlin", "London", "Tokyo", "Montreal"], rng);
 						return {
-							subject: "Your weekly stats are here",
-							paragraphs: [
-								fill("Your track <strong>\"{track}\"</strong> received {plays} plays this week.", { track, plays }),
-								"That is a solid increase compared to the previous week."
-							]
+							subject: fill("SoundCloud Weekly Report: {plays} streams for \"{track}\"", { plays, track }),
+							body: `
+								<p>Your electronic and ambient compositions gained substantial listening traction over the past week.</p>
+								<div style="background: #fff8f5; border: 1px solid #fed7c2; border-radius: 6px; padding: 14px; margin: 12px 0;">
+									<div style="font-size: 14px; font-weight: bold; color: #ff5500; margin-bottom: 8px;">"${track}"</div>
+									<div style="display: flex; gap: 20px; font-size: 12px; font-family: monospace;">
+										<div><strong>Plays:</strong> ${plays.toLocaleString()}</div>
+										<div><strong>Likes:</strong> ${likes}</div>
+										<div><strong>Reposts:</strong> ${reposts}</div>
+									</div>
+									<div style="margin-top: 8px; font-size: 12px; color: #57606a;">Top listener hub: <strong>${topCity}</strong> (54% completion rate)</div>
+								</div>
+								<p>Keep sharing your experimental synthesis and algorithmic music projects with your audience.</p>
+								<p style="font-size: 11px; color: #666; margin-top: 16px;">SoundCloud Creator Community Insights</p>
+							`
 						};
 					},
 					(rng) => {
-						const track = pick(musicTrackTitles, rng);
+						const track = pick(audioTracks, rng);
+						const sampleRate = pick([44100, 48000, 96000], rng);
+						const latency = pickFloat(1.2, 3.8, 2, rng);
 						return {
-							subject: fill("New comment on \"{track}\"", { track }),
-							paragraphs: [
-								fill("Someone left a new comment on your track <strong>\"{track}\"</strong>.", { track }),
-								"Reply to keep the conversation going with your listeners."
-							]
-						};
-					},
-					(rng) => {
-						const track = pick(musicTrackTitles, rng);
-						const subs = pickInt(3, 42, rng);
-						return {
-							subject: fill("{subs} new followers this week", { subs }),
-							paragraphs: [
-								fill("You gained {subs} new followers this week, many of whom discovered you through <strong>\"{track}\"</strong>.", { subs, track }),
-								"Consider sharing your latest release to keep the momentum going."
-							]
+							subject: fill("Faust DSP: Real-time synthesizer engine compiled for {track}", { track }),
+							body: `
+								<p>The real-time polyphonic audio DSP engine for <strong>${track}</strong> has been transpiled from Faust code to optimized C++ / WebAssembly.</p>
+								<div style="background: #f6f8fa; border: 1px solid #d0d7de; padding: 10px 14px; margin: 12px 0; font-family: Consolas, monospace; font-size: 12px; line-height: 1.5;">
+									<div>Audio Sample Rate: ${sampleRate} Hz (32-bit floating point)</div>
+									<div>Buffer Size: 128 samples per audio quantum</div>
+									<div>Round-trip Audio Latency: <strong>${latency} ms</strong></div>
+									<div>Filter Topology: Non-linear Zero-Delay Feedback (ZDF) 4-pole Ladder Filter</div>
+									<div>CPU Load per Voice: &lt; 0.18% of single core</div>
+								</div>
+								<p>Zero buffer underruns were detected during the stress testing cycle.</p>
+								<p style="font-size: 11px; color: #666; margin-top: 16px;">Faust Functional Audio Stream DSP Architecture &bull; GRAME</p>
+							`
 						};
 					}
 				]
 			},
 			{
-				id: "productivity",
+				id: "scientificHistoryAndCulture",
 				senders: [
-					{ name: "Notion", address: "team@notion.so" },
-					{ name: "Trello", address: "noreply@trello.com" },
-					{ name: "Slack", address: "team@slack.com" },
-					{ name: "Figma", address: "notifications@figma.com" },
-					{ name: "Discord", address: "noreply@discord.com" },
-					{ name: "Dropbox", address: "no-reply@dropbox.com" },
-					{ name: "Google Drive", address: "drive-shares-noreply@google.com" },
-					{ name: "Google Calendar", address: "calendar-notification@google.com" }
-				],
-				closings: [
-					"You can adjust how often you receive these notifications in your settings.",
-					"This is an automated notification and does not require a reply.",
-					"Open the application to see the full context of this activity."
+					{ name: "Institut Henri Poincare", address: "annonces@ihp.fr" },
+					{ name: "Royal Society Publishing", address: "archives@royalsocietypublishing.org" },
+					{ name: "History of Physics Forum", address: "bulletin@physics-history.org" }
 				],
 				scenarios: [
 					(rng) => {
-						const doc = pick(productivityDocumentNames, rng);
+						const subjectMatter = pick([
+							"Poincare's Original Manuscripts on the Three-Body Problem (1889)",
+							"The Centenary of the 1927 Solvay Conference on Electrons and Photons",
+							"Maxwell's Mechanical Ether Models and the Genesis of Displacement Current",
+							"Boltzmann's H-Theorem and the Microscopic Foundations of Irreversibility",
+							"Euler-Lagrange Variational Principles across Classical and Geometric Optics"
+						], rng);
 						return {
-							subject: fill("A document was shared with you: \"{doc}\"", { doc }),
-							paragraphs: [
-								fill("A collaborator shared the document <strong>\"{doc}\"</strong> with you.", { doc }),
-								"You now have access to view and comment on it."
-							]
-						};
-					},
-					(rng) => {
-						const doc = pick(productivityDocumentNames, rng);
-						return {
-							subject: fill("You were assigned a task in \"{doc}\"", { doc }),
-							paragraphs: [
-								fill("You have been assigned a new task within the board <strong>\"{doc}\"</strong>.", { doc }),
-								"Check the due date and update the task status once you begin working on it."
-							]
-						};
-					},
-					(rng) => {
-						const channel = pick(slackChannels, rng);
-						return {
-							subject: fill("You were mentioned in #{channel}", { channel }),
-							paragraphs: [
-								fill("You were mentioned in a message posted to #<strong>{channel}</strong>.", { channel }),
-								"Open the conversation to see the full context and reply if needed."
-							]
-						};
-					},
-					(rng) => {
-						const folder = pick(dropboxFolderNames, rng);
-						return {
-							subject: fill("A folder was shared with you: \"{folder}\"", { folder }),
-							paragraphs: [
-								fill("Access to the folder <strong>\"{folder}\"</strong> has been shared with your account.", { folder }),
-								"You can now sync its contents to your local devices."
-							]
-						};
-					},
-					(rng) => {
-						const doc = pick(productivityDocumentNames, rng);
-						const minutesBefore = pick([15, 30, 60], rng);
-						return {
-							subject: fill("Reminder: meeting starting in {minutesBefore} minutes", { minutesBefore }),
-							paragraphs: [
-								fill("Your scheduled meeting related to <strong>\"{doc}\"</strong> starts in {minutesBefore} minutes.", { doc, minutesBefore }),
-								"Make sure you have reviewed the agenda before joining."
-							]
+							subject: fill("Archives & History: Digitized collection on {subjectMatter}", { subjectMatter }),
+							body: `
+								<p>The Historical Archives Department has published an open-access digitized dossier:</p>
+								<div style="background: #fbfbf8; border: 1px solid #e2e0d8; border-radius: 4px; padding: 12px; margin: 12px 0;">
+									<div style="font-size: 13px; font-weight: bold; color: #4a4438; margin-bottom: 6px;">${subjectMatter}</div>
+									<p style="font-size: 12px; color: #5a5448; margin: 0; line-height: 1.5;">
+										Featuring ultra-high resolution manuscript scans, transcribed lecture notes, and contemporary analytical commentaries on the evolution of mathematical and theoretical physics concepts.
+									</p>
+								</div>
+								<p>All high-resolution facsimile plates are available for academic research and study in the library public repository.</p>
+								<p style="font-size: 11px; color: #666; margin-top: 16px;">Bibliotheque Henri Poincare &bull; Institut Henri Poincare (IHP), Paris</p>
+							`
 						};
 					}
 				]
 			},
 			{
-				id: "security",
+				id: "infrastructureAndHomelab",
 				senders: [
-					{ name: "Microsoft", address: "account-security@microsoft.com" },
-					{ name: "Google", address: "accounts-noreply@google.com" },
-					{ name: "Windows Update", address: "update@microsoft.com" }
-				],
-				closings: [
-					"If this was not you, please reset your password immediately and enable two-factor authentication.",
-					"This is an automated security notification.",
-					"No further action is required if you recognize this activity."
+					{ name: "ZFS Storage Daemon", address: "zfs-monitor@storage.wartets.local" },
+					{ name: "Private Git Service", address: "git-admin@wartets.local" },
+					{ name: "WireGuard VPN Gateway", address: "gateway@vpn.wartets.net" }
 				],
 				scenarios: [
 					(rng) => {
-						const device = pick(["Windows PC", "Android device", "MacBook", "iPhone"], rng);
+						const scannedTb = pickFloat(2.8, 8.4, 2, rng);
+						const rateMB = pickInt(380, 720, rng);
+						const hours = pickInt(1, 4, rng);
+						const mins = pickInt(10, 55, rng);
 						return {
-							subject: "New sign-in detected on your account",
-							paragraphs: [
-								fill("A new sign-in to your account was detected from a <strong>{device}</strong>.", { device }),
-								"If you recognize this device, no action is needed."
-							]
+							subject: "ZFS Pool Status: Scrub finished on pool 'tank0' (0 errors)",
+							body: `
+								<p>The automated bi-weekly data integrity scrub completed successfully on pool <code>tank0</code>.</p>
+								<div style="background: #f6f8fa; border: 1px solid #d0d7de; border-radius: 4px; padding: 10px 14px; margin: 12px 0; font-family: Consolas, monospace; font-size: 12px; line-height: 1.5;">
+									<div>Pool State: <strong>ONLINE</strong></div>
+									<div>Scrubbed: ${scannedTb} TiB in ${hours}h ${mins}m with an average throughput of ${rateMB} MB/s</div>
+									<div>Read Errors: <strong>0</strong></div>
+									<div>Write Errors: <strong>0</strong></div>
+									<div>Checksum Inconsistencies: <strong>0 (Clean parity)</strong></div>
+									<div>Datasets: /tank0/research, /tank0/simulations, /tank0/archives</div>
+								</div>
+								<p>All cryptographic Fletcher4 checksums match block allocation tables across the mirror vdev array.</p>
+								<p style="font-size: 11px; color: #666; margin-top: 16px;">OpenZFS Storage Subsystem &bull; Homelab Node</p>
+							`
 						};
 					},
 					(rng) => {
+						const repo = pick(repoNames, rng);
+						const hash = formatHex(pickInt(0x1000000, 0xFFFFFFF, rng), 7).toLowerCase();
 						return {
-							subject: "Your password was recently changed",
-							paragraphs: [
-								"This is a confirmation that the password associated with your account was changed successfully.",
-								"If you did not make this change, please contact support right away."
-							]
-						};
-					},
-					(rng) => {
-						const versionBuild = pickInt(19041, 26100, rng);
-						return {
-							subject: "Windows Update is ready to install",
-							paragraphs: [
-								fill("A cumulative update (build {versionBuild}) is ready to be installed on your device.", { versionBuild }),
-								"Restart your computer to complete the installation."
-							]
-						};
-					}
-				]
-			},
-			{
-				id: "community",
-				senders: [
-					{ name: "Reddit", address: "notifications@reddit.com" },
-					{ name: "Medium", address: "hello@medium.com" },
-					{ name: "Kaggle", address: "notifications@kaggle.com" }
-				],
-				closings: [
-					"You can manage what you get notified about from your account preferences.",
-					"This digest was generated based on your recent activity.",
-					"Engage with the community to keep the discussion going."
-				],
-				scenarios: [
-					(rng) => {
-						const subreddit = pick(redditSubreddits, rng);
-						return {
-							subject: fill("New reply to your post in r/{subreddit}", { subreddit }),
-							paragraphs: [
-								fill("Someone replied to your post in <strong>r/{subreddit}</strong>.", { subreddit }),
-								"Join the discussion by replying back."
-							]
-						};
-					},
-					(rng) => {
-						const readers = pickInt(12, 340, rng);
-						return {
-							subject: "Your story has new readers",
-							paragraphs: [
-								fill("Your latest story on Medium reached {readers} new readers this week.", { readers }),
-								"Consider publishing a follow-up to maintain engagement."
-							]
-						};
-					},
-					(rng) => {
-						const dataset = pick(kaggleDatasets, rng);
-						return {
-							subject: fill("New version available for \"{dataset}\"", { dataset }),
-							paragraphs: [
-								fill("A new version of the dataset <strong>\"{dataset}\"</strong> you follow has just been published.", { dataset }),
-								"Download the updated version to keep your analysis current."
-							]
-						};
-					}
-				]
-			},
-			{
-				id: "spaceScience",
-				senders: [
-					{ name: "NASA", address: "nasa@newsletters.nasa.gov" },
-					{ name: "ESA", address: "news@esa.int" },
-					{ name: "Météo France", address: "alerts@meteo-france.fr" }
-				],
-				closings: [
-					"This is an informational message and does not require a reply.",
-					"Stay tuned for further updates as the situation develops.",
-					"You can unsubscribe from these alerts at any time."
-				],
-				scenarios: [
-					(rng) => {
-						const mission = pick(["Artemis II", "Europa Clipper", "James Webb Space Telescope", "Perseverance Rover"], rng);
-						return {
-							subject: fill("Mission update: {mission}", { mission }),
-							paragraphs: [
-								fill("A new status update has been published for the <strong>{mission}</strong> mission.", { mission }),
-								"The full report is available on the mission's official page."
-							]
-						};
-					},
-					(rng) => {
-						const mission = pick(["Ariane 6", "JUICE", "Solar Orbiter", "Hera"], rng);
-						return {
-							subject: fill("Launch update: {mission}", { mission }),
-							paragraphs: [
-								fill("The launch schedule for <strong>{mission}</strong> has been updated.", { mission }),
-								"Check the live stream details closer to the launch window."
-							]
-						};
-					},
-					(rng) => {
-						const condition = pick(["orage", "vent violent", "vague de chaleur", "pluie verglaçante"], rng);
-						return {
-							subject: fill("Alerte météo : {condition} en Île-de-France", { condition }),
-							paragraphs: [
-								fill("Météo France a émis une alerte de type <strong>{condition}</strong> pour l'Île-de-France.", { condition }),
-								"Prenez vos précautions et suivez les recommandations des autorités locales."
-							]
-						};
-					}
-				]
-			},
-			{
-				id: "openSourceRelease",
-				senders: [
-					{ name: "Python", address: "python-dev@python.org" },
-					{ name: "Rust", address: "notifications@rust-lang.org" },
-					{ name: "Ubuntu", address: "newsletter@ubuntu.com" },
-					{ name: "Debian", address: "news@debian.org" },
-					{ name: "Arch Linux", address: "newsletter@archlinux.org" },
-					{ name: "Mozilla", address: "newsletter@mozilla.org" }
-				],
-				closings: [
-					"See the full changelog for a complete list of changes.",
-					"We recommend updating at your earliest convenience.",
-					"This announcement was sent to all subscribed users."
-				],
-				scenarios: [
-					(rng) => {
-						const major = pickInt(1, 4, rng);
-						const minor = pickInt(0, 12, rng);
-						const patch = pickInt(0, 9, rng);
-						return {
-							subject: fill("New release available: v{version}", { version: `${major}.${minor}.${patch}` }),
-							paragraphs: [
-								fill("A new stable release, version {version}, is now available for download.", { version: `${major}.${minor}.${patch}` }),
-								"This release includes performance improvements and several bug fixes."
-							]
-						};
-					},
-					(rng) => {
-						return {
-							subject: "Security patch released",
-							paragraphs: [
-								"A security patch addressing a recently discovered vulnerability has been released.",
-								"Updating as soon as possible is strongly recommended."
-							]
-						};
-					}
-				]
-			},
-			{
-				id: "association",
-				senders: [
-					{ name: "Phisis Association", address: "contact@phisis-asso.fr" }
-				],
-				closings: [
-					"N'hésitez pas à répondre à ce message si vous avez des questions.",
-					"Toute l'équipe du bureau se réjouit de vous y voir.",
-					"Ce message a été envoyé à l'ensemble des membres de l'association."
-				],
-				scenarios: [
-					(rng) => {
-						const event = pick(associationEvents, rng);
-						return {
-							subject: fill("Rappel : {event} approche", { event }),
-							paragraphs: [
-								fill("Nous vous rappelons que <strong>{event}</strong> aura lieu très prochainement.", { event }),
-								"Merci de confirmer votre présence via le formulaire habituel."
-							]
-						};
-					},
-					(rng) => {
-						const event = pick(associationEvents, rng);
-						return {
-							subject: fill("Compte-rendu de {event}", { event }),
-							paragraphs: [
-								fill("Voici un résumé des points abordés lors de <strong>{event}</strong>.", { event }),
-								"Le compte-rendu complet est disponible sur le drive partagé de l'association."
-							]
-						};
-					}
-				]
-			},
-			{
-				id: "banking",
-				senders: [
-					{ name: "Société Générale", address: "no-reply@societegenerale.fr" },
-					{ name: "Boursorama Banque", address: "notifications@boursorama.com" },
-					{ name: "Revolut", address: "noreply@revolut.com" },
-					{ name: "PayPal", address: "service@paypal.com" }
-				],
-				closings: [
-					"Ceci est un message automatique, merci de ne pas y répondre directement.",
-					"Vous pouvez consulter le détail de cette opération depuis votre espace client.",
-					"Pour toute question, contactez notre service client depuis l'application."
-				],
-				scenarios: [
-					(rng) => {
-						const amount = (pickInt(5, 480, rng) + rng()).toFixed(2);
-						const merchant = pick(["Amazon", "SNCF Connect", "Uber", "Fnac", "Decathlon", "Steam"], rng);
-						return {
-							subject: fill("Nouvelle transaction : {amount} € chez {merchant}", { amount, merchant }),
-							paragraphs: [
-								fill("Une transaction de <strong>{amount} €</strong> a été effectuée chez <strong>{merchant}</strong>.", { amount, merchant }),
-								"Si vous ne reconnaissez pas cette opération, faites opposition immédiatement depuis l'application."
-							]
-						};
-					},
-					(rng) => {
-						const balance = pickInt(120, 4200, rng);
-						return {
-							subject: "Votre relevé mensuel est disponible",
-							paragraphs: [
-								fill("Votre relevé de compte du mois est désormais consultable. Solde actuel : <strong>{balance} €</strong>.", { balance }),
-								"Téléchargez le PDF depuis la rubrique Documents de votre espace client."
-							]
-						};
-					},
-					(rng) => {
-						return {
-							subject: "Confirmation de virement",
-							paragraphs: [
-								"Votre virement a bien été traité et sera crédité sous 1 à 2 jours ouvrés.",
-								"Aucune action supplémentaire n'est requise de votre part."
-							]
-						};
-					}
-				]
-			},
-			{
-				id: "travel",
-				senders: [
-					{ name: "SNCF Connect", address: "no-reply@sncf-connect.com" },
-					{ name: "Air France", address: "noreply@airfrance.fr" },
-					{ name: "Booking.com", address: "no-reply@booking.com" },
-					{ name: "BlaBlaCar", address: "notifications@blablacar.fr" }
-				],
-				closings: [
-					"Bon voyage !",
-					"Retrouvez tous les détails de votre réservation dans votre espace personnel.",
-					"Ce message confirme votre réservation, conservez-le pour vos démarches."
-				],
-				scenarios: [
-					(rng) => {
-						const city = pick(["Lyon", "Marseille", "Bordeaux", "Lille", "Strasbourg", "Nantes"], rng);
-						const trainNumber = pickInt(6100, 8999, rng);
-						return {
-							subject: fill("Votre billet Paris - {city} est confirmé", { city }),
-							paragraphs: [
-								fill("Votre trajet Paris - <strong>{city}</strong> à bord du train n°{trainNumber} est confirmé.", { city, trainNumber }),
-								"Présentez votre billet électronique ou votre carte de fidélité à bord."
-							]
-						};
-					},
-					(rng) => {
-						const nights = pickInt(1, 6, rng);
-						const city = pick(["Rome", "Lisbonne", "Barcelone", "Amsterdam", "Prague"], rng);
-						return {
-							subject: fill("Confirmation de votre séjour à {city}", { city }),
-							paragraphs: [
-								fill("Votre réservation pour {nights} nuit(s) à <strong>{city}</strong> est confirmée.", { nights, city }),
-								"L'hôte vous contactera prochainement avec les instructions d'arrivée."
-							]
-						};
-					},
-					(rng) => {
-						const departure = pick(["Paris", "Lyon", "Toulouse"], rng);
-						const arrival = pick(["Bruxelles", "Genève", "Barcelone"], rng);
-						return {
-							subject: fill("Trajet {departure} - {arrival} : votre conducteur a confirmé", { departure, arrival }),
-							paragraphs: [
-								fill("Votre conducteur pour le trajet <strong>{departure} → {arrival}</strong> a confirmé votre réservation.", { departure, arrival }),
-								"Vous recevrez le point de rendez-vous exact la veille du départ."
-							]
-						};
-					}
-				]
-			},
-			{
-				id: "shopping",
-				senders: [
-					{ name: "Amazon", address: "expedition@amazon.fr" },
-					{ name: "Fnac", address: "commande@fnac.com" },
-					{ name: "Decathlon", address: "no-reply@decathlon.fr" },
-					{ name: "Steam", address: "noreply@steampowered.com" }
-				],
-				closings: [
-					"Merci pour votre commande.",
-					"Vous pouvez suivre votre colis depuis votre compte.",
-					"À bientôt sur notre boutique."
-				],
-				scenarios: [
-					(rng) => {
-						const item = pick(["un casque audio", "une carte graphique", "un livre de physique", "des chaussures de randonnée", "un microphone USB"], rng);
-						return {
-							subject: "Votre commande a été expédiée",
-							paragraphs: [
-								fill("Votre commande contenant <strong>{item}</strong> a été expédiée et arrivera sous 2 à 4 jours ouvrés.", { item }),
-								"Vous pouvez suivre l'acheminement du colis en temps réel."
-							]
-						};
-					},
-					(rng) => {
-						const discount = pickInt(10, 40, rng);
-						return {
-							subject: fill("-{discount}% sur une sélection d'articles", { discount }),
-							paragraphs: [
-								fill("Profitez de <strong>-{discount}%</strong> sur une sélection d'articles jusqu'à dimanche minuit.", { discount }),
-								"L'offre est automatiquement appliquée au moment du paiement."
-							]
-						};
-					},
-					(rng) => {
-						const game = pick(["Factorio", "Cities: Skylines II", "Kerbal Space Program", "Portal 2", "Hades II"], rng);
-						return {
-							subject: fill("{game} est maintenant disponible dans votre bibliothèque", { game }),
-							paragraphs: [
-								fill("<strong>{game}</strong> a été ajouté à votre bibliothèque suite à votre achat.", { game }),
-								"Lancez le client pour commencer le téléchargement."
-							]
-						};
-					}
-				]
-			},
-			{
-				id: "recruiting",
-				senders: [
-					{ name: "LinkedIn", address: "jobs-noreply@linkedin.com" },
-					{ name: "Indeed", address: "noreply@indeed.com" },
-					{ name: "WelcomeToTheJungle", address: "hello@welcometothejungle.com" }
-				],
-				closings: [
-					"Cette offre correspond à votre profil et vos recherches récentes.",
-					"Vous pouvez postuler directement en un clic depuis l'application.",
-					"Modifiez vos préférences de recherche à tout moment depuis votre profil."
-				],
-				scenarios: [
-					(rng) => {
-						const role = pick(["Ingénieur Simulation Numérique", "Développeur Python Scientifique", "Data Scientist Junior", "Ingénieur Recherche & Développement"], rng);
-						const company = pick(["CNES", "CEA", "Thales", "Dassault Systèmes", "Onera"], rng);
-						return {
-							subject: fill("Nouvelle offre : {role} chez {company}", { role, company }),
-							paragraphs: [
-								fill("Une nouvelle offre correspondant à votre profil vient d'être publiée : <strong>{role}</strong> chez {company}.", { role, company }),
-								"Consultez la fiche de poste complète et postulez directement en ligne."
-							]
-						};
-					},
-					(rng) => {
-						const views = pickInt(3, 28, rng);
-						return {
-							subject: "Votre profil a été consulté récemment",
-							paragraphs: [
-								fill("Votre profil a été consulté {views} fois cette semaine par des recruteurs.", { views }),
-								"Mettez à jour vos compétences pour augmenter votre visibilité."
-							]
-						};
-					}
-				]
-			},
-			{
-				id: "cloudQuota",
-				senders: [
-					{ name: "Google One", address: "no-reply@google.com" },
-					{ name: "iCloud", address: "no_reply@email.apple.com" },
-					{ name: "Proton Mail", address: "no-reply@proton.me" }
-				],
-				closings: [
-					"Gérez votre stockage à tout moment depuis les paramètres de votre compte.",
-					"Ce message est envoyé automatiquement lorsque le seuil est atteint.",
-					"Passez à un forfait supérieur pour éviter toute interruption de service."
-				],
-				scenarios: [
-					(rng) => {
-						const percent = pickInt(80, 98, rng);
-						return {
-							subject: fill("Votre espace de stockage est utilisé à {percent}%", { percent }),
-							paragraphs: [
-								fill("Votre espace de stockage est actuellement utilisé à <strong>{percent}%</strong> de sa capacité.", { percent }),
-								"Libérez de l'espace ou augmentez votre quota pour continuer à recevoir des messages et sauvegarder vos fichiers."
-							]
-						};
-					},
-					(rng) => {
-						return {
-							subject: "Votre sauvegarde automatique a échoué",
-							paragraphs: [
-								"La dernière tentative de sauvegarde automatique n'a pas pu être réalisée par manque d'espace disponible.",
-								"Une nouvelle tentative sera effectuée automatiquement dans 24 heures."
-							]
+							subject: fill("[Gitea] Backup snapshot synchronized for {repo}", { repo }),
+							body: `
+								<p>Automated offsite differential backup completed for repository <strong>${repo}</strong>.</p>
+								<div style="background: #f6f8fa; border: 1px solid #d0d7de; padding: 10px; margin: 10px 0; font-family: Consolas, monospace; font-size: 12px;">
+									<div>Commit HEAD: <code>${hash}</code> (refs/heads/main)</div>
+									<div>Encrypted target: remote-cold-storage:backups/git/${repo}.bundle.gpg</div>
+									<div>Deduplication ratio: 2.84x &bull; SHA-256 integrity verified</div>
+								</div>
+								<p>Your local working trees and computational datasets remain fully synchronized.</p>
+								<p style="font-size: 11px; color: #666; margin-top: 16px;">Local Infrastructure Automated Backup Daemon</p>
+							`
 						};
 					}
 				]
 			}
 		];
 
-		const rng = mulberry32(djb2(`daily-mail::${dateKey}`));
+		const rng = mulberry32(djb2("procedural-email-stream::" + String(dateKey)));
 		const category = pick(categories, rng);
 		const sender = pick(category.senders, rng);
 		const scenario = pick(category.scenarios, rng);
 		const result = scenario(rng);
-		const closing = pick(category.closings, rng);
-
-		const bodyHtml = result.paragraphs.map(paragraph => `<p>${paragraph}</p>`).join("\n\t\t\t\t") + `\n\t\t\t\t<p>${closing}</p>`;
 
 		return {
 			from: sender.name,
 			fromAddress: sender.address,
 			subject: result.subject,
-			body: bodyHtml
+			body: result.body
 		};
 	}
 };
