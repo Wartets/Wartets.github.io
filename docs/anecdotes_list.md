@@ -54,7 +54,7 @@ Liste complète des anecdotes présentes dans `data/anecdotes/registry.js`, clas
 | anecdote_theoreme_incompletude_godel | les deux théorèmes d'incomplétude de gödel (1931). |
 | anecdote_theoreme_noether | emmy noether relie symétries continues et lois de conservation (1918). |
 | anecdote_topology_4d_knots | aucun nœud n'est possible dans un espace à 4 dimensions. |
-| anecdote_water_density_anomaly | (physique, voir section physique) |
+| anecdote_water_density_anomaly | l'anomalie de densité de l'eau : l'eau est plus dense à 4°C qu'à 0°C. |
 | anecdote_zipfs_law_linguistics | la loi de zipf sur la fréquence des mots dans les langues. |
 | anecdote_bayes_theorem_probability | le théorème de bayes, publié à titre posthume en 1763, fonde l'inférence bayésienne. |
 | anecdote_cantor_diagonalization_infinity | l'argument de la diagonale de cantor prouve l'existence de plusieurs tailles d'infini. |
