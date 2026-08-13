@@ -717,6 +717,14 @@ function startInlineRename(iconElement) {
 	});
 }
 
+function resolveProjectTitle(title) {
+	if (typeof title === 'string') return title;
+	if (title && typeof title === 'object') {
+		return title.en || title.fr || Object.values(title)[0] || '';
+	}
+	return '';
+}
+
 function initializeFileSystem() {
 	fs = new FileSystemManager();
 	fs.load();
@@ -725,8 +733,9 @@ function initializeFileSystem() {
 
 	projects.flat().forEach(project => {
 		if (typeof project === 'object' && project !== null && project.title) {
-			if (!existingNames.has(project.title)) {
-				const projectFile = new ProjectFile(project.title, null, project);
+			const titleText = resolveProjectTitle(project.title);
+			if (titleText && !existingNames.has(titleText)) {
+				const projectFile = new ProjectFile(titleText, null, project);
 				projectFile.createdAt = new Date(project.timestamp || Date.now());
 				fs.root.add(projectFile);
 			}
@@ -1477,7 +1486,8 @@ function removeTaskbarButton(id) {
 }
 
 function openProjectWindow(project) {
-	const id = `window-${project.title.replace(/\s/g, '-')}`;
+	const projectTitle = resolveProjectTitle(project.title);
+	const id = `window-${projectTitle.replace(/\s/g, '-')}`;
 
 	const languageNames = {
 		en: 'English',
@@ -1534,34 +1544,34 @@ function openProjectWindow(project) {
 					${projectLink}
 					${githubLink}
 				</div>
-				 <div class="project-details">
+				<div class="project-details">
 					<h4>Details</h4>
 					<p><strong>Category:</strong> ${project.keywords ? project.keywords.join(', ') : 'N/A'}</p>
 					${languagesHtml}
 				</div>
 			</div>
 			<div class="project-view-main">
-				<h2>${project.title}</h2>
+				<h2>${projectTitle}</h2>
 				<p class="project-long-description">${project.longDescription || project.longDescrition || project.description || 'No description available.'}</p>
 			</div>
 			<div class="project-view-statusbar">
 				<span>Ready</span>
 				<span class="status-separator"></span>
-				<span>${project.title}</span>
+				<span>${projectTitle}</span>
 			</div>
 		</div>
 	`;
 
-	const projectWindow = createXPWindow(id, project.title, content, 700, 500, { iconSrc: project.icon });
+	const projectWindow = createXPWindow(id, projectTitle, content, 700, 500, { iconSrc: project.icon });
 	projectWindow.querySelector('.xp-window-content').style.padding = '0';
 	projectWindow.classList.add('project-window');
 
 	const runBtn = projectWindow.querySelector('.run-project-btn');
 	if (runBtn) {
 		runBtn.addEventListener('click', () => {
-			const appId = `app-running-${project.title.replace(/\s/g, '-')}-${Date.now()}`;
+			const appId = `app-running-${projectTitle.replace(/\s/g, '-')}-${Date.now()}`;
 			const appContent = `<iframe src="${project.link}" style="width: 100%; height: 100%; border: none;"></iframe>`;
-			const appWindow = createXPWindow(appId, project.title, appContent, 800, 600, { iconSrc: project.icon });
+			const appWindow = createXPWindow(appId, projectTitle, appContent, 800, 600, { iconSrc: project.icon });
 			appWindow.querySelector('.xp-window-content').style.padding = '0';
 			appWindow.querySelector('.xp-window-content').style.overflow = 'hidden';
 		});
@@ -2089,12 +2099,13 @@ function openFilteredProjectsFolder(category) {
 	const filteredProjects = flattenedProjects.filter(p => p.keywords.includes(category));
 
 	filteredProjects.forEach(project => {
+		const projectTitle = resolveProjectTitle(project.title);
 		const icon = document.createElement('div');
 		icon.className = 'project-icon';
-		icon.dataset.projectId = project.title.replace(/\s/g, '-');
+		icon.dataset.projectId = projectTitle.replace(/\s/g, '-');
 		icon.dataset.iconData = JSON.stringify({
-			id: project.title.replace(/\s/g, '-'),
-			name: project.title,
+			id: projectTitle.replace(/\s/g, '-'),
+			name: projectTitle,
 			icon: project.icon,
 			type: 'project',
 			timestamp: project.timestamp
@@ -2103,11 +2114,11 @@ function openFilteredProjectsFolder(category) {
 
 		const img = document.createElement('img');
 		img.src = project.icon || 'https://img.icons8.com/fluency/48/file.png';
-		img.alt = project.title;
+		img.alt = projectTitle;
 		icon.appendChild(img);
 
 		const span = document.createElement('span');
-		span.textContent = project.title;
+		span.textContent = projectTitle;
 		icon.appendChild(span);
 
 		icon.addEventListener('dblclick', () => openProjectWindow(project));
@@ -2327,7 +2338,7 @@ function handleContextMenuAction(action) {
 					const path = targetElement.dataset.path;
 					if (path.startsWith('project://')) {
 						const projectTitle = path.substring(10);
-						const project = projects.flat().find(p => p.title.replace(/\s/g, '-') === projectTitle);
+						const project = projects.flat().find(p => resolveProjectTitle(p.title).replace(/\s/g, '-') === projectTitle);
 						if (project) openProjectWindow(project);
 					} else {
 						const element = fs.findByPath(path);
