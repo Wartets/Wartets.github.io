@@ -56,13 +56,40 @@
         "Random Retro Trivia",
         "Keyboard Shortcuts",
         "Generate Secure Password",
-        "Convert 100 km to miles",
-        "Convert 32 celsius to fahrenheit",
-        "Convert 1024 mb to gb",
-        "Calc sqrt(144) * 5 + cos(0)",
-        "Calc 2^10 * log10(100)",
+        "Convert 1.5e11 m to au",
+        "Convert 13.6 eV to Joules",
+        "Convert 101325 Pa to bar",
+        "Convert 1 ly to parsec",
+        "Convert 1024 GiB to TiB",
+        "Calc hbar * c / (1e-15)",
+        "Calc sqrt(G * 1.989e30 / (1.496e11))",
+        "Calc exp(-0.5) * cos(pi/3) + gamma(5)",
+        "Calc sinh(1.2) / cosh(1.2) + erf(0.8)",
         "System uptime and clock",
-        "Lunar phase details"
+        "Lunar phase details",
+        "Calc hbar * c / (1.602176634e-19 * 1e-9)",
+        "Calc 4 * pi * 1e-7 * 1.0",
+        "Calc 1 / sqrt(8.8541878128e-12 * 1.25663706212e-6)",
+        "Calc gamma(6) / (fact(4) + 1)",
+        "Calc erf(1.0 / sqrt(2))",
+        "Calc asinh(2.5) + acosh(3.0)",
+        "Convert 1 atm to torr",
+        "Convert 1.0545718e-34 J to eV",
+        "Convert 1.989e30 kg to solar_mass",
+        "Convert 5.291772109e-11 m to angstrom",
+        "Convert 1.0 bar to psi",
+        "Convert 299792458 mps to kmh",
+        "Convert 384400 km to au",
+        "Convert 1.0 tesla to gauss",
+        "Convert 1.0 cal to joules",
+        "Evaluate Planck constant h",
+        "Evaluate speed of light c",
+        "Evaluate gravitational constant G",
+        "Evaluate Boltzmann constant kb",
+        "Scientific & Mathematical Index",
+        "Thermodynamics & Statistical Physics",
+        "Quantum Mechanics & Field Constants",
+        "Differential Geometry & Tensor calculus"
     ];
 
     const GREETINGS = [
@@ -80,7 +107,12 @@
         "Greetings, user. Workspace telemetry indicates zero critical faults. Standing by for user instructions.",
         "Need a hand navigating the interface? Ask me to launch Notepad, Paint, Minesweeper, or check your running windows.",
         "Interactive assistant ready. All Office 97 heuristics and Windows XP management subroutines are fully loaded.",
-        "Welcome! It appears you are working on something interesting. Let me know if you need assistance organizing your workspace."
+        "Welcome! It appears you are working on something interesting. Let me know if you need assistance organizing your workspace.",
+        "Analytical subsystem initialized. Mathematical evaluation kernels, physical constant registries, and dimensional analysis pipelines are fully operational.",
+        "Workstation heuristics primed. Ready to process rigorous differential approximations, unit conversions, or algorithmic state verifications.",
+        "Greetings. All IEEE 754 arithmetic coprocessors, floating-point units, and discrete matrix engines are synchronized and awaiting instruction.",
+        "Assistant ready. Physical constants (CODATA 2018/2022 standards) and transcendental evaluation functions are loaded into workstation memory.",
+        "Console operational. I can evaluate mathematical expressions, perform SI and CGS dimensional analysis, inspect system processes, or administer scientific quizzes."
     ];
 
     const FALLBACKS = [
@@ -93,7 +125,11 @@
         "Command syntax unindexed. You may query system memory, check the recycle bin, inspect open windows, or generate a strong password.",
         "Instruction not understood. If you wish to manage your tasks, type 'todo add [Task description]' or 'todo clear'.",
         "Heuristic analysis returned zero definitive matches. Enter 'diagnostics' to review machine statistics or 'trivia' for retro tech history.",
-        "The command interpreter could not parse your statement. Type 'help' for comprehensive system documentation."
+        "The command interpreter could not parse your statement. Type 'help' for comprehensive system documentation.",
+        "Lexical analysis failure. The query string could not be mapped to any known mathematical operand, physical constant, or shell command.",
+        "Evaluation exception: Unrecognized symbolic statement. Verify syntax or invoke 'calc [expression]' for algebraic evaluation or 'convert [val] [u1] to [u2]' for dimensional conversion.",
+        "Subsystem parser returned non-zero status. The statement does not correspond to an internal workstation dispatch table. Type 'help' for technical documentation.",
+        "Heuristic parsing indeterminate. No matching register found in system task definitions, physical registries, or discrete game engines."
     ];
 
     const SafeDeskAPI = {
@@ -303,16 +339,75 @@
         return keywords.some(keyword => text.includes(keyword));
     }
 
+    function gammaLanczos(z) {
+        if (z < 0.5) return Math.PI / (Math.sin(Math.PI * z) * gammaLanczos(1 - z));
+        z -= 1;
+        const p = [
+            0.99999999999980993, 676.5203681218851, -1259.1392167224028,
+            771.32342877765313, -176.61502916214059, 12.507343278686905,
+            -0.13857109583115912, 9.9843695780195716e-6, 1.5056327351493116e-7
+        ];
+        let x = p[0];
+        for (let i = 1; i < p.length; i++) x += p[i] / (z + i);
+        const t = z + p.length - 1.5;
+        return Math.sqrt(2 * Math.PI) * Math.pow(t, z + 0.5) * Math.exp(-t) * x;
+    }
+
+    function errorFunction(x) {
+        const sign = (x >= 0) ? 1 : -1;
+        x = Math.abs(x);
+        const a1 = 0.254829592, a2 = -0.284496736, a3 = 1.421413741, a4 = -1.453152027, a5 = 1.061405429, p = 0.3275911;
+        const t = 1.0 / (1.0 + p * x);
+        const y = 1.0 - (((((a5 * t + a4) * t) + a3) * t + a2) * t + a1) * t * Math.exp(-x * x);
+        return sign * y;
+    }
+
+    function factorialInt(n) {
+        n = Math.round(n);
+        if (n < 0) return NaN;
+        if (n === 0 || n === 1) return 1;
+        let res = 1;
+        for (let i = 2; i <= n; i++) res *= i;
+        return res;
+    }
+
     function evaluateMathExpression(str) {
         let exp = str.toLowerCase()
+            .replace(/\bhbar\b/g, '(1.054571817e-34)')
+            .replace(/\bh\b/g, '(6.62607015e-34)')
+            .replace(/\bc_light\b/g, '(299792458)')
+            .replace(/\bc\b/g, '(299792458)')
+            .replace(/\bg_accel\b/g, '(9.80665)')
+            .replace(/\bkb\b/g, '(1.380649e-23)')
+            .replace(/\bk_b\b/g, '(1.380649e-23)')
+            .replace(/\bna\b/g, '(6.02214076e23)')
+            .replace(/\beps0\b/g, '(8.8541878128e-12)')
+            .replace(/\bmu0\b/g, '(1.25663706212e-6)')
+            .replace(/\bme\b/g, '(9.1093837015e-31)')
+            .replace(/\bmp\b/g, '(1.67262192369e-27)')
+            .replace(/\bmn\b/g, '(1.67492749804e-27)')
+            .replace(/\bqe\b/g, '(1.602176634e-19)')
+            .replace(/\bq_e\b/g, '(1.602176634e-19)')
+            .replace(/\bsigma_sb\b/g, '(5.670374419e-8)')
+            .replace(/\br_gas\b/g, '(8.314462618)')
+            .replace(/\bphi\b/g, '(1.618033988749895)')
+            .replace(/\balpha_fs\b/g, '(0.0072973525693)')
+            .replace(/\basinh\b/g, 'Math.asinh')
+            .replace(/\bacosh\b/g, 'Math.acosh')
+            .replace(/\batanh\b/g, 'Math.atanh')
+            .replace(/\bsinh\b/g, 'Math.sinh')
+            .replace(/\bcosh\b/g, 'Math.cosh')
+            .replace(/\btanh\b/g, 'Math.tanh')
             .replace(/\basin\b/g, 'Math.asin')
             .replace(/\bacos\b/g, 'Math.acos')
+            .replace(/\batan2\b/g, 'Math.atan2')
             .replace(/\batan\b/g, 'Math.atan')
             .replace(/\bsin\b/g, 'Math.sin')
             .replace(/\bcos\b/g, 'Math.cos')
             .replace(/\btan\b/g, 'Math.tan')
             .replace(/\bsqrt\b/g, 'Math.sqrt')
             .replace(/\bcbrt\b/g, 'Math.cbrt')
+            .replace(/\bhypot\b/g, 'Math.hypot')
             .replace(/\babs\b/g, 'Math.abs')
             .replace(/\bfloor\b/g, 'Math.floor')
             .replace(/\bceil\b/g, 'Math.ceil')
@@ -322,16 +417,24 @@
             .replace(/\blog\b/g, 'Math.log10')
             .replace(/\bln\b/g, 'Math.log')
             .replace(/\bexp\b/g, 'Math.exp')
+            .replace(/\berf\b/g, 'errorFunction')
+            .replace(/\bgamma\b/g, 'gammaLanczos')
+            .replace(/\bfact\b/g, 'factorialInt')
+            .replace(/\bfactorial\b/g, 'factorialInt')
             .replace(/\bpi\b/g, 'Math.PI')
             .replace(/\be\b/g, 'Math.E')
             .replace(/\^/g, '**');
 
-        const allowed = /^[0-9+\-*/(). %**\sMath\.sincotaqrbelgPIEfloundexp210]+$/;
+        const allowed = /^[0-9+\-*/(). %**\sMath\.sincotaqrbelgPIEfloundexp210asinhcoshynputGgLanczverFkbaM_]+$/;
         if (!allowed.test(exp)) return null;
 
         try {
-            const result = Function(`'use strict'; return (${exp})`)();
+            const evalFn = new Function('gammaLanczos', 'errorFunction', 'factorialInt', `'use strict'; return (${exp})`);
+            const result = evalFn(gammaLanczos, errorFunction, factorialInt);
             if (typeof result === 'number' && !isNaN(result) && isFinite(result)) {
+                if (Math.abs(result) < 1e-4 || Math.abs(result) >= 1e9) {
+                    return result.toExponential(8);
+                }
                 return Math.round(result * 100000000) / 100000000;
             }
         } catch (e) {}
@@ -339,7 +442,7 @@
     }
 
     function parseUnitConversion(text) {
-        const match = text.match(/([\d\.]+)\s*(km|mi|miles|mile|meters|meter|m|ft|feet|foot|yd|yards|yard|cm|mm|nm|inch|in|kg|lbs|pounds|pound|g|oz|ounces|ounce|ton|tons|c|f|k|celsius|fahrenheit|kelvin|tb|gb|mb|kb|bytes|byte|b|bits|bit|kmh|mph|knot|knots|ms|liters|liter|l|ml|gallons|gallon|gal|floz|bar|psi|pa|atm|deg|rad)\s*(?:to|in|en|vers)\s*(km|mi|miles|mile|meters|meter|m|ft|feet|foot|yd|yards|yard|cm|mm|nm|inch|in|kg|lbs|pounds|pound|g|oz|ounces|ounce|ton|tons|c|f|k|celsius|fahrenheit|kelvin|tb|gb|mb|kb|bytes|byte|b|bits|bit|kmh|mph|knot|knots|ms|liters|liter|l|ml|gallons|gallon|gal|floz|bar|psi|pa|atm|deg|rad)/i);
+        const match = text.match(/([\d\.eE\+\-]+)\s*(km|mi|miles|mile|meters|meter|m|ft|feet|foot|yd|yards|yard|cm|mm|nm|pm|fm|angstrom|inch|in|au|ly|parsec|pc|kg|lbs|pounds|pound|g|mg|ug|amu|u|slug|solar_mass|oz|ounces|ounce|ton|tons|c|f|k|celsius|fahrenheit|kelvin|rankine|r|tib|gib|mib|kib|tb|gb|mb|kb|bytes|byte|b|bits|bit|kmh|mph|knot|knots|ms|mps|c_light|liters|liter|l|ml|gallons|gallon|gal|floz|bar|mbar|psi|pa|kpa|mpa|atm|torr|mmhg|ev|kev|mev|gev|joules|joule|j|kj|cal|kcal|btu|kwh|erg|watt|w|kw|mw|gw|hp|tesla|t|gauss|g_field|deg|rad|arcmin|arcsec)\s*(?:to|in|en|vers)\s*(km|mi|miles|mile|meters|meter|m|ft|feet|foot|yd|yards|yard|cm|mm|nm|pm|fm|angstrom|inch|in|au|ly|parsec|pc|kg|lbs|pounds|pound|g|mg|ug|amu|u|slug|solar_mass|oz|ounces|ounce|ton|tons|c|f|k|celsius|fahrenheit|kelvin|rankine|r|tib|gib|mib|kib|tb|gb|mb|kb|bytes|byte|b|bits|bit|kmh|mph|knot|knots|ms|mps|c_light|liters|liter|l|ml|gallons|gallon|gal|floz|bar|mbar|psi|pa|kpa|mpa|atm|torr|mmhg|ev|kev|mev|gev|joules|joule|j|kj|cal|kcal|btu|kwh|erg|watt|w|kw|mw|gw|hp|tesla|t|gauss|g_field|deg|rad|arcmin|arcsec)/i);
         if (!match) return null;
 
         const val = parseFloat(match[1]);
@@ -348,57 +451,112 @@
 
         if (isNaN(val)) return null;
 
-        if ((from === 'km') && (to === 'mi' || to === 'miles' || to === 'mile')) return `${val} km = ${(val * 0.621371).toFixed(4)} miles`;
-        if ((from === 'mi' || from === 'miles' || from === 'mile') && to === 'km') return `${val} miles = ${(val * 1.609344).toFixed(4)} km`;
-        if ((from === 'm' || from === 'meters' || from === 'meter') && (to === 'ft' || to === 'feet' || to === 'foot')) return `${val} m = ${(val * 3.28084).toFixed(4)} feet`;
-        if ((from === 'ft' || from === 'feet' || from === 'foot') && (to === 'm' || to === 'meters' || to === 'meter')) return `${val} feet = ${(val * 0.3048).toFixed(4)} m`;
-        if ((from === 'm' || from === 'meters' || from === 'meter') && (to === 'yd' || to === 'yards' || to === 'yard')) return `${val} m = ${(val * 1.09361).toFixed(4)} yards`;
-        if ((from === 'yd' || from === 'yards' || from === 'yard') && (to === 'm' || to === 'meters' || to === 'meter')) return `${val} yards = ${(val * 0.9144).toFixed(4)} m`;
-        if ((from === 'cm') && (to === 'inch' || to === 'in')) return `${val} cm = ${(val * 0.393701).toFixed(4)} inches`;
-        if ((from === 'inch' || from === 'in') && to === 'cm') return `${val} inches = ${(val * 2.54).toFixed(4)} cm`;
-        if ((from === 'mm') && (to === 'inch' || to === 'in')) return `${val} mm = ${(val * 0.0393701).toFixed(4)} inches`;
-        if ((from === 'inch' || from === 'in') && to === 'mm') return `${val} inches = ${(val * 25.4).toFixed(4)} mm`;
+        if ((from === 'km') && (to === 'mi' || to === 'miles' || to === 'mile')) return `${val} km = ${(val * 0.621371192).toFixed(6)} miles`;
+        if ((from === 'mi' || from === 'miles' || from === 'mile') && to === 'km') return `${val} miles = ${(val * 1.609344).toFixed(6)} km`;
+        if ((from === 'm' || from === 'meters' || from === 'meter') && (to === 'ft' || to === 'feet' || to === 'foot')) return `${val} m = ${(val * 3.280839895).toFixed(6)} feet`;
+        if ((from === 'ft' || from === 'feet' || from === 'foot') && (to === 'm' || to === 'meters' || to === 'meter')) return `${val} feet = ${(val * 0.3048).toFixed(6)} m`;
+        if ((from === 'm' || from === 'meters' || from === 'meter') && (to === 'yd' || to === 'yards' || to === 'yard')) return `${val} m = ${(val * 1.093613298).toFixed(6)} yards`;
+        if ((from === 'yd' || from === 'yards' || from === 'yard') && (to === 'm' || to === 'meters' || to === 'meter')) return `${val} yards = ${(val * 0.9144).toFixed(6)} m`;
+        if ((from === 'cm') && (to === 'inch' || to === 'in')) return `${val} cm = ${(val * 0.393700787).toFixed(6)} inches`;
+        if ((from === 'inch' || from === 'in') && to === 'cm') return `${val} inches = ${(val * 2.54).toFixed(6)} cm`;
+        if ((from === 'mm') && (to === 'inch' || to === 'in')) return `${val} mm = ${(val * 0.0393700787).toFixed(6)} inches`;
+        if ((from === 'inch' || from === 'in') && to === 'mm') return `${val} inches = ${(val * 25.4).toFixed(6)} mm`;
+        if (from === 'm' && to === 'au') return `${val} m = ${(val / 1.495978707e11).toExponential(6)} au`;
+        if (from === 'au' && to === 'm') return `${val} au = ${(val * 1.495978707e11).toExponential(6)} m`;
+        if (from === 'au' && to === 'km') return `${val} au = ${(val * 1.495978707e8).toFixed(3)} km`;
+        if (from === 'km' && to === 'au') return `${val} km = ${(val / 1.495978707e8).toExponential(6)} au`;
+        if (from === 'ly' && to === 'm') return `${val} ly = ${(val * 9.4607304725808e15).toExponential(6)} m`;
+        if (from === 'm' && to === 'ly') return `${val} m = ${(val / 9.4607304725808e15).toExponential(6)} ly`;
+        if (from === 'ly' && to === 'parsec' || from === 'ly' && to === 'pc') return `${val} ly = ${(val * 0.306601).toFixed(6)} parsec`;
+        if ((from === 'parsec' || from === 'pc') && to === 'ly') return `${val} parsec = ${(val * 3.26156).toFixed(6)} ly`;
+        if (from === 'angstrom' && to === 'm') return `${val} Å = ${(val * 1e-10).toExponential(6)} m`;
+        if (from === 'm' && to === 'angstrom') return `${val} m = ${(val * 1e10).toExponential(6)} Å`;
+        if (from === 'nm' && to === 'm') return `${val} nm = ${(val * 1e-9).toExponential(6)} m`;
+        if (from === 'm' && to === 'nm') return `${val} m = ${(val * 1e9).toExponential(6)} nm`;
+        if (from === 'pm' && to === 'm') return `${val} pm = ${(val * 1e-12).toExponential(6)} m`;
+        if (from === 'fm' && to === 'm') return `${val} fm = ${(val * 1e-15).toExponential(6)} m`;
 
-        if ((from === 'kg') && (to === 'lbs' || to === 'pounds' || to === 'pound')) return `${val} kg = ${(val * 2.20462).toFixed(4)} lbs`;
-        if ((from === 'lbs' || from === 'pounds' || from === 'pound') && to === 'kg') return `${val} lbs = ${(val * 0.453592).toFixed(4)} kg`;
-        if ((from === 'g') && (to === 'oz' || to === 'ounces' || to === 'ounce')) return `${val} g = ${(val * 0.035274).toFixed(4)} oz`;
-        if ((from === 'oz' || from === 'ounces' || from === 'ounce') && to === 'g') return `${val} oz = ${(val * 28.34952).toFixed(4)} g`;
-        if ((from === 'ton' || from === 'tons') && (to === 'kg')) return `${val} tons = ${(val * 1000).toFixed(2)} kg`;
-        if ((from === 'kg') && (to === 'ton' || to === 'tons')) return `${val} kg = ${(val / 1000).toFixed(4)} tons`;
+        if ((from === 'kg') && (to === 'lbs' || to === 'pounds' || to === 'pound')) return `${val} kg = ${(val * 2.20462262).toFixed(6)} lbs`;
+        if ((from === 'lbs' || from === 'pounds' || from === 'pound') && to === 'kg') return `${val} lbs = ${(val * 0.45359237).toFixed(6)} kg`;
+        if ((from === 'g') && (to === 'oz' || to === 'ounces' || to === 'ounce')) return `${val} g = ${(val * 0.03527396).toFixed(6)} oz`;
+        if ((from === 'oz' || from === 'ounces' || from === 'ounce') && to === 'g') return `${val} oz = ${(val * 28.349523125).toFixed(6)} g`;
+        if ((from === 'ton' || from === 'tons') && (to === 'kg')) return `${val} metric tons = ${(val * 1000).toFixed(2)} kg`;
+        if ((from === 'kg') && (to === 'ton' || to === 'tons')) return `${val} kg = ${(val / 1000).toFixed(6)} metric tons`;
+        if (from === 'amu' || from === 'u') {
+            if (to === 'kg') return `${val} u = ${(val * 1.66053906660e-27).toExponential(8)} kg`;
+            if (to === 'mev') return `${val} u = ${(val * 931.49410242).toFixed(6)} MeV/c^2`;
+        }
+        if (from === 'kg' && (to === 'amu' || to === 'u')) return `${val} kg = ${(val / 1.66053906660e-27).toExponential(8)} u`;
+        if (from === 'solar_mass' && to === 'kg') return `${val} M_sun = ${(val * 1.98847e30).toExponential(6)} kg`;
+        if (from === 'kg' && to === 'solar_mass') return `${val} kg = ${(val / 1.98847e30).toExponential(6)} M_sun`;
 
-        if ((from === 'c' || from === 'celsius') && (to === 'f' || to === 'fahrenheit')) return `${val} °C = ${((val * 9/5) + 32).toFixed(2)} °F`;
-        if ((from === 'f' || from === 'fahrenheit') && (to === 'c' || to === 'celsius')) return `${val} °F = ${(((val - 32) * 5)/9).toFixed(2)} °C`;
-        if ((from === 'c' || from === 'celsius') && (to === 'k' || to === 'kelvin')) return `${val} °C = ${(val + 273.15).toFixed(2)} K`;
-        if ((from === 'k' || from === 'kelvin') && (to === 'c' || to === 'celsius')) return `${val} K = ${(val - 273.15).toFixed(2)} °C`;
+        if ((from === 'c' || from === 'celsius') && (to === 'f' || to === 'fahrenheit')) return `${val} °C = ${((val * 9/5) + 32).toFixed(4)} °F`;
+        if ((from === 'f' || from === 'fahrenheit') && (to === 'c' || to === 'celsius')) return `${val} °F = ${(((val - 32) * 5)/9).toFixed(4)} °C`;
+        if ((from === 'c' || from === 'celsius') && (to === 'k' || to === 'kelvin')) return `${val} °C = ${(val + 273.15).toFixed(4)} K`;
+        if ((from === 'k' || from === 'kelvin') && (to === 'c' || to === 'celsius')) return `${val} K = ${(val - 273.15).toFixed(4)} °C`;
+        if ((from === 'k' || from === 'kelvin') && (to === 'rankine' || to === 'r')) return `${val} K = ${(val * 1.8).toFixed(4)} °R`;
 
-        if (from === 'tb' && to === 'gb') return `${val} TB = ${val * 1024} GB`;
-        if (from === 'gb' && to === 'tb') return `${val} GB = ${(val / 1024).toFixed(4)} TB`;
-        if (from === 'gb' && to === 'mb') return `${val} GB = ${val * 1024} MB`;
-        if (from === 'mb' && to === 'gb') return `${val} MB = ${(val / 1024).toFixed(4)} GB`;
-        if (from === 'mb' && to === 'kb') return `${val} MB = ${val * 1024} KB`;
-        if (from === 'kb' && to === 'mb') return `${val} KB = ${(val / 1024).toFixed(4)} MB`;
+        if ((from === 'ev') && (to === 'joules' || to === 'joule' || to === 'j')) return `${val} eV = ${(val * 1.602176634e-19).toExponential(8)} J`;
+        if ((from === 'joules' || from === 'joule' || from === 'j') && to === 'ev') return `${val} J = ${(val / 1.602176634e-19).toExponential(8)} eV`;
+        if (from === 'kev' && (to === 'joules' || to === 'j')) return `${val} keV = ${(val * 1.602176634e-16).toExponential(8)} J`;
+        if (from === 'mev' && (to === 'joules' || to === 'j')) return `${val} MeV = ${(val * 1.602176634e-13).toExponential(8)} J`;
+        if (from === 'gev' && (to === 'joules' || to === 'j')) return `${val} GeV = ${(val * 1.602176634e-10).toExponential(8)} J`;
+        if ((from === 'cal') && (to === 'joules' || to === 'j')) return `${val} cal = ${(val * 4.184).toFixed(4)} J`;
+        if ((from === 'joules' || from === 'j') && to === 'cal') return `${val} J = ${(val / 4.184).toFixed(4)} cal`;
+        if (from === 'kwh' && (to === 'joules' || to === 'j')) return `${val} kWh = ${(val * 3.6e6).toExponential(6)} J`;
+        if ((from === 'joules' || from === 'j') && to === 'kwh') return `${val} J = ${(val / 3.6e6).toExponential(6)} kWh`;
+        if (from === 'erg' && (to === 'joules' || to === 'j')) return `${val} erg = ${(val * 1e-7).toExponential(6)} J`;
+        if ((from === 'joules' || from === 'j') && to === 'erg') return `${val} J = ${(val * 1e7).toExponential(6)} erg`;
+
+        if (from === 'bar' && to === 'psi') return `${val} bar = ${(val * 14.5037738).toFixed(4)} psi`;
+        if (from === 'psi' && to === 'bar') return `${val} psi = ${(val * 0.06894757).toFixed(6)} bar`;
+        if (from === 'atm' && to === 'pa') return `${val} atm = ${(val * 101325).toFixed(2)} Pa`;
+        if (from === 'pa' && to === 'atm') return `${val} Pa = ${(val / 101325).toExponential(6)} atm`;
+        if (from === 'atm' && to === 'bar') return `${val} atm = ${(val * 1.01325).toFixed(5)} bar`;
+        if (from === 'bar' && to === 'atm') return `${val} bar = ${(val / 1.01325).toFixed(5)} atm`;
+        if (from === 'atm' && (to === 'torr' || to === 'mmhg')) return `${val} atm = ${(val * 760).toFixed(2)} Torr`;
+        if ((from === 'torr' || from === 'mmhg') && to === 'pa') return `${val} Torr = ${(val * (101325 / 760)).toFixed(3)} Pa`;
+        if (from === 'pa' && (to === 'torr' || to === 'mmhg')) return `${val} Pa = ${(val * (760 / 101325)).toFixed(4)} Torr`;
+        if (from === 'bar' && to === 'pa') return `${val} bar = ${(val * 1e5).toFixed(2)} Pa`;
+        if (from === 'pa' && to === 'bar') return `${val} Pa = ${(val * 1e-5).toExponential(6)} bar`;
+
+        if ((from === 'tesla' || from === 't') && (to === 'gauss' || to === 'g_field')) return `${val} T = ${(val * 10000).toFixed(2)} Gauss`;
+        if ((from === 'gauss' || from === 'g_field') && (to === 'tesla' || to === 't')) return `${val} Gauss = ${(val * 1e-4).toExponential(6)} T`;
+
+        if ((from === 'watt' || from === 'w') && to === 'hp') return `${val} W = ${(val / 745.699872).toFixed(4)} hp`;
+        if (from === 'hp' && (to === 'watt' || to === 'w')) return `${val} hp = ${(val * 745.699872).toFixed(2)} W`;
+
+        if (from === 'tb' && to === 'gb') return `${val} TB = ${val * 1000} GB (or ${val * 1024} GiB equivalent)`;
+        if (from === 'tib' && to === 'gib') return `${val} TiB = ${val * 1024} GiB`;
+        if (from === 'gib' && to === 'mib') return `${val} GiB = ${val * 1024} MiB`;
+        if (from === 'mib' && to === 'kib') return `${val} MiB = ${val * 1024} KiB`;
+        if (from === 'gb' && to === 'tb') return `${val} GB = ${(val / 1000).toFixed(4)} TB`;
+        if (from === 'gb' && to === 'mb') return `${val} GB = ${val * 1000} MB`;
+        if (from === 'mb' && to === 'gb') return `${val} MB = ${(val / 1000).toFixed(4)} GB`;
+        if (from === 'mb' && to === 'kb') return `${val} MB = ${val * 1000} KB`;
+        if (from === 'kb' && to === 'mb') return `${val} KB = ${(val / 1000).toFixed(4)} MB`;
         if (from === 'kb' && (to === 'bytes' || to === 'byte' || to === 'b')) return `${val} KB = ${val * 1024} Bytes`;
         if ((from === 'bytes' || from === 'byte' || from === 'b') && (to === 'bits' || to === 'bit')) return `${val} Bytes = ${val * 8} Bits`;
         if ((from === 'bits' || from === 'bit') && (to === 'bytes' || to === 'byte' || to === 'b')) return `${val} Bits = ${(val / 8).toFixed(2)} Bytes`;
 
-        if (from === 'kmh' && to === 'mph') return `${val} km/h = ${(val * 0.621371).toFixed(3)} mph`;
-        if (from === 'mph' && to === 'kmh') return `${val} mph = ${(val * 1.60934).toFixed(3)} km/h`;
-        if (from === 'ms' && to === 'kmh') return `${val} m/s = ${(val * 3.6).toFixed(3)} km/h`;
-        if (from === 'kmh' && to === 'ms') return `${val} km/h = ${(val / 3.6).toFixed(3)} m/s`;
-        if ((from === 'knot' || from === 'knots') && to === 'kmh') return `${val} knots = ${(val * 1.852).toFixed(3)} km/h`;
+        if (from === 'kmh' && to === 'mph') return `${val} km/h = ${(val * 0.621371192).toFixed(4)} mph`;
+        if (from === 'mph' && to === 'kmh') return `${val} mph = ${(val * 1.609344).toFixed(4)} km/h`;
+        if ((from === 'ms' || from === 'mps') && to === 'kmh') return `${val} m/s = ${(val * 3.6).toFixed(4)} km/h`;
+        if (from === 'kmh' && (from === 'ms' || to === 'mps')) return `${val} km/h = ${(val / 3.6).toFixed(4)} m/s`;
+        if ((from === 'ms' || from === 'mps') && to === 'c_light') return `${val} m/s = ${(val / 299792458).toExponential(6)} c`;
+        if (from === 'c_light' && (to === 'ms' || to === 'mps')) return `${val} c = ${(val * 299792458).toExponential(6)} m/s`;
+        if ((from === 'knot' || from === 'knots') && to === 'kmh') return `${val} knots = ${(val * 1.852).toFixed(4)} km/h`;
 
-        if ((from === 'liters' || from === 'liter' || from === 'l') && (to === 'gallons' || to === 'gallon' || to === 'gal')) return `${val} L = ${(val * 0.264172).toFixed(4)} gal`;
-        if ((from === 'gallons' || from === 'gallon' || from === 'gal') && (to === 'liters' || to === 'liter' || to === 'l')) return `${val} gal = ${(val * 3.78541).toFixed(4)} L`;
-        if ((from === 'ml') && (to === 'floz')) return `${val} mL = ${(val * 0.033814).toFixed(4)} fl oz`;
-        if ((from === 'floz') && (to === 'ml')) return `${val} fl oz = ${(val * 29.5735).toFixed(4)} mL`;
+        if ((from === 'liters' || from === 'liter' || from === 'l') && (to === 'gallons' || to === 'gallon' || to === 'gal')) return `${val} L = ${(val * 0.264172052).toFixed(6)} US gal`;
+        if ((from === 'gallons' || from === 'gallon' || from === 'gal') && (to === 'liters' || to === 'liter' || to === 'l')) return `${val} US gal = ${(val * 3.785411784).toFixed(6)} L`;
+        if ((from === 'ml') && (to === 'floz')) return `${val} mL = ${(val * 0.0338140227).toFixed(6)} fl oz`;
+        if ((from === 'floz') && (to === 'ml')) return `${val} fl oz = ${(val * 29.5735295625).toFixed(6)} mL`;
 
-        if (from === 'bar' && to === 'psi') return `${val} bar = ${(val * 14.5038).toFixed(3)} psi`;
-        if (from === 'psi' && to === 'bar') return `${val} psi = ${(val * 0.0689476).toFixed(4)} bar`;
-        if (from === 'atm' && to === 'pa') return `${val} atm = ${(val * 101325).toFixed(0)} Pa`;
-        if (from === 'pa' && to === 'atm') return `${val} Pa = ${(val / 101325).toFixed(6)} atm`;
-
-        if (from === 'deg' && to === 'rad') return `${val} deg = ${(val * Math.PI / 180).toFixed(6)} rad`;
-        if (from === 'rad' && to === 'deg') return `${val} rad = ${(val * 180 / Math.PI).toFixed(4)} deg`;
+        if (from === 'deg' && to === 'rad') return `${val} deg = ${(val * Math.PI / 180).toFixed(8)} rad`;
+        if (from === 'rad' && to === 'deg') return `${val} rad = ${(val * 180 / Math.PI).toFixed(8)} deg`;
+        if (from === 'arcmin' && to === 'deg') return `${val} arcmin = ${(val / 60).toFixed(6)} deg`;
+        if (from === 'arcsec' && to === 'deg') return `${val} arcsec = ${(val / 3600).toFixed(8)} deg`;
+        if (from === 'deg' && to === 'arcsec') return `${val} deg = ${(val * 3600).toFixed(2)} arcsec`;
 
         return null;
     }
@@ -566,7 +724,17 @@
         "What is a compiler's favorite genre of music? Heavy Metal, compiled straight to machine code.",
         "Why do sysadmins love automation scripts? Because repetition without automation is unallocated CPU cycles.",
         "Why did the terminal prompt refuse to cooperate? Access denied: superuser privileges required.",
-        "What happens when you declare an infinite loop without a break statement? See: What happens when you declare an infinite loop without a break statement."
+        "What happens when you declare an infinite loop without a break statement? See: What happens when you declare an infinite loop without a break statement.",
+        "Heisenberg and Schrodinger get pulled over by a patrol officer. The officer asks Heisenberg: 'Do you know how fast you were going?' Heisenberg replies: 'No, but I know exactly where I am!' The officer conducts a search and exclaims: 'There is a dead cat in the trunk!' Schrodinger shouts back: 'Well, there is now!'",
+        "Why do mathematicians confuse topology with gastronomy? Because they cannot distinguish between a coffee mug and a torus.",
+        "A physicist, a biologist, and a mathematician sit outside a cafe watching an empty building. Two people enter and three exit. The biologist says: 'They reproduced.' The physicist states: 'Measurement error of order +/- 1.' The mathematician observes: 'If exactly one person enters the premises, the building will be strictly empty once more.'",
+        "Why is the number e so arrogant in calculus? Because its derivative remains identical under all transformations.",
+        "An infinite number of mathematicians walk into a tavern. The first orders 1 pint. The second orders 1/2 pint. The third orders 1/4 pint. The bartender pours 2 pints onto the counter and says: 'Know your limits.'",
+        "Why did the photon refuse to check luggage at the airport terminal? Because it was traveling entirely light.",
+        "What is the contour integral around Western Europe? Zero, because all the Poles are located in Eastern Europe, provided Cauchy's residue theorem applies.",
+        "Why did the thermodynamicist stay indoors during the heatwave? Because their entropy was already at maximum potential.",
+        "How does a mathematician name their pet dog? Cauchy, because it leaves a residue on every pole.",
+        "Why did the quantum state vector collapse? Because someone made an unshielded macroscopic observation."
     ];
 
     const TRIVIA_LIST = [
@@ -599,7 +767,17 @@
         "The first hard disk drive, the IBM 350 Disk Storage Unit shipped in 1956, weighed over one ton and stored approximately 3.75 Megabytes of data across 50 magnetic platters.",
         "The BIOS (Basic Input/Output System) acronym was first coined by Gary Kildall in 1975 for the CP/M operating system boot sequence.",
         "Microsoft Solitaire was originally written in 1989 by Microsoft intern Wes Cherry to help novice users practice fluent mouse drag-and-drop actions in Windows 3.0.",
-        "Minesweeper was originally created by Robert Donner and Curt Johnson for the Windows Entertainment Pack in 1990 to train users on precision left and right mouse clicks."
+        "Minesweeper was originally created by Robert Donner and Curt Johnson for the Windows Entertainment Pack in 1990 to train users on precision left and right mouse clicks.",
+        "In 1900, Max Planck resolved the ultraviolet catastrophe of blackbody radiation by hypothesizing that electromagnetic energy is quantized in discrete packets: E = h * nu.",
+        "In 1905, Albert Einstein published four Annus Mirabilis papers establishing the photoelectric effect (for which he received the Nobel Prize), Brownian motion, Special Relativity, and mass-energy equivalence E = m*c^2.",
+        "The fine-structure constant alpha = e^2 / (4 * pi * eps0 * hbar * c) is a dimensionless physical constant approximately equal to 1 / 137.035999206, quantifying electromagnetic interaction strength.",
+        "Kurt Godel published his Incompleteness Theorems in 1931, proving that any consistent formal axiomatic system capable of arithmetic contains true statements that cannot be proven within the system.",
+        "Alan Turing introduced the concept of the Universal Turing Machine in 1936, establishing the theoretical foundations of modern algorithmic computation and proving the undecidability of the Halting Problem.",
+        "Claude Shannon founded information theory in 1948 with his landmark paper 'A Mathematical Theory of Communication', defining the Shannon entropy H = - sum(p_i * log2(p_i)).",
+        "The fast Fourier transform (FFT) algorithm published by James Cooley and John Tukey in 1965 reduced the computational complexity of discrete Fourier transforms from O(N^2) to O(N log N).",
+        "The speed of light in vacuum is defined exactly as 299,792,458 meters per second in the SI metric system, fixing the definition of the meter since 1983.",
+        "The cosmic microwave background (CMB) radiation was discovered serendipitously in 1964 by Arno Penzias and Robert Wilson using the Holmdel Horn Antenna, providing pivotal empirical validation for the Big Bang model.",
+        "John von Neumann formulated the mathematical foundations of quantum mechanics using Hilbert space operators in 1932, and later defined the stored-program computer architecture in 1945."
     ];
 
     const SHORTCUTS_LIST = [
@@ -740,6 +918,36 @@
             options: ["x86 (IA-32)", "ARMv5", "MIPS", "SPARC"],
             answer: 0,
             fact: "Windows XP 32-bit was engineered natively for Intel IA-32 (x86) compatible microprocessors."
+        },
+        {
+            q: "Which equation defines the relativistic invariant energy-momentum relation in flat Minkowski spacetime?",
+            options: ["E = m * c^2", "E^2 = (p*c)^2 + (m_0*c^2)^2", "E = 1/2 * m * v^2", "E = p^2 / (2*m)"],
+            answer: 1,
+            fact: "E^2 = (p*c)^2 + (m_0*c^2)^2 accurately relates total energy E, relativistic momentum p, rest mass m_0, and the speed of light c."
+        },
+        {
+            q: "What fundamental theorem establishes that every continuous symmetry of the action yields a conserved current?",
+            options: ["Noether's Theorem", "Liouville's Theorem", "Poynting's Theorem", "Bloch's Theorem"],
+            answer: 0,
+            fact: "Emmy Noether proved in 1915 that continuous symmetries of a Lagrangian system correspond directly to conservation laws (e.g. time translation -> energy conservation)."
+        },
+        {
+            q: "What is the computational complexity class of the Boolean Satisfiability Problem (SAT) according to Cook-Levin?",
+            options: ["P", "NP-Complete", "PSPACE-Complete", "EXPTIME"],
+            answer: 1,
+            fact: "The Cook-Levin theorem (1971) demonstrated that Boolean SAT is NP-Complete, establishing the foundation of computational complexity theory."
+        },
+        {
+            q: "Which Maxwell equation mathematically guarantees the non-existence of isolated magnetic monopoles in classical electrodynamics?",
+            options: ["div(E) = rho / eps0", "div(B) = 0", "curl(E) = -dB/dt", "curl(B) = mu0*J + mu0*eps0*dE/dt"],
+            answer: 1,
+            fact: "The divergence of the magnetic B-field is identically zero (div B = 0), implying magnetic flux lines form closed continuous loops with no scalar monopole source."
+        },
+        {
+            q: "In statistical mechanics, what distribution describes identical, indistinguishable particles obeying the Pauli Exclusion Principle?",
+            options: ["Bose-Einstein", "Fermi-Dirac", "Maxwell-Boltzmann", "Poisson"],
+            answer: 1,
+            fact: "Fermi-Dirac statistics govern half-integer spin fermions (e.g. electrons, protons, neutrons) which cannot occupy identical quantum states."
         }
     ];
 
@@ -756,7 +964,19 @@
         "CONTROLLER", "INTERFACE", "PERIPHERAL", "RESOLUTION", "PIXEL", "RASTER",
         "DEBUGGER", "ASSEMBLER", "INSTRUCTION", "SYNTAX", "EXCEPTION", "SOCKET",
         "THREAD", "MULTITASK", "OVERFLOW", "RECURSION", "BOOLEAN", "HEXADECIMAL",
-        "BINARY", "DECIMAL", "MONOCHROME", "EXPANSION", "MODEM", "BROADBAND"
+        "BINARY", "DECIMAL", "MONOCHROME", "EXPANSION", "MODEM", "BROADBAND",
+        "HAMILTONIAN", "LAGRANGIAN", "EIGENVALUE", "EIGENVECTOR", "TENSOR",
+        "HERMITIAN", "FERMION", "BOSON", "SUPERPOSITION", "ENTANGLEMENT",
+        "SPACETIME", "GEODESIC", "MINKOWSKI", "RIEMANNIAN", "MANIFOLD",
+        "ENTROPY", "THERMODYNAMICS", "ADIABATIC", "ISOTHERMAL", "QUARK",
+        "LEPTON", "GLUON", "GRAVITON", "SPECTROSCOPY", "DIFFRACTION",
+        "INTERFEROMETRY", "ASYMPTOTIC", "POLYNOMIAL", "DETERMINANT", "ISOMORPHISM",
+        "HOMOLOGY", "COHOMOLOGY", "DIFFEOMORPHISM", "FOURIER", "LAPLACE",
+        "DIRICHLET", "SCHRODINGER", "HEISENBERG", "POINCARE", "CAUCHY",
+        "NOETHER", "BOLTZMANN", "MAXWELL", "GAUSSIAN", "ORTHOGONAL",
+        "SINGULARITY", "ASYMMETRY", "QUATERNION", "OCTONION", "TOPOLOGY",
+        "JACOBIAN", "HESSIAN", "COVARIANT", "CONTRAVARIANT", "COMMUTATOR",
+        "BRACHISTOCHRONE", "CYCLOID", "FIBONACCI", "ASYMMETRIC", "DECIDABILITY"
     ];
 
     function startTicTacToe() {
@@ -1568,11 +1788,31 @@
         };
     }
 
+    function respondPhysicalConstants() {
+        setVisualState('think');
+        return "[CODATA FUNDAMENTAL PHYSICAL CONSTANTS]\n" +
+            "- Speed of light in vacuum (c): 299,792,458 m s^-1 (exact)\n" +
+            "- Planck constant (h): 6.62607015 x 10^-34 J s (exact)\n" +
+            "- Reduced Planck constant (hbar = h / 2pi): 1.054571817 x 10^-34 J s\n" +
+            "- Elementary electric charge (e): 1.602176634 x 10^-19 C (exact)\n" +
+            "- Boltzmann constant (k_B): 1.380649 x 10^-23 J K^-1 (exact)\n" +
+            "- Avogadro constant (N_A): 6.02214076 x 10^23 mol^-1 (exact)\n" +
+            "- Universal Gas Constant (R = N_A * k_B): 8.314462618 J mol^-1 K^-1\n" +
+            "- Newtonian gravitational constant (G): 6.67430(15) x 10^-11 m^3 kg^-1 s^-2\n" +
+            "- Vacuum electric permittivity (eps_0): 8.8541878128(13) x 10^-12 F m^-1\n" +
+            "- Vacuum magnetic permeability (mu_0): 1.25663706212(19) x 10^-6 N A^-2\n" +
+            "- Electron rest mass (m_e): 9.1093837015 x 10^-31 kg (0.510998950 MeV/c^2)\n" +
+            "- Proton rest mass (m_p): 1.67262192369 x 10^-27 kg (938.272088 MeV/c^2)\n" +
+            "- Neutron rest mass (m_n): 1.67492749804 x 10^-27 kg (939.565420 MeV/c^2)\n" +
+            "- Stefan-Boltzmann constant (sigma_SB): 5.670374419 x 10^-8 W m^-2 K^-4\n" +
+            "- Fine-structure constant (alpha): 7.2973525693 x 10^-3 approx 1 / 137.035999206";
+    }
+
     const INTENTS = [
         { id: 'greeting', keywords: ['hello', 'hi', 'hey', 'greetings', 'morning', 'afternoon', 'good day', 'bonjour', 'coucou', 'salut', 'yo', 'howdy', 'bonsoir'], respond: () => pickFrom(GREETINGS) },
         { id: 'bye', keywords: ['bye', 'goodbye', 'see ya', 'farewell', 'exit', 'close', 'quit', 'aurevoir', 'ciao', 'adieu', 'leave'], respond: () => "Session closed. Click the tray icon at any point to reactivate the assistant interface." },
         { id: 'thanks', keywords: ['thanks', 'thank you', 'thx', 'appreciate it', 'merci', 'grateful', 'remercie', 'much obliged'], respond: () => "You are very welcome. Standing by for further workspace instructions." },
-        { id: 'identity', keywords: ['who are you', 'your name', 'what are you', 'introduce yourself', 'clippy', 'qui es tu', 'about you', 'identity', 'presentation'], respond: () => "I am Clippit, the default interactive office and workspace assistant for Windows XP, operating with full 32-bit heuristics." },
+        { id: 'identity', keywords: ['who are you', 'your name', 'what are you', 'introduce yourself', 'clippy', 'qui es tu', 'about you', 'identity', 'presentation'], respond: () => "I am Clippit, the default interactive office and workspace assistant for Windows XP, operating with full 32-bit heuristics and scientific computation pipelines." },
         { id: 'mail', keywords: ['mail', 'mails', 'email', 'emails', 'inbox', 'outlook', 'unread', 'messages', 'courrier', 'boite de reception', 'message'], respond: respondUnreadMail },
         { id: 'projects', keywords: ['project', 'projects', 'portfolio', 'work', 'code', 'showcase', 'projets', 'travaux', 'creations'], respond: respondProjects },
         { id: 'desktop', keywords: ['desktop', 'files', 'icons', 'items', 'bureau', 'fichiers', 'surface'], respond: respondDesktop },
@@ -1582,15 +1822,16 @@
         { id: 'windows', keywords: ['window', 'windows', 'running apps', 'active windows', 'fenetres', 'taches', 'processes'], respond: respondWindows },
         { id: 'music', keywords: ['music', 'song', 'track', 'audio', 'now playing', 'player', 'musique', 'chanson', 'lecteur audio'], respond: respondMusic },
         { id: 'status', keywords: ['status', 'diagnostics', 'system info', 'specs', 'memory', 'ram', 'cpu', 'workstation', 'configuration', 'systeme', 'info systeme'], respond: respondSystemStatus },
+        { id: 'constants', keywords: ['constant', 'constants', 'physic', 'physics', 'codata', 'planck', 'speed of light', 'constantes', 'constante physique'], respond: respondPhysicalConstants },
         { id: 'shortcuts', keywords: ['shortcut', 'shortcuts', 'hotkeys', 'keybinds', 'raccourcis', 'clavier', 'touches'], respond: respondShortcuts },
-        { id: 'trivia', keywords: ['trivia', 'fact', 'facts', 'did you know', 'anecdote', 'histoire', 'culture', 'culture g'], respond: () => pickFrom(TRIVIA_LIST) },
+        { id: 'trivia', keywords: ['trivia', 'fact', 'facts', 'did you know', 'anecdote', 'histoire', 'culture', 'culture g', 'science fact'], respond: () => pickFrom(TRIVIA_LIST) },
         { id: 'joke', keywords: ['joke', 'funny', 'tell me a joke', 'humor', 'blague', 'rigolo', 'drole', 'blagues'], respond: () => pickFrom(JOKES_LIST) },
         { id: 'defrag', keywords: ['defrag', 'defragment', 'disk defragmenter', 'optimise', 'optimiser', 'defragmentation'], respond: () => { simulateDefrag(); return null; } },
         { id: 'pet', keywords: ['pet', 'feed', 'pet clippy', 'tamagotchi', 'nourrir', 'statut compagnon', 'compagnon'], respond: () => { handlePetAction('status'); return null; } },
         { id: 'memory', keywords: ['memory', 'memory match', 'pairs', 'cartes', 'jeu de memoire', 'paires'], respond: () => { startMemoryGame(); return null; } },
         { id: 'hangman', keywords: ['hangman', 'pendu', 'guess word', 'jeu du pendu'], respond: () => { startHangmanGame(); return null; } },
         { id: 'ttt', keywords: ['tic tac toe', 'tictactoe', 'morpion', 'morpion game'], respond: () => { startTicTacToe(); return null; } },
-        { id: 'quiz', keywords: ['quiz', 'tech quiz', 'test me', 'qcm', 'questionnaire'], respond: () => { startQuizGame(); return null; } },
+        { id: 'quiz', keywords: ['quiz', 'tech quiz', 'test me', 'qcm', 'questionnaire', 'physics quiz', 'math quiz'], respond: () => { startQuizGame(); return null; } },
         { id: 'guess', keywords: ['guess', 'guess number', 'devinette', 'nombre mystere', 'deviner'], respond: () => { startGuessNumberGame(); return null; } },
         { id: 'rps', keywords: ['rps', 'rock paper scissors', 'chifoumi', 'pierre feuille ciseaux', 'shifumi'], respond: startRPSGame },
         { id: 'help', keywords: ['help', 'what can you do', 'options', 'commands', 'aide', 'manuel', 'fonctions', 'instructions', '?'], respond: respondHelp }
