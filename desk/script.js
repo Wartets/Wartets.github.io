@@ -1962,11 +1962,89 @@ function renderCalendar(year, month) {
 		dayCell.className = 'calendar-day';
 		dayCell.textContent = day;
 
-		if (year === today.getFullYear() && month === today.getMonth() && day === today.getDate()) {
+		const isToday = year === today.getFullYear() && month === today.getMonth() && day === today.getDate();
+		if (isToday) {
 			dayCell.classList.add('today');
+		}
+
+		const isSelectable = year === today.getFullYear() && month === today.getMonth() && day <= today.getDate();
+		if (isSelectable) {
+			dayCell.classList.add('selectable');
+			dayCell.title = 'View the anecdote scheduled for this day';
+			dayCell.addEventListener('click', () => {
+				openAnecdoteWindow(new Date(Date.UTC(year, month, day)));
+			});
 		}
 		
 		gridEl.appendChild(dayCell);
+	}
+}
+
+let anecdotesRegistryPromise = null;
+
+function getAnecdotesRegistry() {
+	if (!anecdotesRegistryPromise) {
+		anecdotesRegistryPromise = import('/js/anecdotes/loader.js').then(({ loadRegistry }) => loadRegistry());
+	}
+	return anecdotesRegistryPromise;
+}
+
+function toISODateKeyUTC(dateUTC) {
+	return `${dateUTC.getUTCFullYear()}-${String(dateUTC.getUTCMonth() + 1).padStart(2, '0')}-${String(dateUTC.getUTCDate()).padStart(2, '0')}`;
+}
+
+async function openAnecdoteWindow(dateUTC) {
+	const id = `window-anecdote-${toISODateKeyUTC(dateUTC)}`;
+	const existingWindow = document.getElementById(id);
+	if (existingWindow) {
+		bringWindowToFront(existingWindow);
+		return;
+	}
+
+	const dateLabel = dateUTC.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric', timeZone: 'UTC' });
+	const win = createXPWindow(id, `Anecdote - ${dateLabel}`, '<div style="padding:15px; font-size:12px;">Loading...</div>', 420, 260, {
+		iconSrc: 'https://api.iconify.design/mdi/calendar-star.svg',
+		resizable: false
+	});
+
+	const content = win.querySelector('.xp-window-content');
+
+	try {
+		const [{ resolveEntryForDate }, { getFullEntry }, registry] = await Promise.all([
+			import('/js/anecdotes/debug/engine.js'),
+			import('/js/anecdotes/debug/entry-cache.js'),
+			getAnecdotesRegistry()
+		]);
+
+		const { registryEntry } = resolveEntryForDate(dateUTC, registry);
+
+		if (!registryEntry) {
+			content.innerHTML = '<div style="padding:15px; font-size:12px;">No anecdote available for this date.</div>';
+			return;
+		}
+
+		const fullEntry = await getFullEntry(registryEntry, 'en');
+
+		if (!document.getElementById(id)) return;
+
+		const domainText = (fullEntry.domain && (fullEntry.domain.en || fullEntry.domain.fr)) || '';
+		let contentText = '';
+		try {
+			contentText = typeof fullEntry.content === 'function'
+				? fullEntry.content('en', dateUTC.getUTCFullYear(), dateUTC)
+				: (fullEntry.content && (fullEntry.content.en || fullEntry.content.fr)) || '';
+		} catch (error) {
+			contentText = 'This anecdote could not be rendered.';
+		}
+
+		content.innerHTML = `
+			<div style="padding:15px; font-family: Arial, sans-serif; font-size: 13px; line-height: 1.5; color: var(--xp-font-color);">
+				<div style="font-size: 11px; text-transform: uppercase; color: #555; margin-bottom: 8px; font-family: 'Roboto Mono', monospace; letter-spacing: 0.05em;">${domainText}</div>
+				<div>${contentText}</div>
+			</div>
+		`;
+	} catch (error) {
+		content.innerHTML = '<div style="padding:15px; font-size:12px;">Unable to load the anecdote for this date.</div>';
 	}
 }
 
