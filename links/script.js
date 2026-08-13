@@ -23,7 +23,8 @@ document.addEventListener('DOMContentLoaded', () => {
 		{ name: "Thought's Library", url: '../poetry/' },
 		{ name: 'Music', url: '../music/' },
 		{ name: 'Desk', url: '../desk/' },
-		{ name: 'Anecdotes', url: '../anecdote/' }
+		{ name: '404', url: '../404.html' },
+		{ name: 'Offline', url: '../offline.html' }
 	];
 
 	const socialLinks = [

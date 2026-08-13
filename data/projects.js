@@ -608,7 +608,7 @@ const projects = [
 			link: "https://soundcloud.com/wartets",
 			keywords: ["music", "creative", "electronic", "ambient"],
 			languages: ["en", "fr"],
-			show: true
+			show: false
 		},
 		{
 			title: { en: "My Music (YouTube)", fr: "Ma Musique (YouTube)" },
