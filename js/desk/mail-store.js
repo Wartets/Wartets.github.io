@@ -232,10 +232,11 @@
 
 	async function buildAnecdoteEmail(dateUTC, dateKey) {
 		try {
-			const [{ resolveEntryForDate }, { getFullEntry }, { loadRegistry }] = await Promise.all([
+			const [{ resolveEntryForDate }, { getFullEntry }, { loadRegistry }, markdownModule] = await Promise.all([
 				import("/js/anecdotes/debug/engine.js"),
 				import("/js/anecdotes/debug/entry-cache.js"),
-				import("/js/anecdotes/loader.js")
+				import("/js/anecdotes/loader.js"),
+				import("/js/anecdotes/markdown-render.js")
 			]);
 			const registry = await loadRegistry();
 			const { registryEntry } = resolveEntryForDate(dateUTC, registry);
@@ -244,21 +245,23 @@
 			const fullEntry = await getFullEntry(registryEntry, "en");
 			if (!fullEntry || fullEntry.__loadFailed) return null;
 
+			await markdownModule.ensureMarkdownAssets();
+
 			const domainText = (fullEntry.domain && (fullEntry.domain.en || fullEntry.domain.fr)) || "";
 			const contentText = typeof fullEntry.content === "function"
 				? fullEntry.content("en", dateUTC.getUTCFullYear(), dateUTC)
 				: ((fullEntry.content && (fullEntry.content.en || fullEntry.content.fr)) || "");
 
 			let bodyHtml = `<p style="text-transform:uppercase;font-size:11px;color:#666;letter-spacing:0.05em;">${domainText}</p>`;
-			bodyHtml += `<p>${contentText}</p>`;
+			bodyHtml += `<div class="anecdote-markdown-body">${await markdownModule.renderMarkdownWithMath(contentText)}</div>`;
 
-			(fullEntry.contexts || []).forEach(context => {
-				if (context.external) return;
+			for (const context of (fullEntry.contexts || [])) {
+				if (context.external) continue;
 				const title = (context.title && (context.title.en || context.title.fr)) || "";
 				const body = (context.body && (context.body.en || context.body.fr)) || "";
 				bodyHtml += `<h4 style="margin-bottom:4px;">${title}</h4>`;
-				bodyHtml += `<p>${body.replace(/\n\n/g, "</p><p>").replace(/\n/g, "<br>")}</p>`;
-			});
+				bodyHtml += `<div class="anecdote-markdown-body">${await markdownModule.renderMarkdownWithMath(body)}</div>`;
+			}
 
 			if (fullEntry.sources && fullEntry.sources.length > 0) {
 				bodyHtml += '<h4 style="margin-bottom:4px;">Sources</h4><ul>';

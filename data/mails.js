@@ -42,6 +42,33 @@ window.mailData = {
 			body: "<p>You got 1,234 plays this week! Keep up the great work.</p>"
 		},
 		{
+			id: 4,
+			folder: "Inbox",
+			from: "Université Paris Cité",
+			fromAddress: "scolarite@u-paris.fr",
+			subject: "Confirmation d'inscription pédagogique",
+			date: "2026-07-02 09:15",
+			body: `
+				<p>Bonjour Colin Bossu Réaubourg,</p>
+				<p>Votre inscription pédagogique pour l'année universitaire à venir a bien été enregistrée par les services de scolarité.</p>
+				<p>Vous pouvez dès à présent consulter votre emploi du temps provisoire depuis votre espace étudiant.</p>
+				<p>Cordialement,<br>La scolarité de l'UFR de Physique</p>
+			`
+		},
+		{
+			id: 5,
+			folder: "Inbox",
+			from: "Overleaf",
+			fromAddress: "notifications@overleaf.com",
+			subject: "Vous avez été invité à collaborer sur un projet",
+			date: "2026-06-11 17:42",
+			body: `
+				<p>Un collaborateur vous a ajouté au projet Overleaf "Rapport de stage MPQ-QITE".</p>
+				<p>Vous pouvez désormais éditer ce document en temps réel avec les autres membres du projet.</p>
+				<p>Ouvrez Overleaf pour commencer à collaborer.</p>
+			`
+		},
+		{
 			id: 100,
 			folder: "Spam",
 			from: "Milfeuille.com",
@@ -58,166 +85,6 @@ window.mailData = {
 				</div>
 			`
 		}
-	],
-
-	senderPool: [
-		{ name: "GitHub", address: "notifications@github.com" },
-		{ name: "SoundCloud", address: "no-reply@soundcloud.com" },
-		{ name: "YouTube", address: "no-reply@youtube.com" },
-		{ name: "Université Paris Cité", address: "scolarite@u-paris.fr" },
-		{ name: "Phisis Association", address: "contact@phisis-asso.fr" },
-		{ name: "Overleaf", address: "notifications@overleaf.com" },
-		{ name: "Steam", address: "noreply@steampowered.com" },
-		{ name: "LinkedIn", address: "messages-noreply@linkedin.com" },
-		{ name: "arXiv", address: "no-reply@arxiv.org" },
-		{ name: "Google Drive", address: "drive-shares-noreply@google.com" },
-		{ name: "Docker Hub", address: "noreply@docker.com" },
-		{ name: "npm", address: "support@npmjs.com" },
-		{ name: "Windows Update", address: "update@microsoft.com" },
-		{ name: "Météo France", address: "alerts@meteo-france.fr" },
-		{ name: "CNRS Newsletter", address: "newsletter@cnrs.fr" },
-        { name: "Mozilla", address: "newsletter@mozilla.org" },
-        { name: "Stack Overflow", address: "noreply@stackoverflow.com" },
-        { name: "GitLab", address: "notifications@gitlab.com" },
-        { name: "Microsoft", address: "account-security@microsoft.com" },
-        { name: "Google", address: "accounts-noreply@google.com" },
-        { name: "Google Calendar", address: "calendar-notification@google.com" },
-        { name: "Discord", address: "noreply@discord.com" },
-        { name: "Reddit", address: "notifications@reddit.com" },
-        { name: "Medium", address: "hello@medium.com" },
-        { name: "Notion", address: "team@notion.so" },
-        { name: "Figma", address: "notifications@figma.com" },
-        { name: "Vercel", address: "notifications@vercel.com" },
-        { name: "Netlify", address: "notifications@netlify.com" },
-        { name: "Cloudflare", address: "notifications@cloudflare.com" },
-        { name: "Trello", address: "noreply@trello.com" },
-        { name: "Slack", address: "team@slack.com" },
-        { name: "Dropbox", address: "no-reply@dropbox.com" },
-        { name: "ResearchGate", address: "updates@researchgate.net" },
-        { name: "Nature", address: "alerts@nature.com" },
-        { name: "ScienceDirect", address: "alerts@sciencedirect.com" },
-        { name: "IEEE", address: "noreply@ieee.org" },
-        { name: "Springer", address: "alerts@springernature.com" },
-        { name: "ESA", address: "news@esa.int" },
-        { name: "NASA", address: "nasa@newsletters.nasa.gov" },
-        { name: "Python", address: "python-dev@python.org" },
-        { name: "Rust", address: "notifications@rust-lang.org" },
-        { name: "Ubuntu", address: "newsletter@ubuntu.com" },
-        { name: "Debian", address: "news@debian.org" },
-        { name: "Arch Linux", address: "newsletter@archlinux.org" },
-        { name: "Kaggle", address: "notifications@kaggle.com" }
-	],
-
-	topicPool: [
-		"the Lenia GPU Simulator repository", "the physics seminar", "your repository",
-		"quantum computing resources", "the Phisis association meeting", "your cloud storage",
-		"the N-Body simulation project", "your open-source contributions", "your recent upload",
-		"the upcoming conference", "your Turbulence Simulation build", "your document library",
-		"the TikZ Generator issue tracker", "your account settings", "the weekly newsletter",
-        "the Lenia cellular automaton", "the GPU benchmark results", "the CUDA implementation",
-        "the N-Body simulation", "the Barnes-Hut algorithm", "the fluid dynamics experiment",
-        "the Navier-Stokes project", "the particle simulator", "the TikZ Generator",
-        "the LaTeX document", "the physics seminar", "the mathematics department", 
-        "the research notebook", "the numerical methods project", "the scientific computing environment",
-        "the Python package", "the Rust simulation engine", "the Docker container",
-        "the GitHub repository", "the GitLab project", "the CI pipeline",
-        "the latest commit", "the open-source project", "the documentation website",
-        "the portfolio website", "the personal homepage", "the university account",
-        "the student portal", "the research group", "the upcoming conference",
-        "the summer workshop", "the weekly meeting", "the association meeting",
-        "the cloud storage", "the shared document", "the project bibliography",
-        "the Overleaf workspace", "the latest paper", "the arXiv search",
-        "the research digest", "the security settings", "the account activity",
-        "the authentication system", "the notification preferences", "the weekly statistics",
-        "the latest upload", "the media library", "the development environment",
-        "the package registry", "the dependency tree", "the container registry",
-        "the server configuration"
-	],
-
-	subjectTemplates: [
-		"{count} new notifications regarding {topic}",
-		"Your weekly digest is ready",
-		"Action required: {topic}",
-		"New comment on {topic}",
-		"Reminder: {topic} deadline approaching",
-		"{topic} - system update available",
-		"Your report on {topic} is ready to view",
-		"Security notice regarding your account",
-		"Invitation: collaborate on {topic}",
-		"Your subscription related to {topic} has been renewed",
-        "{count} new events detected in {topic}",
-        "New activity detected: {topic}",
-        "Update available for {topic}",
-        "Status report: {topic}",
-        "Daily summary: {topic}",
-        "Weekly report concerning {topic}",
-        "New activity on {topic}",
-        "Someone commented on {topic}",
-        "Someone mentioned you in {topic}",
-        "Review requested: {topic}",
-        "Your attention is needed: {topic}",
-        "Task update: {topic}",
-        "Reminder: review {topic}",
-        "Reminder: {topic}",
-        "Important information about {topic}",
-        "New document related to {topic}",
-        "New version available: {topic}",
-        "Build completed: {topic}",
-        "Build failed: {topic}",
-        "Deployment notification: {topic}",
-        "Security notification: {topic}",
-        "Account activity: {topic}",
-        "New collaboration request: {topic}",
-        "Invitation to {topic}",
-        "Your {topic} digest",
-        "Monthly summary: {topic}",
-        "Automatic notification: {topic}",
-        "System notification: {topic}",
-        "Activity summary for {topic}",
-        "Changes detected in {topic}",
-	],
-
-	bodyIntros: [
-		"We wanted to let you know about some recent activity related to {topic}.",
-		"Here is a short summary concerning {sender} and {topic}.",
-		"This is an automated message regarding {topic}.",
-		"Your attention is requested for an update involving {topic}.",
-		"A new event has been recorded that concerns {topic}.",
-        "A recent change has been detected concerning {topic}.",
-        "Your account has received new activity related to {topic}.",
-        "The system has generated a new notification concerning {topic}.",
-        "There has been an update involving {topic}.",
-        "A new event has been registered for {topic}.",
-        "Several changes have been detected in {topic}.",
-        "The latest activity concerning {topic} is now available.",
-        "A new update has been generated automatically for {topic}.",
-        "Your latest activity concerning {topic} has been processed.",
-        "The system has finished processing the latest information about {topic}.",
-        "A new item has been added to {topic}.",
-        "Your recent activity has triggered a notification concerning {topic}.",
-        "New information has become available concerning {topic}.",
-        "The latest status information for {topic} is now available.",
-        "A new automated report concerning {topic} has been generated.",
-	],
-
-	bodyClosings: [
-		"You can review the full details by logging into your account.",
-		"No further action is required at this time.",
-		"Thank you for continuing to use our services.",
-		"Feel free to reach out if you have any questions.",
-		"This message was sent automatically and does not require a reply.",
-        "You can open the corresponding application to view additional information.",
-        "The information will remain available in your account.",
-        "You do not need to respond to this automated notification.",
-        "Please review the information when convenient.",
-        "This notification was generated automatically.",
-        "The current status can be checked from your dashboard.",
-        "Additional details may be available in the associated project.",
-        "Your existing preferences have not been modified.",
-        "No immediate action is required.",
-        "The system will continue monitoring for new activity.",
-        "Thank you for your attention.",
-        "This message is part of your regular activity summary.",
 	],
 
 	generateProceduralEmail: function(dateKey) {
@@ -245,32 +112,554 @@ window.mailData = {
 			return array[Math.floor(rng() * array.length)];
 		}
 
+		function pickInt(min, max, rng) {
+			return min + Math.floor(rng() * (max - min + 1));
+		}
+
+		function fill(template, vars) {
+			return template.replace(/\{(\w+)\}/g, (match, key) => (key in vars) ? String(vars[key]) : match);
+		}
+
+		function resolveProjectTitle(title) {
+			if (typeof title === 'string') return title;
+			if (title && typeof title === 'object') return title.en || title.fr || Object.values(title)[0] || '';
+			return '';
+		}
+
+		function getProjectRepoNames() {
+			try {
+				if (typeof projects === 'undefined') return [];
+				return projects.flat()
+					.filter(p => typeof p === 'object' && p !== null && p.github && p.title)
+					.map(p => resolveProjectTitle(p.title))
+					.filter(Boolean);
+			} catch (error) {
+				return [];
+			}
+		}
+
+		function getLibraryDocumentTitles() {
+			try {
+				if (typeof window.libraryData === 'undefined' || !window.libraryData.documents) return [];
+				return window.libraryData.documents
+					.filter(d => d.show !== false && d.title)
+					.map(d => (d.title && typeof d.title === 'object') ? (d.title.en || d.title.fr || Object.values(d.title)[0]) : d.title)
+					.filter(Boolean);
+			} catch (error) {
+				return [];
+			}
+		}
+
+		const fallbackRepoNames = ["Lenia GPU Simulator", "N-Body-Simulation", "TikZ Generator", "Turbulence Simulation", "FDTD Wave Simulator", "Origami", "Molecule Builder"];
+		const fallbackPaperTitles = ["Rapport de stage MPQ-QITE", "Construction progressive du modèle standard", "Étude expérimentale du lasso", "Probabilités des galettes des rois"];
+
+		const repoNames = getProjectRepoNames().length ? getProjectRepoNames() : fallbackRepoNames;
+		const paperTitles = getLibraryDocumentTitles().length ? getLibraryDocumentTitles() : fallbackPaperTitles;
+
+		const musicTrackTitles = ["Projet 27", "Projet 12", "Projet 8", "Dance", "Projet 2", "End of Chapter One", "Cell", "Hypocritical World's Nostalgia"];
+		const universityCourses = ["Mécanique Quantique", "Physique Statistique", "Électromagnétisme", "Analyse Numérique", "Optique Ondulatoire", "Thermodynamique", "Mécanique des Fluides"];
+		const associationEvents = ["la conférence de rentrée", "l'atelier de vulgarisation scientifique", "la sortie au Palais de la Découverte", "la réunion du bureau", "la soirée d'intégration", "le café-débat mensuel"];
+		const arxivSearchTerms = ["quantum computing", "cellular automata", "fluid dynamics", "N-body simulation", "condensed matter physics", "statistical mechanics", "entangled photon sources"];
+		const productivityDocumentNames = ["Notes de réunion", "Feuille de route Q3", "Cahier des charges", "Plan de présentation", "Suivi de projet", "Compte-rendu hebdomadaire"];
+		const slackChannels = ["general", "physique-projets", "dev-simulation", "annonces", "random"];
+		const redditSubreddits = ["Physics", "ProgrammerHumor", "generative", "math", "simulation"];
+		const kaggleDatasets = ["particle-collision-events", "exoplanet-transit-curves", "n-body-trajectories", "fluid-turbulence-samples"];
+		const dropboxFolderNames = ["Archives Simulation", "Documents Administratifs", "Backup Musique", "Notes de Cours"];
+
+		function unorderedListItems(items) {
+			return items.map(item => `<li>${item}</li>`).join("");
+		}
+
+		const categories = [
+			{
+				id: "development",
+				senders: [
+					{ name: "GitHub", address: "notifications@github.com" },
+					{ name: "GitLab", address: "notifications@gitlab.com" },
+					{ name: "Docker Hub", address: "noreply@docker.com" },
+					{ name: "npm", address: "support@npmjs.com" },
+					{ name: "Vercel", address: "notifications@vercel.com" },
+					{ name: "Netlify", address: "notifications@netlify.com" },
+					{ name: "Cloudflare", address: "notifications@cloudflare.com" },
+					{ name: "Stack Overflow", address: "noreply@stackoverflow.com" }
+				],
+				closings: [
+					"No action is required unless you want to review the changes yourself.",
+					"You can manage notification preferences for this repository at any time.",
+					"This is an automated message generated by your repository's activity feed.",
+					"Feel free to mute this repository if you no longer wish to receive these updates."
+				],
+				scenarios: [
+					(rng) => {
+						const repo = pick(repoNames, rng);
+						const count = pickInt(1, 9, rng);
+						return {
+							subject: fill("New issue opened on {repo}", { repo }),
+							paragraphs: [
+								fill("A new issue has just been opened on the repository <strong>{repo}</strong>.", { repo }),
+								fill("There {verb} currently {count} open issue{plural} awaiting triage on this repository.", { count, verb: count === 1 ? "is" : "are", plural: count === 1 ? "" : "s" })
+							]
+						};
+					},
+					(rng) => {
+						const repo = pick(repoNames, rng);
+						const prNumber = pickInt(12, 348, rng);
+						return {
+							subject: fill("Pull request #{prNumber} merged into {repo}", { prNumber, repo }),
+							paragraphs: [
+								fill("Pull request #{prNumber} has been successfully merged into the main branch of <strong>{repo}</strong>.", { prNumber, repo }),
+								"All required checks passed before the merge was completed."
+							]
+						};
+					},
+					(rng) => {
+						const repo = pick(repoNames, rng);
+						const count = pickInt(2, 47, rng);
+						return {
+							subject: fill("{count} new stargazers on {repo}", { count, repo }),
+							paragraphs: [
+								fill("Your repository <strong>{repo}</strong> gained {count} new stargazers this week.", { count, repo }),
+								"Keep up the momentum, your project is gaining visibility within the community."
+							]
+						};
+					},
+					(rng) => {
+						const repo = pick(repoNames, rng);
+						const versionMajor = pickInt(1, 4, rng);
+						const versionMinor = pickInt(0, 9, rng);
+						const versionPatch = pickInt(0, 9, rng);
+						return {
+							subject: fill("New release published: {repo} v{version}", { repo, version: `${versionMajor}.${versionMinor}.${versionPatch}` }),
+							paragraphs: [
+								fill("A new release of <strong>{repo}</strong> has just been published: version {version}.", { repo, version: `${versionMajor}.${versionMinor}.${versionPatch}` }),
+								"The changelog and release notes are available on the repository's Releases page."
+							]
+						};
+					},
+					(rng) => {
+						const repo = pick(repoNames, rng);
+						return {
+							subject: fill("Build failed: {repo} — action required", { repo }),
+							paragraphs: [
+								fill("The latest continuous integration build for <strong>{repo}</strong> has failed.", { repo }),
+								"Check the build logs to identify which step caused the failure before merging any further changes."
+							]
+						};
+					}
+				]
+			},
+			{
+				id: "academic",
+				senders: [
+					{ name: "Université Paris Cité", address: "scolarite@u-paris.fr" },
+					{ name: "arXiv", address: "no-reply@arxiv.org" },
+					{ name: "ResearchGate", address: "updates@researchgate.net" },
+					{ name: "Nature", address: "alerts@nature.com" },
+					{ name: "IEEE", address: "noreply@ieee.org" },
+					{ name: "Springer", address: "alerts@springernature.com" },
+					{ name: "ScienceDirect", address: "alerts@sciencedirect.com" },
+					{ name: "CNRS Newsletter", address: "newsletter@cnrs.fr" },
+					{ name: "Overleaf", address: "notifications@overleaf.com" }
+				],
+				closings: [
+					"You can access the full details from your institutional account.",
+					"This alert was generated based on your saved search preferences.",
+					"No further action is required unless you wish to follow up.",
+					"You can adjust your notification settings for this topic at any time."
+				],
+				scenarios: [
+					(rng) => {
+						const paper = pick(paperTitles, rng);
+						return {
+							subject: fill("New citation alert for \"{paper}\"", { paper }),
+							paragraphs: [
+								fill("A recently published article has cited your work <strong>\"{paper}\"</strong>.", { paper }),
+								"You can view the citing publication and its context from your citation tracking dashboard."
+							]
+						};
+					},
+					(rng) => {
+						const term = pick(arxivSearchTerms, rng);
+						const count = pickInt(1, 6, rng);
+						return {
+							subject: fill("{count} new preprints matching \"{term}\"", { count, term }),
+							paragraphs: [
+								fill("{count} new preprint(s) matching your saved search \"{term}\" have been submitted to arXiv today.", { count, term }),
+								"You can review the abstracts directly from your personalized feed."
+							]
+						};
+					},
+					(rng) => {
+						const paper = pick(paperTitles, rng);
+						return {
+							subject: fill("Vous avez été invité à collaborer sur \"{paper}\"", { paper }),
+							paragraphs: [
+								fill("Un collaborateur vous a ajouté au projet Overleaf <strong>\"{paper}\"</strong>.", { paper }),
+								"Vous pouvez désormais éditer ce document en temps réel avec les autres membres du projet."
+							]
+						};
+					},
+					(rng) => {
+						const course = pick(universityCourses, rng);
+						return {
+							subject: fill("Rappel : contrôle continu de {course}", { course }),
+							paragraphs: [
+								fill("Le contrôle continu de l'UE <strong>{course}</strong> aura lieu prochainement.", { course }),
+								"Consultez votre emploi du temps pour connaître la date, l'heure et la salle exactes."
+							]
+						};
+					},
+					(rng) => {
+						const paper = pick(paperTitles, rng);
+						return {
+							subject: fill("Your submission \"{paper}\" is under review", { paper }),
+							paragraphs: [
+								fill("Your manuscript <strong>\"{paper}\"</strong> has entered the peer review stage.", { paper }),
+								"Reviewers typically respond within four to six weeks. You will be notified as soon as a decision is made."
+							]
+						};
+					}
+				]
+			},
+			{
+				id: "music",
+				senders: [
+					{ name: "SoundCloud", address: "no-reply@soundcloud.com" },
+					{ name: "YouTube", address: "no-reply@youtube.com" }
+				],
+				closings: [
+					"Keep creating, your audience is growing steadily.",
+					"You can view the full analytics breakdown from your creator dashboard.",
+					"This summary is generated automatically at the end of each week."
+				],
+				scenarios: [
+					(rng) => {
+						const track = pick(musicTrackTitles, rng);
+						const plays = pickInt(230, 4800, rng);
+						return {
+							subject: "Your weekly stats are here",
+							paragraphs: [
+								fill("Your track <strong>\"{track}\"</strong> received {plays} plays this week.", { track, plays }),
+								"That is a solid increase compared to the previous week."
+							]
+						};
+					},
+					(rng) => {
+						const track = pick(musicTrackTitles, rng);
+						return {
+							subject: fill("New comment on \"{track}\"", { track }),
+							paragraphs: [
+								fill("Someone left a new comment on your track <strong>\"{track}\"</strong>.", { track }),
+								"Reply to keep the conversation going with your listeners."
+							]
+						};
+					},
+					(rng) => {
+						const track = pick(musicTrackTitles, rng);
+						const subs = pickInt(3, 42, rng);
+						return {
+							subject: fill("{subs} new followers this week", { subs }),
+							paragraphs: [
+								fill("You gained {subs} new followers this week, many of whom discovered you through <strong>\"{track}\"</strong>.", { subs, track }),
+								"Consider sharing your latest release to keep the momentum going."
+							]
+						};
+					}
+				]
+			},
+			{
+				id: "productivity",
+				senders: [
+					{ name: "Notion", address: "team@notion.so" },
+					{ name: "Trello", address: "noreply@trello.com" },
+					{ name: "Slack", address: "team@slack.com" },
+					{ name: "Figma", address: "notifications@figma.com" },
+					{ name: "Discord", address: "noreply@discord.com" },
+					{ name: "Dropbox", address: "no-reply@dropbox.com" },
+					{ name: "Google Drive", address: "drive-shares-noreply@google.com" },
+					{ name: "Google Calendar", address: "calendar-notification@google.com" }
+				],
+				closings: [
+					"You can adjust how often you receive these notifications in your settings.",
+					"This is an automated notification and does not require a reply.",
+					"Open the application to see the full context of this activity."
+				],
+				scenarios: [
+					(rng) => {
+						const doc = pick(productivityDocumentNames, rng);
+						return {
+							subject: fill("A document was shared with you: \"{doc}\"", { doc }),
+							paragraphs: [
+								fill("A collaborator shared the document <strong>\"{doc}\"</strong> with you.", { doc }),
+								"You now have access to view and comment on it."
+							]
+						};
+					},
+					(rng) => {
+						const doc = pick(productivityDocumentNames, rng);
+						return {
+							subject: fill("You were assigned a task in \"{doc}\"", { doc }),
+							paragraphs: [
+								fill("You have been assigned a new task within the board <strong>\"{doc}\"</strong>.", { doc }),
+								"Check the due date and update the task status once you begin working on it."
+							]
+						};
+					},
+					(rng) => {
+						const channel = pick(slackChannels, rng);
+						return {
+							subject: fill("You were mentioned in #{channel}", { channel }),
+							paragraphs: [
+								fill("You were mentioned in a message posted to #<strong>{channel}</strong>.", { channel }),
+								"Open the conversation to see the full context and reply if needed."
+							]
+						};
+					},
+					(rng) => {
+						const folder = pick(dropboxFolderNames, rng);
+						return {
+							subject: fill("A folder was shared with you: \"{folder}\"", { folder }),
+							paragraphs: [
+								fill("Access to the folder <strong>\"{folder}\"</strong> has been shared with your account.", { folder }),
+								"You can now sync its contents to your local devices."
+							]
+						};
+					},
+					(rng) => {
+						const doc = pick(productivityDocumentNames, rng);
+						const minutesBefore = pick([15, 30, 60], rng);
+						return {
+							subject: fill("Reminder: meeting starting in {minutesBefore} minutes", { minutesBefore }),
+							paragraphs: [
+								fill("Your scheduled meeting related to <strong>\"{doc}\"</strong> starts in {minutesBefore} minutes.", { doc, minutesBefore }),
+								"Make sure you have reviewed the agenda before joining."
+							]
+						};
+					}
+				]
+			},
+			{
+				id: "security",
+				senders: [
+					{ name: "Microsoft", address: "account-security@microsoft.com" },
+					{ name: "Google", address: "accounts-noreply@google.com" },
+					{ name: "Windows Update", address: "update@microsoft.com" }
+				],
+				closings: [
+					"If this was not you, please reset your password immediately and enable two-factor authentication.",
+					"This is an automated security notification.",
+					"No further action is required if you recognize this activity."
+				],
+				scenarios: [
+					(rng) => {
+						const device = pick(["Windows PC", "Android device", "MacBook", "iPhone"], rng);
+						return {
+							subject: "New sign-in detected on your account",
+							paragraphs: [
+								fill("A new sign-in to your account was detected from a <strong>{device}</strong>.", { device }),
+								"If you recognize this device, no action is needed."
+							]
+						};
+					},
+					(rng) => {
+						return {
+							subject: "Your password was recently changed",
+							paragraphs: [
+								"This is a confirmation that the password associated with your account was changed successfully.",
+								"If you did not make this change, please contact support right away."
+							]
+						};
+					},
+					(rng) => {
+						const versionBuild = pickInt(19041, 26100, rng);
+						return {
+							subject: "Windows Update is ready to install",
+							paragraphs: [
+								fill("A cumulative update (build {versionBuild}) is ready to be installed on your device.", { versionBuild }),
+								"Restart your computer to complete the installation."
+							]
+						};
+					}
+				]
+			},
+			{
+				id: "community",
+				senders: [
+					{ name: "Reddit", address: "notifications@reddit.com" },
+					{ name: "Medium", address: "hello@medium.com" },
+					{ name: "Kaggle", address: "notifications@kaggle.com" }
+				],
+				closings: [
+					"You can manage what you get notified about from your account preferences.",
+					"This digest was generated based on your recent activity.",
+					"Engage with the community to keep the discussion going."
+				],
+				scenarios: [
+					(rng) => {
+						const subreddit = pick(redditSubreddits, rng);
+						return {
+							subject: fill("New reply to your post in r/{subreddit}", { subreddit }),
+							paragraphs: [
+								fill("Someone replied to your post in <strong>r/{subreddit}</strong>.", { subreddit }),
+								"Join the discussion by replying back."
+							]
+						};
+					},
+					(rng) => {
+						const readers = pickInt(12, 340, rng);
+						return {
+							subject: "Your story has new readers",
+							paragraphs: [
+								fill("Your latest story on Medium reached {readers} new readers this week.", { readers }),
+								"Consider publishing a follow-up to maintain engagement."
+							]
+						};
+					},
+					(rng) => {
+						const dataset = pick(kaggleDatasets, rng);
+						return {
+							subject: fill("New version available for \"{dataset}\"", { dataset }),
+							paragraphs: [
+								fill("A new version of the dataset <strong>\"{dataset}\"</strong> you follow has just been published.", { dataset }),
+								"Download the updated version to keep your analysis current."
+							]
+						};
+					}
+				]
+			},
+			{
+				id: "spaceScience",
+				senders: [
+					{ name: "NASA", address: "nasa@newsletters.nasa.gov" },
+					{ name: "ESA", address: "news@esa.int" },
+					{ name: "Météo France", address: "alerts@meteo-france.fr" }
+				],
+				closings: [
+					"This is an informational message and does not require a reply.",
+					"Stay tuned for further updates as the situation develops.",
+					"You can unsubscribe from these alerts at any time."
+				],
+				scenarios: [
+					(rng) => {
+						const mission = pick(["Artemis II", "Europa Clipper", "James Webb Space Telescope", "Perseverance Rover"], rng);
+						return {
+							subject: fill("Mission update: {mission}", { mission }),
+							paragraphs: [
+								fill("A new status update has been published for the <strong>{mission}</strong> mission.", { mission }),
+								"The full report is available on the mission's official page."
+							]
+						};
+					},
+					(rng) => {
+						const mission = pick(["Ariane 6", "JUICE", "Solar Orbiter", "Hera"], rng);
+						return {
+							subject: fill("Launch update: {mission}", { mission }),
+							paragraphs: [
+								fill("The launch schedule for <strong>{mission}</strong> has been updated.", { mission }),
+								"Check the live stream details closer to the launch window."
+							]
+						};
+					},
+					(rng) => {
+						const condition = pick(["orage", "vent violent", "vague de chaleur", "pluie verglaçante"], rng);
+						return {
+							subject: fill("Alerte météo : {condition} en Île-de-France", { condition }),
+							paragraphs: [
+								fill("Météo France a émis une alerte de type <strong>{condition}</strong> pour l'Île-de-France.", { condition }),
+								"Prenez vos précautions et suivez les recommandations des autorités locales."
+							]
+						};
+					}
+				]
+			},
+			{
+				id: "openSourceRelease",
+				senders: [
+					{ name: "Python", address: "python-dev@python.org" },
+					{ name: "Rust", address: "notifications@rust-lang.org" },
+					{ name: "Ubuntu", address: "newsletter@ubuntu.com" },
+					{ name: "Debian", address: "news@debian.org" },
+					{ name: "Arch Linux", address: "newsletter@archlinux.org" },
+					{ name: "Mozilla", address: "newsletter@mozilla.org" }
+				],
+				closings: [
+					"See the full changelog for a complete list of changes.",
+					"We recommend updating at your earliest convenience.",
+					"This announcement was sent to all subscribed users."
+				],
+				scenarios: [
+					(rng) => {
+						const major = pickInt(1, 4, rng);
+						const minor = pickInt(0, 12, rng);
+						const patch = pickInt(0, 9, rng);
+						return {
+							subject: fill("New release available: v{version}", { version: `${major}.${minor}.${patch}` }),
+							paragraphs: [
+								fill("A new stable release, version {version}, is now available for download.", { version: `${major}.${minor}.${patch}` }),
+								"This release includes performance improvements and several bug fixes."
+							]
+						};
+					},
+					(rng) => {
+						return {
+							subject: "Security patch released",
+							paragraphs: [
+								"A security patch addressing a recently discovered vulnerability has been released.",
+								"Updating as soon as possible is strongly recommended."
+							]
+						};
+					}
+				]
+			},
+			{
+				id: "association",
+				senders: [
+					{ name: "Phisis Association", address: "contact@phisis-asso.fr" }
+				],
+				closings: [
+					"N'hésitez pas à répondre à ce message si vous avez des questions.",
+					"Toute l'équipe du bureau se réjouit de vous y voir.",
+					"Ce message a été envoyé à l'ensemble des membres de l'association."
+				],
+				scenarios: [
+					(rng) => {
+						const event = pick(associationEvents, rng);
+						return {
+							subject: fill("Rappel : {event} approche", { event }),
+							paragraphs: [
+								fill("Nous vous rappelons que <strong>{event}</strong> aura lieu très prochainement.", { event }),
+								"Merci de confirmer votre présence via le formulaire habituel."
+							]
+						};
+					},
+					(rng) => {
+						const event = pick(associationEvents, rng);
+						return {
+							subject: fill("Compte-rendu de {event}", { event }),
+							paragraphs: [
+								fill("Voici un résumé des points abordés lors de <strong>{event}</strong>.", { event }),
+								"Le compte-rendu complet est disponible sur le drive partagé de l'association."
+							]
+						};
+					}
+				]
+			}
+		];
+
 		const rng = mulberry32(djb2(`daily-mail::${dateKey}`));
-		const sender = pick(window.mailData.senderPool, rng);
-		const topic = pick(window.mailData.topicPool, rng);
-		const subjectTemplate = pick(window.mailData.subjectTemplates, rng);
-		const count = 1 + Math.floor(rng() * 12);
+		const category = pick(categories, rng);
+		const sender = pick(category.senders, rng);
+		const scenario = pick(category.scenarios, rng);
+		const result = scenario(rng);
+		const closing = pick(category.closings, rng);
 
-		const subject = subjectTemplate
-			.replace("{count}", String(count))
-			.replace("{sender}", sender.name)
-			.replace("{topic}", topic);
-
-		const introA = pick(window.mailData.bodyIntros, rng).replace("{topic}", topic).replace("{sender}", sender.name);
-		const introB = pick(window.mailData.bodyIntros, rng).replace("{topic}", topic).replace("{sender}", sender.name);
-		const closing = pick(window.mailData.bodyClosings, rng);
-
-		const body = `
-			<p>${introA}</p>
-			<p>${introB}</p>
-			<p>${closing}</p>
-		`;
+		const bodyHtml = result.paragraphs.map(paragraph => `<p>${paragraph}</p>`).join("\n\t\t\t\t") + `\n\t\t\t\t<p>${closing}</p>`;
 
 		return {
 			from: sender.name,
 			fromAddress: sender.address,
-			subject,
-			body
+			subject: result.subject,
+			body: bodyHtml
 		};
 	}
 };

@@ -2599,3 +2599,100 @@ body {
 	background: rgba(49, 106, 197, 0.18);
 	outline: 1px dashed var(--xp-selection-blue);
 }
+
+.folder-content-wrapper.drop-target,
+#project-icons-container.drop-target {
+	background-color: rgba(50, 100, 200, 0.12);
+	outline: 2px dashed var(--xp-selection-blue);
+	outline-offset: -4px;
+}
+
+#context-menu li.disabled {
+	color: #888888;
+	cursor: default;
+	pointer-events: none;
+}
+
+#context-menu li.disabled:hover {
+	background-color: transparent;
+	color: #888888;
+}
+
+#taskbar-windows.compact .taskbar-window-btn {
+	max-width: 34px;
+	padding: 0 6px;
+	justify-content: center;
+}
+
+#taskbar-windows.compact .taskbar-window-btn span {
+	display: none;
+}
+
+#taskbar-windows.compact .taskbar-btn-icon {
+	margin-right: 0;
+}
+
+.oe-unread-badge {
+	background: #2f6ccf;
+	color: #ffffff;
+	font-size: 10px;
+	font-weight: bold;
+	line-height: 1;
+	border-radius: 8px;
+	padding: 3px 6px;
+	margin-left: auto;
+	flex-shrink: 0;
+}
+
+.outlook-tool-btn:disabled,
+.outlook-tool-btn.disabled {
+	opacity: 0.4;
+	cursor: default;
+	pointer-events: none;
+	box-shadow: none;
+}
+
+.outlook-preview-body .anecdote-markdown-body {
+	line-height: 1.5;
+}
+
+.outlook-preview-body .anecdote-markdown-body p {
+	margin: 0 0 10px 0;
+}
+
+.outlook-preview-body .anecdote-markdown-body :is(h1, h2, h3, h4) {
+	margin: 14px 0 8px 0;
+	color: #0b3b7a;
+}
+
+.outlook-preview-body .anecdote-markdown-body ul,
+.outlook-preview-body .anecdote-markdown-body ol {
+	margin: 0 0 10px 20px;
+}
+
+.outlook-preview-body .anecdote-markdown-body blockquote {
+	margin: 0 0 10px 0;
+	padding: 4px 12px;
+	border-left: 3px solid var(--xp-border-light);
+	color: #555555;
+}
+
+.outlook-preview-body .anecdote-markdown-body code {
+	background: #f0f0f0;
+	padding: 1px 4px;
+	border-radius: 3px;
+	font-family: 'Roboto Mono', monospace;
+	font-size: 12px;
+}
+
+.outlook-preview-body .anecdote-markdown-body pre code {
+	display: block;
+	padding: 8px;
+	overflow-x: auto;
+}
+
+.outlook-preview-body .anecdote-markdown-body .katex-display {
+	overflow-x: auto;
+	overflow-y: hidden;
+	margin: 10px 0;
+}

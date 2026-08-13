@@ -809,6 +809,32 @@ function resolveProjectTitle(title) {
 	return '';
 }
 
+function relocateElement(element, destinationFolder) {
+	let finalName = element.name;
+	let counter = 1;
+	while (destinationFolder.children.has(finalName)) {
+		finalName = `${element.name} (${counter})`;
+		counter++;
+	}
+	element.name = finalName;
+	destinationFolder.add(element);
+}
+
+function migrateProjectFileLocations(othersFolder, othersProjectsFolder) {
+	const misplacedInOthers = othersFolder.listContent().filter(el => el instanceof ProjectFile);
+	misplacedInOthers.forEach(projectFile => {
+		othersFolder.remove(projectFile.name);
+		const isVisible = projectFile.projectData && projectFile.projectData.show !== false;
+		relocateElement(projectFile, isVisible ? fs.root : othersProjectsFolder);
+	});
+
+	const misplacedOnDesktop = fs.root.listContent().filter(el => el instanceof ProjectFile && el.projectData && el.projectData.show === false);
+	misplacedOnDesktop.forEach(projectFile => {
+		fs.root.remove(projectFile.name);
+		relocateElement(projectFile, othersProjectsFolder);
+	});
+}
+
 function initializeFileSystem() {
 	fs = new FileSystemManager();
 	fs.load();
@@ -821,17 +847,35 @@ function initializeFileSystem() {
 	}
 	othersFolder.hidden = true;
 
-	const existingProjectNames = new Set(othersFolder.listContent().map(el => el.name));
+	let othersProjectsFolder = othersFolder.getByName('Projects');
+	if (!othersProjectsFolder) {
+		othersProjectsFolder = new Folder('Projects');
+		othersProjectsFolder.icon = 'https://img.icons8.com/fluent/48/folder-invoices.png';
+		othersFolder.add(othersProjectsFolder);
+	}
+
+	migrateProjectFileLocations(othersFolder, othersProjectsFolder);
+
+	const existingDesktopProjectNames = new Set(
+		fs.root.listContent().filter(el => el instanceof ProjectFile).map(el => el.name)
+	);
+	const existingHiddenProjectNames = new Set(othersProjectsFolder.listContent().map(el => el.name));
 
 	projects.flat().forEach(project => {
-		if (typeof project === 'object' && project !== null && project.title) {
-			const titleText = resolveProjectTitle(project.title);
-			if (titleText && !existingProjectNames.has(titleText)) {
-				const projectFile = new ProjectFile(titleText, null, project);
-				projectFile.createdAt = new Date(project.timestamp || Date.now());
-				othersFolder.add(projectFile);
-			}
-		}
+		if (typeof project !== 'object' || project === null || !project.title) return;
+		const titleText = resolveProjectTitle(project.title);
+		if (!titleText) return;
+
+		const isVisible = project.show !== false;
+		const targetFolder = isVisible ? fs.root : othersProjectsFolder;
+		const existingNames = isVisible ? existingDesktopProjectNames : existingHiddenProjectNames;
+
+		if (existingNames.has(titleText)) return;
+
+		const projectFile = new ProjectFile(titleText, null, project);
+		projectFile.createdAt = new Date(project.timestamp || Date.now());
+		targetFolder.add(projectFile);
+		existingNames.add(titleText);
 	});
 
 	initPoemsFolder(othersFolder);
@@ -1017,6 +1061,20 @@ function clearIconSelections() {
 	selectedIcons.clear();
 }
 
+const APP_WINDOW_BASE_SIZES = {
+	outlook: { width: 980, height: 640 }
+};
+
+function computeXPWindowDimensions(preferredWidth, preferredHeight) {
+	const availableWidth = window.innerWidth;
+	const availableHeight = window.innerHeight - 40;
+	const maxWidth = availableWidth * 0.92;
+	const maxHeight = availableHeight * 0.88;
+	const width = Math.max(240, Math.min(preferredWidth, maxWidth));
+	const height = Math.max(150, Math.min(preferredHeight, maxHeight));
+	return { width, height };
+}
+
 function createXPWindow(id, title, contentHTML, initialWidth = 600, initialHeight = 400, options = {}) {
 	const windowArea = document.getElementById('window-area');
 	const existingWindow = document.getElementById(id);
@@ -1038,17 +1096,18 @@ function createXPWindow(id, title, contentHTML, initialWidth = 600, initialHeigh
 		win.style.position = 'relative';
 		win.style.boxShadow = '4px 4px 15px rgba(0,0,0,0.5)';
 	} else if (!options.isMenu) {
-		win.style.width = `${initialWidth}px`;
-		win.style.height = `${initialHeight}px`;
-		win.style.left = `${Math.random() * (window.innerWidth - initialWidth)}px`;
-		win.style.top = `${Math.random() * (window.innerHeight - initialHeight - 40)}px`;
+		const { width, height } = computeXPWindowDimensions(initialWidth, initialHeight);
+		win.style.width = `${width}px`;
+		win.style.height = `${height}px`;
+		win.style.left = `${Math.random() * (window.innerWidth - width)}px`;
+		win.style.top = `${Math.random() * (window.innerHeight - height - 40)}px`;
 	}
 	
 	win.style.opacity = '0';
 	win.style.zIndex = ++zIndexCounter;
 
-	const minimizeBtnHTML = options.isModal ? '<div class="xp-window-button minimize-btn" style="visibility: hidden;">_</div>' : '<div class="xp-window-button minimize-btn" title="Minimize">_</div>';
-	const maximizeBtnHTML = (options.resizable === false || options.isModal) ? '<div class="xp-window-button maximize-btn" style="visibility: hidden;">□</div>' : '<div class="xp-window-button maximize-btn" title="Maximize">□</div>';
+	const minimizeBtnHTML = options.isModal ? '<div class="xp-window-button minimize-btn" style="display: none;">_</div>' : '<div class="xp-window-button minimize-btn" title="Minimize">_</div>';
+	const maximizeBtnHTML = (options.resizable === false || options.isModal) ? '<div class="xp-window-button maximize-btn" style="display: none;">□</div>' : '<div class="xp-window-button maximize-btn" title="Maximize">□</div>';
 
 	win.innerHTML = `
 		<div class="xp-window-header">
@@ -1168,6 +1227,7 @@ function makeWindowDraggable(win) {
 	header.addEventListener('mousedown', (e) => {
 		bringWindowToFront(win);
 		if (e.target.closest('.xp-window-buttons')) return;
+		if (win.classList.contains('maximized')) return;
 
 		isDragging = true;
 		if (overlay) overlay.style.display = 'block';
@@ -1559,6 +1619,7 @@ function addTaskbarButton(id, title, iconSrc) {
 	btn.innerHTML = `${iconHTML}<span>${title}</span>`;
 	
 	taskbarWindows.appendChild(btn);
+	updateTaskbarDensity();
 
 	btn.addEventListener('click', () => {
 		const win = document.getElementById(id);
@@ -1613,11 +1674,20 @@ function addTaskbarButton(id, title, iconSrc) {
 	});
 }
 
+const TASKBAR_COMPACT_THRESHOLD = 6;
+
+function updateTaskbarDensity() {
+	const taskbarWindows = document.getElementById('taskbar-windows');
+	if (!taskbarWindows) return;
+	taskbarWindows.classList.toggle('compact', taskbarWindows.children.length > TASKBAR_COMPACT_THRESHOLD);
+}
+
 function removeTaskbarButton(id) {
 	const btn = document.querySelector(`#taskbar-windows .taskbar-window-btn[data-window-id="${id}"]`);
 	if (btn) {
 		btn.remove();
 	}
+	updateTaskbarDensity();
 }
 
 function openProjectWindow(project) {
@@ -2473,17 +2543,24 @@ function updateContextMenuItems() {
 	const contextMenu = document.getElementById('context-menu');
 	const isIconTargeted = currentContextMenuTarget && currentContextMenuTarget.classList.contains('project-icon');
 	const isContainerTargeted = currentContextMenuTarget && (currentContextMenuTarget.id === 'desktop' || currentContextMenuTarget.classList.contains('folder-content'));
-	
+
 	let anyFileSystemElementSelected = false;
 	if (selectedIcons.size > 0) {
 		anyFileSystemElementSelected = Array.from(selectedIcons).some(icon => icon.dataset.path && !icon.dataset.path.startsWith('project://'));
 	}
 
-	contextMenu.querySelector('[data-action="open"]').classList.toggle('hidden', selectedIcons.size !== 1);
-	contextMenu.querySelector('[data-action="cut"]').classList.toggle('hidden', !anyFileSystemElementSelected);
-	contextMenu.querySelector('[data-action="copy"]').classList.toggle('hidden', !anyFileSystemElementSelected);
-	contextMenu.querySelector('[data-action="delete"]').classList.toggle('hidden', !anyFileSystemElementSelected);
-	contextMenu.querySelector('[data-action="rename"]').classList.toggle('hidden', !(anyFileSystemElementSelected && selectedIcons.size === 1));
+	const setItemState = (action, disabled) => {
+		const item = contextMenu.querySelector(`[data-action="${action}"]`);
+		if (!item) return;
+		item.classList.remove('hidden');
+		item.classList.toggle('disabled', disabled);
+	};
+
+	setItemState('open', selectedIcons.size !== 1);
+	setItemState('cut', !anyFileSystemElementSelected);
+	setItemState('copy', !anyFileSystemElementSelected);
+	setItemState('delete', !anyFileSystemElementSelected);
+	setItemState('rename', !(anyFileSystemElementSelected && selectedIcons.size === 1));
 
 	const hasClipboardContent = fs.clipboard.mode && fs.clipboard.element;
 	let canPaste = false;
@@ -2497,26 +2574,28 @@ function updateContextMenuItems() {
 
 		const destElement = fs.findByPath(destPath);
 		const sourceElement = fs.clipboard.element;
-		
-		let targetFolder = (destElement instanceof Folder) ? destElement : destElement.parent;
-		
-		canPaste = true;
-		if (sourceElement.getFullPath() === targetFolder.getFullPath()) {
-			if (fs.clipboard.mode === 'cut') {
-				canPaste = false;
+
+		if (destElement) {
+			let targetFolder = (destElement instanceof Folder) ? destElement : destElement.parent;
+
+			canPaste = true;
+			if (sourceElement.getFullPath() === targetFolder.getFullPath()) {
+				if (fs.clipboard.mode === 'cut') {
+					canPaste = false;
+				}
 			}
-		}
-		
-		let checkParent = targetFolder;
-		while(checkParent) {
-			if (checkParent === sourceElement) {
-				canPaste = false;
-				break;
+
+			let checkParent = targetFolder;
+			while (checkParent) {
+				if (checkParent === sourceElement) {
+					canPaste = false;
+					break;
+				}
+				checkParent = checkParent.parent;
 			}
-			checkParent = checkParent.parent;
 		}
 	}
-	contextMenu.querySelector('[data-action="paste"]').classList.toggle('hidden', !canPaste);
+	setItemState('paste', !canPaste);
 
 	const newItems = contextMenu.querySelector('.has-submenu');
 	newItems.classList.toggle('hidden', !isContainerTargeted);
@@ -2803,9 +2882,12 @@ function openFolderWindow(folder) {
 		}
 	});
 
-	contentArea.addEventListener('dragover', handleDragOver);
-	contentArea.addEventListener('dragleave', handleDragLeave);
-	contentArea.addEventListener('drop', handleDrop);
+	const contentWrapper = folderWindow.querySelector('.folder-content-wrapper');
+	[contentArea, contentWrapper].forEach(zone => {
+		zone.addEventListener('dragover', handleDragOver);
+		zone.addEventListener('dragleave', handleDragLeave);
+		zone.addEventListener('drop', handleDrop);
+	});
 
 	folderWindow.querySelector('.back-btn').addEventListener('click', () => {
 		const nav = folderWindow.navigationHistory;
@@ -3141,21 +3223,25 @@ function handleDragEnd(e) {
 	});
 }
 
+function resolveDropDestPath(target) {
+	if (target.id === 'desktop' || target.id === 'project-icons-container') {
+		return '/';
+	}
+	if (target.classList.contains('folder-content-wrapper')) {
+		const inner = target.querySelector('.folder-content');
+		return inner ? inner.dataset.path : '/';
+	}
+	return target.dataset.path;
+}
+
 function handleDrop(e) {
 	e.preventDefault();
 	e.stopPropagation();
 	e.currentTarget.classList.remove('drop-target');
 
 	const pathsData = e.dataTransfer.getData('application/json-paths');
-	
-	let destPath;
 	const target = e.currentTarget;
-
-	if (target.id === 'desktop' || target.id === 'project-icons-container') {
-		destPath = '/';
-	} else {
-		destPath = target.dataset.path;
-	}
+	const destPath = resolveDropDestPath(target);
 
 	if (typeof destPath === 'undefined') {
 		return;
@@ -3168,7 +3254,7 @@ function handleDrop(e) {
 		finalDestPath = destElement.getFullPath();
 	} else if ((destElement instanceof File || destElement instanceof Shortcut || destElement instanceof ProjectFile) && destElement.parent) {
 		finalDestPath = destElement.parent.getFullPath();
-	} else if (target.id === 'desktop') {
+	} else if (destPath === '/') {
 		finalDestPath = '/';
 	} else {
 		return;
@@ -3190,13 +3276,16 @@ function handleDrop(e) {
 
 function setupDesktopDropzone() {
 	const desktop = document.getElementById('desktop');
-	desktop.addEventListener('dragover', handleDragOver);
-	desktop.addEventListener('dragleave', (e) => {
-		if (e.target.id === 'desktop') {
-			e.currentTarget.classList.remove('drop-target');
-		}
+	const iconsContainer = document.getElementById('project-icons-container');
+	[desktop, iconsContainer].forEach(zone => {
+		zone.addEventListener('dragover', handleDragOver);
+		zone.addEventListener('dragleave', (e) => {
+			if (e.target === zone) {
+				zone.classList.remove('drop-target');
+			}
+		});
+		zone.addEventListener('drop', handleDrop);
 	});
-	desktop.addEventListener('drop', handleDrop);
 }
 
 async function openReadOnlyTextWindow(file) {
@@ -3964,7 +4053,7 @@ async function openOutlookExpress() {
 			</div>
 		</div>
 	`;
-	const outlookWindow = createXPWindow(id, 'Outlook Express', contentHTML, 700, 480, { iconSrc: '../assets/images/desk/OE2001.webp' });
+	const outlookWindow = createXPWindow(id, 'Outlook Express', contentHTML, APP_WINDOW_BASE_SIZES.outlook.width, APP_WINDOW_BASE_SIZES.outlook.height, { iconSrc: '../assets/images/desk/OE2001.webp' });
 	outlookWindow.querySelector('.xp-window-content').style.padding = '0';
 
 	const folderListEl = outlookWindow.querySelector('#oe-folder-list');
@@ -4110,6 +4199,15 @@ async function openOutlookExpress() {
 			li.appendChild(img);
 			li.appendChild(span);
 
+			const unreadCount = MailStore.getMessages(folder.id).filter(message => !message.read).length;
+			if (unreadCount > 0) {
+				span.style.fontWeight = 'bold';
+				const badge = document.createElement('span');
+				badge.className = 'oe-unread-badge';
+				badge.textContent = unreadCount > 5 ? '5+' : String(unreadCount);
+				li.appendChild(badge);
+			}
+
 			li.addEventListener('click', () => {
 				currentFolderId = folder.id;
 				selectedMessageId = null;
@@ -4205,6 +4303,18 @@ async function openOutlookExpress() {
 		previewDate.textContent = '';
 		previewSubject.textContent = '';
 		previewBody.innerHTML = '';
+		updateToolbarState();
+	}
+
+	function updateToolbarState() {
+		const hasSelection = !!selectedMessageId && !!MailStore.getMessageById(selectedMessageId);
+		['reply', 'forward', 'delete'].forEach(action => {
+			const btn = outlookWindow.querySelector(`.outlook-tool-btn[data-action="${action}"]`);
+			if (btn) {
+				btn.classList.toggle('disabled', !hasSelection);
+				btn.disabled = !hasSelection;
+			}
+		});
 	}
 
 	function formatMessageDate(iso) {
@@ -4237,8 +4347,10 @@ async function openOutlookExpress() {
 				if (!message.read) {
 					MailStore.markRead(message.id, true);
 					li.style.fontWeight = '';
+					renderFolderList();
 				}
 				renderPreview(message.id);
+				updateToolbarState();
 			});
 
 			li.addEventListener('dblclick', () => {
@@ -4256,6 +4368,7 @@ async function openOutlookExpress() {
 				messageList.querySelectorAll('li').forEach(item => item.classList.remove('selected'));
 				li.classList.add('selected');
 				renderPreview(message.id);
+				updateToolbarState();
 
 				const moveItems = MailStore.getFolders()
 					.filter(folder => folder.id !== currentFolderId)
@@ -4264,20 +4377,23 @@ async function openOutlookExpress() {
 						action: () => {
 							MailStore.moveMessage(message.id, folder.id);
 							renderMessageList();
+							renderFolderList();
 							clearPreview();
 						}
 					}));
 
 				showGenericContextMenu(e.clientX, e.clientY, [
 					{ label: 'Open', action: () => (currentFolderId === 'drafts' ? openComposeWindow({ draftId: message.id, to: message.to, subject: message.subject, body: htmlToPlainText(message.body) }) : openMessageWindow(message)) },
-					{ label: message.read ? 'Mark as Unread' : 'Mark as Read', action: () => { MailStore.markRead(message.id, !message.read); renderMessageList(); } },
+					{ label: message.read ? 'Mark as Unread' : 'Mark as Read', action: () => { MailStore.markRead(message.id, !message.read); renderMessageList(); renderFolderList(); } },
 					{ label: 'Reply', action: () => openComposeWindow(buildReply(message)) },
 					{ label: 'Forward', action: () => openComposeWindow(buildForward(message)) },
 					{ separator: true },
 					{ label: 'Move to', action: () => showGenericContextMenu(e.clientX + 160, e.clientY, moveItems) },
 					{ label: currentFolderId === 'deleted' ? 'Delete Permanently' : 'Delete', action: () => {
 						MailStore.deleteMessage(message.id);
+						selectedMessageId = null;
 						renderMessageList();
+						renderFolderList();
 						clearPreview();
 					} }
 				]);
@@ -4421,6 +4537,7 @@ async function openOutlookExpress() {
 				MailStore.deleteMessage(selectedMessageId);
 				selectedMessageId = null;
 				renderMessageList();
+				renderFolderList();
 				clearPreview();
 			} else if (action === 'new-folder') {
 				promptNewFolder();
