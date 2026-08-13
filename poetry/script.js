@@ -1,7 +1,7 @@
 gsap.registerPlugin(Flip);
 
 function initLibrary() {
-	if (!window.libraryData) {
+	if (!window.poetryData ) {
 		if (!initLibrary.retries) initLibrary.retries = 0;
 		if (initLibrary.retries < 50) {
 			initLibrary.retries++;
@@ -122,15 +122,15 @@ function initLibrary() {
 		}
 	}
 
-	const libraryData = window.libraryData;
+	const poetryData  = window.poetryData ;
 
-	if (!libraryData || !libraryData.documents) {
+	if (!poetryData  || !poetryData .documents) {
 		grid.innerHTML = '<div class="loader-wrapper"><p>Error: Library data could not be loaded.</p></div>';
 		return;
 	}
 
-	const categoryMap = new Map((libraryData.categories || []).map(c => [c.id, c.name]));
-	const authorMap = new Map((libraryData.authors || []).map(a => [a.id, a.name]));
+	const categoryMap = new Map((poetryData .categories || []).map(c => [c.id, c.name]));
+	const authorMap = new Map((poetryData .authors || []).map(a => [a.id, a.name]));
 
 	function parseDate(dateStr) {
 		if (!dateStr) return 0;
@@ -192,7 +192,7 @@ function initLibrary() {
 	}
 
 	async function prepareLibrary() {
-		const docPromises = (libraryData.documents || []).map(doc => fetchAndParseDoc(doc));
+		const docPromises = (poetryData .documents || []).map(doc => fetchAndParseDoc(doc));
 		processedDocs = await Promise.all(docPromises);
 
 		fuse = typeof Fuse !== 'undefined' ? new Fuse(processedDocs, {
@@ -219,9 +219,9 @@ function initLibrary() {
 	}, { rootMargin: '0px 0px 200px 0px' });
 
 	function populateFilters() {
-		if (filterDropdown && libraryData.categories) {
+		if (filterDropdown && poetryData .categories) {
 			filterDropdown.innerHTML = '<div class="filter-option selected" data-value="all">All Categories</div>';
-			libraryData.categories.forEach(category => {
+			poetryData .categories.forEach(category => {
 				const option = document.createElement('div');
 				option.className = 'filter-option';
 				option.dataset.value = category.id;
@@ -568,10 +568,10 @@ function initLibrary() {
 		const urlParams = new URLSearchParams(window.location.search);
 
 		const categoryParam = urlParams.get('category');
-		if (categoryParam && libraryData.categories.some(c => c.id == categoryParam)) {
+		if (categoryParam && poetryData .categories.some(c => c.id == categoryParam)) {
 			currentFilter = categoryParam;
 			if (filterTrigger) {
-				const catName = libraryData.categories.find(c => c.id == categoryParam).name;
+				const catName = poetryData .categories.find(c => c.id == categoryParam).name;
 				filterTrigger.textContent = catName;
 			}
 			setTimeout(() => {

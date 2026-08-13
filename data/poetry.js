@@ -1,4 +1,4 @@
-window.libraryData = {
+window.poetryData  = {
 	categories: [
 		{ id: 1, name: "Poésie" },
 		{ id: 2, name: "Prose" },

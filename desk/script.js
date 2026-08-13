@@ -7,6 +7,7 @@ class Element {
 		this.parent = parent;
 		this.createdAt = new Date();
 		this.modifiedAt = new Date();
+		this.hidden = false;
 	}
 
 	rename(newName) {
@@ -47,7 +48,8 @@ class Element {
 			name: this.name,
 			createdAt: this.createdAt,
 			modifiedAt: this.modifiedAt,
-			type: this.constructor.name
+			type: this.constructor.name,
+			hidden: this.hidden
 		};
 	}
 }
@@ -58,6 +60,8 @@ class File extends Element {
 		this.content = content;
 		this.size = new TextEncoder().encode(content).length;
 		this.icon = 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSfYBdqM_UJgzAsG1A17GxeHVikpX0e5k_N5g&s';
+		this.readOnly = false;
+		this.remoteUrl = null;
 	}
 
 	read() {
@@ -65,6 +69,9 @@ class File extends Element {
 	}
 
 	write(newContent) {
+		if (this.readOnly) {
+			throw new Error('This file is read-only.');
+		}
 		this.content = newContent;
 		this.size = new TextEncoder().encode(this.content).length;
 		this.modifiedAt = new Date();
@@ -77,6 +84,8 @@ class File extends Element {
 		const newFile = new File(this.name, null, this.content);
 		newFile.createdAt = this.createdAt;
 		newFile.modifiedAt = this.modifiedAt;
+		newFile.readOnly = this.readOnly;
+		newFile.remoteUrl = this.remoteUrl;
 		return newFile;
 	}
 
@@ -86,6 +95,8 @@ class File extends Element {
 			content: this.content,
 			size: this.size,
 			icon: this.icon,
+			readOnly: this.readOnly,
+			remoteUrl: this.remoteUrl,
 		};
 	}
 }
@@ -129,6 +140,7 @@ class Folder extends Element {
 		const newFolder = new Folder(this.name, null);
 		newFolder.createdAt = this.createdAt;
 		newFolder.modifiedAt = this.modifiedAt;
+		newFolder.hidden = this.hidden;
 		for (const child of this.children.values()) {
 			const childCopy = child.copy();
 			newFolder.add(childCopy);
@@ -327,6 +339,75 @@ class FileSystemManager {
 		return newElement;
 	}
 
+	moveToRecycleBin(path) {
+		const element = this.findByPath(path);
+		if (!element || !element.parent) {
+			throw new Error('Cannot recycle root or non-existent element.');
+		}
+		const originalPath = element.parent.getFullPath();
+		const serialized = element.toJSON();
+		element.parent.remove(element.name);
+
+		const recycleItems = this.loadRecycleBinItems();
+		recycleItems.push({
+			uid: `rb-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+			originalPath,
+			deletedAt: new Date().toISOString(),
+			data: serialized
+		});
+		this.saveRecycleBinItems(recycleItems);
+		this.save();
+	}
+
+	loadRecycleBinItems() {
+		try {
+			const raw = localStorage.getItem('recycleBinItems');
+			return raw ? JSON.parse(raw) : [];
+		} catch (error) {
+			return [];
+		}
+	}
+
+	saveRecycleBinItems(items) {
+		localStorage.setItem('recycleBinItems', JSON.stringify(items));
+	}
+
+	restoreFromRecycleBin(uid) {
+		const items = this.loadRecycleBinItems();
+		const index = items.findIndex(item => item.uid === uid);
+		if (index === -1) {
+			throw new Error('Item not found in Recycle Bin.');
+		}
+		const item = items[index];
+		let destFolder = this.findByPath(item.originalPath);
+		if (!(destFolder instanceof Folder)) {
+			destFolder = this.root;
+		}
+		const restored = this.rehydrate(item.data, null);
+		let finalName = restored.name;
+		let counter = 1;
+		while (destFolder.children.has(finalName)) {
+			finalName = `${restored.name} (${counter})`;
+			counter++;
+		}
+		restored.name = finalName;
+		destFolder.add(restored);
+		items.splice(index, 1);
+		this.saveRecycleBinItems(items);
+		this.save();
+		return restored;
+	}
+
+	deletePermanentlyFromRecycleBin(uid) {
+		const items = this.loadRecycleBinItems();
+		const filtered = items.filter(item => item.uid !== uid);
+		this.saveRecycleBinItems(filtered);
+	}
+
+	emptyRecycleBin() {
+		this.saveRecycleBinItems([]);
+	}
+
 	save() {
 		localStorage.setItem('fileSystem', JSON.stringify(this.root.toJSON()));
 	}
@@ -355,9 +436,12 @@ class FileSystemManager {
 			element = new ProjectFile(data.name, parent, data.projectData);
 		} else {
 			element = new File(data.name, parent, data.content || '');
+			element.readOnly = !!data.readOnly;
+			element.remoteUrl = data.remoteUrl || null;
 		}
 		element.createdAt = new Date(data.createdAt);
 		element.modifiedAt = new Date(data.modifiedAt);
+		element.hidden = !!data.hidden;
 		if (data.icon) {
 			element.icon = data.icon;
 		}
@@ -729,19 +813,55 @@ function initializeFileSystem() {
 	fs = new FileSystemManager();
 	fs.load();
 
-	const existingNames = new Set(fs.root.listContent().map(el => el.name));
+	let othersFolder = fs.root.getByName('Others');
+	if (!othersFolder) {
+		othersFolder = new Folder('Others');
+		othersFolder.icon = 'https://img.icons8.com/fluent/48/folder-invoices.png';
+		fs.root.add(othersFolder);
+	}
+	othersFolder.hidden = true;
+
+	const existingProjectNames = new Set(othersFolder.listContent().map(el => el.name));
 
 	projects.flat().forEach(project => {
 		if (typeof project === 'object' && project !== null && project.title) {
 			const titleText = resolveProjectTitle(project.title);
-			if (titleText && !existingNames.has(titleText)) {
+			if (titleText && !existingProjectNames.has(titleText)) {
 				const projectFile = new ProjectFile(titleText, null, project);
 				projectFile.createdAt = new Date(project.timestamp || Date.now());
-				fs.root.add(projectFile);
+				othersFolder.add(projectFile);
 			}
 		}
 	});
+
+	initPoemsFolder(othersFolder);
+
 	fs.save();
+}
+
+function initPoemsFolder(othersFolder) {
+	if (typeof window.poetryData === 'undefined' || !window.poetryData.documents) return;
+
+	let poemsFolder = othersFolder.getByName('Poems');
+	if (!poemsFolder) {
+		poemsFolder = new Folder('Poems');
+		poemsFolder.icon = 'https://img.icons8.com/fluent/48/folder-invoices.png';
+		othersFolder.add(poemsFolder);
+	}
+
+	window.poetryData.documents.forEach(poem => {
+		const fileName = poem.filePath.split('/').pop();
+		let file = poemsFolder.getByName(fileName);
+		if (!file) {
+			file = new File(fileName, null, '');
+			file.icon = 'https://img.icons8.com/color/48/txt.png';
+			poemsFolder.add(file);
+		}
+		file.readOnly = true;
+		file.remoteUrl = poem.filePath;
+		file.createdAt = new Date(poem.timestamp);
+		file.modifiedAt = new Date(poem.timestamp);
+	});
 }
 
 function renderDesktopIcons() {
@@ -756,14 +876,9 @@ function renderDesktopIcons() {
 	}, {
 		name: "Recycle Bin",
 		icon: "../assets/images/desk/trash.png",
-		action: () => showXPDialog(
-			'Error',
-			'Recycle Bin is empty. (feature not implemented yet)',
-			'error'
-		),
+		action: openRecycleBinWindow,
 		type: "system"
 	}];
-
 
 	appIcons.forEach(app => {
 		const icon = createIconElement({
@@ -776,7 +891,11 @@ function renderDesktopIcons() {
 		container.appendChild(icon);
 	});
 
+	const showHidden = isShowHiddenEnabled();
+
 	fs.root.listContent().forEach(element => {
+		if (element.hidden && !showHidden) return;
+
 		let type = 'file';
 		if (element instanceof Folder) type = 'folder';
 		else if (element instanceof Shortcut) type = 'shortcut';
@@ -789,10 +908,26 @@ function renderDesktopIcons() {
 			type: type,
 			element: element
 		}, openFileSystemElement);
+
+		if (element.hidden) {
+			icon.classList.add('hidden-item');
+			icon.style.opacity = '0.55';
+		}
+
 		container.appendChild(icon);
 	});
 
 	arrangeIcons('none');
+}
+
+function isShowHiddenEnabled() {
+	return localStorage.getItem('desktopShowHidden') === 'true';
+}
+
+function toggleShowHidden() {
+	const current = isShowHiddenEnabled();
+	localStorage.setItem('desktopShowHidden', (!current).toString());
+	refreshUI();
 }
 
 function createIconElement(data, dblClickHandler) {
@@ -2357,7 +2492,7 @@ function updateContextMenuItems() {
 		if (currentContextMenuTarget.id === 'desktop') {
 			destPath = '/';
 		} else {
-			 destPath = currentContextMenuTarget.dataset.path;
+			destPath = currentContextMenuTarget.dataset.path;
 		}
 
 		const destElement = fs.findByPath(destPath);
@@ -2386,6 +2521,12 @@ function updateContextMenuItems() {
 	const newItems = contextMenu.querySelector('.has-submenu');
 	newItems.classList.toggle('hidden', !isContainerTargeted);
 	newItems.previousElementSibling.classList.toggle('hidden', !isContainerTargeted);
+
+	const toggleHiddenItem = contextMenu.querySelector('[data-action="toggle-hidden"]');
+	if (toggleHiddenItem) {
+		toggleHiddenItem.classList.toggle('hidden', currentContextMenuTarget !== document.getElementById('desktop'));
+		toggleHiddenItem.textContent = isShowHiddenEnabled() ? 'Hide Hidden Items' : 'Show Hidden Items';
+	}
 }
 
 function handleContextMenuAction(action) {
@@ -2454,14 +2595,14 @@ function handleContextMenuAction(action) {
 				});
 
 				if (iconsToDelete.length > 0) {
-					const message = `Are you sure you want to delete ${iconsToDelete.length} item(s)?`;
+					const message = `Are you sure you want to move ${iconsToDelete.length} item(s) to the Recycle Bin?`;
 					createConfirmationDialog(message, () => {
 						iconsToDelete.forEach(icon => {
 							const path = icon.dataset.path;
 							try {
-								fs.delete(path);
+								fs.moveToRecycleBin(path);
 							} catch (e) {
-								console.error(`Failed to delete ${path}:`, e.message);
+								console.error(`Failed to recycle ${path}:`, e.message);
 							}
 						});
 						refreshUI();
@@ -2478,6 +2619,9 @@ function handleContextMenuAction(action) {
 				break;
 			case 'refresh':
 				refreshUI();
+				break;
+			case 'toggle-hidden':
+				toggleShowHidden();
 				break;
 			case 'arrange-icons-name':
 				arrangeIcons('name');
@@ -2529,7 +2673,9 @@ function openFileSystemElement(element, windowContext = null) {
 		openProjectWindow(element.projectData);
 	} else if (element instanceof File) {
 		const lowerName = element.name.toLowerCase();
-		if (lowerName.endsWith('.pdf')) {
+		if (element.readOnly && element.remoteUrl) {
+			openReadOnlyTextWindow(element);
+		} else if (lowerName.endsWith('.pdf')) {
 			openPDFWindow(element);
 		} else if (lowerName.endsWith('.html') || lowerName.endsWith('.htm')) {
 			openInternetExplorer();
@@ -2729,7 +2875,8 @@ function renderFolderContent(folder, container, win) {
 	const viewMode = win.dataset.viewMode || 'icons';
 	container.classList.add(`view-${viewMode}`);
 
-	const items = folder.listContent();
+	const showHidden = isShowHiddenEnabled();
+	const items = folder.listContent().filter(item => !item.hidden || showHidden);
 
 	if (viewMode === 'details') {
 		const header = document.createElement('div');
@@ -3052,6 +3199,87 @@ function setupDesktopDropzone() {
 	desktop.addEventListener('drop', handleDrop);
 }
 
+async function openReadOnlyTextWindow(file) {
+	const id = `window-file-${file.getFullPath().replace(/[^\w-]/g, '_')}`;
+	const existingWindow = document.getElementById(id);
+	if (existingWindow) {
+		bringWindowToFront(existingWindow);
+		return;
+	}
+
+	const content = `
+		<div class="notepad-layout">
+			<div class="notepad-readonly-banner">This file is read-only and cannot be modified.</div>
+			<div class="notepad-editor-container">
+				<textarea class="readonly-notepad-textarea" readonly>Loading...</textarea>
+			</div>
+		</div>
+	`;
+
+	const win = createXPWindow(id, `${file.name} - Notepad`, content, 620, 480, {
+		iconSrc: file.icon
+	});
+	win.querySelector('.xp-window-content').style.padding = '0';
+
+	const textarea = win.querySelector('.readonly-notepad-textarea');
+	textarea.style.width = '100%';
+	textarea.style.height = '100%';
+	textarea.style.boxSizing = 'border-box';
+	textarea.style.border = 'none';
+	textarea.style.resize = 'none';
+	textarea.style.fontFamily = "'Times New Roman', serif";
+	textarea.style.fontSize = '16px';
+	textarea.style.padding = '12px 15px';
+	textarea.style.outline = 'none';
+
+	let readOnlyWarningActive = false;
+	const showReadOnlyWarning = () => {
+		if (readOnlyWarningActive) return;
+		readOnlyWarningActive = true;
+		showXPDialog('Read-Only File', `"${file.name}" is read-only. Changes cannot be saved.`, 'warning', {
+			callback: () => {
+				readOnlyWarningActive = false;
+			}
+		});
+	};
+
+	textarea.addEventListener('keydown', (e) => {
+		const allowedKeys = ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Home', 'End', 'PageUp', 'PageDown', 'Tab', 'Shift', 'Control', 'Alt', 'Meta'];
+		const isCopy = (e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'c';
+		const isSelectAll = (e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'a';
+		if (allowedKeys.includes(e.key) || isCopy || isSelectAll) return;
+		e.preventDefault();
+		showReadOnlyWarning();
+	});
+
+	textarea.addEventListener('paste', (e) => {
+		e.preventDefault();
+		showReadOnlyWarning();
+	});
+
+	textarea.addEventListener('beforeinput', (e) => {
+		if (e.inputType && e.inputType.startsWith('insert')) {
+			e.preventDefault();
+			showReadOnlyWarning();
+		}
+	});
+
+	try {
+		const response = await fetch(file.remoteUrl);
+		if (!response.ok) throw new Error('Network response was not ok.');
+		const text = await response.text();
+		if (document.getElementById(id)) {
+			textarea.value = text;
+			file.content = text;
+			file.size = new TextEncoder().encode(text).length;
+		}
+	} catch (error) {
+		if (document.getElementById(id)) {
+			textarea.value = 'Unable to load this document.';
+		}
+	}
+}
+
 function openTextEditorWindow(file) {
 	const id = `window-file-${file.getFullPath().replace(/[^\w-]/g, '_')}`;
 	const existingWindow = document.getElementById(id);
@@ -3175,6 +3403,162 @@ function openDisplaySettings() {
 		localStorage.setItem('desktopBackground', selectedWallpaper);
 	});
 	document.getElementById('desktop').style.backgroundImage = `url('${selectedWallpaper}')`;
+}
+
+function openRecycleBinWindow() {
+	const id = 'window-recycle-bin';
+	const existingWindow = document.getElementById(id);
+	if (existingWindow) {
+		bringWindowToFront(existingWindow);
+		renderRecycleBinContent(existingWindow);
+		return;
+	}
+
+	const contentHTML = `
+		<div class="folder-window-layout">
+			<div class="folder-toolbar">
+				<button class="folder-nav-btn" id="recycle-empty-btn" title="Empty Recycle Bin">
+					<img src="https://api.iconify.design/mdi/delete-sweep-outline.svg" alt="Empty">
+				</button>
+				<div class="folder-toolbar-separator"></div>
+				<button class="folder-nav-btn" id="recycle-restore-btn" title="Restore Selected" disabled>
+					<img src="https://api.iconify.design/mdi/backup-restore.svg" alt="Restore">
+				</button>
+			</div>
+			<div class="folder-main-content">
+				<div class="folder-content-wrapper">
+					<div class="folder-content" id="recycle-bin-content"></div>
+				</div>
+				<div class="folder-status-bar">
+					<div class="status-bar-left" id="recycle-status"></div>
+					<div class="status-bar-right"></div>
+				</div>
+			</div>
+		</div>
+	`;
+
+	const win = createXPWindow(id, 'Recycle Bin', contentHTML, 600, 420, { iconSrc: '../assets/images/desk/trash.png' });
+	win.querySelector('.xp-window-content').style.padding = '0';
+	win.classList.add('project-window');
+
+	win.querySelector('#recycle-empty-btn').addEventListener('click', () => {
+		const items = fs.loadRecycleBinItems();
+		if (items.length === 0) return;
+		createConfirmationDialog(`Are you sure you want to permanently delete ${items.length} item(s)?`, () => {
+			fs.emptyRecycleBin();
+			renderRecycleBinContent(win);
+		});
+	});
+
+	win.querySelector('#recycle-restore-btn').addEventListener('click', () => {
+		const selected = win.querySelector('.project-icon.selected');
+		if (!selected) return;
+		try {
+			fs.restoreFromRecycleBin(selected.dataset.recycleUid);
+			renderRecycleBinContent(win);
+			refreshUI();
+		} catch (e) {
+			showXPDialog('Error', e.message, 'error');
+		}
+	});
+
+	renderRecycleBinContent(win);
+}
+
+function renderRecycleBinContent(win) {
+	const container = win.querySelector('#recycle-bin-content');
+	const statusEl = win.querySelector('#recycle-status');
+	const restoreBtn = win.querySelector('#recycle-restore-btn');
+	if (!container) return;
+
+	container.innerHTML = '';
+	const items = fs.loadRecycleBinItems();
+	statusEl.textContent = `${items.length} item(s)`;
+	if (restoreBtn) restoreBtn.disabled = true;
+
+	items.forEach(item => {
+		const icon = document.createElement('div');
+		icon.className = 'project-icon';
+		icon.dataset.recycleUid = item.uid;
+		icon.title = `${item.data.name}\nOriginal location: ${item.originalPath}`;
+
+		const img = document.createElement('img');
+		img.src = item.data.icon || 'https://img.icons8.com/fluency/48/file.png';
+		img.alt = item.data.name;
+		icon.appendChild(img);
+
+		const span = document.createElement('span');
+		span.textContent = item.data.name;
+		icon.appendChild(span);
+
+		icon.addEventListener('click', () => {
+			container.querySelectorAll('.project-icon.selected').forEach(el => el.classList.remove('selected'));
+			icon.classList.add('selected');
+			if (restoreBtn) restoreBtn.disabled = false;
+		});
+
+		icon.addEventListener('dblclick', () => {
+			try {
+				fs.restoreFromRecycleBin(item.uid);
+				renderRecycleBinContent(win);
+				refreshUI();
+			} catch (e) {
+				showXPDialog('Error', e.message, 'error');
+			}
+		});
+
+		icon.addEventListener('contextmenu', (e) => {
+			e.preventDefault();
+			e.stopPropagation();
+			container.querySelectorAll('.project-icon.selected').forEach(el => el.classList.remove('selected'));
+			icon.classList.add('selected');
+			if (restoreBtn) restoreBtn.disabled = false;
+
+			const menu = document.createElement('div');
+			menu.className = 'xp-window';
+			menu.style.position = 'fixed';
+			menu.style.left = `${e.clientX}px`;
+			menu.style.top = `${e.clientY}px`;
+			menu.style.zIndex = String(++zIndexCounter);
+			menu.style.minWidth = '150px';
+			menu.style.padding = '2px';
+			menu.innerHTML = `
+				<ul style="list-style:none;margin:0;padding:0;">
+					<li data-recycle-action="restore" style="padding:6px 15px;cursor:pointer;">Restore</li>
+					<li data-recycle-action="delete" style="padding:6px 15px;cursor:pointer;">Delete Permanently</li>
+				</ul>
+			`;
+			document.body.appendChild(menu);
+
+			const removeMenu = () => {
+				menu.remove();
+				document.removeEventListener('mousedown', outsideHandler);
+			};
+			const outsideHandler = (ev) => {
+				if (!menu.contains(ev.target)) removeMenu();
+			};
+			setTimeout(() => document.addEventListener('mousedown', outsideHandler), 0);
+
+			menu.addEventListener('click', (ev) => {
+				const action = ev.target.closest('[data-recycle-action]')?.dataset.recycleAction;
+				if (action === 'restore') {
+					try {
+						fs.restoreFromRecycleBin(item.uid);
+						renderRecycleBinContent(win);
+						refreshUI();
+					} catch (err) {
+						showXPDialog('Error', err.message, 'error');
+					}
+				} else if (action === 'delete') {
+					fs.deletePermanentlyFromRecycleBin(item.uid);
+					renderRecycleBinContent(win);
+				}
+				removeMenu();
+			});
+		});
+
+		container.appendChild(icon);
+	});
 }
 
 function setupQuickLaunchIcons() {
@@ -3532,55 +3916,14 @@ function openInternetExplorer() {
 	showHome();
 }
 
-function openOutlookExpress() {
+async function openOutlookExpress() {
 	const id = 'window-outlook-express';
 	if (document.getElementById(id)) {
 		bringWindowToFront(document.getElementById(id));
 		return;
 	}
 
-	const fakeEmails = [{
-		id: 1,
-		folder: 'Inbox',
-		from: 'GitHub',
-		subject: 'Welcome to your portfolio!',
-		date: '2024-05-20 10:00',
-		body: `
-			<p>Hello Wartets,</p>
-			<p>Welcome to your interactive Windows XP portfolio. This is a demonstration of the Outlook Express application.</p>
-			<p>You can click on different emails in the list to see their content displayed here in the preview pane.</p>
-			<p>Best regards,<br>The Developer</p>
-		`
-	}, {
-		id: 2,
-		folder: 'Inbox',
-		from: 'System Administrator',
-		subject: 'Security Alert: New Login',
-		date: '2024-05-19 15:30',
-		body: '<p>A new device has logged into your account. If this was not you, please secure your account immediately.</p>'
-	}, {
-		id: 3,
-		folder: 'Inbox',
-		from: 'SoundCloud',
-		subject: 'Your weekly stats are here',
-		date: '2024-05-18 08:45',
-		body: '<p>You got 1,234 plays this week! Keep up the great work.</p>'
-	}, {
-		id: 100,
-		folder: 'Spam',
-		from: 'Milfeuille.com',
-		subject: 'Rencontrez votre douceur parfaite 🍰💕',
-		date: '2026-02-19 09:12',
-		body: `
-			<div style="font-family: sans-serif; color: #333;">
-				<h2 style="color: #d63384; margin: 0 0 8px 0;">Salut beauté,</h2>
-				<p>Vous méritez le plus délicat des plaisirs — et nous l'avons trouvé pour vous. Milfeuille est le nouveau site de rencontres où les coeurs sensibles rencontrent des gourmands charmants.</p>
-				<p style="background: #fff0f6; padding: 8px; border-radius: 6px;">Créez votre profil en 2 minutes et recevez des messages de personnes prêtes à partager pâtisseries et câlins. <a href="https://wartets.github.io/Milfeuille/" target="_blank">Découvrir Milfeuille</a></p>
-				<p>Inscrivez-vous maintenant et obtenez <strong>1 mois gratuit</strong> de visibilité premium — seulement pour nos nouvelles membres.</p>
-				<p style="margin-top: 12px;">Bisous sucrés,<br><em>L'équipe Milfeuille</em></p>
-			</div>
-		`
-	}];
+	MailStore.init();
 
 	const contentHTML = `
 		<div class="outlook-window-layout">
@@ -3588,20 +3931,15 @@ function openOutlookExpress() {
 				<button class="outlook-tool-btn" data-action="new"><img src="https://api.iconify.design/mdi/email-plus-outline.svg" alt="New"><span>New Mail</span></button>
 				<button class="outlook-tool-btn" data-action="reply"><img src="https://api.iconify.design/mdi/reply-outline.svg" alt="Reply"><span>Reply</span></button>
 				<button class="outlook-tool-btn" data-action="forward"><img src="https://api.iconify.design/mdi/share-outline.svg" alt="Forward"><span>Forward</span></button>
+				<button class="outlook-tool-btn" data-action="delete"><img src="https://api.iconify.design/mdi/delete-outline.svg" alt="Delete"><span>Delete</span></button>
+				<button class="outlook-tool-btn" data-action="new-folder"><img src="https://api.iconify.design/mdi/folder-plus-outline.svg" alt="New Folder"><span>New Folder</span></button>
 				<div style="flex:1"></div>
 				<button id="oe-collapse-folders" class="outlook-tool-btn"><img src="https://api.iconify.design/mdi/chevron-left.svg" alt="Collapse"><span>Hide Folders</span></button>
 			</div>
 			<div class="outlook-main-content">
 				<div class="outlook-folder-pane" id="oe-folders">
 					<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;"><h4 style="margin:0;color:#0b3b7a;">Folders</h4></div>
-					<ul>
-						<li class="active" data-folder="Inbox"><img src="https://staging.svgrepo.com/show/76102/inbox.svg"> Inbox</li>
-						<li data-folder="Outbox"><img src="https://api.iconify.design/mdi/folder-outline.svg"> Outbox</li>
-						<li data-folder="Sent Items"><img src="https://api.iconify.design/mdi/folder-arrow-up-outline.svg"> Sent Items</li>
-						<li data-folder="Drafts"><img src="https://api.iconify.design/mdi/folder-edit-outline.svg"> Drafts</li>
-						<li data-folder="Deleted Items"><img src="https://api.iconify.design/mdi/folder-remove-outline.svg"> Deleted Items</li>
-						<li data-folder="Spam"><img src="https://api.iconify.design/mdi/folder-outline.svg"> Spam</li>
-					</ul>
+					<ul id="oe-folder-list"></ul>
 				</div>
 				<div class="splitter-vertical" id="oe-splitter-vertical"></div>
 				<div class="outlook-right-section" id="oe-right">
@@ -3626,9 +3964,10 @@ function openOutlookExpress() {
 			</div>
 		</div>
 	`;
-	const outlookWindow = createXPWindow(id, 'Outlook Express', contentHTML, 600, 400, { iconSrc: '../assets/images/desk/OE2001.webp' });
+	const outlookWindow = createXPWindow(id, 'Outlook Express', contentHTML, 700, 480, { iconSrc: '../assets/images/desk/OE2001.webp' });
 	outlookWindow.querySelector('.xp-window-content').style.padding = '0';
 
+	const folderListEl = outlookWindow.querySelector('#oe-folder-list');
 	const messageList = outlookWindow.querySelector('.outlook-message-list');
 	const previewFrom = outlookWindow.querySelector('#preview-from');
 	const previewDate = outlookWindow.querySelector('#preview-date');
@@ -3665,19 +4004,16 @@ function openOutlookExpress() {
 			const startX = e.clientX;
 			const startW = foldersPane.getBoundingClientRect().width;
 			document.body.style.userSelect = 'none';
-
 			function onMove(ev) {
 				const delta = ev.clientX - startX;
 				const newW = Math.max(80, Math.min(window.innerWidth - 220, startW + delta));
 				foldersPane.style.width = newW + 'px';
 			}
-
 			function onUp() {
 				document.removeEventListener('mousemove', onMove);
 				document.removeEventListener('mouseup', onUp);
 				document.body.style.userSelect = '';
 			}
-
 			document.addEventListener('mousemove', onMove);
 			document.addEventListener('mouseup', onUp);
 		});
@@ -3689,136 +4025,417 @@ function openOutlookExpress() {
 			const startY = e.clientY;
 			const startH = messagesPane.getBoundingClientRect().height;
 			document.body.style.userSelect = 'none';
-
 			function onMove(ev) {
 				const delta = ev.clientY - startY;
 				const newH = Math.max(80, Math.min(window.innerHeight - 200, startH + delta));
 				messagesPane.style.flex = '0 0 auto';
 				messagesPane.style.height = newH + 'px';
 			}
-
 			function onUp() {
 				document.removeEventListener('mousemove', onMove);
 				document.removeEventListener('mouseup', onUp);
 				document.body.style.userSelect = '';
 			}
-
 			document.addEventListener('mousemove', onMove);
 			document.addEventListener('mouseup', onUp);
 		});
 	}
 
-		let currentFolder = 'Inbox';
+	let currentFolderId = 'inbox';
+	let selectedMessageId = null;
 
-		function openMessageWindow(email) {
-			const mid = `window-email-${email.id}`;
-			if (document.getElementById(mid)) {
-				bringWindowToFront(document.getElementById(mid));
+	function closeContextMenu() {
+		const existing = document.getElementById('oe-context-menu');
+		if (existing) existing.remove();
+	}
+
+	function showGenericContextMenu(x, y, items) {
+		closeContextMenu();
+		const menu = document.createElement('div');
+		menu.id = 'oe-context-menu';
+		menu.className = 'xp-window';
+		menu.style.position = 'fixed';
+		menu.style.left = `${x}px`;
+		menu.style.top = `${y}px`;
+		menu.style.zIndex = String(++zIndexCounter);
+		menu.style.minWidth = '160px';
+		menu.style.padding = '2px';
+		const list = document.createElement('ul');
+		list.style.listStyle = 'none';
+		list.style.margin = '0';
+		list.style.padding = '0';
+		items.forEach(item => {
+			if (item.separator) {
+				const sep = document.createElement('li');
+				sep.style.height = '1px';
+				sep.style.margin = '4px 2px';
+				sep.style.background = 'rgba(0,0,0,0.15)';
+				list.appendChild(sep);
 				return;
 			}
+			const li = document.createElement('li');
+			li.textContent = item.label;
+			li.style.padding = '6px 15px';
+			li.style.cursor = 'pointer';
+			li.addEventListener('mouseenter', () => { li.style.background = 'var(--xp-selection-blue)'; li.style.color = '#fff'; });
+			li.addEventListener('mouseleave', () => { li.style.background = ''; li.style.color = ''; });
+			li.addEventListener('click', () => {
+				closeContextMenu();
+				item.action();
+			});
+			list.appendChild(li);
+		});
+		menu.appendChild(list);
+		document.body.appendChild(menu);
 
-			const html = `
-				<div style="padding:12px; font-family: Arial, sans-serif;">
-					<h3 style="margin:0 0 8px 0;">${email.subject}</h3>
-					<div style="color:#555; font-size:12px; margin-bottom:12px;"><strong>From:</strong> ${email.from} &nbsp; <strong>Date:</strong> ${email.date}</div>
-					<div style="border-top:1px solid #ddd; padding-top:10px;">${email.body}</div>
+		const outsideHandler = (ev) => {
+			if (!menu.contains(ev.target)) {
+				closeContextMenu();
+				document.removeEventListener('mousedown', outsideHandler);
+			}
+		};
+		setTimeout(() => document.addEventListener('mousedown', outsideHandler), 0);
+	}
+
+	function renderFolderList() {
+		folderListEl.innerHTML = '';
+		MailStore.getFolders().forEach(folder => {
+			const li = document.createElement('li');
+			li.dataset.folder = folder.id;
+			if (folder.id === currentFolderId) li.classList.add('active');
+			const img = document.createElement('img');
+			img.src = folder.icon;
+			const span = document.createElement('span');
+			span.textContent = folder.name;
+			li.appendChild(img);
+			li.appendChild(span);
+
+			li.addEventListener('click', () => {
+				currentFolderId = folder.id;
+				selectedMessageId = null;
+				renderFolderList();
+				renderMessageList();
+				clearPreview();
+			});
+
+			li.addEventListener('contextmenu', (e) => {
+				e.preventDefault();
+				e.stopPropagation();
+				const menuItems = [];
+				if (folder.deletable) {
+					menuItems.push({ label: 'Rename Folder', action: () => promptRenameFolder(folder) });
+					menuItems.push({
+						label: 'Delete Folder',
+						action: () => {
+							createConfirmationDialog(`Delete folder "${folder.name}"? Messages inside will be moved to Inbox.`, () => {
+								try {
+									MailStore.deleteFolder(folder.id);
+									if (currentFolderId === folder.id) currentFolderId = 'inbox';
+									renderFolderList();
+									renderMessageList();
+									clearPreview();
+								} catch (err) {
+									showXPDialog('Error', err.message, 'error');
+								}
+							});
+						}
+					});
+					menuItems.push({ separator: true });
+				}
+				menuItems.push({ label: 'New Folder', action: promptNewFolder });
+				showGenericContextMenu(e.clientX, e.clientY, menuItems);
+			});
+
+			folderListEl.appendChild(li);
+		});
+	}
+
+	function promptNewFolder() {
+		openFolderNamePrompt('New Folder', '', (name) => {
+			try {
+				MailStore.createFolder(name);
+				renderFolderList();
+			} catch (err) {
+				showXPDialog('Error', err.message, 'error');
+			}
+		});
+	}
+
+	function promptRenameFolder(folder) {
+		openFolderNamePrompt('Rename Folder', folder.name, (name) => {
+			try {
+				MailStore.renameFolder(folder.id, name);
+				renderFolderList();
+			} catch (err) {
+				showXPDialog('Error', err.message, 'error');
+			}
+		});
+	}
+
+	function openFolderNamePrompt(title, initialValue, onConfirm) {
+		const dialogId = `dialog-folder-name-${Date.now()}`;
+		const content = `
+			<div style="padding:15px;display:flex;flex-direction:column;gap:10px;">
+				<label for="folder-name-input">Folder name:</label>
+				<input type="text" id="folder-name-input" value="${initialValue.replace(/"/g, '&quot;')}" style="padding:4px;">
+				<div style="display:flex;justify-content:flex-end;gap:8px;">
+					<button class="xp-button" id="folder-name-ok">OK</button>
+					<button class="xp-button" id="folder-name-cancel">Cancel</button>
 				</div>
-			`;
-			const win = createXPWindow(mid, email.subject, html, 520, 380, { iconSrc: '../assets/images/desk/OE2001.webp' });
-			win.querySelector('.xp-window-content').style.padding = '0';
-		}
+			</div>
+		`;
+		const dialog = createXPWindow(dialogId, title, content, 320, 150, { resizable: false, isModal: true });
+		const input = dialog.querySelector('#folder-name-input');
+		input.focus();
+		input.select();
+		const confirm = () => {
+			const value = input.value;
+			closeWindow(dialog, dialogId);
+			onConfirm(value);
+		};
+		dialog.querySelector('#folder-name-ok').addEventListener('click', confirm);
+		dialog.querySelector('#folder-name-cancel').addEventListener('click', () => closeWindow(dialog, dialogId));
+		input.addEventListener('keydown', (e) => {
+			if (e.key === 'Enter') confirm();
+		});
+	}
 
-		function renderMessageList() {
+	function clearPreview() {
+		previewFrom.textContent = '';
+		previewDate.textContent = '';
+		previewSubject.textContent = '';
+		previewBody.innerHTML = '';
+	}
+
+	function formatMessageDate(iso) {
+		const date = new Date(iso);
+		if (isNaN(date.getTime())) return iso;
+		return date.toLocaleString('en-US', { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+	}
+
+	function renderMessageList() {
 		messageList.innerHTML = '';
-		const filtered = fakeEmails.filter(e => (e.folder || 'Inbox') === currentFolder);
-		filtered.forEach(email => {
+		const messages = MailStore.getMessages(currentFolderId);
+
+		messages.forEach(message => {
 			const li = document.createElement('li');
 			li.className = 'msg-row';
-			li.dataset.emailId = email.id;
+			li.dataset.messageId = message.id;
+			if (!message.read) li.style.fontWeight = 'bold';
+			if (message.id === selectedMessageId) li.classList.add('selected');
+
 			li.innerHTML = `
-				<div class="col from">${email.from}</div>
-				<div class="col subject">${email.subject}</div>
-				<div class="col date">${email.date}</div>
+				<div class="col from">${message.from}</div>
+				<div class="col subject">${message.subject}</div>
+				<div class="col date">${formatMessageDate(message.date)}</div>
 			`;
 
 			li.addEventListener('click', () => {
+				selectedMessageId = message.id;
 				messageList.querySelectorAll('li').forEach(item => item.classList.remove('selected'));
 				li.classList.add('selected');
-				renderPreview(email.id);
+				if (!message.read) {
+					MailStore.markRead(message.id, true);
+					li.style.fontWeight = '';
+				}
+				renderPreview(message.id);
 			});
 
 			li.addEventListener('dblclick', () => {
-				openMessageWindow(email);
+				if (currentFolderId === 'drafts') {
+					openComposeWindow({ draftId: message.id, to: message.to, subject: message.subject, body: htmlToPlainText(message.body) });
+				} else {
+					openMessageWindow(message);
+				}
+			});
+
+			li.addEventListener('contextmenu', (e) => {
+				e.preventDefault();
+				e.stopPropagation();
+				selectedMessageId = message.id;
+				messageList.querySelectorAll('li').forEach(item => item.classList.remove('selected'));
+				li.classList.add('selected');
+				renderPreview(message.id);
+
+				const moveItems = MailStore.getFolders()
+					.filter(folder => folder.id !== currentFolderId)
+					.map(folder => ({
+						label: folder.name,
+						action: () => {
+							MailStore.moveMessage(message.id, folder.id);
+							renderMessageList();
+							clearPreview();
+						}
+					}));
+
+				showGenericContextMenu(e.clientX, e.clientY, [
+					{ label: 'Open', action: () => (currentFolderId === 'drafts' ? openComposeWindow({ draftId: message.id, to: message.to, subject: message.subject, body: htmlToPlainText(message.body) }) : openMessageWindow(message)) },
+					{ label: message.read ? 'Mark as Unread' : 'Mark as Read', action: () => { MailStore.markRead(message.id, !message.read); renderMessageList(); } },
+					{ label: 'Reply', action: () => openComposeWindow(buildReply(message)) },
+					{ label: 'Forward', action: () => openComposeWindow(buildForward(message)) },
+					{ separator: true },
+					{ label: 'Move to', action: () => showGenericContextMenu(e.clientX + 160, e.clientY, moveItems) },
+					{ label: currentFolderId === 'deleted' ? 'Delete Permanently' : 'Delete', action: () => {
+						MailStore.deleteMessage(message.id);
+						renderMessageList();
+						clearPreview();
+					} }
+				]);
 			});
 
 			messageList.appendChild(li);
 		});
-
-		const first = messageList.querySelector('li');
-		if (first) {
-			first.classList.add('selected');
-			renderPreview(Number(first.dataset.emailId));
-		} else {
-			previewFrom.textContent = '';
-			previewDate.textContent = '';
-			previewSubject.textContent = '';
-			previewBody.innerHTML = '';
-		}
 	}
 
-	function renderPreview(emailId) {
-		const email = fakeEmails.find(e => e.id === emailId);
-		if (email) {
-			previewFrom.textContent = email.from;
-			previewDate.textContent = email.date;
-			previewSubject.textContent = email.subject;
-			previewBody.innerHTML = email.body;
+	function renderPreview(messageId) {
+		const message = MailStore.getMessageById(messageId);
+		if (!message) {
+			clearPreview();
+			return;
 		}
+		previewFrom.textContent = `${message.from} <${message.fromAddress || 'unknown'}>`;
+		previewDate.textContent = formatMessageDate(message.date);
+		previewSubject.textContent = message.subject;
+		previewBody.innerHTML = message.body;
 	}
 
-	outlookWindow.querySelectorAll('.outlook-tool-btn').forEach(btn => {
-		btn.addEventListener('click', (e) => {
+	function htmlToPlainText(html) {
+		const container = document.createElement('div');
+		container.innerHTML = html || '';
+		return container.textContent || container.innerText || '';
+	}
+
+	function buildReply(message) {
+		return {
+			to: message.fromAddress || '',
+			subject: message.subject.startsWith('Re:') ? message.subject : `Re: ${message.subject}`,
+			body: `\n\nOriginal message\nFrom: ${message.from}\nDate: ${formatMessageDate(message.date)}\nSubject: ${message.subject}\n\n${htmlToPlainText(message.body)}`
+		};
+	}
+
+	function buildForward(message) {
+		return {
+			to: '',
+			subject: message.subject.startsWith('Fwd:') ? message.subject : `Fwd: ${message.subject}`,
+			body: `\n\nForwarded message\nFrom: ${message.from}\nDate: ${formatMessageDate(message.date)}\nSubject: ${message.subject}\n\n${htmlToPlainText(message.body)}`
+		};
+	}
+
+	function openMessageWindow(message) {
+		const mid = `window-email-${message.id}`;
+		if (document.getElementById(mid)) {
+			bringWindowToFront(document.getElementById(mid));
+			return;
+		}
+		const html = `
+			<div style="padding:12px; font-family: Arial, sans-serif;">
+				<h3 style="margin:0 0 8px 0;">${message.subject}</h3>
+				<div style="color:#555; font-size:12px; margin-bottom:12px;"><strong>From:</strong> ${message.from} &lt;${message.fromAddress || 'unknown'}&gt; &nbsp; <strong>Date:</strong> ${formatMessageDate(message.date)}</div>
+				<div style="border-top:1px solid #ddd; padding-top:10px;">${message.body}</div>
+			</div>
+		`;
+		const win = createXPWindow(mid, message.subject, html, 520, 380, { iconSrc: '../assets/images/desk/OE2001.webp' });
+		win.querySelector('.xp-window-content').style.padding = '0';
+	}
+
+	function openComposeWindow(prefill = {}) {
+		const composeId = prefill.draftId ? `window-compose-${prefill.draftId}` : `window-compose-${Date.now()}`;
+		if (document.getElementById(composeId)) {
+			bringWindowToFront(document.getElementById(composeId));
+			return;
+		}
+
+		const content = `
+			<div style="display:flex;flex-direction:column;height:100%;">
+				<div style="display:flex;flex-direction:column;gap:6px;padding:10px;border-bottom:1px solid var(--xp-border-light);">
+					<div style="display:flex;align-items:center;gap:8px;">
+						<label style="width:60px;">To:</label>
+						<input type="text" id="compose-to" style="flex:1;padding:4px;" value="${(prefill.to || '').replace(/"/g, '&quot;')}">
+					</div>
+					<div style="display:flex;align-items:center;gap:8px;">
+						<label style="width:60px;">Subject:</label>
+						<input type="text" id="compose-subject" style="flex:1;padding:4px;" value="${(prefill.subject || '').replace(/"/g, '&quot;')}">
+					</div>
+				</div>
+				<textarea id="compose-body" style="flex:1;border:none;padding:10px;font-family:'Roboto Mono',monospace;font-size:13px;resize:none;outline:none;">${prefill.body || ''}</textarea>
+				<div style="display:flex;justify-content:flex-end;gap:8px;padding:10px;border-top:1px solid var(--xp-border-light);">
+					<button class="xp-button" id="compose-send">Send</button>
+					<button class="xp-button" id="compose-save-draft">Save as Draft</button>
+					<button class="xp-button" id="compose-cancel">Cancel</button>
+				</div>
+			</div>
+		`;
+
+		const win = createXPWindow(composeId, prefill.subject ? `New Message - ${prefill.subject}` : 'New Message', content, 560, 440, { iconSrc: '../assets/images/desk/OE2001.webp' });
+		win.querySelector('.xp-window-content').style.padding = '0';
+
+		const toInput = win.querySelector('#compose-to');
+		const subjectInput = win.querySelector('#compose-subject');
+		const bodyInput = win.querySelector('#compose-body');
+
+		win.querySelector('#compose-send').addEventListener('click', () => {
+			try {
+				MailStore.sendMessage({ to: toInput.value, subject: subjectInput.value, body: bodyInput.value });
+				if (prefill.draftId) MailStore.deleteDraft(prefill.draftId);
+				showXPDialog('Message Sent', `Your message has been sent to ${toInput.value}.`, 'info');
+				closeWindow(win, composeId);
+				if (currentFolderId === 'sent' || currentFolderId === 'drafts') renderMessageList();
+			} catch (err) {
+				showXPDialog('Error', err.message, 'error');
+			}
+		});
+
+		win.querySelector('#compose-save-draft').addEventListener('click', () => {
+			MailStore.saveDraft({ id: prefill.draftId, to: toInput.value, subject: subjectInput.value, body: bodyInput.value });
+			closeWindow(win, composeId);
+			if (currentFolderId === 'drafts') renderMessageList();
+		});
+
+		win.querySelector('#compose-cancel').addEventListener('click', () => closeWindow(win, composeId));
+	}
+
+	outlookWindow.querySelectorAll('.outlook-tool-btn[data-action]').forEach(btn => {
+		btn.addEventListener('click', () => {
 			const action = btn.dataset.action;
-			if (action === 'mark-spam') {
-				const selected = messageList.querySelector('li.selected');
-				if (!selected) {
-					showXPDialog('Mark as Spam', 'Please select a message first.', 'warning');
+			if (action === 'new') {
+				openComposeWindow();
+			} else if (action === 'reply') {
+				if (!selectedMessageId) {
+					showXPDialog('Reply', 'Please select a message first.', 'warning');
 					return;
 				}
-				const id = Number(selected.dataset.emailId);
-				const email = fakeEmails.find(em => em.id === id);
-				if (email) {
-					email.folder = 'Spam';
-					renderMessageList();
-					previewFrom.textContent = '';
-					previewDate.textContent = '';
-					previewSubject.textContent = '';
-					previewBody.innerHTML = '';
+				const message = MailStore.getMessageById(selectedMessageId);
+				if (message) openComposeWindow(buildReply(message));
+			} else if (action === 'forward') {
+				if (!selectedMessageId) {
+					showXPDialog('Forward', 'Please select a message first.', 'warning');
+					return;
 				}
-				return;
+				const message = MailStore.getMessageById(selectedMessageId);
+				if (message) openComposeWindow(buildForward(message));
+			} else if (action === 'delete') {
+				if (!selectedMessageId) {
+					showXPDialog('Delete', 'Please select a message first.', 'warning');
+					return;
+				}
+				MailStore.deleteMessage(selectedMessageId);
+				selectedMessageId = null;
+				renderMessageList();
+				clearPreview();
+			} else if (action === 'new-folder') {
+				promptNewFolder();
 			}
-
-			showXPDialog('Outlook Express', 'This feature is for demonstration purposes only. Sorry...', 'info');
 		});
 	});
 
-	const folderItems = outlookWindow.querySelectorAll('.outlook-folder-pane ul li');
-	folderItems.forEach(li => {
-		li.addEventListener('click', () => {
-			folderItems.forEach(i => i.classList.remove('active'));
-			li.classList.add('active');
-			currentFolder = li.dataset.folder || 'Inbox';
-			renderMessageList();
-			previewFrom.textContent = '';
-			previewDate.textContent = '';
-			previewSubject.textContent = '';
-			previewBody.innerHTML = '';
-		});
-	});
-
+	renderFolderList();
 	renderMessageList();
-	if (fakeEmails.length > 0) {
-		messageList.children[0].classList.add('selected');
-		renderPreview(fakeEmails[0].id);
-	}
+	clearPreview();
+
+	MailStore.ensureDailyContent().then(added => {
+		if (added && document.getElementById(id)) {
+			renderFolderList();
+			if (currentFolderId === 'inbox') renderMessageList();
+		}
+	});
 }
