@@ -249,6 +249,17 @@ const particlesConfig = {
 	}
 };
 
+function getOldText(field) {
+	if (field === null || field === undefined) return '';
+	if (typeof field === 'string') return field;
+	if (typeof field === 'object') {
+		if (typeof field.en === 'string' && field.en.trim() !== '') return field.en;
+		const fallback = Object.values(field).find(value => typeof value === 'string' && value.trim() !== '');
+		return fallback || '';
+	}
+	return String(field);
+}
+
 function renderProjects(filteredProjects = null) {
 	const main = document.querySelector('main');
 	const linkDisplay = document.getElementById('link-display');
@@ -338,7 +349,7 @@ function createCard(project, isReversed) {
 			}
 			})
 			.catch(err => {
-			console.warn(`GitHub recovery failed for ${project.title}`, err);
+			console.warn(`GitHub recovery failed for ${getOldText(project.title)}`, err);
 			});
 		}
 	}
@@ -359,13 +370,14 @@ function createCard(project, isReversed) {
 	content.className = 'content-container';
 	
 	const title = document.createElement('h2');
+	const titleText = getOldText(project.title);
 	title.textContent = project.date 
-		? `${project.title} (${project.date})` 
-		: project.title;
+		? `${titleText} (${project.date})` 
+		: titleText;
 	content.appendChild(title);
 	
 	const desc = document.createElement('p');
-	desc.textContent = project.description;
+	desc.textContent = getOldText(project.description);
 	content.appendChild(desc);
 	
 	card.appendChild(content);
@@ -547,7 +559,7 @@ function processProjects({ searchTerm = '', category = 'all', sortValue = 'date-
 
 	let filtered = cloned.filter(item => {
 		const matchText = p => (
-			(p.title + ' ' + p.description + ' ' + (p.keywords || []).join(' '))
+			(getOldText(p.title) + ' ' + getOldText(p.description) + ' ' + (p.keywords || []).join(' '))
 				.toLowerCase()
 				.includes(term)
 		);
@@ -584,7 +596,7 @@ function processProjects({ searchTerm = '', category = 'all', sortValue = 'date-
 		return el.timestamp ? new Date(el.timestamp).getTime() : 0;
 	};
 	const getTitle = el =>
-		(Array.isArray(el) ? el[0].title : el.title).toLowerCase();
+		getOldText(Array.isArray(el) ? el[0].title : el.title).toLowerCase();
 
 	filtered.sort((a, b) => {
 		switch (sortValue) {
@@ -610,8 +622,8 @@ function processProjects({ searchTerm = '', category = 'all', sortValue = 'date-
 					return sortValue === 'date-asc' ? ta - tb : tb - ta;
 				} else {
 					return sortValue === 'title-asc'
-						? a.title.toLowerCase().localeCompare(b.title.toLowerCase())
-						: b.title.toLowerCase().localeCompare(a.title.toLowerCase());
+						? getOldText(a.title).toLowerCase().localeCompare(getOldText(b.title).toLowerCase())
+						: getOldText(b.title).toLowerCase().localeCompare(getOldText(a.title).toLowerCase());
 				}
 			});
 		}
