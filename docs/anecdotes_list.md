@@ -67,6 +67,7 @@ Liste complète des anecdotes présentes dans `data/anecdotes/registry.js`, clas
 | anecdote_poincare_n_body_problem_chaos | poincaré découvre le chaos déterministe en étudiant le problème des trois corps (1889). |
 | anecdote_turing_bombe_enigma_crypto | turing et la bombe de bletchley park cassent le chiffrement enigma. |
 | anecdote_weierstrass_nowhere_differentiable | la fonction de weierstrass (1872), continue partout mais dérivable nulle part. |
+| anecdote_arrow_impossibility_theorem_voting | le théorème d'impossibilité d'arrow prouve qu'aucun système de vote ordinal ne peut respecter trois critères démocratiques de base sans dictature. |
 
 ## Physique
 
@@ -178,6 +179,9 @@ Liste complète des anecdotes présentes dans `data/anecdotes/registry.js`, clas
 | anecdote_planck_units_natural_scale | les unités de planck (1899), un système de mesure fondé sur les constantes universelles. |
 | anecdote_quantum_zeno_effect_observation | l'effet zénon quantique : observer fréquemment un système gèle son évolution. |
 | anecdote_tolman_oppenheimer_volkoff_limit_neutron | la limite de tolman-oppenheimer-volkoff fixe la masse maximale d'une étoile à neutrons (1939). |
+| anecdote_dynamical_casimir_effect_quantum | l'effet casimir dynamique convertit les fluctuations du vide en photons réels via un miroir relativiste. |
+| anecdote_oklo_natural_nuclear_reactor_fission | des réacteurs nucléaires de fission naturels ont fonctionné en autonomie à oklo il y a 2 milliards d'années. |
+| anecdote_negative_absolute_temperature_spin | les températures absolues négatives existent dans les systèmes de spins bornés et sont plus chaudes que toute température positive. |
 
 ## Histoire des Sciences
 

@@ -1550,5 +1550,37 @@ export default [
 		addedDate: '2026-08-11',
 		scheduling: { type: 'period', dates: ['12-30', '01-02'] },
 		path: '/data/anecdotes/physique/international_date_line_new_year.js'
+	},
+	{
+		id: 'anecdote_dynamical_casimir_effect_quantum',
+		priority: 4,
+		enabled: true,
+		addedDate: '2026-08-13',
+		scheduling: { type: 'anytime', dates: [] },
+		path: '/data/anecdotes/physique/dynamical_casimir_effect_quantum.js'
+	},
+	{
+		id: 'anecdote_oklo_natural_nuclear_reactor_fission',
+		priority: 4,
+		enabled: true,
+		addedDate: '2026-08-13',
+		scheduling: { type: 'anytime', dates: [] },
+		path: '/data/anecdotes/physique/oklo_natural_nuclear_reactor_fission.js'
+	},
+	{
+		id: 'anecdote_arrow_impossibility_theorem_voting',
+		priority: 4,
+		enabled: true,
+		addedDate: '2026-08-13',
+		scheduling: { type: 'anytime', dates: [] },
+		path: '/data/anecdotes/mathematiques/arrow_impossibility_theorem_voting.js'
+	},
+	{
+		id: 'anecdote_negative_absolute_temperature_spin',
+		priority: 4,
+		enabled: true,
+		addedDate: '2026-08-13',
+		scheduling: { type: 'anytime', dates: [] },
+		path: '/data/anecdotes/physique/negative_absolute_temperature_spin.js'
 	}
 ];
