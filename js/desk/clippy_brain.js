@@ -47,20 +47,6 @@
 		{ topic: 'OFFICE_LORE', keywords: ['clippy', 'office 97', 'kevan', 'merlin', 'rover', 'the dot', 'microsoft bob'] }
 	];
 
-	const ACTION_TRIGGER_COMMANDS = {
-		timer_25: 'timer 25',
-		show_todos: 'todo',
-		game_ttt: 'morpion',
-		game_memory: 'memory',
-		game_hangman: 'hangman',
-		game_quiz: 'quiz',
-		action_defrag: 'defrag',
-		action_trivia: 'trivia',
-		action_joke: 'joke',
-		action_status: 'diagnostics',
-		action_pass: 'password 16'
-	};
-
 	class ClippyBrainEngine {
 		constructor() {
 			this.knowledge = window.ClippyKnowledge || {
@@ -523,13 +509,8 @@
 		}
 
 		dispatchActionTrigger(trigger) {
-			const command = ACTION_TRIGGER_COMMANDS[trigger];
-			if (!command || !window.ClippyAgent) return;
-			if (typeof window.ClippyAgent.queuePrompt === 'function') {
-				setTimeout(() => window.ClippyAgent.queuePrompt(command), 500);
-			} else {
-				setTimeout(() => window.ClippyAgent.prompt(command), 900);
-			}
+			if (!trigger || !window.ClippyAgent || typeof window.ClippyAgent.executeAction !== 'function') return;
+			setTimeout(() => window.ClippyAgent.executeAction(trigger), 550);
 		}
 
 		buildGraphActions(options) {
@@ -705,7 +686,7 @@
 				if (coreReply) {
 					if (typeof coreReply === 'string') {
 						const currentNode = window.ClippyDialogueTrees ? window.ClippyDialogueTrees.getNode(this.state.activeGraphNode || 'greeting_root') : null;
-						const contextOptions = currentNode && window.ClippyDialogueTrees ? window.ClippyDialogueTrees.getOptionsForNode(currentNode, this.state.mood, this.state.affinity) : [];
+						const contextOptions = currentNode && window.ClippyDialogueTrees ? window.ClippyDialogueTrees.getOptionsForNode(currentNode, this.state.mood, this.state.affinity, this.state.patience) : [];
 						return { text: coreReply, actions: this.buildGraphActions(contextOptions), source: 'CORE_RULE' };
 					}
 					return Object.assign({ source: 'CORE_RULE' }, coreReply);
@@ -713,7 +694,7 @@
 			}
 
 			const fallbackNode = window.ClippyDialogueTrees ? window.ClippyDialogueTrees.getNode(this.state.activeGraphNode || 'greeting_root') : null;
-			const fallbackOptions = fallbackNode && window.ClippyDialogueTrees ? window.ClippyDialogueTrees.getOptionsForNode(fallbackNode, this.state.mood, this.state.affinity) : [];
+			const fallbackOptions = fallbackNode && window.ClippyDialogueTrees ? window.ClippyDialogueTrees.getOptionsForNode(fallbackNode, this.state.mood, this.state.affinity, this.state.patience) : [];
 
 			const prefix = this.craftMoodPrefix();
 			const genericAnswers = [

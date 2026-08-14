@@ -1977,7 +1977,8 @@
 		try {
 			const nodeId = (window.ClippyBrain.state && window.ClippyBrain.state.activeGraphNode) || 'greeting_root';
 			const node = window.ClippyDialogueTrees.getNode(nodeId);
-			const opts = window.ClippyDialogueTrees.getOptionsForNode(node, window.ClippyBrain.getMood(), window.ClippyBrain.getAffinity());
+			const patience = (window.ClippyBrain.state && window.ClippyBrain.state.patience !== undefined) ? window.ClippyBrain.state.patience : 50;
+			const opts = window.ClippyDialogueTrees.getOptionsForNode(node, window.ClippyBrain.getMood(), window.ClippyBrain.getAffinity(), patience);
 			return window.ClippyBrain.buildGraphActions(opts);
 		} catch (e) {
 			return [];
@@ -2059,6 +2060,64 @@
 			updateMoodBadge();
 			typeWriterMessage('assistant', result.text, null, actions);
 		}, 160 + Math.random() * 140);
+	}
+
+	function executeAgentAction(actionId, attemptsLeft) {
+		if (attemptsLeft === undefined) attemptsLeft = 40;
+		if (!isOpen) openPopup();
+		if (isThinking || isTyping) {
+			if (attemptsLeft <= 0) return;
+			setTimeout(() => executeAgentAction(actionId, attemptsLeft - 1), 200);
+			return;
+		}
+		runAgentAction(actionId);
+	}
+
+	function runAgentAction(actionId) {
+		switch (actionId) {
+			case 'timer_25':
+				startPomodoroTimer(25);
+				break;
+			case 'show_todos':
+				renderInteractiveTodos();
+				break;
+			case 'game_ttt':
+				startTicTacToe();
+				break;
+			case 'game_memory':
+				startMemoryGame();
+				break;
+			case 'game_hangman':
+				startHangmanGame();
+				break;
+			case 'game_quiz':
+				startQuizGame();
+				break;
+			case 'action_defrag':
+				simulateDefrag();
+				break;
+			case 'action_trivia':
+				setVisualState('think');
+				typeWriterMessage('assistant', pickFrom(TRIVIA_LIST));
+				break;
+			case 'action_joke':
+				setVisualState('talk');
+				typeWriterMessage('assistant', pickFrom(JOKES_LIST));
+				break;
+			case 'action_status':
+				setVisualState('think');
+				typeWriterMessage('assistant', respondSystemStatus());
+				break;
+			case 'action_pass': {
+				const pwd = generateSecurePassword(16);
+				setVisualState('write');
+				playRetroSound('action');
+				typeWriterMessage('assistant', `Generated Secure Password (16 chars):\n**\`${pwd}\`**`);
+				break;
+			}
+			default:
+				break;
+		}
 	}
 
 	function makeDraggable(element, handle) {
@@ -2352,6 +2411,7 @@
 			handleUserAction(command);
 		},
 		queuePrompt: (command) => queuePrompt(command),
+		executeAction: (actionId) => executeAgentAction(actionId),
 		notify: (text) => showIdleBubble(text),
 		selectGraphOption: handleGraphOptionClick
 	};

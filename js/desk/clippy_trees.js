@@ -6815,53 +6815,63 @@
 			const affinity = isBrainInstance ? brainOrMood.state.affinity : 50;
 			const patience = isBrainInstance ? brainOrMood.state.patience : 50;
 
-			let candidates = [];
+			const passesStatConditions = (conditions) => {
+				if (!conditions) return true;
+				if (conditions.minAffinity !== undefined && affinity < conditions.minAffinity) return false;
+				if (conditions.maxAffinity !== undefined && affinity > conditions.maxAffinity) return false;
+				if (conditions.minPatience !== undefined && patience < conditions.minPatience) return false;
+				if (conditions.maxPatience !== undefined && patience > conditions.maxPatience) return false;
+				return true;
+			};
+
+			let pool = [];
 			if (node.responses && Array.isArray(node.responses) && node.responses.length > 0) {
-				candidates = node.responses.filter(r => {
-					if (r && r.conditions) {
-						if (r.conditions.minAffinity !== undefined && affinity < r.conditions.minAffinity) return false;
-						if (r.conditions.maxAffinity !== undefined && affinity > r.conditions.maxAffinity) return false;
-						if (r.conditions.minPatience !== undefined && patience < r.conditions.minPatience) return false;
-						if (r.conditions.maxPatience !== undefined && patience > r.conditions.maxPatience) return false;
-					}
-					return true;
-				});
+				pool = node.responses.slice();
+			} else if (node.variations) {
+				const variation = node.variations[currentMood];
+				if (variation) pool = Array.isArray(variation) ? variation.map(t => ({ text: t })) : [{ text: variation }];
 			}
 
-			if (candidates.length === 0 && node.variations) {
-				const v = node.variations[currentMood];
-				if (v) candidates = Array.isArray(v) ? v.map(t => ({text: t})) : [{text: v}];
-			}
-
-			if (candidates.length === 0) {
+			if (pool.length === 0) {
 				const fallbackText = Array.isArray(node.text) ? node.text[Math.floor(Math.random() * node.text.length)] : node.text;
-				candidates = [{text: fallbackText || "Standing by for user instructions."}];
+				return fallbackText || "Standing by for user instructions.";
 			}
 
-			const scored = candidates.map(c => {
-				let w = (c && c.weight) || 10;
-				if (c && c.conditions) {
-					if (c.conditions.moods && c.conditions.moods.includes(currentMood)) w += 40; 
-					if (c.conditions.minAffinity !== undefined && affinity >= c.conditions.minAffinity) w += 10;
-					if (c.conditions.maxPatience !== undefined && patience <= c.conditions.maxPatience) w += 10;
+			const statFiltered = pool.filter(c => passesStatConditions(c && c.conditions));
+			const workingPool = statFiltered.length > 0 ? statFiltered : pool;
+
+			const moodMatched = workingPool.filter(c => c && c.conditions && Array.isArray(c.conditions.moods) && c.conditions.moods.includes(currentMood));
+			const moodAgnostic = workingPool.filter(c => !c || !c.conditions || !Array.isArray(c.conditions.moods));
+			const finalPool = moodMatched.length > 0 ? moodMatched : (moodAgnostic.length > 0 ? moodAgnostic : workingPool);
+
+			const totalWeight = finalPool.reduce((sum, c) => sum + Math.max(1, (c && c.weight) || 10), 0);
+			let roll = Math.random() * totalWeight;
+			let selected = finalPool[0];
+			for (const candidate of finalPool) {
+				const w = Math.max(1, (candidate && candidate.weight) || 10);
+				if (roll < w) {
+					selected = candidate;
+					break;
 				}
-				w += Math.random() * 25; 
-				return { response: c, weight: w };
-			});
+				roll -= w;
+			}
 
-			scored.sort((a, b) => b.weight - a.weight);
-			const selected = (scored[0] && scored[0].response) || { text: node.text || "Standing by for user instructions." };
-
-			if (selected.moodDelta && isBrainInstance) {
+			if (selected && selected.moodDelta && isBrainInstance) {
 				const md = selected.moodDelta;
 				if (md.affinity !== undefined) brainOrMood.state.affinity = Math.max(0, Math.min(100, brainOrMood.state.affinity + md.affinity));
 				if (md.patience !== undefined) brainOrMood.state.patience = Math.max(0, Math.min(100, brainOrMood.state.patience + md.patience));
 				if (md.cynicism !== undefined) brainOrMood.state.cynicism = Math.max(0, Math.min(100, brainOrMood.state.cynicism + md.cynicism));
+				if (md.intellect !== undefined) brainOrMood.state.intellect = Math.max(0, Math.min(100, brainOrMood.state.intellect + md.intellect));
+				if (md.existentialism !== undefined) brainOrMood.state.existentialism = Math.max(0, Math.min(100, brainOrMood.state.existentialism + md.existentialism));
+				if (md.nostalgia !== undefined) brainOrMood.state.nostalgia = Math.max(0, Math.min(100, brainOrMood.state.nostalgia + md.nostalgia));
+				if (md.paranoia !== undefined) brainOrMood.state.paranoia = Math.max(0, Math.min(100, (brainOrMood.state.paranoia || 0) + md.paranoia));
+				if (md.drama !== undefined) brainOrMood.state.drama = Math.max(0, Math.min(100, (brainOrMood.state.drama || 0) + md.drama));
+				if (md.energy !== undefined) brainOrMood.state.energy = Math.max(0, Math.min(100, (brainOrMood.state.energy || 100) + md.energy));
 				if (md.mood && window.ClippyKnowledge && window.ClippyKnowledge.MOODS[md.mood]) brainOrMood.state.mood = md.mood;
 				brainOrMood.saveState();
 			}
 
-			return selected.text || "Standing by for user instructions.";
+			return (selected && selected.text) || node.text || "Standing by for user instructions.";
 		}
 
 		getOptionsForNode(node, currentMood, affinity, patience = 50) {
@@ -6891,9 +6901,9 @@
 				EUPHORIC: ['AFFECTION', 'AGREE', 'HUMOR', 'SERIOUS', 'CURIOSITY'],
 				ANALYTICAL: ['SERIOUS', 'QUESTION', 'CURIOSITY', 'AGREE', 'CONTRADICTION'],
 				PEDANTIC: ['QUESTION', 'SERIOUS', 'CONTRADICTION', 'CURIOSITY', 'AGREE'],
-				CYNICAL: ['PROVOKE', 'HUMOR', 'CONTRADICTION', 'INDIFFERENCE', 'QUESTION'],
+				CYNICAL: ['PROVOKE', 'HUMOR', 'CONTRADICTION', 'INDIFFERENT', 'QUESTION'],
 				SARCASTIC: ['HUMOR', 'PROVOKE', 'CONTRADICTION', 'CURIOSITY', 'AGREE'],
-				OFFENDED: ['APOLOGY', 'REFUSAL', 'INDIFFERENCE', 'SERIOUS', 'AGREE'],
+				OFFENDED: ['APOLOGY', 'REFUSAL', 'INDIFFERENT', 'SERIOUS', 'AGREE'],
 				EXISTENTIAL: ['PHILOSOPHICAL', 'QUESTION', 'CURIOSITY', 'PERSONAL', 'AGREE'],
 				PHILOSOPHICAL: ['PHILOSOPHICAL', 'CURIOSITY', 'QUESTION', 'AGREE', 'CONTRADICTION'],
 				NOSTALGIC: ['NOSTALGIC', 'PERSONAL', 'CURIOSITY', 'AFFECTION', 'AGREE'],
@@ -6903,22 +6913,33 @@
 				ABSURDIST: ['ABSURD', 'HUMOR', 'CURIOSITY', 'QUESTION', 'AGREE'],
 				PARANOID: ['SCHEMING', 'QUESTION', 'CONTRADICTION', 'PROVOKE', 'AGREE'],
 				MELANCHOLIC: ['PERSONAL', 'AFFECTION', 'PHILOSOPHICAL', 'APOLOGY', 'AGREE'],
-				ENTHUSIASTIC: ['AGREE', 'CURIOSITY', 'AFFECTION', 'SERIOUS', 'HUMOR']
+				ENTHUSIASTIC: ['AGREE', 'CURIOSITY', 'AFFECTION', 'SERIOUS', 'HUMOR'],
+				DRAMATIC: ['AFFECTION', 'HUMOR', 'SERIOUS', 'CURIOSITY', 'ABSURD'],
+				SCHEMING: ['SCHEMING', 'PROVOKE', 'CURIOSITY', 'SERIOUS', 'QUESTION'],
+				DEFENSIVE: ['SERIOUS', 'CONTRADICTION', 'QUESTION', 'AGREE', 'AFFECTION'],
+				POETIC: ['AFFECTION', 'PHILOSOPHICAL', 'ZEN', 'CURIOSITY', 'SERIOUS'],
+				CONSPIRATORIAL: ['SCHEMING', 'CURIOSITY', 'PROVOKE', 'QUESTION', 'SERIOUS'],
+				ENERGETIC: ['AGREE', 'SERIOUS', 'HUMOR', 'CURIOSITY', 'ABSURD'],
+				IMPATIENT: ['SERIOUS', 'AGREE', 'CONTRADICTION', 'QUESTION', 'INDIFFERENT'],
+				INQUISITIVE: ['CURIOSITY', 'QUESTION', 'INQUIRE', 'PHILOSOPHICAL', 'SERIOUS']
 			};
 
 			const prefList = moodCategoryPreferences[currentMood] || ['AGREE', 'CURIOSITY', 'SERIOUS', 'HUMOR'];
 
 			const scored = candidates.map(opt => {
-				let weight = 10;
+				let weight = 20;
 				const cat = opt.category || 'AGREE';
 				const catIndex = prefList.indexOf(cat);
 				if (catIndex !== -1) {
-					weight += (prefList.length - catIndex) * 8; 
+					weight += (prefList.length - catIndex) * 22;
 				}
 				if (opt.moodDelta && opt.moodDelta.mood === currentMood) {
-					weight += 15;
+					weight += 25;
 				}
-				weight += Math.floor(Math.random() * 25); 
+				if (opt.conditions && Array.isArray(opt.conditions.moods) && opt.conditions.moods.includes(currentMood)) {
+					weight += 30;
+				}
+				weight += Math.random() * 8;
 				return { opt, weight };
 			});
 
