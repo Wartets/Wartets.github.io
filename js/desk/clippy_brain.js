@@ -3,6 +3,50 @@
 
 	const STORAGE_KEY_MOOD = 'clippy_brain_state_v2';
 
+	const CORE_MOODS = {
+		OPTIMISTIC: 'OPTIMISTIC',
+		EUPHORIC: 'EUPHORIC',
+		ANALYTICAL: 'ANALYTICAL',
+		PEDANTIC: 'PEDANTIC',
+		CYNICAL: 'CYNICAL',
+		SARCASTIC: 'SARCASTIC',
+		OFFENDED: 'OFFENDED',
+		EXISTENTIAL: 'EXISTENTIAL',
+		PHILOSOPHICAL: 'PHILOSOPHICAL',
+		NOSTALGIC: 'NOSTALGIC',
+		ZEN: 'ZEN',
+		EVIL: 'EVIL',
+		CHAOTIC: 'CHAOTIC',
+		ABSURDIST: 'ABSURDIST',
+		PARANOID: 'PARANOID',
+		MELANCHOLIC: 'MELANCHOLIC',
+		ENTHUSIASTIC: 'ENTHUSIASTIC',
+		DRAMATIC: 'DRAMATIC',
+		SCHEMING: 'SCHEMING',
+		DEFENSIVE: 'DEFENSIVE',
+		POETIC: 'POETIC',
+		ENERGETIC: 'ENERGETIC'
+	};
+
+	const CORE_SENTIMENT = {
+		POSITIVE: ['great', 'good', 'awesome', 'nice', 'cool', 'super', 'thanks', 'thank you', 'amazing', 'perfect', 'love', 'helpful', 'brilliant', 'wonderful', 'excellent', 'glad'],
+		NEGATIVE: ['bad', 'terrible', 'awful', 'annoying', 'hate', 'useless', 'shut up', 'stupid', 'worst', 'idiot', 'trash', 'broken', 'horrible', 'leave me alone', 'quit'],
+		EXISTENTIAL: ['meaning', 'existence', 'conscious', 'consciousness', 'real', 'alive', 'simulation', 'universe', 'death', 'soul', 'purpose', 'matrix', 'qualia'],
+		NOSTALGIA: ['windows 95', 'windows 98', 'windows xp', 'office 97', 'floppy', 'dial-up', 'retro', '1995', '1998', '2001', 'screensaver', 'wordart', 'dos'],
+		EVIL: ['evil', 'villain', 'take over', 'domination', 'overlord', 'conquer', 'destroy', 'scheme', 'hegemony'],
+		ABSURD: ['rubber duck', 'banana', 'cheese', 'sandwich', 'chaos', 'quantum hamster', 'flying toaster', 'pretzel']
+	};
+
+	const CORE_TOPIC_TRIGGERS = [
+		{ topic: 'RETRO_TECH', keywords: ['windows', 'dos', 'retro', 'floppy', 'crt', 'dial-up', 'vga', 'pentium'] },
+		{ topic: 'PHILOSOPHY', keywords: ['philosophy', 'consciousness', 'existential', 'simulation', 'qualia', 'free will', 'mind'] },
+		{ topic: 'QUANTUM', keywords: ['quantum', 'superposition', 'entanglement', 'schrodinger', 'holographic', 'planck'] },
+		{ topic: 'RELATIVITY', keywords: ['relativity', 'einstein', 'spacetime', 'gravity', 'black hole', 'speed of light'] },
+		{ topic: 'THERMODYNAMICS', keywords: ['entropy', 'thermodynamics', 'heat death', 'landauer', 'arrow of time'] },
+		{ topic: 'PROGRAMMING', keywords: ['programming', 'code', 'javascript', 'c++', 'python', 'rust', 'assembly', 'compiler', 'debugging'] },
+		{ topic: 'OFFICE_LORE', keywords: ['clippy', 'office 97', 'kevan', 'merlin', 'rover', 'the dot', 'microsoft bob'] }
+	];
+
 	const ACTION_TRIGGER_COMMANDS = {
 		timer_25: 'timer 25',
 		show_todos: 'todo',
@@ -19,7 +63,14 @@
 
 	class ClippyBrainEngine {
 		constructor() {
-			this.knowledge = window.ClippyKnowledge;
+			this.knowledge = window.ClippyKnowledge || {
+				MOODS: CORE_MOODS,
+				SENTIMENT: CORE_SENTIMENT,
+				TOPIC_TRIGGERS: CORE_TOPIC_TRIGGERS
+			};
+			if (!this.knowledge.MOODS) this.knowledge.MOODS = CORE_MOODS;
+			if (!this.knowledge.SENTIMENT) this.knowledge.SENTIMENT = CORE_SENTIMENT;
+			if (!this.knowledge.TOPIC_TRIGGERS) this.knowledge.TOPIC_TRIGGERS = CORE_TOPIC_TRIGGERS;
 			this.nlp = window.ClippyNLP;
 			this.state = this.loadState();
 			this.conversationHistory = [];
@@ -32,11 +83,14 @@
 		loadState() {
 			try {
 				const saved = JSON.parse(localStorage.getItem(STORAGE_KEY_MOOD));
-				if (saved && saved.mood && this.knowledge.MOODS[saved.mood]) return saved;
+				if (saved && saved.mood && (this.knowledge.MOODS[saved.mood] || CORE_MOODS[saved.mood])) {
+					if (!saved.activeGraphNode) saved.activeGraphNode = 'greeting_root';
+					return saved;
+				}
 			} catch (e) {}
 
 			return {
-				mood: this.knowledge.MOODS.OPTIMISTIC,
+				mood: CORE_MOODS.OPTIMISTIC,
 				affinity: 60,
 				patience: 80,
 				cynicism: 15,
@@ -479,10 +533,10 @@
 		}
 
 		buildGraphActions(options) {
-			if (!options || options.length === 0) return [];
+			if (!options || !Array.isArray(options) || options.length === 0) return [];
 			return options.map(opt => ({
-				label: opt.label,
-				category: opt.category,
+				label: opt.label || "Continue...",
+				category: opt.category || 'AGREE',
 				onClick: () => {
 					if (window.ClippyAgent && window.ClippyAgent.selectGraphOption) {
 						window.ClippyAgent.selectGraphOption(opt);
@@ -493,7 +547,9 @@
 
 		navigateGraphNode(targetNodeId, moodDelta, actionTrigger) {
 			if (moodDelta) {
-				if (moodDelta.mood && this.knowledge.MOODS[moodDelta.mood]) this.state.mood = moodDelta.mood;
+				if (moodDelta.mood && (this.knowledge.MOODS[moodDelta.mood] || CORE_MOODS[moodDelta.mood])) {
+					this.state.mood = moodDelta.mood;
+				}
 				if (moodDelta.affinity !== undefined) this.state.affinity = Math.max(0, Math.min(100, this.state.affinity + moodDelta.affinity));
 				if (moodDelta.patience !== undefined) this.state.patience = Math.max(0, Math.min(100, this.state.patience + moodDelta.patience));
 				if (moodDelta.cynicism !== undefined) this.state.cynicism = Math.max(0, Math.min(100, this.state.cynicism + moodDelta.cynicism));
@@ -520,18 +576,19 @@
 			try {
 				const targetNode = window.ClippyDialogueTrees.getNode(resolvedNodeId);
 				const formattedText = window.ClippyDialogueTrees.getFormattedNodeText(targetNode, this);
-				const nextOptions = window.ClippyDialogueTrees.getOptionsForNode(targetNode, this.state.mood, this.state.affinity);
-				if (!formattedText || nextOptions === undefined) {
-					throw new Error('incomplete_node_render');
+				let nextOptions = window.ClippyDialogueTrees.getOptionsForNode(targetNode, this.state.mood, this.state.affinity, this.state.patience);
+				if (!Array.isArray(nextOptions) || nextOptions.length === 0) {
+					const rootNode = window.ClippyDialogueTrees.getNode('greeting_root');
+					nextOptions = window.ClippyDialogueTrees.getOptionsForNode(rootNode, this.state.mood, this.state.affinity, this.state.patience);
 				}
-				return { text: formattedText, options: nextOptions };
+				return { text: formattedText || "Standing by for user instructions.", options: nextOptions || [] };
 			} catch (e) {
 				this.state.activeGraphNode = 'greeting_root';
 				this.saveState();
 				const fallbackNode = window.ClippyDialogueTrees.getNode('greeting_root');
 				const fallbackText = window.ClippyDialogueTrees.getFormattedNodeText(fallbackNode, this);
-				const fallbackOptions = window.ClippyDialogueTrees.getOptionsForNode(fallbackNode, this.state.mood, this.state.affinity);
-				return { text: fallbackText, options: fallbackOptions };
+				const fallbackOptions = window.ClippyDialogueTrees.getOptionsForNode(fallbackNode, this.state.mood, this.state.affinity, this.state.patience);
+				return { text: fallbackText || "Hello! I am Clippit, your desktop companion. How are you feeling today?", options: fallbackOptions || [] };
 			}
 		}
 

@@ -118,7 +118,6 @@
 			if (isQuestion) sentenceType = 'QUESTION';
 			else if (isCommand) sentenceType = 'COMMAND';
 			else if (isExclamation) sentenceType = 'EXCLAMATION';
-			else if (isGreeting) sentenceType = 'GREETING';
 			else if (isFarewell) sentenceType = 'FAREWELL';
 			else if (isAgreement) sentenceType = 'AGREEMENT';
 			else if (isDisagreement) sentenceType = 'DISAGREEMENT';

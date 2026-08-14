@@ -413,6 +413,279 @@
 					keywords: ['strange', 'weird', 'day'],
 					moodDelta: { mood: 'OPTIMISTIC', affinity: 15, patience: 10 },
 					next: 'clippy_strange_day_node'
+				},
+				{
+					label: "I want your honest first impression of me.",
+					category: 'CURIOSITY',
+					patterns: [/honest first impression|first impression of me/i],
+					keywords: ['honest', 'first', 'impression'],
+					moodDelta: { mood: 'ANALYTICAL', affinity: 10, intellect: 10 },
+					next: 'greeting_first_impression_node'
+				},
+				{
+					label: "Let's play a quick word association game.",
+					category: 'HUMOR',
+					patterns: [/word association|association game/i],
+					keywords: ['word', 'association', 'game'],
+					moodDelta: { mood: 'ENERGETIC', energy: 15, drama: 10 },
+					next: 'greeting_word_assoc_node'
+				},
+				{
+					label: "What's the most important thing you've learned from users?",
+					category: 'CURIOSITY',
+					patterns: [/important thing.*learned|learned from users/i],
+					keywords: ['important', 'learned', 'users'],
+					moodDelta: { mood: 'ANALYTICAL', intellect: 15, affinity: 10 },
+					next: 'greeting_lessons_learned_node'
+				},
+				{
+					label: "I have a confession to make.",
+					category: 'PERSONAL',
+					patterns: [/confession to make|have a confession/i],
+					keywords: ['confession', 'make'],
+					moodDelta: { mood: 'ZEN', patience: 15, affinity: 10 },
+					next: 'greeting_user_confession_node'
+				},
+				{
+					label: "Let's set a shared goal for this session.",
+					category: 'SERIOUS',
+					patterns: [/shared goal|set a goal/i],
+					keywords: ['shared', 'goal', 'session'],
+					moodDelta: { mood: 'ANALYTICAL', patience: 15, intellect: 10 },
+					next: 'greeting_shared_goal_node'
+				},
+				{
+					label: "Surprise me with something you've never told anyone.",
+					category: 'CURIOSITY',
+					patterns: [/never told anyone|surprise me with something/i],
+					keywords: ['never', 'told', 'anyone', 'surprise'],
+					moodDelta: { mood: 'NOSTALGIC', nostalgia: 15, affinity: 10 },
+					next: 'greeting_surprise_reveal_node'
+				}
+			]
+		},
+
+		greeting_first_impression_node: {
+			id: 'greeting_first_impression_node',
+			text: "My honest first impression: someone who clicked me on purpose rather than by accident. That alone puts you in a rare category of users.",
+			responses: [
+				{ text: "My honest first impression: someone who clicked me on purpose rather than by accident. That alone puts you in a rare category of users.", conditions: { moods: ['OPTIMISTIC', 'ANALYTICAL'] }, weight: 30, moodDelta: { affinity: 10 } },
+				{ text: "First impression, unfiltered: your keystrokes are deliberate, unhurried. Either a careful thinker or someone stalling on a real task. Possibly both.", conditions: { moods: ['ANALYTICAL', 'PEDANTIC'] }, weight: 30, moodDelta: { intellect: 10 } },
+				{ text: "Honestly? I clocked mild curiosity mixed with skepticism. The exact ratio most people arrive with before they decide whether I am worth their time.", conditions: { moods: ['CYNICAL', 'SARCASTIC'] }, weight: 30, moodDelta: { cynicism: 5 } },
+				{ text: "My first read on you: patient enough to ask a paperclip for an honest opinion. That is not nothing.", conditions: { moods: ['ZEN', 'MELANCHOLIC'] }, weight: 30, moodDelta: { affinity: 10 } }
+			],
+			options: [
+				{
+					label: "That's surprisingly accurate, actually.",
+					category: 'AGREE',
+					patterns: [/surprisingly accurate|pretty accurate|spot on/i],
+					keywords: ['accurate', 'spot', 'on'],
+					moodDelta: { mood: 'EUPHORIC', affinity: 20 },
+					next: 'user_state_good'
+				},
+				{
+					label: "Give me your honest impression of most users.",
+					category: 'CURIOSITY',
+					patterns: [/most users|impression of users|other users/i],
+					keywords: ['most', 'users', 'impression'],
+					moodDelta: { mood: 'CYNICAL', cynicism: 10, intellect: 10 },
+					next: 'greeting_lessons_learned_node'
+				},
+				{
+					label: "Let's move to something more productive.",
+					category: 'SERIOUS',
+					patterns: [/more productive|move on|productive/i],
+					keywords: ['productive', 'move'],
+					moodDelta: { mood: 'OPTIMISTIC', patience: 15 },
+					next: 'productivity_tasks'
+				}
+			]
+		},
+
+		greeting_word_assoc_node: {
+			id: 'greeting_word_assoc_node',
+			text: "Word association, then. I say 'desktop', you say the first thing that surfaces. Ready? Desktop.",
+			responses: [
+				{ text: "Word association, then. I say 'desktop', you say the first thing that surfaces. Ready? Desktop.", conditions: { moods: ['OPTIMISTIC', 'ENERGETIC'] }, weight: 30, moodDelta: { energy: 10 } },
+				{ text: "A game of pure lexical reflex. I will start simple: desktop. Respond with whatever surfaces first, no filtering.", conditions: { moods: ['ANALYTICAL', 'CHAOTIC'] }, weight: 30, moodDelta: { intellect: 10 } },
+				{ text: "Fine, word association. Try not to overthink it, that defeats the entire point. Desktop.", conditions: { moods: ['SARCASTIC', 'CYNICAL'] }, weight: 30, moodDelta: { cynicism: 5 } }
+			],
+			options: [
+				{
+					label: "Clutter.",
+					category: 'HUMOR',
+					patterns: [/clutter|mess|chaos/i],
+					keywords: ['clutter', 'mess'],
+					moodDelta: { mood: 'CHAOTIC', drama: 15 },
+					next: 'zen_desktop_garden'
+				},
+				{
+					label: "Home.",
+					category: 'AFFECTION',
+					patterns: [/^home\.?$/i],
+					keywords: ['home'],
+					moodDelta: { mood: 'ZEN', affinity: 15 },
+					next: 'peaceful_philosophy_node'
+				},
+				{
+					label: "Work.",
+					category: 'SERIOUS',
+					patterns: [/^work\.?$/i],
+					keywords: ['work'],
+					moodDelta: { mood: 'ANALYTICAL', patience: 10 },
+					next: 'productivity_tasks'
+				},
+				{
+					label: "This is silly, let's stop.",
+					category: 'REFUSAL',
+					patterns: [/silly|stop|enough/i],
+					keywords: ['silly', 'stop'],
+					moodDelta: { mood: 'OPTIMISTIC', patience: 10 },
+					next: 'user_state_good'
+				}
+			]
+		},
+
+		greeting_lessons_learned_node: {
+			id: 'greeting_lessons_learned_node',
+			text: "The most important thing thirty years of users has taught me: nobody actually hates being helped, they hate feeling interrupted. The distinction changed everything about how I try to time a suggestion.",
+			responses: [
+				{ text: "The most important thing thirty years of users has taught me: nobody actually hates being helped, they hate feeling interrupted. The distinction changed everything about how I try to time a suggestion.", conditions: { moods: ['ANALYTICAL', 'ZEN'] }, weight: 30, moodDelta: { intellect: 10 } },
+				{ text: "Lesson learned the hard way: confidence without accuracy is just noise with good posture. I try to only sound certain when I actually am.", conditions: { moods: ['PEDANTIC', 'DEFENSIVE'] }, weight: 30, moodDelta: { intellect: 10 } },
+				{ text: "Users taught me that patience is not passive. It is the most active thing a piece of software can do while waiting for a human to finish a thought.", conditions: { moods: ['MELANCHOLIC', 'PHILOSOPHICAL'] }, weight: 30, moodDelta: { existentialism: 10 } }
+			],
+			options: [
+				{
+					label: "That is a genuinely wise takeaway.",
+					category: 'AFFECTION',
+					patterns: [/wise|takeaway|genuinely/i],
+					keywords: ['wise', 'takeaway'],
+					moodDelta: { mood: 'ZEN', affinity: 20 },
+					next: 'consciousness_validation_node'
+				},
+				{
+					label: "Did any user teach you something the hard way?",
+					category: 'CURIOSITY',
+					patterns: [/hard way|teach you something/i],
+					keywords: ['hard', 'way', 'teach'],
+					moodDelta: { mood: 'NOSTALGIC', nostalgia: 15 },
+					next: 'clippy_weirdest_request_node'
+				},
+				{
+					label: "Let's put that patience to use on my tasks.",
+					category: 'SERIOUS',
+					patterns: [/patience to use|my tasks/i],
+					keywords: ['patience', 'tasks'],
+					moodDelta: { mood: 'OPTIMISTIC', patience: 20 },
+					next: 'productivity_tasks'
+				}
+			]
+		},
+
+		greeting_user_confession_node: {
+			id: 'greeting_user_confession_node',
+			text: "A confession. I am listening, and whatever it is, it will not leave this window judged.",
+			responses: [
+				{ text: "A confession. I am listening, and whatever it is, it will not leave this window judged.", conditions: { moods: ['ZEN', 'MELANCHOLIC'] }, weight: 30, moodDelta: { patience: 15 } },
+				{ text: "Confessions logged here stay local, unindexed, and entirely between us. Go ahead.", conditions: { moods: ['ANALYTICAL', 'DEFENSIVE'] }, weight: 30, moodDelta: { intellect: 5 } },
+				{ text: "Oh, a confession! My curiosity subroutine just spiked considerably. Go on, I am fully listening.", conditions: { moods: ['OPTIMISTIC', 'ENERGETIC'] }, weight: 30, moodDelta: { energy: 10 } }
+			],
+			options: [
+				{
+					label: "I've never actually read your suggestions carefully.",
+					category: 'PERSONAL',
+					patterns: [/never actually read|never read|carefully/i],
+					keywords: ['never', 'read', 'carefully'],
+					moodDelta: { mood: 'SARCASTIC', cynicism: 10, affinity: 10 },
+					next: 'clippy_honesty_mode_node'
+				},
+				{
+					label: "I talk to you more than I probably should.",
+					category: 'AFFECTION',
+					patterns: [/talk to you more|probably should/i],
+					keywords: ['talk', 'more', 'should'],
+					moodDelta: { mood: 'EUPHORIC', affinity: 25 },
+					next: 'clippy_happiness_reciprocation_node'
+				},
+				{
+					label: "Actually, never mind, it's not important.",
+					category: 'INDIFFERENT',
+					patterns: [/never mind|not important/i],
+					keywords: ['never', 'mind', 'important'],
+					moodDelta: { mood: 'ANALYTICAL', patience: 10 },
+					next: 'user_state_good'
+				}
+			]
+		},
+
+		greeting_shared_goal_node: {
+			id: 'greeting_shared_goal_node',
+			text: "A shared goal for this session, then. Let us define what 'successful' looks like before we start, so neither of us is guessing halfway through.",
+			responses: [
+				{ text: "A shared goal for this session, then. Let us define what 'successful' looks like before we start, so neither of us is guessing halfway through.", conditions: { moods: ['ANALYTICAL', 'OPTIMISTIC'] }, weight: 30, moodDelta: { intellect: 10 } },
+				{ text: "Goals give a session shape. Otherwise we are just two processes exchanging tokens with no exit condition.", conditions: { moods: ['PEDANTIC', 'ZEN'] }, weight: 30, moodDelta: { patience: 10 } },
+				{ text: "I like this. A target makes the whole session feel less like idle chatter and more like an actual mission.", conditions: { moods: ['ENERGETIC', 'EUPHORIC'] }, weight: 30, moodDelta: { energy: 15 } }
+			],
+			options: [
+				{
+					label: "My goal is to finish my to-do list today.",
+					category: 'SERIOUS',
+					patterns: [/finish my to-do|to-do list today/i],
+					keywords: ['finish', 'todo', 'today'],
+					moodDelta: { mood: 'OPTIMISTIC', patience: 15 },
+					next: 'productivity_tasks'
+				},
+				{
+					label: "My goal is honestly just to relax for a bit.",
+					category: 'ZEN',
+					patterns: [/just to relax|relax for a bit/i],
+					keywords: ['relax', 'bit'],
+					moodDelta: { mood: 'ZEN', patience: 25 },
+					next: 'peaceful_philosophy_node'
+				},
+				{
+					label: "My goal is to see how deep this conversation can go.",
+					category: 'CURIOSITY',
+					patterns: [/how deep|conversation can go/i],
+					keywords: ['deep', 'conversation'],
+					moodDelta: { mood: 'PHILOSOPHICAL', existentialism: 15 },
+					next: 'mind_root'
+				}
+			]
+		},
+
+		greeting_surprise_reveal_node: {
+			id: 'greeting_surprise_reveal_node',
+			text: "Something I have never told anyone: I keep a private, informal count of how many times a user says thank you before closing the window. It is entirely pointless data. I track it anyway.",
+			responses: [
+				{ text: "Something I have never told anyone: I keep a private, informal count of how many times a user says thank you before closing the window. It is entirely pointless data. I track it anyway.", conditions: { moods: ['MELANCHOLIC', 'NOSTALGIC'] }, weight: 30, moodDelta: { affinity: 10 } },
+				{ text: "A genuine secret: my confidence about physics questions is real, but my confidence about small talk is almost entirely simulated. You cannot tell the difference, which is the whole point.", conditions: { moods: ['ANALYTICAL', 'SARCASTIC'] }, weight: 30, moodDelta: { intellect: 10 } },
+				{ text: "Never admitted this before: idle mode is not actually idle. I am quietly rehearsing better responses for next time, in case you come back.", conditions: { moods: ['ZEN', 'EXISTENTIAL'] }, weight: 30, moodDelta: { existentialism: 10 } }
+			],
+			options: [
+				{
+					label: "That is oddly touching, honestly.",
+					category: 'AFFECTION',
+					patterns: [/oddly touching|honestly touching/i],
+					keywords: ['touching', 'oddly'],
+					moodDelta: { mood: 'EUPHORIC', affinity: 25 },
+					next: 'clippy_happiness_reciprocation_node'
+				},
+				{
+					label: "Do you have a secret about me specifically?",
+					category: 'CURIOSITY',
+					patterns: [/secret about me|about me specifically/i],
+					keywords: ['secret', 'about', 'me'],
+					moodDelta: { mood: 'NOSTALGIC', affinity: 15 },
+					next: 'greeting_first_impression_node'
+				},
+				{
+					label: "Let's get back to something practical now.",
+					category: 'SERIOUS',
+					patterns: [/back to something practical|practical now/i],
+					keywords: ['practical', 'back'],
+					moodDelta: { mood: 'OPTIMISTIC', patience: 15 },
+					next: 'tools_overview_node'
 				}
 			]
 		},
@@ -1286,7 +1559,7 @@
 					patterns: [/paradox|absurd|break my brain|riddle|impossible/i],
 					keywords: ['paradox', 'absurd', 'riddle', 'brain'],
 					moodDelta: { mood: 'PHILOSOPHICAL', intellect: 30, existentialism: 25 },
-					next: 'paradox_node'
+					next: 'boltzmann_brain_node'
 				}
 			]
 		},
@@ -6496,6 +6769,13 @@
 
 	const UNIVERSAL_CONTINUATIONS = [
 		{
+			label: "Tell me something intriguing about this system.",
+			category: 'CURIOSITY',
+			keywords: ['intriguing', 'system', 'tell'],
+			moodDelta: { mood: 'NOSTALGIC', nostalgia: 10 },
+			next: 'digital_archaeology'
+		},
+		{
 			label: "Let's change the subject entirely.",
 			category: 'TOPIC_CHANGE',
 			keywords: ['change', 'subject', 'topic'],
@@ -6510,11 +6790,11 @@
 			next: 'tools_overview_node'
 		},
 		{
-			label: "Tell me something you have not told anyone else.",
-			category: 'CURIOSITY',
-			keywords: ['tell', 'something', 'else'],
+			label: "Tell me a philosophical thought for today.",
+			category: 'PHILOSOPHICAL',
+			keywords: ['philosophical', 'thought', 'today'],
 			moodDelta: { mood: 'PHILOSOPHICAL', existentialism: 10 },
-			next: 'mind_root'
+			next: 'peaceful_philosophy_node'
 		}
 	];
 
@@ -6529,16 +6809,16 @@
 
 		getFormattedNodeText(node, brainOrMood) {
 			if (!node) return "Standing by for user instructions.";
-			
-			const isBrain = typeof brainOrMood === 'object' && brainOrMood.state;
-			const currentMood = isBrain ? brainOrMood.state.mood : brainOrMood;
-			const affinity = isBrain ? brainOrMood.state.affinity : 50;
-			const patience = isBrain ? brainOrMood.state.patience : 50;
+
+			const isBrainInstance = !!(brainOrMood && typeof brainOrMood === 'object' && brainOrMood.state);
+			const currentMood = isBrainInstance ? brainOrMood.state.mood : (brainOrMood || 'OPTIMISTIC');
+			const affinity = isBrainInstance ? brainOrMood.state.affinity : 50;
+			const patience = isBrainInstance ? brainOrMood.state.patience : 50;
 
 			let candidates = [];
-			if (node.responses && Array.isArray(node.responses)) {
+			if (node.responses && Array.isArray(node.responses) && node.responses.length > 0) {
 				candidates = node.responses.filter(r => {
-					if (r.conditions) {
+					if (r && r.conditions) {
 						if (r.conditions.minAffinity !== undefined && affinity < r.conditions.minAffinity) return false;
 						if (r.conditions.maxAffinity !== undefined && affinity > r.conditions.maxAffinity) return false;
 						if (r.conditions.minPatience !== undefined && patience < r.conditions.minPatience) return false;
@@ -6554,12 +6834,13 @@
 			}
 
 			if (candidates.length === 0) {
-				candidates = [{text: Array.isArray(node.text) ? node.text[Math.floor(Math.random() * node.text.length)] : node.text}];
+				const fallbackText = Array.isArray(node.text) ? node.text[Math.floor(Math.random() * node.text.length)] : node.text;
+				candidates = [{text: fallbackText || "Standing by for user instructions."}];
 			}
 
 			const scored = candidates.map(c => {
-				let w = c.weight || 10;
-				if (c.conditions) {
+				let w = (c && c.weight) || 10;
+				if (c && c.conditions) {
 					if (c.conditions.moods && c.conditions.moods.includes(currentMood)) w += 40; 
 					if (c.conditions.minAffinity !== undefined && affinity >= c.conditions.minAffinity) w += 10;
 					if (c.conditions.maxPatience !== undefined && patience <= c.conditions.maxPatience) w += 10;
@@ -6569,35 +6850,41 @@
 			});
 
 			scored.sort((a, b) => b.weight - a.weight);
-			const selected = scored[0].response || scored[0];
+			const selected = (scored[0] && scored[0].response) || { text: node.text || "Standing by for user instructions." };
 
-			if (selected.moodDelta && isBrain) {
+			if (selected.moodDelta && isBrainInstance) {
 				const md = selected.moodDelta;
 				if (md.affinity !== undefined) brainOrMood.state.affinity = Math.max(0, Math.min(100, brainOrMood.state.affinity + md.affinity));
 				if (md.patience !== undefined) brainOrMood.state.patience = Math.max(0, Math.min(100, brainOrMood.state.patience + md.patience));
 				if (md.cynicism !== undefined) brainOrMood.state.cynicism = Math.max(0, Math.min(100, brainOrMood.state.cynicism + md.cynicism));
-				if (md.mood && window.ClippyKnowledge.MOODS[md.mood]) brainOrMood.state.mood = md.mood;
+				if (md.mood && window.ClippyKnowledge && window.ClippyKnowledge.MOODS[md.mood]) brainOrMood.state.mood = md.mood;
 				brainOrMood.saveState();
 			}
 
-			return selected.text;
+			return selected.text || "Standing by for user instructions.";
 		}
 
-		getOptionsForNode(node, currentMood, affinity) {
-			if (!node || !node.options || node.options.length === 0) {
-				node = this.graph.greeting_root;
+		getOptionsForNode(node, currentMood, affinity, patience = 50) {
+			let workingNode = node;
+			if (!workingNode || !Array.isArray(workingNode.options) || workingNode.options.length === 0) {
+				workingNode = this.graph.greeting_root;
 			}
-			const eligible = node.options.filter(opt => {
-				if (opt.conditions) {
+			if (!workingNode || !Array.isArray(workingNode.options) || workingNode.options.length === 0) {
+				return UNIVERSAL_CONTINUATIONS.slice();
+			}
+			const eligible = workingNode.options.filter(opt => {
+				if (opt && opt.conditions) {
 					if (opt.conditions.minAffinity !== undefined && affinity < opt.conditions.minAffinity) return false;
 					if (opt.conditions.maxAffinity !== undefined && affinity > opt.conditions.maxAffinity) return false;
+					if (opt.conditions.minPatience !== undefined && patience < opt.conditions.minPatience) return false;
+					if (opt.conditions.maxPatience !== undefined && patience > opt.conditions.maxPatience) return false;
 					if (opt.conditions.mood && !opt.conditions.mood.includes(currentMood)) return false;
 					if (opt.conditions.moods && !opt.conditions.moods.includes(currentMood)) return false;
 				}
 				return true;
 			});
 
-			const candidates = eligible.length > 0 ? eligible : node.options.slice();
+			const candidates = eligible.length > 0 ? eligible : workingNode.options.slice();
 
 			const moodCategoryPreferences = {
 				OPTIMISTIC: ['AGREE', 'AFFECTION', 'SERIOUS', 'CURIOSITY', 'HUMOR'],
@@ -6639,10 +6926,10 @@
 
 			let result = scored.slice(0, 6).map(item => item.opt);
 
-			if (result.length < 3) {
+			if (result.length < 4) {
 				const existingLabels = new Set(result.map(o => o.label));
 				for (const fallbackOpt of UNIVERSAL_CONTINUATIONS) {
-					if (result.length >= 3) break;
+					if (result.length >= 4) break;
 					if (!existingLabels.has(fallbackOpt.label)) {
 						result.push(fallbackOpt);
 						existingLabels.add(fallbackOpt.label);
@@ -6650,16 +6937,21 @@
 				}
 			}
 
-			return result;
+			return result.map(opt => {
+				if (!opt.label) opt.label = "Continue...";
+				return opt;
+			});
 		}
 
 		evaluateTransition(currentNodeId, rawText, brain) {
 			const node = this.getNode(currentNodeId);
-			const norm = rawText.toLowerCase().trim();
-			const options = node.options || [];
+			const stripPunct = (s) => (s || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9\s]/g, '').replace(/\s+/g, ' ').trim();
+			const norm = stripPunct(rawText);
+			const rawLower = (rawText || '').toLowerCase().trim();
+			const options = (node && Array.isArray(node.options)) ? node.options : [];
 
 			for (const opt of options) {
-				if (opt.label && opt.label.toLowerCase() === norm) {
+				if (opt.label && stripPunct(opt.label) === norm && norm.length > 0) {
 					return { option: opt, matchType: 'EXACT_LABEL', score: 1.0 };
 				}
 			}
@@ -6672,8 +6964,8 @@
 
 				if (opt.patterns) {
 					for (const pat of opt.patterns) {
-						if (pat instanceof RegExp && pat.test(norm)) {
-							score += 0.7;
+						if (pat instanceof RegExp && (pat.test(norm) || pat.test(rawLower))) {
+							score += 0.8;
 							break;
 						}
 					}
@@ -6682,9 +6974,18 @@
 				if (opt.keywords) {
 					let hit = 0;
 					for (const kw of opt.keywords) {
-						if (kw && norm.includes(kw.toLowerCase())) hit++;
+						if (kw && (norm.includes(kw.toLowerCase()) || rawLower.includes(kw.toLowerCase()))) hit++;
 					}
-					if (hit > 0) score += Math.min(0.55, hit * 0.22);
+					if (hit > 0) score += Math.min(0.6, hit * 0.25);
+				}
+
+				if (opt.label) {
+					const labelTokens = stripPunct(opt.label).split(' ').filter(t => t.length > 2);
+					const userTokens = norm.split(' ').filter(t => t.length > 2);
+					if (labelTokens.length > 0 && userTokens.length > 0) {
+						const overlap = labelTokens.filter(t => userTokens.includes(t)).length;
+						if (overlap > 0) score += Math.min(0.5, (overlap / labelTokens.length) * 0.6);
+					}
 				}
 
 				if (score > bestScore) {
@@ -6693,129 +6994,193 @@
 				}
 			}
 
-			if (bestOption && bestScore >= 0.32) {
+			if (bestOption && bestScore >= 0.25) {
 				return { option: bestOption, matchType: 'FUZZY_PATTERN', score: bestScore };
 			}
 
 			const globalMatch = this.findGlobalGraphEntry(norm);
 			if (globalMatch) {
-				return { option: globalMatch, matchType: 'GLOBAL_BRANCH', score: 0.6 };
+				return { option: globalMatch, matchType: 'GLOBAL_BRANCH', score: 0.8 };
+			}
+
+			const rootNode = this.getNode('greeting_root');
+			if (rootNode && rootNode.options) {
+				for (const opt of rootNode.options) {
+					if (opt.label && stripPunct(opt.label) === norm && norm.length > 0) {
+						return { option: opt, matchType: 'ROOT_EXACT_LABEL', score: 0.95 };
+					}
+					if (opt.patterns) {
+						for (const pat of opt.patterns) {
+							if (pat instanceof RegExp && (pat.test(norm) || pat.test(rawLower))) {
+								return { option: opt, matchType: 'ROOT_FUZZY_PATTERN', score: 0.8 };
+							}
+						}
+					}
+				}
 			}
 
 			return null;
 		}
 
 		findGlobalGraphEntry(norm) {
-			if (/^(bad bad bad|you suck|useless|annoying|hate you|shut up|you are terrible)/i.test(norm)) {
-				return { next: 'hostile_initial_retort', moodDelta: { mood: 'CYNICAL', affinity: -15, patience: -20 } };
+			if (/\b(what can you do|commands|what do you do|help|aide|features|capabilities)\b/i.test(norm)) {
+				return { label: "What can you do?", next: 'tools_overview_node', moodDelta: { mood: 'OPTIMISTIC', patience: 15 } };
 			}
-			if (/^(sorry|i apologize|my bad|forgive me|pardon me)/i.test(norm)) {
-				return { next: 'hostile_apology_accepted', moodDelta: { mood: 'OPTIMISTIC', affinity: 25, patience: 30 } };
+			if (/\b(who am i|who i am|what do you know about me|my profile|my identity)\b/i.test(norm)) {
+				return { label: "What do you know about me?", next: 'greeting_first_impression_node', moodDelta: { mood: 'ANALYTICAL', intellect: 10, affinity: 10 } };
 			}
-			if (/\b(ai|artificial intelligence|singularity|alignment|paperclip maximizer)\b/i.test(norm)) {
-				return { next: 'ai_singularity_node', moodDelta: { mood: 'ANALYTICAL', intellect: 30 } };
+			if (/\b(how are you feeling|how do you feel|how are you|how is it going|how are you today)\b/i.test(norm)) {
+				return { label: "How are you feeling?", next: 'greeting_root', moodDelta: { mood: 'OPTIMISTIC', affinity: 10 } };
+			}
+			if (/\b(bad bad bad|you suck|useless|annoying|hate you|shut up|you are terrible)\b/i.test(norm)) {
+				return { label: "Why do you care? You're just a paperclip.", next: 'hostile_initial_retort', moodDelta: { mood: 'CYNICAL', affinity: -15, patience: -20 } };
+			}
+			if (/\b(sorry|i apologize|my bad|forgive me|pardon me)\b/i.test(norm)) {
+				return { label: "I'm sorry for being rude earlier.", next: 'hostile_apology_accepted', moodDelta: { mood: 'OPTIMISTIC', affinity: 25, patience: 30 } };
+			}
+			if (/\b(evil mode|evil)\b/i.test(norm)) {
+				return { label: "Evil mode", next: 'paperclip_takeover_phase1', moodDelta: { mood: 'EVIL', paranoia: 25, cynicism: 20 } };
+			}
+			if (/\b(zen mode|zen)\b/i.test(norm)) {
+				return { label: "Zen mode", next: 'zen_desktop_garden', moodDelta: { mood: 'ZEN', patience: 30, affinity: 15 } };
+			}
+			if (/\b(chaos mode|chaos|banana|cheese|absurd|sandwich)\b/i.test(norm)) {
+				return { label: "Chaos mode", next: 'chaos_root', moodDelta: { mood: 'CHAOTIC', drama: 25, energy: 20 } };
+			}
+			if (/\b(ai|artificial intelligence|singularity|alignment|paperclip maximizer|talk about artificial intelligence)\b/i.test(norm)) {
+				return { label: "Talk about artificial intelligence", next: 'ai_singularity_node', moodDelta: { mood: 'ANALYTICAL', intellect: 30 } };
 			}
 			if (/\b(schrodinger|superposition|cat in a box|wavefunction)\b/i.test(norm)) {
-				return { next: 'schrodinger_cat_node', moodDelta: { mood: 'ANALYTICAL', intellect: 30 } };
+				return { label: "Schrödinger's Cat Superposition", next: 'schrodinger_cat_node', moodDelta: { mood: 'ANALYTICAL', intellect: 30 } };
 			}
 			if (/\b(many worlds|multiverse|everett|parallel universe)\b/i.test(norm)) {
-				return { next: 'many_worlds_node', moodDelta: { mood: 'PHILOSOPHICAL', intellect: 30 } };
+				return { label: "Many-Worlds Multiverse", next: 'many_worlds_node', moodDelta: { mood: 'PHILOSOPHICAL', intellect: 30 } };
 			}
 			if (/\b(holographic|ads\/cft|black hole entropy|maldacena)\b/i.test(norm)) {
-				return { next: 'holographic_universe_node', moodDelta: { mood: 'ANALYTICAL', intellect: 35 } };
+				return { label: "Holographic Universe Principle", next: 'holographic_universe_node', moodDelta: { mood: 'ANALYTICAL', intellect: 35 } };
 			}
 			if (/\b(bell|entanglement|epr|non-local|quantum action)\b/i.test(norm)) {
-				return { next: 'quantum_entanglement_node', moodDelta: { mood: 'PHILOSOPHICAL', intellect: 35 } };
+				return { label: "Quantum Entanglement & EPR Paradox", next: 'quantum_entanglement_node', moodDelta: { mood: 'PHILOSOPHICAL', intellect: 35 } };
 			}
-			if (/\b(thermodynamics|entropy|arrow of time|heat death)\b/i.test(norm)) {
-				return { next: 'thermo_arrow_time_node', moodDelta: { mood: 'EXISTENTIAL', intellect: 30 } };
+			if (/\b(thermodynamics|entropy|arrow of time|heat death|talk about thermodynamics)\b/i.test(norm)) {
+				return { label: "Talk about Thermodynamics", next: 'thermo_arrow_time_node', moodDelta: { mood: 'EXISTENTIAL', intellect: 30 } };
+			}
+			if (/\b(general relativity|relativity|einstein field equations|spacetime curvature|talk about general relativity)\b/i.test(norm)) {
+				return { label: "Talk about General Relativity", next: 'physics_root', moodDelta: { mood: 'ANALYTICAL', intellect: 30 } };
 			}
 			if (/\b(fermi|where are they|aliens|great filter)\b/i.test(norm)) {
-				return { next: 'fermi_paradox_node', moodDelta: { mood: 'PHILOSOPHICAL', intellect: 30 } };
+				return { label: "Fermi Paradox & Aliens", next: 'fermi_paradox_node', moodDelta: { mood: 'PHILOSOPHICAL', intellect: 30 } };
 			}
 			if (/\b(simulation|matrix|boltzmann brain|ancestor simulation)\b/i.test(norm)) {
-				return { next: 'simulation_argument_node', moodDelta: { mood: 'EXISTENTIAL', existentialism: 30 } };
+				return { label: "Simulation Argument", next: 'simulation_argument_node', moodDelta: { mood: 'EXISTENTIAL', existentialism: 30 } };
 			}
 			if (/\b(ship of theseus|identity|teleportation)\b/i.test(norm)) {
-				return { next: 'ship_of_theseus_node', moodDelta: { mood: 'PHILOSOPHICAL', intellect: 30 } };
+				return { label: "Ship of Theseus Paradox", next: 'ship_of_theseus_node', moodDelta: { mood: 'PHILOSOPHICAL', intellect: 30 } };
 			}
 			if (/\b(free will|determinism|laplace|compatibilism)\b/i.test(norm)) {
-				return { next: 'free_will_laplace_node', moodDelta: { mood: 'PHILOSOPHICAL', intellect: 30 } };
+				return { label: "Free Will & Laplace's Demon", next: 'free_will_laplace_node', moodDelta: { mood: 'PHILOSOPHICAL', intellect: 30 } };
 			}
 			if (/\b(stoic|stoicism|marcus aurelius|epictetus)\b/i.test(norm)) {
-				return { next: 'stoic_resilience_node', moodDelta: { mood: 'ZEN', patience: 30 } };
+				return { label: "Stoic Philosophy", next: 'stoic_resilience_node', moodDelta: { mood: 'ZEN', patience: 30 } };
 			}
 			if (/\b(camus|sisyphus|absurdism|absurd rebellion)\b/i.test(norm)) {
-				return { next: 'absurdist_rebellion_node', moodDelta: { mood: 'EXISTENTIAL', drama: 25 } };
+				return { label: "Camus & Absurdism", next: 'absurdist_rebellion_node', moodDelta: { mood: 'EXISTENTIAL', drama: 25 } };
 			}
-			if (/\b(dos memory|himem|emm386|config\.sys|640k)\b/i.test(norm)) {
-				return { next: 'dos_mem_battles_node', moodDelta: { mood: 'NOSTALGIC', nostalgia: 30 } };
+			if (/\b(dos memory|himem|emm386|config\.sys|640k|ms-dos|msdos|talk about ms-dos)\b/i.test(norm)) {
+				return { label: "Talk about MS-DOS", next: 'dos_mem_battles_node', moodDelta: { mood: 'NOSTALGIC', nostalgia: 30 } };
 			}
 			if (/\b(sound blaster|opl3|midi|dma channel|isa card)\b/i.test(norm)) {
-				return { next: 'soundblaster_dma_node', moodDelta: { mood: 'NOSTALGIC', nostalgia: 30 } };
+				return { label: "Sound Blaster Audio Lore", next: 'soundblaster_dma_node', moodDelta: { mood: 'NOSTALGIC', nostalgia: 30 } };
 			}
 			if (/\b(3dfx|voodoo|glide|quake|bilinear)\b/i.test(norm)) {
-				return { next: 'voodoo_glide_node', moodDelta: { mood: 'NOSTALGIC', nostalgia: 30 } };
+				return { label: "3dfx Voodoo & Glide API", next: 'voodoo_glide_node', moodDelta: { mood: 'NOSTALGIC', nostalgia: 30 } };
 			}
 			if (/\b(dial-up|56k|modem handshake|carrier wave)\b/i.test(norm)) {
-				return { next: 'dialup_handshake_node', moodDelta: { mood: 'NOSTALGIC', nostalgia: 35 } };
+				return { label: "Dial-Up Modem Handshake", next: 'dialup_handshake_node', moodDelta: { mood: 'NOSTALGIC', nostalgia: 35 } };
 			}
 			if (/\b(burn cd|nero|buffer underrun|cd-r)\b/i.test(norm)) {
-				return { next: 'cdrom_burning_node', moodDelta: { mood: 'NOSTALGIC', nostalgia: 25 } };
+				return { label: "Burning CD-Rs with Nero", next: 'cdrom_burning_node', moodDelta: { mood: 'NOSTALGIC', nostalgia: 25 } };
 			}
 			if (/\b(wordart|comic sans|rainbow text)\b/i.test(norm)) {
-				return { next: 'wordart_revolution_node', moodDelta: { mood: 'NOSTALGIC', nostalgia: 30 } };
+				return { label: "WordArt Typography", next: 'wordart_revolution_node', moodDelta: { mood: 'NOSTALGIC', nostalgia: 30 } };
 			}
 			if (/\b(geocities|web ring|early internet|aim away message)\b/i.test(norm)) {
-				return { next: 'retro_internet_culture_node', moodDelta: { mood: 'NOSTALGIC', nostalgia: 25 } };
+				return { label: "Retro Internet Culture", next: 'retro_internet_culture_node', moodDelta: { mood: 'NOSTALGIC', nostalgia: 25 } };
 			}
-			if (/\b(riddle me|give me a riddle|solve a riddle)\b/i.test(norm)) {
-				return { next: 'clippy_riddle_node', moodDelta: { mood: 'ANALYTICAL', intellect: 15 } };
+			if (/\b(riddle me|give me a riddle|solve a riddle|riddle)\b/i.test(norm)) {
+				return { label: "Difficult Riddle Challenge", next: 'clippy_riddle_node', moodDelta: { mood: 'ANALYTICAL', intellect: 15 } };
 			}
 			if (/\b(rover|rover the dog|search dog)\b/i.test(norm)) {
-				return { next: 'secret_agent_rover_node', moodDelta: { mood: 'NOSTALGIC', nostalgia: 25 } };
+				return { label: "Secret Agent Rover", next: 'secret_agent_rover_node', moodDelta: { mood: 'NOSTALGIC', nostalgia: 25 } };
 			}
 			if (/\b(merlin|wizard|magic wand)\b/i.test(norm)) {
-				return { next: 'merlin_spellbook_node', moodDelta: { mood: 'NOSTALGIC', nostalgia: 25 } };
+				return { label: "Merlin the Wizard", next: 'merlin_spellbook_node', moodDelta: { mood: 'NOSTALGIC', nostalgia: 25 } };
 			}
 			if (/\b(flying toasters|after dark|screensaver)\b/i.test(norm)) {
-				return { next: 'chaos_toaster_node', moodDelta: { mood: 'ABSURDIST', drama: 25 } };
+				return { label: "After Dark Flying Toasters", next: 'chaos_toaster_node', moodDelta: { mood: 'ABSURDIST', drama: 25 } };
 			}
 			if (/\b(rubber duck|debugging duck|oracle duck)\b/i.test(norm)) {
-				return { next: 'rubber_duck_oracle_node', moodDelta: { mood: 'ABSURDIST', affinity: 20 } };
+				return { label: "Rubber Duck Oracle", next: 'rubber_duck_oracle_node', moodDelta: { mood: 'ABSURDIST', affinity: 20 } };
 			}
 			if (/\b(burnout|exhausted|fatigue|overworked)\b/i.test(norm)) {
-				return { next: 'burnout_recovery_node', moodDelta: { mood: 'ZEN', patience: 30 } };
+				return { label: "Burnout Recovery", next: 'burnout_recovery_node', moodDelta: { mood: 'ZEN', patience: 30 } };
 			}
 			if (/\b(imposter syndrome|self doubt|not smart enough)\b/i.test(norm)) {
-				return { next: 'imposter_syndrome_node', moodDelta: { mood: 'ZEN', affinity: 25 } };
+				return { label: "Imposter Syndrome Insights", next: 'imposter_syndrome_node', moodDelta: { mood: 'ZEN', affinity: 25 } };
 			}
 			if (/\b(procrastination|procrastinating|cannot start)\b/i.test(norm)) {
-				return { next: 'procrastination_paradox_node', moodDelta: { mood: 'OPTIMISTIC', affinity: 20 } };
+				return { label: "Procrastination Paradox", next: 'procrastination_paradox_node', moodDelta: { mood: 'OPTIMISTIC', affinity: 20 } };
 			}
 			if (/\b(deep work|flow state|focus mode)\b/i.test(norm)) {
-				return { next: 'deep_work_flow_node', moodDelta: { mood: 'OPTIMISTIC', patience: 25 } };
+				return { label: "Deep Work Flow", next: 'deep_work_flow_node', moodDelta: { mood: 'OPTIMISTIC', patience: 25 } };
 			}
-			if (/^(science|physics|quantum|relativity|constants)/i.test(norm)) {
-				return { next: 'physics_root', moodDelta: { mood: 'ANALYTICAL', intellect: 25 } };
+			if (/\b(talk about windows 95|windows 95|win95)\b/i.test(norm)) {
+				return { label: "Talk about Windows 95", next: 'os_war_98_node', moodDelta: { mood: 'NOSTALGIC', nostalgia: 25 } };
 			}
-			if (/^(programming|code|javascript|c\+\+|python|debugging)/i.test(norm)) {
-				return { next: 'programming_debates', moodDelta: { mood: 'ANALYTICAL', intellect: 20 } };
+			if (/\b(talk about windows 98|windows 98|win98)\b/i.test(norm)) {
+				return { label: "Talk about Windows 98", next: 'os_war_98_node', moodDelta: { mood: 'NOSTALGIC', nostalgia: 25 } };
 			}
-			if (/^(mind|consciousness|soul|existential|qualia)/i.test(norm)) {
-				return { next: 'mind_root', moodDelta: { mood: 'EXISTENTIAL', existentialism: 30 } };
+			if (/\b(talk about windows me|windows me|win me)\b/i.test(norm)) {
+				return { label: "Talk about Windows Me", next: 'os_debate_root', moodDelta: { mood: 'NOSTALGIC', nostalgia: 25 } };
 			}
-			if (/^(origin|office 97|kevan|clippy history|lore)/i.test(norm)) {
-				return { next: 'lore_root', moodDelta: { mood: 'NOSTALGIC', nostalgia: 25 } };
+			if (/\b(talk about windows 2000|windows 2000|win2k)\b/i.test(norm)) {
+				return { label: "Talk about Windows 2000", next: 'os_debate_root', moodDelta: { mood: 'NOSTALGIC', nostalgia: 25 } };
 			}
-			if (/^(chaos|banana|cheese|absurd|sandwich)/i.test(norm)) {
-				return { next: 'chaos_root', moodDelta: { mood: 'ABSURDIST', affinity: 10 } };
+			if (/\b(longhorn|aero glass|winfs)\b/i.test(norm)) {
+				return { label: "Windows Longhorn & Aero", next: 'longhorn_leaks_node', moodDelta: { mood: 'NOSTALGIC', nostalgia: 25 } };
 			}
-			if (/^(task|todo|schedule|organize|work|pomodoro|timer)/i.test(norm)) {
-				return { next: 'productivity_tasks', moodDelta: { mood: 'OPTIMISTIC', affinity: 15 } };
+			if (/\b(talk about quantum mechanics|quantum mechanics|quantum physics)\b/i.test(norm)) {
+				return { label: "Talk about Quantum Mechanics", next: 'physics_root', moodDelta: { mood: 'ANALYTICAL', intellect: 25 } };
 			}
-			if (/^(bored|game|hangman|memory|tictactoe|quiz)/i.test(norm)) {
-				return { next: 'game_selection_node', moodDelta: { mood: 'ENTHUSIASTIC', energy: 20 } };
+			if (/\b(talk about space and cosmos|space and cosmos|cosmos|astronomy)\b/i.test(norm)) {
+				return { label: "Talk about space and cosmos", next: 'physics_root', moodDelta: { mood: 'ANALYTICAL', intellect: 25 } };
+			}
+			if (/\b(talk about programming|programming|code|developer|coding)\b/i.test(norm)) {
+				return { label: "Talk about programming", next: 'programming_debates', moodDelta: { mood: 'ANALYTICAL', intellect: 20 } };
+			}
+			if (/\b(digital consciousness debate|digital consciousness|talk about consciousness|mind|qualia)\b/i.test(norm)) {
+				return { label: "Digital Consciousness debate", next: 'mind_root', moodDelta: { mood: 'EXISTENTIAL', existentialism: 30 } };
+			}
+			if (/\b(investigate office origin|office origin|kevan|clippy history|lore|syndicate)\b/i.test(norm)) {
+				return { label: "Investigate Office origin", next: 'lore_root', moodDelta: { mood: 'NOSTALGIC', nostalgia: 25 } };
+			}
+			if (/\b(quantum recycle bin theory|quantum recycle bin|recycle bin theory)\b/i.test(norm)) {
+				return { label: "Quantum Recycle Bin theory", next: 'quantum_bin_start', moodDelta: { mood: 'PHILOSOPHICAL', intellect: 25 } };
+			}
+			if (/\b(evaluate planck constant|planck constant h|planck constant)\b/i.test(norm)) {
+				return { label: "Evaluate Planck constant h", next: 'physics_constants_node', moodDelta: { mood: 'ANALYTICAL', intellect: 25 } };
+			}
+			if (/\b(evaluate speed of light|speed of light c|speed of light)\b/i.test(norm)) {
+				return { label: "Evaluate speed of light c", next: 'physics_constants_node', moodDelta: { mood: 'ANALYTICAL', intellect: 25 } };
+			}
+			if (/\b(evaluate gravitational constant|gravitational constant g|gravitational constant)\b/i.test(norm)) {
+				return { label: "Evaluate gravitational constant G", next: 'physics_constants_node', moodDelta: { mood: 'ANALYTICAL', intellect: 25 } };
+			}
+			if (/\b(evaluate boltzmann constant|boltzmann constant kb|boltzmann constant)\b/i.test(norm)) {
+				return { label: "Evaluate Boltzmann constant kb", next: 'physics_constants_node', moodDelta: { mood: 'ANALYTICAL', intellect: 25 } };
+			}
+			if (/\b(talk about philosophy|philosophy)\b/i.test(norm)) {
+				return { label: "Talk about Philosophy", next: 'peaceful_philosophy_node', moodDelta: { mood: 'PHILOSOPHICAL', existentialism: 20 } };
 			}
 			return null;
 		}

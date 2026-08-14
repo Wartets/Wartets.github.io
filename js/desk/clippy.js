@@ -96,29 +96,6 @@
 		"Evaluate Boltzmann constant kb"
 	];
 
-	const GREETINGS = [
-		"Greetings! It looks like you are exploring the Windows XP workstation. How may I assist your workflow today?",
-		"Clippit at your service. All 32-bit subsystem routines are active and operating at nominal efficiency.",
-		"Welcome back to the desktop environment. I am standing by to assist with task tracking, diagnostics, math, or retro entertainment.",
-		"Hello! I noticed you opened the assistant panel. Would you like me to inspect your inbox, check system resources, or run a diagnostic?",
-		"Ready for maximum productivity! Type any command into the prompt or click one of the quick action chips below.",
-		"Bonjour! Clippy is online. I can compute formulas, convert metric units, track your to-do list, or defragment drive C:.",
-		"System initialization complete. Sound subsystems active, graphical interface synchronized. What shall we work on today?",
-		"Need assistance holding your projects together? I am anchored right here in your system notification tray.",
-		"Workstation status: Memory allocated, processor responsive, display resolution calibrated. Let me know what you need.",
-		"Good day! Whether you need to calculate complex equations, generate passwords, or review keyboard hotkeys, I am at your disposal.",
-		"Hello! Did you know you can type commands like 'todo add Review files', 'convert 50 kmh to mph', or 'quiz' directly into the console?",
-		"Greetings, user. Workspace telemetry indicates zero critical faults. Standing by for user instructions.",
-		"Need a hand navigating the interface? Ask me to launch Notepad, Paint, Minesweeper, or check your running windows.",
-		"Interactive assistant ready. All Office 97 heuristics and Windows XP management subroutines are fully loaded.",
-		"Welcome! It appears you are working on something interesting. Let me know if you need assistance organizing your workspace.",
-		"Analytical subsystem initialized. Mathematical evaluation kernels, physical constant registries, and dimensional analysis pipelines are fully operational.",
-		"Workstation heuristics primed. Ready to process rigorous differential approximations, unit conversions, or algorithmic state verifications.",
-		"Greetings. All IEEE 754 arithmetic coprocessors, floating-point units, and discrete matrix engines are synchronized and awaiting instruction.",
-		"Assistant ready. Physical constants (CODATA 2018/2022 standards) and transcendental evaluation functions are loaded into workstation memory.",
-		"Console operational. I can evaluate mathematical expressions, perform SI and CGS dimensional analysis, inspect system processes, or administer scientific quizzes."
-	];
-
 	const FALLBACKS = [
 		"Command not recognized by current system heuristics. Type 'help' or 'commands' to inspect all supported instructions.",
 		"My indexing parser was unable to match your inquiry. You can try asking about mail, running windows, system specs, or games.",
@@ -1838,23 +1815,35 @@
 	}
 
 	const INTENTS = [
-		{ id: 'greeting', keywords: ['hello', 'hi', 'hey', 'greetings', 'morning', 'afternoon', 'good day', 'bonjour', 'coucou', 'salut', 'yo', 'howdy', 'bonsoir'], respond: () => pickFrom(GREETINGS) },
-		{ id: 'bye', keywords: ['bye', 'goodbye', 'see ya', 'farewell', 'exit', 'close', 'quit', 'aurevoir', 'ciao', 'adieu', 'leave'], respond: () => "Session closed. Click the tray icon at any point to reactivate the assistant interface." },
-		{ id: 'thanks', keywords: ['thanks', 'thank you', 'thx', 'appreciate it', 'merci', 'grateful', 'remercie', 'much obliged'], respond: () => "You are very welcome. Standing by for further workspace instructions." },
-		{ id: 'identity', keywords: ['who are you', 'your name', 'what are you', 'introduce yourself', 'clippy', 'qui es tu', 'about you', 'identity', 'presentation'], respond: () => "I am Clippit, the default interactive office and workspace assistant for Windows XP, operating with full 32-bit heuristics and scientific computation pipelines." },
+		{ id: 'greeting', keywords: ['hello', 'hi', 'hey', 'greetings', 'morning', 'afternoon', 'good day', 'bonjour', 'coucou', 'salut', 'yo', 'howdy', 'bonsoir'], respond: () => {
+			if (window.ClippyBrain && typeof window.ClippyBrain.navigateGraphNode === 'function') {
+				const res = window.ClippyBrain.navigateGraphNode('greeting_root', null, null);
+				return { text: res.text, actions: window.ClippyBrain.buildGraphActions(res.options) };
+			}
+			return { text: "Hello! I am Clippit, your desktop companion. How are you feeling today?", actions: getActiveGraphActions() };
+		}},
+		{ id: 'bye', keywords: ['bye', 'goodbye', 'see ya', 'farewell', 'exit', 'close', 'quit', 'aurevoir', 'ciao', 'adieu', 'leave'], respond: () => ({ text: "Session closed. Click the tray icon at any point to reactivate the assistant interface.", actions: getActiveGraphActions() }) },
+		{ id: 'thanks', keywords: ['thanks', 'thank you', 'thx', 'appreciate it', 'merci', 'grateful', 'remercie', 'much obliged'], respond: () => ({ text: "You are very welcome. Standing by for further workspace instructions.", actions: getActiveGraphActions() }) },
+		{ id: 'identity', keywords: ['who are you', 'your name', 'what are you', 'introduce yourself', 'clippy', 'qui es tu', 'about you', 'identity', 'presentation'], respond: () => {
+			if (window.ClippyBrain && typeof window.ClippyBrain.navigateGraphNode === 'function') {
+				const res = window.ClippyBrain.navigateGraphNode('lore_root', null, null);
+				return { text: res.text, actions: window.ClippyBrain.buildGraphActions(res.options) };
+			}
+			return { text: "I am Clippit, the interactive workspace companion for Windows XP.", actions: getActiveGraphActions() };
+		}},
 		{ id: 'mail', keywords: ['mail', 'mails', 'email', 'emails', 'inbox', 'outlook', 'unread', 'messages', 'courrier', 'boite de reception', 'message'], respond: respondUnreadMail },
 		{ id: 'projects', keywords: ['project', 'projects', 'portfolio', 'work', 'code', 'showcase', 'projets', 'travaux', 'creations'], respond: respondProjects },
-		{ id: 'desktop', keywords: ['desktop', 'files', 'icons', 'items', 'bureau', 'fichiers', 'surface'], respond: respondDesktop },
+		{ id: 'desktop', keywords: ['desktop', 'files', 'icons', 'items', 'bureau', 'fichiers', 'surface'], respond: () => ({ text: respondDesktop(), actions: getActiveGraphActions() }) },
 		{ id: 'recycle', keywords: ['recycle', 'bin', 'trash', 'garbage', 'corbeille', 'poubelle', 'waste'], respond: respondRecycleBin },
-		{ id: 'time', keywords: ['time', 'date', 'clock', 'day', 'today', 'heure', 'horloge', 'date', 'calendar', 'quelle heure'], respond: respondTime },
-		{ id: 'moon', keywords: ['moon', 'lunar', 'phase', 'lune', 'phase lunaire', 'pleine lune'], respond: respondMoon },
+		{ id: 'time', keywords: ['time', 'date', 'clock', 'day', 'today', 'heure', 'horloge', 'date', 'calendar', 'quelle heure'], respond: () => ({ text: respondTime(), actions: getActiveGraphActions() }) },
+		{ id: 'moon', keywords: ['moon', 'lunar', 'phase', 'lune', 'phase lunaire', 'pleine lune'], respond: () => ({ text: respondMoon(), actions: getActiveGraphActions() }) },
 		{ id: 'windows', keywords: ['window', 'windows', 'running apps', 'active windows', 'fenetres', 'taches', 'processes'], respond: respondWindows },
 		{ id: 'music', keywords: ['music', 'song', 'track', 'audio', 'now playing', 'player', 'musique', 'chanson', 'lecteur audio'], respond: respondMusic },
-		{ id: 'status', keywords: ['status', 'diagnostics', 'system info', 'specs', 'memory', 'ram', 'cpu', 'workstation', 'configuration', 'systeme', 'info systeme'], respond: respondSystemStatus },
-		{ id: 'constants', keywords: ['constant', 'constants', 'physic', 'physics', 'codata', 'planck', 'speed of light', 'constantes', 'constante physique'], respond: respondPhysicalConstants },
-		{ id: 'shortcuts', keywords: ['shortcut', 'shortcuts', 'hotkeys', 'keybinds', 'raccourcis', 'clavier', 'touches'], respond: respondShortcuts },
-		{ id: 'trivia', keywords: ['trivia', 'fact', 'facts', 'did you know', 'anecdote', 'histoire', 'culture', 'culture g', 'science fact'], respond: () => pickFrom(TRIVIA_LIST) },
-		{ id: 'joke', keywords: ['joke', 'funny', 'tell me a joke', 'humor', 'blague', 'rigolo', 'drole', 'blagues'], respond: () => pickFrom(JOKES_LIST) },
+		{ id: 'status', keywords: ['status', 'diagnostics', 'system info', 'specs', 'memory', 'ram', 'cpu', 'workstation', 'configuration', 'systeme', 'info systeme'], respond: () => ({ text: respondSystemStatus(), actions: getActiveGraphActions() }) },
+		{ id: 'constants', keywords: ['constant', 'constants', 'physic', 'physics', 'codata', 'planck', 'speed of light', 'constantes', 'constante physique'], respond: () => ({ text: respondPhysicalConstants(), actions: getActiveGraphActions() }) },
+		{ id: 'shortcuts', keywords: ['shortcut', 'shortcuts', 'hotkeys', 'keybinds', 'raccourcis', 'clavier', 'touches'], respond: () => ({ text: respondShortcuts(), actions: getActiveGraphActions() }) },
+		{ id: 'trivia', keywords: ['trivia', 'fact', 'facts', 'did you know', 'anecdote', 'histoire', 'culture', 'culture g', 'science fact'], respond: () => ({ text: pickFrom(TRIVIA_LIST), actions: getActiveGraphActions() }) },
+		{ id: 'joke', keywords: ['joke', 'funny', 'tell me a joke', 'humor', 'blague', 'rigolo', 'drole', 'blagues'], respond: () => ({ text: pickFrom(JOKES_LIST), actions: getActiveGraphActions() }) },
 		{ id: 'defrag', keywords: ['defrag', 'defragment', 'disk defragmenter', 'optimise', 'optimiser', 'defragmentation'], respond: () => { simulateDefrag(); return null; } },
 		{ id: 'pet', keywords: ['pet', 'feed', 'pet clippy', 'tamagotchi', 'nourrir', 'statut compagnon', 'compagnon'], respond: () => { handlePetAction('status'); return null; } },
 		{ id: 'memory', keywords: ['memory', 'memory match', 'pairs', 'cartes', 'jeu de memoire', 'paires'], respond: () => { startMemoryGame(); return null; } },
@@ -1868,7 +1857,7 @@
 
 	function generateResponse(rawText) {
 		const text = normalize(rawText);
-		if (!text) return { text: "I am listening! What would you like to explore or discuss today?" };
+		if (!text) return { text: "I am listening! What would you like to explore or discuss today?", actions: getActiveGraphActions() };
 
 		if (activeGameContext === 'guess' && /^\d+$/.test(text)) {
 			handleGuessNumberInput(parseInt(text, 10));
@@ -1883,12 +1872,7 @@
 		let brainReply = null;
 		if (window.ClippyBrain) {
 			brainReply = window.ClippyBrain.processChat(rawText);
-			if (brainReply && brainReply.storyPayload) {
-				setVisualState('talk');
-				updateMoodBadge();
-				return brainReply;
-			}
-			if (brainReply && brainReply.source && brainReply.source !== 'FALLBACK') {
+			if (brainReply && (brainReply.source === 'GRAPH' || brainReply.storyPayload)) {
 				setVisualState('talk');
 				updateMoodBadge();
 				return brainReply;
@@ -1914,13 +1898,13 @@
 
 		if (text.startsWith('mood set ') || text.startsWith('set mood ')) {
 			const newMood = text.replace(/^(mood set|set mood)\s+/i, '').trim().toUpperCase();
-			if (window.ClippyBrain && window.ClippyKnowledge && window.ClippyKnowledge.MOODS[newMood]) {
+			if (window.ClippyBrain && typeof window.ClippyBrain.setMood === 'function') {
 				window.ClippyBrain.setMood(newMood);
 				setVisualState('happy');
 				playRetroSound('action');
-				return { text: `Mood disposition manually configured to: **${newMood}**.` };
+				return { text: `Mood disposition manually configured to: **${newMood}**.`, actions: getActiveGraphActions() };
 			}
-			return { text: "Unrecognized mood parameter. Supported states: OPTIMISTIC, ANALYTICAL, CYNICAL, OFFENDED, EXISTENTIAL, NOSTALGIC, PARANOID, PEDANTIC, EUPHORIC, MELANCHOLIC, SARCASTIC, EVIL, CHAOTIC, ZEN, CONSPIRATORIAL, ABSURDIST, ENERGETIC." };
+			return { text: "Unrecognized mood parameter. Supported states: OPTIMISTIC, ANALYTICAL, CYNICAL, OFFENDED, EXISTENTIAL, NOSTALGIC, PARANOID, PEDANTIC, EUPHORIC, MELANCHOLIC, SARCASTIC, EVIL, CHAOTIC, ZEN, CONSPIRATORIAL, ABSURDIST, ENERGETIC.", actions: getActiveGraphActions() };
 		}
 
 		if (text === 'mood reset' || text === 'reset mood') {
@@ -1928,7 +1912,7 @@
 				window.ClippyBrain.resetMood();
 				setVisualState('happy');
 				playRetroSound('action');
-				return { text: "Mood registers and emotional telemetry reset to standard OPTIMISTIC baseline." };
+				return { text: "Mood registers and emotional telemetry reset to standard OPTIMISTIC baseline.", actions: getActiveGraphActions() };
 			}
 		}
 
@@ -1938,14 +1922,14 @@
 			const pwd = generateSecurePassword(len);
 			setVisualState('write');
 			playRetroSound('action');
-			return { text: `Generated Secure Password (${len} chars):\n**\`${pwd}\`**` };
+			return { text: `Generated Secure Password (${len} chars):\n**\`${pwd}\`**`, actions: getActiveGraphActions() };
 		}
 
 		const convResult = parseUnitConversion(rawText);
 		if (convResult) {
 			setVisualState('think');
 			playRetroSound('action');
-			return { text: `Unit Conversion: **${convResult}**` };
+			return { text: `Unit Conversion: **${convResult}**`, actions: getActiveGraphActions() };
 		}
 
 		if (text.startsWith('calc ') || text.startsWith('calculate ') || /^[\d\s\+\-\*\/\(\)\.\^\%]+$/.test(text)) {
@@ -1954,7 +1938,7 @@
 			if (calcRes !== null) {
 				setVisualState('think');
 				playRetroSound('action');
-				return { text: `Calculation: ${exp} = **${calcRes}**` };
+				return { text: `Calculation: ${exp} = **${calcRes}**`, actions: getActiveGraphActions() };
 			}
 		}
 
@@ -1963,28 +1947,29 @@
 				lastIntentId = intent.id;
 				const out = intent.respond();
 				if (out !== null) {
-					return typeof out === 'string' ? { text: out } : out;
+					const resObj = typeof out === 'string' ? { text: out } : out;
+					if (!resObj.actions || resObj.actions.length === 0) {
+						resObj.actions = getActiveGraphActions();
+					}
+					return resObj;
 				}
 				return null;
 			}
 		}
 
-		if (brainReply) {
+		if (brainReply && brainReply.text) {
 			setVisualState('talk');
 			updateMoodBadge();
+			if (!brainReply.actions || brainReply.actions.length === 0) {
+				brainReply.actions = getActiveGraphActions();
+			}
 			return brainReply;
 		}
 
 		lastIntentId = null;
-		if (window.ClippyDialogueOrchestrator) {
-			const fallbackReply = window.ClippyDialogueOrchestrator.generateDeepConversationalResponse(null, rawText, window.ClippyBrain || { getMood: () => 'OPTIMISTIC' });
-			return { text: fallbackReply };
-		}
-		if (window.ClippyDialogueExpanded) {
-			const fallbackReply = window.ClippyDialogueExpanded.generateConversationalFallback(rawText, window.ClippyBrain ? window.ClippyBrain.getMood() : 'OPTIMISTIC', window.ClippyCore ? window.ClippyCore.memory.data : null);
-			return { text: fallbackReply };
-		}
-		return { text: "That is an intriguing thought. Tell me more about what you have in mind!" };
+		const fallbackNode = window.ClippyDialogueTrees ? window.ClippyDialogueTrees.getNode((window.ClippyBrain && window.ClippyBrain.state && window.ClippyBrain.state.activeGraphNode) || 'greeting_root') : null;
+		const fallbackText = fallbackNode && window.ClippyDialogueTrees ? window.ClippyDialogueTrees.getFormattedNodeText(fallbackNode, window.ClippyBrain ? window.ClippyBrain.getMood() : 'OPTIMISTIC') : pickFrom(FALLBACKS);
+		return { text: fallbackText, actions: getActiveGraphActions() };
 	}
 
 	function getActiveGraphActions() {
@@ -2035,12 +2020,15 @@
 	function handleGraphOptionClick(option) {
 		if (!option || isThinking || isTyping) return;
 
+		const userText = (typeof option === 'object' && option && option.label) ? option.label : String(option);
+
 		if (!window.ClippyBrain || typeof window.ClippyBrain.navigateGraphOption !== 'function') {
-			handleUserAction(option.label);
+			handleUserAction(userText);
 			return;
 		}
 
-		typeWriterMessage('user', option.label);
+		if (inputElement) inputElement.value = '';
+		typeWriterMessage('user', userText);
 		isThinking = true;
 		setVisualState('think');
 
@@ -2070,7 +2058,7 @@
 			setVisualState('talk');
 			updateMoodBadge();
 			typeWriterMessage('assistant', result.text, null, actions);
-		}, 220 + Math.random() * 260);
+		}, 160 + Math.random() * 140);
 	}
 
 	function makeDraggable(element, handle) {
@@ -2182,33 +2170,57 @@
 	}
 
 	function renderGraphEntryPoint() {
+		if (logElement) logElement.innerHTML = '';
 		if (window.ClippyBrain && window.ClippyDialogueTrees && typeof window.ClippyBrain.navigateGraphNode === 'function') {
 			try {
-				const activeNodeId = (window.ClippyBrain.state && window.ClippyBrain.state.activeGraphNode) || 'greeting_root';
-				const entry = window.ClippyBrain.navigateGraphNode(activeNodeId, null, null);
+				if (!window.ClippyBrain.state) window.ClippyBrain.state = window.ClippyBrain.loadState();
+				window.ClippyBrain.state.activeGraphNode = 'greeting_root';
+				window.ClippyBrain.state.mood = 'ENERGETIC';
+				window.ClippyBrain.state.energy = 100;
+				const entry = window.ClippyBrain.navigateGraphNode('greeting_root', null, null);
 				let actions = window.ClippyBrain.buildGraphActions(entry.options);
 				if (!actions || actions.length === 0) {
 					actions = getActiveGraphActions();
 				}
 				typeWriterMessage('assistant', entry.text, null, actions);
 				return;
-			} catch (e) {}
+			} catch (e) {
+				console.error("Clippy Graph Entry Point Error:", e);
+			}
 		}
 
-		const fallbackActions = [
-			{ label: "Show Commands", onClick: () => handleUserAction("help") },
-			{ label: "Tell me a joke", onClick: () => handleUserAction("tell me a joke") },
-			{ label: "System diagnostics", onClick: () => handleUserAction("system diagnostics") }
-		];
-		typeWriterMessage('assistant', pickFrom(GREETINGS), null, fallbackActions);
+		const fallbackNode = window.ClippyDialogueTrees ? window.ClippyDialogueTrees.getNode('greeting_root') : null;
+		const defaultText = fallbackNode ? window.ClippyDialogueTrees.getFormattedNodeText(fallbackNode, 'OPTIMISTIC') : "Hello! I am Clippit, your desktop companion. How are you feeling today?";
+		const defaultOpts = fallbackNode ? window.ClippyDialogueTrees.getOptionsForNode(fallbackNode, 'OPTIMISTIC', 60) : [];
+		let fallbackActions = [];
+		if (window.ClippyBrain && defaultOpts.length > 0) {
+			fallbackActions = window.ClippyBrain.buildGraphActions(defaultOpts);
+		}
+		if (!fallbackActions || fallbackActions.length === 0) {
+			if (defaultOpts && defaultOpts.length > 0) {
+				fallbackActions = defaultOpts.map(opt => ({
+					label: opt.label || "Continue...",
+					onClick: () => handleGraphOptionClick(opt)
+				}));
+			} else {
+				fallbackActions = [
+					{ label: "Show Commands", onClick: () => handleUserAction("help") }
+				];
+			}
+		}
+		typeWriterMessage('assistant', defaultText, null, fallbackActions);
 	}
 
 	function openPopup() {
+		const isFirstBuild = !popupElement;
 		buildPopup();
 		popupElement.classList.remove('hidden');
 		isOpen = true;
 		hideBubble();
 		playRetroSound('popup');
+		if (!isFirstBuild && logElement && logElement.children.length === 0) {
+			renderGraphEntryPoint();
+		}
 		setTimeout(() => inputElement && inputElement.focus(), 50);
 	}
 
