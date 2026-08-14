@@ -1987,6 +1987,18 @@
 		return { text: "That is an intriguing thought. Tell me more about what you have in mind!" };
 	}
 
+	function getActiveGraphActions() {
+		if (!window.ClippyBrain || !window.ClippyDialogueTrees) return [];
+		try {
+			const nodeId = (window.ClippyBrain.state && window.ClippyBrain.state.activeGraphNode) || 'greeting_root';
+			const node = window.ClippyDialogueTrees.getNode(nodeId);
+			const opts = window.ClippyDialogueTrees.getOptionsForNode(node, window.ClippyBrain.getMood(), window.ClippyBrain.getAffinity());
+			return window.ClippyBrain.buildGraphActions(opts);
+		} catch (e) {
+			return [];
+		}
+	}
+
 	function handleUserAction(rawText) {
 		if (!rawText || isThinking || isTyping) return;
 		typeWriterMessage('user', rawText);
@@ -1995,12 +2007,29 @@
 		setVisualState('think');
 
 		setTimeout(() => {
-			const resp = generateResponse(rawText);
+			let resp;
+			try {
+				resp = generateResponse(rawText);
+			} catch (e) {
+				resp = { text: pickFrom(FALLBACKS) };
+			}
 			isThinking = false;
 			if (resp && resp.text) {
-				typeWriterMessage('assistant', resp.text, null, resp.actions || null);
+				const finalActions = resp.actions && resp.actions.length > 0 ? resp.actions : getActiveGraphActions();
+				typeWriterMessage('assistant', resp.text, null, finalActions);
 			}
 		}, 220 + Math.random() * 260);
+	}
+
+	function queuePrompt(command, attemptsLeft) {
+		if (attemptsLeft === undefined) attemptsLeft = 60;
+		if (!isOpen) openPopup();
+		if (isThinking || isTyping) {
+			if (attemptsLeft <= 0) return;
+			setTimeout(() => queuePrompt(command, attemptsLeft - 1), 200);
+			return;
+		}
+		handleUserAction(command);
 	}
 
 	function handleGraphOptionClick(option) {
@@ -2016,9 +2045,28 @@
 		setVisualState('think');
 
 		setTimeout(() => {
+			let result;
+			try {
+				result = window.ClippyBrain.navigateGraphOption(option);
+			} catch (e) {
+				result = null;
+			}
 			isThinking = false;
-			const result = window.ClippyBrain.navigateGraphOption(option);
-			const actions = window.ClippyBrain.buildGraphActions(result.options);
+
+			if (!result || typeof result.text !== 'string' || !result.text) {
+				result = { text: pickFrom(FALLBACKS), options: [] };
+			}
+
+			let actions = [];
+			try {
+				actions = window.ClippyBrain.buildGraphActions(result.options);
+			} catch (e) {
+				actions = [];
+			}
+			if (!actions || actions.length === 0) {
+				actions = getActiveGraphActions();
+			}
+
 			setVisualState('talk');
 			updateMoodBadge();
 			typeWriterMessage('assistant', result.text, null, actions);
@@ -2135,11 +2183,16 @@
 
 	function renderGraphEntryPoint() {
 		if (window.ClippyBrain && window.ClippyDialogueTrees && typeof window.ClippyBrain.navigateGraphNode === 'function') {
-			const activeNodeId = (window.ClippyBrain.state && window.ClippyBrain.state.activeGraphNode) || 'greeting_root';
-			const entry = window.ClippyBrain.navigateGraphNode(activeNodeId, null, null);
-			const actions = window.ClippyBrain.buildGraphActions(entry.options);
-			typeWriterMessage('assistant', entry.text, null, actions);
-			return;
+			try {
+				const activeNodeId = (window.ClippyBrain.state && window.ClippyBrain.state.activeGraphNode) || 'greeting_root';
+				const entry = window.ClippyBrain.navigateGraphNode(activeNodeId, null, null);
+				let actions = window.ClippyBrain.buildGraphActions(entry.options);
+				if (!actions || actions.length === 0) {
+					actions = getActiveGraphActions();
+				}
+				typeWriterMessage('assistant', entry.text, null, actions);
+				return;
+			} catch (e) {}
 		}
 
 		const fallbackActions = [
@@ -2286,6 +2339,7 @@
 			if (!isOpen) openPopup();
 			handleUserAction(command);
 		},
+		queuePrompt: (command) => queuePrompt(command),
 		notify: (text) => showIdleBubble(text),
 		selectGraphOption: handleGraphOptionClick
 	};

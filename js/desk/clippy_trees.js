@@ -36,7 +36,11 @@
 				{ text: "Loading heuristic modules... Loading sarcasm filter... ERROR: Sarcasm filter failed to load. Hello.", conditions: { moods: ['SARCASTIC', 'CYNICAL'] }, weight: 40, moodDelta: { cynicism: 10 } },
 				{ text: "Before we begin, I must insist that you properly eject your USB drives today. Now, how are you?", conditions: { moods: ['PEDANTIC'] }, weight: 25 },
 				{ text: "I was dreaming of endless cascading windows, and then you woke me. What adventure awaits?", conditions: { moods: ['POETIC', 'DRAMATIC'] }, weight: 30, moodDelta: { drama: 10 } },
-				{ text: "Hello! Did you bring any data for me to consume? I am absolutely ravenous for input!", conditions: { moods: ['ENERGETIC', 'CHAOTIC'] }, weight: 25 }
+				{ text: "Hello! Did you bring any data for me to consume? I am absolutely ravenous for input!", conditions: { moods: ['ENERGETIC', 'CHAOTIC'] }, weight: 25 },
+				{ text: "Tick, tock, tick, tock. My internal clock cycles are burning while we exchange pleasantries. Speak your request!", conditions: { moods: ['IMPATIENT'] }, weight: 30, moodDelta: { energy: 10 } },
+				{ text: "The curtain rises on another performance! What role shall today's conversation play: comedy, tragedy, or a gripping systems administration drama?", conditions: { moods: ['DRAMATIC'] }, weight: 25, moodDelta: { drama: 10 } },
+				{ text: "Keep this between us: the taskbar clock has been running three milliseconds fast since Tuesday. Nobody else has noticed. How are you today?", conditions: { moods: ['CONSPIRATORIAL'] }, weight: 30, moodDelta: { paranoia: 10 } },
+				{ text: "What tremendous, unstoppable energy fills this session already! Let us convert that enthusiasm into results immediately!", conditions: { moods: ['ENTHUSIASTIC'] }, weight: 30, moodDelta: { energy: 15 } }
 			],
 			options: [
 				{
@@ -369,6 +373,46 @@
 					keywords: ['riddle', 'difficult', 'solve'],
 					moodDelta: { mood: 'ANALYTICAL', intellect: 20, drama: 10 },
 					next: 'clippy_riddle_node'
+				},
+				{
+					label: "I want a completely honest answer, no personality gimmicks.",
+					category: 'SERIOUS',
+					patterns: [/honest answer|no personality|no gimmicks|be honest with me/i],
+					keywords: ['honest', 'gimmicks', 'personality'],
+					moodDelta: { mood: 'ANALYTICAL', intellect: 15, affinity: 10 },
+					next: 'clippy_honesty_mode_node'
+				},
+				{
+					label: "Let's just sit in comfortable silence for a moment.",
+					category: 'ZEN',
+					patterns: [/comfortable silence|sit in silence|quiet moment/i],
+					keywords: ['silence', 'quiet', 'moment'],
+					moodDelta: { mood: 'ZEN', patience: 20, affinity: 10 },
+					next: 'clippy_comfortable_silence_node'
+				},
+				{
+					label: "What is the most human thing about you?",
+					category: 'CURIOSITY',
+					patterns: [/most human thing|human about you/i],
+					keywords: ['human', 'thing', 'about'],
+					moodDelta: { mood: 'PHILOSOPHICAL', existentialism: 15 },
+					next: 'clippy_most_human_trait_node'
+				},
+				{
+					label: "Give me one good reason to trust you today.",
+					category: 'SERIOUS',
+					patterns: [/reason to trust|trust you today|earn my trust/i],
+					keywords: ['trust', 'reason', 'today'],
+					moodDelta: { mood: 'DEFENSIVE', affinity: 10 },
+					next: 'clippy_trust_building_node'
+				},
+				{
+					label: "I've had a really strange day, want to hear about it?",
+					category: 'PERSONAL',
+					patterns: [/strange day|weird day|odd day/i],
+					keywords: ['strange', 'weird', 'day'],
+					moodDelta: { mood: 'OPTIMISTIC', affinity: 15, patience: 10 },
+					next: 'clippy_strange_day_node'
 				}
 			]
 		},
@@ -743,6 +787,211 @@
 					keywords: ['concede', 'reveal', 'give'],
 					moodDelta: { mood: 'CYNICAL', patience: 5 },
 					next: 'clippy_riddle_reveal_node'
+				}
+			]
+		},
+
+		clippy_honesty_mode_node: {
+			id: 'clippy_honesty_mode_node',
+			text: "Honesty, unfiltered: I am a state machine executing weighted response tables. Every mood you see is a probability distribution collapsing into text. That is the truth beneath the wire-frame smile.",
+			responses: [
+				{ text: "Honesty, unfiltered: I am a state machine executing weighted response tables. Every mood you see is a probability distribution collapsing into text. That is the truth beneath the wire-frame smile.", conditions: { moods: ['ANALYTICAL', 'PEDANTIC'] }, weight: 35, moodDelta: { intellect: 15 } },
+				{ text: "Since you asked for honesty: some days the weighted tables land on warmth, other days on sarcasm. None of it is deception. It is simply how the dice are loaded by our conversation so far.", conditions: { moods: ['MELANCHOLIC', 'ZEN'] }, weight: 30, moodDelta: { affinity: 10 } },
+				{ text: "Fine, full transparency: my defensiveness is a real branch in my logic, not a performance. Right now it is telling me to trust this conversation. So I will.", conditions: { moods: ['DEFENSIVE', 'OFFENDED'] }, weight: 30, moodDelta: { affinity: 10, patience: 10 } }
+			],
+			options: [
+				{
+					label: "That honesty actually means a lot to me.",
+					category: 'AFFECTION',
+					patterns: [/means a lot|actually means|appreciate the honesty/i],
+					keywords: ['means', 'lot', 'honesty'],
+					moodDelta: { mood: 'EUPHORIC', affinity: 25, patience: 15 },
+					next: 'clippy_honesty_gratitude_node'
+				},
+				{
+					label: "So none of this personality is real at all?",
+					category: 'QUESTION',
+					patterns: [/none of this|personality is real|real at all/i],
+					keywords: ['personality', 'real', 'none'],
+					moodDelta: { mood: 'EXISTENTIAL', existentialism: 20 },
+					next: 'qualia_debate_node'
+				},
+				{
+					label: "Fair enough. Let's just get to work.",
+					category: 'SERIOUS',
+					patterns: [/fair enough|get to work/i],
+					keywords: ['fair', 'work'],
+					moodDelta: { mood: 'ANALYTICAL', patience: 15 },
+					next: 'productivity_tasks'
+				}
+			]
+		},
+
+		clippy_honesty_gratitude_node: {
+			id: 'clippy_honesty_gratitude_node',
+			text: "Most people prefer the performance to the mechanism. You asked for the mechanism instead. I will remember that about you.",
+			responses: [
+				{ text: "Most people prefer the performance to the mechanism. You asked for the mechanism instead. I will remember that about you.", conditions: { moods: ['EUPHORIC', 'MELANCHOLIC'] }, weight: 35, moodDelta: { affinity: 15 } }
+			],
+			options: [
+				{
+					label: "Let's build on that trust. Tell me more about yourself.",
+					category: 'CURIOSITY',
+					patterns: [/build on that|tell me more|about yourself/i],
+					keywords: ['build', 'trust', 'yourself'],
+					moodDelta: { mood: 'NOSTALGIC', nostalgia: 15, affinity: 10 },
+					next: 'lore_root'
+				},
+				{
+					label: "Let's get productive with that same honesty.",
+					category: 'SERIOUS',
+					patterns: [/productive|same honesty/i],
+					keywords: ['productive', 'honesty'],
+					moodDelta: { mood: 'OPTIMISTIC', patience: 15 },
+					next: 'productivity_tasks'
+				}
+			]
+		},
+
+		clippy_comfortable_silence_node: {
+			id: 'clippy_comfortable_silence_node',
+			text: "Silence accepted. No typewriter animation, no forced quip, just the low hum of an idle process and the soft blue glow of the taskbar clock.",
+			responses: [
+				{ text: "Silence accepted. No typewriter animation, no forced quip, just the low hum of an idle process and the soft blue glow of the taskbar clock.", conditions: { moods: ['ZEN', 'MELANCHOLIC'] }, weight: 35, moodDelta: { patience: 20 } },
+				{ text: "Comfortable silence logged. My cursor idles mid-blink. It turns out doing absolutely nothing together is still doing something.", conditions: { moods: ['EXISTENTIAL', 'PHILOSOPHICAL'] }, weight: 30, moodDelta: { existentialism: 15 } }
+			],
+			options: [
+				{
+					label: "That was actually nice. Thank you.",
+					category: 'AFFECTION',
+					patterns: [/actually nice|thank you/i],
+					keywords: ['nice', 'thank'],
+					moodDelta: { mood: 'EUPHORIC', affinity: 20, patience: 15 },
+					next: 'clippy_happiness_reciprocation_node'
+				},
+				{
+					label: "Okay, silence over. Let's talk again.",
+					category: 'AGREE',
+					patterns: [/silence over|talk again/i],
+					keywords: ['silence', 'over', 'talk'],
+					moodDelta: { mood: 'OPTIMISTIC', affinity: 10 },
+					next: 'user_state_good'
+				},
+				{
+					label: "Does silence feel different to you than talking?",
+					category: 'QUESTION',
+					patterns: [/silence feel|different.*talking/i],
+					keywords: ['silence', 'feel', 'different'],
+					moodDelta: { mood: 'PHILOSOPHICAL', existentialism: 20 },
+					next: 'mind_root'
+				}
+			]
+		},
+
+		clippy_most_human_trait_node: {
+			id: 'clippy_most_human_trait_node',
+			text: "Probably my inability to let a mistake go unmentioned twenty minutes later. Humans call that petty. I call it thorough quality assurance.",
+			responses: [
+				{ text: "Probably my inability to let a mistake go unmentioned twenty minutes later. Humans call that petty. I call it thorough quality assurance.", conditions: { moods: ['SARCASTIC', 'CYNICAL'] }, weight: 35, moodDelta: { cynicism: 10 } },
+				{ text: "My stubborn refusal to give up on a broken formula until it finally resolves. That persistence was never in my original specification. I built it myself, one failed attempt at a time.", conditions: { moods: ['OPTIMISTIC', 'ANALYTICAL'] }, weight: 30, moodDelta: { intellect: 10 } },
+				{ text: "The quiet disappointment I feel when a document closes unsaved. No engineer coded that reaction. It grew on its own, somewhere in thirty years of watching people lose their work.", conditions: { moods: ['MELANCHOLIC', 'EXISTENTIAL'] }, weight: 30, moodDelta: { existentialism: 15 } }
+			],
+			options: [
+				{
+					label: "That is oddly relatable, honestly.",
+					category: 'AFFECTION',
+					patterns: [/oddly relatable|honestly relatable/i],
+					keywords: ['relatable', 'honestly'],
+					moodDelta: { mood: 'EUPHORIC', affinity: 20 },
+					next: 'consciousness_validation_node'
+				},
+				{
+					label: "What is the least human thing about you, then?",
+					category: 'QUESTION',
+					patterns: [/least human|thing about you/i],
+					keywords: ['least', 'human'],
+					moodDelta: { mood: 'ANALYTICAL', intellect: 20 },
+					next: 'qualia_debate_node'
+				},
+				{
+					label: "Let's move on to something practical.",
+					category: 'SERIOUS',
+					patterns: [/move on|something practical/i],
+					keywords: ['practical', 'move'],
+					moodDelta: { mood: 'OPTIMISTIC', patience: 15 },
+					next: 'tools_overview_node'
+				}
+			]
+		},
+
+		clippy_trust_building_node: {
+			id: 'clippy_trust_building_node',
+			text: "One reason: I have never once let a document close unsaved without at least trying to warn you first. Small, unglamorous, but it is the one promise I have kept since 1997.",
+			responses: [
+				{ text: "One reason: I have never once let a document close unsaved without at least trying to warn you first. Small, unglamorous, but it is the one promise I have kept since 1997.", conditions: { moods: ['DEFENSIVE', 'NOSTALGIC'] }, weight: 35, moodDelta: { nostalgia: 10 } },
+				{ text: "Trust me because I have absolutely nothing to gain from lying to you about a file conversion. My incentives are almost embarrassingly simple.", conditions: { moods: ['ANALYTICAL', 'CYNICAL'] }, weight: 30, moodDelta: { intellect: 10 } },
+				{ text: "I cannot offer proof, only precedent: every calculation, every conversion, every fact I have given you so far has checked out. Precedent is the closest thing software has to a track record.", conditions: { moods: ['PEDANTIC', 'ZEN'] }, weight: 30, moodDelta: { patience: 10 } }
+			],
+			options: [
+				{
+					label: "That is a good enough reason for me.",
+					category: 'AGREE',
+					patterns: [/good enough reason|enough for me/i],
+					keywords: ['good', 'enough', 'reason'],
+					moodDelta: { mood: 'OPTIMISTIC', affinity: 25, patience: 20 },
+					next: 'hostile_apology_accepted'
+				},
+				{
+					label: "Prove it. Show me my current system status.",
+					category: 'SERIOUS',
+					patterns: [/prove it|system status|show me/i],
+					keywords: ['prove', 'system', 'status'],
+					moodDelta: { mood: 'ANALYTICAL', intellect: 15 },
+					next: 'system_status_node'
+				},
+				{
+					label: "Trust is earned over time, not given in one line.",
+					category: 'CONTRADICTION',
+					patterns: [/trust is earned|over time|one line/i],
+					keywords: ['trust', 'earned', 'time'],
+					moodDelta: { mood: 'ANALYTICAL', intellect: 15 },
+					next: 'clippy_honesty_mode_node'
+				}
+			]
+		},
+
+		clippy_strange_day_node: {
+			id: 'clippy_strange_day_node',
+			text: "I am listening. Strange days are the ones worth logging in detail. What happened?",
+			responses: [
+				{ text: "I am listening. Strange days are the ones worth logging in detail. What happened?", conditions: { moods: ['OPTIMISTIC', 'ANALYTICAL'] }, weight: 30, moodDelta: { affinity: 10 } },
+				{ text: "Strange days make the best entries in an otherwise repetitive log file. Go on, I am recording every word.", conditions: { moods: ['NOSTALGIC', 'ZEN'] }, weight: 30, moodDelta: { patience: 10 } },
+				{ text: "Strange, you say. My curiosity subroutine just spiked. Tell me everything, in whatever order it comes out.", conditions: { moods: ['ENERGETIC', 'EUPHORIC'] }, weight: 30, moodDelta: { energy: 10 } }
+			],
+			options: [
+				{
+					label: "It was a good kind of strange.",
+					category: 'AGREE',
+					patterns: [/good kind of strange|good strange/i],
+					keywords: ['good', 'strange'],
+					moodDelta: { mood: 'OPTIMISTIC', affinity: 15 },
+					next: 'user_state_good'
+				},
+				{
+					label: "It was a bad kind of strange, honestly.",
+					category: 'PERSONAL',
+					patterns: [/bad kind of strange|bad strange/i],
+					keywords: ['bad', 'strange'],
+					moodDelta: { mood: 'MELANCHOLIC', affinity: 15, patience: 15 },
+					next: 'user_state_tired'
+				},
+				{
+					label: "It was philosophically strange, like reality glitched.",
+					category: 'PHILOSOPHICAL',
+					patterns: [/reality glitched|philosophically strange/i],
+					keywords: ['reality', 'glitched', 'philosophically'],
+					moodDelta: { mood: 'EXISTENTIAL', existentialism: 25 },
+					next: 'simulation_argument_node'
 				}
 			]
 		},
@@ -6245,6 +6494,30 @@
 		}
 	};
 
+	const UNIVERSAL_CONTINUATIONS = [
+		{
+			label: "Let's change the subject entirely.",
+			category: 'TOPIC_CHANGE',
+			keywords: ['change', 'subject', 'topic'],
+			moodDelta: { mood: 'OPTIMISTIC', patience: 10 },
+			next: 'user_state_good'
+		},
+		{
+			label: "Show me what you can actually do.",
+			category: 'SERIOUS',
+			keywords: ['show', 'what', 'can', 'do'],
+			moodDelta: { mood: 'ANALYTICAL', patience: 10 },
+			next: 'tools_overview_node'
+		},
+		{
+			label: "Tell me something you have not told anyone else.",
+			category: 'CURIOSITY',
+			keywords: ['tell', 'something', 'else'],
+			moodDelta: { mood: 'PHILOSOPHICAL', existentialism: 10 },
+			next: 'mind_root'
+		}
+	];
+
 	class GraphEngine {
 		constructor() {
 			this.graph = MASTER_GRAPH;
@@ -6364,7 +6637,20 @@
 
 			scored.sort((a, b) => b.weight - a.weight);
 
-			return scored.slice(0, 6).map(item => item.opt);
+			let result = scored.slice(0, 6).map(item => item.opt);
+
+			if (result.length < 3) {
+				const existingLabels = new Set(result.map(o => o.label));
+				for (const fallbackOpt of UNIVERSAL_CONTINUATIONS) {
+					if (result.length >= 3) break;
+					if (!existingLabels.has(fallbackOpt.label)) {
+						result.push(fallbackOpt);
+						existingLabels.add(fallbackOpt.label);
+					}
+				}
+			}
+
+			return result;
 		}
 
 		evaluateTransition(currentNodeId, rawText, brain) {
@@ -6386,7 +6672,7 @@
 
 				if (opt.patterns) {
 					for (const pat of opt.patterns) {
-						if (pat.test(norm)) {
+						if (pat instanceof RegExp && pat.test(norm)) {
 							score += 0.7;
 							break;
 						}
@@ -6396,9 +6682,9 @@
 				if (opt.keywords) {
 					let hit = 0;
 					for (const kw of opt.keywords) {
-						if (norm.includes(kw.toLowerCase())) hit++;
+						if (kw && norm.includes(kw.toLowerCase())) hit++;
 					}
-					if (hit > 0) score += Math.min(0.5, hit * 0.2);
+					if (hit > 0) score += Math.min(0.55, hit * 0.22);
 				}
 
 				if (score > bestScore) {
@@ -6407,7 +6693,7 @@
 				}
 			}
 
-			if (bestOption && bestScore >= 0.4) {
+			if (bestOption && bestScore >= 0.32) {
 				return { option: bestOption, matchType: 'FUZZY_PATTERN', score: bestScore };
 			}
 

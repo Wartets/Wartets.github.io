@@ -471,7 +471,11 @@
 		dispatchActionTrigger(trigger) {
 			const command = ACTION_TRIGGER_COMMANDS[trigger];
 			if (!command || !window.ClippyAgent) return;
-			setTimeout(() => window.ClippyAgent.prompt(command), 400);
+			if (typeof window.ClippyAgent.queuePrompt === 'function') {
+				setTimeout(() => window.ClippyAgent.queuePrompt(command), 500);
+			} else {
+				setTimeout(() => window.ClippyAgent.prompt(command), 900);
+			}
 		}
 
 		buildGraphActions(options) {
@@ -513,26 +517,39 @@
 				return { text: "Standing by for user instructions.", options: [] };
 			}
 
-			const targetNode = window.ClippyDialogueTrees.getNode(resolvedNodeId);
-			const formattedText = window.ClippyDialogueTrees.getFormattedNodeText(targetNode, this);
-			const nextOptions = window.ClippyDialogueTrees.getOptionsForNode(targetNode, this.state.mood, this.state.affinity);
-
-			return { text: formattedText, options: nextOptions };
+			try {
+				const targetNode = window.ClippyDialogueTrees.getNode(resolvedNodeId);
+				const formattedText = window.ClippyDialogueTrees.getFormattedNodeText(targetNode, this);
+				const nextOptions = window.ClippyDialogueTrees.getOptionsForNode(targetNode, this.state.mood, this.state.affinity);
+				if (!formattedText || nextOptions === undefined) {
+					throw new Error('incomplete_node_render');
+				}
+				return { text: formattedText, options: nextOptions };
+			} catch (e) {
+				this.state.activeGraphNode = 'greeting_root';
+				this.saveState();
+				const fallbackNode = window.ClippyDialogueTrees.getNode('greeting_root');
+				const fallbackText = window.ClippyDialogueTrees.getFormattedNodeText(fallbackNode, this);
+				const fallbackOptions = window.ClippyDialogueTrees.getOptionsForNode(fallbackNode, this.state.mood, this.state.affinity);
+				return { text: fallbackText, options: fallbackOptions };
+			}
 		}
 
 		navigateGraphOption(option) {
-			if (!option) {
+			if (!option || !option.next) {
 				return this.navigateGraphNode('greeting_root', null, null);
 			}
 
 			const result = this.navigateGraphNode(option.next, option.moodDelta, option.actionTrigger);
 
 			this.state.totalInteractions = (this.state.totalInteractions || 0) + 1;
-			if (window.ClippyCore) {
-				const inferredTopic = option.category || this.detectTopic(option.label || '') || 'GRAPH_CHOICE';
-				window.ClippyCore.memory.incrementTopic(inferredTopic);
-				window.ClippyCore.context.updateTurn(option.label || '', result.text, inferredTopic, {});
-			}
+			try {
+				if (window.ClippyCore) {
+					const inferredTopic = option.category || this.detectTopic(option.label || '') || 'GRAPH_CHOICE';
+					window.ClippyCore.memory.incrementTopic(inferredTopic);
+					window.ClippyCore.context.updateTurn(option.label || '', result.text, inferredTopic, {});
+				}
+			} catch (e) {}
 			this.saveState();
 
 			return result;
