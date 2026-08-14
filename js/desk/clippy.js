@@ -2000,6 +2000,28 @@
 		}, 220 + Math.random() * 260);
 	}
 
+	function handleGraphOptionClick(option) {
+		if (!option || isThinking || isTyping) return;
+
+		if (!window.ClippyBrain || typeof window.ClippyBrain.navigateGraphOption !== 'function') {
+			handleUserAction(option.label);
+			return;
+		}
+
+		typeWriterMessage('user', option.label);
+		isThinking = true;
+		setVisualState('think');
+
+		setTimeout(() => {
+			isThinking = false;
+			const result = window.ClippyBrain.navigateGraphOption(option);
+			const actions = window.ClippyBrain.buildGraphActions(result.options);
+			setVisualState('talk');
+			updateMoodBadge();
+			typeWriterMessage('assistant', result.text, null, actions);
+		}, 220 + Math.random() * 260);
+	}
+
 	function makeDraggable(element, handle) {
 		let posX = 0, posY = 0, mouseX = 0, mouseY = 0;
 		handle.style.cursor = 'move';
@@ -2107,18 +2129,20 @@
 		let rootActions = [
 			{ label: "I'm doing great, ready to work!", onClick: () => handleUserAction("I'm doing great, ready to be productive!") },
 			{ label: "I'm feeling terrible and exhausted.", onClick: () => handleUserAction("I'm feeling terrible and exhausted today.") },
-			{ label: "Why do you care? You're a paperclip.", onClick: () => handleUserAction("Why do you care? You're just a paperclip.") },
+			{ label: "Why do you care? You're just a paperclip.", onClick: () => handleUserAction("Why do you care? You're just a paperclip.") },
 			{ label: "Show Commands", onClick: () => handleUserAction("help") }
 		];
 
 		if (window.ClippyDialogueTrees && window.ClippyBrain) {
-			const rootNode = window.ClippyDialogueTrees.getNode('greeting_root');
+			const activeNodeId = (window.ClippyBrain.state && window.ClippyBrain.state.activeGraphNode) || 'greeting_root';
+			const rootNode = window.ClippyDialogueTrees.getNode(activeNodeId);
 			rootText = window.ClippyDialogueTrees.getFormattedNodeText(rootNode, window.ClippyBrain.getMood());
 			const opts = window.ClippyDialogueTrees.getOptionsForNode(rootNode, window.ClippyBrain.getMood(), window.ClippyBrain.getAffinity());
 			if (opts && opts.length > 0) {
 				rootActions = opts.map(o => ({
 					label: o.label,
-					onClick: () => handleUserAction(o.label)
+					category: o.category,
+					onClick: () => handleGraphOptionClick(o)
 				}));
 			}
 		}
@@ -2264,7 +2288,8 @@
 			if (!isOpen) openPopup();
 			handleUserAction(command);
 		},
-		notify: (text) => showIdleBubble(text)
+		notify: (text) => showIdleBubble(text),
+		selectGraphOption: handleGraphOptionClick
 	};
 
 	if (document.readyState === 'complete' || document.readyState === 'interactive') {

@@ -183,7 +183,7 @@
 					return /^(bad bad bad|you suck|i don't like you|i do not like you|you're annoying|you are annoying|you're useless|you are useless|you are bad|you're bad|shut up|hate you|i hate you)$/i.test(text) ||
 						(nlp.speechActs && nlp.speechActs.includes('DIRECT_CRITIQUE'));
 				},
-				execute: (ctx, mem, brain) => {
+				execute: (ctx, mem, brain, nlp) => {
 					const count = ctx.state.consecutiveCritiqueCount + 1;
 					brain.state.patience = Math.max(0, brain.state.patience - 25);
 					brain.state.cynicism = Math.min(100, brain.state.cynicism + 20);
@@ -221,7 +221,7 @@
 					const text = nlp.raw.toLowerCase();
 					return /\b(you (keep|are) ignoring (me|what i (say|said))|that's not what i (asked|meant|said)|that is not what i (asked|meant|said)|you did not answer|stop ignoring me|why are you like this)\b/i.test(text);
 				},
-				execute: (ctx, mem, brain) => {
+				execute: (ctx, mem, brain, nlp) => {
 					const text = nlp.raw.toLowerCase();
 					if (text.includes('why are you like this')) {
 						brain.setMood('EXISTENTIAL');
@@ -241,7 +241,7 @@
 					const text = nlp.raw.toLowerCase().trim();
 					return /^(because|cuz|bc)\b/i.test(text);
 				},
-				execute: (ctx, mem, brain) => {
+				execute: (ctx, mem, brain, nlp) => {
 					const text = nlp.raw.toLowerCase();
 					if (text.includes('useless') || text.includes('ignoring')) {
 						brain.setMood('DEFENSIVE');
@@ -395,7 +395,7 @@
 				condition: (ctx, mem, nlp) => {
 					return ctx.state.pendingQuestion !== null && (nlp.speechActs.includes('AGREEMENT') || nlp.speechActs.includes('DISAGREEMENT') || nlp.raw.trim().length <= 25);
 				},
-				execute: (ctx, mem, brain) => {
+				execute: (ctx, mem, brain, nlp) => {
 					const pq = ctx.state.pendingQuestion;
 					ctx.clearPendingQuestion();
 					if (pq.type === 'CONFIRM_APP_LAUNCH') {
@@ -421,7 +421,7 @@
 			this.registerRule({
 				name: 'USER_CORRECTION_HANDLER',
 				condition: (ctx, mem, nlp) => nlp.speechActs.includes('CORRECTION') || /^(i meant|no i mean|actually|correction|no,? i meant the other thing)\b/i.test(nlp.raw),
-				execute: (ctx, mem, brain) => {
+				execute: (ctx, mem, brain, nlp) => {
 					const cleanText = nlp.raw.replace(/^(i meant|no i mean|actually|rather|typo|meant to say|correction|no,? i meant the other thing)\s*/i, '').trim();
 					return `Got it! Correction acknowledged: "${cleanText || 'the alternative topic'}". I have re-indexed our context around that immediately.`;
 				}
@@ -434,39 +434,14 @@
 					const entry = window.ClippyDialogueTrees.findGlobalGraphEntry(nlp.raw.toLowerCase().trim());
 					return entry !== null;
 				},
-				execute: (ctx, mem, brain) => {
+				execute: (ctx, mem, brain, nlp) => {
 					const norm = nlp.raw.toLowerCase().trim();
 					const entry = window.ClippyDialogueTrees.findGlobalGraphEntry(norm);
 					if (entry) {
-						if (entry.moodDelta) {
-							const md = entry.moodDelta;
-							if (md.mood && window.ClippyKnowledge.MOODS[md.mood]) brain.setMood(md.mood);
-							if (md.affinity !== undefined) brain.state.affinity = Math.max(0, Math.min(100, brain.state.affinity + md.affinity));
-							if (md.patience !== undefined) brain.state.patience = Math.max(0, Math.min(100, brain.state.patience + md.patience));
-							if (md.cynicism !== undefined) brain.state.cynicism = Math.max(0, Math.min(100, brain.state.cynicism + md.cynicism));
-							if (md.intellect !== undefined) brain.state.intellect = Math.max(0, Math.min(100, brain.state.intellect + md.intellect));
-							if (md.existentialism !== undefined) brain.state.existentialism = Math.max(0, Math.min(100, brain.state.existentialism + md.existentialism));
-							if (md.nostalgia !== undefined) brain.state.nostalgia = Math.max(0, Math.min(100, brain.state.nostalgia + md.nostalgia));
-							if (md.paranoia !== undefined) brain.state.paranoia = Math.max(0, Math.min(100, (brain.state.paranoia || 0) + md.paranoia));
-							if (md.drama !== undefined) brain.state.drama = Math.max(0, Math.min(100, (brain.state.drama || 0) + md.drama));
-						}
-						brain.state.activeGraphNode = entry.next;
-						brain.saveState();
-						const targetNode = window.ClippyDialogueTrees.getNode(entry.next);
-						const formattedText = window.ClippyDialogueTrees.getFormattedNodeText(targetNode, brain.getMood());
-						const nextOptions = window.ClippyDialogueTrees.getOptionsForNode(targetNode, brain.getMood(), brain.getAffinity());
-						const actions = nextOptions.map(nextOpt => ({
-							label: nextOpt.label,
-							category: nextOpt.category,
-							onClick: () => {
-								if (window.ClippyAgent && window.ClippyAgent.prompt) {
-									window.ClippyAgent.prompt(nextOpt.label);
-								}
-							}
-						}));
+						const navResult = brain.navigateGraphNode(entry.next, entry.moodDelta, entry.actionTrigger);
 						return {
-							text: formattedText,
-							actions: actions
+							text: navResult.text,
+							actions: brain.buildGraphActions(navResult.options)
 						};
 					}
 					return null;
@@ -481,7 +456,7 @@
 		evaluate(ctx, mem, nlpParsed, brain) {
 			for (const rule of this.rules) {
 				if (rule.condition(ctx, mem, nlpParsed, brain)) {
-					return rule.execute(ctx, mem, brain);
+					return rule.execute(ctx, mem, brain, nlpParsed);
 				}
 			}
 			return null;

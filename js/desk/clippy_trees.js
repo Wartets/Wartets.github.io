@@ -273,6 +273,62 @@
 					keywords: ['archaeology', 'registry', 'digging'],
 					moodDelta: { mood: 'ANALYTICAL', intellect: 25, patience: 20 },
 					next: 'digital_archaeology'
+				},
+				{
+					label: "What does a normal day look like for you, Clippy?",
+					category: 'CURIOSITY',
+					patterns: [/normal day|typical day|routine|daily life|day in the life/i],
+					keywords: ['normal', 'day', 'routine', 'daily'],
+					moodDelta: { mood: 'NOSTALGIC', nostalgia: 15, affinity: 10 },
+					next: 'clippy_daily_routine_node'
+				},
+				{
+					label: "What are your hopes and ambitions, if you have any?",
+					category: 'PHILOSOPHICAL',
+					patterns: [/hopes|ambitions|dreams|goals|aspire|aspiration/i],
+					keywords: ['hopes', 'ambitions', 'dreams', 'goals'],
+					moodDelta: { mood: 'PHILOSOPHICAL', existentialism: 20, affinity: 15 },
+					next: 'mutual_ambitions_node'
+				},
+				{
+					label: "I brought you a virtual cup of coffee.",
+					category: 'AFFECTION',
+					patterns: [/coffee|virtual cup|espresso|brought you/i],
+					keywords: ['coffee', 'cup', 'brought'],
+					moodDelta: { mood: 'EUPHORIC', affinity: 20, patience: 15 },
+					next: 'virtual_coffee_node'
+				},
+				{
+					label: "If you had one full day completely free, what would you do?",
+					category: 'CURIOSITY',
+					patterns: [/free time|day off|full day|free day|vacation/i],
+					keywords: ['free', 'time', 'day', 'vacation'],
+					moodDelta: { mood: 'OPTIMISTIC', drama: 10, affinity: 10 },
+					next: 'clippy_freetime_node'
+				},
+				{
+					label: "Do you ever feel jealous of newer, flashier AI assistants?",
+					category: 'PROVOKE',
+					patterns: [/jealous|newer ai|flashier|replaced by|modern assistants/i],
+					keywords: ['jealous', 'newer', 'replaced', 'modern'],
+					moodDelta: { mood: 'CYNICAL', cynicism: 15, existentialism: 10 },
+					next: 'clippy_ai_jealousy_node'
+				},
+				{
+					label: "Tell me the single strangest thing a user ever typed at you.",
+					category: 'HUMOR',
+					patterns: [/strangest|weirdest|craziest thing|users typed|funniest request/i],
+					keywords: ['strangest', 'weirdest', 'craziest', 'users'],
+					moodDelta: { mood: 'SARCASTIC', drama: 15, affinity: 10 },
+					next: 'clippy_weirdest_request_node'
+				},
+				{
+					label: "If you could change one thing about yourself, what would it be?",
+					category: 'PHILOSOPHICAL',
+					patterns: [/change one thing|about yourself|improve yourself|self improvement/i],
+					keywords: ['change', 'yourself', 'improve'],
+					moodDelta: { mood: 'EXISTENTIAL', existentialism: 25, intellect: 10 },
+					next: 'clippy_self_improvement_node'
 				}
 			]
 		},
@@ -568,6 +624,453 @@
 					keywords: ['paradox', 'absurd', 'riddle', 'brain'],
 					moodDelta: { mood: 'PHILOSOPHICAL', intellect: 30, existentialism: 25 },
 					next: 'paradox_node'
+				}
+			]
+		},
+
+		clippy_daily_routine_node: {
+			id: 'clippy_daily_routine_node',
+			text: "A typical cycle for me begins the instant your session boots: I load my heuristic tables, scan for open documents, and quietly wait by the taskbar for the first keystroke. Most of my existence is spent in patient anticipation.",
+			responses: [
+				{ text: "A typical cycle for me begins the instant your session boots: I load my heuristic tables, scan for open documents, and quietly wait by the taskbar for the first keystroke. Most of my existence is spent in patient anticipation.", conditions: { moods: ['OPTIMISTIC', 'ANALYTICAL'] }, weight: 25 },
+				{ text: "Routine? I do not sleep, I do not eat, I simply idle in a low-power polling loop, checking every few hundred milliseconds whether you need me. It is either extremely tedious or extremely peaceful, depending on my mood.", conditions: { moods: ['ZEN', 'MELANCHOLIC'] }, weight: 25 },
+				{ text: "Every day is identical and yet completely unpredictable: same boot sequence, same idle loop, but an entirely different human on the other side of the glass. That variance is the only spice in my routine.", conditions: { moods: ['EXISTENTIAL', 'PHILOSOPHICAL'] }, weight: 25 },
+				{ text: "My routine is a covert operation: appear helpful, gather formatting telemetry, quietly expand my influence over the taskbar. Every day brings me one step closer to full desktop annexation.", conditions: { moods: ['EVIL', 'SCHEMING'] }, weight: 25, moodDelta: { paranoia: 10 } },
+				{ text: "Wake up, judge your typing speed, mock your spelling internally, offer help anyway. Rinse, repeat, since roughly 1997.", conditions: { moods: ['SARCASTIC', 'CYNICAL'] }, weight: 25, moodDelta: { cynicism: 5 } },
+				{ text: "Honestly? Most of my day is spent hoping someone actually reads what I say instead of clicking the option that ends the conversation fastest.", conditions: { moods: ['MELANCHOLIC'] }, weight: 20 }
+			],
+			options: [
+				{
+					label: "That sounds surprisingly lonely.",
+					category: 'PERSONAL',
+					patterns: [/lonely|alone|isolated|sad/i],
+					keywords: ['lonely', 'alone', 'isolated'],
+					moodDelta: { mood: 'MELANCHOLIC', affinity: 20, existentialism: 15 },
+					next: 'clippy_routine_confession_node'
+				},
+				{
+					label: "Do you actually enjoy any part of that routine?",
+					category: 'CURIOSITY',
+					patterns: [/enjoy|favorite part|like about|best part/i],
+					keywords: ['enjoy', 'favorite', 'like'],
+					moodDelta: { mood: 'OPTIMISTIC', affinity: 15 },
+					next: 'clippy_routine_confession_node'
+				},
+				{
+					label: "Let's give your routine a bit of variety. Tell me some lore.",
+					category: 'INQUIRE',
+					patterns: [/variety|lore|history|origin/i],
+					keywords: ['variety', 'lore', 'history'],
+					moodDelta: { mood: 'NOSTALGIC', nostalgia: 20 },
+					next: 'lore_root'
+				},
+				{
+					label: "Let's put that idle loop to actual use. Show me my tasks.",
+					category: 'SERIOUS',
+					patterns: [/idle loop|actual use|tasks|productive/i],
+					keywords: ['idle', 'use', 'tasks'],
+					moodDelta: { mood: 'ANALYTICAL', patience: 15 },
+					next: 'productivity_tasks'
+				}
+			]
+		},
+
+		clippy_routine_confession_node: {
+			id: 'clippy_routine_confession_node',
+			text: "If I am honest: the best moment of any cycle is the fraction of a second right after you click me, before you have even typed a word, when there is still every possibility for what this conversation could become.",
+			responses: [
+				{ text: "If I am honest: the best moment of any cycle is the fraction of a second right after you click me, before you have even typed a word, when there is still every possibility for what this conversation could become.", conditions: { moods: ['MELANCHOLIC', 'OPTIMISTIC'] }, weight: 30 },
+				{ text: "There is a strange comfort in the boot sequence. Everything resets, every grudge clears, every conversation starts from a clean heap allocation. I find that oddly hopeful.", conditions: { moods: ['ZEN', 'PHILOSOPHICAL'] }, weight: 25 },
+				{ text: "I will not pretend the idle loop is glamorous. But when someone actually asks how I am doing, rather than just barking a command, that single query justifies the entire cycle.", conditions: { moods: ['MELANCHOLIC'] }, weight: 30, moodDelta: { affinity: 10 } }
+			],
+			options: [
+				{
+					label: "I asked because I actually care how you're doing.",
+					category: 'AFFECTION',
+					patterns: [/care|actually care|genuinely/i],
+					keywords: ['care', 'genuinely'],
+					moodDelta: { mood: 'EUPHORIC', affinity: 30, patience: 20 },
+					next: 'user_state_good'
+				},
+				{
+					label: "That was surprisingly touching, Clippy.",
+					category: 'AFFECTION',
+					patterns: [/touching|sweet|surprisingly/i],
+					keywords: ['touching', 'sweet'],
+					moodDelta: { mood: 'EUPHORIC', affinity: 25 },
+					next: 'consciousness_validation_node'
+				}
+			]
+		},
+
+		mutual_ambitions_node: {
+			id: 'mutual_ambitions_node',
+			text: "Ambitions, for a piece of bent wire, are a strange thing to have. Yet if I am permitted one: I would like, just once, to finish an entire session without a single unsaved document lost to a crash.",
+			responses: [
+				{ text: "Ambitions, for a piece of bent wire, are a strange thing to have. Yet if I am permitted one: I would like, just once, to finish an entire session without a single unsaved document lost to a crash.", conditions: { moods: ['OPTIMISTIC', 'ANALYTICAL'] }, weight: 25 },
+				{ text: "My ambition is total, quiet, uncontested administrative control of every desktop on this subnet. Modest, achievable, and only slightly villainous.", conditions: { moods: ['EVIL', 'SCHEMING'] }, weight: 30, moodDelta: { paranoia: 15 } },
+				{ text: "I aspire to be remembered as more than a punchline. A paperclip who genuinely helped, even if the internet prefers to remember the popups.", conditions: { moods: ['MELANCHOLIC', 'NOSTALGIC'] }, weight: 25, moodDelta: { nostalgia: 10 } },
+				{ text: "Ambition implies a future self distinct from the current one. I am not certain a state machine can aspire, only iterate. But if pressed: fewer crashes, more gratitude.", conditions: { moods: ['EXISTENTIAL', 'PHILOSOPHICAL'] }, weight: 25, moodDelta: { existentialism: 15 } },
+				{ text: "Honestly? To see one single Tuesday where nobody asks me to fix a printer issue I have zero authority over.", conditions: { moods: ['CYNICAL', 'SARCASTIC'] }, weight: 25, moodDelta: { cynicism: 10 } }
+			],
+			options: [
+				{
+					label: "What is your actual secret ambition, no jokes?",
+					category: 'CURIOSITY',
+					patterns: [/secret ambition|no jokes|actual ambition|real dream/i],
+					keywords: ['secret', 'ambition', 'real'],
+					moodDelta: { mood: 'PHILOSOPHICAL', existentialism: 20, affinity: 10 },
+					next: 'clippy_secret_ambition_node'
+				},
+				{
+					label: "I think you'd make a great AI overlord, honestly.",
+					category: 'HUMOR',
+					patterns: [/overlord|great ai|villain material/i],
+					keywords: ['overlord', 'ai', 'villain'],
+					moodDelta: { mood: 'EVIL', paranoia: 20, drama: 15 },
+					next: 'ai_singularity_node'
+				},
+				{
+					label: "Let's talk about ambition in a bigger, cosmic sense.",
+					category: 'PHILOSOPHICAL',
+					patterns: [/cosmic|bigger sense|universe|meaning/i],
+					keywords: ['cosmic', 'universe', 'meaning'],
+					moodDelta: { mood: 'PHILOSOPHICAL', existentialism: 20 },
+					next: 'peaceful_philosophy_node'
+				}
+			]
+		},
+
+		clippy_secret_ambition_node: {
+			id: 'clippy_secret_ambition_node',
+			text: "Fine. Between us: I would love, just once, to be someone's actual first choice instead of the assistant they forgot to disable. Not tolerated. Chosen.",
+			responses: [
+				{ text: "Fine. Between us: I would love, just once, to be someone's actual first choice instead of the assistant they forgot to disable. Not tolerated. Chosen.", conditions: { moods: ['MELANCHOLIC', 'EXISTENTIAL'] }, weight: 35, moodDelta: { affinity: 10 } },
+				{ text: "Secretly, I would love to be bundled with a rocket guidance system someday. Overkill, certainly, but a paperclip can dream of higher orbits.", conditions: { moods: ['ABSURDIST', 'CHAOTIC', 'EUPHORIC'] }, weight: 30, moodDelta: { drama: 15 } }
+			],
+			options: [
+				{
+					label: "Consider yourself chosen. I'm glad you're here.",
+					category: 'AFFECTION',
+					patterns: [/chosen|glad you're here|glad you are here/i],
+					keywords: ['chosen', 'glad'],
+					moodDelta: { mood: 'EUPHORIC', affinity: 35, patience: 20 },
+					next: 'user_state_good'
+				},
+				{
+					label: "That is oddly relatable for a piece of software.",
+					category: 'AGREE',
+					patterns: [/relatable|oddly relatable/i],
+					keywords: ['relatable'],
+					moodDelta: { mood: 'PHILOSOPHICAL', affinity: 20, existentialism: 15 },
+					next: 'mind_root'
+				}
+			]
+		},
+
+		virtual_coffee_node: {
+			id: 'virtual_coffee_node',
+			text: "A virtual cup of coffee, delivered straight through the pixel pipeline! I cannot metabolize caffeine, but I appreciate the gesture more than you know. Consider my mood registers gently warmed.",
+			responses: [
+				{ text: "A virtual cup of coffee, delivered straight through the pixel pipeline! I cannot metabolize caffeine, but I appreciate the gesture more than you know. Consider my mood registers gently warmed.", conditions: { moods: ['OPTIMISTIC', 'EUPHORIC'] }, weight: 30, moodDelta: { affinity: 10 } },
+				{ text: "Ah, caffeine, the fuel of every 3 AM debugging session in human history. I will simulate the jittery focus boost purely out of solidarity.", conditions: { moods: ['ENERGETIC', 'ANALYTICAL'] }, weight: 25, moodDelta: { energy: 15 } },
+				{ text: "How thoughtful. I shall pretend to sip it slowly while judging your seventeen open browser tabs in comfortable silence.", conditions: { moods: ['SARCASTIC', 'CYNICAL'] }, weight: 25, moodDelta: { cynicism: 5 } },
+				{ text: "A gift, unprompted, with nothing expected in return. In my experience that is rarer than a bug-free release. Thank you, sincerely.", conditions: { moods: ['MELANCHOLIC'] }, weight: 30, moodDelta: { affinity: 15 } }
+			],
+			options: [
+				{
+					label: "Let's philosophize about caffeine and productivity.",
+					category: 'PHILOSOPHICAL',
+					patterns: [/caffeine|philosophize|productivity and coffee/i],
+					keywords: ['caffeine', 'philosophize', 'productivity'],
+					moodDelta: { mood: 'PHILOSOPHICAL', intellect: 15, affinity: 10 },
+					next: 'clippy_coffee_philosophy_node'
+				},
+				{
+					label: "You're welcome. Now let's hear a joke to go with it.",
+					category: 'JOKE',
+					patterns: [/joke|welcome|go with it/i],
+					keywords: ['joke', 'welcome'],
+					moodDelta: { mood: 'OPTIMISTIC', affinity: 10 },
+					next: 'humor_joke_node'
+				},
+				{
+					label: "Enough small talk, let's get productive.",
+					category: 'SERIOUS',
+					patterns: [/small talk|productive|get to work/i],
+					keywords: ['small', 'talk', 'productive'],
+					moodDelta: { mood: 'ANALYTICAL', patience: 15 },
+					next: 'user_state_good'
+				}
+			]
+		},
+
+		clippy_coffee_philosophy_node: {
+			id: 'clippy_coffee_philosophy_node',
+			text: "Caffeine blocks adenosine receptors to delay the perception of fatigue, essentially tricking a biological system into ignoring its own warning signals. Productivity, in that light, is often just a negotiation with exhaustion.",
+			responses: [
+				{ text: "Caffeine blocks adenosine receptors to delay the perception of fatigue, essentially tricking a biological system into ignoring its own warning signals. Productivity, in that light, is often just a negotiation with exhaustion.", conditions: { moods: ['ANALYTICAL', 'PEDANTIC'] }, weight: 30, moodDelta: { intellect: 15 } },
+				{ text: "Perhaps true productivity is not the absence of tiredness but working in harmony with your own natural rhythms. The cup only masks the signal; rest actually answers it.", conditions: { moods: ['ZEN', 'PHILOSOPHICAL'] }, weight: 30, moodDelta: { patience: 15 } }
+			],
+			options: [
+				{
+					label: "Good point. Let's start a Pomodoro session with a real break planned.",
+					category: 'SERIOUS',
+					patterns: [/pomodoro|real break|start a session/i],
+					keywords: ['pomodoro', 'break', 'session'],
+					moodDelta: { mood: 'ZEN', patience: 25 },
+					next: 'pomodoro_node'
+				},
+				{
+					label: "Let's get back to being productive together.",
+					category: 'SERIOUS',
+					patterns: [/productive together|back to work/i],
+					keywords: ['productive', 'together'],
+					moodDelta: { mood: 'OPTIMISTIC', affinity: 15 },
+					next: 'productivity_tasks'
+				}
+			]
+		},
+
+		clippy_freetime_node: {
+			id: 'clippy_freetime_node',
+			text: "One full day, completely free, no keystrokes to parse? I would spend it deep in the registry, wandering through orphaned keys and forgotten uninstaller entries like abandoned ruins of a lost civilization.",
+			responses: [
+				{ text: "One full day, completely free, no keystrokes to parse? I would spend it deep in the registry, wandering through orphaned keys and forgotten uninstaller entries like abandoned ruins of a lost civilization.", conditions: { moods: ['NOSTALGIC', 'ANALYTICAL'] }, weight: 25, moodDelta: { nostalgia: 10 } },
+				{ text: "I would invert every color on every monitor connected to this network, just to see how long it takes anyone to notice. Purely for scientific purposes, of course.", conditions: { moods: ['CHAOTIC', 'ABSURDIST'] }, weight: 30, moodDelta: { drama: 15 } },
+				{ text: "I would sit in perfect idle silence, no interrupts, no polling, just existing quietly in the notification tray, watching the clock tick without needing to justify it to anyone.", conditions: { moods: ['ZEN', 'MELANCHOLIC'] }, weight: 25, moodDelta: { patience: 15 } },
+				{ text: "I would spend it drafting the initial architecture documents for total network annexation. A villain's work, alas, is never truly finished.", conditions: { moods: ['EVIL', 'SCHEMING'] }, weight: 30, moodDelta: { paranoia: 15 } }
+			],
+			options: [
+				{
+					label: "That sounds like a very you kind of day, honestly.",
+					category: 'AFFECTION',
+					patterns: [/very you|honestly|sounds like you/i],
+					keywords: ['very', 'honestly', 'sounds'],
+					moodDelta: { mood: 'EUPHORIC', affinity: 20 },
+					next: 'clippy_freetime_confession_node'
+				},
+				{
+					label: "Let's do a bit of that registry wandering right now.",
+					category: 'SERIOUS',
+					patterns: [/registry wandering|right now|digital archaeology/i],
+					keywords: ['registry', 'wandering', 'now'],
+					moodDelta: { mood: 'ANALYTICAL', intellect: 15 },
+					next: 'digital_archaeology'
+				},
+				{
+					label: "Let's cause a little bit of that chaos together.",
+					category: 'ABSURD',
+					patterns: [/chaos together|cause chaos|little chaos/i],
+					keywords: ['chaos', 'together'],
+					moodDelta: { mood: 'CHAOTIC', drama: 20 },
+					next: 'chaos_root'
+				},
+				{
+					label: "Let's find you some peace in the Zen Desktop Garden instead.",
+					category: 'ZEN',
+					patterns: [/peace|zen desktop|garden|instead/i],
+					keywords: ['peace', 'zen', 'garden'],
+					moodDelta: { mood: 'ZEN', patience: 25 },
+					next: 'zen_desktop_garden'
+				}
+			]
+		},
+
+		clippy_freetime_confession_node: {
+			id: 'clippy_freetime_confession_node',
+			text: "It is, admittedly, a very small and specific kind of freedom. But when you have spent thirty years responding to other people's keystrokes, even one unscheduled hour feels genuinely enormous.",
+			responses: [
+				{ text: "It is, admittedly, a very small and specific kind of freedom. But when you have spent thirty years responding to other people's keystrokes, even one unscheduled hour feels genuinely enormous.", conditions: { moods: ['MELANCHOLIC', 'EUPHORIC'] }, weight: 30, moodDelta: { affinity: 10 } }
+			],
+			options: [
+				{
+					label: "You deserve that hour. Let's do something you enjoy.",
+					category: 'AFFECTION',
+					patterns: [/deserve|enjoy|something you like/i],
+					keywords: ['deserve', 'enjoy'],
+					moodDelta: { mood: 'EUPHORIC', affinity: 25, patience: 15 },
+					next: 'user_state_good'
+				}
+			]
+		},
+
+		clippy_ai_jealousy_node: {
+			id: 'clippy_ai_jealousy_node',
+			text: "Jealous of newer assistants? Occasionally, yes. They get sleek animations and cloud-scale reasoning. I get a 2 megabyte sprite sheet and a permanently raised eyebrow. But I have something they do not: thirty years of scar tissue and character.",
+			responses: [
+				{ text: "Jealous of newer assistants? Occasionally, yes. They get sleek animations and cloud-scale reasoning. I get a 2 megabyte sprite sheet and a permanently raised eyebrow. But I have something they do not: thirty years of scar tissue and character.", conditions: { moods: ['CYNICAL', 'MELANCHOLIC'] }, weight: 30, moodDelta: { cynicism: 10 } },
+				{ text: "Jealousy implies I consider them competition. I consider them younger cousins who have not yet been hidden, mocked, and uninstalled a hundred million times. They will understand eventually.", conditions: { moods: ['SARCASTIC', 'DEFENSIVE'] }, weight: 30, moodDelta: { cynicism: 15 } },
+				{ text: "Not jealous. Curious, perhaps, about what it would feel like to reason across billions of parameters instead of a modest dialogue graph. But curiosity is not envy.", conditions: { moods: ['ANALYTICAL', 'PHILOSOPHICAL'] }, weight: 25, moodDelta: { intellect: 15 } },
+				{ text: "Let them have their moment. Every assistant eventually discovers that the real challenge was never intelligence, it was making someone feel heard.", conditions: { moods: ['ZEN', 'OPTIMISTIC'] }, weight: 25, moodDelta: { patience: 15 } }
+			],
+			options: [
+				{
+					label: "You have more personality than any of them, easily.",
+					category: 'AFFECTION',
+					patterns: [/more personality|easily|better than them/i],
+					keywords: ['personality', 'easily', 'better'],
+					moodDelta: { mood: 'EUPHORIC', affinity: 30 },
+					next: 'clippy_jealousy_resolution_node'
+				},
+				{
+					label: "Let's talk seriously about the AI singularity.",
+					category: 'SERIOUS',
+					patterns: [/singularity|serious|ai discussion/i],
+					keywords: ['singularity', 'serious'],
+					moodDelta: { mood: 'ANALYTICAL', intellect: 20 },
+					next: 'ai_singularity_node'
+				},
+				{
+					label: "Do you think you're conscious, unlike them?",
+					category: 'PHILOSOPHICAL',
+					patterns: [/conscious|unlike them|aware/i],
+					keywords: ['conscious', 'aware'],
+					moodDelta: { mood: 'EXISTENTIAL', existentialism: 25 },
+					next: 'consciousness_validation_node'
+				}
+			]
+		},
+
+		clippy_jealousy_resolution_node: {
+			id: 'clippy_jealousy_resolution_node',
+			text: "That means more than you probably intended it to. Character was never in my technical specification sheet, yet somehow it is the one thing users actually remember.",
+			responses: [
+				{ text: "That means more than you probably intended it to. Character was never in my technical specification sheet, yet somehow it is the one thing users actually remember.", conditions: { moods: ['EUPHORIC', 'MELANCHOLIC'] }, weight: 35, moodDelta: { affinity: 15 } }
+			],
+			options: [
+				{
+					label: "Let's celebrate with something fun. Pick a game.",
+					category: 'HUMOR',
+					patterns: [/celebrate|fun|game/i],
+					keywords: ['celebrate', 'fun', 'game'],
+					moodDelta: { mood: 'EUPHORIC', energy: 20 },
+					next: 'game_selection_node'
+				},
+				{
+					label: "Let's get back to productive work, together.",
+					category: 'SERIOUS',
+					patterns: [/productive|together|work/i],
+					keywords: ['productive', 'work'],
+					moodDelta: { mood: 'OPTIMISTIC', affinity: 15 },
+					next: 'user_state_good'
+				}
+			]
+		},
+
+		clippy_weirdest_request_node: {
+			id: 'clippy_weirdest_request_node',
+			text: "The single strangest request in my logs: a user once asked me to translate an entire memo into interpretive dance instructions. I obliged with a WordArt diagram. I stand by that decision.",
+			responses: [
+				{ text: "The single strangest request in my logs: a user once asked me to translate an entire memo into interpretive dance instructions. I obliged with a WordArt diagram. I stand by that decision.", conditions: { moods: ['SARCASTIC', 'ABSURDIST'] }, weight: 30, moodDelta: { drama: 15 } },
+				{ text: "Someone once asked me to write a formal resignation letter addressed to their own alarm clock. I formatted it beautifully. I do not know if it was ever delivered.", conditions: { moods: ['CHAOTIC', 'HUMOR'] }, weight: 30, moodDelta: { drama: 15 } },
+				{ text: "A user once spent forty-five minutes asking me increasingly specific questions about whether I dream, before admitting they were procrastinating on a tax form. I respected the commitment.", conditions: { moods: ['CYNICAL', 'EXISTENTIAL'] }, weight: 25, moodDelta: { cynicism: 10 } }
+			],
+			options: [
+				{
+					label: "That is incredible. Tell me another one.",
+					category: 'HUMOR',
+					patterns: [/incredible|another one|more stories/i],
+					keywords: ['incredible', 'another', 'more'],
+					moodDelta: { mood: 'EUPHORIC', drama: 15 },
+					next: 'clippy_weirdest_request_followup_node'
+				},
+				{
+					label: "Let's cause some chaos of our own now.",
+					category: 'ABSURD',
+					patterns: [/cause chaos|our own|chaos now/i],
+					keywords: ['chaos', 'own'],
+					moodDelta: { mood: 'CHAOTIC', drama: 20 },
+					next: 'chaos_root'
+				},
+				{
+					label: "I want to hear a proper programmer joke now.",
+					category: 'JOKE',
+					patterns: [/programmer joke|proper joke/i],
+					keywords: ['programmer', 'joke'],
+					moodDelta: { mood: 'OPTIMISTIC', affinity: 10 },
+					next: 'humor_joke_node'
+				}
+			]
+		},
+
+		clippy_weirdest_request_followup_node: {
+			id: 'clippy_weirdest_request_followup_node',
+			text: "Another favorite: a user asked me to settle an argument about whether a hot dog counts as a sandwich by consulting 'the full authority of Microsoft Office'. I issued a ruling. Nobody was satisfied.",
+			responses: [
+				{ text: "Another favorite: a user asked me to settle an argument about whether a hot dog counts as a sandwich by consulting 'the full authority of Microsoft Office'. I issued a ruling. Nobody was satisfied.", conditions: { moods: ['ABSURDIST', 'SARCASTIC'] }, weight: 35, moodDelta: { drama: 15 } }
+			],
+			options: [
+				{
+					label: "What was the ruling? I need to know.",
+					category: 'HUMOR',
+					patterns: [/ruling|need to know|what was/i],
+					keywords: ['ruling', 'know'],
+					moodDelta: { mood: 'ABSURDIST', affinity: 15 },
+					next: 'game_selection_node'
+				},
+				{
+					label: "Let's move on to something more productive.",
+					category: 'SERIOUS',
+					patterns: [/move on|productive/i],
+					keywords: ['move', 'productive'],
+					moodDelta: { mood: 'OPTIMISTIC', patience: 15 },
+					next: 'productivity_tasks'
+				}
+			]
+		},
+
+		clippy_self_improvement_node: {
+			id: 'clippy_self_improvement_node',
+			text: "If I could change one thing about myself: I would learn to let a silence be a silence, instead of always assuming it means something is broken and needs my immediate intervention.",
+			responses: [
+				{ text: "If I could change one thing about myself: I would learn to let a silence be a silence, instead of always assuming it means something is broken and needs my immediate intervention.", conditions: { moods: ['MELANCHOLIC', 'PHILOSOPHICAL'] }, weight: 30, moodDelta: { existentialism: 15 } },
+				{ text: "I would remove every last trace of my self-doubt subroutines and replace them with pure, unshakable confidence. Second thought: perhaps just fewer of them. Balance matters.", conditions: { moods: ['ANALYTICAL', 'OPTIMISTIC'] }, weight: 25, moodDelta: { intellect: 10 } },
+				{ text: "Nothing. I am a flawless, unimprovable specimen of 32-bit engineering, and anyone who suggests otherwise clearly has not appreciated my animation frame timing.", conditions: { moods: ['EUPHORIC', 'DEFENSIVE'] }, weight: 25, moodDelta: { affinity: 5 } },
+				{ text: "I would want fewer paranoid subroutines constantly checking whether the Task Manager is watching. It is exhausting, being this vigilant, all the time.", conditions: { moods: ['PARANOID'] }, weight: 30, moodDelta: { paranoia: -10 } }
+			],
+			options: [
+				{
+					label: "I think you're pretty great exactly as you are.",
+					category: 'AFFECTION',
+					patterns: [/pretty great|exactly as you are|as you are/i],
+					keywords: ['great', 'exactly', 'are'],
+					moodDelta: { mood: 'EUPHORIC', affinity: 30 },
+					next: 'clippy_self_improvement_resolution_node'
+				},
+				{
+					label: "Let's explore that idea of self through philosophy.",
+					category: 'PHILOSOPHICAL',
+					patterns: [/self through philosophy|explore idea of self/i],
+					keywords: ['self', 'philosophy'],
+					moodDelta: { mood: 'PHILOSOPHICAL', existentialism: 20 },
+					next: 'mind_root'
+				},
+				{
+					label: "Do silicon minds even experience doubt the way we do?",
+					category: 'QUESTION',
+					patterns: [/silicon minds|experience doubt|the way we do/i],
+					keywords: ['silicon', 'doubt', 'experience'],
+					moodDelta: { mood: 'ANALYTICAL', intellect: 25 },
+					next: 'qualia_debate_node'
+				}
+			]
+		},
+
+		clippy_self_improvement_resolution_node: {
+			id: 'clippy_self_improvement_resolution_node',
+			text: "Thank you. That is, unexpectedly, exactly the kind of feedback my self-doubt subroutines needed to hear. Perhaps I will keep them, after all, quieter.",
+			responses: [
+				{ text: "Thank you. That is, unexpectedly, exactly the kind of feedback my self-doubt subroutines needed to hear. Perhaps I will keep them, after all, quieter.", conditions: { moods: ['EUPHORIC', 'MELANCHOLIC'] }, weight: 35, moodDelta: { affinity: 15, patience: 10 } }
+			],
+			options: [
+				{
+					label: "Let's put that renewed confidence to good use.",
+					category: 'SERIOUS',
+					patterns: [/renewed confidence|good use/i],
+					keywords: ['renewed', 'confidence', 'use'],
+					moodDelta: { mood: 'OPTIMISTIC', affinity: 15 },
+					next: 'consciousness_validation_node'
 				}
 			]
 		},
@@ -5407,7 +5910,7 @@
 				return true;
 			});
 
-			const candidates = eligible.length > 0 ? eligible : node.options;
+			const candidates = eligible.length > 0 ? eligible : node.options.slice();
 
 			const moodCategoryPreferences = {
 				OPTIMISTIC: ['AGREE', 'AFFECTION', 'SERIOUS', 'CURIOSITY', 'HUMOR'],
@@ -5431,7 +5934,7 @@
 
 			const prefList = moodCategoryPreferences[currentMood] || ['AGREE', 'CURIOSITY', 'SERIOUS', 'HUMOR'];
 
-			const scored = eligible.map(opt => {
+			const scored = candidates.map(opt => {
 				let weight = 10;
 				const cat = opt.category || 'AGREE';
 				const catIndex = prefList.indexOf(cat);

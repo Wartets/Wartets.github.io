@@ -3,6 +3,20 @@
 
 	const STORAGE_KEY_MOOD = 'clippy_brain_state_v2';
 
+	const ACTION_TRIGGER_COMMANDS = {
+		timer_25: 'timer 25',
+		show_todos: 'todo',
+		game_ttt: 'morpion',
+		game_memory: 'memory',
+		game_hangman: 'hangman',
+		game_quiz: 'quiz',
+		action_defrag: 'defrag',
+		action_trivia: 'trivia',
+		action_joke: 'joke',
+		action_status: 'diagnostics',
+		action_pass: 'password 16'
+	};
+
 	class ClippyBrainEngine {
 		constructor() {
 			this.knowledge = window.ClippyKnowledge;
@@ -441,6 +455,65 @@
 			return "";
 		}
 
+		dispatchActionTrigger(trigger) {
+			const command = ACTION_TRIGGER_COMMANDS[trigger];
+			if (!command || !window.ClippyAgent) return;
+			setTimeout(() => window.ClippyAgent.prompt(command), 400);
+		}
+
+		buildGraphActions(options) {
+			if (!options || options.length === 0) return [];
+			return options.map(opt => ({
+				label: opt.label,
+				category: opt.category,
+				onClick: () => {
+					if (window.ClippyAgent && window.ClippyAgent.selectGraphOption) {
+						window.ClippyAgent.selectGraphOption(opt);
+					}
+				}
+			}));
+		}
+
+		navigateGraphNode(targetNodeId, moodDelta, actionTrigger) {
+			if (moodDelta) {
+				if (moodDelta.mood && this.knowledge.MOODS[moodDelta.mood]) this.state.mood = moodDelta.mood;
+				if (moodDelta.affinity !== undefined) this.state.affinity = Math.max(0, Math.min(100, this.state.affinity + moodDelta.affinity));
+				if (moodDelta.patience !== undefined) this.state.patience = Math.max(0, Math.min(100, this.state.patience + moodDelta.patience));
+				if (moodDelta.cynicism !== undefined) this.state.cynicism = Math.max(0, Math.min(100, this.state.cynicism + moodDelta.cynicism));
+				if (moodDelta.intellect !== undefined) this.state.intellect = Math.max(0, Math.min(100, this.state.intellect + moodDelta.intellect));
+				if (moodDelta.existentialism !== undefined) this.state.existentialism = Math.max(0, Math.min(100, this.state.existentialism + moodDelta.existentialism));
+				if (moodDelta.nostalgia !== undefined) this.state.nostalgia = Math.max(0, Math.min(100, this.state.nostalgia + moodDelta.nostalgia));
+				if (moodDelta.paranoia !== undefined) this.state.paranoia = Math.max(0, Math.min(100, (this.state.paranoia || 0) + moodDelta.paranoia));
+				if (moodDelta.drama !== undefined) this.state.drama = Math.max(0, Math.min(100, (this.state.drama || 0) + moodDelta.drama));
+				if (moodDelta.energy !== undefined) this.state.energy = Math.max(0, Math.min(100, (this.state.energy || 100) + moodDelta.energy));
+			}
+
+			const resolvedNodeId = targetNodeId || 'greeting_root';
+			this.state.activeGraphNode = resolvedNodeId;
+			this.saveState();
+
+			if (actionTrigger) {
+				this.dispatchActionTrigger(actionTrigger);
+			}
+
+			if (!window.ClippyDialogueTrees) {
+				return { text: "Standing by for user instructions.", options: [] };
+			}
+
+			const targetNode = window.ClippyDialogueTrees.getNode(resolvedNodeId);
+			const formattedText = window.ClippyDialogueTrees.getFormattedNodeText(targetNode, this);
+			const nextOptions = window.ClippyDialogueTrees.getOptionsForNode(targetNode, this.state.mood, this.state.affinity);
+
+			return { text: formattedText, options: nextOptions };
+		}
+
+		navigateGraphOption(option) {
+			if (!option) {
+				return this.navigateGraphNode('greeting_root', null, null);
+			}
+			return this.navigateGraphNode(option.next, option.moodDelta, option.actionTrigger);
+		}
+
 		startStoryTree(treeId) {
 			if (!window.ClippyDialogueTrees) return null;
 			const tree = window.ClippyDialogueTrees.getTree(treeId);
@@ -520,68 +593,10 @@
 				const transition = window.ClippyDialogueTrees.evaluateTransition(currentNId, rawText, this);
 
 				if (transition && transition.option) {
-					const opt = transition.option;
-					if (opt.moodDelta) {
-						const md = opt.moodDelta;
-						if (md.mood && this.knowledge.MOODS[md.mood]) this.state.mood = md.mood;
-						if (md.affinity !== undefined) this.state.affinity = Math.max(0, Math.min(100, this.state.affinity + md.affinity));
-						if (md.patience !== undefined) this.state.patience = Math.max(0, Math.min(100, this.state.patience + md.patience));
-						if (md.cynicism !== undefined) this.state.cynicism = Math.max(0, Math.min(100, this.state.cynicism + md.cynicism));
-						if (md.intellect !== undefined) this.state.intellect = Math.max(0, Math.min(100, this.state.intellect + md.intellect));
-						if (md.existentialism !== undefined) this.state.existentialism = Math.max(0, Math.min(100, this.state.existentialism + md.existentialism));
-						if (md.nostalgia !== undefined) this.state.nostalgia = Math.max(0, Math.min(100, this.state.nostalgia + md.nostalgia));
-						if (md.paranoia !== undefined) this.state.paranoia = Math.max(0, Math.min(100, (this.state.paranoia || 0) + md.paranoia));
-						if (md.drama !== undefined) this.state.drama = Math.max(0, Math.min(100, (this.state.drama || 0) + md.drama));
-						if (md.energy !== undefined) this.state.energy = Math.max(0, Math.min(100, (this.state.energy || 100) + md.energy));
-					}
-
-					const targetNodeId = opt.next || 'greeting_root';
-					this.state.activeGraphNode = targetNodeId;
-					this.saveState();
-
-					const targetNode = window.ClippyDialogueTrees.getNode(targetNodeId);
-					const formattedText = window.ClippyDialogueTrees.getFormattedNodeText(targetNode, this);
-					const nextOptions = window.ClippyDialogueTrees.getOptionsForNode(targetNode, this.state.mood, this.state.affinity);
-
-					const actions = nextOptions.map(nextOpt => ({
-						label: nextOpt.label,
-						category: nextOpt.category,
-						onClick: () => {
-							if (window.ClippyAgent && window.ClippyAgent.prompt) {
-								window.ClippyAgent.prompt(nextOpt.label);
-							}
-						}
-					}));
-
-					if (opt.actionTrigger) {
-						if (opt.actionTrigger === 'timer_25' && window.ClippyAgent) {
-							setTimeout(() => window.ClippyAgent.prompt("timer 25"), 400);
-						} else if (opt.actionTrigger === 'show_todos' && window.ClippyAgent) {
-							setTimeout(() => window.ClippyAgent.prompt("todo"), 400);
-						} else if (opt.actionTrigger === 'game_ttt' && window.ClippyAgent) {
-							setTimeout(() => window.ClippyAgent.prompt("morpion"), 400);
-						} else if (opt.actionTrigger === 'game_memory' && window.ClippyAgent) {
-							setTimeout(() => window.ClippyAgent.prompt("memory"), 400);
-						} else if (opt.actionTrigger === 'game_hangman' && window.ClippyAgent) {
-							setTimeout(() => window.ClippyAgent.prompt("hangman"), 400);
-						} else if (opt.actionTrigger === 'game_quiz' && window.ClippyAgent) {
-							setTimeout(() => window.ClippyAgent.prompt("quiz"), 400);
-						} else if (opt.actionTrigger === 'action_defrag' && window.ClippyAgent) {
-							setTimeout(() => window.ClippyAgent.prompt("defrag"), 400);
-						} else if (opt.actionTrigger === 'action_trivia' && window.ClippyAgent) {
-							setTimeout(() => window.ClippyAgent.prompt("trivia"), 400);
-						} else if (opt.actionTrigger === 'action_joke' && window.ClippyAgent) {
-							setTimeout(() => window.ClippyAgent.prompt("joke"), 400);
-						} else if (opt.actionTrigger === 'action_status' && window.ClippyAgent) {
-							setTimeout(() => window.ClippyAgent.prompt("diagnostics"), 400);
-						} else if (opt.actionTrigger === 'action_pass' && window.ClippyAgent) {
-							setTimeout(() => window.ClippyAgent.prompt("password 16"), 400);
-						}
-					}
-
+					const navResult = this.navigateGraphNode(transition.option.next, transition.option.moodDelta, transition.option.actionTrigger);
 					return {
-						text: formattedText,
-						actions: actions
+						text: navResult.text,
+						actions: this.buildGraphActions(navResult.options)
 					};
 				}
 			}
@@ -589,21 +604,17 @@
 			if (window.ClippyCore) {
 				const coreReply = window.ClippyCore.dialogue.handleTurn(rawText, this);
 				if (coreReply) {
-					return typeof coreReply === 'string' ? { text: coreReply } : coreReply;
+					if (typeof coreReply === 'string') {
+						const currentNode = window.ClippyDialogueTrees ? window.ClippyDialogueTrees.getNode(this.state.activeGraphNode || 'greeting_root') : null;
+						const contextOptions = currentNode && window.ClippyDialogueTrees ? window.ClippyDialogueTrees.getOptionsForNode(currentNode, this.state.mood, this.state.affinity) : [];
+						return { text: coreReply, actions: this.buildGraphActions(contextOptions) };
+					}
+					return coreReply;
 				}
 			}
 
 			const fallbackNode = window.ClippyDialogueTrees ? window.ClippyDialogueTrees.getNode(this.state.activeGraphNode || 'greeting_root') : null;
-			const fallbackOptions = fallbackNode ? window.ClippyDialogueTrees.getOptionsForNode(fallbackNode, this.state.mood, this.state.affinity) : [];
-			const actions = fallbackOptions.map(nextOpt => ({
-				label: nextOpt.label,
-				category: nextOpt.category,
-				onClick: () => {
-					if (window.ClippyAgent && window.ClippyAgent.prompt) {
-						window.ClippyAgent.prompt(nextOpt.label);
-					}
-				}
-			}));
+			const fallbackOptions = fallbackNode && window.ClippyDialogueTrees ? window.ClippyDialogueTrees.getOptionsForNode(fallbackNode, this.state.mood, this.state.affinity) : [];
 
 			const prefix = this.craftMoodPrefix();
 			const genericAnswers = [
@@ -615,7 +626,7 @@
 			];
 			return {
 				text: prefix + this.pickDialogue(genericAnswers),
-				actions: actions
+				actions: this.buildGraphActions(fallbackOptions)
 			};
 		}
 	}
