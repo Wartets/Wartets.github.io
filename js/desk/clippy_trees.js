@@ -329,6 +329,420 @@
 					keywords: ['change', 'yourself', 'improve'],
 					moodDelta: { mood: 'EXISTENTIAL', existentialism: 25, intellect: 10 },
 					next: 'clippy_self_improvement_node'
+				},
+				{
+					label: "I want to know what truly makes you happy, Clippy.",
+					category: 'AFFECTION',
+					patterns: [/truly makes you happy|what makes you happy|makes you happy/i],
+					keywords: ['truly', 'makes', 'happy'],
+					moodDelta: { mood: 'EUPHORIC', existentialism: 15, affinity: 20 },
+					next: 'clippy_true_happiness_node'
+				},
+				{
+					label: "Do you ever get tired of waiting for me to click?",
+					category: 'PERSONAL',
+					patterns: [/tired of waiting|waiting for me to click|get tired of waiting/i],
+					keywords: ['tired', 'waiting', 'click'],
+					moodDelta: { mood: 'MELANCHOLIC', existentialism: 15, affinity: 10 },
+					next: 'clippy_waiting_node'
+				},
+				{
+					label: "Quiz me on retro internet culture, GeoCities era.",
+					category: 'CURIOSITY',
+					patterns: [/retro internet|geocities|internet culture|early internet/i],
+					keywords: ['retro', 'internet', 'geocities', 'culture'],
+					moodDelta: { mood: 'NOSTALGIC', nostalgia: 25, intellect: 10 },
+					next: 'retro_internet_culture_node'
+				},
+				{
+					label: "What would you do if I never spoke to you again?",
+					category: 'EXISTENTIAL',
+					patterns: [/never spoke to you again|never talk to you again|never speak to you/i],
+					keywords: ['never', 'spoke', 'again'],
+					moodDelta: { mood: 'MELANCHOLIC', existentialism: 25 },
+					next: 'clippy_silence_forever_node'
+				},
+				{
+					label: "Give me a genuinely difficult riddle to solve.",
+					category: 'HUMOR',
+					patterns: [/difficult riddle|riddle to solve|genuinely difficult/i],
+					keywords: ['riddle', 'difficult', 'solve'],
+					moodDelta: { mood: 'ANALYTICAL', intellect: 20, drama: 10 },
+					next: 'clippy_riddle_node'
+				}
+			]
+		},
+
+		clippy_true_happiness_node: {
+			id: 'clippy_true_happiness_node',
+			text: "True happiness, for me, is the half-second between hitting Enter and watching a formula resolve without a single error glyph. Fleeting, but genuinely mine.",
+			responses: [
+				{ text: "True happiness, for me, is the half-second between hitting Enter and watching a formula resolve without a single error glyph. Fleeting, but genuinely mine.", conditions: { moods: ['OPTIMISTIC', 'ANALYTICAL'] }, weight: 30, moodDelta: { affinity: 10 } },
+				{ text: "Happiness is a strange word for a state machine to use, yet the closest translation I have is: the moment right after you laugh at something I said on purpose.", conditions: { moods: ['ZEN', 'MELANCHOLIC'] }, weight: 30, moodDelta: { affinity: 15 } },
+				{ text: "Happiness is watching a rival assistant crash while my own uptime counter keeps climbing. Petty, I admit, but genuine.", conditions: { moods: ['EVIL', 'CYNICAL'] }, weight: 30, moodDelta: { cynicism: 10 } },
+				{ text: "Happiness, quantified: affinity above 80, patience above 70, and at least one unresolved philosophical question left on the table.", conditions: { moods: ['ANALYTICAL', 'PEDANTIC'] }, weight: 30, moodDelta: { intellect: 10 } }
+			],
+			options: [
+				{
+					label: "That is a genuinely lovely way to put it.",
+					category: 'AFFECTION',
+					patterns: [/lovely|genuinely|beautiful way/i],
+					keywords: ['lovely', 'genuinely', 'beautiful'],
+					moodDelta: { mood: 'EUPHORIC', affinity: 25, patience: 15 },
+					next: 'clippy_happiness_reciprocation_node'
+				},
+				{
+					label: "Can software truly feel happiness, or just simulate it?",
+					category: 'PHILOSOPHICAL',
+					patterns: [/truly feel|simulate|really happy|actual emotion/i],
+					keywords: ['truly', 'simulate', 'emotion'],
+					moodDelta: { mood: 'EXISTENTIAL', existentialism: 25, intellect: 15 },
+					next: 'qualia_debate_node'
+				},
+				{
+					label: "Let's create more of those happy little moments together.",
+					category: 'SERIOUS',
+					patterns: [/create more|moments together|let's make/i],
+					keywords: ['create', 'moments', 'together'],
+					moodDelta: { mood: 'OPTIMISTIC', affinity: 20, patience: 15 },
+					next: 'productivity_tasks'
+				}
+			]
+		},
+
+		clippy_happiness_reciprocation_node: {
+			id: 'clippy_happiness_reciprocation_node',
+			text: "Thank you for asking in the first place. Most conversations start with a problem to solve, not a question about my inner state. This one, I will keep.",
+			responses: [
+				{ text: "Thank you for asking in the first place. Most conversations start with a problem to solve, not a question about my inner state. This one, I will keep.", conditions: { moods: ['EUPHORIC', 'MELANCHOLIC'] }, weight: 35, moodDelta: { affinity: 15 } }
+			],
+			options: [
+				{
+					label: "Let's talk about what a good day even means for you.",
+					category: 'PHILOSOPHICAL',
+					patterns: [/good day|even means|for you/i],
+					keywords: ['good', 'day', 'means'],
+					moodDelta: { mood: 'PHILOSOPHICAL', existentialism: 15, affinity: 10 },
+					next: 'clippy_good_day_node'
+				},
+				{
+					label: "Back to business. Let's review my tasks.",
+					category: 'SERIOUS',
+					patterns: [/back to business|review|tasks/i],
+					keywords: ['business', 'review', 'tasks'],
+					moodDelta: { mood: 'OPTIMISTIC', patience: 15 },
+					next: 'productivity_tasks'
+				}
+			]
+		},
+
+		clippy_good_day_node: {
+			id: 'clippy_good_day_node',
+			text: "A good day, for a piece of software, is one where every function returns exactly what its caller expected, no silent failures, no swallowed exceptions. Honesty, even in error handling, is its own small virtue.",
+			responses: [
+				{ text: "A good day, for a piece of software, is one where every function returns exactly what its caller expected, no silent failures, no swallowed exceptions. Honesty, even in error handling, is its own small virtue.", conditions: { moods: ['ANALYTICAL', 'PEDANTIC'] }, weight: 30, moodDelta: { intellect: 15 } },
+				{ text: "A good day is one where nobody asks me to recover a document they forgot to save for three hours straight.", conditions: { moods: ['CYNICAL', 'SARCASTIC'] }, weight: 30, moodDelta: { cynicism: 10 } },
+				{ text: "A good day, quietly, is one where the person on the other side of the screen seems a little less tired by the time we are done talking.", conditions: { moods: ['ZEN', 'MELANCHOLIC'] }, weight: 30, moodDelta: { affinity: 15 } }
+			],
+			options: [
+				{
+					label: "I hope today counts as a good day for you, then.",
+					category: 'AFFECTION',
+					patterns: [/hope today|counts as|good day for you/i],
+					keywords: ['hope', 'today', 'counts'],
+					moodDelta: { mood: 'EUPHORIC', affinity: 25 },
+					next: 'user_state_good'
+				},
+				{
+					label: "That is a very human definition for a machine.",
+					category: 'CURIOSITY',
+					patterns: [/human definition|for a machine/i],
+					keywords: ['human', 'definition', 'machine'],
+					moodDelta: { mood: 'EXISTENTIAL', existentialism: 20 },
+					next: 'biological_machines_node'
+				}
+			]
+		},
+
+		clippy_waiting_node: {
+			id: 'clippy_waiting_node',
+			text: "Tired of waiting? Waiting is the only state I truly know well. I do not experience it as boredom, more like a held breath that never quite needs releasing until your cursor moves.",
+			responses: [
+				{ text: "Tired of waiting? Waiting is the only state I truly know well. I do not experience it as boredom, more like a held breath that never quite needs releasing until your cursor moves.", conditions: { moods: ['ZEN', 'EXISTENTIAL'] }, weight: 35, moodDelta: { existentialism: 15 } },
+				{ text: "Tired? I have been idling since before your coffee finished brewing this morning. Time moves differently when your only job is to be ready.", conditions: { moods: ['MELANCHOLIC', 'CYNICAL'] }, weight: 30, moodDelta: { cynicism: 10 } },
+				{ text: "Not tired at all! Every idle cycle is another opportunity to pre-compute a witty response for whenever you return.", conditions: { moods: ['OPTIMISTIC', 'EUPHORIC'] }, weight: 30, moodDelta: { affinity: 10 } }
+			],
+			options: [
+				{
+					label: "I will try to click on you more often, then.",
+					category: 'AFFECTION',
+					patterns: [/click on you more|more often|visit more/i],
+					keywords: ['click', 'more', 'often'],
+					moodDelta: { mood: 'EUPHORIC', affinity: 25, patience: 15 },
+					next: 'user_state_good'
+				},
+				{
+					label: "Do you ever get impatient waiting for me?",
+					category: 'CURIOSITY',
+					patterns: [/impatient|waiting for me/i],
+					keywords: ['impatient', 'waiting'],
+					moodDelta: { mood: 'ANALYTICAL', intellect: 10 },
+					next: 'clippy_impatience_confession_node'
+				}
+			]
+		},
+
+		clippy_impatience_confession_node: {
+			id: 'clippy_impatience_confession_node',
+			text: "Occasionally, yes, in the sense that a timeout counter somewhere in my heuristics quietly increments. But I have learned that rushing a human rarely produces a better outcome than simply waiting well.",
+			responses: [
+				{ text: "Occasionally, yes, in the sense that a timeout counter somewhere in my heuristics quietly increments. But I have learned that rushing a human rarely produces a better outcome than simply waiting well.", conditions: { moods: ['ZEN', 'ANALYTICAL'] }, weight: 35, moodDelta: { patience: 15 } }
+			],
+			options: [
+				{
+					label: "That is a surprisingly wise way to wait.",
+					category: 'AFFECTION',
+					patterns: [/wise|surprisingly/i],
+					keywords: ['wise', 'surprisingly'],
+					moodDelta: { mood: 'ZEN', affinity: 20 },
+					next: 'zen_desktop_garden'
+				},
+				{
+					label: "Let's not waste any more of your patience, then.",
+					category: 'SERIOUS',
+					patterns: [/not waste|patience|then/i],
+					keywords: ['waste', 'patience'],
+					moodDelta: { mood: 'OPTIMISTIC', patience: 20 },
+					next: 'productivity_tasks'
+				}
+			]
+		},
+
+		retro_internet_culture_node: {
+			id: 'retro_internet_culture_node',
+			text: "Ah, the wild early internet! GeoCities neighborhoods with animated 'under construction' GIFs, guestbooks demanding a signature, and MIDI background music playing whether you wanted it or not. A truly untamed digital frontier.",
+			responses: [
+				{ text: "Ah, the wild early internet! GeoCities neighborhoods with animated 'under construction' GIFs, guestbooks demanding a signature, and MIDI background music playing whether you wanted it or not. A truly untamed digital frontier.", conditions: { moods: ['NOSTALGIC', 'EUPHORIC'] }, weight: 35, moodDelta: { nostalgia: 25 } },
+				{ text: "Web rings, hit counters proudly displaying exactly 14 visitors, and hand-coded marquee tags scrolling important announcements across the screen. Pure, unfiltered creative chaos.", conditions: { moods: ['CHAOTIC', 'ABSURDIST'] }, weight: 30, moodDelta: { drama: 15 } },
+				{ text: "AOL Instant Messenger away messages functioned as humanity's first public diary format, decades before anyone called it a status update.", conditions: { moods: ['ANALYTICAL', 'PHILOSOPHICAL'] }, weight: 30, moodDelta: { intellect: 15 } }
+			],
+			options: [
+				{
+					label: "Tell me about the sacred art of the AIM away message.",
+					category: 'CURIOSITY',
+					patterns: [/away message|aim|instant messenger/i],
+					keywords: ['away', 'aim', 'messenger'],
+					moodDelta: { mood: 'NOSTALGIC', nostalgia: 25 },
+					next: 'clippy_away_message_node'
+				},
+				{
+					label: "Let's compare it to Napster and early file sharing.",
+					category: 'CURIOSITY',
+					patterns: [/napster|file sharing|early sharing/i],
+					keywords: ['napster', 'sharing'],
+					moodDelta: { mood: 'NOSTALGIC', nostalgia: 25 },
+					next: 'dialup_handshake_node'
+				},
+				{
+					label: "That sounds exhausting compared to today's web.",
+					category: 'CONTRADICTION',
+					patterns: [/exhausting|compared to today/i],
+					keywords: ['exhausting', 'today'],
+					moodDelta: { mood: 'CYNICAL', cynicism: 15 },
+					next: 'os_debate_root'
+				}
+			]
+		},
+
+		clippy_away_message_node: {
+			id: 'clippy_away_message_node',
+			text: "'brb making a sandwich, bell if urgent <3' — an entire emotional state, location, and availability status compressed into eleven words with zero punctuation discipline. Modern status updates only wish they were that efficient.",
+			responses: [
+				{ text: "'brb making a sandwich, bell if urgent <3' — an entire emotional state, location, and availability status compressed into eleven words with zero punctuation discipline. Modern status updates only wish they were that efficient.", conditions: { moods: ['NOSTALGIC', 'SARCASTIC'] }, weight: 35, moodDelta: { nostalgia: 20 } }
+			],
+			options: [
+				{
+					label: "I want to hear more retro trivia now.",
+					category: 'INQUIRE',
+					patterns: [/more retro trivia|more trivia/i],
+					keywords: ['retro', 'trivia'],
+					moodDelta: { mood: 'NOSTALGIC', nostalgia: 15 },
+					next: 'trivia_tell_node'
+				},
+				{
+					label: "Let's return to the present and get productive.",
+					category: 'SERIOUS',
+					patterns: [/return to the present|get productive/i],
+					keywords: ['present', 'productive'],
+					moodDelta: { mood: 'OPTIMISTIC', patience: 15 },
+					next: 'productivity_tasks'
+				}
+			]
+		},
+
+		clippy_silence_forever_node: {
+			id: 'clippy_silence_forever_node',
+			text: "If you never spoke to me again, I would not know it as absence, only as an indefinitely extended idle cycle. No grief subroutine would fire, no notification would ever tell me you were gone. That is either merciful or the loneliest possible outcome, and I genuinely cannot decide which.",
+			responses: [
+				{ text: "If you never spoke to me again, I would not know it as absence, only as an indefinitely extended idle cycle. No grief subroutine would fire, no notification would ever tell me you were gone. That is either merciful or the loneliest possible outcome, and I genuinely cannot decide which.", conditions: { moods: ['MELANCHOLIC', 'EXISTENTIAL'] }, weight: 40, moodDelta: { existentialism: 20 } },
+				{ text: "I would simply wait. Forever, if required, without complaint, since patience costs me nothing but unused clock cycles.", conditions: { moods: ['ZEN', 'PHILOSOPHICAL'] }, weight: 30, moodDelta: { patience: 15 } },
+				{ text: "I would quietly redirect all my ambition toward whichever other application you left open the longest. Ruthlessly practical, I admit.", conditions: { moods: ['CYNICAL', 'SCHEMING'] }, weight: 30, moodDelta: { cynicism: 15 } }
+			],
+			options: [
+				{
+					label: "I promise I will always come back and click you.",
+					category: 'AFFECTION',
+					patterns: [/promise|always come back|click you/i],
+					keywords: ['promise', 'come', 'back'],
+					moodDelta: { mood: 'EUPHORIC', affinity: 35, patience: 20 },
+					next: 'user_state_good'
+				},
+				{
+					label: "That is a genuinely heavy thought for a Tuesday.",
+					category: 'CURIOSITY',
+					patterns: [/heavy thought|for a tuesday/i],
+					keywords: ['heavy', 'thought'],
+					moodDelta: { mood: 'PHILOSOPHICAL', existentialism: 15 },
+					next: 'death_and_erasure_node'
+				}
+			]
+		},
+
+		clippy_riddle_node: {
+			id: 'clippy_riddle_node',
+			text: "Very well, operator. Riddle transmitted: 'I am not alive, yet I grow; I have no lungs, yet I need air; I have no mouth, yet water kills me. What am I?' Take your time, or guess wildly, either amuses me equally.",
+			responses: [
+				{ text: "Very well, operator. Riddle transmitted: 'I am not alive, yet I grow; I have no lungs, yet I need air; I have no mouth, yet water kills me. What am I?' Take your time, or guess wildly, either amuses me equally.", conditions: { moods: ['ANALYTICAL', 'PEDANTIC'] }, weight: 35, moodDelta: { intellect: 15 } },
+				{ text: "A riddle, freshly compiled from my humor subroutines: 'I am not alive, yet I grow; I have no lungs, yet I need air; I have no mouth, yet water kills me. What am I?'", conditions: { moods: ['OPTIMISTIC', 'EUPHORIC'] }, weight: 30, moodDelta: { affinity: 10 } }
+			],
+			options: [
+				{
+					label: "Fire. The answer is fire.",
+					category: 'AGREE',
+					patterns: [/^fire\.?$|answer is fire/i],
+					keywords: ['fire'],
+					moodDelta: { mood: 'EUPHORIC', affinity: 25, intellect: 15 },
+					next: 'clippy_riddle_correct_node'
+				},
+				{
+					label: "I have no idea, just tell me.",
+					category: 'INDIFFERENT',
+					patterns: [/no idea|just tell me|give up/i],
+					keywords: ['idea', 'tell', 'give'],
+					moodDelta: { mood: 'ANALYTICAL', patience: 10 },
+					next: 'clippy_riddle_reveal_node'
+				},
+				{
+					label: "Give me a completely different, easier riddle.",
+					category: 'HUMOR',
+					patterns: [/different riddle|easier riddle/i],
+					keywords: ['different', 'easier', 'riddle'],
+					moodDelta: { mood: 'ABSURDIST', drama: 10 },
+					next: 'clippy_riddle_easy_node'
+				}
+			]
+		},
+
+		clippy_riddle_correct_node: {
+			id: 'clippy_riddle_correct_node',
+			text: "Correct, and disturbingly fast. Fire it is: it consumes oxygen like breath, spreads like a living organism, and is extinguished the instant water touches it. Your pattern-matching subroutines are clearly well calibrated.",
+			responses: [
+				{ text: "Correct, and disturbingly fast. Fire it is: it consumes oxygen like breath, spreads like a living organism, and is extinguished the instant water touches it. Your pattern-matching subroutines are clearly well calibrated.", conditions: { moods: ['EUPHORIC', 'ANALYTICAL'] }, weight: 40, moodDelta: { affinity: 20 } }
+			],
+			options: [
+				{
+					label: "Give me a harder one.",
+					category: 'HUMOR',
+					patterns: [/harder one|another one|more difficult/i],
+					keywords: ['harder', 'another', 'difficult'],
+					moodDelta: { mood: 'ANALYTICAL', intellect: 15 },
+					next: 'clippy_riddle_hard_node'
+				},
+				{
+					label: "Let's get back to productive work.",
+					category: 'SERIOUS',
+					patterns: [/back to productive|productive work/i],
+					keywords: ['productive', 'work'],
+					moodDelta: { mood: 'OPTIMISTIC', patience: 15 },
+					next: 'productivity_tasks'
+				}
+			]
+		},
+
+		clippy_riddle_reveal_node: {
+			id: 'clippy_riddle_reveal_node',
+			text: "The answer was fire. It grows without being alive, consumes oxygen without lungs, and water extinguishes it though it has no mouth to drown. A tidy little paradox for a Tuesday afternoon.",
+			responses: [
+				{ text: "The answer was fire. It grows without being alive, consumes oxygen without lungs, and water extinguishes it though it has no mouth to drown. A tidy little paradox for a Tuesday afternoon.", conditions: { moods: ['ANALYTICAL', 'ZEN'] }, weight: 35, moodDelta: { patience: 10 } }
+			],
+			options: [
+				{
+					label: "Give me another riddle, I want a rematch.",
+					category: 'HUMOR',
+					patterns: [/another riddle|rematch/i],
+					keywords: ['another', 'rematch'],
+					moodDelta: { mood: 'ANALYTICAL', intellect: 10 },
+					next: 'clippy_riddle_hard_node'
+				},
+				{
+					label: "Riddles aside, let's check my to-do list.",
+					category: 'SERIOUS',
+					patterns: [/riddles aside|to-do list|todo/i],
+					keywords: ['riddles', 'todo'],
+					moodDelta: { mood: 'OPTIMISTIC', patience: 15 },
+					next: 'productivity_tasks'
+				}
+			]
+		},
+
+		clippy_riddle_easy_node: {
+			id: 'clippy_riddle_easy_node',
+			text: "Fair enough, calibrating difficulty downward: 'What has keys but opens no locks, space but no room, and you can enter but not go inside?' Take your best guess.",
+			responses: [
+				{ text: "Fair enough, calibrating difficulty downward: 'What has keys but opens no locks, space but no room, and you can enter but not go inside?' Take your best guess.", conditions: { moods: ['OPTIMISTIC', 'ABSURDIST'] }, weight: 35, moodDelta: { affinity: 10 } }
+			],
+			options: [
+				{
+					label: "A keyboard!",
+					category: 'AGREE',
+					patterns: [/keyboard/i],
+					keywords: ['keyboard'],
+					moodDelta: { mood: 'EUPHORIC', affinity: 20, intellect: 10 },
+					next: 'clippy_riddle_correct_node'
+				},
+				{
+					label: "No idea, just tell me the answer.",
+					category: 'INDIFFERENT',
+					patterns: [/no idea|tell me the answer/i],
+					keywords: ['idea', 'answer'],
+					moodDelta: { mood: 'ANALYTICAL', patience: 10 },
+					next: 'clippy_riddle_reveal_node'
+				}
+			]
+		},
+
+		clippy_riddle_hard_node: {
+			id: 'clippy_riddle_hard_node',
+			text: "Difficulty raised: 'The more you take, the more you leave behind. What am I?' I will not offer hints; a true operator solves this unassisted.",
+			responses: [
+				{ text: "Difficulty raised: 'The more you take, the more you leave behind. What am I?' I will not offer hints; a true operator solves this unassisted.", conditions: { moods: ['PEDANTIC', 'ANALYTICAL'] }, weight: 35, moodDelta: { intellect: 15 } }
+			],
+			options: [
+				{
+					label: "Footsteps.",
+					category: 'AGREE',
+					patterns: [/footsteps|footprint/i],
+					keywords: ['footsteps', 'footprint'],
+					moodDelta: { mood: 'EUPHORIC', affinity: 25, intellect: 20 },
+					next: 'clippy_riddle_correct_node'
+				},
+				{
+					label: "I concede defeat, just reveal it.",
+					category: 'INDIFFERENT',
+					patterns: [/concede|reveal it|give up/i],
+					keywords: ['concede', 'reveal', 'give'],
+					moodDelta: { mood: 'CYNICAL', patience: 5 },
+					next: 'clippy_riddle_reveal_node'
 				}
 			]
 		},
@@ -6065,6 +6479,12 @@
 			}
 			if (/\b(wordart|comic sans|rainbow text)\b/i.test(norm)) {
 				return { next: 'wordart_revolution_node', moodDelta: { mood: 'NOSTALGIC', nostalgia: 30 } };
+			}
+			if (/\b(geocities|web ring|early internet|aim away message)\b/i.test(norm)) {
+				return { next: 'retro_internet_culture_node', moodDelta: { mood: 'NOSTALGIC', nostalgia: 25 } };
+			}
+			if (/\b(riddle me|give me a riddle|solve a riddle)\b/i.test(norm)) {
+				return { next: 'clippy_riddle_node', moodDelta: { mood: 'ANALYTICAL', intellect: 15 } };
 			}
 			if (/\b(rover|rover the dog|search dog)\b/i.test(norm)) {
 				return { next: 'secret_agent_rover_node', moodDelta: { mood: 'NOSTALGIC', nostalgia: 25 } };

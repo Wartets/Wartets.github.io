@@ -170,12 +170,17 @@
 			if (this.knowledge.SENTIMENT.EVIL && this.knowledge.SENTIMENT.EVIL.some(w => rawLower.includes(w))) {
 				this.state.mood = this.knowledge.MOODS.EVIL;
 				this.state.cynicism = Math.min(100, this.state.cynicism + 30);
+				if (window.ClippyCore) {
+					window.ClippyCore.memory.adjustAffinityTrack('evilAffinity', 12);
+					window.ClippyCore.memory.recordMoodSample(this.state.mood);
+				}
 				this.saveState();
 				return;
 			}
 
 			if (this.knowledge.SENTIMENT.ABSURD && this.knowledge.SENTIMENT.ABSURD.some(w => rawLower.includes(w))) {
 				this.state.mood = this.knowledge.MOODS.ABSURDIST;
+				if (window.ClippyCore) window.ClippyCore.memory.recordMoodSample(this.state.mood);
 				this.saveState();
 				return;
 			}
@@ -221,6 +226,7 @@
 
 			if (topic === 'PHILOSOPHY' || (parsed.entities && parsed.entities.philosophy && parsed.entities.philosophy.length > 0)) {
 				this.state.existentialism = Math.min(100, this.state.existentialism + 25);
+				if (window.ClippyCore) window.ClippyCore.memory.adjustAffinityTrack('existentialAffinity', 10);
 				if (this.state.existentialism > 45) {
 					this.state.mood = this.knowledge.MOODS.EXISTENTIAL;
 				}
@@ -228,6 +234,7 @@
 
 			if (['RETRO_TECH', 'WINDOWS_XP', 'WINDOWS_95', 'WINDOWS_98', 'WINDOWS_ME', 'WINDOWS_2000', 'WINDOWS_31', 'MSDOS', 'OS2', 'AMIGA'].includes(topic)) {
 				this.state.nostalgia = Math.min(100, this.state.nostalgia + 25);
+				if (window.ClippyCore) window.ClippyCore.memory.adjustAffinityTrack('retroAffinity', 10);
 				if (this.state.nostalgia > 40) {
 					this.state.mood = this.knowledge.MOODS.NOSTALGIC;
 				}
@@ -250,6 +257,7 @@
 
 			if (['RETRO_HARDWARE', 'OFFICE_LORE'].includes(topic)) {
 				this.state.nostalgia = Math.min(100, this.state.nostalgia + 30);
+				if (window.ClippyCore) window.ClippyCore.memory.adjustAffinityTrack('retroAffinity', 12);
 				this.state.mood = this.knowledge.MOODS.NOSTALGIC;
 			}
 
@@ -257,6 +265,7 @@
 				this.state.existentialism = Math.min(100, this.state.existentialism + 30);
 				this.state.intellect = Math.min(100, this.state.intellect + 20);
 				this.state.mood = this.knowledge.MOODS.PHILOSOPHICAL;
+				if (window.ClippyCore) window.ClippyCore.memory.adjustAffinityTrack('existentialAffinity', 15);
 			}
 
 			if (topic === 'TIRED' || topic === 'BOREDOM') {
@@ -265,6 +274,10 @@
 				} else {
 					this.state.mood = this.knowledge.MOODS.CYNICAL;
 				}
+			}
+
+			if (window.ClippyCore) {
+				window.ClippyCore.memory.recordMoodSample(this.state.mood);
 			}
 
 			this.saveState();
@@ -511,7 +524,18 @@
 			if (!option) {
 				return this.navigateGraphNode('greeting_root', null, null);
 			}
-			return this.navigateGraphNode(option.next, option.moodDelta, option.actionTrigger);
+
+			const result = this.navigateGraphNode(option.next, option.moodDelta, option.actionTrigger);
+
+			this.state.totalInteractions = (this.state.totalInteractions || 0) + 1;
+			if (window.ClippyCore) {
+				const inferredTopic = option.category || this.detectTopic(option.label || '') || 'GRAPH_CHOICE';
+				window.ClippyCore.memory.incrementTopic(inferredTopic);
+				window.ClippyCore.context.updateTurn(option.label || '', result.text, inferredTopic, {});
+			}
+			this.saveState();
+
+			return result;
 		}
 
 		startStoryTree(treeId) {
@@ -596,7 +620,8 @@
 					const navResult = this.navigateGraphNode(transition.option.next, transition.option.moodDelta, transition.option.actionTrigger);
 					return {
 						text: navResult.text,
-						actions: this.buildGraphActions(navResult.options)
+						actions: this.buildGraphActions(navResult.options),
+						source: 'GRAPH'
 					};
 				}
 			}
@@ -607,9 +632,9 @@
 					if (typeof coreReply === 'string') {
 						const currentNode = window.ClippyDialogueTrees ? window.ClippyDialogueTrees.getNode(this.state.activeGraphNode || 'greeting_root') : null;
 						const contextOptions = currentNode && window.ClippyDialogueTrees ? window.ClippyDialogueTrees.getOptionsForNode(currentNode, this.state.mood, this.state.affinity) : [];
-						return { text: coreReply, actions: this.buildGraphActions(contextOptions) };
+						return { text: coreReply, actions: this.buildGraphActions(contextOptions), source: 'CORE_RULE' };
 					}
-					return coreReply;
+					return Object.assign({ source: 'CORE_RULE' }, coreReply);
 				}
 			}
 
@@ -626,7 +651,8 @@
 			];
 			return {
 				text: prefix + this.pickDialogue(genericAnswers),
-				actions: this.buildGraphActions(fallbackOptions)
+				actions: this.buildGraphActions(fallbackOptions),
+				source: 'FALLBACK'
 			};
 		}
 	}

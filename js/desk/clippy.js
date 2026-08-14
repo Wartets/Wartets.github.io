@@ -1880,12 +1880,18 @@
 			return null;
 		}
 
+		let brainReply = null;
 		if (window.ClippyBrain) {
-			const brainReply = window.ClippyBrain.processChat(rawText);
-			if (brainReply && (brainReply.actions || brainReply.storyPayload)) {
+			brainReply = window.ClippyBrain.processChat(rawText);
+			if (brainReply && brainReply.storyPayload) {
 				setVisualState('talk');
 				updateMoodBadge();
-				return typeof brainReply === 'string' ? { text: brainReply } : brainReply;
+				return brainReply;
+			}
+			if (brainReply && brainReply.source && brainReply.source !== 'FALLBACK') {
+				setVisualState('talk');
+				updateMoodBadge();
+				return brainReply;
 			}
 		}
 
@@ -1963,13 +1969,10 @@
 			}
 		}
 
-		if (window.ClippyBrain) {
-			const brainReply = window.ClippyBrain.processChat(rawText);
-			if (brainReply) {
-				setVisualState('talk');
-				updateMoodBadge();
-				return typeof brainReply === 'string' ? { text: brainReply } : brainReply;
-			}
+		if (brainReply) {
+			setVisualState('talk');
+			updateMoodBadge();
+			return brainReply;
 		}
 
 		lastIntentId = null;
@@ -2125,31 +2128,26 @@
 			if (e.key === 'Escape' && isOpen) closePopup();
 		});
 
-		let rootText = "Hello! I am Clippit, your desktop companion. How are you feeling today?";
-		let rootActions = [
-			{ label: "I'm doing great, ready to work!", onClick: () => handleUserAction("I'm doing great, ready to be productive!") },
-			{ label: "I'm feeling terrible and exhausted.", onClick: () => handleUserAction("I'm feeling terrible and exhausted today.") },
-			{ label: "Why do you care? You're just a paperclip.", onClick: () => handleUserAction("Why do you care? You're just a paperclip.") },
-			{ label: "Show Commands", onClick: () => handleUserAction("help") }
-		];
-
-		if (window.ClippyDialogueTrees && window.ClippyBrain) {
-			const activeNodeId = (window.ClippyBrain.state && window.ClippyBrain.state.activeGraphNode) || 'greeting_root';
-			const rootNode = window.ClippyDialogueTrees.getNode(activeNodeId);
-			rootText = window.ClippyDialogueTrees.getFormattedNodeText(rootNode, window.ClippyBrain.getMood());
-			const opts = window.ClippyDialogueTrees.getOptionsForNode(rootNode, window.ClippyBrain.getMood(), window.ClippyBrain.getAffinity());
-			if (opts && opts.length > 0) {
-				rootActions = opts.map(o => ({
-					label: o.label,
-					category: o.category,
-					onClick: () => handleGraphOptionClick(o)
-				}));
-			}
-		}
-
-		typeWriterMessage('assistant', rootText, null, rootActions);
+		renderGraphEntryPoint();
 
 		return popupElement;
+	}
+
+	function renderGraphEntryPoint() {
+		if (window.ClippyBrain && window.ClippyDialogueTrees && typeof window.ClippyBrain.navigateGraphNode === 'function') {
+			const activeNodeId = (window.ClippyBrain.state && window.ClippyBrain.state.activeGraphNode) || 'greeting_root';
+			const entry = window.ClippyBrain.navigateGraphNode(activeNodeId, null, null);
+			const actions = window.ClippyBrain.buildGraphActions(entry.options);
+			typeWriterMessage('assistant', entry.text, null, actions);
+			return;
+		}
+
+		const fallbackActions = [
+			{ label: "Show Commands", onClick: () => handleUserAction("help") },
+			{ label: "Tell me a joke", onClick: () => handleUserAction("tell me a joke") },
+			{ label: "System diagnostics", onClick: () => handleUserAction("system diagnostics") }
+		];
+		typeWriterMessage('assistant', pickFrom(GREETINGS), null, fallbackActions);
 	}
 
 	function openPopup() {

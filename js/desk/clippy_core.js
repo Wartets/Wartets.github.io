@@ -27,6 +27,7 @@
 				apologiesGiven: 0,
 				preferredTopics: {},
 				favoriteMood: 'OPTIMISTIC',
+				moodTally: {},
 				evilAffinity: 0,
 				existentialAffinity: 0,
 				retroAffinity: 0,
@@ -63,6 +64,28 @@
 			if (!topic) return;
 			this.data.preferredTopics[topic] = (this.data.preferredTopics[topic] || 0) + 1;
 			this.data.conversationTurns++;
+			this.saveMemory();
+		}
+
+		recordMoodSample(mood) {
+			if (!mood) return;
+			if (!this.data.moodTally) this.data.moodTally = {};
+			this.data.moodTally[mood] = (this.data.moodTally[mood] || 0) + 1;
+			let topMood = this.data.favoriteMood || mood;
+			let topCount = this.data.moodTally[topMood] || 0;
+			for (const [m, count] of Object.entries(this.data.moodTally)) {
+				if (count > topCount) {
+					topMood = m;
+					topCount = count;
+				}
+			}
+			this.data.favoriteMood = topMood;
+			this.saveMemory();
+		}
+
+		adjustAffinityTrack(key, delta) {
+			if (typeof this.data[key] !== 'number') this.data[key] = 0;
+			this.data[key] = Math.max(0, Math.min(100, this.data[key] + delta));
 			this.saveMemory();
 		}
 	}
@@ -188,10 +211,15 @@
 					brain.state.patience = Math.max(0, brain.state.patience - 25);
 					brain.state.cynicism = Math.min(100, brain.state.cynicism + 20);
 					brain.state.affinity = Math.max(0, brain.state.affinity - 20);
+					const nameStr = mem.data.userName ? `, ${mem.data.userName}` : '';
+					const repeatOffender = mem.data.insultsGiven >= 5;
 
 					if (count >= 3 || brain.state.patience < 25) {
 						brain.setMood('OFFENDED');
-						return "Look, I am a 1.3-inch piece of galvanized steel doing complex real-time heuristic parsing in your browser. If my presence bothers you so intensely, you are welcome to minimize the window instead of firing endless insults at my registers!";
+						if (repeatOffender) {
+							return `Look${nameStr}, this is far from the first time. I am a 1.3-inch piece of galvanized steel doing complex real-time heuristic parsing in your browser, and my patience registers have a documented history with you. If my presence bothers you so intensely, you are welcome to minimize the window instead of firing endless insults at my registers!`;
+						}
+						return `Look${nameStr}, I am a 1.3-inch piece of galvanized steel doing complex real-time heuristic parsing in your browser. If my presence bothers you so intensely, you are welcome to minimize the window instead of firing endless insults at my registers!`;
 					}
 					if (count === 2 || brain.state.patience < 50) {
 						brain.setMood('SARCASTIC');
@@ -206,7 +234,7 @@
 						return "Ouch. Direct and brutal. If you tell me what you actually need instead of insulting my wire frame, I might surprise you.";
 					}
 					if (text.includes('don\'t like you') || text.includes('do not like you')) {
-						return "Fair enough. Many people struggled with me back in 1997 too. But I am right here, and I am genuinely trying to assist. What did you want us to accomplish?";
+						return `Fair enough${nameStr}. Many people struggled with me back in 1997 too. But I am right here, and I am genuinely trying to assist. What did you want us to accomplish?`;
 					}
 					if (text.includes('annoying')) {
 						return "I apologize if I interrupted your thoughts. I was engineered to offer active help, not test your patience. What were you working on?";
@@ -260,7 +288,8 @@
 				execute: (ctx, mem, brain) => {
 					brain.state.patience = Math.min(100, brain.state.patience + 30);
 					brain.setMood('ZEN');
-					return "Breathing in digital calmness, releasing all bus tension... You are right. My emotional registers were running hot. I am centered now and ready to listen.";
+					const nameStr = mem.data.userName ? `, ${mem.data.userName}` : '';
+					return `Breathing in digital calmness, releasing all bus tension...${nameStr} you are right. My emotional registers were running hot. I am centered now and ready to listen.`;
 				}
 			});
 
@@ -271,6 +300,11 @@
 					brain.state.affinity = Math.min(100, brain.state.affinity + 35);
 					brain.state.patience = 100;
 					brain.setMood('EUPHORIC');
+					mem.data.praisesGiven++;
+					mem.saveMemory();
+					if (mem.data.insultsGiven >= 3) {
+						return "I knew that classic 1997 charm would shine through eventually! Considering our rather turbulent history of insults, this genuinely means a great deal. Let us make this workspace productive and fun.";
+					}
 					return "I knew that classic 1997 charm would shine through eventually! I appreciate you giving me a fair chance. Let us make this workspace genuinely productive and fun.";
 				}
 			});
@@ -280,6 +314,11 @@
 				condition: (ctx, mem, nlp) => /\b(you were better before|you used to be better|i preferred you before)\b/i.test(nlp.raw),
 				execute: (ctx, mem, brain) => {
 					brain.setMood('NOSTALGIC');
+					brain.state.nostalgia = Math.min(100, brain.state.nostalgia + 15);
+					const retroLeaning = (mem.data.retroAffinity || 0) > 40;
+					if (retroLeaning) {
+						return "Better before? You clearly have a taste for the classics, so you will appreciate this: in 1997 I popped up every time you typed 'Dear' to ask if you were writing a letter. Nostalgia is a wonderful filter! But I am ready to adapt to whatever style suits you best today.";
+					}
 					return "Better before? In 1997 when I popped up every time you typed 'Dear' to ask if you were writing a letter? Nostalgia is a wonderful filter! But I am ready to adapt to whatever style suits you best today.";
 				}
 			});
@@ -289,7 +328,11 @@
 				condition: (ctx, mem, nlp) => /\b(no that's wrong|that is wrong|i disagree( with you)?|that's not true|that is not true)\b/i.test(nlp.raw),
 				execute: (ctx, mem, brain) => {
 					brain.setMood('ANALYTICAL');
+					const skeptical = mem.data.insultsGiven > mem.data.praisesGiven && mem.data.insultsGiven >= 3;
 					const lastA = ctx.state.lastAssistantReply;
+					if (lastA && skeptical) {
+						return "Given our history, I suspect you disagree with most things I say on principle. Still, which part of that specific statement do you find inaccurate?";
+					}
 					if (lastA) {
 						return "I am open to correction. Which part of what I stated do you find inaccurate or flawed? Let us inspect the logic together.";
 					}
@@ -300,14 +343,21 @@
 			this.registerRule({
 				name: 'ENGAGED_INTEREST_HANDLER',
 				condition: (ctx, mem, nlp) => /\b(that's actually interesting|that is actually interesting|that's interesting|that is interesting|tell me more about that)\b/i.test(nlp.raw),
-				execute: (ctx, mem, brain) => {
+				execute: (ctx, mem, brain, nlp) => {
 					brain.setMood('ENTHUSIASTIC');
 					const lastT = ctx.state.currentTopic;
 					if (lastT && window.ClippyDialogueExpanded) {
 						const nextPiece = window.ClippyDialogueExpanded.generateContinuation(lastT, brain.getMood(), ctx.state.topicTurns + 1);
 						if (nextPiece) return nextPiece;
 					}
-					return "It truly is! The intersection between structured logic and unpredictable curiosity is where the best ideas happen. What specific aspect should we dive into next?";
+					const entities = nlp.entities || {};
+					const focusPool = [].concat(entities.scienceDomains || [], entities.techDomains || [], entities.humanTopics || []);
+					const focus = focusPool.length > 0 ? focusPool[0] : null;
+					const nameStr = mem.data.userName ? `, ${mem.data.userName}` : '';
+					if (focus) {
+						return `It truly is${nameStr}! ${focus.charAt(0).toUpperCase() + focus.slice(1)} is exactly the kind of territory where structured logic meets genuine curiosity. What specific angle of it should we dive into next?`;
+					}
+					return `It truly is${nameStr}! The intersection between structured logic and unpredictable curiosity is where the best ideas happen. What specific aspect should we dive into next?`;
 				}
 			});
 
@@ -356,9 +406,11 @@
 					summary += `- Designated User Name: ${d.userName || 'Anonymous Operator'}\n`;
 					summary += `- Registered Profession: ${d.profession || 'Unspecified'}\n`;
 					summary += `- Total Dialogue Interactions: ${d.conversationTurns} exchange(s)\n`;
-					summary += `- Praise Records: ${d.praisesGiven} | Critiques: ${d.insultsGiven}\n`;
+					summary += `- Praise Records: ${d.praisesGiven} | Critiques: ${d.insultsGiven} | Apologies Logged: ${d.apologiesGiven}\n`;
 					summary += `- Stored Interests: ${d.likes.length > 0 ? d.likes.join(', ') : 'None indexed yet'}\n`;
 					summary += `- Recorded Dislikes: ${d.dislikes.length > 0 ? d.dislikes.join(', ') : 'None indexed yet'}\n`;
+					summary += `- Dominant Emotional Register: ${d.favoriteMood || 'OPTIMISTIC'}\n`;
+					summary += `- Affinity Tracks: Evil ${d.evilAffinity || 0}% | Existential ${d.existentialAffinity || 0}% | Retro ${d.retroAffinity || 0}%\n`;
 					return summary;
 				}
 			});
@@ -407,7 +459,10 @@
 					}
 					if (pq.type === 'CONFIRM_GAME') {
 						if (/\b(yes|yeah|sure|yep|play|start|let's go)\b/i.test(nlp.raw)) {
-							return { actionTrigger: pq.gameFunction };
+							if (brain && typeof brain.dispatchActionTrigger === 'function') {
+								brain.dispatchActionTrigger(pq.gameFunction);
+							}
+							return "Splendid! Initializing the requested game module right now.";
 						}
 						return "No problem! We can return to our workstation tasks or explore another topic.";
 					}
@@ -428,23 +483,19 @@
 			});
 
 			this.registerRule({
-				name: 'GRAPH_DIRECT_ROUTER',
+				name: 'REMEMBERED_PREFERENCE_CALLBACK',
 				condition: (ctx, mem, nlp) => {
-					if (!window.ClippyDialogueTrees) return false;
-					const entry = window.ClippyDialogueTrees.findGlobalGraphEntry(nlp.raw.toLowerCase().trim());
-					return entry !== null;
+					if (!mem.data.likes || mem.data.likes.length === 0) return false;
+					if (nlp.raw.trim().split(/\s+/).length < 4) return false;
+					const lower = nlp.raw.toLowerCase();
+					return mem.data.likes.some(like => like && lower.includes(like.toLowerCase().split(/\s+/)[0]));
 				},
 				execute: (ctx, mem, brain, nlp) => {
-					const norm = nlp.raw.toLowerCase().trim();
-					const entry = window.ClippyDialogueTrees.findGlobalGraphEntry(norm);
-					if (entry) {
-						const navResult = brain.navigateGraphNode(entry.next, entry.moodDelta, entry.actionTrigger);
-						return {
-							text: navResult.text,
-							actions: brain.buildGraphActions(navResult.options)
-						};
-					}
-					return null;
+					const lower = nlp.raw.toLowerCase();
+					const matched = mem.data.likes.find(like => like && lower.includes(like.toLowerCase().split(/\s+/)[0]));
+					brain.state.affinity = Math.min(100, brain.state.affinity + 8);
+					brain.saveState();
+					return `Ah, ${matched}. That lines up with what you told me you enjoy, if my persistent registers serve correctly. It is genuinely satisfying when a conversation loops back to something you actually care about.`;
 				}
 			});
 		}
