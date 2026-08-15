@@ -484,6 +484,40 @@ let customIcons = JSON.parse(localStorage.getItem('customIcons')) || [];
 let webampInstance = null;
 let lastClickedIconForRange = null;
 
+const RECENT_DOCUMENTS_STORAGE_KEY = 'xp_recent_documents';
+
+function addToRecentDocs(item) {
+	if (!item || !item.name) return;
+	try {
+		let list = JSON.parse(localStorage.getItem(RECENT_DOCUMENTS_STORAGE_KEY) || '[]');
+		list = list.filter(doc => doc.name !== item.name);
+		list.unshift({
+			name: item.name,
+			type: item.type || 'file',
+			icon: item.icon || 'https://img.icons8.com/fluency/48/file.png',
+			path: item.path || '',
+			targetId: item.targetId || null,
+			timestamp: Date.now()
+		});
+		if (list.length > 15) list = list.slice(0, 15);
+		localStorage.setItem(RECENT_DOCUMENTS_STORAGE_KEY, JSON.stringify(list));
+	} catch (e) {
+		console.warn('Failed to save recent document:', e);
+	}
+}
+
+function getRecentDocs() {
+	try {
+		return JSON.parse(localStorage.getItem(RECENT_DOCUMENTS_STORAGE_KEY) || '[]');
+	} catch (e) {
+		return [];
+	}
+}
+
+function clearRecentDocs() {
+	localStorage.removeItem(RECENT_DOCUMENTS_STORAGE_KEY);
+}
+
 window.DeskAPI = {
 	getUnreadMailCount: () => {
 		if (!window.MailStore) return 0;
@@ -504,24 +538,28 @@ window.DeskAPI = {
 	openMinesweeperGame: () => openMinesweeper(),
 	openWinampPlayer: () => openWinamp(),
 	getMoonPhaseDay: () => (typeof getMoonPhaseDayNumber === 'function') ? getMoonPhaseDayNumber() : null,
-	getRecycleBinCount: () => (typeof fs !== 'undefined' && fs) ? fs.loadRecycleBinItems().length : 0
+	getRecycleBinCount: () => (typeof fs !== 'undefined' && fs) ? fs.loadRecycleBinItems().length : 0,
+	addToRecentDocs: (item) => addToRecentDocs(item),
+	getRecentDocs: () => getRecentDocs(),
+	clearRecentDocs: () => clearRecentDocs(),
+	openMyComputer: () => openMyComputerWindow(),
+	openSearch: (query) => openSearchWindow(query),
+	openPrinters: () => openPrintersWindow(),
+	openNetworkPlaces: () => openNetworkPlacesWindow()
 };
 
 document.addEventListener('DOMContentLoaded', () => {
-	applyInitialDesktopBackground();
 	initializeFileSystem();
 	initDocuments();
+	applyInitialDesktopBackground();
 	renderDesktopIcons();
-	setupStartButton();
-	setupTaskbarClock();
-	renderAllProgramsMenu();
-	setupDesktopContextMenu();
-	setupTaskbarContextMenu();
-	setupQuickLaunchIcons();
-	const showDesktopIcon = document.getElementById('show-desktop-icon');
-	if (showDesktopIcon) {
-		showDesktopIcon.addEventListener('click', showDesktop);
+	if (window.Taskbar) {
+		window.Taskbar.init();
 	}
+	if (window.StartMenu) {
+		window.StartMenu.init();
+	}
+	setupDesktopContextMenu();
 	setupCalendar();
 	setupDesktopDropzone();
 	setupDesktopSelection();
@@ -750,6 +788,7 @@ function openPDFWindow(file) {
 		</div>
 	`;
 
+	addToRecentDocs({ name: file.name, icon: file.icon, type: 'pdf', path: file.getFullPath() });
 	const win = createXPWindow(id, file.name, contentHTML, 800, 600, {
 		iconSrc: file.icon
 	});
@@ -939,6 +978,7 @@ function initPoemsFolder(othersFolder) {
 
 function renderDesktopIcons() {
 	const container = document.getElementById('project-icons-container');
+	if (!container || !fs || !fs.root) return;
 	container.innerHTML = '';
 
 	const appIcons = [{
@@ -1035,9 +1075,10 @@ function createIconElement(data, dblClickHandler) {
 			selectedIcons.add(icon);
 		}
 
-		currentContextMenuTarget = icon;
-		showContextMenu(e);
-		updateContextMenuItems();
+		if (window.ContextMenu && data.element) {
+			const items = window.ContextMenu.getIconItems(data.element, icon, icon.closest('.xp-window'));
+			window.ContextMenu.show(items, e.clientX, e.clientY, { element: data.element, icon });
+		}
 	});
 
 	icon.addEventListener('dragstart', handleDragStart);
@@ -1139,6 +1180,10 @@ function createXPWindow(id, title, contentHTML, initialWidth = 600, initialHeigh
 		return existingWindow;
 	}
 
+	if (window.SettingsApp && window.SettingsApp.playSound) {
+		window.SettingsApp.playSound('window');
+	}
+
 	const win = document.createElement('div');
 	win.id = id;
 	win.className = 'xp-window opening';
@@ -1209,7 +1254,9 @@ function createXPWindow(id, title, contentHTML, initialWidth = 600, initialHeigh
 			}
 		});
 		setActiveWindow(win);
-		addTaskbarButton(id, title, options.iconSrc);
+		if (window.Taskbar) {
+			window.Taskbar.addWindowButton(id, title, options.iconSrc);
+		}
 	}
 
 	return win;
@@ -1219,6 +1266,13 @@ function showXPDialog(title, message, type = 'info', options = {}) {
 	const id = `dialog-${Date.now()}`;
 	let iconSrc = '';
 	
+	if (window.SettingsApp && window.SettingsApp.playSound) {
+		if (type === 'error') window.SettingsApp.playSound('error');
+		else if (type === 'warning') window.SettingsApp.playSound('exclamation');
+		else if (type === 'question') window.SettingsApp.playSound('question');
+		else window.SettingsApp.playSound('asterisk');
+	}
+
 	switch (type) {
 		case 'error':
 			iconSrc = 'https://api.iconify.design/mdi/close-circle.svg?color=red';
@@ -1781,16 +1835,8 @@ function openMailInfoWindow(message) {
 }
 
 function updateOutlookUnreadBadge() {
-	if (!window.MailStore) return;
-	window.MailStore.init();
-	const badge = document.getElementById('outlook-unread-badge');
-	if (!badge) return;
-	const unreadCount = window.MailStore.getFolders().reduce((sum, folder) => sum + window.MailStore.getMessages(folder.id).filter(m => !m.read).length, 0);
-	if (unreadCount > 0) {
-		badge.textContent = unreadCount > 5 ? '5+' : String(unreadCount);
-		badge.classList.remove('hidden');
-	} else {
-		badge.classList.add('hidden');
+	if (window.Taskbar && typeof window.Taskbar.updateUnreadBadges === 'function') {
+		window.Taskbar.updateUnreadBadges();
 	}
 }
 
@@ -1801,16 +1847,12 @@ function setActiveWindow(win) {
 		if (header) header.classList.add('inactive');
 	});
 
-	const allTaskbarBtns = document.querySelectorAll('.taskbar-window-btn');
-	allTaskbarBtns.forEach(btn => btn.classList.remove('active'));
-
 	activeWindow = win;
-	const currentHeader = win.querySelector('.xp-window-header');
+	const currentHeader = win ? win.querySelector('.xp-window-header') : null;
 	if (currentHeader) currentHeader.classList.remove('inactive');
 
-	const taskbarBtn = document.querySelector(`.taskbar-window-btn[data-window-id="${win.id}"]`);
-	if (taskbarBtn) {
-		taskbarBtn.classList.add('active');
+	if (window.Taskbar) {
+		window.Taskbar.setActiveButton(win ? win.id : null);
 	}
 }
 
@@ -1822,6 +1864,9 @@ function bringWindowToFront(win) {
 }
 
 function minimizeWindow(win, id) {
+	if (window.SettingsApp && window.SettingsApp.playSound) {
+		window.SettingsApp.playSound('window');
+	}
 	win.classList.add('minimizing');
 	win.dataset.originalLeft = win.style.left;
 	win.dataset.originalTop = win.style.top;
@@ -1866,6 +1911,9 @@ function minimizeWindow(win, id) {
 }
 
 function unminimizeWindow(win) {
+	if (window.SettingsApp && window.SettingsApp.playSound) {
+		window.SettingsApp.playSound('window');
+	}
 	win.classList.remove('hidden', 'minimized');
 	win.classList.add('opening');
 
@@ -1933,93 +1981,14 @@ function closeWindow(win, id) {
 		}
 		
 		delete openWindows[id];
-		removeTaskbarButton(id);
+		if (window.Taskbar) {
+			window.Taskbar.removeWindowButton(id);
+		}
 		if (activeWindow === win) {
 			activeWindow = null;
 		}
 		win.removeEventListener('transitionend', handler);
 	});
-}
-
-function addTaskbarButton(id, title, iconSrc) {
-	const taskbarWindows = document.getElementById('taskbar-windows');
-	const btn = document.createElement('div');
-	btn.className = 'taskbar-window-btn';
-	btn.dataset.windowId = id;
-
-	const iconHTML = iconSrc ? `<img src="${iconSrc}" class="taskbar-btn-icon" alt="">` : '';
-	btn.innerHTML = `${iconHTML}<span>${title}</span>`;
-	
-	taskbarWindows.appendChild(btn);
-	updateTaskbarDensity();
-
-	btn.addEventListener('click', () => {
-		const win = document.getElementById(id);
-		if (win) {
-			if (win.classList.contains('minimized')) {
-				unminimizeWindow(win);
-				bringWindowToFront(win);
-			} else {
-				if (activeWindow === win) {
-					minimizeWindow(win, id);
-				} else {
-					bringWindowToFront(win);
-				}
-			}
-		}
-	});
-
-	btn.addEventListener('contextmenu', (e) => {
-		e.preventDefault();
-		const menu = document.getElementById('taskbar-context-menu');
-		const win = document.getElementById(id);
-		
-		if (!menu || !win) return;
-
-		menu.dataset.targetId = id;
-		
-		const restoreBtn = menu.querySelector('[data-action="restore"]');
-		const minimizeBtn = menu.querySelector('[data-action="minimize"]');
-		const maximizeBtn = menu.querySelector('[data-action="maximize"]');
-
-		restoreBtn.classList.remove('disabled');
-		minimizeBtn.classList.remove('disabled');
-		maximizeBtn.classList.remove('disabled');
-
-		if (win.classList.contains('minimized')) {
-			minimizeBtn.classList.add('disabled');
-		} else if (win.classList.contains('maximized')) {
-			maximizeBtn.classList.add('disabled');
-		} else {
-			restoreBtn.classList.add('disabled');
-		}
-
-		menu.classList.remove('hidden');
-		menu.style.bottom = '40px';
-		menu.style.left = `${e.clientX}px`;
-		menu.style.top = 'auto'; 
-		
-		const rect = menu.getBoundingClientRect();
-		if (rect.right > window.innerWidth) {
-			menu.style.left = `${window.innerWidth - rect.width}px`;
-		}
-	});
-}
-
-const TASKBAR_COMPACT_THRESHOLD = 6;
-
-function updateTaskbarDensity() {
-	const taskbarWindows = document.getElementById('taskbar-windows');
-	if (!taskbarWindows) return;
-	taskbarWindows.classList.toggle('compact', taskbarWindows.children.length > TASKBAR_COMPACT_THRESHOLD);
-}
-
-function removeTaskbarButton(id) {
-	const btn = document.querySelector(`#taskbar-windows .taskbar-window-btn[data-window-id="${id}"]`);
-	if (btn) {
-		btn.remove();
-	}
-	updateTaskbarDensity();
 }
 
 function openProjectWindow(project) {
@@ -2099,6 +2068,7 @@ function openProjectWindow(project) {
 		</div>
 	`;
 
+	addToRecentDocs({ name: projectTitle, icon: project.icon, type: 'project', path: `project://${projectTitle}` });
 	const projectWindow = createXPWindow(id, projectTitle, content, 700, 500, { iconSrc: project.icon });
 	projectWindow.querySelector('.xp-window-content').style.padding = '0';
 	projectWindow.classList.add('project-window');
@@ -2113,92 +2083,6 @@ function openProjectWindow(project) {
 			appWindow.querySelector('.xp-window-content').style.overflow = 'hidden';
 		});
 	}
-}
-
-function setupStartButton() {
-	const startButton = document.getElementById('start-button');
-	const startMenu = document.getElementById('start-menu');
-	const taskbarStartButton = document.getElementById('taskbar-start-button');
-	const calendarPopup = document.getElementById('calendar-popup');
-	const clockElement = document.getElementById('taskbar-clock');
-	const allProgramsBtn = document.querySelector('.all-programs-btn');
-	const allProgramsSubmenu = document.getElementById('all-programs-submenu');
-
-	function toggleStartMenu(forceClose = false) {
-		const isHidden = startMenu.classList.contains('hidden');
-		if (forceClose || !isHidden) {
-			startMenu.classList.add('hidden');
-			allProgramsSubmenu.classList.add('hidden');
-			startButton.classList.remove('active');
-			taskbarStartButton.classList.remove('active');
-		} else {
-			startMenu.classList.remove('hidden');
-			startButton.classList.add('active');
-			taskbarStartButton.classList.add('active');
-		}
-	}
-
-	startButton.addEventListener('click', (e) => {
-		e.stopPropagation();
-		toggleStartMenu();
-	});
-	taskbarStartButton.addEventListener('click', (e) => {
-		e.stopPropagation();
-		toggleStartMenu();
-	});
-
-	document.addEventListener('mousedown', (e) => {
-		if (!startMenu.classList.contains('hidden') &&
-			!startMenu.contains(e.target) &&
-			!startButton.contains(e.target) &&
-			!taskbarStartButton.contains(e.target)) {
-			toggleStartMenu(true);
-		}
-		if (!calendarPopup.classList.contains('hidden') && !calendarPopup.contains(e.target) && e.target !== clockElement) {
-			calendarPopup.classList.add('hidden');
-		}
-	});
-
-	allProgramsBtn.addEventListener('click', (e) => {
-		e.stopPropagation();
-		allProgramsSubmenu.classList.toggle('hidden');
-	});
-
-	startMenu.addEventListener('click', (e) => {
-		const targetItem = e.target.closest('[data-action]');
-		if (targetItem) {
-			const action = targetItem.dataset.action;
-			if (action === 'all-projects') {
-				e.preventDefault();
-				toggleStartMenu(true);
-				openAllProjectsFolder();
-			} else if (action === 'open-ie') {
-				toggleStartMenu(true);
-				openInternetExplorer();
-			} else if (action === 'open-outlook') {
-				toggleStartMenu(true);
-				openOutlookExpress();
-			} else if (action === 'open-winamp') {
-				toggleStartMenu(true);
-				openWinamp();
-			} else if (action === 'open-minesweeper') {
-				toggleStartMenu(true);
-				openMinesweeper();
-			} else if (action === 'run') {
-				toggleStartMenu(true);
-				openRunDialog();
-			} else if (action === 'turn-off') {
-				toggleStartMenu(true);
-				openShutdownDialog();
-			} else if (action === 'log-off') {
-				toggleStartMenu(true);
-				alert('Log Off is not available in the guest session.');
-			} else if (action === 'help') {
-				toggleStartMenu(true);
-				window.open('https://github.com/wartets/Wartets.github.io', '_blank');
-			}
-		}
-	});
 }
 
 function setupCalendar() {
@@ -2612,84 +2496,6 @@ function openAllProjectsFolder() {
 	openFolderWindow(projectsFolder);
 }
 
-function setupTaskbarClock() {
-	const clockElement = document.getElementById('taskbar-clock');
-	const calendarPopup = document.getElementById('calendar-popup');
-
-	function updateClock() {
-		const now = new Date();
-		const hours = String(now.getHours()).padStart(2, '0');
-		const minutes = String(now.getMinutes()).padStart(2, '0');
-		const seconds = String(now.getSeconds()).padStart(2, '0');
-		clockElement.textContent = `${hours}:${minutes}:${seconds}`;
-		
-		const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-		clockElement.title = now.toLocaleDateString('en-US', options);
-	}
-
-	clockElement.addEventListener('click', (e) => {
-		e.stopPropagation();
-		const isHidden = calendarPopup.classList.contains('hidden');
-		if (isHidden) {
-			renderCalendar(currentCalendarDate.getFullYear(), currentCalendarDate.getMonth());
-		}
-		calendarPopup.classList.toggle('hidden');
-	});
-
-	document.addEventListener('click', (e) => {
-		if (!calendarPopup.classList.contains('hidden') && !calendarPopup.contains(e.target) && e.target !== clockElement) {
-			calendarPopup.classList.add('hidden');
-		}
-	});
-
-	updateClock();
-	setInterval(updateClock, 1000);
-}
-
-function renderAllProgramsMenu() {
-	const categoriesList = document.getElementById('all-programs-submenu');
-	categoriesList.innerHTML = '';
-	const allKeywords = new Set();
-	const projectIcons = {};
-
-	projects.flat().forEach(p => {
-		if (typeof p === 'object' && p !== null && p.keywords) {
-			p.keywords.forEach(kw => {
-				allKeywords.add(kw);
-				if (!projectIcons[kw]) {
-					projectIcons[kw] = p.icon;
-				}
-			});
-		}
-	});
-
-	const sortedKeywords = [...allKeywords].sort();
-	sortedKeywords.forEach(keyword => {
-		const li = document.createElement('li');
-		const a = document.createElement('a');
-		a.href = '#';
-		a.dataset.category = keyword;
-
-		const img = document.createElement('img');
-		img.src = projectIcons[keyword] || 'https://img.icons8.com/fluent/48/folder-invoices.png';
-		a.appendChild(img);
-
-		const span = document.createElement('span');
-		span.textContent = keyword.charAt(0).toUpperCase() + keyword.slice(1);
-		a.appendChild(span);
-
-		a.addEventListener('click', (e) => {
-			e.preventDefault();
-			document.getElementById('start-menu').classList.add('hidden');
-			document.getElementById('start-button').classList.remove('active');
-			document.getElementById('taskbar-start-button').classList.remove('active');
-			openFilteredProjectsFolder(keyword);
-		});
-		li.appendChild(a);
-		categoriesList.appendChild(li);
-	});
-}
-
 function openFilteredProjectsFolder(category) {
 	const id = `window-category-${category.replace(/\s/g, '-')}`;
 	const title = `${category.charAt(0).toUpperCase() + category.slice(1)} Projects`;
@@ -2748,340 +2554,23 @@ function openFilteredProjectsFolder(category) {
 
 function setupDesktopContextMenu() {
 	const desktop = document.getElementById('desktop');
-	const contextMenu = document.getElementById('context-menu');
 
 	desktop.addEventListener('contextmenu', (e) => {
 		if (e.target === desktop || e.target.id === 'project-icons-container') {
 			e.preventDefault();
 			clearIconSelections();
-			currentContextMenuTarget = desktop;
-			showContextMenu(e);
-			updateContextMenuItems();
+			if (window.ContextMenu) {
+				const items = window.ContextMenu.getDesktopItems('/');
+				window.ContextMenu.show(items, e.clientX, e.clientY);
+			}
 		}
 	});
 
 	document.addEventListener('mousedown', (e) => {
-		if (isContextMenuVisible) {
-			if (!contextMenu.contains(e.target)) {
-				contextMenu.classList.add('hidden');
-				isContextMenuVisible = false;
-			}
-		}
-		
-		if (!e.target.closest('.project-icon') && !contextMenu.contains(e.target)) {
+		if (!e.target.closest('.project-icon') && !e.target.closest('.xp-context-menu')) {
 			clearIconSelections();
 		}
 	});
-
-	contextMenu.addEventListener('click', (e) => {
-		const targetItem = e.target.closest('li[data-action]');
-		if (targetItem && !targetItem.classList.contains('hidden')) {
-			e.stopPropagation();
-			const action = targetItem.dataset.action;
-			
-			handleContextMenuAction(action);
-			
-			contextMenu.classList.add('hidden');
-			isContextMenuVisible = false;
-		}
-	});
-
-	const submenuTrigger = contextMenu.querySelector('.has-submenu');
-	const submenu = submenuTrigger.querySelector('.submenu');
-	submenuTrigger.addEventListener('mouseenter', () => {
-		submenu.classList.remove('hidden');
-		submenu.classList.remove('submenu-flip');
-		const rect = submenu.getBoundingClientRect();
-		if (rect.right > window.innerWidth) {
-			submenu.classList.add('submenu-flip');
-		}
-	});
-	submenuTrigger.addEventListener('mouseleave', (e) => {
-		if (!submenuTrigger.contains(e.relatedTarget)) {
-			submenu.classList.add('hidden');
-		}
-	});
-	submenu.addEventListener('mouseleave', (e) => {
-		if (e.relatedTarget !== submenuTrigger) {
-			submenu.classList.add('hidden');
-		}
-	});
-}
-
-function setupTaskbarContextMenu() {
-	const menu = document.getElementById('taskbar-context-menu');
-	
-	document.addEventListener('mousedown', (e) => {
-		if (!menu.classList.contains('hidden') && !menu.contains(e.target)) {
-			menu.classList.add('hidden');
-		}
-	});
-
-	menu.addEventListener('click', (e) => {
-		const action = e.target.dataset.action;
-		const targetId = menu.dataset.targetId;
-		const win = document.getElementById(targetId);
-
-		if (!action || !win || e.target.classList.contains('disabled')) return;
-
-		switch (action) {
-			case 'restore':
-				if (win.classList.contains('minimized')) unminimizeWindow(win);
-				else if (win.classList.contains('maximized')) maximizeWindow(win);
-				bringWindowToFront(win);
-				break;
-			case 'minimize':
-				minimizeWindow(win, targetId);
-				break;
-			case 'maximize':
-				if (!win.classList.contains('maximized')) maximizeWindow(win);
-				bringWindowToFront(win);
-				break;
-			case 'close':
-				closeWindow(win, targetId);
-				break;
-		}
-		menu.classList.add('hidden');
-	});
-}
-
-function positionFloatingMenu(menu, x, y) {
-	const rect = menu.getBoundingClientRect();
-	let posX = x;
-	let posY = y;
-	if (posX + rect.width > window.innerWidth) posX = Math.max(4, window.innerWidth - rect.width - 4);
-	if (posY + rect.height > window.innerHeight - 40) posY = Math.max(4, window.innerHeight - 40 - rect.height);
-	if (posX < 4) posX = 4;
-	if (posY < 4) posY = 4;
-	menu.style.left = `${posX}px`;
-	menu.style.top = `${posY}px`;
-}
-
-function showContextMenu(e) {
-	const contextMenu = document.getElementById('context-menu');
-	contextMenu.classList.remove('hidden');
-	contextMenu.style.left = '0px';
-	contextMenu.style.top = '0px';
-	contextMenu.querySelectorAll('.submenu').forEach(sm => sm.classList.add('hidden', 'submenu-flip'));
-
-	positionFloatingMenu(contextMenu, e.clientX, e.clientY);
-	contextMenu.style.zIndex = ++zIndexCounter;
-	isContextMenuVisible = true;
-}
-
-function handleIconContextMenu(e, icon) {
-	e.preventDefault();
-	icon.classList.add('selected');
-	selectedIcons.add(icon);
-	currentContextMenuTarget = icon;
-	showContextMenu(e);
-	updateContextMenuItems(icon);
-}
-
-function updateContextMenuItems() {
-	const contextMenu = document.getElementById('context-menu');
-	const isIconTargeted = currentContextMenuTarget && currentContextMenuTarget.classList.contains('project-icon');
-	const isContainerTargeted = currentContextMenuTarget && (currentContextMenuTarget.id === 'desktop' || currentContextMenuTarget.classList.contains('folder-content'));
-
-	let anyFileSystemElementSelected = false;
-	if (selectedIcons.size > 0) {
-		anyFileSystemElementSelected = Array.from(selectedIcons).some(icon => icon.dataset.path && !icon.dataset.path.startsWith('project://'));
-	}
-
-	const setItemState = (action, disabled) => {
-		const item = contextMenu.querySelector(`[data-action="${action}"]`);
-		if (!item) return;
-		item.classList.remove('hidden');
-		item.classList.toggle('disabled', disabled);
-	};
-
-	setItemState('open', selectedIcons.size !== 1);
-	setItemState('info', !(anyFileSystemElementSelected && selectedIcons.size === 1));
-	setItemState('cut', !anyFileSystemElementSelected);
-	setItemState('copy', !anyFileSystemElementSelected);
-	setItemState('delete', !anyFileSystemElementSelected);
-	setItemState('rename', !(anyFileSystemElementSelected && selectedIcons.size === 1));
-
-	const hasClipboardContent = fs.clipboard.mode && fs.clipboard.element;
-	let canPaste = false;
-	if (hasClipboardContent && (isContainerTargeted || isIconTargeted)) {
-		let destPath = '/';
-		if (currentContextMenuTarget.id === 'desktop') {
-			destPath = '/';
-		} else {
-			destPath = currentContextMenuTarget.dataset.path;
-		}
-
-		const destElement = fs.findByPath(destPath);
-		const sourceElement = fs.clipboard.element;
-
-		if (destElement) {
-			let targetFolder = (destElement instanceof Folder) ? destElement : destElement.parent;
-
-			canPaste = true;
-			if (sourceElement.getFullPath() === targetFolder.getFullPath()) {
-				if (fs.clipboard.mode === 'cut') {
-					canPaste = false;
-				}
-			}
-
-			let checkParent = targetFolder;
-			while (checkParent) {
-				if (checkParent === sourceElement) {
-					canPaste = false;
-					break;
-				}
-				checkParent = checkParent.parent;
-			}
-		}
-	}
-	setItemState('paste', !canPaste);
-
-	const newItems = contextMenu.querySelector('.has-submenu');
-	newItems.classList.toggle('hidden', !isContainerTargeted);
-	newItems.previousElementSibling.classList.toggle('hidden', !isContainerTargeted);
-
-	const toggleHiddenItem = contextMenu.querySelector('[data-action="toggle-hidden"]');
-	if (toggleHiddenItem) {
-		toggleHiddenItem.classList.toggle('hidden', currentContextMenuTarget !== document.getElementById('desktop'));
-		toggleHiddenItem.textContent = isShowHiddenEnabled() ? 'Hide Hidden Items' : 'Show Hidden Items';
-	}
-}
-
-function handleContextMenuAction(action) {
-	let targetElement = null;
-	if (selectedIcons.size > 0) {
-		targetElement = selectedIcons.values().next().value;
-	}
-
-	let destPath = '/';
-	if (currentContextMenuTarget) {
-		const targetPath = currentContextMenuTarget.dataset.path;
-		if (currentContextMenuTarget.id === 'desktop') {
-			destPath = '/';
-		} else if (targetPath) {
-			const element = fs.findByPath(targetPath);
-			if (element instanceof Folder) {
-				destPath = element.getFullPath();
-			} else if (element && element.parent) {
-				destPath = element.parent.getFullPath();
-			}
-		}
-	}
-
-	try {
-		switch (action) {
-			case 'open':
-				if (targetElement) {
-					const path = targetElement.dataset.path;
-					if (path.startsWith('project://')) {
-						const projectTitle = path.substring(10);
-						const project = projects.flat().find(p => resolveProjectTitle(p.title).replace(/\s/g, '-') === projectTitle);
-						if (project) openProjectWindow(project);
-					} else {
-						const element = fs.findByPath(path);
-						if (element) openFileSystemElement(element);
-					}
-				}
-				break;
-			case 'cut':
-			case 'copy':
-				if (targetElement) {
-					const path = targetElement.dataset.path;
-					if (path && !path.startsWith('project://')) {
-						fs.clipboard.mode = action;
-						fs.clipboard.element = fs.findByPath(path);
-					}
-				}
-				break;
-			case 'paste':
-				if (fs.clipboard.element) {
-					const sourcePath = fs.clipboard.element.getFullPath();
-					if (fs.clipboard.mode === 'cut') {
-						fs.move(sourcePath, destPath);
-						fs.clipboard.mode = null;
-						fs.clipboard.element = null;
-					} else if (fs.clipboard.mode === 'copy') {
-						fs.copy(sourcePath, destPath);
-					}
-					refreshUI();
-				}
-				break;
-			case 'delete':
-				const iconsToDelete = Array.from(selectedIcons).filter(icon => {
-					const path = icon.dataset.path;
-					return path && !path.startsWith('project://');
-				});
-
-				if (iconsToDelete.length > 0) {
-					const message = `Are you sure you want to move ${iconsToDelete.length} item(s) to the Recycle Bin?`;
-					createConfirmationDialog(message, () => {
-						iconsToDelete.forEach(icon => {
-							const path = icon.dataset.path;
-							try {
-								fs.moveToRecycleBin(path);
-							} catch (e) {
-								console.error(`Failed to recycle ${path}:`, e.message);
-							}
-						});
-						refreshUI();
-					});
-				}
-				break;
-			case 'rename':
-				if (targetElement) {
-					const path = targetElement.dataset.path;
-					if (!path.startsWith('project://')) {
-						startInlineRename(targetElement);
-					}
-				}
-				break;
-			case 'info':
-				if (targetElement) {
-					const path = targetElement.dataset.path;
-					if (path && !path.startsWith('app://')) {
-						const element = fs.findByPath(path);
-						if (element) openElementInfoWindow(element);
-					}
-				}
-				break;
-			case 'refresh':
-				refreshUI();
-				break;
-			case 'toggle-hidden':
-				toggleShowHidden();
-				break;
-			case 'arrange-icons-name':
-				arrangeIcons('name');
-				break;
-			case 'arrange-icons-date':
-				arrangeIcons('date');
-				break;
-			case 'line-up-icons':
-				arrangeIcons('none');
-				break;
-			case 'arrange-icons-type':
-				arrangeIcons('type');
-				break;
-			case 'new-folder':
-				fs.create('Folder', destPath, 'New Folder');
-				refreshUI();
-				break;
-			case 'new-text-document':
-				fs.create('File', destPath, 'New Document.txt');
-				refreshUI();
-				break;
-			case 'display-settings':
-				openDisplaySettings();
-				break;
-		}
-	} catch (error) {
-		showXPDialog('Error', error.message, 'error');
-	}
-
-	if (action !== 'delete' && action !== 'rename') {
-		clearIconSelections();
-	}
 }
 
 function openFileSystemElement(element, windowContext = null) {
@@ -3221,9 +2710,12 @@ function openFolderWindow(folder) {
 		e.stopPropagation();
 		if (e.target === contentArea || e.target === contentArea.parentElement) {
 			clearIconSelections();
-			currentContextMenuTarget = contentArea;
-			showContextMenu(e);
-			updateContextMenuItems();
+			const currentPath = contentArea.dataset.path;
+			const currentFolder = fs.findByPath(currentPath) || folder;
+			if (window.ContextMenu) {
+				const items = window.ContextMenu.getFolderAreaItems(currentFolder, folderWindow);
+				window.ContextMenu.show(items, e.clientX, e.clientY);
+			}
 		}
 	});
 
@@ -3427,6 +2919,7 @@ function updateFolderView(folder, win, recordHistory = true) {
 }
 
 function refreshUI() {
+	if (!fs || !fs.root) return;
 	renderDesktopIcons();
 	Object.values(openWindows).forEach(win => {
 		if (win.classList.contains('project-window')) {
@@ -3814,11 +3307,19 @@ function openTextEditorWindow(file) {
 const DEFAULT_DESKTOP_WALLPAPER = '../assets/images/desk/wallpapers/wallpaper-default.webp';
 let desktopWallpapersRegistry = null;
 
+const preloadedWallpapers = new Map();
+
 function applyInitialDesktopBackground() {
 	const current = localStorage.getItem('desktopBackground') || DEFAULT_DESKTOP_WALLPAPER;
 	const desktop = document.getElementById('desktop');
-	if (desktop) {
-		desktop.style.backgroundImage = `url('${current}')`;
+	if (!desktop) return;
+
+	desktop.style.backgroundImage = `url('${current}')`;
+	if (!preloadedWallpapers.has(current)) {
+		const img = new Image();
+		img.src = current;
+		img.onload = () => preloadedWallpapers.set(current, img);
+		if (img.complete) preloadedWallpapers.set(current, img);
 	}
 }
 
@@ -4128,67 +3629,42 @@ function renderRecycleBinContent(win) {
 			icon.classList.add('selected');
 			if (restoreBtn) restoreBtn.disabled = false;
 
-			const menu = document.createElement('div');
-			menu.className = 'xp-window';
-			menu.style.position = 'fixed';
-			menu.style.zIndex = String(++zIndexCounter);
-			menu.style.minWidth = '150px';
-			menu.style.padding = '2px';
-			menu.innerHTML = `
-				<ul style="list-style:none;margin:0;padding:0;">
-					<li data-recycle-action="restore" style="padding:6px 15px;cursor:pointer;">Restore</li>
-					<li data-recycle-action="delete" style="padding:6px 15px;cursor:pointer;">Delete Permanently</li>
-				</ul>
-			`;
-			document.body.appendChild(menu);
-			positionFloatingMenu(menu, e.clientX, e.clientY);
-
-			const removeMenu = () => {
-				menu.remove();
-				document.removeEventListener('mousedown', outsideHandler);
-			};
-			const outsideHandler = (ev) => {
-				if (!menu.contains(ev.target)) removeMenu();
-			};
-			setTimeout(() => document.addEventListener('mousedown', outsideHandler), 0);
-
-			menu.addEventListener('click', (ev) => {
-				const action = ev.target.closest('[data-recycle-action]')?.dataset.recycleAction;
-				if (action === 'restore') {
-					try {
-						fs.restoreFromRecycleBin(item.uid);
-						renderRecycleBinContent(win);
-						refreshUI();
-					} catch (err) {
-						showXPDialog('Error', err.message, 'error');
+			if (window.ContextMenu) {
+				const items = [
+					{
+						label: 'Restore',
+						bold: true,
+						action: () => {
+							try {
+								fs.restoreFromRecycleBin(item.uid);
+								renderRecycleBinContent(win);
+								refreshUI();
+							} catch (err) {
+								showXPDialog('Error', err.message, 'error');
+							}
+						}
+					},
+					{
+						label: 'Delete Permanently',
+						action: () => {
+							fs.deletePermanentlyFromRecycleBin(item.uid);
+							renderRecycleBinContent(win);
+						}
+					},
+					{ separator: true },
+					{
+						label: 'Properties',
+						action: () => {
+							showXPDialog('Properties', `${item.data.name}\nOriginal location: ${item.originalPath}`, 'info');
+						}
 					}
-				} else if (action === 'delete') {
-					fs.deletePermanentlyFromRecycleBin(item.uid);
-					renderRecycleBinContent(win);
-				}
-				removeMenu();
-			});
+				];
+				window.ContextMenu.show(items, e.clientX, e.clientY);
+			}
 		});
 
 		container.appendChild(icon);
 	});
-}
-
-function setupQuickLaunchIcons() {
-	const showDesktopIcon = document.getElementById('show-desktop-icon');
-	if (showDesktopIcon) {
-		showDesktopIcon.addEventListener('click', () => {
-			Object.values(openWindows).forEach(win => {
-				if (!win.classList.contains('minimized')) {
-					minimizeWindow(win, win.id);
-				}
-			});
-		});
-	}
-	document.querySelector('.quick-launch-icon[alt="Internet Explorer"]').addEventListener('click', openInternetExplorer);
-	document.querySelector('.quick-launch-icon[alt="Outlook Express"]').addEventListener('click', openOutlookExpress);
-	document.querySelector('.quick-launch-icon[alt="Winamp"]').addEventListener('click', openWinamp);
-	document.querySelector('.quick-launch-icon[alt="Minesweeper"]').addEventListener('click', openMinesweeper);
 }
 
 function openRunDialog() {
@@ -4305,6 +3781,383 @@ function processRunCommand(command) {
 	} else {
 		showXPDialog(command, `Cannot find '${command}'. Make sure you typed the name correctly, and then try again.`, 'error');
 	}
+}
+
+function openMyComputerWindow() {
+	const id = 'window-my-computer';
+	const existing = document.getElementById(id);
+	if (existing) {
+		bringWindowToFront(existing);
+		return;
+	}
+
+	const contentHTML = `
+		<div class="folder-window-layout">
+			<div class="folder-menu-bar">
+				<ul><li><u>F</u>ile</li><li><u>E</u>dit</li><li><u>V</u>iew</li><li><u>F</u>avorites</li><li><u>T</u>ools</li><li><u>H</u>elp</li></ul>
+			</div>
+			<div class="folder-toolbar">
+				<div class="folder-nav-buttons">
+					<button class="folder-nav-btn" disabled><img src="data:image/svg+xml;charset=UTF-8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%232c63c3'><path d='M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z'/></svg>" alt="Back"></button>
+					<button class="folder-nav-btn" disabled><img src="data:image/svg+xml;charset=UTF-8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%232c63c3'><path d='M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z'/></svg>" alt="Forward"></button>
+					<button class="folder-nav-btn" disabled><img src="data:image/svg+xml;charset=UTF-8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%232c63c3'><path d='M4 12l1.41 1.41L11 7.83V20h2V7.83l5.58 5.59L20 12l-8-8-8 8z'/></svg>" alt="Up"></button>
+				</div>
+				<div class="folder-toolbar-separator"></div>
+				<div class="folder-address-bar-container">
+					<span>Address</span>
+					<input type="text" class="folder-address-bar" value="My Computer" readonly>
+				</div>
+			</div>
+			<div class="folder-main-layout">
+				<div class="folder-sidebar">
+					<div class="sidebar-section">
+						<h3>System Tasks</h3>
+						<ul>
+							<li><a href="#" id="mycomp-task-info"><span>View system information</span></a></li>
+							<li><a href="#" id="mycomp-task-ctrl"><span>Change a setting</span></a></li>
+						</ul>
+					</div>
+					<div class="sidebar-section">
+						<h3>Other Places</h3>
+						<ul>
+							<li><a href="#" id="mycomp-place-network"><span>My Network Places</span></a></li>
+							<li><a href="#" id="mycomp-place-docs"><span>My Documents</span></a></li>
+							<li><a href="#" id="mycomp-place-projects"><span>My Projects</span></a></li>
+						</ul>
+					</div>
+					<div class="sidebar-section details">
+						<h3>Details</h3>
+						<div class="details-content">
+							<b>My Computer</b><br>
+							System Folder
+						</div>
+					</div>
+				</div>
+				<div class="folder-main-content" style="padding: 12px; overflow-y: auto;">
+					<div class="my-comp-group">
+						<div class="my-comp-group-title">Files Stored on This Computer</div>
+						<div class="my-comp-grid">
+							<div class="my-comp-item" id="mycomp-item-shared">
+								<img src="https://img.icons8.com/fluent/48/folder-invoices.png" alt="Shared Documents">
+								<div class="my-comp-texts">
+									<strong>Shared Documents</strong>
+									<span>System Folder</span>
+								</div>
+							</div>
+							<div class="my-comp-item" id="mycomp-item-userdocs">
+								<img src="https://img.icons8.com/fluent/48/folder-invoices.png" alt="User's Documents">
+								<div class="my-comp-texts">
+									<strong>Colin's Documents</strong>
+									<span>Personal Folder</span>
+								</div>
+							</div>
+						</div>
+					</div>
+
+					<div class="my-comp-group">
+						<div class="my-comp-group-title">Hard Disk Drives</div>
+						<div class="my-comp-grid">
+							<div class="my-comp-item" id="mycomp-item-drive-c">
+								<img src="https://api.iconify.design/mdi/harddisk.svg?color=%231b4b9b" alt="Drive C">
+								<div class="my-comp-texts">
+									<strong>Local Disk (C:)</strong>
+									<span>24.8 GB free of 40.0 GB</span>
+								</div>
+							</div>
+						</div>
+					</div>
+
+					<div class="my-comp-group">
+						<div class="my-comp-group-title">Devices with Removable Storage</div>
+						<div class="my-comp-grid">
+							<div class="my-comp-item" id="mycomp-item-floppy">
+								<img src="https://api.iconify.design/mdi/floppy.svg?color=%23555555" alt="Floppy A">
+								<div class="my-comp-texts">
+									<strong>3½ Floppy (A:)</strong>
+									<span>3½-Inch Floppy Disk</span>
+								</div>
+							</div>
+							<div class="my-comp-item" id="mycomp-item-cdrom">
+								<img src="https://api.iconify.design/mdi/disc.svg?color=%23555555" alt="CD Drive D">
+								<div class="my-comp-texts">
+									<strong>CD Drive (D:) XP_SP3</strong>
+									<span>Compact Disc</span>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	`;
+
+	const win = createXPWindow(id, 'My Computer', contentHTML, 680, 480, {
+		iconSrc: '../assets/images/desk/XPIcon.png'
+	});
+	win.querySelector('.xp-window-content').style.padding = '0';
+
+	win.querySelector('#mycomp-task-info').addEventListener('click', (e) => {
+		e.preventDefault();
+		if (window.SettingsApp) window.SettingsApp.open('system');
+	});
+	win.querySelector('#mycomp-task-ctrl').addEventListener('click', (e) => {
+		e.preventDefault();
+		if (window.SettingsApp) window.SettingsApp.open('system');
+	});
+	win.querySelector('#mycomp-place-network').addEventListener('click', (e) => {
+		e.preventDefault();
+		openNetworkPlacesWindow();
+	});
+	win.querySelector('#mycomp-place-docs').addEventListener('click', (e) => {
+		e.preventDefault();
+		if (fs.root.getByName('PDFs')) openFolderWindow(fs.root.getByName('PDFs'));
+	});
+	win.querySelector('#mycomp-place-projects').addEventListener('click', (e) => {
+		e.preventDefault();
+		openAllProjectsFolder();
+	});
+
+	win.querySelector('#mycomp-item-shared').addEventListener('dblclick', () => {
+		if (fs.root.getByName('PDFs')) openFolderWindow(fs.root.getByName('PDFs'));
+	});
+	win.querySelector('#mycomp-item-userdocs').addEventListener('dblclick', () => {
+		openFolderWindow(fs.root);
+	});
+	win.querySelector('#mycomp-item-drive-c').addEventListener('dblclick', () => {
+		openFolderWindow(fs.root);
+	});
+	win.querySelector('#mycomp-item-floppy').addEventListener('dblclick', () => {
+		showXPDialog('Drive A:', 'Please insert a disk into drive A:.', 'error');
+	});
+	win.querySelector('#mycomp-item-cdrom').addEventListener('dblclick', () => {
+		showXPDialog('CD Drive (D:)', 'Microsoft Windows XP Professional SP3 Installation Media.', 'info');
+	});
+}
+
+function openSearchWindow(initialQuery = '') {
+	const id = 'window-search-companion';
+	const existing = document.getElementById(id);
+	if (existing) {
+		bringWindowToFront(existing);
+		const input = existing.querySelector('#search-input-field');
+		if (input) {
+			input.value = initialQuery;
+			input.focus();
+		}
+		return;
+	}
+
+	const contentHTML = `
+		<div style="display: flex; height: 100%; background: #ffffff;">
+			<div class="search-companion-sidebar">
+				<div class="search-companion-dog-card">
+					<img src="https://api.iconify.design/mdi/dog.svg?color=%23f4b400" alt="Search Rover">
+					<div class="search-companion-balloon">What are you looking for today?</div>
+				</div>
+				<div style="display: flex; flex-direction: column; gap: 4px; margin-top: 6px;">
+					<label for="search-input-field">Search term:</label>
+					<input type="text" id="search-input-field" class="xp-input" value="${initialQuery.replace(/"/g, '&quot;')}" placeholder="Name or keyword...">
+				</div>
+				<div style="display: flex; flex-direction: column; gap: 4px;">
+					<label for="search-type-select">Look in:</label>
+					<select id="search-type-select" class="xp-select">
+						<option value="all">Everywhere (Projects & Files)</option>
+						<option value="projects">Portfolio Projects</option>
+						<option value="files">Desktop Documents</option>
+					</select>
+				</div>
+				<div style="margin-top: 8px; display: flex; justify-content: flex-end;">
+					<button class="xp-button" id="search-submit-btn">Search</button>
+				</div>
+			</div>
+			<div style="flex: 1; display: flex; flex-direction: column; overflow: hidden;">
+				<div style="padding: 8px 12px; background: #f0f4fa; border-bottom: 1px solid #d0dbe9; font-size: 11px; font-weight: bold; color: #153c8f;" id="search-status-header">
+					Enter a query and click Search.
+				</div>
+				<div style="flex: 1; overflow-y: auto; padding: 6px;" id="search-results-pane">
+					<ul class="search-results-list" id="search-results-ul"></ul>
+				</div>
+			</div>
+		</div>
+	`;
+
+	const win = createXPWindow(id, 'Search Results', contentHTML, 680, 420, {
+		iconSrc: 'https://api.iconify.design/mdi/magnify.svg'
+	});
+	win.querySelector('.xp-window-content').style.padding = '0';
+
+	const input = win.querySelector('#search-input-field');
+	const typeSelect = win.querySelector('#search-type-select');
+	const submitBtn = win.querySelector('#search-submit-btn');
+	const statusHeader = win.querySelector('#search-status-header');
+	const listEl = win.querySelector('#search-results-ul');
+
+	function runSearch() {
+		const q = input.value.trim().toLowerCase();
+		const type = typeSelect.value;
+		listEl.innerHTML = '';
+
+		if (!q) {
+			statusHeader.textContent = 'Please type a search query.';
+			return;
+		}
+
+		let hits = [];
+
+		if (type === 'all' || type === 'projects') {
+			if (typeof projects !== 'undefined') {
+				projects.flat().forEach(p => {
+					if (!p) return;
+					const title = (typeof p.title === 'string') ? p.title : (p.title?.en || p.title?.fr || '');
+					const desc = p.description || p.longDescription || '';
+					const kw = (p.keywords || []).join(' ');
+					if (title.toLowerCase().includes(q) || desc.toLowerCase().includes(q) || kw.toLowerCase().includes(q)) {
+						hits.push({
+							name: title,
+							category: 'Project',
+							icon: p.icon || 'https://img.icons8.com/fluency/48/file.png',
+							action: () => openProjectWindow(p)
+						});
+					}
+				});
+			}
+		}
+
+		if (type === 'all' || type === 'files') {
+			if (typeof fs !== 'undefined') {
+				const scanFolder = (folder) => {
+					folder.listContent().forEach(child => {
+						if (child.name.toLowerCase().includes(q)) {
+							hits.push({
+								name: child.name,
+								category: child instanceof Folder ? 'Folder' : 'File',
+								icon: child.icon,
+								action: () => openFileSystemElement(child)
+							});
+						}
+						if (child instanceof Folder) scanFolder(child);
+					});
+				};
+				scanFolder(fs.root);
+			}
+		}
+
+		statusHeader.textContent = `Found ${hits.length} matching item(s) for "${input.value.trim()}".`;
+
+		if (hits.length === 0) {
+			listEl.innerHTML = '<li style="padding: 12px; font-size: 11px; color: #777;">No matching items found.</li>';
+			return;
+		}
+
+		hits.forEach(hit => {
+			const li = document.createElement('li');
+			li.className = 'search-result-row';
+			li.innerHTML = `
+				<img src="${hit.icon}" alt="">
+				<div style="flex: 1;">
+					<strong>${hit.name}</strong>
+					<span style="color: #666; margin-left: 8px; font-size: 10px;">[${hit.category}]</span>
+				</div>
+			`;
+			li.addEventListener('dblclick', hit.action);
+			listEl.appendChild(li);
+		});
+	}
+
+	submitBtn.addEventListener('click', runSearch);
+	input.addEventListener('keydown', (e) => {
+		if (e.key === 'Enter') runSearch();
+	});
+
+	if (initialQuery) runSearch();
+}
+
+function openPrintersWindow() {
+	const id = 'window-printers-faxes';
+	const existing = document.getElementById(id);
+	if (existing) {
+		bringWindowToFront(existing);
+		return;
+	}
+
+	const contentHTML = `
+		<div class="folder-window-layout">
+			<div class="folder-toolbar">
+				<button class="folder-nav-btn" disabled><img src="data:image/svg+xml;charset=UTF-8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%232c63c3'><path d='M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z'/></svg>" alt="Back"></button>
+			</div>
+			<div style="padding: 15px; display: flex; flex-wrap: wrap; gap: 16px; background: #ffffff; height: 100%; box-sizing: border-box;">
+				<div class="my-comp-item" style="flex-direction: column; width: 110px; text-align: center;" id="printer-add-wizard">
+					<img src="https://api.iconify.design/mdi/printer-plus.svg?color=%231b4b9b" style="width: 40px; height: 40px;" alt="">
+					<span style="font-size: 11px; margin-top: 4px;">Add Printer</span>
+				</div>
+				<div class="my-comp-item" style="flex-direction: column; width: 110px; text-align: center;">
+					<img src="https://api.iconify.design/mdi/printer.svg?color=%232e7d32" style="width: 40px; height: 40px;" alt="">
+					<span style="font-size: 11px; margin-top: 4px; font-weight: bold;">PDF Document Writer (Default)</span>
+				</div>
+				<div class="my-comp-item" style="flex-direction: column; width: 110px; text-align: center;">
+					<img src="https://api.iconify.design/mdi/fax.svg?color=%23555555" style="width: 40px; height: 40px;" alt="">
+					<span style="font-size: 11px; margin-top: 4px;">Fax</span>
+				</div>
+			</div>
+		</div>
+	`;
+
+	const win = createXPWindow(id, 'Printers and Faxes', contentHTML, 520, 320, {
+		iconSrc: 'https://api.iconify.design/mdi/printer.svg'
+	});
+	win.querySelector('.xp-window-content').style.padding = '0';
+
+	win.querySelector('#printer-add-wizard').addEventListener('dblclick', () => {
+		showXPDialog('Add Printer Wizard', 'The wizard could not detect any plug and play parallel or USB printer connected.', 'warning');
+	});
+}
+
+function openNetworkPlacesWindow() {
+	const id = 'window-network-places';
+	const existing = document.getElementById(id);
+	if (existing) {
+		bringWindowToFront(existing);
+		return;
+	}
+
+	const links = [
+		{ name: 'GitHub Profile', url: 'https://github.com/wartets', icon: 'https://img.icons8.com/fluent/48/000000/github.png' },
+		{ name: 'SoundCloud Music', url: 'https://soundcloud.com/wartets', icon: 'https://api.iconify.design/mdi/soundcloud.svg?color=%23ff5500' },
+		{ name: 'YouTube Channel', url: 'https://www.youtube.com/@Wartets', icon: 'https://api.iconify.design/mdi/youtube.svg?color=%23cc0000' },
+		{ name: 'Live Portfolio Web', url: 'https://wartets.github.io/', icon: 'https://img.icons8.com/fluent/48/domain.png' }
+	];
+
+	let linksHtml = '';
+	links.forEach(l => {
+		linksHtml += `
+			<div class="my-comp-item" data-url="${l.url}" style="padding: 10px; width: 220px;">
+				<img src="${l.icon}" alt="">
+				<div class="my-comp-texts">
+					<strong>${l.name}</strong>
+					<span>External Network Link</span>
+				</div>
+			</div>
+		`;
+	});
+
+	const contentHTML = `
+		<div class="folder-window-layout">
+			<div style="padding: 15px; display: flex; flex-wrap: wrap; gap: 12px; background: #ffffff; height: 100%; box-sizing: border-box;">
+				${linksHtml}
+			</div>
+		</div>
+	`;
+
+	const win = createXPWindow(id, 'My Network Places', contentHTML, 540, 340, {
+		iconSrc: 'https://img.icons8.com/fluent/48/domain.png'
+	});
+	win.querySelector('.xp-window-content').style.padding = '0';
+
+	win.querySelectorAll('.my-comp-item[data-url]').forEach(item => {
+		item.addEventListener('dblclick', () => {
+			window.open(item.dataset.url, '_blank');
+		});
+	});
 }
 
 function openShutdownDialog() {
@@ -4752,45 +4605,10 @@ async function openOutlookExpress() {
 	let currentFolderId = 'inbox';
 	let selectedMessageId = null;
 
-	function closeContextMenu() {
-		const existing = document.getElementById('oe-context-menu');
-		if (existing) existing.remove();
-	}
-
 	function showGenericContextMenu(x, y, items) {
-		closeContextMenu();
-		const menu = document.createElement('div');
-		menu.id = 'oe-context-menu';
-		menu.className = 'oe-context-menu';
-		menu.style.zIndex = String(++zIndexCounter);
-		const list = document.createElement('ul');
-		items.forEach(item => {
-			if (item.separator) {
-				const sep = document.createElement('li');
-				sep.className = 'oe-context-menu-separator';
-				list.appendChild(sep);
-				return;
-			}
-			const li = document.createElement('li');
-			li.className = 'oe-context-menu-item';
-			li.textContent = item.label;
-			li.addEventListener('click', () => {
-				closeContextMenu();
-				item.action();
-			});
-			list.appendChild(li);
-		});
-		menu.appendChild(list);
-		document.body.appendChild(menu);
-		positionFloatingMenu(menu, x, y);
-
-		const outsideHandler = (ev) => {
-			if (!menu.contains(ev.target)) {
-				closeContextMenu();
-				document.removeEventListener('mousedown', outsideHandler);
-			}
-		};
-		setTimeout(() => document.addEventListener('mousedown', outsideHandler), 0);
+		if (window.ContextMenu) {
+			window.ContextMenu.show(items, x, y);
+		}
 	}
 
 	function renderFolderList() {
