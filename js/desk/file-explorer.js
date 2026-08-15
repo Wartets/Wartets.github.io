@@ -4,13 +4,20 @@
 	const FileExplorer = {
 		open(folder, initialOptions = {}) {
 			if (!folder) return null;
-			const path = typeof folder === 'string' ? folder : folder.getFullPath();
-			const targetFolder = typeof folder === 'string' ? (fs ? fs.findByPath(folder) : null) : folder;
+			let targetFolder = null;
+			if (typeof folder === 'string') {
+				targetFolder = fs ? fs.findByPath(folder) : null;
+			} else {
+				targetFolder = folder;
+			}
 			if (!targetFolder || !(targetFolder instanceof Folder)) return null;
 
-			const windowId = `window-folder-${targetFolder.getFullPath().replace(/[^\w-]/g, '_')}`;
+			const windowId = initialOptions.newWindow 
+				? `window-folder-${targetFolder.getFullPath().replace(/[^\w-]/g, '_')}-${Date.now()}`
+				: `window-folder-${targetFolder.getFullPath().replace(/[^\w-]/g, '_')}`;
+
 			const existingWin = document.getElementById(windowId);
-			if (existingWin) {
+			if (existingWin && !initialOptions.newWindow) {
 				if (typeof bringWindowToFront === 'function') bringWindowToFront(existingWin);
 				if (existingWin.classList.contains('minimized') && typeof unminimizeWindow === 'function') {
 					unminimizeWindow(existingWin);
@@ -67,11 +74,11 @@
 							<button type="button" class="xp-tb-btn xp-tb-btn-labeled tb-back" title="Back" disabled>
 								<div class="xp-tb-icon-back"></div>
 								<span>Back</span>
-								<div class="xp-tb-drop-arrow"></div>
+								<div class="xp-tb-drop-arrow tb-back-arrow" title="History"></div>
 							</button>
 							<button type="button" class="xp-tb-btn tb-forward" title="Forward" disabled>
 								<div class="xp-tb-icon-forward"></div>
-								<div class="xp-tb-drop-arrow"></div>
+								<div class="xp-tb-drop-arrow tb-forward-arrow" title="History"></div>
 							</button>
 							<button type="button" class="xp-tb-btn tb-up" title="Up One Level">
 								<div class="xp-tb-icon-up"></div>
@@ -123,9 +130,9 @@
 						<div class="xp-address-combo">
 							<img src="../assets/images/desk/icons/Folder Closed.webp" class="xp-address-icon" alt="">
 							<input type="text" class="xp-address-input" value="${folder.getFullPath()}">
-							<div class="xp-address-dropdown-arrow">▼</div>
+							<div class="xp-address-dropdown-arrow" title="Address Bar Locations">▼</div>
 						</div>
-						<button type="button" class="xp-address-go-btn">
+						<button type="button" class="xp-address-go-btn" title="Go to Address">
 							<div class="xp-go-icon">➔</div>
 							<span>Go</span>
 						</button>
@@ -139,13 +146,7 @@
 										<span>File and Folder Tasks</span>
 										<button type="button" class="xp-task-chevron"></button>
 									</div>
-									<div class="xp-task-content">
-										<a href="#" class="xp-task-link" data-task="new-folder"><img src="../assets/images/desk/icons/Folder Closed.webp" alt=""><span>Make a new folder</span></a>
-										<a href="#" class="xp-task-link" data-task="rename"><img src="../assets/images/desk/icons/File.webp" alt=""><span>Rename this item</span></a>
-										<a href="#" class="xp-task-link" data-task="move"><img src="https://api.iconify.design/mdi/folder-move-outline.svg" alt=""><span>Move this item</span></a>
-										<a href="#" class="xp-task-link" data-task="copy"><img src="https://api.iconify.design/mdi/content-copy.svg" alt=""><span>Copy this item</span></a>
-										<a href="#" class="xp-task-link" data-task="delete"><img src="https://api.iconify.design/mdi/delete-outline.svg" alt=""><span>Delete this item</span></a>
-									</div>
+									<div class="xp-task-content" id="xp-task-content-actions"></div>
 								</div>
 
 								<div class="xp-task-box xp-tasks-places">
@@ -158,6 +159,7 @@
 										<a href="#" class="xp-task-link" data-place="my-documents"><img src="../assets/images/desk/icons/My Profile Folder.webp" alt=""><span>My Documents</span></a>
 										<a href="#" class="xp-task-link" data-place="my-computer"><img src="../assets/images/desk/icons/My Computer.webp" alt=""><span>My Computer</span></a>
 										<a href="#" class="xp-task-link" data-place="my-network"><img src="../assets/images/desk/icons/My Network Places.webp" alt=""><span>My Network Places</span></a>
+										<a href="#" class="xp-task-link" data-place="recycle-bin"><img src="../assets/images/desk/trash.png" alt=""><span>Recycle Bin</span></a>
 									</div>
 								</div>
 
@@ -166,11 +168,7 @@
 										<span>Details</span>
 										<button type="button" class="xp-task-chevron"></button>
 									</div>
-									<div class="xp-task-content xp-task-details-body">
-										<div class="xp-details-name"><b>${folder.name}</b></div>
-										<div class="xp-details-type">File Folder</div>
-										<div class="xp-details-modified">Date Modified: ${folder.modifiedAt.toLocaleDateString()}</div>
-									</div>
+									<div class="xp-task-content xp-task-details-body"></div>
 								</div>
 							</div>
 
@@ -206,7 +204,6 @@
 
 		bindWindowEvents(win) {
 			const state = win.explorerState;
-			const layout = win.querySelector('.xp-explorer-layout');
 			const backBtn = win.querySelector('.tb-back');
 			const forwardBtn = win.querySelector('.tb-forward');
 			const upBtn = win.querySelector('.tb-up');
@@ -215,6 +212,7 @@
 			const viewsBtn = win.querySelector('.tb-views');
 			const addressInput = win.querySelector('.xp-address-input');
 			const addressGoBtn = win.querySelector('.xp-address-go-btn');
+			const addressArrow = win.querySelector('.xp-address-dropdown-arrow');
 			const contentContainer = win.querySelector('.folder-content');
 			const viewContainer = win.querySelector('.xp-explorer-view-container');
 			const sidebar = win.querySelector('.xp-explorer-sidebar');
@@ -222,7 +220,12 @@
 			const treeView = win.querySelector('.xp-sidebar-tree-view');
 			const tasksView = win.querySelector('.xp-sidebar-tasks-view');
 
-			backBtn.addEventListener('click', () => {
+			backBtn.addEventListener('click', (e) => {
+				if (e.target.closest('.tb-back-arrow')) {
+					e.stopPropagation();
+					this.showHistoryDropdown(win, backBtn, true);
+					return;
+				}
 				if (state.historyIndex > 0) {
 					state.historyIndex--;
 					const targetPath = state.history[state.historyIndex];
@@ -231,7 +234,12 @@
 				}
 			});
 
-			forwardBtn.addEventListener('click', () => {
+			forwardBtn.addEventListener('click', (e) => {
+				if (e.target.closest('.tb-forward-arrow')) {
+					e.stopPropagation();
+					this.showHistoryDropdown(win, forwardBtn, false);
+					return;
+				}
 				if (state.historyIndex < state.history.length - 1) {
 					state.historyIndex++;
 					const targetPath = state.history[state.historyIndex];
@@ -292,6 +300,57 @@
 					window.ContextMenu.show(menuItems, rect.left, rect.bottom + 2);
 				}
 			});
+
+			if (addressArrow) {
+				addressArrow.addEventListener('click', (e) => {
+					e.stopPropagation();
+					const rect = addressInput.getBoundingClientRect();
+					const locations = [
+						{
+							label: 'Desktop',
+							icon: '../assets/images/desk/icons/Display.webp',
+							action: () => this.navigateTo(fs.root, win, true)
+						},
+						{
+							label: 'My Documents',
+							icon: '../assets/images/desk/icons/My Profile Folder.webp',
+							action: () => {
+								const pdfs = fs.root.getByName('PDFs') || fs.root;
+								this.navigateTo(pdfs, win, true);
+							}
+						},
+						{
+							label: 'My Computer',
+							icon: '../assets/images/desk/icons/My Computer.webp',
+							action: () => {
+								if (window.DeskAPI && window.DeskAPI.openMyComputer) window.DeskAPI.openMyComputer();
+							}
+						},
+						{
+							label: 'Local Disk (C:)',
+							icon: 'https://api.iconify.design/mdi/harddisk.svg?color=%231b4b9b',
+							action: () => this.navigateTo(fs.root, win, true)
+						},
+						{
+							label: 'My Network Places',
+							icon: '../assets/images/desk/icons/My Network Places.webp',
+							action: () => {
+								if (window.DeskAPI && window.DeskAPI.openNetworkPlaces) window.DeskAPI.openNetworkPlaces();
+							}
+						},
+						{
+							label: 'Recycle Bin',
+							icon: '../assets/images/desk/trash.png',
+							action: () => {
+								if (typeof openRecycleBinWindow === 'function') openRecycleBinWindow();
+							}
+						}
+					];
+					if (window.ContextMenu) {
+						window.ContextMenu.show(locations, rect.left, rect.bottom + 2);
+					}
+				});
+			}
 
 			const cutBtn = win.querySelector('.tb-cut');
 			const copyBtn = win.querySelector('.tb-copy');
@@ -363,7 +422,7 @@
 			const handleAddressSubmit = () => {
 				let targetPath = addressInput.value.trim();
 				if (!targetPath.startsWith('/')) {
-					if (targetPath.toLowerCase() === 'desktop' || targetPath.toLowerCase() === 'c:\\') {
+					if (targetPath.toLowerCase() === 'desktop' || targetPath.toLowerCase() === 'c:\\' || targetPath.toLowerCase() === 'c:') {
 						targetPath = '/';
 					} else {
 						targetPath = '/' + targetPath;
@@ -413,32 +472,8 @@
 					if (window.DeskAPI && window.DeskAPI.openMyComputer) window.DeskAPI.openMyComputer();
 				} else if (place === 'my-network') {
 					if (window.DeskAPI && window.DeskAPI.openNetworkPlaces) window.DeskAPI.openNetworkPlaces();
-				}
-			});
-
-			win.querySelector('.xp-tasks-file').addEventListener('click', (e) => {
-				const link = e.target.closest('.xp-task-link');
-				if (!link || link.classList.contains('disabled')) return;
-				e.preventDefault();
-				const task = link.dataset.task;
-				const currentPath = state.currentFolder.getFullPath();
-
-				if (task === 'new-folder') {
-					try {
-						fs.create('Folder', currentPath, 'New Folder');
-						refreshUI();
-					} catch (err) {
-						showXPDialog('Error', err.message, 'error');
-					}
-				} else if (task === 'rename') {
-					const selected = Array.from(state.selectedItems);
-					if (selected.length === 1) startInlineRename(selected[0]);
-				} else if (task === 'delete') {
-					deleteBtn.click();
-				} else if (task === 'copy') {
-					copyBtn.click();
-				} else if (task === 'move') {
-					cutBtn.click();
+				} else if (place === 'recycle-bin') {
+					if (typeof openRecycleBinWindow === 'function') openRecycleBinWindow();
 				}
 			});
 
@@ -496,6 +531,42 @@
 			});
 		},
 
+		showHistoryDropdown(win, buttonEl, isBack = true) {
+			const state = win.explorerState;
+			const rect = buttonEl.getBoundingClientRect();
+			const items = [];
+
+			if (isBack) {
+				for (let i = state.historyIndex - 1; i >= 0; i--) {
+					const path = state.history[i];
+					const folder = fs.findByPath(path);
+					items.push({
+						label: folder ? folder.name : path,
+						action: () => {
+							state.historyIndex = i;
+							if (folder) this.navigateTo(folder, win, false);
+						}
+					});
+				}
+			} else {
+				for (let i = state.historyIndex + 1; i < state.history.length; i++) {
+					const path = state.history[i];
+					const folder = fs.findByPath(path);
+					items.push({
+						label: folder ? folder.name : path,
+						action: () => {
+							state.historyIndex = i;
+							if (folder) this.navigateTo(folder, win, false);
+						}
+					});
+				}
+			}
+
+			if (items.length > 0 && window.ContextMenu) {
+				window.ContextMenu.show(items, rect.left, rect.bottom + 2);
+			}
+		},
+
 		openMenuBarDropdown(menuType, win, x, y) {
 			const state = win.explorerState;
 			const currentFolder = state.currentFolder;
@@ -518,14 +589,39 @@
 								}
 							},
 							{
+								label: 'Shortcut',
+								icon: '../assets/images/desk/icons/Folder Closed.webp',
+								action: () => {
+									fs.create('Shortcut', currentFolder.getFullPath(), 'New Shortcut', {
+										targetPath: '/',
+										icon: '../assets/images/desk/icons/Folder Closed.webp'
+									});
+									refreshUI();
+								}
+							},
+							{
 								label: 'Text Document',
 								icon: '../assets/images/desk/icons/File.webp',
 								action: () => {
 									fs.create('File', currentFolder.getFullPath(), 'New Text Document.txt');
 									refreshUI();
 								}
+							},
+							{
+								label: 'Wave Sound Document',
+								icon: '../assets/images/desk/icons/Music File.webp',
+								action: () => {
+									fs.create('File', currentFolder.getFullPath(), 'New Audio.wav');
+									refreshUI();
+								}
 							}
 						]
+					},
+					{
+						label: 'Open in New Window',
+						action: () => {
+							FileExplorer.open(currentFolder, { newWindow: true });
+						}
 					},
 					{ separator: true },
 					{
@@ -562,6 +658,7 @@
 					},
 					{
 						label: 'Properties',
+						bold: true,
 						action: () => {
 							if (hasSelection) {
 								const icon = Array.from(state.selectedItems)[0];
@@ -580,6 +677,13 @@
 				];
 			} else if (menuType === 'edit') {
 				items = [
+					{
+						label: 'Undo',
+						shortcut: 'Ctrl+Z',
+						disabled: true,
+						action: () => {}
+					},
+					{ separator: true },
 					{
 						label: 'Cut',
 						shortcut: 'Ctrl+X',
@@ -607,12 +711,26 @@
 							if (pasteBtn) pasteBtn.click();
 						}
 					},
+					{
+						label: 'Paste Shortcut',
+						disabled: !hasClipboard,
+						action: () => {
+							if (fs && fs.clipboard && fs.clipboard.element) {
+								const el = fs.clipboard.element;
+								fs.create('Shortcut', currentFolder.getFullPath(), `${el.name} - Shortcut`, {
+									targetPath: el.getFullPath(),
+									icon: el.icon
+								});
+								refreshUI();
+							}
+						}
+					},
 					{ separator: true },
 					{
 						label: 'Select All',
 						shortcut: 'Ctrl+A',
 						action: () => {
-							const icons = win.querySelectorAll('.project-icon');
+							const icons = win.querySelectorAll('.project-icon, .xp-details-row');
 							icons.forEach(i => {
 								i.classList.add('selected');
 								state.selectedItems.add(i);
@@ -623,7 +741,7 @@
 					{
 						label: 'Invert Selection',
 						action: () => {
-							const icons = win.querySelectorAll('.project-icon');
+							const icons = win.querySelectorAll('.project-icon, .xp-details-row');
 							icons.forEach(i => {
 								if (state.selectedItems.has(i)) {
 									i.classList.remove('selected');
@@ -639,6 +757,36 @@
 				];
 			} else if (menuType === 'view') {
 				items = [
+					{
+						label: 'Toolbars',
+						submenu: [
+							{ label: 'Standard Buttons', checked: true, action: () => {} },
+							{ label: 'Address Bar', checked: true, action: () => {} },
+							{ separator: true },
+							{ label: 'Lock the Toolbars', checked: true, action: () => {} }
+						]
+					},
+					{
+						label: 'Explorer Bar',
+						submenu: [
+							{
+								label: 'Search',
+								checked: false,
+								action: () => {
+									if (window.DeskAPI && window.DeskAPI.openSearch) window.DeskAPI.openSearch('');
+								}
+							},
+							{
+								label: 'Folders',
+								checked: state.sidebarMode === 'tree',
+								action: () => {
+									const foldersBtn = win.querySelector('.tb-folders');
+									if (foldersBtn) foldersBtn.click();
+								}
+							}
+						]
+					},
+					{ separator: true },
 					{
 						label: 'Thumbnails',
 						radio: state.viewMode === 'thumbnails',
@@ -671,7 +819,10 @@
 							{ label: 'Name', radio: state.sortBy === 'name', action: () => { state.sortBy = 'name'; this.updateView(win, false); } },
 							{ label: 'Size', radio: state.sortBy === 'size', action: () => { state.sortBy = 'size'; this.updateView(win, false); } },
 							{ label: 'Type', radio: state.sortBy === 'type', action: () => { state.sortBy = 'type'; this.updateView(win, false); } },
-							{ label: 'Modified', radio: state.sortBy === 'date', action: () => { state.sortBy = 'date'; this.updateView(win, false); } }
+							{ label: 'Modified', radio: state.sortBy === 'date', action: () => { state.sortBy = 'date'; this.updateView(win, false); } },
+							{ separator: true },
+							{ label: 'Ascending', radio: state.sortAsc, action: () => { state.sortAsc = true; this.updateView(win, false); } },
+							{ label: 'Descending', radio: !state.sortAsc, action: () => { state.sortAsc = false; this.updateView(win, false); } }
 						]
 					},
 					{ separator: true },
@@ -683,21 +834,26 @@
 				];
 			} else if (menuType === 'favorites') {
 				items = [
-					{ label: 'Add to Favorites...', action: () => showXPDialog('Favorites', 'Folder added to favorites.', 'info') },
+					{ label: 'Add to Favorites...', action: () => showXPDialog('Favorites', `"${currentFolder.name}" has been added to your favorites list.`, 'info') },
+					{ label: 'Organize Favorites...', action: () => showXPDialog('Favorites', 'Manage folder bookmarks.', 'info') },
 					{ separator: true },
-					{ label: 'Desktop', action: () => this.navigateTo(fs.root, win, true) },
-					{ label: 'My Documents', action: () => this.navigateTo(fs.root.getByName('PDFs') || fs.root, win, true) }
+					{ label: 'Desktop', icon: '../assets/images/desk/icons/Display.webp', action: () => this.navigateTo(fs.root, win, true) },
+					{ label: 'My Documents', icon: '../assets/images/desk/icons/My Profile Folder.webp', action: () => this.navigateTo(fs.root.getByName('PDFs') || fs.root, win, true) },
+					{ label: 'My Computer', icon: '../assets/images/desk/icons/My Computer.webp', action: () => { if (window.DeskAPI && window.DeskAPI.openMyComputer) window.DeskAPI.openMyComputer(); } },
+					{ label: 'My Network Places', icon: '../assets/images/desk/icons/My Network Places.webp', action: () => { if (window.DeskAPI && window.DeskAPI.openNetworkPlaces) window.DeskAPI.openNetworkPlaces(); } }
 				];
 			} else if (menuType === 'tools') {
 				items = [
-					{ label: 'Map Network Drive...', action: () => showXPDialog('Map Network Drive', 'No external network domain found.', 'warning') },
+					{ label: 'Map Network Drive...', action: () => showXPDialog('Map Network Drive', 'Specify the drive letter and folder path to connect.', 'info') },
+					{ label: 'Disconnect Network Drive...', disabled: true, action: () => {} },
+					{ separator: true },
 					{ label: 'Folder Options...', action: () => { if (window.SettingsApp) window.SettingsApp.open('input'); } }
 				];
 			} else if (menuType === 'help') {
 				items = [
 					{ label: 'Help and Support Center', action: () => window.open('https://github.com/wartets/Wartets.github.io', '_blank') },
 					{ separator: true },
-					{ label: 'About Windows XP', action: () => { if (window.SettingsApp) window.SettingsApp.open('system'); } }
+					{ label: 'About Windows XP', bold: true, action: () => { if (window.SettingsApp) window.SettingsApp.open('system'); } }
 				];
 			}
 
@@ -998,7 +1154,7 @@
 			const sbCount = win.querySelector('.xp-sb-count');
 			const sbSize = win.querySelector('.xp-sb-size');
 			const detailsBody = win.querySelector('.xp-task-details-body');
-			const fileTasks = win.querySelector('.xp-tasks-file');
+			const actionsContainer = win.querySelector('#xp-task-content-actions');
 
 			if (selectedCount === 0) {
 				if (sbCount) sbCount.textContent = `${totalCount} objects`;
@@ -1014,12 +1170,12 @@
 						<div class="xp-details-modified">Date Modified: ${state.currentFolder.modifiedAt.toLocaleDateString()}</div>
 					`;
 				}
-				if (fileTasks) {
-					fileTasks.querySelectorAll('.xp-task-link').forEach(link => {
-						const t = link.dataset.task;
-						if (t === 'new-folder') link.classList.remove('disabled');
-						else link.classList.add('disabled');
-					});
+				if (actionsContainer) {
+					actionsContainer.innerHTML = `
+						<a href="#" class="xp-task-link" data-action="new-folder"><img src="../assets/images/desk/icons/Folder Closed.webp" alt=""><span>Make a new folder</span></a>
+						<a href="#" class="xp-task-link" data-action="publish"><img src="../assets/images/desk/icons/Earth (fixed).webp" alt=""><span>Publish this folder to the Web</span></a>
+						<a href="#" class="xp-task-link" data-action="share"><img src="../assets/images/desk/icons/Folder Closed (Alt).webp" alt=""><span>Share this folder</span></a>
+					`;
 				}
 			} else if (selectedCount === 1) {
 				const itemEl = Array.from(state.selectedItems)[0];
@@ -1027,17 +1183,39 @@
 				if (sbCount) sbCount.textContent = `1 object selected`;
 				if (sbSize && el) sbSize.textContent = el.size !== undefined ? `${Math.ceil(el.size / 1024)} KB` : '';
 				if (detailsBody && el) {
-					const sizeLine = el.size !== undefined ? `<div>Size: ${Math.ceil(el.size / 1024)} KB</div>` : '';
+					let typeName = 'File';
+					if (el instanceof Folder) typeName = 'File Folder';
+					else if (el instanceof Shortcut) typeName = 'Shortcut';
+					else if (el instanceof ProjectFile) typeName = 'Project Application';
+					else typeName = 'Text Document';
+
+					const sizeLine = el.size !== undefined && !(el instanceof Folder) ? `<div>Size: ${Math.ceil(el.size / 1024)} KB</div>` : '';
+					const previewImg = el.icon || '../assets/images/desk/icons/File.webp';
+
 					detailsBody.innerHTML = `
-						<div class="xp-details-thumb"><img src="${el.icon || '../assets/images/desk/icons/File.webp'}" alt=""></div>
+						<div class="xp-details-preview-frame"><img src="${previewImg}" alt=""></div>
 						<div class="xp-details-name"><b>${el.name}</b></div>
-						<div class="xp-details-type">${el.constructor.name}</div>
+						<div class="xp-details-type">${typeName}</div>
 						${sizeLine}
 						<div class="xp-details-modified">Modified: ${el.modifiedAt.toLocaleDateString()}</div>
 					`;
 				}
-				if (fileTasks) {
-					fileTasks.querySelectorAll('.xp-task-link').forEach(link => link.classList.remove('disabled'));
+				if (actionsContainer && el) {
+					const isFolder = el instanceof Folder;
+					const isProject = el instanceof ProjectFile;
+					let playAction = '';
+					if (isProject && el.projectData && el.projectData.link) {
+						playAction = `<a href="#" class="xp-task-link" data-action="run"><img src="https://api.iconify.design/mdi/play-box-outline.svg" alt=""><span>Run application</span></a>`;
+					}
+
+					actionsContainer.innerHTML = `
+						${playAction}
+						<a href="#" class="xp-task-link" data-action="rename"><img src="../assets/images/desk/icons/File.webp" alt=""><span>Rename this ${isFolder ? 'folder' : 'file'}</span></a>
+						<a href="#" class="xp-task-link" data-action="move"><img src="https://api.iconify.design/mdi/folder-move-outline.svg" alt=""><span>Move this ${isFolder ? 'folder' : 'file'}</span></a>
+						<a href="#" class="xp-task-link" data-action="copy"><img src="https://api.iconify.design/mdi/content-copy.svg" alt=""><span>Copy this ${isFolder ? 'folder' : 'file'}</span></a>
+						<a href="#" class="xp-task-link" data-action="email"><img src="https://api.iconify.design/mdi/email-outline.svg" alt=""><span>E-mail this file</span></a>
+						<a href="#" class="xp-task-link" data-action="delete"><img src="https://api.iconify.design/mdi/delete-outline.svg" alt=""><span>Delete this ${isFolder ? 'folder' : 'file'}</span></a>
+					`;
 				}
 			} else {
 				if (sbCount) sbCount.textContent = `${selectedCount} objects selected`;
@@ -1053,13 +1231,58 @@
 						<div>Total size: ${Math.ceil(selBytes / 1024)} KB</div>
 					`;
 				}
-				if (fileTasks) {
-					fileTasks.querySelectorAll('.xp-task-link').forEach(link => {
-						const t = link.dataset.task;
-						if (t === 'rename') link.classList.add('disabled');
-						else link.classList.remove('disabled');
-					});
+				if (actionsContainer) {
+					actionsContainer.innerHTML = `
+						<a href="#" class="xp-task-link" data-action="move"><img src="https://api.iconify.design/mdi/folder-move-outline.svg" alt=""><span>Move the selected items</span></a>
+						<a href="#" class="xp-task-link" data-action="copy"><img src="https://api.iconify.design/mdi/content-copy.svg" alt=""><span>Copy the selected items</span></a>
+						<a href="#" class="xp-task-link" data-action="email"><img src="https://api.iconify.design/mdi/email-outline.svg" alt=""><span>E-mail the selected items</span></a>
+						<a href="#" class="xp-task-link" data-action="delete"><img src="https://api.iconify.design/mdi/delete-outline.svg" alt=""><span>Delete the selected items</span></a>
+					`;
 				}
+			}
+
+			if (actionsContainer) {
+				actionsContainer.querySelectorAll('.xp-task-link').forEach(link => {
+					link.addEventListener('click', (e) => {
+						e.preventDefault();
+						const act = link.dataset.action;
+						if (act === 'new-folder') {
+							try {
+								fs.create('Folder', state.currentFolder.getFullPath(), 'New Folder');
+								refreshUI();
+							} catch (err) {
+								showXPDialog('Error', err.message, 'error');
+							}
+						} else if (act === 'rename') {
+							const icon = Array.from(state.selectedItems)[0];
+							if (icon) startInlineRename(icon);
+						} else if (act === 'delete') {
+							const delBtn = win.querySelector('.tb-delete');
+							if (delBtn) delBtn.click();
+						} else if (act === 'copy') {
+							const copyBtn = win.querySelector('.tb-copy');
+							if (copyBtn) copyBtn.click();
+						} else if (act === 'move') {
+							const cutBtn = win.querySelector('.tb-cut');
+							if (cutBtn) cutBtn.click();
+						} else if (act === 'run') {
+							const icon = Array.from(state.selectedItems)[0];
+							const el = fs.findByPath(icon.dataset.path);
+							if (el && el.projectData) {
+								const title = resolveProjectTitle(el.projectData.title);
+								const appId = `app-running-${title.replace(/\s/g, '-')}-${Date.now()}`;
+								const appContent = `<iframe src="${el.projectData.link}" style="width: 100%; height: 100%; border: none;"></iframe>`;
+								const appWin = createXPWindow(appId, title, appContent, 800, 600, { iconSrc: el.projectData.icon });
+								appWin.querySelector('.xp-window-content').style.padding = '0';
+								appWin.querySelector('.xp-window-content').style.overflow = 'hidden';
+							}
+						} else if (act === 'email') {
+							if (typeof openOutlookExpress === 'function') openOutlookExpress();
+						} else if (act === 'publish' || act === 'share') {
+							showXPDialog('Web Publishing Wizard', 'This feature requires an active network connection to MSN or an FTP host.', 'info');
+						}
+					});
+				});
 			}
 		},
 
@@ -1071,6 +1294,8 @@
 			const buildNode = (folder, depth = 0) => {
 				const node = document.createElement('div');
 				node.className = 'xp-tree-node';
+				node.dataset.path = folder.getFullPath();
+				node.dataset.type = 'folder';
 				node.style.paddingLeft = `${depth * 14 + 4}px`;
 
 				const hasSubfolders = folder.listContent().some(c => c instanceof Folder);
@@ -1119,6 +1344,10 @@
 				label.addEventListener('click', () => {
 					this.navigateTo(folder, win, true);
 				});
+
+				node.addEventListener('dragover', handleDragOver);
+				node.addEventListener('dragleave', handleDragLeave);
+				node.addEventListener('drop', handleDrop);
 
 				return node;
 			};

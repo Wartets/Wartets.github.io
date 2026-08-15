@@ -2779,30 +2779,47 @@ function handleDragEnd(e) {
 function resolveDropDestination(dropTarget) {
 	if (!dropTarget) return null;
 
-	if (dropTarget.classList.contains('project-icon')) {
-		if (dropTarget.dataset.systemType === 'recycle-bin') {
+	const treeNode = dropTarget.closest('.xp-tree-node');
+	if (treeNode) {
+		const treePath = treeNode.dataset.path;
+		if (treePath) return { type: 'folder', path: treePath };
+	}
+
+	const iconCandidate = dropTarget.closest('.project-icon, .xp-details-row');
+	if (iconCandidate) {
+		if (iconCandidate.dataset.systemType === 'recycle-bin') {
 			return { type: 'recycle' };
 		}
-		if (dropTarget.dataset.type === 'folder') {
-			return { type: 'folder', path: dropTarget.dataset.path };
+		if (iconCandidate.dataset.type === 'folder' || iconCandidate.querySelector('.col-type')?.textContent.includes('Folder')) {
+			return { type: 'folder', path: iconCandidate.dataset.path };
 		}
 	}
 
-	if (dropTarget.classList.contains('folder-content')) {
-		const win = dropTarget.closest('.xp-window');
+	const folderContent = dropTarget.closest('.folder-content');
+	if (folderContent) {
+		const win = folderContent.closest('.xp-window');
 		if (win && win.id === 'window-recycle-bin') {
 			return { type: 'recycle' };
 		}
-		return { type: 'folder', path: dropTarget.dataset.path || '/' };
+		return { type: 'folder', path: folderContent.dataset.path || '/' };
 	}
 
-	if (dropTarget.classList.contains('folder-content-wrapper')) {
-		const win = dropTarget.closest('.xp-window');
+	const folderWrapper = dropTarget.closest('.folder-content-wrapper, .xp-explorer-view-container');
+	if (folderWrapper) {
+		const win = folderWrapper.closest('.xp-window');
 		if (win && win.id === 'window-recycle-bin') {
 			return { type: 'recycle' };
 		}
-		const inner = dropTarget.querySelector('.folder-content');
+		const inner = folderWrapper.querySelector('.folder-content');
 		return { type: 'folder', path: (inner && inner.dataset.path) ? inner.dataset.path : '/' };
+	}
+
+	const addressRow = dropTarget.closest('.xp-explorer-addressbar-row, .folder-address-bar-container');
+	if (addressRow) {
+		const win = addressRow.closest('.xp-window');
+		if (win && win.explorerState && win.explorerState.currentFolder) {
+			return { type: 'folder', path: win.explorerState.currentFolder.getFullPath() };
+		}
 	}
 
 	if (dropTarget.id === 'desktop' || dropTarget.id === 'project-icons-container') {
@@ -4262,8 +4279,15 @@ async function openOutlookExpress() {
 
 	const contentHTML = `
 		<div class="outlook-window-layout">
-			<div class="folder-menu-bar">
-				<ul><li><u>F</u>ile</li><li><u>E</u>dit</li><li><u>V</u>iew</li><li><u>T</u>ools</li><li><u>M</u>essage</li><li><u>H</u>elp</li></ul>
+			<div class="folder-menu-bar" id="oe-menubar">
+				<ul>
+					<li data-oe-menu="file"><u>F</u>ile</li>
+					<li data-oe-menu="edit"><u>E</u>dit</li>
+					<li data-oe-menu="view"><u>V</u>iew</li>
+					<li data-oe-menu="tools"><u>T</u>ools</li>
+					<li data-oe-menu="message"><u>M</u>essage</li>
+					<li data-oe-menu="help"><u>H</u>elp</li>
+				</ul>
 			</div>
 			<div class="outlook-toolbar">
 				<button class="outlook-tool-btn" data-action="new"><img src="../assets/images/desk/icons/List File.webp" alt="Create Mail"><span>Create Mail</span></button>
@@ -4312,6 +4336,198 @@ async function openOutlookExpress() {
 	const previewDate = outlookWindow.querySelector('#preview-date');
 	const previewSubject = outlookWindow.querySelector('#preview-subject');
 	const previewBody = outlookWindow.querySelector('#preview-body');
+
+	outlookWindow.querySelectorAll('#oe-menubar li[data-oe-menu]').forEach(menuLi => {
+		menuLi.addEventListener('click', (e) => {
+			e.stopPropagation();
+			const menuType = menuLi.dataset.oeMenu;
+			const rect = menuLi.getBoundingClientRect();
+			const hasSelection = !!selectedMessageId && !!MailStore.getMessageById(selectedMessageId);
+			const selectedMsg = hasSelection ? MailStore.getMessageById(selectedMessageId) : null;
+			let items = [];
+
+			if (menuType === 'file') {
+				items = [
+					{
+						label: 'New',
+						submenu: [
+							{ label: 'Mail Message', shortcut: 'Ctrl+N', action: () => openComposeWindow() },
+							{ label: 'Folder...', action: promptNewFolder }
+						]
+					},
+					{
+						label: 'Open',
+						disabled: !hasSelection,
+						action: () => {
+							if (selectedMsg) {
+								if (currentFolderId === 'drafts') {
+									openComposeWindow({ draftId: selectedMsg.id, to: selectedMsg.to, subject: selectedMsg.subject, body: htmlToPlainText(selectedMsg.body) });
+								} else {
+									openMessageWindow(selectedMsg);
+								}
+							}
+						}
+					},
+					{ separator: true },
+					{
+						label: 'Delete',
+						shortcut: 'Del',
+						disabled: !hasSelection,
+						action: () => {
+							if (selectedMsg) {
+								MailStore.deleteMessage(selectedMsg.id);
+								selectedMessageId = null;
+								renderMessageList();
+								renderFolderList();
+								clearPreview();
+							}
+						}
+					},
+					{
+						label: 'Properties',
+						disabled: !hasSelection,
+						action: () => {
+							if (selectedMsg) openMailInfoWindow(selectedMsg);
+						}
+					},
+					{ separator: true },
+					{ label: 'Close', action: () => closeWindow(outlookWindow, id) }
+				];
+			} else if (menuType === 'edit') {
+				items = [
+					{
+						label: 'Select All',
+						shortcut: 'Ctrl+A',
+						action: () => {
+							const rows = outlookWindow.querySelectorAll('.outlook-message-list .msg-row');
+							rows.forEach(r => r.classList.add('selected'));
+						}
+					},
+					{
+						label: 'Mark as Read',
+						disabled: !hasSelection,
+						action: () => {
+							if (selectedMsg) {
+								MailStore.markRead(selectedMsg.id, true);
+								renderMessageList();
+								renderFolderList();
+							}
+						}
+					},
+					{
+						label: 'Mark as Unread',
+						disabled: !hasSelection,
+						action: () => {
+							if (selectedMsg) {
+								MailStore.markRead(selectedMsg.id, false);
+								renderMessageList();
+								renderFolderList();
+							}
+						}
+					},
+					{
+						label: 'Mark All as Read',
+						action: () => {
+							MailStore.getMessages(currentFolderId).forEach(m => MailStore.markRead(m.id, true));
+							renderMessageList();
+							renderFolderList();
+						}
+					}
+				];
+			} else if (menuType === 'view') {
+				items = [
+					{
+						label: 'Folders Pane',
+						checked: !foldersPane.classList.contains('collapsed'),
+						action: () => {
+							if (collapseBtn) collapseBtn.click();
+						}
+					},
+					{
+						label: 'Preview Pane',
+						checked: previewPane.style.display !== 'none',
+						action: () => {
+							const isHidden = previewPane.style.display === 'none';
+							previewPane.style.display = isHidden ? 'flex' : 'none';
+							if (splitterH) splitterH.style.display = isHidden ? 'block' : 'none';
+						}
+					},
+					{ separator: true },
+					{
+						label: 'Refresh',
+						shortcut: 'F5',
+						action: () => {
+							renderFolderList();
+							renderMessageList();
+						}
+					}
+				];
+			} else if (menuType === 'tools') {
+				items = [
+					{
+						label: 'Send and Receive All',
+						shortcut: 'F5',
+						action: () => {
+							MailStore.ensureDailyContent().then(added => {
+								renderFolderList();
+								renderMessageList();
+								showXPDialog('Send/Receive Complete', 'All mail folders are up to date.', 'info');
+							});
+						}
+					},
+					{ separator: true },
+					{
+						label: 'Accounts...',
+						action: () => {
+							showXPDialog('Internet Accounts', 'Account: Colin B.R.\nProtocol: POP3/SMTP (Simulated Local Store)', 'info');
+						}
+					},
+					{
+						label: 'Options...',
+						action: () => {
+							if (window.SettingsApp) window.SettingsApp.open('system');
+						}
+					}
+				];
+			} else if (menuType === 'message') {
+				items = [
+					{ label: 'New Message', shortcut: 'Ctrl+N', action: () => openComposeWindow() },
+					{
+						label: 'Reply to Sender',
+						shortcut: 'Ctrl+R',
+						disabled: !hasSelection,
+						action: () => {
+							if (selectedMsg) openComposeWindow(buildReply(selectedMsg));
+						}
+					},
+					{
+						label: 'Forward',
+						shortcut: 'Ctrl+F',
+						disabled: !hasSelection,
+						action: () => {
+							if (selectedMsg) openComposeWindow(buildForward(selectedMsg));
+						}
+					}
+				];
+			} else if (menuType === 'help') {
+				items = [
+					{ label: 'Contents and Index', action: () => window.open('https://github.com/wartets/Wartets.github.io', '_blank') },
+					{ separator: true },
+					{
+						label: 'About Microsoft Outlook Express',
+						bold: true,
+						action: () => {
+							showXPDialog('About Outlook Express', 'Microsoft Outlook Express 6.0\nRunning on Windows XP Professional\nPortfolio Communications Client', 'info');
+						}
+					}
+				];
+			}
+
+			if (window.ContextMenu) {
+				window.ContextMenu.show(items, rect.left, rect.bottom + 2);
+			}
+		});
+	});
 
 	const collapseBtn = outlookWindow.querySelector('#oe-collapse-folders');
 	const foldersPane = outlookWindow.querySelector('#oe-folders');
