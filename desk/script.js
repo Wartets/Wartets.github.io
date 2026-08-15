@@ -2455,7 +2455,7 @@ async function openAnecdoteWindow(dateUTC) {
 
 	const dateLabel = dateUTC.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric', timeZone: 'UTC' });
 	const win = createXPWindow(id, `Anecdote - ${dateLabel}`, '<div style="padding:15px; font-size:12px;">Loading...</div>', 420, 260, {
-		iconSrc: 'https://api.iconify.design/mdi/calendar-star.svg',
+		iconSrc: '../assets/images/desk/icons/Calendar.webp',
 		resizable: false
 	});
 

@@ -96,6 +96,22 @@
 		}
 
 		bindEvents() {
+			this.win.beforeClose = (forceClose) => {
+				if (!this.isDirty) return true;
+				const currentName = this.file ? this.file.name : (this.options.title || 'Untitled');
+				showXPDialog('Notepad', `Do you want to save changes to ${currentName}?`, 'question', {
+					buttons: ['Yes', 'No', 'Cancel'],
+					callback: (res) => {
+						if (res === 'Yes') {
+							if (this.save()) forceClose();
+						} else if (res === 'No') {
+							forceClose();
+						}
+					}
+				});
+				return false;
+			};
+
 			this.textarea.addEventListener('input', () => {
 				if (!this.isDirty) {
 					this.isDirty = true;
@@ -231,139 +247,88 @@
 		}
 
 		saveAs() {
-			const dialogId = `dialog-notepad-saveas-${Date.now()}`;
-			const currentName = this.file ? this.file.name : (this.options.title || 'New Text Document.txt');
+			if (window.FileDialog) {
+				const currentName = this.file ? this.file.name : (this.options.title || 'Untitled.txt');
+				window.FileDialog.open({
+					mode: 'save',
+					title: 'Save As',
+					defaultFolder: this.file ? (this.file.parent || fs.root) : fs.root,
+					defaultName: currentName,
+					filterTypes: [
+						{ label: 'Text Documents (*.txt)', ext: '.txt', mime: 'text/plain' },
+						{ label: 'Batch Scripts (*.bat;*.cmd)', ext: '.bat;.cmd', mime: 'text/plain' },
+						{ label: 'All Files (*.*)', ext: '.*', mime: '*/*' }
+					],
+					onConfirm: (folder, fileName, existingFile, filter) => {
+						try {
+							let targetFile = existingFile;
+							if (!targetFile) {
+								targetFile = fs.create('File', folder.getFullPath(), fileName);
+							}
+							targetFile.write(this.textarea.value);
+							if (fileName.toLowerCase().endsWith('.bat') || fileName.toLowerCase().endsWith('.cmd')) {
+								targetFile.icon = '../assets/images/desk/icons/Command Prompt.webp';
+							} else {
+								targetFile.icon = '../assets/images/desk/icons/File.webp';
+							}
+							fs.save();
 
-			const content = `
-				<div style="padding: 12px; display: flex; flex-direction: column; gap: 10px;">
-					<div class="xp-form-row">
-						<label style="width: 80px;">Save in:</label>
-						<select id="np-saveas-folder" class="xp-select" style="flex: 1;">
-							<option value="/">Desktop</option>
-							<option value="/PDFs">PDFs Folder</option>
-						</select>
-					</div>
-					<div class="xp-form-row">
-						<label style="width: 80px;">File name:</label>
-						<input type="text" id="np-saveas-name" class="xp-input" value="${currentName}" style="flex: 1;">
-					</div>
-					<div class="xp-form-row">
-						<label style="width: 80px;">Save as type:</label>
-						<select id="np-saveas-type" class="xp-select" style="flex: 1;">
-							<option value="txt">Text Documents (*.txt)</option>
-							<option value="bat">Batch Scripts (*.bat; *.cmd)</option>
-							<option value="all">All Files (*.*)</option>
-						</select>
-					</div>
-					<div class="xp-dialog-action-footer">
-						<button type="button" class="xp-button" id="np-saveas-ok">Save</button>
-						<button type="button" class="xp-button" id="np-saveas-cancel">Cancel</button>
-					</div>
-				</div>
-			`;
-
-			const dlg = createXPWindow(dialogId, 'Save As', content, 420, 210, {
-				resizable: false,
-				isModal: true,
-				iconSrc: '../assets/images/desk/icons/Notepad.webp'
-			});
-			dlg.querySelector('.xp-window-content').style.padding = '0';
-
-			const nameInput = dlg.querySelector('#np-saveas-name');
-			const folderSelect = dlg.querySelector('#np-saveas-folder');
-			nameInput.focus();
-			nameInput.select();
-
-			dlg.querySelector('#np-saveas-ok').addEventListener('click', () => {
-				let filename = nameInput.value.trim();
-				if (!filename) filename = 'Untitled.txt';
-				const folderPath = folderSelect.value;
-				const parentFolder = fs.findByPath(folderPath) || fs.root;
-
-				try {
-					let targetFile = parentFolder.getByName(filename);
-					if (!targetFile) {
-						targetFile = fs.create('File', parentFolder.getFullPath(), filename);
+							this.file = targetFile;
+							this.isDirty = false;
+							this.updateTitle();
+							if (typeof refreshUI === 'function') refreshUI();
+							if (window.DeskAPI) {
+								window.DeskAPI.addToRecentDocs({
+									name: targetFile.name,
+									icon: targetFile.icon,
+									type: 'file',
+									path: targetFile.getFullPath()
+								});
+							}
+						} catch (e) {
+							showXPDialog('Save As', `Could not save file: ${e.message}`, 'error');
+						}
 					}
-					targetFile.write(this.textarea.value);
-					if (filename.toLowerCase().endsWith('.bat') || filename.toLowerCase().endsWith('.cmd')) {
-						targetFile.icon = '../assets/images/desk/icons/Command Prompt.webp';
-					} else {
-						targetFile.icon = '../assets/images/desk/icons/File.webp';
-					}
-					fs.save();
-
-					this.file = targetFile;
-					this.isDirty = false;
-					this.updateTitle();
-					closeWindow(dlg, dialogId);
-					if (typeof refreshUI === 'function') refreshUI();
-					if (window.DeskAPI) {
-						window.DeskAPI.addToRecentDocs({
-							name: targetFile.name,
-							icon: targetFile.icon,
-							type: 'file',
-							path: targetFile.getFullPath()
-						});
-					}
-				} catch (e) {
-					showXPDialog('Save As', `Could not save file: ${e.message}`, 'error');
-				}
-			});
-
-			dlg.querySelector('#np-saveas-cancel').addEventListener('click', () => {
-				closeWindow(dlg, dialogId);
-			});
+				});
+			}
 		}
 
 		showOpenPrompt() {
-			const dialogId = `dialog-notepad-open-${Date.now()}`;
-			const files = [];
-
-			const scan = (f) => {
-				f.listContent().forEach(c => {
-					if (c instanceof File) files.push(c);
-					if (c instanceof Folder) scan(c);
-				});
-			};
-			scan(fs.root);
-
-			let optionsHtml = files.map(f => `<option value="${f.getFullPath()}">${f.name} (${f.getFullPath()})</option>`).join('');
-
-			const content = `
-				<div style="padding: 12px; display: flex; flex-direction: column; gap: 10px;">
-					<label>Select a file to open in Notepad:</label>
-					<select id="np-open-select" class="xp-select" size="8" style="height: 120px;">
-						${optionsHtml}
-					</select>
-					<div class="xp-dialog-action-footer">
-						<button type="button" class="xp-button" id="np-open-ok">Open</button>
-						<button type="button" class="xp-button" id="np-open-cancel">Cancel</button>
-					</div>
-				</div>
-			`;
-
-			const dlg = createXPWindow(dialogId, 'Open', content, 420, 240, {
-				resizable: false,
-				isModal: true,
-				iconSrc: '../assets/images/desk/icons/Notepad.webp'
-			});
-			dlg.querySelector('.xp-window-content').style.padding = '0';
-
-			const sel = dlg.querySelector('#np-open-select');
-			dlg.querySelector('#np-open-ok').addEventListener('click', () => {
-				if (sel.value) {
-					const target = fs.findByPath(sel.value);
-					if (target && target instanceof File) {
-						closeWindow(dlg, dialogId);
-						NotepadApp.open(target);
-					}
+			const proceedOpen = () => {
+				if (window.FileDialog) {
+					window.FileDialog.open({
+						mode: 'open',
+						title: 'Open',
+						defaultFolder: this.file ? (this.file.parent || fs.root) : fs.root,
+						filterTypes: [
+							{ label: 'Text Documents (*.txt)', ext: '.txt', mime: 'text/plain' },
+							{ label: 'Batch Scripts (*.bat;*.cmd)', ext: '.bat;.cmd', mime: 'text/plain' },
+							{ label: 'All Files (*.*)', ext: '.*', mime: '*/*' }
+						],
+						onConfirm: (folder, fileName, fileObj) => {
+							if (fileObj && fileObj instanceof File) {
+								NotepadApp.open(fileObj);
+							}
+						}
+					});
 				}
-			});
+			};
 
-			dlg.querySelector('#np-open-cancel').addEventListener('click', () => {
-				closeWindow(dlg, dialogId);
-			});
+			if (this.isDirty) {
+				const currentName = this.file ? this.file.name : (this.options.title || 'Untitled');
+				showXPDialog('Notepad', `Do you want to save changes to ${currentName}?`, 'question', {
+					buttons: ['Yes', 'No', 'Cancel'],
+					callback: (res) => {
+						if (res === 'Yes') {
+							if (this.save()) proceedOpen();
+						} else if (res === 'No') {
+							proceedOpen();
+						}
+					}
+				});
+			} else {
+				proceedOpen();
+			}
 		}
 
 		showFindDialog() {
@@ -643,7 +608,23 @@
 					{
 						label: 'New',
 						shortcut: 'Ctrl+N',
-						action: () => NotepadApp.openNew()
+						action: () => {
+							if (this.isDirty) {
+								const currentName = this.file ? this.file.name : (this.options.title || 'Untitled');
+								showXPDialog('Notepad', `Do you want to save changes to ${currentName}?`, 'question', {
+									buttons: ['Yes', 'No', 'Cancel'],
+									callback: (res) => {
+										if (res === 'Yes') {
+											if (this.save()) NotepadApp.openNew();
+										} else if (res === 'No') {
+											NotepadApp.openNew();
+										}
+									}
+								});
+							} else {
+								NotepadApp.openNew();
+							}
+						}
 					},
 					{
 						label: 'Open...',

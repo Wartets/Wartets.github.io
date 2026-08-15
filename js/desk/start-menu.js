@@ -104,7 +104,7 @@
 								</div>
 							</div>
 							<div class="xp-start-item" data-action="open-today-anecdote">
-								<img src="https://api.iconify.design/mdi/calendar-star.svg" class="xp-start-item-icon" alt="Daily Anecdote">
+								<img src="../assets/images/desk/icons/Calendar.webp" class="xp-start-item-icon" alt="Daily Anecdote">
 								<div class="xp-start-item-texts">
 									<span class="xp-start-title">Today's Anecdote</span>
 								</div>
@@ -320,7 +320,7 @@
 					</div>
 					<div id="xp-start-all-programs-list">
 						<div class="xp-start-flyout-item" data-action="my-projects">
-							<img src="https://api.iconify.design/mdi/folder-open-outline.svg" class="xp-start-item-icon" alt="">
+							<img src="../assets/images/desk/icons/Folder Open.webp" class="xp-start-item-icon" alt="">
 							<span class="xp-start-title"><strong>All Project Shortcuts</strong></span>
 						</div>
 						<div class="xp-start-divider"></div>
@@ -426,7 +426,7 @@
 									<span class="xp-start-title">Command Prompt</span>
 								</div>
 								<div class="xp-start-flyout-item" data-action="open-today-anecdote">
-									<img src="https://api.iconify.design/mdi/calendar-star.svg" class="xp-start-item-icon" alt="">
+									<img src="../assets/images/desk/icons/Calendar.webp" class="xp-start-item-icon" alt="">
 									<span class="xp-start-title">Daily Anecdotes</span>
 								</div>
 								<div class="xp-start-flyout-item" data-action="my-documents">
@@ -479,7 +479,7 @@
 							const categoryProjects = this.getProjectsByCategory(catKey);
 							let prjHtml = `
 								<div class="xp-start-flyout-item" data-category-open="${catKey}">
-									<img src="https://api.iconify.design/mdi/folder-open-outline.svg" class="xp-start-item-icon" alt="">
+									<img src="../assets/images/desk/icons/Folder Open.webp" class="xp-start-item-icon" alt="">
 									<span class="xp-start-title"><strong>Open Folder (${catKey})</strong></span>
 								</div>
 								<div class="xp-start-divider"></div>
