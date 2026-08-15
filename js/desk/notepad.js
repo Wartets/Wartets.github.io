@@ -792,7 +792,7 @@
 						label: 'About Notepad',
 						bold: true,
 						action: () => {
-							showXPDialog('About Notepad', 'Microsoft Windows XP Notepad\nVersion 5.1 (Build 2600.xpsp_sp3_gdr)\nCopyright (C) 1985-2001 Microsoft Corporation.', 'info');
+							showXPDialog('About Notepad', 'MacroPof Windows XP Notepad\nVersion 5.1 (Build 2600.xpsp_sp3_gdr)\nCopyright (C) 1985-2001 MacroPof Corporation.', 'info');
 						}
 					}
 				];

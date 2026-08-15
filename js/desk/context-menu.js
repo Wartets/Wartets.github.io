@@ -595,6 +595,21 @@
 			items.push({ separator: true });
 
 			items.push({
+				label: 'Pin to Quick Launch',
+				icon: 'https://api.iconify.design/mdi/pin-outline.svg?color=%231b4b9b',
+				action: () => {
+					if (window.Taskbar && window.Taskbar.addQuickLaunchItem) {
+						window.Taskbar.addQuickLaunchItem({
+							name: element.name,
+							icon: element.icon,
+							action: 'open-path',
+							path: element.getFullPath()
+						});
+					}
+				}
+			});
+
+			items.push({
 				label: 'Send To',
 				submenu: [
 					{
@@ -605,6 +620,19 @@
 								icon: element.icon
 							});
 							refreshUI();
+						}
+					},
+					{
+						label: 'Quick Launch',
+						action: () => {
+							if (window.Taskbar && window.Taskbar.addQuickLaunchItem) {
+								window.Taskbar.addQuickLaunchItem({
+									name: element.name,
+									icon: element.icon,
+									action: 'open-path',
+									path: element.getFullPath()
+								});
+							}
 						}
 					},
 					{
@@ -834,24 +862,110 @@
 			];
 		},
 
-		getQuickLaunchItemItems(appId, appName) {
+		getQuickLaunchBarItems() {
+			const isLocked = window.SettingsApp ? !!window.SettingsApp.get('taskbarLocked') : true;
+
 			return [
 				{
-					label: `Open ${appName}`,
-					bold: true,
+					label: 'Open Quick Launch Folder',
 					action: () => {
-						const el = document.getElementById(appId);
-						if (el) el.click();
+						if (typeof openFolderWindow === 'function' && typeof fs !== 'undefined') {
+							openFolderWindow(fs.root);
+						}
+					}
+				},
+				{
+					label: 'Reset Default Quick Launch Icons',
+					action: () => {
+						if (window.Taskbar && window.Taskbar.resetQuickLaunchDefaults) {
+							window.Taskbar.resetQuickLaunchDefaults();
+						}
 					}
 				},
 				{ separator: true },
 				{
+					label: 'Lock the Taskbar',
+					checked: isLocked,
+					action: () => {
+						if (window.SettingsApp) window.SettingsApp.set('taskbarLocked', !isLocked);
+					}
+				},
+				{
 					label: 'Properties',
+					bold: true,
 					action: () => {
 						if (window.SettingsApp) window.SettingsApp.open('taskbar');
 					}
 				}
 			];
+		},
+
+		getQuickLaunchItemItems(itemId, appName, itemData = null, itemIndex = 0) {
+			const items = [];
+			const qlList = (window.Taskbar && window.Taskbar.getQuickLaunchItems) ? window.Taskbar.getQuickLaunchItems() : [];
+
+			items.push({
+				label: `Open ${appName}`,
+				bold: true,
+				action: () => {
+					const el = document.getElementById(itemId);
+					if (el) el.click();
+				}
+			});
+
+			items.push({ separator: true });
+
+			if (itemIndex > 0) {
+				items.push({
+					label: 'Move Left',
+					icon: 'https://api.iconify.design/mdi/arrow-left.svg?color=%231b4b9b',
+					action: () => {
+						if (window.Taskbar && window.Taskbar.moveQuickLaunchItem) {
+							window.Taskbar.moveQuickLaunchItem(itemIndex, itemIndex - 1);
+						}
+					}
+				});
+			}
+
+			if (itemIndex < qlList.length - 1) {
+				items.push({
+					label: 'Move Right',
+					icon: 'https://api.iconify.design/mdi/arrow-right.svg?color=%231b4b9b',
+					action: () => {
+						if (window.Taskbar && window.Taskbar.moveQuickLaunchItem) {
+							window.Taskbar.moveQuickLaunchItem(itemIndex, itemIndex + 1);
+						}
+					}
+				});
+			}
+
+			items.push({
+				label: 'Remove from Quick Launch',
+				icon: 'https://api.iconify.design/mdi/delete-outline.svg?color=%23cc3333',
+				action: () => {
+					if (window.Taskbar && window.Taskbar.removeQuickLaunchItem) {
+						window.Taskbar.removeQuickLaunchItem(itemId);
+					}
+				}
+			});
+
+			items.push({ separator: true });
+
+			items.push({
+				label: 'Properties',
+				action: () => {
+					if (itemData && itemData.path && typeof fs !== 'undefined') {
+						const el = fs.findByPath(itemData.path);
+						if (el) {
+							openElementInfoWindow(el);
+							return;
+						}
+					}
+					if (window.SettingsApp) window.SettingsApp.open('taskbar');
+				}
+			});
+
+			return items;
 		},
 
 		getTrayItems(trayId) {

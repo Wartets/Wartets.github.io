@@ -372,7 +372,7 @@
 						<div style="display: flex; gap: 14px; margin-bottom: 10px; align-items: center;">
 							<img src="../assets/images/desk/icons/System Properties.webp" alt="Windows XP" style="width: 48px; height: 48px; flex-shrink: 0;">
 							<div style="font-size: 11px; line-height: 1.45;">
-								<strong>Microsoft Windows XP</strong><br>
+								<strong>MacroPof Windows XP</strong><br>
 								Professional Version 2002 Service Pack 3<br>
 								Wartets Interactive Experience & Portfolio Engine
 							</div>
@@ -623,7 +623,7 @@
 							</div>
 							<div class="xp-checkbox-row" style="margin-top: 6px;">
 								<input type="checkbox" id="settings-clippy-toggle" ${pendingSettings.clippyEnabled ? 'checked' : ''}>
-								<label for="settings-clippy-toggle">Enable Microsoft Clippy assistant in taskbar</label>
+								<label for="settings-clippy-toggle">Enable MacroPof Clippy assistant in taskbar</label>
 							</div>
 						</fieldset>
 					</div>

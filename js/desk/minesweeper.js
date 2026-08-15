@@ -243,7 +243,7 @@
 					{
 						label: 'About Minesweeper',
 						action: () => {
-							showXPDialog('About Minesweeper', 'Microsoft Windows XP Minesweeper Recreation.\nAuthentic gameplay, high scores and board calibration.', 'info');
+							showXPDialog('About Minesweeper', 'MacroPof Windows XP Minesweeper Recreation.\nAuthentic gameplay, high scores and board calibration.', 'info');
 						}
 					}
 				];

@@ -2323,24 +2323,9 @@ function openProjectWindow(project) {
 }
 
 function setupCalendar() {
-	const prevButton = document.getElementById('calendar-prev');
-	const nextButton = document.getElementById('calendar-next');
-	const todayFooter = document.getElementById('calendar-footer');
-
-	prevButton.addEventListener('click', () => {
-		currentCalendarDate.setMonth(currentCalendarDate.getMonth() - 1);
-		renderCalendar(currentCalendarDate.getFullYear(), currentCalendarDate.getMonth());
-	});
-
-	nextButton.addEventListener('click', () => {
-		currentCalendarDate.setMonth(currentCalendarDate.getMonth() + 1);
-		renderCalendar(currentCalendarDate.getFullYear(), currentCalendarDate.getMonth());
-	});
-	
-	todayFooter.addEventListener('click', () => {
-		currentCalendarDate = new Date();
-		renderCalendar(currentCalendarDate.getFullYear(), currentCalendarDate.getMonth());
-	});
+	if (window.Taskbar && typeof window.Taskbar.renderCalendar === 'function') {
+		window.Taskbar.renderCalendar();
+	}
 }
 
 function openWinamp() {
@@ -2387,48 +2372,8 @@ function openMinesweeper() {
 }
 
 function renderCalendar(year, month) {
-	const monthYearEl = document.getElementById('calendar-month-year');
-	const gridEl = document.getElementById('calendar-grid');
-	const todayDateEl = document.getElementById('calendar-today-date');
-
-	gridEl.innerHTML = '';
-
-	const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
-	monthYearEl.textContent = `${monthNames[month]} ${year}`;
-
-	const today = new Date();
-	todayDateEl.textContent = `Today: ${today.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}`;
-
-
-	const firstDayOfMonth = new Date(year, month, 1);
-	const daysInMonth = new Date(year, month + 1, 0).getDate();
-	const startDayOfWeek = firstDayOfMonth.getDay();
-
-	for (let i = 0; i < startDayOfWeek; i++) {
-		const emptyCell = document.createElement('div');
-		gridEl.appendChild(emptyCell);
-	}
-
-	for (let day = 1; day <= daysInMonth; day++) {
-		const dayCell = document.createElement('div');
-		dayCell.className = 'calendar-day';
-		dayCell.textContent = day;
-
-		const isToday = year === today.getFullYear() && month === today.getMonth() && day === today.getDate();
-		if (isToday) {
-			dayCell.classList.add('today');
-		}
-
-		const isSelectable = year === today.getFullYear() && month === today.getMonth() && day <= today.getDate();
-		if (isSelectable) {
-			dayCell.classList.add('selectable');
-			dayCell.title = 'View the anecdote scheduled for this day';
-			dayCell.addEventListener('click', () => {
-				openAnecdoteWindow(new Date(Date.UTC(year, month, day)));
-			});
-		}
-		
-		gridEl.appendChild(dayCell);
+	if (window.Taskbar && typeof window.Taskbar.renderCalendar === 'function') {
+		window.Taskbar.renderCalendar();
 	}
 }
 
@@ -3455,8 +3400,8 @@ function processRunCommand(command) {
 		const id = `window-cmd-${Date.now()}`;
 		const content = `
 			<div style="background-color: black; color: white; font-family: 'Consolas', 'Lucida Console', monospace; height: 100%; padding: 5px; overflow-y: auto;">
-				<div>Microsoft Windows XP [Version 5.1.5627]</div>
-				<div>(C) Copyright 1985-2001 Microsoft Corp.</div>
+				<div>MacroPof Windows XP [Version 5.1.5627]</div>
+				<div>(C) Copyright 1985-2001 MacroPof Corp.</div>
 				<br>
 				<div>C:\\Documents\\Wartets>${command}</div>
 				<br>
@@ -3646,7 +3591,7 @@ function openMyComputerWindow() {
 		showXPDialog('Drive A:', 'Please insert a disk into drive A:.', 'error');
 	});
 	win.querySelector('#mycomp-item-cdrom').addEventListener('dblclick', () => {
-		showXPDialog('CD Drive (D:)', 'Microsoft Windows XP Professional SP3 Installation Media.', 'info');
+		showXPDialog('CD Drive (D:)', 'MacroPof Windows XP Professional SP3 Installation Media.', 'info');
 	});
 }
 
@@ -4016,7 +3961,7 @@ function openNetworkPlacesWindow() {
 								<img src="../assets/images/desk/icons/Earth (fixed).webp" alt="">
 								<div class="xp-tile-texts">
 									<strong>Entire Network</strong>
-									<span>Microsoft Windows Network</span>
+									<span>MacroPof Windows Network</span>
 								</div>
 							</div>
 							<div class="xp-explorer-item mode-tile net-card-item" id="net-item-workgroup" style="cursor: pointer;">
@@ -4088,7 +4033,7 @@ function openNetworkPlacesWindow() {
 		showXPDialog('Network Setup Wizard', 'Your home network is configured with IP 192.168.1.1 gateway.', 'info');
 	});
 
-	win.querySelector('#net-item-entire').addEventListener('dblclick', () => showXPDialog('Entire Network', 'Scanning Microsoft Windows Network domains... (MSHOME)', 'info'));
+	win.querySelector('#net-item-entire').addEventListener('dblclick', () => showXPDialog('Entire Network', 'Scanning MacroPof Windows Network domains... (MSHOME)', 'info'));
 	win.querySelector('#net-item-workgroup').addEventListener('dblclick', () => showXPDialog('Workgroup (MSHOME)', 'Found hosts: Colin-Laptop, Router-Gateway.', 'info'));
 	win.querySelector('#net-item-laptop').addEventListener('dblclick', () => showXPDialog('Colin-Laptop', 'Shared resources:\n\\\\Colin-Laptop\\Public\n\\\\Colin-Laptop\\Projects', 'info'));
 
@@ -4676,10 +4621,10 @@ async function openOutlookExpress() {
 					{ label: 'Contents and Index', action: () => window.open('https://github.com/wartets/Wartets.github.io', '_blank') },
 					{ separator: true },
 					{
-						label: 'About Microsoft Outlook Express',
+						label: 'About MacroPof Outlook Express',
 						bold: true,
 						action: () => {
-							showXPDialog('About Outlook Express', 'Microsoft Outlook Express 6.0\nRunning on Windows XP Professional\nPortfolio Communications Client', 'info');
+							showXPDialog('About Outlook Express', 'MacroPof Outlook Express 6.0\nRunning on Windows XP Professional\nPortfolio Communications Client', 'info');
 						}
 					}
 				];

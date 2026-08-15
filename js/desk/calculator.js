@@ -410,7 +410,7 @@
 								label: 'About Calculator',
 								bold: true,
 								action: () => {
-									showXPDialog('About Calculator', 'Microsoft Windows XP Calculator\nVersion 5.1 (Build 2600.xpsp_sp3_gdr)\nStandard Numeric Engine', 'info');
+									showXPDialog('About Calculator', 'MacroPof Windows XP Calculator\nVersion 5.1 (Build 2600.xpsp_sp3_gdr)\nStandard Numeric Engine', 'info');
 								}
 							}
 						];

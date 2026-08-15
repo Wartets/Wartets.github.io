@@ -3,27 +3,42 @@
  * Highly extensible, modular taskbar with quick launch, system tray, and clock integration.
  */
 (function () {
+	const QUICK_LAUNCH_STORAGE_KEY = 'xp_quick_launch_items';
+
+	const DEFAULT_QUICK_LAUNCH = [
+		{ id: 'ql-show-desktop', name: 'Show Desktop', icon: '../assets/images/desk/XPIcon.png', action: 'show-desktop', system: true },
+		{ id: 'ql-settings', name: 'Control Panel & Settings', icon: '../assets/images/desk/icons/System Properties.webp', action: 'open-settings' },
+		{ id: 'ql-ie', name: 'Internet Explorer', icon: '../assets/images/desk/internet-explorer.png', action: 'open-ie' },
+		{ id: 'ql-oe', name: 'Outlook Express', icon: '../assets/images/desk/OE2001.webp', action: 'open-oe', hasBadge: true },
+		{ id: 'ql-cmd', name: 'Command Prompt', icon: '../assets/images/desk/icons/Command Prompt.webp', action: 'open-cmd' },
+		{ id: 'ql-notepad', name: 'Notepad', icon: '../assets/images/desk/icons/Notepad.webp', action: 'open-notepad' },
+		{ id: 'ql-calc', name: 'Calculator', icon: '../assets/images/desk/icons/Calculator.webp', action: 'open-calc' },
+		{ id: 'ql-paint', name: 'Paint', icon: '../assets/images/desk/icons/Paint.webp', action: 'open-paint' },
+		{ id: 'ql-winamp', name: 'Winamp Media Player', icon: 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/0d/Winamp-logo.svg/960px-Winamp-logo.svg.png', action: 'open-winamp' },
+		{ id: 'ql-mine', name: 'Minesweeper', icon: '../assets/images/desk/icons/Minesweeper.webp', action: 'open-mine' },
+	];
+
 	let taskbarEl = null;
 	let startBtnEl = null;
 	let quickLaunchEl = null;
 	let windowsContainerEl = null;
 	let systemTrayEl = null;
 	let clockEl = null;
-	let taskbarMenuEl = null;
-	let buttonMenuEl = null;
 	let volumePopupEl = null;
+	let calendarPopupEl = null;
 	let previewPopupEl = null;
 	let balloonContainerEl = null;
 	let trayChevronEl = null;
 	let trayHiddenGroupEl = null;
-	let volumeSliderEl = null;
-	let volumeMuteEl = null;
 
 	let isTrayExpanded = false;
 	let clockInterval = null;
 	let flashingButtons = new Map();
 	let previewHoverTimeout = null;
 	let customTrayIcons = new Map();
+	let quickLaunchItems = [];
+	let draggedQlId = null;
+	let calendarCurrentDate = new Date();
 
 	const Taskbar = {
 		init() {
@@ -37,16 +52,265 @@
 			clockEl = document.getElementById('taskbar-clock');
 			trayChevronEl = document.getElementById('tray-chevron-btn');
 			trayHiddenGroupEl = document.getElementById('tray-hidden-icons');
-			volumePopupEl = document.getElementById('taskbar-volume-popup');
-			volumeSliderEl = document.getElementById('taskbar-volume-slider');
-			volumeMuteEl = document.getElementById('taskbar-volume-mute');
 
+			this.loadQuickLaunchItems();
 			this.createDomElements();
-			this.createContextMenus();
+			this.renderQuickLaunch();
 			this.bindEvents();
 			this.initClock();
 			this.updateDensity();
 			this.updateUnreadBadges();
+		},
+
+		loadQuickLaunchItems() {
+			try {
+				const saved = localStorage.getItem(QUICK_LAUNCH_STORAGE_KEY);
+				if (saved) {
+					quickLaunchItems = JSON.parse(saved);
+				} else {
+					quickLaunchItems = JSON.parse(JSON.stringify(DEFAULT_QUICK_LAUNCH));
+				}
+			} catch (e) {
+				quickLaunchItems = JSON.parse(JSON.stringify(DEFAULT_QUICK_LAUNCH));
+			}
+		},
+
+		saveQuickLaunchItems() {
+			try {
+				localStorage.setItem(QUICK_LAUNCH_STORAGE_KEY, JSON.stringify(quickLaunchItems));
+			} catch (e) {}
+		},
+
+		getQuickLaunchItems() {
+			return quickLaunchItems;
+		},
+
+		addQuickLaunchItem(item) {
+			if (!item || !item.name) return;
+			const newItem = {
+				id: item.id || `ql-custom-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
+				name: item.name,
+				icon: item.icon || '../assets/images/desk/icons/File.webp',
+				action: item.action || 'open-path',
+				path: item.path || null,
+				hasBadge: !!item.hasBadge
+			};
+			quickLaunchItems.push(newItem);
+			this.saveQuickLaunchItems();
+			this.renderQuickLaunch();
+			if (window.SettingsApp && window.SettingsApp.playSound) {
+				window.SettingsApp.playSound('click');
+			}
+		},
+
+		removeQuickLaunchItem(id) {
+			quickLaunchItems = quickLaunchItems.filter(item => item.id !== id);
+			this.saveQuickLaunchItems();
+			this.renderQuickLaunch();
+			if (window.SettingsApp && window.SettingsApp.playSound) {
+				window.SettingsApp.playSound('recycle');
+			}
+		},
+
+		moveQuickLaunchItem(fromIndex, toIndex) {
+			if (fromIndex < 0 || fromIndex >= quickLaunchItems.length || toIndex < 0 || toIndex >= quickLaunchItems.length) return;
+			const item = quickLaunchItems.splice(fromIndex, 1)[0];
+			quickLaunchItems.splice(toIndex, 0, item);
+			this.saveQuickLaunchItems();
+			this.renderQuickLaunch();
+		},
+
+		resetQuickLaunchDefaults() {
+			quickLaunchItems = JSON.parse(JSON.stringify(DEFAULT_QUICK_LAUNCH));
+			this.saveQuickLaunchItems();
+			this.renderQuickLaunch();
+		},
+
+		renderQuickLaunch() {
+			if (!quickLaunchEl) return;
+			quickLaunchEl.innerHTML = '';
+
+			const handle = document.createElement('div');
+			handle.className = 'quick-launch-handle';
+			handle.title = 'Quick Launch';
+			quickLaunchEl.appendChild(handle);
+
+			quickLaunchItems.forEach((item, index) => {
+				const wrapper = document.createElement('div');
+				wrapper.className = 'quick-launch-icon-wrapper';
+				wrapper.id = item.id;
+				wrapper.title = item.name;
+				wrapper.draggable = true;
+				wrapper.dataset.index = String(index);
+				wrapper.dataset.qlId = item.id;
+
+				const img = document.createElement('img');
+				img.src = item.icon;
+				img.alt = item.name;
+				img.className = 'quick-launch-icon';
+				wrapper.appendChild(img);
+
+				if (item.hasBadge || item.action === 'open-oe') {
+					const badge = document.createElement('span');
+					badge.className = 'quick-launch-badge hidden';
+					badge.id = `ql-badge-${item.id}`;
+					wrapper.appendChild(badge);
+				}
+
+				wrapper.addEventListener('click', (e) => {
+					e.stopPropagation();
+					this.executeQuickLaunchItem(item);
+				});
+
+				wrapper.addEventListener('contextmenu', (e) => {
+					e.preventDefault();
+					e.stopPropagation();
+					if (window.ContextMenu) {
+						const menuItems = window.ContextMenu.getQuickLaunchItemItems(item.id, item.name, item, index);
+						window.ContextMenu.show(menuItems, e.clientX, e.clientY);
+					}
+				});
+
+				let longPressTimeout = null;
+				wrapper.addEventListener('mousedown', (e) => {
+					if (e.button !== 0) return;
+					longPressTimeout = setTimeout(() => {
+						wrapper.classList.add('ql-reorder-active');
+					}, 400);
+				});
+				const cancelLongPress = () => {
+					if (longPressTimeout) {
+						clearTimeout(longPressTimeout);
+						longPressTimeout = null;
+					}
+					wrapper.classList.remove('ql-reorder-active');
+				};
+				wrapper.addEventListener('mouseup', cancelLongPress);
+				wrapper.addEventListener('mouseleave', cancelLongPress);
+
+				wrapper.addEventListener('dragstart', (e) => {
+					draggedQlId = item.id;
+					e.dataTransfer.effectAllowed = 'move';
+					e.dataTransfer.setData('text/quicklaunch-id', item.id);
+					e.dataTransfer.setData('text/quicklaunch-index', String(index));
+					wrapper.classList.add('ql-dragging');
+				});
+
+				wrapper.addEventListener('dragover', (e) => {
+					e.preventDefault();
+					e.stopPropagation();
+					e.dataTransfer.dropEffect = 'move';
+					const rect = wrapper.getBoundingClientRect();
+					const isAfter = (e.clientX - rect.left) > (rect.width / 2);
+					wrapper.classList.toggle('ql-drop-after', isAfter);
+					wrapper.classList.toggle('ql-drop-before', !isAfter);
+				});
+
+				wrapper.addEventListener('dragleave', () => {
+					wrapper.classList.remove('ql-drop-after', 'ql-drop-before');
+				});
+
+				wrapper.addEventListener('drop', (e) => {
+					e.preventDefault();
+					e.stopPropagation();
+					wrapper.classList.remove('ql-drop-after', 'ql-drop-before');
+
+					const qlSourceIndex = e.dataTransfer.getData('text/quicklaunch-index');
+					if (qlSourceIndex !== '') {
+						const fromIdx = parseInt(qlSourceIndex, 10);
+						const rect = wrapper.getBoundingClientRect();
+						const isAfter = (e.clientX - rect.left) > (rect.width / 2);
+						let toIdx = index;
+						if (isAfter && fromIdx < toIdx) toIdx = index;
+						else if (isAfter && fromIdx > toIdx) toIdx = index + 1;
+						else if (!isAfter && fromIdx > toIdx) toIdx = index;
+						else if (!isAfter && fromIdx < toIdx) toIdx = Math.max(0, index - 1);
+						Taskbar.moveQuickLaunchItem(fromIdx, toIdx);
+						return;
+					}
+
+					const fsRaw = e.dataTransfer.getData('text/plain');
+					if (fsRaw) {
+						try {
+							const paths = JSON.parse(fsRaw);
+							if (Array.isArray(paths) && paths.length > 0 && typeof fs !== 'undefined') {
+								paths.forEach(p => {
+									const el = fs.findByPath(p);
+									if (el) {
+										Taskbar.addQuickLaunchItem({
+											name: el.name,
+											icon: el.icon,
+											action: 'open-path',
+											path: el.getFullPath()
+										});
+									}
+								});
+							}
+						} catch (err) {}
+					}
+				});
+
+				wrapper.addEventListener('dragend', () => {
+					draggedQlId = null;
+					wrapper.classList.remove('ql-dragging');
+					document.querySelectorAll('.quick-launch-icon-wrapper').forEach(w => {
+						w.classList.remove('ql-drop-after', 'ql-drop-before');
+					});
+				});
+
+				quickLaunchEl.appendChild(wrapper);
+			});
+
+			this.updateUnreadBadges();
+		},
+
+		executeQuickLaunchItem(item) {
+			const action = item.action;
+			switch (action) {
+				case 'show-desktop':
+					this.showDesktop();
+					break;
+				case 'open-ie':
+					if (typeof openInternetExplorer === 'function') openInternetExplorer();
+					break;
+				case 'open-oe':
+					if (typeof openOutlookExpress === 'function') openOutlookExpress();
+					break;
+				case 'open-cmd':
+					if (window.CommandPrompt) window.CommandPrompt.open();
+					else if (typeof processRunCommand === 'function') processRunCommand('cmd');
+					break;
+				case 'open-notepad':
+					if (window.NotepadApp) window.NotepadApp.openNew();
+					break;
+				case 'open-calc':
+					if (window.CalculatorApp) window.CalculatorApp.open();
+					break;
+				case 'open-paint':
+					if (window.PaintApp) window.PaintApp.open();
+					break;
+				case 'open-winamp':
+					if (typeof openWinamp === 'function') openWinamp();
+					break;
+				case 'open-mine':
+					if (typeof openMinesweeper === 'function') openMinesweeper();
+					break;
+				case 'open-settings':
+					if (window.SettingsApp) window.SettingsApp.open('system');
+					break;
+				case 'open-path':
+					if (item.path && typeof fs !== 'undefined') {
+						const el = fs.findByPath(item.path);
+						if (el && typeof openFileSystemElement === 'function') openFileSystemElement(el);
+					}
+					break;
+				default:
+					if (item.path && typeof fs !== 'undefined') {
+						const el = fs.findByPath(item.path);
+						if (el && typeof openFileSystemElement === 'function') openFileSystemElement(el);
+					}
+					break;
+			}
 		},
 
 		createDomElements() {
@@ -63,162 +327,63 @@
 				balloonContainerEl.className = 'xp-taskbar-balloon-container';
 				document.body.appendChild(balloonContainerEl);
 			}
+
+			if (!volumePopupEl) {
+				volumePopupEl = document.createElement('div');
+				volumePopupEl.id = 'taskbar-volume-popup';
+				volumePopupEl.className = 'xp-volume-popup hidden';
+				volumePopupEl.innerHTML = `
+					<div class="xp-volume-header">Volume</div>
+					<div class="xp-volume-label">Master</div>
+					<div class="xp-volume-body">
+						<div class="xp-volume-ticks">
+							<div class="xp-volume-tick"></div>
+							<div class="xp-volume-tick"></div>
+							<div class="xp-volume-tick"></div>
+							<div class="xp-volume-tick"></div>
+							<div class="xp-volume-tick"></div>
+						</div>
+						<input type="range" id="taskbar-volume-slider" min="0" max="1" step="0.05" value="0.7" orient="vertical" class="xp-vertical-slider">
+					</div>
+					<div class="xp-volume-footer">
+						<label><input type="checkbox" id="taskbar-volume-mute"> Mute</label>
+					</div>
+				`;
+				document.body.appendChild(volumePopupEl);
+			}
+
+			if (!calendarPopupEl) {
+				calendarPopupEl = document.createElement('div');
+				calendarPopupEl.id = 'calendar-popup';
+				calendarPopupEl.className = 'hidden';
+				calendarPopupEl.innerHTML = `
+					<div id="calendar-header">
+						<button type="button" class="calendar-nav-btn" id="calendar-prev">&lt;</button>
+						<span id="calendar-month-year"></span>
+						<button type="button" class="calendar-nav-btn" id="calendar-next">&gt;</button>
+					</div>
+					<div id="calendar-days-header">
+						<div>Su</div>
+						<div>Mo</div>
+						<div>Tu</div>
+						<div>We</div>
+						<div>Th</div>
+						<div>Fr</div>
+						<div>Sa</div>
+					</div>
+					<div id="calendar-grid"></div>
+					<div id="calendar-footer">
+						<span id="calendar-today-date"></span>
+					</div>
+				`;
+				document.body.appendChild(calendarPopupEl);
+				this.bindCalendarEvents();
+			}
 		},
 
 		createContextMenus() {},
 
 		bindEvents() {
-			const showDesktopBtn = document.getElementById('show-desktop-icon');
-			if (showDesktopBtn) {
-				showDesktopBtn.addEventListener('click', (e) => {
-					e.stopPropagation();
-					this.showDesktop();
-				});
-				showDesktopBtn.addEventListener('contextmenu', (e) => {
-					e.preventDefault();
-					e.stopPropagation();
-					if (window.ContextMenu) {
-						const items = window.ContextMenu.getQuickLaunchItemItems('show-desktop-icon', 'Show Desktop');
-						window.ContextMenu.show(items, e.clientX, e.clientY);
-					}
-				});
-			}
-
-			const notepadLaunch = document.getElementById('quick-launch-notepad');
-			if (notepadLaunch) {
-				notepadLaunch.addEventListener('click', () => {
-					if (window.NotepadApp) window.NotepadApp.openNew();
-				});
-				notepadLaunch.addEventListener('contextmenu', (e) => {
-					e.preventDefault();
-					e.stopPropagation();
-					if (window.ContextMenu) {
-						const items = window.ContextMenu.getQuickLaunchItemItems('quick-launch-notepad', 'Notepad');
-						window.ContextMenu.show(items, e.clientX, e.clientY);
-					}
-				});
-			}
-
-			const calcLaunch = document.getElementById('quick-launch-calc');
-			if (calcLaunch) {
-				calcLaunch.addEventListener('click', () => {
-					if (window.CalculatorApp) window.CalculatorApp.open();
-				});
-				calcLaunch.addEventListener('contextmenu', (e) => {
-					e.preventDefault();
-					e.stopPropagation();
-					if (window.ContextMenu) {
-						const items = window.ContextMenu.getQuickLaunchItemItems('quick-launch-calc', 'Calculator');
-						window.ContextMenu.show(items, e.clientX, e.clientY);
-					}
-				});
-			}
-
-			const paintLaunch = document.getElementById('quick-launch-paint');
-			if (paintLaunch) {
-				paintLaunch.addEventListener('click', () => {
-					if (window.PaintApp) window.PaintApp.open();
-				});
-				paintLaunch.addEventListener('contextmenu', (e) => {
-					e.preventDefault();
-					e.stopPropagation();
-					if (window.ContextMenu) {
-						const items = window.ContextMenu.getQuickLaunchItemItems('quick-launch-paint', 'Paint');
-						window.ContextMenu.show(items, e.clientX, e.clientY);
-					}
-				});
-			}
-
-			const settingsLaunch = document.getElementById('quick-launch-settings');
-			if (settingsLaunch) {
-				settingsLaunch.addEventListener('click', () => {
-					if (window.SettingsApp) window.SettingsApp.open('system');
-				});
-				settingsLaunch.addEventListener('contextmenu', (e) => {
-					e.preventDefault();
-					e.stopPropagation();
-					if (window.ContextMenu) {
-						const items = window.ContextMenu.getQuickLaunchItemItems('quick-launch-settings', 'Control Panel');
-						window.ContextMenu.show(items, e.clientX, e.clientY);
-					}
-				});
-			}
-
-			const cmdLaunch = document.getElementById('quick-launch-cmd');
-			if (cmdLaunch) {
-				cmdLaunch.addEventListener('click', () => {
-					if (window.CommandPrompt) window.CommandPrompt.open();
-				});
-				cmdLaunch.addEventListener('contextmenu', (e) => {
-					e.preventDefault();
-					e.stopPropagation();
-					if (window.ContextMenu) {
-						const items = window.ContextMenu.getQuickLaunchItemItems('quick-launch-cmd', 'Command Prompt');
-						window.ContextMenu.show(items, e.clientX, e.clientY);
-					}
-				});
-			}
-
-			const ieLaunch = document.getElementById('quick-launch-ie');
-			if (ieLaunch) {
-				ieLaunch.addEventListener('click', () => {
-					if (typeof openInternetExplorer === 'function') openInternetExplorer();
-				});
-				ieLaunch.addEventListener('contextmenu', (e) => {
-					e.preventDefault();
-					e.stopPropagation();
-					if (window.ContextMenu) {
-						const items = window.ContextMenu.getQuickLaunchItemItems('quick-launch-ie', 'Internet Explorer');
-						window.ContextMenu.show(items, e.clientX, e.clientY);
-					}
-				});
-			}
-
-			const oeLaunch = document.getElementById('quick-launch-oe');
-			if (oeLaunch) {
-				oeLaunch.addEventListener('click', () => {
-					if (typeof openOutlookExpress === 'function') openOutlookExpress();
-				});
-				oeLaunch.addEventListener('contextmenu', (e) => {
-					e.preventDefault();
-					e.stopPropagation();
-					if (window.ContextMenu) {
-						const items = window.ContextMenu.getQuickLaunchItemItems('quick-launch-oe', 'Outlook Express');
-						window.ContextMenu.show(items, e.clientX, e.clientY);
-					}
-				});
-			}
-
-			const winampLaunch = document.getElementById('quick-launch-winamp');
-			if (winampLaunch) {
-				winampLaunch.addEventListener('click', () => {
-					if (typeof openWinamp === 'function') openWinamp();
-				});
-				winampLaunch.addEventListener('contextmenu', (e) => {
-					e.preventDefault();
-					e.stopPropagation();
-					if (window.ContextMenu) {
-						const items = window.ContextMenu.getQuickLaunchItemItems('quick-launch-winamp', 'Winamp');
-						window.ContextMenu.show(items, e.clientX, e.clientY);
-					}
-				});
-			}
-
-			const mineLaunch = document.getElementById('quick-launch-mine');
-			if (mineLaunch) {
-				mineLaunch.addEventListener('click', () => {
-					if (typeof openMinesweeper === 'function') openMinesweeper();
-				});
-				mineLaunch.addEventListener('contextmenu', (e) => {
-					e.preventDefault();
-					e.stopPropagation();
-					if (window.ContextMenu) {
-						const items = window.ContextMenu.getQuickLaunchItemItems('quick-launch-mine', 'Minesweeper');
-						window.ContextMenu.show(items, e.clientX, e.clientY);
-					}
-				});
-			}
-
 			if (startBtnEl) {
 				startBtnEl.addEventListener('contextmenu', (e) => {
 					e.preventDefault();
@@ -299,14 +464,7 @@
 			if (clockEl) {
 				clockEl.addEventListener('click', (e) => {
 					e.stopPropagation();
-					const calendarPopup = document.getElementById('calendar-popup');
-					if (calendarPopup) {
-						const isHidden = calendarPopup.classList.contains('hidden');
-						if (isHidden && typeof renderCalendar === 'function' && typeof currentCalendarDate !== 'undefined') {
-							renderCalendar(currentCalendarDate.getFullYear(), currentCalendarDate.getMonth());
-						}
-						calendarPopup.classList.toggle('hidden');
-					}
+					this.toggleCalendar(e);
 				});
 				clockEl.addEventListener('contextmenu', (e) => {
 					e.preventDefault();
@@ -329,15 +487,68 @@
 				});
 			}
 
+			if (quickLaunchEl) {
+				quickLaunchEl.addEventListener('contextmenu', (e) => {
+					if (e.target.closest('.quick-launch-icon-wrapper')) return;
+					e.preventDefault();
+					e.stopPropagation();
+					if (window.ContextMenu) {
+						const items = window.ContextMenu.getQuickLaunchBarItems();
+						window.ContextMenu.show(items, e.clientX, e.clientY);
+					}
+				});
+
+				quickLaunchEl.addEventListener('dragover', (e) => {
+					e.preventDefault();
+					e.stopPropagation();
+					quickLaunchEl.classList.add('ql-drop-target-active');
+				});
+
+				quickLaunchEl.addEventListener('dragleave', (e) => {
+					if (!quickLaunchEl.contains(e.relatedTarget)) {
+						quickLaunchEl.classList.remove('ql-drop-target-active');
+					}
+				});
+
+				quickLaunchEl.addEventListener('drop', (e) => {
+					quickLaunchEl.classList.remove('ql-drop-target-active');
+					const fsRaw = e.dataTransfer.getData('text/plain');
+					if (fsRaw) {
+						try {
+							const paths = JSON.parse(fsRaw);
+							if (Array.isArray(paths) && paths.length > 0 && typeof fs !== 'undefined') {
+								paths.forEach(p => {
+									const el = fs.findByPath(p);
+									if (el) {
+										Taskbar.addQuickLaunchItem({
+											name: el.name,
+											icon: el.icon,
+											action: 'open-path',
+											path: el.getFullPath()
+										});
+									}
+								});
+							}
+						} catch (err) {}
+					}
+				});
+			}
+
 			document.addEventListener('mousedown', (e) => {
 				if (volumePopupEl && !volumePopupEl.contains(e.target) && !e.target.closest('#tray-volume-btn')) {
 					volumePopupEl.classList.add('hidden');
 				}
+				if (calendarPopupEl && !calendarPopupEl.contains(e.target) && !e.target.closest('#taskbar-clock')) {
+					calendarPopupEl.classList.add('hidden');
+				}
 			});
 
-			if (volumeSliderEl) {
-				volumeSliderEl.addEventListener('input', () => {
-					const vol = parseFloat(volumeSliderEl.value);
+			const volumeSlider = volumePopupEl.querySelector('#taskbar-volume-slider');
+			const volumeMute = volumePopupEl.querySelector('#taskbar-volume-mute');
+
+			if (volumeSlider) {
+				volumeSlider.addEventListener('input', () => {
+					const vol = parseFloat(volumeSlider.value);
 					if (window.SettingsApp) {
 						window.SettingsApp.set('soundVolume', vol);
 						window.SettingsApp.playSound('click');
@@ -345,9 +556,9 @@
 				});
 			}
 
-			if (volumeMuteEl) {
-				volumeMuteEl.addEventListener('change', () => {
-					const isMuted = volumeMuteEl.checked;
+			if (volumeMute) {
+				volumeMute.addEventListener('change', () => {
+					const isMuted = volumeMute.checked;
 					if (window.SettingsApp) {
 						window.SettingsApp.set('soundEnabled', !isMuted);
 					}
@@ -363,6 +574,148 @@
 			window.addEventListener('resize', () => {
 				this.updateDensity();
 			});
+		},
+
+		bindCalendarEvents() {
+			if (!calendarPopupEl) return;
+			const prevBtn = calendarPopupEl.querySelector('#calendar-prev');
+			const nextBtn = calendarPopupEl.querySelector('#calendar-next');
+			const footerBtn = calendarPopupEl.querySelector('#calendar-footer');
+
+			prevBtn.addEventListener('click', (e) => {
+				e.stopPropagation();
+				calendarCurrentDate.setMonth(calendarCurrentDate.getMonth() - 1);
+				this.renderCalendar();
+			});
+
+			nextBtn.addEventListener('click', (e) => {
+				e.stopPropagation();
+				calendarCurrentDate.setMonth(calendarCurrentDate.getMonth() + 1);
+				this.renderCalendar();
+			});
+
+			footerBtn.addEventListener('click', (e) => {
+				e.stopPropagation();
+				calendarCurrentDate = new Date();
+				this.renderCalendar();
+			});
+		},
+
+		toggleCalendar(e) {
+			if (!calendarPopupEl) return;
+			const isHidden = calendarPopupEl.classList.contains('hidden');
+			if (isHidden) {
+				calendarCurrentDate = new Date();
+				this.renderCalendar();
+				calendarPopupEl.classList.remove('hidden');
+
+				const rect = calendarPopupEl.getBoundingClientRect();
+				const clockRect = clockEl.getBoundingClientRect();
+				let left = clockRect.right - rect.width;
+				if (left < 6) left = 6;
+				calendarPopupEl.style.left = `${left}px`;
+				calendarPopupEl.style.top = `${window.innerHeight - 38 - rect.height}px`;
+			} else {
+				calendarPopupEl.classList.add('hidden');
+			}
+		},
+
+		renderCalendar() {
+			if (!calendarPopupEl) return;
+			const year = calendarCurrentDate.getFullYear();
+			const month = calendarCurrentDate.getMonth();
+
+			const monthYearEl = calendarPopupEl.querySelector('#calendar-month-year');
+			const gridEl = calendarPopupEl.querySelector('#calendar-grid');
+			const todayDateEl = calendarPopupEl.querySelector('#calendar-today-date');
+
+			gridEl.innerHTML = '';
+			const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+			monthYearEl.textContent = `${monthNames[month]} ${year}`;
+
+			const today = new Date();
+			todayDateEl.textContent = `Today: ${today.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}`;
+
+			const firstDayOfMonth = new Date(year, month, 1);
+			const daysInMonth = new Date(year, month + 1, 0).getDate();
+			const startDayOfWeek = firstDayOfMonth.getDay();
+
+			for (let i = 0; i < startDayOfWeek; i++) {
+				const emptyCell = document.createElement('div');
+				gridEl.appendChild(emptyCell);
+			}
+
+			for (let day = 1; day <= daysInMonth; day++) {
+				const dayCell = document.createElement('div');
+				dayCell.className = 'calendar-day';
+				dayCell.textContent = String(day);
+
+				const isToday = year === today.getFullYear() && month === today.getMonth() && day === today.getDate();
+				if (isToday) {
+					dayCell.classList.add('today');
+				}
+
+				const isSelectable = year === today.getFullYear() && month === today.getMonth() && day <= today.getDate();
+				if (isSelectable) {
+					dayCell.classList.add('selectable');
+					dayCell.title = 'View the anecdote scheduled for this day';
+					dayCell.addEventListener('click', () => {
+						if (typeof openAnecdoteWindow === 'function') {
+							openAnecdoteWindow(new Date(Date.UTC(year, month, day)));
+						}
+					});
+				}
+
+				gridEl.appendChild(dayCell);
+			}
+		},
+
+		initClock() {
+			if (clockInterval) clearInterval(clockInterval);
+			const update = () => {
+				if (!clockEl) return;
+				const now = new Date();
+				const is12h = window.SettingsApp ? (window.SettingsApp.get('clockFormat') === '12h') : false;
+				const showSeconds = window.SettingsApp ? (window.SettingsApp.get('showClockSeconds') !== false) : true;
+				const showDate = window.SettingsApp ? (window.SettingsApp.get('showClockDate') !== false) : true;
+				const dateFormat = window.SettingsApp ? (window.SettingsApp.get('dateFormat') || 'dd/mm/yyyy') : 'dd/mm/yyyy';
+
+				let hoursNum = now.getHours();
+				let ampm = '';
+				if (is12h) {
+					ampm = hoursNum >= 12 ? ' PM' : ' AM';
+					hoursNum = hoursNum % 12 || 12;
+				}
+				const hours = String(hoursNum).padStart(2, '0');
+				const minutes = String(now.getMinutes()).padStart(2, '0');
+				const seconds = String(now.getSeconds()).padStart(2, '0');
+				const timeStr = showSeconds ? `${hours}:${minutes}:${seconds}${ampm}` : `${hours}:${minutes}${ampm}`;
+
+				const day = String(now.getDate()).padStart(2, '0');
+				const month = String(now.getMonth() + 1).padStart(2, '0');
+				const year = String(now.getFullYear());
+
+				let dateStr = '';
+				if (dateFormat === 'mm/dd/yyyy') {
+					dateStr = `${month}/${day}/${year}`;
+				} else if (dateFormat === 'yyyy-mm-dd') {
+					dateStr = `${year}-${month}-${day}`;
+				} else if (dateFormat === 'dd.mm.yyyy') {
+					dateStr = `${day}.${month}.${year}`;
+				} else {
+					dateStr = `${day}/${month}/${year}`;
+				}
+
+				if (showDate) {
+					clockEl.innerHTML = `<span class="taskbar-clock-time">${timeStr}</span><span class="taskbar-clock-date">${dateStr}</span>`;
+				} else {
+					clockEl.innerHTML = `<span class="taskbar-clock-time">${timeStr}</span>`;
+				}
+
+				clockEl.title = now.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+			};
+			update();
+			clockInterval = setInterval(update, 1000);
 		},
 
 		initClock() {
@@ -749,11 +1102,16 @@
 			if (!volumePopupEl) return;
 			const isHidden = volumePopupEl.classList.contains('hidden');
 			if (isHidden) {
+				const slider = volumePopupEl.querySelector('#taskbar-volume-slider');
+				const mute = volumePopupEl.querySelector('#taskbar-volume-mute');
+				if (slider && window.SettingsApp) slider.value = String(window.SettingsApp.get('soundVolume') || 0.7);
+				if (mute && window.SettingsApp) mute.checked = !window.SettingsApp.get('soundEnabled');
+
 				volumePopupEl.classList.remove('hidden');
 				const rect = volumePopupEl.getBoundingClientRect();
 				const anchorRect = e.currentTarget.getBoundingClientRect();
 				volumePopupEl.style.left = `${Math.max(5, anchorRect.left - rect.width / 2 + 10)}px`;
-				volumePopupEl.style.top = `${window.innerHeight - 30 - rect.height - 4}px`;
+				volumePopupEl.style.top = `${window.innerHeight - 36 - rect.height - 4}px`;
 			} else {
 				volumePopupEl.classList.add('hidden');
 			}
@@ -778,19 +1136,24 @@
 		},
 
 		updateUnreadBadges() {
-			const badge = document.getElementById('outlook-unread-badge');
 			const trayMailBtn = document.getElementById('tray-mail-btn');
 			if (!window.DeskAPI) return;
 
 			const count = window.DeskAPI.getUnreadMailCount();
-			if (badge) {
-				if (count > 0) {
-					badge.textContent = count > 5 ? '5+' : String(count);
-					badge.classList.remove('hidden');
-				} else {
-					badge.classList.add('hidden');
+
+			quickLaunchItems.forEach(item => {
+				if (item.action === 'open-oe' || item.hasBadge) {
+					const badge = document.getElementById(`ql-badge-${item.id}`);
+					if (badge) {
+						if (count > 0) {
+							badge.textContent = count > 5 ? '5+' : String(count);
+							badge.classList.remove('hidden');
+						} else {
+							badge.classList.add('hidden');
+						}
+					}
 				}
-			}
+			});
 
 			if (trayMailBtn) {
 				trayMailBtn.style.display = count > 0 ? 'inline-flex' : 'none';

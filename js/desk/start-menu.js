@@ -104,7 +104,7 @@
 								</div>
 							</div>
 							<div class="xp-start-item" data-action="open-today-anecdote">
-								<img src="../assets/images/desk/icons/Calendar.webp" class="xp-start-item-icon" alt="Daily Anecdote">
+								<img src="https://api.iconify.design/mdi/calendar-star.svg" class="xp-start-item-icon" alt="Daily Anecdote">
 								<div class="xp-start-item-texts">
 									<span class="xp-start-title">Today's Anecdote</span>
 								</div>
@@ -292,9 +292,22 @@
 			if (!allProgramsBtnEl) return;
 			let flyout = null;
 
-			const openAllProgramsFlyout = () => {
-				if (flyout) return;
+			const closeAllPrograms = () => {
+				if (flyout) {
+					this.closeFlyout(flyout);
+					flyout = null;
+				}
+				allProgramsBtnEl.classList.remove('active');
+			};
+
+			const toggleAllProgramsFlyout = () => {
+				if (flyout) {
+					closeAllPrograms();
+					return;
+				}
+
 				this.closeOtherFlyouts('all-programs');
+				allProgramsBtnEl.classList.add('active');
 
 				flyout = document.createElement('div');
 				flyout.className = 'xp-start-flyout-menu xp-start-flyout-all-programs';
@@ -369,6 +382,7 @@
 
 				const searchInput = flyout.querySelector('#xp-start-all-search');
 				if (searchInput) {
+					searchInput.focus();
 					searchInput.addEventListener('input', () => {
 						const term = searchInput.value.toLowerCase().trim();
 						const items = flyout.querySelectorAll('.xp-start-flyout-item');
@@ -426,7 +440,7 @@
 									<span class="xp-start-title">Command Prompt</span>
 								</div>
 								<div class="xp-start-flyout-item" data-action="open-today-anecdote">
-									<img src="../assets/images/desk/icons/Calendar.webp" class="xp-start-item-icon" alt="">
+									<img src="https://api.iconify.design/mdi/calendar-star.svg" class="xp-start-item-icon" alt="">
 									<span class="xp-start-title">Daily Anecdotes</span>
 								</div>
 								<div class="xp-start-flyout-item" data-action="my-documents">
@@ -526,19 +540,9 @@
 				});
 			};
 
-			allProgramsBtnEl.addEventListener('mouseenter', () => {
-				clearTimeout(flyoutCloseTimeout);
-				openAllProgramsFlyout();
-			});
-
-			allProgramsBtnEl.addEventListener('mouseleave', () => {
-				if (!flyout) return;
-				flyoutCloseTimeout = setTimeout(() => {
-					if (flyout && !flyout.matches(':hover') && !allProgramsBtnEl.matches(':hover')) {
-						this.closeFlyout(flyout);
-						flyout = null;
-					}
-				}, 220);
+			allProgramsBtnEl.addEventListener('click', (e) => {
+				e.stopPropagation();
+				toggleAllProgramsFlyout();
 			});
 		},
 

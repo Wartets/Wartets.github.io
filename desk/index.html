@@ -39,14 +39,14 @@
 	<div id="boot-screen">
 		<div class="boot-logo-container">
 			<img src="../assets/images/desk/window_logo.png" alt="Windows XP" class="boot-logo">
-			<div class="boot-text">Microsoft<br>Windows<span>XP</span></div>
+			<div class="boot-text">MacroPof<br>Windows<span>XP</span></div>
 		</div>
 		<div class="boot-loading-bar">
 			<div class="boot-loading-progress"></div>
 			<div class="boot-loading-progress"></div>
 			<div class="boot-loading-progress"></div>
 		</div>
-		<div class="boot-copyright">Copyright © 1985-2001<br>Microsoft Corporation</div>
+		<div class="boot-copyright">Copyright © 1985-2001<br>MacroPof Corporation</div>
 	</div>
 
 	<div id="welcome-screen" class="hidden">
@@ -54,7 +54,7 @@
 		<div class="welcome-content">
 			<div class="welcome-logo">
 				<img src="../assets/images/desk/window_logo.png" alt="Windows Logo">
-				<span>Microsoft<br>Windows<span>XP</span></span>
+				<span>MacroPof<br>Windows<span>XP</span></span>
 			</div>
 			<div class="welcome-divider"></div>
 			<div class="welcome-users">
@@ -93,40 +93,7 @@
 			<span class="xp-start-text">start</span>
 		</button>
 
-		<div class="quick-launch" id="quick-launch-bar">
-			<div class="quick-launch-handle" title="Quick Launch"></div>
-			<div class="quick-launch-icon-wrapper" id="show-desktop-icon" title="Show Desktop">
-				<img src="../assets/images/desk/XPIcon.png" alt="Show Desktop" class="quick-launch-icon">
-			</div>
-			<div class="quick-launch-icon-wrapper" id="quick-launch-settings" title="Control Panel & Settings">
-				<img src="../assets/images/desk/icons/System Properties.webp" alt="Control Panel" class="quick-launch-icon">
-			</div>
-			<div class="quick-launch-icon-wrapper" id="quick-launch-cmd" title="Command Prompt">
-				<img src="../assets/images/desk/icons/Command Prompt.webp" alt="Command Prompt" class="quick-launch-icon">
-			</div>
-			<div class="quick-launch-icon-wrapper" id="quick-launch-notepad" title="Notepad">
-				<img src="../assets/images/desk/icons/Notepad.webp" alt="Notepad" class="quick-launch-icon">
-			</div>
-			<div class="quick-launch-icon-wrapper" id="quick-launch-calc" title="Calculator">
-				<img src="../assets/images/desk/icons/Calculator.webp" alt="Calculator" class="quick-launch-icon">
-			</div>
-			<div class="quick-launch-icon-wrapper" id="quick-launch-paint" title="Paint">
-				<img src="../assets/images/desk/icons/Paint.webp" alt="Paint" class="quick-launch-icon">
-			</div>
-			<div class="quick-launch-icon-wrapper" id="quick-launch-ie" title="Internet Explorer">
-				<img src="../assets/images/desk/internet-explorer.png" alt="Internet Explorer" class="quick-launch-icon">
-			</div>
-			<div class="quick-launch-icon-wrapper" id="quick-launch-oe" title="Outlook Express">
-				<img src="../assets/images/desk/OE2001.webp" alt="Outlook Express" class="quick-launch-icon">
-				<span id="outlook-unread-badge" class="quick-launch-badge hidden"></span>
-			</div>
-			<div class="quick-launch-icon-wrapper" id="quick-launch-winamp" title="Winamp Media Player">
-				<img src="https://upload.wikimedia.org/wikipedia/commons/thumb/0/0d/Winamp-logo.svg/960px-Winamp-logo.svg.png" alt="Winamp" class="quick-launch-icon">
-			</div>
-			<div class="quick-launch-icon-wrapper" id="quick-launch-mine" title="Minesweeper">
-				<img src="../assets/images/desk/icons/Minesweeper.webp" alt="Minesweeper" class="quick-launch-icon">
-			</div>
-		</div>
+		<div class="quick-launch" id="quick-launch-bar"></div>
 
 		<div class="taskbar-divider"></div>
 
@@ -148,47 +115,14 @@
 			<div class="tray-icon-item" id="tray-volume-btn" title="Volume">
 				<img src="https://api.iconify.design/mdi/volume-high.svg?color=%23ffffff" alt="Volume">
 			</div>
-			<div id="clippy-taskbar-icon" class="tray-icon-item clippy-taskbar-icon" title="Microsoft Clippy Assistant">
+			<div id="clippy-taskbar-icon" class="tray-icon-item clippy-taskbar-icon" title="MacroPof Clippy Assistant">
 				<img src="../assets/images/desk/clippy/idle.png" alt="Clippy" id="clippy-taskbar-img">
 			</div>
 			<div id="taskbar-clock" title="Date and Time"></div>
 		</div>
 	</div>
 
-	<div id="taskbar-volume-popup" class="xp-volume-popup hidden">
-		<div class="xp-volume-header">Master Volume</div>
-		<div class="xp-volume-body">
-			<input type="range" id="taskbar-volume-slider" min="0" max="1" step="0.05" value="0.7" orient="vertical" class="xp-vertical-slider">
-		</div>
-		<div class="xp-volume-footer">
-			<label><input type="checkbox" id="taskbar-volume-mute"> Mute</label>
-		</div>
-	</div>
-
-	<div id="window-area">
-		<!-- Project windows opened here -->
-	</div>
-
-	<div id="calendar-popup" class="xp-window hidden">
-		<div id="calendar-header">
-			<button id="calendar-prev">&lt;</button>
-			<span id="calendar-month-year"></span>
-			<button id="calendar-next">&gt;</button>
-		</div>
-		<div id="calendar-days-header">
-			<div>Su</div>
-			<div>Mo</div>
-			<div>Tu</div>
-			<div>We</div>
-			<div>Th</div>
-			<div>Fr</div>
-			<div>Sa</div>
-		</div>
-		<div id="calendar-grid"></div>
-		<div id="calendar-footer">
-			<span id="calendar-today-date"></span>
-		</div>
-	</div>
+	<div id="window-area"></div>
 
 	<script src="../data/projects.js"></script>
 	<script src="../data/library.js"></script>

@@ -20,9 +20,9 @@
 
 	const SYSTEM_SPECS = [
 		'Host Name:                 WARTETS-XP-PC',
-		'OS Name:                   Microsoft Windows XP Professional',
+		'OS Name:                   MacroPof Windows XP Professional',
 		'OS Version:                5.1.2600 Service Pack 3 Build 2600',
-		'OS Manufacturer:           Microsoft Corporation',
+		'OS Manufacturer:           MacroPof Corporation',
 		'OS Configuration:          Standalone Workstation',
 		'OS Build Type:             Multiprocessor Free',
 		'Registered Owner:          Colin B.R.',
@@ -454,8 +454,8 @@
 		}
 
 		printHeader() {
-			this.println('Microsoft Windows XP [Version 5.1.2600]');
-			this.println('(C) Copyright 1985-2001 Microsoft Corp.\n');
+			this.println('MacroPof Windows XP [Version 5.1.2600]');
+			this.println('(C) Copyright 1985-2001 MacroPof Corp.\n');
 		}
 
 		getPromptString() {
@@ -727,7 +727,7 @@
 					this.cmdTitle(args, line);
 					break;
 				case 'ver':
-					this.println('\nMicrosoft Windows XP [Version 5.1.2600]\n');
+					this.println('\nMacroPof Windows XP [Version 5.1.2600]\n');
 					break;
 				case 'vol':
 					this.println(' Volume in drive C has no label.');
@@ -1816,7 +1816,7 @@
 
 		cmdDefrag(args) {
 			this.println('\nWindows Disk Defragmenter');
-			this.println('Copyright (c) 2001 Microsoft Corp. and Executive Software International, Inc.\n');
+			this.println('Copyright (c) 2001 MacroPof Corp. and Executive Software International, Inc.\n');
 			this.println('Analysis Report for Volume (C:):');
 			this.println('    Volume size                 = 40.0 GB');
 			this.println('    Free space                  = 24.8 GB');
@@ -1826,8 +1826,8 @@
 		}
 
 		cmdDiskpart() {
-			this.println('\nMicrosoft DiskPart version 5.1.2600');
-			this.println('Copyright (C) 1999-2001 Microsoft Corporation.\n');
+			this.println('\nMacroPof DiskPart version 5.1.2600');
+			this.println('Copyright (C) 1999-2001 MacroPof Corporation.\n');
 			this.println('DISKPART> LIST DISK');
 			this.println('  Disk ###  Status      Size     Free     Dyn  Gpt');
 			this.println('  --------  ----------  -------  -------  ---  ---');

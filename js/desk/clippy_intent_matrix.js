@@ -203,7 +203,7 @@
 				{
 					id: 'OFFICE_LORE_TOPIC',
 					cluster: 'OFFICE',
-					patterns: [/\b(office 97|microsoft word|clippy|clippit|paperclip|merlin|rover|microsoft bob)\b/i],
+					patterns: [/\b(office 97|MacroPof word|clippy|clippit|paperclip|merlin|rover|MacroPof bob)\b/i],
 					priority: 7,
 					minScore: 0.25
 				},
