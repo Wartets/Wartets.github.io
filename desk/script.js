@@ -2576,7 +2576,15 @@ function openFileSystemElement(element, windowContext = null) {
 		openProjectWindow(element.projectData);
 	} else if (element instanceof File) {
 		const lowerName = element.name.toLowerCase();
-		if (element.readOnly && element.remoteUrl) {
+		if (lowerName.endsWith('.bat') || lowerName.endsWith('.cmd')) {
+			if (window.CommandPrompt) {
+				window.CommandPrompt.open({
+					script: element.content,
+					title: element.name,
+					initialFolder: element.parent || fs.root
+				});
+			}
+		} else if (element.readOnly && element.remoteUrl) {
 			openReadOnlyTextWindow(element);
 		} else if (lowerName.endsWith('.pdf')) {
 			openPDFWindow(element);
@@ -2905,185 +2913,24 @@ function setupDesktopDropzone() {
 }
 
 async function openReadOnlyTextWindow(file) {
-	const id = `window-file-${file.getFullPath().replace(/[^\w-]/g, '_')}`;
-	const existingWindow = document.getElementById(id);
-	if (existingWindow) {
-		bringWindowToFront(existingWindow);
-		return;
-	}
-
-	const content = `
-		<div class="notepad-layout">
-			<div class="notepad-readonly-banner">This file is read-only and cannot be modified.</div>
-			<div class="notepad-editor-container">
-				<textarea class="readonly-notepad-textarea" readonly>Loading...</textarea>
-			</div>
-		</div>
-	`;
-
-	const win = createXPWindow(id, `${file.name} - Notepad`, content, 620, 480, {
-		iconSrc: file.icon
-	});
-	win.querySelector('.xp-window-content').style.padding = '0';
-
-	const textarea = win.querySelector('.readonly-notepad-textarea');
-	textarea.style.width = '100%';
-	textarea.style.height = '100%';
-	textarea.style.boxSizing = 'border-box';
-	textarea.style.border = 'none';
-	textarea.style.resize = 'none';
-	textarea.style.fontFamily = "'Times New Roman', serif";
-	textarea.style.fontSize = '16px';
-	textarea.style.padding = '12px 15px';
-	textarea.style.outline = 'none';
-
-	let readOnlyWarningActive = false;
-	const showReadOnlyWarning = () => {
-		if (readOnlyWarningActive) return;
-		readOnlyWarningActive = true;
-		showXPDialog('Read-Only File', `"${file.name}" is read-only. Changes cannot be saved.`, 'warning', {
-			callback: () => {
-				readOnlyWarningActive = false;
+	if (file.remoteUrl && !file.content) {
+		try {
+			const response = await fetch(file.remoteUrl);
+			if (response.ok) {
+				file.content = await response.text();
+				file.size = new TextEncoder().encode(file.content).length;
 			}
-		});
-	};
-
-	textarea.addEventListener('keydown', (e) => {
-		const allowedKeys = ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Home', 'End', 'PageUp', 'PageDown', 'Tab', 'Shift', 'Control', 'Alt', 'Meta'];
-		const isCopy = (e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'c';
-		const isSelectAll = (e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'a';
-		if (allowedKeys.includes(e.key) || isCopy || isSelectAll) return;
-		e.preventDefault();
-		showReadOnlyWarning();
-	});
-
-	textarea.addEventListener('paste', (e) => {
-		e.preventDefault();
-		showReadOnlyWarning();
-	});
-
-	textarea.addEventListener('beforeinput', (e) => {
-		if (e.inputType && e.inputType.startsWith('insert')) {
-			e.preventDefault();
-			showReadOnlyWarning();
-		}
-	});
-
-	textarea.addEventListener('contextmenu', (e) => {
-		e.preventDefault();
-		if (window.ContextMenu) {
-			const items = window.ContextMenu.getEditorItems(textarea, true);
-			window.ContextMenu.show(items, e.clientX, e.clientY);
-		}
-	});
-
-	try {
-		const response = await fetch(file.remoteUrl);
-		if (!response.ok) throw new Error('Network response was not ok.');
-		const text = await response.text();
-		if (document.getElementById(id)) {
-			textarea.value = text;
-			file.content = text;
-			file.size = new TextEncoder().encode(text).length;
-		}
-	} catch (error) {
-		if (document.getElementById(id)) {
-			textarea.value = 'Unable to load this document.';
-		}
+		} catch (error) {}
+	}
+	if (window.NotepadApp) {
+		window.NotepadApp.open(file, { readOnly: true });
 	}
 }
 
 function openTextEditorWindow(file) {
-	const id = `window-file-${file.getFullPath().replace(/[^\w-]/g, '_')}`;
-	const existingWindow = document.getElementById(id);
-	if (existingWindow) {
-		bringWindowToFront(existingWindow);
-		return;
+	if (window.NotepadApp) {
+		window.NotepadApp.open(file);
 	}
-
-	const uniqueId = `editor-${Date.now()}`;
-	const content = `
-		<div class="notepad-layout">
-			<div id="toolbar-${uniqueId}" class="notepad-toolbar">
-				<span class="ql-formats">
-					<select class="ql-font"></select>
-					<select class="ql-size"></select>
-				</span>
-				<span class="ql-formats">
-					<button class="ql-bold"></button>
-					<button class="ql-italic"></button>
-					<button class="ql-underline"></button>
-					<button class="ql-strike"></button>
-				</span>
-				<span class="ql-formats">
-					<select class="ql-color"></select>
-					<select class="ql-background"></select>
-				</span>
-				<span class="ql-formats">
-					<button class="ql-script" value="sub"></button>
-					<button class="ql-script" value="super"></button>
-				</span>
-				<span class="ql-formats">
-					<button class="ql-header" value="1"></button>
-					<button class="ql-header" value="2"></button>
-					<button class="ql-blockquote"></button>
-					<button class="ql-code-block"></button>
-				</span>
-				<span class="ql-formats">
-					<button class="ql-list" value="ordered"></button>
-					<button class="ql-list" value="bullet"></button>
-					<button class="ql-indent" value="-1"></button>
-					<button class="ql-indent" value="+1"></button>
-				</span>
-				<span class="ql-formats">
-					<select class="ql-align"></select>
-				</span>
-				<span class="ql-formats">
-					<button class="ql-link"></button>
-					<button class="ql-image"></button>
-				</span>
-				<span class="ql-formats">
-					<button class="ql-clean"></button>
-				</span>
-			</div>
-			<div class="notepad-editor-container">
-				<div id="${uniqueId}"></div>
-			</div>
-		</div>
-	`;
-	const win = createXPWindow(id, `${file.name} - Notepad`, content, 700, 500, {
-		iconSrc: file.icon
-	});
-	win.querySelector('.xp-window-content').style.padding = '0';
-
-	const quill = new Quill(`#${uniqueId}`, {
-		modules: {
-			toolbar: `#toolbar-${uniqueId}`
-		},
-		theme: 'snow'
-	});
-
-	const initialContent = file.read();
-	if (initialContent) {
-		quill.clipboard.dangerouslyPasteHTML(0, initialContent);
-	}
-
-	let saveTimeout;
-	quill.on('text-change', () => {
-		clearTimeout(saveTimeout);
-		saveTimeout = setTimeout(() => {
-			file.write(quill.root.innerHTML);
-			fs.save();
-		}, 500);
-	});
-
-	quill.root.addEventListener('contextmenu', (e) => {
-		e.preventDefault();
-		if (window.ContextMenu) {
-			const items = window.ContextMenu.getEditorItems(quill.root, false);
-			window.ContextMenu.show(items, e.clientX, e.clientY);
-		}
-	});
 }
 
 const DEFAULT_DESKTOP_WALLPAPER = '../assets/images/desk/wallpapers/wallpaper-default.webp';
@@ -3405,6 +3252,15 @@ function renderRecycleBinContent(win) {
 		});
 
 		icon.addEventListener('dblclick', () => {
+			if (item.data && (item.data.name.endsWith('.bat') || item.data.name.endsWith('.cmd'))) {
+				if (window.CommandPrompt) {
+					window.CommandPrompt.open({
+						script: item.data.content,
+						title: item.data.name
+					});
+				}
+				return;
+			}
 			try {
 				fs.restoreFromRecycleBin(item.uid);
 				renderRecycleBinContent(win);

@@ -84,6 +84,21 @@
 				});
 			}
 
+			const notepadLaunch = document.getElementById('quick-launch-notepad');
+			if (notepadLaunch) {
+				notepadLaunch.addEventListener('click', () => {
+					if (window.NotepadApp) window.NotepadApp.openNew();
+				});
+				notepadLaunch.addEventListener('contextmenu', (e) => {
+					e.preventDefault();
+					e.stopPropagation();
+					if (window.ContextMenu) {
+						const items = window.ContextMenu.getQuickLaunchItemItems('quick-launch-notepad', 'Notepad');
+						window.ContextMenu.show(items, e.clientX, e.clientY);
+					}
+				});
+			}
+
 			const settingsLaunch = document.getElementById('quick-launch-settings');
 			if (settingsLaunch) {
 				settingsLaunch.addEventListener('click', () => {
@@ -94,6 +109,21 @@
 					e.stopPropagation();
 					if (window.ContextMenu) {
 						const items = window.ContextMenu.getQuickLaunchItemItems('quick-launch-settings', 'Control Panel');
+						window.ContextMenu.show(items, e.clientX, e.clientY);
+					}
+				});
+			}
+
+			const cmdLaunch = document.getElementById('quick-launch-cmd');
+			if (cmdLaunch) {
+				cmdLaunch.addEventListener('click', () => {
+					if (window.CommandPrompt) window.CommandPrompt.open();
+				});
+				cmdLaunch.addEventListener('contextmenu', (e) => {
+					e.preventDefault();
+					e.stopPropagation();
+					if (window.ContextMenu) {
+						const items = window.ContextMenu.getQuickLaunchItemItems('quick-launch-cmd', 'Command Prompt');
 						window.ContextMenu.show(items, e.clientX, e.clientY);
 					}
 				});

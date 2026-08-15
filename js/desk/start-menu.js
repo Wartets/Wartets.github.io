@@ -74,13 +74,13 @@
 								</div>
 							</div>
 							<div class="xp-start-item" data-action="new-text-document">
-								<img src="../assets/images/desk/icons/File.webp" class="xp-start-item-icon" alt="Notepad">
+								<img src="../assets/images/desk/icons/Notepad.webp" class="xp-start-item-icon" alt="Notepad">
 								<div class="xp-start-item-texts">
 									<span class="xp-start-title">Notepad</span>
 								</div>
 							</div>
 							<div class="xp-start-item" data-action="open-cmd">
-								<img src="https://api.iconify.design/mdi/console.svg" class="xp-start-item-icon" alt="Command Prompt">
+								<img src="../assets/images/desk/icons/Command Prompt.webp" class="xp-start-item-icon" alt="Command Prompt">
 								<div class="xp-start-item-texts">
 									<span class="xp-start-title">Command Prompt</span>
 								</div>
@@ -402,7 +402,7 @@
 									<span class="xp-start-title">Notepad</span>
 								</div>
 								<div class="xp-start-flyout-item" data-action="open-cmd">
-									<img src="https://api.iconify.design/mdi/console.svg" class="xp-start-item-icon" alt="">
+									<img src="../assets/images/desk/icons/Command Prompt.webp" class="xp-start-item-icon" alt="">
 									<span class="xp-start-title">Command Prompt</span>
 								</div>
 								<div class="xp-start-flyout-item" data-action="open-today-anecdote">
@@ -854,7 +854,9 @@
 					if (typeof openRecycleBinWindow === 'function') openRecycleBinWindow();
 					break;
 				case 'new-text-document':
-					if (typeof fs !== 'undefined') {
+					if (window.NotepadApp) {
+						window.NotepadApp.openNew();
+					} else if (typeof fs !== 'undefined') {
 						try {
 							const newFile = fs.create('File', '/', 'New Document.txt');
 							if (typeof openTextEditorWindow === 'function') openTextEditorWindow(newFile);

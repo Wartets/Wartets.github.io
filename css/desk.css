@@ -3406,35 +3406,179 @@ body.theme-zune .xp-start-all-programs:hover {
 	display: flex;
 	flex-direction: column;
 	height: 100%;
-	background-color: var(--xp-window-bg);
+	background-color: #ffffff;
+	user-select: none;
+	box-sizing: border-box;
 }
 
-.notepad-toolbar {
-	border-bottom: 1px solid var(--xp-border-light);
-	background: var(--xp-window-bg);
-	padding: 2px;
+.notepad-menubar {
+	height: 20px;
+	background: #ece9d8;
+	border-bottom: 1px solid #d4d0c8;
+	display: flex;
+	align-items: center;
+	padding: 0 4px;
 	flex-shrink: 0;
+	user-select: none;
+	font-family: 'Tahoma', 'Segoe UI', Arial, sans-serif;
+	font-size: 11px;
 }
 
-.notepad-toolbar .ql-formats {
-	margin-right: 10px !important;
+.notepad-menubar ul {
+	display: flex;
+	list-style: none;
+	margin: 0;
+	padding: 0;
+	gap: 2px;
 }
 
-.notepad-editor-container {
-	flex-grow: 1;
+.notepad-menubar li {
+	padding: 1px 6px;
+	cursor: pointer;
+	border-radius: 2px;
+	color: #000000;
+	font-size: 11px;
+	display: inline-flex;
+	align-items: center;
+	height: 18px;
+	white-space: nowrap;
+}
+
+.notepad-menubar li:hover {
+	background-color: var(--xp-selection-blue);
+	color: #ffffff !important;
+}
+
+.notepad-textarea-container {
+	flex: 1;
+	display: flex;
+	position: relative;
+	background: #ffffff;
+	overflow: hidden;
+}
+
+.notepad-textarea {
+	flex: 1;
+	width: 100%;
+	height: 100%;
+	border: none;
+	outline: none;
+	padding: 4px 6px;
+	box-sizing: border-box;
+	resize: none;
+	font-family: 'Lucida Console', 'Consolas', 'Courier New', monospace;
+	font-size: 13px;
+	line-height: 1.35;
+	color: #000000;
+	background: #ffffff;
+	user-select: text;
+	overflow-y: scroll;
+	white-space: pre;
+}
+
+.notepad-textarea.wrap-enabled {
+	white-space: pre-wrap;
+	word-break: break-all;
+}
+
+.notepad-statusbar {
+	height: 20px;
+	background: #ece9d8;
+	border-top: 1px solid #aca899;
+	display: flex;
+	align-items: center;
+	font-size: 11px;
+	font-family: 'Tahoma', sans-serif;
+	flex-shrink: 0;
+	user-select: none;
+	padding: 0;
+}
+
+.xp-cmd-window .xp-window-content {
+	background-color: #000000 !important;
+}
+
+.xp-cmd-container {
+	display: flex;
+	flex-direction: column;
+	position: relative;
+	width: 100%;
+	height: 100%;
+	overflow: hidden;
+}
+
+.xp-cmd-terminal {
+	flex: 1;
+	overflow-y: auto;
+	overflow-x: hidden;
+	padding: 4px 6px;
+	box-sizing: border-box;
+	line-height: 1.25;
+}
+
+.xp-cmd-line {
+	margin: 0;
+	padding: 0;
+	white-space: pre-wrap;
+	word-break: break-all;
+	font-family: inherit;
+}
+
+.xp-cmd-input-line {
+	display: flex;
+	align-items: center;
+	white-space: pre;
 	position: relative;
 }
 
-.notepad-editor-container .ql-container {
-	border: none !important;
-	font-family: 'Times New Roman', serif;
-	font-size: 16px;
-	height: 100%;
+.xp-cmd-prompt-text {
+	user-select: none;
+	margin-right: 2px;
 }
 
-.notepad-editor-container .ql-editor {
+.xp-cmd-visible-input {
+	white-space: pre;
+}
+
+.xp-cmd-cursor {
+	display: inline-block;
+	font-weight: bold;
+	line-height: 1;
+	animation: xpCmdCursorBlink 0.8s infinite;
+}
+
+.xp-matrix-canvas {
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100%;
 	height: 100%;
-	padding: 12px 15px;
+	z-index: 10;
+}
+
+.notepad-sb-cell {
+	padding: 0 8px;
+	border-right: 1px solid #d4d0c8;
+	height: 100%;
+	display: flex;
+	align-items: center;
+	white-space: nowrap;
+	box-sizing: border-box;
+}
+
+.notepad-sb-pos {
+	min-width: 140px;
+}
+
+.notepad-sb-info {
+	flex: 1;
+}
+
+.notepad-sb-encoding {
+	min-width: 90px;
+	border-right: none;
+	border-left: 1px solid #d4d0c8;
+	margin-left: auto;
 }
 
 #boot-screen {
@@ -3977,6 +4121,86 @@ body.theme-zune .xp-start-all-programs:hover {
 
 .xp-dialog-buttons .xp-button {
 	min-width: 75px;
+}
+
+.xp-window.xp-cmd-window {
+	background-color: #000000;
+}
+
+.xp-cmd-container {
+	background-color: #000000;
+	color: #c0c0c0;
+	position: relative;
+	width: 100%;
+	height: 100%;
+	box-sizing: border-box;
+}
+
+.xp-cmd-terminal {
+	width: 100%;
+	height: 100%;
+	overflow-y: auto;
+	overflow-x: hidden;
+	box-sizing: border-box;
+	padding: 4px 6px;
+	font-family: Consolas, "Lucida Console", "Courier New", monospace;
+	font-size: 13px;
+	line-height: 1.25;
+	white-space: pre-wrap;
+	word-break: break-all;
+	user-select: text;
+}
+
+.xp-cmd-line {
+	margin: 0;
+	padding: 0;
+	line-height: 1.25;
+}
+
+.xp-cmd-input-line {
+	display: flex;
+	align-items: center;
+	position: relative;
+	line-height: 1.25;
+}
+
+.xp-cmd-prompt-text {
+	margin-right: 2px;
+	white-space: pre;
+}
+
+.xp-cmd-visible-input {
+	white-space: pre;
+}
+
+.xp-cmd-hidden-input {
+	position: absolute;
+	opacity: 0;
+	left: -9999px;
+	top: -9999px;
+	width: 1px;
+	height: 1px;
+}
+
+.xp-cmd-cursor {
+	display: inline-block;
+	font-weight: bold;
+	line-height: 1;
+	animation: xpCmdCursorBlink 0.8s infinite;
+}
+
+@keyframes xpCmdCursorBlink {
+	0%, 49% { opacity: 1; }
+	50%, 100% { opacity: 0; }
+}
+
+.xp-matrix-canvas {
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	background-color: #000000;
 }
 
 .xp-window iframe {
