@@ -483,6 +483,26 @@ let isContextMenuVisible = false;
 let customIcons = JSON.parse(localStorage.getItem('customIcons')) || [];
 let webampInstance = null;
 let lastClickedIconForRange = null;
+let nextWindowCascadeIndex = 0;
+
+function getNextWindowPosition(width, height) {
+	const startX = 24;
+	const startY = 24;
+	const step = 26;
+	const maxSteps = 10;
+
+	let posX = startX + (nextWindowCascadeIndex % maxSteps) * step;
+	let posY = startY + (nextWindowCascadeIndex % maxSteps) * step;
+
+	if (posX + width > window.innerWidth - 20 || posY + height > window.innerHeight - 60) {
+		nextWindowCascadeIndex = 0;
+		posX = startX;
+		posY = startY;
+	}
+
+	nextWindowCascadeIndex++;
+	return { x: Math.max(10, posX), y: Math.max(10, posY) };
+}
 
 const RECENT_DOCUMENTS_STORAGE_KEY = 'xp_recent_documents';
 
@@ -535,7 +555,7 @@ window.DeskAPI = {
 	openMailApp: () => openOutlookExpress(),
 	openProjectsFolder: () => openAllProjectsFolder(),
 	openRecycleBin: () => openRecycleBinWindow(),
-	openMinesweeperGame: () => openMinesweeper(),
+	openMinesweeperGame: () => (window.MinesweeperApp ? window.MinesweeperApp.open() : openMinesweeper()),
 	openWinampPlayer: () => openWinamp(),
 	getMoonPhaseDay: () => (typeof getMoonPhaseDayNumber === 'function') ? getMoonPhaseDayNumber() : null,
 	getRecycleBinCount: () => (typeof fs !== 'undefined' && fs) ? fs.loadRecycleBinItems().length : 0,
@@ -1167,13 +1187,15 @@ const APP_WINDOW_BASE_SIZES = {
 	outlook: { width: 980, height: 640 }
 };
 
-function computeXPWindowDimensions(preferredWidth, preferredHeight) {
+function computeXPWindowDimensions(preferredWidth, preferredHeight, isCompact = false) {
 	const availableWidth = window.innerWidth;
 	const availableHeight = window.innerHeight - 40;
 	const maxWidth = availableWidth * 0.92;
 	const maxHeight = availableHeight * 0.88;
-	const width = Math.max(240, Math.min(preferredWidth, maxWidth));
-	const height = Math.max(150, Math.min(preferredHeight, maxHeight));
+	const minW = isCompact ? 160 : Math.max(240, Math.min(preferredWidth, maxWidth));
+	const minH = isCompact ? 120 : Math.max(150, Math.min(preferredHeight, maxHeight));
+	const width = Math.max(minW, Math.min(preferredWidth, maxWidth));
+	const height = Math.max(minH, Math.min(preferredHeight, maxHeight));
 	return { width, height };
 }
 
@@ -1202,11 +1224,13 @@ function createXPWindow(id, title, contentHTML, initialWidth = 600, initialHeigh
 		win.style.position = 'relative';
 		win.style.boxShadow = '4px 4px 15px rgba(0,0,0,0.5)';
 	} else if (!options.isMenu) {
-		const { width, height } = computeXPWindowDimensions(initialWidth, initialHeight);
+		const isCompact = options.resizable === false;
+		const { width, height } = computeXPWindowDimensions(initialWidth, initialHeight, isCompact);
+		const pos = getNextWindowPosition(width, height);
 		win.style.width = `${width}px`;
 		win.style.height = `${height}px`;
-		win.style.left = `${Math.random() * (window.innerWidth - width)}px`;
-		win.style.top = `${Math.random() * (window.innerHeight - height - 40)}px`;
+		win.style.left = `${pos.x}px`;
+		win.style.top = `${pos.y}px`;
 	}
 	
 	win.style.opacity = '0';
@@ -1604,6 +1628,57 @@ function getActiveContainerDestPath() {
 	return '/';
 }
 
+let altTabState = {
+	active: false,
+	selectedIndex: 0,
+	windowIds: [],
+	overlayEl: null
+};
+
+function renderAltTabOverlay() {
+	if (!altTabState.overlayEl) {
+		altTabState.overlayEl = document.createElement('div');
+		altTabState.overlayEl.id = 'xp-alt-tab-overlay';
+		document.body.appendChild(altTabState.overlayEl);
+	}
+
+	const listEl = document.createElement('div');
+	listEl.className = 'alt-tab-list';
+
+	altTabState.windowIds.forEach((id, index) => {
+		const win = document.getElementById(id);
+		if (!win) return;
+		const itemEl = document.createElement('div');
+		itemEl.className = `alt-tab-item ${index === altTabState.selectedIndex ? 'selected' : ''}`;
+		const img = document.createElement('img');
+		const iconSrc = win.querySelector('.xp-window-header img')?.src || '../assets/images/desk/icons/File.webp';
+		img.src = iconSrc;
+		itemEl.appendChild(img);
+		listEl.appendChild(itemEl);
+	});
+
+	const selectedWin = document.getElementById(altTabState.windowIds[altTabState.selectedIndex]);
+	const titleText = selectedWin ? (selectedWin.querySelector('.xp-window-header .title')?.textContent || 'Window') : '';
+
+	const titleEl = document.createElement('div');
+	titleEl.className = 'alt-tab-title';
+	titleEl.textContent = titleText;
+
+	altTabState.overlayEl.innerHTML = '';
+	altTabState.overlayEl.appendChild(listEl);
+	altTabState.overlayEl.appendChild(titleEl);
+	altTabState.overlayEl.style.display = 'flex';
+}
+
+function hideAltTabOverlay() {
+	if (altTabState.overlayEl) {
+		altTabState.overlayEl.remove();
+		altTabState.overlayEl = null;
+	}
+	altTabState.active = false;
+	altTabState.windowIds = [];
+}
+
 function setupGlobalKeyboardShortcuts() {
 	document.addEventListener('keydown', (e) => {
 		const boot = document.getElementById('boot-screen');
@@ -1613,25 +1688,89 @@ function setupGlobalKeyboardShortcuts() {
 		const isEditable = e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.isContentEditable;
 		const ctrlOrMeta = e.ctrlKey || e.metaKey;
 
-		if (e.altKey && e.key === 'F4') {
-			e.preventDefault();
-			if (activeWindow) closeWindow(activeWindow, activeWindow.id);
+		if (e.key === 'Alt') {
 			return;
 		}
 
 		if (e.altKey && e.key === 'Tab') {
 			e.preventDefault();
-			const windowIds = Object.keys(openWindows).filter(id => !document.getElementById(id).classList.contains('minimized'));
-			if (windowIds.length === 0) return;
-			const currentId = activeWindow ? activeWindow.id : null;
-			let index = currentId ? windowIds.indexOf(currentId) : -1;
-			if (e.shiftKey) {
-				index = index <= 0 ? windowIds.length - 1 : index - 1;
+			const validIds = Object.keys(openWindows).filter(id => {
+				const w = document.getElementById(id);
+				return w && !w.classList.contains('xp-modal-overlay');
+			});
+
+			if (validIds.length === 0) return;
+
+			if (!altTabState.active) {
+				altTabState.active = true;
+				altTabState.windowIds = validIds;
+				const currentId = activeWindow ? activeWindow.id : null;
+				let currentPos = currentId ? validIds.indexOf(currentId) : 0;
+				if (currentPos === -1) currentPos = 0;
+				altTabState.selectedIndex = (currentPos + 1) % validIds.length;
 			} else {
-				index = index >= windowIds.length - 1 ? 0 : index + 1;
+				if (e.shiftKey) {
+					altTabState.selectedIndex = (altTabState.selectedIndex - 1 + altTabState.windowIds.length) % altTabState.windowIds.length;
+				} else {
+					altTabState.selectedIndex = (altTabState.selectedIndex + 1) % altTabState.windowIds.length;
+				}
 			}
-			const nextWindow = document.getElementById(windowIds[index]);
-			if (nextWindow) bringWindowToFront(nextWindow);
+
+			renderAltTabOverlay();
+			return;
+		}
+
+		if ((e.key === 'Meta' || (e.ctrlKey && e.key === 'Escape')) && !isEditable) {
+			e.preventDefault();
+			if (window.StartMenu) window.StartMenu.toggle();
+			return;
+		}
+
+		if (e.key === 'F5' && !isEditable) {
+			e.preventDefault();
+			refreshUI();
+			return;
+		}
+
+		if (e.key === 'F2' && !isEditable) {
+			if (selectedIcons.size === 1) {
+				e.preventDefault();
+				const icon = selectedIcons.values().next().value;
+				startInlineRename(icon);
+			}
+			return;
+		}
+
+		if (e.key === 'Delete' && !isEditable) {
+			if (selectedIcons.size > 0) {
+				e.preventDefault();
+				const count = selectedIcons.size;
+				const message = count > 1
+					? `Are you sure you want to move these ${count} items to the Recycle Bin?`
+					: `Are you sure you want to move this item to the Recycle Bin?`;
+
+				createConfirmationDialog(message, () => {
+					selectedIcons.forEach(icon => {
+						const p = icon.dataset.path;
+						if (p && !p.startsWith('app://')) {
+							try {
+								fs.moveToRecycleBin(p);
+							} catch (err) {}
+						}
+					});
+					clearIconSelections();
+					refreshUI();
+				});
+			}
+			return;
+		}
+
+		if (e.key === 'Backspace' && !isEditable && activeWindow && activeWindow.classList.contains('project-window')) {
+			const upBtn = activeWindow.querySelector('.up-btn');
+			if (upBtn && !upBtn.disabled) {
+				e.preventDefault();
+				upBtn.click();
+			}
 			return;
 		}
 
@@ -1730,6 +1869,20 @@ function setupGlobalKeyboardShortcuts() {
 			return;
 		}
 	});
+
+	document.addEventListener('keyup', (e) => {
+		if (e.key === 'Alt' && altTabState.active) {
+			const targetId = altTabState.windowIds[altTabState.selectedIndex];
+			hideAltTabOverlay();
+			if (targetId) {
+				const win = document.getElementById(targetId);
+				if (win) {
+					if (win.classList.contains('minimized')) unminimizeWindow(win);
+					bringWindowToFront(win);
+				}
+			}
+		}
+	});
 }
 
 function formatBytes(bytes) {
@@ -1774,7 +1927,6 @@ function openElementInfoWindow(element) {
 		extraRows += buildInfoRow('Items', String(element.listContent().length));
 	} else if (type === 'File') {
 		extraRows += buildInfoRow('Size', formatBytes(element.size));
-		extraRows += buildInfoRow('Read-only', element.readOnly ? 'Yes' : 'No');
 		if (!element.readOnly) {
 			const preview = (element.content || '').replace(/<[^>]*>/g, ' ').trim().slice(0, 240);
 			if (preview) previewHtml = `<div class="info-preview">${preview}${element.content.length > 240 ? '…' : ''}</div>`;
@@ -1794,28 +1946,78 @@ function openElementInfoWindow(element) {
 		if (description) previewHtml += `<div class="info-preview">${description}</div>`;
 	}
 
+	const readOnlyCheckbox = (element instanceof File)
+		? `<label class="xp-checkbox-row" style="margin: 0;"><input type="checkbox" id="prop-readonly-check" ${element.readOnly ? 'checked' : ''}> Read-only</label>`
+		: '';
+
 	const contentHTML = `
-		<div class="info-window-body">
+		<div class="info-window-body" style="display: flex; flex-direction: column; height: 100%; box-sizing: border-box;">
 			<div class="info-header">
 				<img src="${element.icon}" alt="${element.name}" class="info-icon">
 				<div class="info-title">${element.name}</div>
 			</div>
 			${previewHtml}
-			<div class="info-rows">
+			<div class="info-rows" style="flex: 1;">
 				${buildInfoRow('Type', type)}
 				${buildInfoRow('Location', element.parent ? element.parent.getFullPath() : '/')}
 				${buildInfoRow('Created', formatFullDate(element.createdAt))}
 				${buildInfoRow('Modified', formatFullDate(element.modifiedAt))}
 				${extraRows}
 			</div>
+			<fieldset class="xp-groupbox" style="margin-top: 8px; padding: 6px 10px;">
+				<legend>Attributes</legend>
+				<div style="display: flex; gap: 16px; align-items: center;">
+					${readOnlyCheckbox}
+					<label class="xp-checkbox-row" style="margin: 0;">
+						<input type="checkbox" id="prop-hidden-check" ${element.hidden ? 'checked' : ''}> Hidden
+					</label>
+				</div>
+			</fieldset>
+			<div style="display: flex; justify-content: flex-end; gap: 6px; margin-top: 12px;">
+				<button type="button" class="xp-button" id="prop-btn-ok">OK</button>
+				<button type="button" class="xp-button" id="prop-btn-cancel">Cancel</button>
+				<button type="button" class="xp-button" id="prop-btn-apply" disabled>Apply</button>
+			</div>
 		</div>
 	`;
 
-	const win = createXPWindow(id, `${element.name} Properties`, contentHTML, 380, 420, {
+	const win = createXPWindow(id, `${element.name} Properties`, contentHTML, 380, 460, {
 		iconSrc: element.icon,
 		resizable: false
 	});
 	win.querySelector('.xp-window-content').style.padding = '0';
+
+	const hiddenCheck = win.querySelector('#prop-hidden-check');
+	const readOnlyCheck = win.querySelector('#prop-readonly-check');
+	const okBtn = win.querySelector('#prop-btn-ok');
+	const cancelBtn = win.querySelector('#prop-btn-cancel');
+	const applyBtn = win.querySelector('#prop-btn-apply');
+
+	const onChange = () => {
+		if (applyBtn) applyBtn.disabled = false;
+	};
+
+	if (hiddenCheck) hiddenCheck.addEventListener('change', onChange);
+	if (readOnlyCheck) readOnlyCheck.addEventListener('change', onChange);
+
+	const applyProperties = () => {
+		if (hiddenCheck) element.hidden = hiddenCheck.checked;
+		if (readOnlyCheck && element instanceof File) element.readOnly = readOnlyCheck.checked;
+		fs.save();
+		refreshUI();
+		if (applyBtn) applyBtn.disabled = true;
+	};
+
+	if (applyBtn) applyBtn.addEventListener('click', applyProperties);
+	if (okBtn) {
+		okBtn.addEventListener('click', () => {
+			applyProperties();
+			closeWindow(win, id);
+		});
+	}
+	if (cancelBtn) {
+		cancelBtn.addEventListener('click', () => closeWindow(win, id));
+	}
 }
 
 function openMailInfoWindow(message) {
@@ -2161,215 +2363,9 @@ function openWinamp() {
 }
 
 function openMinesweeper() {
-	const id = 'window-minesweeper';
-	if (document.getElementById(id)) {
-		bringWindowToFront(document.getElementById(id));
-		return;
+	if (window.MinesweeperApp && typeof window.MinesweeperApp.open === 'function') {
+		return window.MinesweeperApp.open();
 	}
-
-	const rows = 9;
-	const cols = 9;
-	const minesCount = 10;
-	let gameOver = false;
-	let grid = [];
-	let minesFound = 0;
-	let timer = 0;
-	let timerInterval;
-
-	const contentHTML = `
-		<div class="minesweeper-container">
-			<div class="minesweeper-header">
-				<div class="minesweeper-counter" id="mine-counter">010</div>
-				<button class="minesweeper-face" id="minesweeper-reset">🙂</button>
-				<div class="minesweeper-counter" id="time-counter">000</div>
-			</div>
-			<div class="minesweeper-grid" id="minesweeper-grid"></div>
-		</div>
-	`;
-
-	const win = createXPWindow(id, 'Minesweeper', contentHTML, 200, 280, { 
-		resizable: false,
-		iconSrc: 'https://api.iconify.design/mdi/mine.svg' 
-	});
-
-	const gridEl = win.querySelector('#minesweeper-grid');
-	const resetBtn = win.querySelector('#minesweeper-reset');
-	const mineCounter = win.querySelector('#mine-counter');
-	const timeCounter = win.querySelector('#time-counter');
-
-	function initGame() {
-		gameOver = false;
-		minesFound = 0;
-		timer = 0;
-		clearInterval(timerInterval);
-		timeCounter.textContent = '000';
-		mineCounter.textContent = String(minesCount).padStart(3, '0');
-		resetBtn.textContent = '🙂';
-		gridEl.innerHTML = '';
-		grid = [];
-		
-		gridEl.style.gridTemplateColumns = `repeat(${cols}, 20px)`;
-
-		for (let r = 0; r < rows; r++) {
-			const row = [];
-			for (let c = 0; c < cols; c++) {
-				const cell = document.createElement('div');
-				cell.className = 'minesweeper-cell';
-				cell.dataset.r = r;
-				cell.dataset.c = c;
-				
-				cell.addEventListener('mousedown', (e) => {
-					if (gameOver) return;
-					if (e.button === 0) resetBtn.textContent = '😮';
-				});
-
-				cell.addEventListener('mouseup', () => {
-					if (gameOver) return;
-					resetBtn.textContent = '🙂';
-				});
-
-				cell.addEventListener('click', () => reveal(r, c));
-				cell.addEventListener('contextmenu', (e) => {
-					e.preventDefault();
-					toggleFlag(r, c);
-				});
-
-				gridEl.appendChild(cell);
-				row.push({ 
-					element: cell, 
-					isMine: false, 
-					revealed: false, 
-					flagged: false, 
-					neighborMines: 0 
-				});
-			}
-			grid.push(row);
-		}
-
-		placeMines();
-		calculateNeighbors();
-	}
-
-	function placeMines() {
-		let placed = 0;
-		while (placed < minesCount) {
-			const r = Math.floor(Math.random() * rows);
-			const c = Math.floor(Math.random() * cols);
-			if (!grid[r][c].isMine) {
-				grid[r][c].isMine = true;
-				placed++;
-			}
-		}
-	}
-
-	function calculateNeighbors() {
-		for (let r = 0; r < rows; r++) {
-			for (let c = 0; c < cols; c++) {
-				if (grid[r][c].isMine) continue;
-				let count = 0;
-				for (let dr = -1; dr <= 1; dr++) {
-					for (let dc = -1; dc <= 1; dc++) {
-						const nr = r + dr;
-						const nc = c + dc;
-						if (nr >= 0 && nr < rows && nc >= 0 && nc < cols && grid[nr][nc].isMine) {
-							count++;
-						}
-					}
-				}
-				grid[r][c].neighborMines = count;
-			}
-		}
-	}
-
-	function startTimer() {
-		if (timerInterval) return;
-		timerInterval = setInterval(() => {
-			timer++;
-			if (timer > 999) timer = 999;
-			timeCounter.textContent = String(timer).padStart(3, '0');
-		}, 1000);
-	}
-
-	function reveal(r, c) {
-		if (gameOver || grid[r][c].revealed || grid[r][c].flagged) return;
-		
-		startTimer();
-		const cell = grid[r][c];
-		cell.revealed = true;
-		cell.element.classList.add('revealed');
-
-		if (cell.isMine) {
-			cell.element.classList.add('mine');
-			cell.element.textContent = '💣';
-			cell.element.style.backgroundColor = 'red';
-			gameOver = true;
-			resetBtn.textContent = '😵';
-			clearInterval(timerInterval);
-			revealAllMines();
-		} else {
-			if (cell.neighborMines > 0) {
-				cell.element.textContent = cell.neighborMines;
-				cell.element.dataset.num = cell.neighborMines;
-			} else {
-				for (let dr = -1; dr <= 1; dr++) {
-					for (let dc = -1; dc <= 1; dc++) {
-						const nr = r + dr;
-						const nc = c + dc;
-						if (nr >= 0 && nr < rows && nc >= 0 && nc < cols) {
-							reveal(nr, nc);
-						}
-					}
-				}
-			}
-			checkWin();
-		}
-	}
-
-	function toggleFlag(r, c) {
-		if (gameOver || grid[r][c].revealed) return;
-		startTimer();
-		const cell = grid[r][c];
-		cell.flagged = !cell.flagged;
-		if (cell.flagged) {
-			cell.element.textContent = '🚩';
-			cell.element.classList.add('flagged');
-			minesFound++;
-		} else {
-			cell.element.textContent = '';
-			cell.element.classList.remove('flagged');
-			minesFound--;
-		}
-		mineCounter.textContent = String(Math.max(0, minesCount - minesFound)).padStart(3, '0');
-	}
-
-	function revealAllMines() {
-		for (let r = 0; r < rows; r++) {
-			for (let c = 0; c < cols; c++) {
-				if (grid[r][c].isMine) {
-					grid[r][c].element.classList.add('revealed', 'mine');
-					grid[r][c].element.textContent = '💣';
-				}
-			}
-		}
-	}
-
-	function checkWin() {
-		let revealedCount = 0;
-		for (let r = 0; r < rows; r++) {
-			for (let c = 0; c < cols; c++) {
-				if (grid[r][c].revealed) revealedCount++;
-			}
-		}
-		if (revealedCount === (rows * cols) - minesCount) {
-			gameOver = true;
-			resetBtn.textContent = '😎';
-			clearInterval(timerInterval);
-			mineCounter.textContent = '000';
-		}
-	}
-
-	resetBtn.addEventListener('click', initGame);
-	initGame();
 }
 
 function renderCalendar(year, month) {
@@ -2662,7 +2658,7 @@ function openFolderWindow(folder) {
 				<div class="folder-toolbar-separator"></div>
 				<div class="folder-nav-buttons">
 					<button class="folder-nav-btn search-btn" title="Search"><img src="data:image/svg+xml;charset=UTF-8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%232c63c3'><path d='M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z'/></svg>" alt="Search"></button>
-					<button class="folder-nav-btn folders-btn" title="Folders"><img src="data:image/svg+xml;charset=UTF-8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23ffb300'><path d='M10 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z'/></svg>" alt="Folders"></button>
+					<button class="folder-nav-btn folders-btn" title="Folders"><img src="../assets/images/desk/icons/Folder Closed.webp" alt="Folders"></button>
 				</div>
 				<div class="folder-toolbar-separator"></div>
 				<div class="folder-address-bar-container">
@@ -3052,90 +3048,206 @@ function arrangeIcons(sortBy) {
 	});
 }
 
+let currentDragTargetElement = null;
+
+function clearAllDropTargets() {
+	document.querySelectorAll('.drop-target').forEach(el => el.classList.remove('drop-target'));
+	currentDragTargetElement = null;
+}
+
 function handleDragStart(e) {
-	if (e.target.classList.contains('project-icon')) {
-		const path = e.target.dataset.path;
-		
-		let pathsToDrag = [];
-		if (selectedIcons.has(e.target)) {
-			pathsToDrag = Array.from(selectedIcons).map(icon => icon.dataset.path);
-			selectedIcons.forEach(icon => icon.style.opacity = '0.5');
-		} else {
-			pathsToDrag = [path];
-			e.target.style.opacity = '0.5';
-		}
-		e.dataTransfer.setData('application/json-paths', JSON.stringify(pathsToDrag));
-		e.dataTransfer.effectAllowed = 'move';
+	const icon = e.target.closest('.project-icon');
+	if (!icon) return;
+
+	if (!icon.classList.contains('selected') && !e.ctrlKey) {
+		clearIconSelections();
+		icon.classList.add('selected');
+		selectedIcons.add(icon);
 	}
+
+	const pathsToDrag = [];
+	selectedIcons.forEach(selected => {
+		const p = selected.dataset.path;
+		if (p && !p.startsWith('app://')) {
+			pathsToDrag.push(p);
+			selected.classList.add('dragging-icon');
+		}
+	});
+
+	if (pathsToDrag.length === 0) {
+		const singlePath = icon.dataset.path;
+		if (singlePath && !singlePath.startsWith('app://')) {
+			pathsToDrag.push(singlePath);
+			icon.classList.add('dragging-icon');
+		}
+	}
+
+	if (pathsToDrag.length === 0) {
+		e.preventDefault();
+		return;
+	}
+
+	e.dataTransfer.effectAllowed = 'move';
+	e.dataTransfer.setData('text/plain', JSON.stringify(pathsToDrag));
 }
 
 function handleDragOver(e) {
+	const pathsRaw = e.dataTransfer.types.includes('text/plain');
+	if (!pathsRaw) return;
+
 	e.preventDefault();
+	e.stopPropagation();
 	e.dataTransfer.dropEffect = 'move';
-	let target = e.currentTarget;
-	if (target.classList.contains('project-icon') && target.dataset.type !== 'folder') {
-		return;
+
+	const iconTarget = e.target.closest('.project-icon');
+	const folderContent = e.target.closest('.folder-content');
+	const folderWrapper = e.target.closest('.folder-content-wrapper');
+	const desktopTarget = e.target.closest('#desktop, #project-icons-container');
+
+	let dropCandidate = null;
+
+	if (iconTarget) {
+		const isFolder = iconTarget.dataset.type === 'folder';
+		const isRecycle = iconTarget.dataset.systemType === 'recycle-bin';
+		if (isFolder || isRecycle) {
+			dropCandidate = iconTarget;
+		} else if (folderContent) {
+			dropCandidate = folderContent;
+		} else {
+			dropCandidate = document.getElementById('project-icons-container');
+		}
+	} else if (folderContent) {
+		dropCandidate = folderContent;
+	} else if (folderWrapper) {
+		dropCandidate = folderWrapper.querySelector('.folder-content') || folderWrapper;
+	} else if (desktopTarget) {
+		dropCandidate = document.getElementById('project-icons-container');
 	}
-	target.classList.add('drop-target');
+
+	if (currentDragTargetElement && currentDragTargetElement !== dropCandidate) {
+		currentDragTargetElement.classList.remove('drop-target');
+	}
+
+	if (dropCandidate) {
+		dropCandidate.classList.add('drop-target');
+		currentDragTargetElement = dropCandidate;
+	}
 }
 
 function handleDragLeave(e) {
-	e.currentTarget.classList.remove('drop-target');
+	const related = e.relatedTarget;
+	const current = e.currentTarget;
+	if (!current.contains(related)) {
+		current.classList.remove('drop-target');
+		if (currentDragTargetElement === current) {
+			currentDragTargetElement = null;
+		}
+	}
 }
 
 function handleDragEnd(e) {
-	e.target.style.opacity = '1';
-	selectedIcons.forEach(icon => {
-		icon.style.opacity = '1';
+	document.querySelectorAll('.dragging-icon').forEach(icon => {
+		icon.classList.remove('dragging-icon');
 	});
+	clearAllDropTargets();
 }
 
-function resolveDropDestPath(target) {
-	if (target.id === 'desktop' || target.id === 'project-icons-container') {
-		return '/';
+function resolveDropDestination(dropTarget) {
+	if (!dropTarget) return null;
+
+	if (dropTarget.classList.contains('project-icon')) {
+		if (dropTarget.dataset.systemType === 'recycle-bin') {
+			return { type: 'recycle' };
+		}
+		if (dropTarget.dataset.type === 'folder') {
+			return { type: 'folder', path: dropTarget.dataset.path };
+		}
 	}
-	if (target.classList.contains('folder-content-wrapper')) {
-		const inner = target.querySelector('.folder-content');
-		return inner ? inner.dataset.path : '/';
+
+	if (dropTarget.classList.contains('folder-content')) {
+		const win = dropTarget.closest('.xp-window');
+		if (win && win.id === 'window-recycle-bin') {
+			return { type: 'recycle' };
+		}
+		return { type: 'folder', path: dropTarget.dataset.path || '/' };
 	}
-	return target.dataset.path;
+
+	if (dropTarget.classList.contains('folder-content-wrapper')) {
+		const win = dropTarget.closest('.xp-window');
+		if (win && win.id === 'window-recycle-bin') {
+			return { type: 'recycle' };
+		}
+		const inner = dropTarget.querySelector('.folder-content');
+		return { type: 'folder', path: (inner && inner.dataset.path) ? inner.dataset.path : '/' };
+	}
+
+	if (dropTarget.id === 'desktop' || dropTarget.id === 'project-icons-container') {
+		return { type: 'folder', path: '/' };
+	}
+
+	return { type: 'folder', path: '/' };
 }
 
 function handleDrop(e) {
 	e.preventDefault();
 	e.stopPropagation();
-	e.currentTarget.classList.remove('drop-target');
 
-	const pathsData = e.dataTransfer.getData('application/json-paths');
-	const target = e.currentTarget;
-	const destPath = resolveDropDestPath(target);
+	const target = currentDragTargetElement || e.currentTarget;
+	clearAllDropTargets();
 
-	if (typeof destPath === 'undefined') {
+	const dataRaw = e.dataTransfer.getData('text/plain');
+	if (!dataRaw) return;
+
+	let sourcePaths = [];
+	try {
+		sourcePaths = JSON.parse(dataRaw);
+	} catch (err) {
 		return;
 	}
 
-	const destElement = fs.findByPath(destPath);
-	let finalDestPath;
+	if (!Array.isArray(sourcePaths) || sourcePaths.length === 0) return;
 
-	if (destElement instanceof Folder) {
-		finalDestPath = destElement.getFullPath();
-	} else if ((destElement instanceof File || destElement instanceof Shortcut || destElement instanceof ProjectFile) && destElement.parent) {
-		finalDestPath = destElement.parent.getFullPath();
-	} else if (destPath === '/') {
-		finalDestPath = '/';
-	} else {
-		return;
-	}
+	const destination = resolveDropDestination(target);
+	if (!destination) return;
 
-	if (pathsData) {
-		const sourcePaths = JSON.parse(pathsData);
-		sourcePaths.forEach(sourcePath => {
+	if (destination.type === 'recycle') {
+		sourcePaths.forEach(src => {
 			try {
-				if (sourcePath && sourcePath !== finalDestPath) fs.move(sourcePath, finalDestPath);
-			} catch (error) {
-				showXPDialog('Error', `Error moving item: ${error.message}`, 'error');
+				fs.moveToRecycleBin(src);
+			} catch (err) {
+				showXPDialog('Recycle Bin', err.message, 'error');
 			}
 		});
+		if (window.SettingsApp && window.SettingsApp.playSound) {
+			window.SettingsApp.playSound('recycle');
+		}
+		refreshUI();
+		const rbWindow = document.getElementById('window-recycle-bin');
+		if (rbWindow) renderRecycleBinContent(rbWindow);
+		return;
+	}
+
+	const destFolder = fs.findByPath(destination.path);
+	if (!destFolder || !(destFolder instanceof Folder)) {
+		return;
+	}
+
+	const destFullPath = destFolder.getFullPath();
+
+	sourcePaths.forEach(src => {
+		const element = fs.findByPath(src);
+		if (!element || !element.parent) return;
+		if (element.parent.getFullPath() === destFullPath) return;
+
+		try {
+			fs.move(src, destFullPath);
+		} catch (err) {
+			showXPDialog('Move Error', err.message, 'error');
+		}
+	});
+
+	if (window.SettingsApp && window.SettingsApp.playSound) {
+		window.SettingsApp.playSound('click');
 	}
 
 	refreshUI();
@@ -3146,11 +3258,7 @@ function setupDesktopDropzone() {
 	const iconsContainer = document.getElementById('project-icons-container');
 	[desktop, iconsContainer].forEach(zone => {
 		zone.addEventListener('dragover', handleDragOver);
-		zone.addEventListener('dragleave', (e) => {
-			if (e.target === zone) {
-				zone.classList.remove('drop-target');
-			}
-		});
+		zone.addEventListener('dragleave', handleDragLeave);
 		zone.addEventListener('drop', handleDrop);
 	});
 }
@@ -4530,18 +4638,22 @@ async function openOutlookExpress() {
 
 	const contentHTML = `
 		<div class="outlook-window-layout">
+			<div class="folder-menu-bar">
+				<ul><li><u>F</u>ile</li><li><u>E</u>dit</li><li><u>V</u>iew</li><li><u>T</u>ools</li><li><u>M</u>essage</li><li><u>H</u>elp</li></ul>
+			</div>
 			<div class="outlook-toolbar">
-				<button class="outlook-tool-btn" data-action="new"><img src="https://api.iconify.design/mdi/email-plus-outline.svg" alt="New"><span>New Mail</span></button>
-				<button class="outlook-tool-btn" data-action="reply"><img src="https://api.iconify.design/mdi/reply-outline.svg" alt="Reply"><span>Reply</span></button>
-				<button class="outlook-tool-btn" data-action="forward"><img src="https://api.iconify.design/mdi/share-outline.svg" alt="Forward"><span>Forward</span></button>
-				<button class="outlook-tool-btn" data-action="delete"><img src="https://api.iconify.design/mdi/delete-outline.svg" alt="Delete"><span>Delete</span></button>
-				<button class="outlook-tool-btn" data-action="new-folder"><img src="https://api.iconify.design/mdi/folder-plus-outline.svg" alt="New Folder"><span>New Folder</span></button>
+				<button class="outlook-tool-btn" data-action="new"><img src="../assets/images/desk/icons/List File.webp" alt="Create Mail"><span>Create Mail</span></button>
+				<button class="outlook-tool-btn" data-action="reply"><img src="https://api.iconify.design/mdi/reply.svg?color=%23245edc" alt="Reply"><span>Reply</span></button>
+				<button class="outlook-tool-btn" data-action="forward"><img src="https://api.iconify.design/mdi/share.svg?color=%23245edc" alt="Forward"><span>Forward</span></button>
+				<button class="outlook-tool-btn" data-action="delete"><img src="https://api.iconify.design/mdi/delete.svg?color=%23cc3333" alt="Delete"><span>Delete</span></button>
+				<div class="outlook-separator"></div>
+				<button class="outlook-tool-btn" data-action="new-folder"><img src="../assets/images/desk/icons/Folder Closed.webp" alt="New Folder"><span>New Folder</span></button>
 				<div style="flex:1"></div>
-				<button id="oe-collapse-folders" class="outlook-tool-btn"><img src="https://api.iconify.design/mdi/chevron-left.svg" alt="Collapse"><span>Hide Folders</span></button>
+				<button id="oe-collapse-folders" class="outlook-tool-btn"><img src="../assets/images/desk/icons/Folder Open.webp" alt="Folders"><span>Folders</span></button>
 			</div>
 			<div class="outlook-main-content">
 				<div class="outlook-folder-pane" id="oe-folders">
-					<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;"><h4 style="margin:0;color:#0b3b7a;">Folders</h4></div>
+					<h4>Folders</h4>
 					<ul id="oe-folder-list"></ul>
 				</div>
 				<div class="splitter-vertical" id="oe-splitter-vertical"></div>
@@ -4941,22 +5053,27 @@ async function openOutlookExpress() {
 		}
 
 		const content = `
-			<div style="display:flex;flex-direction:column;height:100%;">
-				<div style="display:flex;flex-direction:column;gap:6px;padding:10px;border-bottom:1px solid var(--xp-border-light);">
-					<div style="display:flex;align-items:center;gap:8px;">
-						<label style="width:60px;">To:</label>
-						<input type="text" id="compose-to" style="flex:1;padding:4px;" value="${(prefill.to || '').replace(/"/g, '&quot;')}">
+			<div style="display:flex;flex-direction:column;height:100%;background:var(--xp-window-bg);font-family:'Tahoma',sans-serif;font-size:11px;">
+				<div class="folder-menu-bar">
+					<ul><li><u>F</u>ile</li><li><u>E</u>dit</li><li><u>V</u>iew</li><li><u>I</u>nsert</li><li><u>F</u>ormat</li><li><u>T</u>ools</li></ul>
+				</div>
+				<div class="outlook-toolbar">
+					<button class="outlook-tool-btn" id="compose-send"><img src="https://api.iconify.design/mdi/send.svg?color=%23245edc" alt="Send"><span>Send</span></button>
+					<button class="outlook-tool-btn" id="compose-save-draft"><img src="../assets/images/desk/icons/File.webp" alt="Save Draft"><span>Save Draft</span></button>
+					<button class="outlook-tool-btn" id="compose-cancel"><img src="https://api.iconify.design/mdi/close.svg?color=%23cc3333" alt="Cancel"><span>Cancel</span></button>
+				</div>
+				<div style="display:flex;flex-direction:column;gap:4px;padding:6px 8px;border-bottom:1px solid var(--xp-border-light);background:var(--xp-window-bg);">
+					<div style="display:flex;align-items:center;gap:6px;">
+						<label style="width:55px;font-weight:bold;color:#000;">To:</label>
+						<input type="text" id="compose-to" class="xp-input" style="flex:1;" value="${(prefill.to || '').replace(/"/g, '&quot;')}">
 					</div>
-					<div style="display:flex;align-items:center;gap:8px;">
-						<label style="width:60px;">Subject:</label>
-						<input type="text" id="compose-subject" style="flex:1;padding:4px;" value="${(prefill.subject || '').replace(/"/g, '&quot;')}">
+					<div style="display:flex;align-items:center;gap:6px;">
+						<label style="width:55px;font-weight:bold;color:#000;">Subject:</label>
+						<input type="text" id="compose-subject" class="xp-input" style="flex:1;" value="${(prefill.subject || '').replace(/"/g, '&quot;')}">
 					</div>
 				</div>
-				<textarea id="compose-body" style="flex:1;border:none;padding:10px;font-family:'Roboto Mono',monospace;font-size:13px;resize:none;outline:none;">${prefill.body || ''}</textarea>
-				<div style="display:flex;justify-content:flex-end;gap:8px;padding:10px;border-top:1px solid var(--xp-border-light);">
-					<button class="xp-button" id="compose-send">Send</button>
-					<button class="xp-button" id="compose-save-draft">Save as Draft</button>
-					<button class="xp-button" id="compose-cancel">Cancel</button>
+				<div style="flex:1;padding:4px;background:var(--xp-window-bg);display:flex;">
+					<textarea id="compose-body" style="flex:1;border:2px inset #ffffff;padding:8px;font-family:'Tahoma',Arial,sans-serif;font-size:12px;resize:none;outline:none;background:#ffffff;color:#000000;">${prefill.body || ''}</textarea>
 				</div>
 			</div>
 		`;

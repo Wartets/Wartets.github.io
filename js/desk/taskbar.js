@@ -311,7 +311,9 @@
 				if (!clockEl) return;
 				const now = new Date();
 				const is12h = window.SettingsApp ? (window.SettingsApp.get('clockFormat') === '12h') : false;
-				const showSeconds = window.SettingsApp ? window.SettingsApp.get('showClockSeconds') : true;
+				const showSeconds = window.SettingsApp ? (window.SettingsApp.get('showClockSeconds') !== false) : true;
+				const showDate = window.SettingsApp ? (window.SettingsApp.get('showClockDate') !== false) : true;
+				const dateFormat = window.SettingsApp ? (window.SettingsApp.get('dateFormat') || 'dd/mm/yyyy') : 'dd/mm/yyyy';
 
 				let hoursNum = now.getHours();
 				let ampm = '';
@@ -322,8 +324,29 @@
 				const hours = String(hoursNum).padStart(2, '0');
 				const minutes = String(now.getMinutes()).padStart(2, '0');
 				const seconds = String(now.getSeconds()).padStart(2, '0');
-				
-				clockEl.textContent = showSeconds ? `${hours}:${minutes}:${seconds}${ampm}` : `${hours}:${minutes}${ampm}`;
+				const timeStr = showSeconds ? `${hours}:${minutes}:${seconds}${ampm}` : `${hours}:${minutes}${ampm}`;
+
+				const day = String(now.getDate()).padStart(2, '0');
+				const month = String(now.getMonth() + 1).padStart(2, '0');
+				const year = String(now.getFullYear());
+
+				let dateStr = '';
+				if (dateFormat === 'mm/dd/yyyy') {
+					dateStr = `${month}/${day}/${year}`;
+				} else if (dateFormat === 'yyyy-mm-dd') {
+					dateStr = `${year}-${month}-${day}`;
+				} else if (dateFormat === 'dd.mm.yyyy') {
+					dateStr = `${day}.${month}.${year}`;
+				} else {
+					dateStr = `${day}/${month}/${year}`;
+				}
+
+				if (showDate) {
+					clockEl.innerHTML = `<span class="taskbar-clock-time">${timeStr}</span><span class="taskbar-clock-date">${dateStr}</span>`;
+				} else {
+					clockEl.innerHTML = `<span class="taskbar-clock-time">${timeStr}</span>`;
+				}
+
 				clockEl.title = now.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
 			};
 			update();

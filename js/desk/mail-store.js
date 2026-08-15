@@ -2,12 +2,12 @@
 	const STORAGE_KEY = "desktopMailState";
 
 	const SYSTEM_FOLDERS = [
-		{ id: "inbox", name: "Inbox", icon: "https://staging.svgrepo.com/show/76102/inbox.svg", deletable: false },
-		{ id: "outbox", name: "Outbox", icon: "https://api.iconify.design/mdi/folder-outline.svg", deletable: false },
-		{ id: "sent", name: "Sent Items", icon: "https://api.iconify.design/mdi/folder-arrow-up-outline.svg", deletable: false },
-		{ id: "drafts", name: "Drafts", icon: "https://api.iconify.design/mdi/folder-edit-outline.svg", deletable: false },
-		{ id: "deleted", name: "Deleted Items", icon: "https://api.iconify.design/mdi/folder-remove-outline.svg", deletable: false },
-		{ id: "spam", name: "Spam", icon: "https://api.iconify.design/mdi/folder-outline.svg", deletable: false }
+		{ id: "inbox", name: "Inbox", icon: "../assets/images/desk/icons/Folder Closed (Alt).webp", deletable: false },
+		{ id: "outbox", name: "Outbox", icon: "../assets/images/desk/icons/Folder Closed.webp", deletable: false },
+		{ id: "sent", name: "Sent Items", icon: "../assets/images/desk/icons/Folder Closed.webp", deletable: false },
+		{ id: "drafts", name: "Drafts", icon: "../assets/images/desk/icons/Folder Closed.webp", deletable: false },
+		{ id: "deleted", name: "Deleted Items", icon: "../assets/images/desk/trash.png", deletable: false },
+		{ id: "spam", name: "Spam", icon: "../assets/images/desk/icons/Folder Closed.webp", deletable: false }
 	];
 
 	const FOLDER_NAME_TO_ID = {
@@ -81,7 +81,7 @@
 		init();
 		return [
 			...SYSTEM_FOLDERS,
-			...state.customFolders.map(f => ({ ...f, icon: "https://api.iconify.design/mdi/folder-outline.svg", deletable: true }))
+			...state.customFolders.map(f => ({ ...f, icon: "../assets/images/desk/icons/Folder Closed.webp", deletable: true }))
 		];
 	}
 

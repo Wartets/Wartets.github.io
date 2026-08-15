@@ -29,22 +29,27 @@
 		iconSize: 'normal',
 		iconTextShadow: true,
 		iconBackground: false,
+		singleClickOpen: false,
 		scanlinesEnabled: true,
 		scanlinesIntensity: 0.85,
 		vignetteEnabled: true,
+		crtFlicker: false,
 		windowAnimations: true,
 		animationSpeed: 'normal',
 		showClockSeconds: true,
+		showClockDate: true,
 		clockFormat: '24h',
+		dateFormat: 'dd/mm/yyyy',
 		taskbarDensity: 'auto',
 		taskbarLocked: true,
 		taskbarAutoHide: false,
 		taskbarBalloons: true,
 		quickLaunchVisible: true,
-		userName: 'Wartets',
+		userName: 'Colin B.R.',
 		userAvatar: '../assets/images/desk/icons/User 1.webp',
 		clippyEnabled: true,
 		clippyFrequency: 'normal',
+		soundScheme: 'default',
 		soundEnabled: true,
 		soundVolume: 0.7,
 		showHiddenFiles: false,
@@ -234,13 +239,14 @@
 
 	function applyAllSettings() {
 		document.body.classList.remove('theme-luna-blue', 'theme-royale', 'theme-silver', 'theme-olive', 'theme-classic', 'theme-zune');
-		document.body.classList.add(`theme-${currentSettings.theme}`);
+		const themeClass = currentSettings.theme === 'default' ? 'theme-luna-blue' : (currentSettings.theme.startsWith('theme-') ? currentSettings.theme : `theme-${currentSettings.theme}`);
+		document.body.classList.add(themeClass);
 
 		document.body.classList.remove('font-roboto-mono', 'font-tahoma', 'font-trebuchet', 'font-sans', 'font-segoe', 'font-comic');
-		document.body.classList.add(`font-${currentSettings.fontFamily}`);
+		document.body.classList.add(`font-${currentSettings.fontFamily || 'roboto-mono'}`);
 
 		document.body.classList.remove('font-scale-normal', 'font-scale-large', 'font-scale-xlarge');
-		document.body.classList.add(`font-scale-${currentSettings.fontScale}`);
+		document.body.classList.add(`font-scale-${currentSettings.fontScale || 'normal'}`);
 
 		const desktop = document.getElementById('desktop');
 		if (desktop && currentSettings.desktopBackground) {
@@ -253,6 +259,7 @@
 		document.body.classList.add(`icon-size-${currentSettings.iconSize || 'normal'}`);
 		document.body.classList.toggle('icon-no-shadow', !currentSettings.iconTextShadow);
 		document.body.classList.toggle('icon-label-bg', !!currentSettings.iconBackground);
+		document.body.classList.toggle('single-click-mode', !!currentSettings.singleClickOpen);
 
 		const scanlinesOverlay = document.getElementById('scanlines-overlay');
 		if (scanlinesOverlay) {
@@ -262,6 +269,7 @@
 		if (desktop) {
 			desktop.classList.toggle('crt-effect', !!currentSettings.vignetteEnabled);
 		}
+		document.body.classList.toggle('crt-flicker', !!currentSettings.crtFlicker);
 
 		document.body.classList.toggle('no-window-animations', !currentSettings.windowAnimations);
 		document.body.classList.remove('anim-fast', 'anim-slow');
@@ -519,6 +527,10 @@
 								<input type="checkbox" id="settings-vignette-toggle" ${pendingSettings.vignetteEnabled ? 'checked' : ''}>
 								<label for="settings-vignette-toggle">Simulate CRT screen curvature and vignette darkening</label>
 							</div>
+							<div class="xp-checkbox-row" style="margin-top: 8px;">
+								<input type="checkbox" id="settings-crt-flicker-toggle" ${pendingSettings.crtFlicker ? 'checked' : ''}>
+								<label for="settings-crt-flicker-toggle">Simulate 60Hz cathode ray tube phosphor flicker</label>
+							</div>
 						</fieldset>
 
 						<fieldset class="xp-groupbox" style="margin-top: 8px;">
@@ -577,11 +589,24 @@
 								<input type="checkbox" id="settings-clock-seconds" ${pendingSettings.showClockSeconds ? 'checked' : ''}>
 								<label for="settings-clock-seconds">Show seconds in taskbar clock</label>
 							</div>
+							<div class="xp-checkbox-row" style="margin-top: 4px;">
+								<input type="checkbox" id="settings-clock-date" ${pendingSettings.showClockDate ? 'checked' : ''}>
+								<label for="settings-clock-date">Show date below time in taskbar</label>
+							</div>
 							<div class="xp-form-row" style="margin-top: 6px;">
 								<label for="settings-clock-format">Time format:</label>
 								<select id="settings-clock-format" class="xp-select">
 									<option value="24h">24-hour clock (14:30)</option>
 									<option value="12h">12-hour clock AM/PM (02:30 PM)</option>
+								</select>
+							</div>
+							<div class="xp-form-row" style="margin-top: 6px;">
+								<label for="settings-date-format">Date format:</label>
+								<select id="settings-date-format" class="xp-select">
+									<option value="dd/mm/yyyy">DD/MM/YYYY (31/12/2001)</option>
+									<option value="mm/dd/yyyy">MM/DD/YYYY (12/31/2001)</option>
+									<option value="yyyy-mm-dd">YYYY-MM-DD (2001-12-31)</option>
+									<option value="dd.mm.yyyy">DD.MM.YYYY (31.12.2001)</option>
 								</select>
 							</div>
 							<div class="xp-checkbox-row" style="margin-top: 6px;">
@@ -593,8 +618,17 @@
 
 					<div class="xp-tab-page" data-page="audio">
 						<fieldset class="xp-groupbox">
-							<legend>Sound Effects Engine</legend>
-							<div class="xp-checkbox-row">
+							<legend>Sound Scheme & Volume</legend>
+							<div class="xp-form-row">
+								<label for="settings-sound-scheme" style="width: 100px;">Sound Scheme:</label>
+								<select id="settings-sound-scheme" class="xp-select" style="flex: 1;">
+									<option value="default">Windows Default</option>
+									<option value="utopia">Windows Utopia</option>
+									<option value="classic">Windows Classic (95/98)</option>
+									<option value="none">No Sounds (Silent)</option>
+								</select>
+							</div>
+							<div class="xp-checkbox-row" style="margin-top: 6px;">
 								<input type="checkbox" id="settings-sound-toggle" ${pendingSettings.soundEnabled ? 'checked' : ''}>
 								<label for="settings-sound-toggle">Play synthesized Windows XP system sound events</label>
 							</div>
@@ -623,6 +657,14 @@
 
 					<div class="xp-tab-page" data-page="input">
 						<fieldset class="xp-groupbox">
+							<legend>Click Item Action</legend>
+							<div class="xp-checkbox-row">
+								<input type="checkbox" id="settings-single-click-toggle" ${pendingSettings.singleClickOpen ? 'checked' : ''}>
+								<label for="settings-single-click-toggle">Single-click to open an item (point to select)</label>
+							</div>
+						</fieldset>
+
+						<fieldset class="xp-groupbox" style="margin-top: 8px;">
 							<legend>Double-Click Speed Calibration</legend>
 							<div style="font-size: 11px; margin-bottom: 4px;">Double-click the test box below to verify your double-click speed:</div>
 							<div class="xp-form-row">
@@ -641,6 +683,10 @@
 							<div class="xp-checkbox-row">
 								<input type="checkbox" id="settings-show-hidden" ${pendingSettings.showHiddenFiles ? 'checked' : ''}>
 								<label for="settings-show-hidden">Show hidden files and folders</label>
+							</div>
+							<div class="xp-checkbox-row" style="margin-top: 4px;">
+								<input type="checkbox" id="settings-show-ext" ${pendingSettings.showFileExtensions ? 'checked' : ''}>
+								<label for="settings-show-ext">Hide file extensions for known file types</label>
 							</div>
 						</fieldset>
 					</div>
@@ -929,6 +975,38 @@
 			});
 		}
 
+		const crtFlickerToggle = win.querySelector('#settings-crt-flicker-toggle');
+		if (crtFlickerToggle) {
+			crtFlickerToggle.addEventListener('change', () => {
+				pendingSettings.crtFlicker = crtFlickerToggle.checked;
+				markDirty(win);
+			});
+		}
+
+		const singleClickToggle = win.querySelector('#settings-single-click-toggle');
+		if (singleClickToggle) {
+			singleClickToggle.addEventListener('change', () => {
+				pendingSettings.singleClickOpen = singleClickToggle.checked;
+				markDirty(win);
+			});
+		}
+
+		const soundSchemeSelect = win.querySelector('#settings-sound-scheme');
+		if (soundSchemeSelect) {
+			soundSchemeSelect.value = pendingSettings.soundScheme || 'default';
+			soundSchemeSelect.addEventListener('change', () => {
+				pendingSettings.soundScheme = soundSchemeSelect.value;
+				if (soundSchemeSelect.value === 'none') {
+					pendingSettings.soundEnabled = false;
+					if (soundToggle) soundToggle.checked = false;
+				} else {
+					pendingSettings.soundEnabled = true;
+					if (soundToggle) soundToggle.checked = true;
+				}
+				markDirty(win);
+			});
+		}
+
 		const animToggle = win.querySelector('#settings-anim-toggle');
 		if (animToggle) {
 			animToggle.addEventListener('change', () => {
@@ -954,11 +1032,28 @@
 			});
 		}
 
+		const clockDateToggle = win.querySelector('#settings-clock-date');
+		if (clockDateToggle) {
+			clockDateToggle.addEventListener('change', () => {
+				pendingSettings.showClockDate = clockDateToggle.checked;
+				markDirty(win);
+			});
+		}
+
 		const clockFormatSelect = win.querySelector('#settings-clock-format');
 		if (clockFormatSelect) {
 			clockFormatSelect.value = pendingSettings.clockFormat || '24h';
 			clockFormatSelect.addEventListener('change', () => {
 				pendingSettings.clockFormat = clockFormatSelect.value;
+				markDirty(win);
+			});
+		}
+
+		const dateFormatSelect = win.querySelector('#settings-date-format');
+		if (dateFormatSelect) {
+			dateFormatSelect.value = pendingSettings.dateFormat || 'dd/mm/yyyy';
+			dateFormatSelect.addEventListener('change', () => {
+				pendingSettings.dateFormat = dateFormatSelect.value;
 				markDirty(win);
 			});
 		}
