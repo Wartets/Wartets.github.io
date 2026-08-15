@@ -40,6 +40,7 @@
 		showClockDate: true,
 		clockFormat: '24h',
 		dateFormat: 'dd/mm/yyyy',
+		taskbarSize: 'medium',
 		taskbarDensity: 'auto',
 		taskbarLocked: true,
 		taskbarAutoHide: false,
@@ -291,6 +292,9 @@
 
 		document.body.classList.toggle('taskbar-locked', !!currentSettings.taskbarLocked);
 		document.body.classList.toggle('taskbar-autohide', !!currentSettings.taskbarAutoHide);
+
+		document.body.classList.remove('taskbar-size-small', 'taskbar-size-medium', 'taskbar-size-large');
+		document.body.classList.add(`taskbar-size-${currentSettings.taskbarSize || 'medium'}`);
 
 		const profileNameEl = document.querySelector('.start-menu-profile span');
 		if (profileNameEl && currentSettings.userName) {
@@ -553,6 +557,14 @@
 					<div class="xp-tab-page" data-page="taskbar">
 						<fieldset class="xp-groupbox">
 							<legend>Taskbar Appearance & Behavior</legend>
+							<div class="xp-form-row" style="margin-bottom: 8px;">
+								<label for="settings-taskbar-size" style="width: 110px;">Taskbar Size:</label>
+								<select id="settings-taskbar-size" class="xp-select" style="flex: 1;">
+									<option value="small">Small (30px Compact)</option>
+									<option value="medium">Medium (36px Windows XP Default)</option>
+									<option value="large">Large (44px Extended)</option>
+								</select>
+							</div>
 							<div class="xp-checkbox-row">
 								<input type="checkbox" id="settings-taskbar-lock" ${pendingSettings.taskbarLocked ? 'checked' : ''}>
 								<label for="settings-taskbar-lock">Lock the taskbar</label>
@@ -1054,6 +1066,15 @@
 			dateFormatSelect.value = pendingSettings.dateFormat || 'dd/mm/yyyy';
 			dateFormatSelect.addEventListener('change', () => {
 				pendingSettings.dateFormat = dateFormatSelect.value;
+				markDirty(win);
+			});
+		}
+
+		const taskbarSizeSelect = win.querySelector('#settings-taskbar-size');
+		if (taskbarSizeSelect) {
+			taskbarSizeSelect.value = pendingSettings.taskbarSize || 'medium';
+			taskbarSizeSelect.addEventListener('change', () => {
+				pendingSettings.taskbarSize = taskbarSizeSelect.value;
 				markDirty(win);
 			});
 		}

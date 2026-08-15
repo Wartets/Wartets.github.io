@@ -507,6 +507,8 @@
 				}
 			};
 
+			const isBat = isFile && (element.name.toLowerCase().endsWith('.bat') || element.name.toLowerCase().endsWith('.cmd'));
+
 			const items = [
 				{
 					label: isFolder ? 'Open' : (isProject ? 'Open Project Details' : 'Open'),
@@ -514,6 +516,18 @@
 					action: openAction
 				}
 			];
+
+			if (isBat) {
+				items.push({
+					label: 'Edit',
+					icon: '../assets/images/desk/icons/Notepad.webp',
+					action: () => {
+						if (window.NotepadApp) {
+							window.NotepadApp.open(element);
+						}
+					}
+				});
+			}
 
 			if (isFolder) {
 				items.push({

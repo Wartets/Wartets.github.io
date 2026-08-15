@@ -18,6 +18,7 @@
 	--xp-button-hover: #f5f4ef;
 	--xp-selection-blue: #316ac5;
 	--xp-selection-text: #ffffff;
+	--xp-taskbar-height: 36px;
 }
 
 body.crt-flicker::after {
@@ -302,7 +303,7 @@ body {
 	top: 0;
 	left: 0;
 	width: 100vw;
-	height: calc(100vh - 30px);
+	height: calc(100vh - var(--xp-taskbar-height, 36px));
 	background: 
 		url('../assets/images/desk/wallpapers/wallpaper-default.webp') center center / cover no-repeat;
 	background-color: var(--xp-blue-dark);
@@ -310,12 +311,16 @@ body {
 	z-index: 0;
 }
 
+body.taskbar-autohide #desktop {
+	height: 100vh !important;
+}
+
 #taskbar {
 	position: fixed;
 	bottom: 0;
 	left: 0;
 	width: 100%;
-	height: 30px;
+	height: var(--xp-taskbar-height, 36px);
 	background: linear-gradient(to bottom, #245edc 0%, #3f8cf3 9%, #245edc 18%, #245edc 92%, #1941a5 100%);
 	border-top: 1px solid #143585;
 	display: flex;
@@ -330,7 +335,7 @@ body {
 }
 
 .xp-taskbar-start {
-	height: 30px;
+	height: var(--xp-taskbar-height, 36px);
 	padding: 0 12px 0 6px;
 	margin: 0;
 	background: radial-gradient(circle at 10px 10px, #5cb85c 0%, #388a38 35%, #246824 85%, #184c18 100%);
@@ -413,12 +418,109 @@ body.taskbar-locked .quick-launch-handle {
 }
 
 body.taskbar-autohide #taskbar {
-	transform: translateY(27px);
+	transform: translateY(calc(100% - 3px));
 	transition: transform 0.2s ease-in-out;
 }
 
 body.taskbar-autohide #taskbar:hover {
 	transform: translateY(0);
+}
+
+body.taskbar-size-small {
+	--xp-taskbar-height: 30px;
+}
+body.taskbar-size-small .xp-taskbar-start {
+	height: 30px;
+	padding: 0 10px 0 6px;
+}
+body.taskbar-size-small .windows-logo {
+	height: 16px;
+}
+body.taskbar-size-small .xp-start-text {
+	font-size: 13px;
+}
+body.taskbar-size-small .quick-launch-icon-wrapper {
+	width: 22px;
+	height: 22px;
+}
+body.taskbar-size-small .quick-launch-icon {
+	width: 16px;
+	height: 16px;
+}
+body.taskbar-size-small .taskbar-window-btn {
+	height: 24px;
+	font-size: 11px;
+}
+
+body.taskbar-size-medium {
+	--xp-taskbar-height: 36px;
+}
+body.taskbar-size-medium .xp-taskbar-start {
+	height: 36px;
+	padding: 0 13px 0 8px;
+}
+body.taskbar-size-medium .windows-logo {
+	height: 20px;
+}
+body.taskbar-size-medium .xp-start-text {
+	font-size: 15px;
+}
+body.taskbar-size-medium .quick-launch-icon-wrapper {
+	width: 26px;
+	height: 26px;
+}
+body.taskbar-size-medium .quick-launch-icon {
+	width: 18px;
+	height: 18px;
+}
+body.taskbar-size-medium .taskbar-window-btn {
+	height: 28px;
+	font-size: 11px;
+}
+body.taskbar-size-medium .tray-icon-item {
+	width: 20px;
+	height: 20px;
+}
+body.taskbar-size-medium .tray-icon-item img {
+	width: 16px;
+	height: 16px;
+}
+
+body.taskbar-size-large {
+	--xp-taskbar-height: 44px;
+}
+body.taskbar-size-large .xp-taskbar-start {
+	height: 44px;
+	padding: 0 16px 0 10px;
+}
+body.taskbar-size-large .windows-logo {
+	height: 24px;
+}
+body.taskbar-size-large .xp-start-text {
+	font-size: 17px;
+}
+body.taskbar-size-large .quick-launch-icon-wrapper {
+	width: 32px;
+	height: 32px;
+}
+body.taskbar-size-large .quick-launch-icon {
+	width: 22px;
+	height: 22px;
+}
+body.taskbar-size-large .taskbar-window-btn {
+	height: 34px;
+	font-size: 12px;
+}
+body.taskbar-size-large .tray-icon-item {
+	width: 24px;
+	height: 24px;
+}
+body.taskbar-size-large .tray-icon-item img {
+	width: 18px;
+	height: 18px;
+}
+body.taskbar-size-large #taskbar-clock {
+	font-size: 11px;
 }
 
 .quick-launch-icon-wrapper {

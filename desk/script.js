@@ -968,6 +968,13 @@ function initializeFileSystem() {
 
 	initPoemsFolder(othersFolder);
 
+	let matrixFile = fs.root.getByName('matrix.bat');
+	if (!matrixFile) {
+		matrixFile = new File('matrix.bat', null, '@echo off\ntitle Matrix Digital Rain\ncolor 0a\ncls\necho Initializing Matrix stream...\nmatrix\n');
+		matrixFile.icon = '../assets/images/desk/icons/Command Prompt.webp';
+		fs.root.add(matrixFile);
+	}
+
 	fs.save();
 }
 
@@ -3252,22 +3259,7 @@ function renderRecycleBinContent(win) {
 		});
 
 		icon.addEventListener('dblclick', () => {
-			if (item.data && (item.data.name.endsWith('.bat') || item.data.name.endsWith('.cmd'))) {
-				if (window.CommandPrompt) {
-					window.CommandPrompt.open({
-						script: item.data.content,
-						title: item.data.name
-					});
-				}
-				return;
-			}
-			try {
-				fs.restoreFromRecycleBin(item.uid);
-				renderRecycleBinContent(win);
-				refreshUI();
-			} catch (e) {
-				showXPDialog('Error', e.message, 'error');
-			}
+			showXPDialog(item.data.name, 'This item is in the Recycle Bin. You must restore it to open or execute it.', 'warning');
 		});
 
 		icon.addEventListener('contextmenu', (e) => {
@@ -3729,34 +3721,142 @@ function openPrintersWindow() {
 	}
 
 	const contentHTML = `
-		<div class="folder-window-layout">
-			<div class="folder-toolbar">
-				<button class="folder-nav-btn" disabled><img src="data:image/svg+xml;charset=UTF-8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%232c63c3'><path d='M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z'/></svg>" alt="Back"></button>
+		<div class="xp-explorer-layout">
+			<div class="xp-explorer-menubar">
+				<ul class="xp-menubar-list">
+					<li class="xp-menubar-item"><u>F</u>ile</li>
+					<li class="xp-menubar-item"><u>E</u>dit</li>
+					<li class="xp-menubar-item"><u>V</u>iew</li>
+					<li class="xp-menubar-item"><u>F</u>avorites</li>
+					<li class="xp-menubar-item"><u>T</u>ools</li>
+					<li class="xp-menubar-item"><u>H</u>elp</li>
+				</ul>
+				<div class="xp-menubar-brand">
+					<img src="../assets/images/desk/window_logo.png" alt="XP">
+				</div>
 			</div>
-			<div style="padding: 15px; display: flex; flex-wrap: wrap; gap: 16px; background: #ffffff; height: 100%; box-sizing: border-box;">
-				<div class="my-comp-item" style="flex-direction: column; width: 110px; text-align: center;" id="printer-add-wizard">
-					<img src="https://api.iconify.design/mdi/printer-plus.svg?color=%231b4b9b" style="width: 40px; height: 40px;" alt="">
-					<span style="font-size: 11px; margin-top: 4px;">Add Printer</span>
+			<div class="xp-explorer-toolbar">
+				<div class="xp-tb-group">
+					<button type="button" class="xp-tb-btn tb-back" disabled><div class="xp-tb-icon-back"></div><span>Back</span></button>
+					<button type="button" class="xp-tb-btn tb-forward" disabled><div class="xp-tb-icon-forward"></div></button>
+					<button type="button" class="xp-tb-btn tb-up" disabled><div class="xp-tb-icon-up"></div></button>
 				</div>
-				<div class="my-comp-item" style="flex-direction: column; width: 110px; text-align: center;">
-					<img src="https://api.iconify.design/mdi/printer.svg?color=%232e7d32" style="width: 40px; height: 40px;" alt="">
-					<span style="font-size: 11px; margin-top: 4px; font-weight: bold;">PDF Document Writer (Default)</span>
+				<div class="xp-tb-sep"></div>
+				<div class="xp-tb-group">
+					<button type="button" class="xp-tb-btn tb-search" id="printers-tb-search"><img src="https://api.iconify.design/mdi/magnify.svg?color=%231b4b9b" alt=""><span>Search</span></button>
+					<button type="button" class="xp-tb-btn" id="printers-tb-folders"><img src="../assets/images/desk/icons/Folder Closed.webp" alt=""><span>Folders</span></button>
 				</div>
-				<div class="my-comp-item" style="flex-direction: column; width: 110px; text-align: center;">
-					<img src="https://api.iconify.design/mdi/fax.svg?color=%23555555" style="width: 40px; height: 40px;" alt="">
-					<span style="font-size: 11px; margin-top: 4px;">Fax</span>
+			</div>
+			<div class="xp-explorer-addressbar-row">
+				<span class="xp-address-label">Address</span>
+				<div class="xp-address-combo">
+					<img src="../assets/images/desk/icons/Fax.webp" class="xp-address-icon" alt="">
+					<input type="text" class="xp-address-input" value="Printers and Faxes" readonly>
 				</div>
+				<button type="button" class="xp-address-go-btn"><div class="xp-go-icon">➔</div><span>Go</span></button>
+			</div>
+			<div class="xp-explorer-body">
+				<div class="xp-explorer-sidebar">
+					<div class="xp-sidebar-tasks-view">
+						<div class="xp-task-box">
+							<div class="xp-task-header"><span>Printer Tasks</span><button type="button" class="xp-task-chevron"></button></div>
+							<div class="xp-task-content">
+								<a href="#" class="xp-task-link" id="printer-task-add"><img src="https://api.iconify.design/mdi/printer-plus.svg?color=%231b4b9b" alt=""><span>Add a printer</span></a>
+								<a href="#" class="xp-task-link" id="printer-task-fax"><img src="../assets/images/desk/icons/Fax.webp" alt=""><span>Set up faxing</span></a>
+								<a href="#" class="xp-task-link" id="printer-task-queue"><img src="https://api.iconify.design/mdi/printer.svg?color=%231b4b9b" alt=""><span>See what's printing</span></a>
+							</div>
+						</div>
+						<div class="xp-task-box">
+							<div class="xp-task-header"><span>See Also</span><button type="button" class="xp-task-chevron"></button></div>
+							<div class="xp-task-content">
+								<a href="#" class="xp-task-link" id="printer-link-troubleshoot"><img src="../assets/images/desk/icons/User Support.webp" alt=""><span>Troubleshoot printing</span></a>
+								<a href="#" class="xp-task-link" id="printer-link-ctrl"><img src="../assets/images/desk/icons/System Properties.webp" alt=""><span>Control Panel</span></a>
+							</div>
+						</div>
+						<div class="xp-task-box">
+							<div class="xp-task-header"><span>Other Places</span><button type="button" class="xp-task-chevron"></button></div>
+							<div class="xp-task-content">
+								<a href="#" class="xp-task-link" id="printer-place-mycomp"><img src="../assets/images/desk/icons/My Computer.webp" alt=""><span>My Computer</span></a>
+								<a href="#" class="xp-task-link" id="printer-place-mydocs"><img src="../assets/images/desk/icons/My Profile Folder.webp" alt=""><span>My Documents</span></a>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="xp-explorer-splitter"></div>
+				<div class="xp-explorer-main">
+					<div class="xp-explorer-view-container">
+						<div class="xp-file-grid view-tiles" style="padding: 12px; gap: 10px;">
+							<div class="xp-explorer-item mode-tile printer-card-item" id="printer-item-add" style="cursor: pointer;">
+								<img src="https://api.iconify.design/mdi/printer-plus.svg?color=%231b4b9b" alt="">
+								<div class="xp-tile-texts">
+									<strong>Add Printer</strong>
+									<span>Printer Wizard</span>
+								</div>
+							</div>
+							<div class="xp-explorer-item mode-tile printer-card-item" id="printer-item-pdf" style="cursor: pointer;">
+								<img src="https://api.iconify.design/mdi/printer-check.svg?color=%232e7d32" alt="">
+								<div class="xp-tile-texts">
+									<strong>PDF Document Writer</strong>
+									<span>0 documents in queue - Ready (Default)</span>
+								</div>
+							</div>
+							<div class="xp-explorer-item mode-tile printer-card-item" id="printer-item-laser" style="cursor: pointer;">
+								<img src="https://api.iconify.design/mdi/printer.svg?color=%23555555" alt="">
+								<div class="xp-tile-texts">
+									<strong>HP LaserJet 4050 Series PCL</strong>
+									<span>0 documents in queue - Ready</span>
+								</div>
+							</div>
+							<div class="xp-explorer-item mode-tile printer-card-item" id="printer-item-fax" style="cursor: pointer;">
+								<img src="../assets/images/desk/icons/Fax.webp" alt="">
+								<div class="xp-tile-texts">
+									<strong>Fax Service Console</strong>
+									<span>Ready</span>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="xp-explorer-statusbar">
+				<div class="xp-sb-pane xp-sb-count">4 objects</div>
+				<div class="xp-sb-pane xp-sb-zone"><img src="../assets/images/desk/icons/My Computer.webp" alt=""><span>Local Computer</span></div>
 			</div>
 		</div>
 	`;
 
-	const win = createXPWindow(id, 'Printers and Faxes', contentHTML, 520, 320, {
-		iconSrc: 'https://api.iconify.design/mdi/printer.svg'
+	const win = createXPWindow(id, 'Printers and Faxes', contentHTML, 720, 480, {
+		iconSrc: '../assets/images/desk/icons/Fax.webp'
 	});
 	win.querySelector('.xp-window-content').style.padding = '0';
 
-	win.querySelector('#printer-add-wizard').addEventListener('dblclick', () => {
-		showXPDialog('Add Printer Wizard', 'The wizard could not detect any plug and play parallel or USB printer connected.', 'warning');
+	const triggerAdd = () => showXPDialog('Add Printer Wizard', 'The Add Printer Wizard could not detect any local parallel or USB printer.', 'warning');
+	const triggerFax = () => showXPDialog('Fax Console', 'Fax device is idle. Line is connected and ready to transmit.', 'info');
+	const triggerQueue = () => showXPDialog('PDF Document Writer', '0 document(s) in queue.', 'info');
+
+	win.querySelector('#printer-item-add').addEventListener('dblclick', triggerAdd);
+	win.querySelector('#printer-task-add').addEventListener('click', (e) => { e.preventDefault(); triggerAdd(); });
+	win.querySelector('#printer-item-fax').addEventListener('dblclick', triggerFax);
+	win.querySelector('#printer-task-fax').addEventListener('click', (e) => { e.preventDefault(); triggerFax(); });
+	win.querySelector('#printer-item-pdf').addEventListener('dblclick', triggerQueue);
+	win.querySelector('#printer-item-laser').addEventListener('dblclick', () => showXPDialog('HP LaserJet 4050', '0 document(s) in queue.', 'info'));
+	win.querySelector('#printer-task-queue').addEventListener('click', (e) => { e.preventDefault(); triggerQueue(); });
+
+	win.querySelector('#printer-link-troubleshoot').addEventListener('click', (e) => {
+		e.preventDefault();
+		showXPDialog('Help and Support', 'Printing Troubleshooter: Check cables, toner status and spooler service.', 'info');
+	});
+	win.querySelector('#printer-link-ctrl').addEventListener('click', (e) => {
+		e.preventDefault();
+		if (window.SettingsApp) window.SettingsApp.open('system');
+	});
+	win.querySelector('#printer-place-mycomp').addEventListener('click', (e) => {
+		e.preventDefault();
+		if (window.DeskAPI && window.DeskAPI.openMyComputer) window.DeskAPI.openMyComputer();
+	});
+	win.querySelector('#printer-place-mydocs').addEventListener('click', (e) => {
+		e.preventDefault();
+		if (fs.root.getByName('PDFs')) openFolderWindow(fs.root.getByName('PDFs'));
 	});
 }
 
@@ -3768,43 +3868,173 @@ function openNetworkPlacesWindow() {
 		return;
 	}
 
-	const links = [
-		{ name: 'GitHub Profile', url: 'https://github.com/wartets', icon: 'https://img.icons8.com/fluent/48/000000/github.png' },
-		{ name: 'SoundCloud Music', url: 'https://soundcloud.com/wartets', icon: 'https://api.iconify.design/mdi/soundcloud.svg?color=%23ff5500' },
-		{ name: 'YouTube Channel', url: 'https://www.youtube.com/@Wartets', icon: 'https://api.iconify.design/mdi/youtube.svg?color=%23cc0000' },
-		{ name: 'Live Portfolio Web', url: 'https://wartets.github.io/', icon: 'https://img.icons8.com/fluent/48/domain.png' }
-	];
-
-	let linksHtml = '';
-	links.forEach(l => {
-		linksHtml += `
-			<div class="my-comp-item" data-url="${l.url}" style="padding: 10px; width: 220px;">
-				<img src="${l.icon}" alt="">
-				<div class="my-comp-texts">
-					<strong>${l.name}</strong>
-					<span>External Network Link</span>
+	const contentHTML = `
+		<div class="xp-explorer-layout">
+			<div class="xp-explorer-menubar">
+				<ul class="xp-menubar-list">
+					<li class="xp-menubar-item"><u>F</u>ile</li>
+					<li class="xp-menubar-item"><u>E</u>dit</li>
+					<li class="xp-menubar-item"><u>V</u>iew</li>
+					<li class="xp-menubar-item"><u>F</u>avorites</li>
+					<li class="xp-menubar-item"><u>T</u>ools</li>
+					<li class="xp-menubar-item"><u>H</u>elp</li>
+				</ul>
+				<div class="xp-menubar-brand">
+					<img src="../assets/images/desk/window_logo.png" alt="XP">
 				</div>
 			</div>
-		`;
-	});
-
-	const contentHTML = `
-		<div class="folder-window-layout">
-			<div style="padding: 15px; display: flex; flex-wrap: wrap; gap: 12px; background: #ffffff; height: 100%; box-sizing: border-box;">
-				${linksHtml}
+			<div class="xp-explorer-toolbar">
+				<div class="xp-tb-group">
+					<button type="button" class="xp-tb-btn tb-back" disabled><div class="xp-tb-icon-back"></div><span>Back</span></button>
+					<button type="button" class="xp-tb-btn tb-forward" disabled><div class="xp-tb-icon-forward"></div></button>
+					<button type="button" class="xp-tb-btn tb-up" disabled><div class="xp-tb-icon-up"></div></button>
+				</div>
+				<div class="xp-tb-sep"></div>
+				<div class="xp-tb-group">
+					<button type="button" class="xp-tb-btn tb-search" id="net-tb-search"><img src="https://api.iconify.design/mdi/magnify.svg?color=%231b4b9b" alt=""><span>Search</span></button>
+					<button type="button" class="xp-tb-btn" id="net-tb-folders"><img src="../assets/images/desk/icons/Folder Closed.webp" alt=""><span>Folders</span></button>
+				</div>
+			</div>
+			<div class="xp-explorer-addressbar-row">
+				<span class="xp-address-label">Address</span>
+				<div class="xp-address-combo">
+					<img src="../assets/images/desk/icons/My Network Places.webp" class="xp-address-icon" alt="">
+					<input type="text" class="xp-address-input" value="My Network Places" readonly>
+				</div>
+				<button type="button" class="xp-address-go-btn"><div class="xp-go-icon">➔</div><span>Go</span></button>
+			</div>
+			<div class="xp-explorer-body">
+				<div class="xp-explorer-sidebar">
+					<div class="xp-sidebar-tasks-view">
+						<div class="xp-task-box">
+							<div class="xp-task-header"><span>Network Tasks</span><button type="button" class="xp-task-chevron"></button></div>
+							<div class="xp-task-content">
+								<a href="#" class="xp-task-link" id="net-task-add"><img src="https://api.iconify.design/mdi/folder-network-outline.svg?color=%231b4b9b" alt=""><span>Add a network place</span></a>
+								<a href="#" class="xp-task-link" id="net-task-view"><img src="../assets/images/desk/icons/Network Computers.webp" alt=""><span>View network connections</span></a>
+								<a href="#" class="xp-task-link" id="net-task-setup"><img src="../assets/images/desk/icons/Earth (fixed).webp" alt=""><span>Set up home or office network</span></a>
+							</div>
+						</div>
+						<div class="xp-task-box">
+							<div class="xp-task-header"><span>Other Places</span><button type="button" class="xp-task-chevron"></button></div>
+							<div class="xp-task-content">
+								<a href="#" class="xp-task-link" id="net-place-desktop"><img src="../assets/images/desk/icons/Display.webp" alt=""><span>Desktop</span></a>
+								<a href="#" class="xp-task-link" id="net-place-mycomp"><img src="../assets/images/desk/icons/My Computer.webp" alt=""><span>My Computer</span></a>
+								<a href="#" class="xp-task-link" id="net-place-mydocs"><img src="../assets/images/desk/icons/My Profile Folder.webp" alt=""><span>My Documents</span></a>
+								<a href="#" class="xp-task-link" id="net-place-printers"><img src="../assets/images/desk/icons/Fax.webp" alt=""><span>Printers and Faxes</span></a>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="xp-explorer-splitter"></div>
+				<div class="xp-explorer-main">
+					<div class="xp-explorer-view-container">
+						<div class="xp-file-grid view-tiles" style="padding: 12px; gap: 10px;">
+							<div class="xp-explorer-item mode-tile net-card-item" id="net-item-add" style="cursor: pointer;">
+								<img src="https://api.iconify.design/mdi/folder-network-outline.svg?color=%231b4b9b" alt="">
+								<div class="xp-tile-texts">
+									<strong>Add Network Place</strong>
+									<span>Network Place Wizard</span>
+								</div>
+							</div>
+							<div class="xp-explorer-item mode-tile net-card-item" id="net-item-entire" style="cursor: pointer;">
+								<img src="../assets/images/desk/icons/Earth (fixed).webp" alt="">
+								<div class="xp-tile-texts">
+									<strong>Entire Network</strong>
+									<span>Microsoft Windows Network</span>
+								</div>
+							</div>
+							<div class="xp-explorer-item mode-tile net-card-item" id="net-item-workgroup" style="cursor: pointer;">
+								<img src="../assets/images/desk/icons/Network Computers.webp" alt="">
+								<div class="xp-tile-texts">
+									<strong>Workgroup (MSHOME)</strong>
+									<span>Local Workgroup Share</span>
+								</div>
+							</div>
+							<div class="xp-explorer-item mode-tile net-card-item" id="net-item-laptop" style="cursor: pointer;">
+								<img src="../assets/images/desk/icons/Laptop.webp" alt="">
+								<div class="xp-tile-texts">
+									<strong>Colin-Laptop (192.168.1.42)</strong>
+									<span>SMB Network Share</span>
+								</div>
+							</div>
+							<div class="xp-explorer-item mode-tile net-card-item" data-url="https://github.com/wartets" style="cursor: pointer;">
+								<img src="https://img.icons8.com/fluent/48/000000/github.png" alt="">
+								<div class="xp-tile-texts">
+									<strong>GitHub Profile (Web)</strong>
+									<span>https://github.com/wartets</span>
+								</div>
+							</div>
+							<div class="xp-explorer-item mode-tile net-card-item" data-url="https://soundcloud.com/wartets" style="cursor: pointer;">
+								<img src="https://api.iconify.design/mdi/soundcloud.svg?color=%23ff5500" alt="">
+								<div class="xp-tile-texts">
+									<strong>SoundCloud Channel (Web)</strong>
+									<span>https://soundcloud.com/wartets</span>
+								</div>
+							</div>
+							<div class="xp-explorer-item mode-tile net-card-item" data-url="https://www.youtube.com/@Wartets" style="cursor: pointer;">
+								<img src="https://api.iconify.design/mdi/youtube.svg?color=%23cc0000" alt="">
+								<div class="xp-tile-texts">
+									<strong>YouTube Channel (Web)</strong>
+									<span>https://youtube.com/@Wartets</span>
+								</div>
+							</div>
+							<div class="xp-explorer-item mode-tile net-card-item" data-url="https://wartets.github.io/" style="cursor: pointer;">
+								<img src="https://img.icons8.com/fluent/48/domain.png" alt="">
+								<div class="xp-tile-texts">
+									<strong>Live Portfolio Web (Host)</strong>
+									<span>https://wartets.github.io/</span>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="xp-explorer-statusbar">
+				<div class="xp-sb-pane xp-sb-count">8 objects</div>
+				<div class="xp-sb-pane xp-sb-zone"><img src="../assets/images/desk/icons/My Network Places.webp" alt=""><span>Local Intranet</span></div>
 			</div>
 		</div>
 	`;
 
-	const win = createXPWindow(id, 'My Network Places', contentHTML, 540, 340, {
+	const win = createXPWindow(id, 'My Network Places', contentHTML, 740, 500, {
 		iconSrc: '../assets/images/desk/icons/My Network Places.webp'
 	});
 	win.querySelector('.xp-window-content').style.padding = '0';
 
-	win.querySelectorAll('.my-comp-item[data-url]').forEach(item => {
-		item.addEventListener('dblclick', () => {
-			window.open(item.dataset.url, '_blank');
-		});
+	const triggerAddPlace = () => showXPDialog('Add Network Place Wizard', 'Type the address of the FTP site or network folder you want to add.', 'info');
+	const triggerViewConn = () => showXPDialog('Network Connections', 'Local Area Connection - 100.0 Mbps Connected\nWAN Miniport - Idle', 'info');
+
+	win.querySelector('#net-item-add').addEventListener('dblclick', triggerAddPlace);
+	win.querySelector('#net-task-add').addEventListener('click', (e) => { e.preventDefault(); triggerAddPlace(); });
+	win.querySelector('#net-task-view').addEventListener('click', (e) => { e.preventDefault(); triggerViewConn(); });
+	win.querySelector('#net-task-setup').addEventListener('click', (e) => {
+		e.preventDefault();
+		showXPDialog('Network Setup Wizard', 'Your home network is configured with IP 192.168.1.1 gateway.', 'info');
+	});
+
+	win.querySelector('#net-item-entire').addEventListener('dblclick', () => showXPDialog('Entire Network', 'Scanning Microsoft Windows Network domains... (MSHOME)', 'info'));
+	win.querySelector('#net-item-workgroup').addEventListener('dblclick', () => showXPDialog('Workgroup (MSHOME)', 'Found hosts: Colin-Laptop, Router-Gateway.', 'info'));
+	win.querySelector('#net-item-laptop').addEventListener('dblclick', () => showXPDialog('Colin-Laptop', 'Shared resources:\n\\\\Colin-Laptop\\Public\n\\\\Colin-Laptop\\Projects', 'info'));
+
+	win.querySelectorAll('.net-card-item[data-url]').forEach(item => {
+		item.addEventListener('dblclick', () => window.open(item.dataset.url, '_blank'));
+	});
+
+	win.querySelector('#net-place-desktop').addEventListener('click', (e) => {
+		e.preventDefault();
+		openFolderWindow(fs.root);
+	});
+	win.querySelector('#net-place-mycomp').addEventListener('click', (e) => {
+		e.preventDefault();
+		if (window.DeskAPI && window.DeskAPI.openMyComputer) window.DeskAPI.openMyComputer();
+	});
+	win.querySelector('#net-place-mydocs').addEventListener('click', (e) => {
+		e.preventDefault();
+		if (fs.root.getByName('PDFs')) openFolderWindow(fs.root.getByName('PDFs'));
+	});
+	win.querySelector('#net-place-printers').addEventListener('click', (e) => {
+		e.preventDefault();
+		if (window.DeskAPI && window.DeskAPI.openPrinters) window.DeskAPI.openPrinters();
 	});
 }
 

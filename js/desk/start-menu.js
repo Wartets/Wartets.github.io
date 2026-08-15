@@ -137,7 +137,7 @@
 							<span class="xp-start-flyout-arrow">►</span>
 						</div>
 						<div class="xp-start-item xp-start-right-item" data-action="printers-faxes">
-							<img src="https://api.iconify.design/mdi/printer.svg" class="xp-start-item-icon" alt="Printers">
+							<img src="../assets/images/desk/icons/Fax.webp" class="xp-start-item-icon" alt="Printers">
 							<span class="xp-start-title">Printers and Faxes</span>
 						</div>
 						<div class="xp-start-item xp-start-right-item has-flyout" id="start-recent-docs-trigger">

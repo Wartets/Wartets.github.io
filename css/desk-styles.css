@@ -20,6 +20,7 @@
 	--xp-button-hover: #f5f4ef;
 	--xp-selection-blue: #316ac5;
 	--xp-selection-text: #ffffff;
+	--xp-taskbar-height: 36px;
 	--xp-taskbar-bg: linear-gradient(to bottom, #245edc 0%, #3f8cf3 9%, #245edc 18%, #245edc 92%, #1941a5 100%);
 	--xp-taskbar-border: #143585;
 	--xp-tray-bg: linear-gradient(to bottom, #0c59b2 0%, #106ad2 10%, #136bd5 88%, #0e4c96 100%);
