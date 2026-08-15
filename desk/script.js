@@ -2504,65 +2504,35 @@ function openAllProjectsFolder() {
 	};
 
 	findProjects(fs.root);
-
 	projectsFolder.add(projectsShortcuts);
-	openFolderWindow(projectsFolder);
+
+	if (window.FileExplorer) {
+		window.FileExplorer.open(projectsFolder);
+	}
 }
 
 function openFilteredProjectsFolder(category) {
-	const id = `window-category-${category.replace(/\s/g, '-')}`;
-	const title = `${category.charAt(0).toUpperCase() + category.slice(1)} Projects`;
-	const contentHTML = `
-		<div id="filtered-projects-folder-content" class="folder-content" style="display: flex; flex-wrap: wrap; gap: 10px; padding: 5px;">
-		</div>
-	`;
-	const folderWindow = createXPWindow(id, title, contentHTML, 700, 500);
-
-	const folderContent = folderWindow.querySelector('#filtered-projects-folder-content');
+	const catFolder = new Folder(`${category.charAt(0).toUpperCase() + category.slice(1)} Projects`);
 
 	const flattenedProjects = [];
 	projects.forEach(projectGroup => {
 		const projectsInGroup = Array.isArray(projectGroup) ? projectGroup : [projectGroup];
 		projectsInGroup.forEach(p => {
-			if (typeof p === 'object' && p !== null && p.keywords) {
+			if (typeof p === 'object' && p !== null && p.keywords && p.keywords.includes(category)) {
 				flattenedProjects.push(p);
 			}
 		});
 	});
 
-	const filteredProjects = flattenedProjects.filter(p => p.keywords.includes(category));
-
-	filteredProjects.forEach(project => {
-		const projectTitle = resolveProjectTitle(project.title);
-		const icon = document.createElement('div');
-		icon.className = 'project-icon';
-		icon.dataset.projectId = projectTitle.replace(/\s/g, '-');
-		icon.dataset.iconData = JSON.stringify({
-			id: projectTitle.replace(/\s/g, '-'),
-			name: projectTitle,
-			icon: project.icon,
-			type: 'project',
-			timestamp: project.timestamp
-		});
-		icon.dataset.type = 'project';
-
-		const img = document.createElement('img');
-		img.src = project.icon || '../assets/images/desk/icons/File.webp';
-		img.alt = projectTitle;
-		icon.appendChild(img);
-
-		const span = document.createElement('span');
-		span.textContent = projectTitle;
-		icon.appendChild(span);
-
-		icon.addEventListener('dblclick', () => openProjectWindow(project));
-		icon.addEventListener('click', (e) => handleIconClick(e, icon));
-		icon.addEventListener('contextmenu', (e) => {
-			e.stopPropagation();
-			handleIconContextMenu(e, icon);
-		});
-		folderContent.appendChild(icon);
+	flattenedProjects.forEach(p => {
+		const title = resolveProjectTitle(p.title);
+		const pf = new ProjectFile(title, null, p);
+		catFolder.add(pf);
 	});
+
+	if (window.FileExplorer) {
+		window.FileExplorer.open(catFolder);
+	}
 }
 
 function setupDesktopContextMenu() {
@@ -2588,15 +2558,15 @@ function setupDesktopContextMenu() {
 
 function openFileSystemElement(element, windowContext = null) {
 	if (element instanceof Folder) {
-		if (windowContext && windowContext.classList.contains('project-window')) {
-			navigateToFolder(element, windowContext);
-		} else {
-			openFolderWindow(element);
+		if (windowContext && windowContext.classList.contains('xp-explorer-window') && window.FileExplorer) {
+			window.FileExplorer.navigateTo(element, windowContext, true);
+		} else if (window.FileExplorer) {
+			window.FileExplorer.open(element);
 		}
 	} else if (element instanceof Shortcut) {
 		const target = fs.findByPath(element.targetPath);
 		if (target) {
-			openFileSystemElement(target);
+			openFileSystemElement(target, windowContext);
 		} else if (element.targetPath.startsWith('project://')) {
 			showXPDialog('Shortcut Error', 'Legacy project shortcut format is no longer supported.', 'error');
 		} else {
@@ -2635,366 +2605,20 @@ function openFileSystemElement(element, windowContext = null) {
 	}
 }
 
-function openFolderWindow(folder) {
-	const id = `window-folder-${folder.getFullPath().replace(/[^\w-]/g, '_')}`;
-	const existingWindow = document.getElementById(id);
-	if (existingWindow) {
-		bringWindowToFront(existingWindow);
-		return;
-	}
-
-	const title = folder.name;
-	const contentHTML = `
-		<div class="folder-window-layout">
-			<div class="folder-menu-bar">
-				<ul><li><u>F</u>ile</li><li><u>E</u>dit</li><li><u>V</u>iew</li><li><u>F</u>avorites</li><li><u>T</u>ools</li><li><u>H</u>elp</li></ul>
-			</div>
-			<div class="folder-toolbar">
-				<div class="folder-nav-buttons">
-					<button class="folder-nav-btn back-btn" title="Back" disabled><img src="data:image/svg+xml;charset=UTF-8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%232c63c3'><path d='M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z'/></svg>" alt="Back"></button>
-					<button class="folder-nav-btn forward-btn" title="Forward" disabled><img src="data:image/svg+xml;charset=UTF-8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%232c63c3'><path d='M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z'/></svg>" alt="Forward"></button>
-					<button class="folder-nav-btn up-btn" title="Up"><img src="data:image/svg+xml;charset=UTF-8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%232c63c3'><path d='M4 12l1.41 1.41L11 7.83V20h2V7.83l5.58 5.59L20 12l-8-8-8 8z'/></svg>" alt="Up"></button>
-				</div>
-				<div class="folder-toolbar-separator"></div>
-				<div class="folder-nav-buttons">
-					<button class="folder-nav-btn search-btn" title="Search"><img src="data:image/svg+xml;charset=UTF-8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%232c63c3'><path d='M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z'/></svg>" alt="Search"></button>
-					<button class="folder-nav-btn folders-btn" title="Folders"><img src="../assets/images/desk/icons/Folder Closed.webp" alt="Folders"></button>
-				</div>
-				<div class="folder-toolbar-separator"></div>
-				<div class="folder-address-bar-container">
-					<span>Address</span>
-					<input type="text" class="folder-address-bar">
-					<button class="xp-button-small" style="height: 20px; margin-left: 2px;">Go</button>
-				</div>
-			</div>
-			<div class="folder-main-layout">
-				<div class="folder-sidebar">
-					<div class="sidebar-section file-tasks">
-						<h3>File and Folder Tasks</h3>
-						<ul>
-							<li><a href="#" data-task="rename" class="disabled">Rename this file</a></li>
-							<li><a href="#" data-task="move" class="disabled">Move this file</a></li>
-							<li><a href="#" data-task="copy" class="disabled">Copy this file</a></li>
-							<li><a href="#" data-task="delete" class="disabled">Delete this file</a></li>
-						</ul>
-					</div>
-					<div class="sidebar-section other-places">
-						<h3>Other Places</h3>
-						<ul>
-							<li><a href="#" data-place="/">Desktop</a></li>
-							<li><a href="#" data-place="/My Projects">My Projects</a></li>
-							<li><a href="#" data-place="/My Documents">My Documents</a></li>
-						</ul>
-					</div>
-					<div class="sidebar-section details">
-						<h3>Details</h3>
-						<div class="details-content">
-							Select an item to view its details.
-						</div>
-					</div>
-				</div>
-				<div class="folder-main-content">
-					<div class="folder-content-wrapper">
-						<div class="folder-content" data-path="${folder.getFullPath()}"></div>
-					</div>
-					<div class="folder-status-bar">
-						<div class="status-bar-left"></div>
-						<div class="status-bar-right"></div>
-					</div>
-				</div>
-			</div>
-		</div>
-	`;
-
-	const folderWindow = createXPWindow(id, title, contentHTML, 700, 500, { iconSrc: folder.icon });
-	folderWindow.classList.add('project-window');
-	folderWindow.querySelector('.xp-window-content').style.padding = '0';
-	folderWindow.navigationHistory = {
-		history: [],
-		currentIndex: -1
-	};
-	folderWindow.dataset.viewMode = 'icons';
-
-	const contentArea = folderWindow.querySelector('.folder-content');
-	const addressBar = folderWindow.querySelector('.folder-address-bar');
-	
-	contentArea.addEventListener('contextmenu', (e) => {
-		e.preventDefault();
-		e.stopPropagation();
-		if (e.target === contentArea || e.target === contentArea.parentElement) {
-			clearIconSelections();
-			const currentPath = contentArea.dataset.path;
-			const currentFolder = fs.findByPath(currentPath) || folder;
-			if (window.ContextMenu) {
-				const items = window.ContextMenu.getFolderAreaItems(currentFolder, folderWindow);
-				window.ContextMenu.show(items, e.clientX, e.clientY);
-			}
-		}
-	});
-
-	contentArea.addEventListener('click', (e) => {
-		if (e.target === contentArea) {
-			clearIconSelections();
-			updateFolderUISelection(folderWindow);
-		}
-	});
-
-	const contentWrapper = folderWindow.querySelector('.folder-content-wrapper');
-	[contentArea, contentWrapper].forEach(zone => {
-		zone.addEventListener('dragover', handleDragOver);
-		zone.addEventListener('dragleave', handleDragLeave);
-		zone.addEventListener('drop', handleDrop);
-	});
-
-	folderWindow.querySelector('.back-btn').addEventListener('click', () => {
-		const nav = folderWindow.navigationHistory;
-		if (nav.currentIndex > 0) {
-			nav.currentIndex--;
-			const folderPath = nav.history[nav.currentIndex];
-			const targetFolder = fs.findByPath(folderPath);
-			if (targetFolder) navigateToFolder(targetFolder, folderWindow, false);
-		}
-	});
-
-	folderWindow.querySelector('.forward-btn').addEventListener('click', () => {
-		const nav = folderWindow.navigationHistory;
-		if (nav.currentIndex < nav.history.length - 1) {
-			nav.currentIndex++;
-			const folderPath = nav.history[nav.currentIndex];
-			const targetFolder = fs.findByPath(folderPath);
-			if (targetFolder) navigateToFolder(targetFolder, folderWindow, false);
-		}
-	});
-
-	folderWindow.querySelector('.up-btn').addEventListener('click', () => {
-		const currentPath = folderWindow.querySelector('.folder-content').dataset.path;
-		const currentFolder = fs.findByPath(currentPath);
-		if (currentFolder && currentFolder.parent) {
-			navigateToFolder(currentFolder.parent, folderWindow);
-		}
-	});
-
-	folderWindow.querySelector('.folders-btn').addEventListener('click', (e) => {
-		folderWindow.querySelector('.folder-sidebar').classList.toggle('hidden');
-	});
-
-	folderWindow.querySelector('.sidebar-section.other-places').addEventListener('click', (e) => {
-		e.preventDefault();
-		const placePath = e.target.closest('a')?.dataset.place;
-		if (placePath) {
-			const targetFolder = fs.findByPath(placePath);
-			if (targetFolder) navigateToFolder(targetFolder, folderWindow);
-		}
-	});
-
-	const handleNavigation = () => {
-		const path = addressBar.value;
-		const targetFolder = fs.findByPath(path);
-		if (targetFolder instanceof Folder) {
-			navigateToFolder(targetFolder, folderWindow);
-		} else {
-			showXPDialog('Address Bar', `Cannot find '${path}'. Check the spelling and try again.`, 'error');
-		}
-	};
-
-	addressBar.addEventListener('keydown', (e) => {
-		if (e.key === 'Enter') handleNavigation();
-	});
-	
-	folderWindow.querySelector('.folder-address-bar-container button').addEventListener('click', handleNavigation);
-
-	navigateToFolder(folder, folderWindow);
-}
-
-function renderFolderContent(folder, container, win) {
-	container.innerHTML = '';
-	if (!folder || !(folder instanceof Folder)) return;
-
-	container.className = 'folder-content';
-	const viewMode = win.dataset.viewMode || 'icons';
-	container.classList.add(`view-${viewMode}`);
-
-	const showHidden = isShowHiddenEnabled();
-	const items = folder.listContent().filter(item => !item.hidden || showHidden);
-
-	if (viewMode === 'details') {
-		const header = document.createElement('div');
-		header.className = 'details-header';
-		header.innerHTML = `
-			<div class="col-name">Name</div>
-			<div class="col-size">Size</div>
-			<div class="col-type">Type</div>
-			<div class="col-modified">Date Modified</div>
-		`;
-		container.appendChild(header);
-
-		items.forEach(element => {
-			const row = document.createElement('div');
-			row.className = 'details-row';
-
-			let type = 'File';
-			if (element instanceof Folder) type = 'Folder';
-			else if (element instanceof Shortcut) type = 'Shortcut';
-			else if (element instanceof ProjectFile) type = 'Project';
-
-			const iconData = {
-				name: element.name,
-				icon: element.icon,
-				path: element.getFullPath(),
-				type: type.toLowerCase(),
-				element: element
-			};
-			const icon = createIconElement(iconData, (el) => openFileSystemElement(el, win));
-			row.appendChild(icon);
-
-			const sizeDiv = document.createElement('div');
-			sizeDiv.className = 'col-size';
-			sizeDiv.textContent = (element.size !== undefined) ? `${Math.ceil(element.size / 1024)} KB` : '';
-			row.appendChild(sizeDiv);
-
-			const typeDiv = document.createElement('div');
-			typeDiv.className = 'col-type';
-			typeDiv.textContent = type;
-			row.appendChild(typeDiv);
-
-			const modifiedDiv = document.createElement('div');
-			modifiedDiv.className = 'col-modified';
-			modifiedDiv.textContent = element.modifiedAt.toLocaleString();
-			row.appendChild(modifiedDiv);
-
-			container.appendChild(row);
-		});
-	} else {
-		items.forEach(element => {
-			let type = 'file';
-			if (element instanceof Folder) type = 'folder';
-			else if (element instanceof Shortcut) type = 'shortcut';
-			else if (element instanceof ProjectFile) type = 'project';
-
-			const icon = createIconElement({
-				name: element.name,
-				icon: element.icon,
-				path: element.getFullPath(),
-				type: type,
-				element: element
-			}, (el) => openFileSystemElement(el, win));
-
-			container.appendChild(icon);
-		});
-	}
-}
-
-function navigateToFolder(folder, win, recordHistory = true) {
-	const nav = win.navigationHistory;
-	
-	const newPath = folder.getFullPath();
-
-	if (recordHistory) {
-		if (nav.currentIndex < nav.history.length - 1) {
-			nav.history = nav.history.slice(0, nav.currentIndex + 1);
-		}
-		if (nav.history[nav.currentIndex] !== newPath) {
-			nav.history.push(newPath);
-			nav.currentIndex++;
-		}
-	}
-
-	updateFolderView(folder, win, false);
-}
-
-function updateFolderView(folder, win, recordHistory = true) {
-	const contentArea = win.querySelector('.folder-content');
-	const nav = win.navigationHistory;
-
-	if (recordHistory) {
-		const newPath = folder.getFullPath();
-		if (nav.currentIndex < nav.history.length - 1) {
-			nav.history = nav.history.slice(0, nav.currentIndex + 1);
-		}
-		if (nav.history[nav.currentIndex] !== newPath) {
-			nav.history.push(newPath);
-			nav.currentIndex++;
-		}
-	}
-
-	win.querySelector('.title').textContent = folder.name;
-	win.querySelector('.folder-address-bar').value = folder.getFullPath();
-	contentArea.dataset.path = folder.getFullPath();
-
-	renderFolderContent(folder, contentArea, win);
-
-	const itemCount = folder.listContent().length;
-	win.querySelector('.folder-status-bar').textContent = `${itemCount} item(s)`;
-
-	win.querySelector('.back-btn').disabled = nav.currentIndex <= 0;
-	win.querySelector('.forward-btn').disabled = nav.currentIndex >= nav.history.length - 1;
-	win.querySelector('.up-btn').disabled = !folder.parent;
-}
-
 function refreshUI() {
 	if (!fs || !fs.root) return;
 	renderDesktopIcons();
 	Object.values(openWindows).forEach(win => {
-		if (win.classList.contains('project-window')) {
-			const folderContent = win.querySelector('.folder-content');
-			if (folderContent) {
-				const path = folderContent.dataset.path;
-				const folder = fs.findByPath(path);
-				if (folder) {
-					renderFolderContent(folder, folderContent, win);
-					updateFolderUISelection(win);
-				} else {
-					closeWindow(win, win.id);
-				}
+		if (win.classList.contains('xp-explorer-window') && win.explorerState && window.FileExplorer) {
+			const folder = fs.findByPath(win.explorerState.currentFolder.getFullPath());
+			if (folder) {
+				win.explorerState.currentFolder = folder;
+				window.FileExplorer.updateView(win, true);
+			} else {
+				closeWindow(win, win.id);
 			}
 		}
 	});
-}
-
-function updateFolderUISelection(win) {
-	const selectedItems = Array.from(win.querySelectorAll('.project-icon.selected'));
-	const fileTasksSection = win.querySelector('.sidebar-section.file-tasks');
-	const detailsSection = win.querySelector('.sidebar-section.details .details-content');
-	const statusBarLeft = win.querySelector('.status-bar-left');
-	const folderContent = win.querySelector('.folder-content');
-
-	if (!folderContent) return;
-
-	const folder = fs.findByPath(folderContent.dataset.path);
-
-	const totalItems = folder ? folder.listContent().length : 0;
-
-	if (selectedItems.length === 0) {
-		if (fileTasksSection) fileTasksSection.querySelectorAll('a').forEach(a => a.classList.add('disabled'));
-		if (detailsSection && folder) detailsSection.innerHTML = `<b>${folder.name}</b><br>${folder.constructor.name}`;
-		if (statusBarLeft) statusBarLeft.textContent = `${totalItems} object(s)`;
-	} else if (selectedItems.length === 1) {
-		if (fileTasksSection) fileTasksSection.querySelectorAll('a').forEach(a => a.classList.remove('disabled'));
-		const icon = selectedItems[0];
-		const element = fs.findByPath(icon.dataset.path);
-		if (element && detailsSection) {
-			detailsSection.innerHTML = `
-				<b>${element.name}</b>
-				${element.constructor.name}<br>
-				Modified: ${element.modifiedAt.toLocaleDateString()}
-				${element.size ? `<br>Size: ${Math.ceil(element.size / 1024)} KB` : ''}
-			`;
-		}
-		if (statusBarLeft) statusBarLeft.textContent = `1 object(s) selected`;
-	} else {
-		if (fileTasksSection) {
-			fileTasksSection.querySelectorAll('a').forEach(a => {
-				const task = a.dataset.task;
-				if (task === 'rename') {
-					a.classList.add('disabled');
-				} else {
-					a.classList.remove('disabled');
-				}
-			});
-		}
-		if (detailsSection) detailsSection.innerHTML = `${selectedItems.length} items selected.`;
-		if (statusBarLeft) statusBarLeft.textContent = `${selectedItems.length} object(s) selected`;
-	}
 }
 
 function arrangeIcons(sortBy) {
