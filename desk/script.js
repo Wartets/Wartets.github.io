@@ -59,7 +59,7 @@ class File extends Element {
 		super(name, parent);
 		this.content = content;
 		this.size = new TextEncoder().encode(content).length;
-		this.icon = 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSfYBdqM_UJgzAsG1A17GxeHVikpX0e5k_N5g&s';
+		this.icon = '../assets/images/desk/icons/File.webp';
 		this.readOnly = false;
 		this.remoteUrl = null;
 	}
@@ -105,7 +105,7 @@ class Folder extends Element {
 	constructor(name, parent = null) {
 		super(name, parent);
 		this.children = new Map();
-		this.icon = 'https://img.icons8.com/fluent/48/folder-invoices.png';
+		this.icon = '../assets/images/desk/icons/Folder Closed.webp';
 	}
 
 	add(element) {
@@ -494,7 +494,7 @@ function addToRecentDocs(item) {
 		list.unshift({
 			name: item.name,
 			type: item.type || 'file',
-			icon: item.icon || 'https://img.icons8.com/fluency/48/file.png',
+			icon: item.icon || '../assets/images/desk/icons/File.webp',
 			path: item.path || '',
 			targetId: item.targetId || null,
 			timestamp: Date.now()
@@ -624,7 +624,7 @@ function initDocuments() {
 
 	if (!docFolder) {
 		docFolder = new Folder(folderName);
-		docFolder.icon = "https://img.icons8.com/color/48/folder-invoices--v1.png";
+		docFolder.icon = "../assets/images/desk/icons/Folder Closed.webp";
 		fs.root.add(docFolder);
 	}
 
@@ -637,7 +637,7 @@ function initDocuments() {
 			file.write(doc.filePath);
 		} else {
 			file = new File(fileName, null, doc.filePath);
-			file.icon = "https://img.icons8.com/color/48/pdf.png";
+			file.icon = "../assets/images/desk/icons/List File.webp";
 			docFolder.add(file);
 		}
 
@@ -910,7 +910,7 @@ function initializeFileSystem() {
 	let othersFolder = fs.root.getByName('Others');
 	if (!othersFolder) {
 		othersFolder = new Folder('Others');
-		othersFolder.icon = 'https://img.icons8.com/fluent/48/folder-invoices.png';
+		othersFolder.icon = '../assets/images/desk/icons/Folder Closed.webp';
 		fs.root.add(othersFolder);
 	}
 	othersFolder.hidden = true;
@@ -918,7 +918,7 @@ function initializeFileSystem() {
 	let othersProjectsFolder = othersFolder.getByName('Projects');
 	if (!othersProjectsFolder) {
 		othersProjectsFolder = new Folder('Projects');
-		othersProjectsFolder.icon = 'https://img.icons8.com/fluent/48/folder-invoices.png';
+		othersProjectsFolder.icon = '../assets/images/desk/icons/Folder Closed.webp';
 		othersFolder.add(othersProjectsFolder);
 	}
 
@@ -957,7 +957,7 @@ function initPoemsFolder(othersFolder) {
 	let poemsFolder = othersFolder.getByName('Poems');
 	if (!poemsFolder) {
 		poemsFolder = new Folder('Poems');
-		poemsFolder.icon = 'https://img.icons8.com/fluent/48/folder-invoices.png';
+		poemsFolder.icon = '../assets/images/desk/icons/Folder Closed.webp';
 		othersFolder.add(poemsFolder);
 	}
 
@@ -966,7 +966,7 @@ function initPoemsFolder(othersFolder) {
 		let file = poemsFolder.getByName(fileName);
 		if (!file) {
 			file = new File(fileName, null, '');
-			file.icon = 'https://img.icons8.com/color/48/txt.png';
+			file.icon = '../assets/images/desk/icons/File.webp';
 			poemsFolder.add(file);
 		}
 		file.readOnly = true;
@@ -983,14 +983,16 @@ function renderDesktopIcons() {
 
 	const appIcons = [{
 		name: "My Computer",
-		icon: "../assets/images/desk/XPIcon.png",
-		action: () => showXPDialog('Error', 'Feature not implemented yet.', 'error'),
-		type: "system"
+		icon: "../assets/images/desk/icons/My Computer.webp",
+		action: openMyComputerWindow,
+		type: "system",
+		systemType: "my-computer"
 	}, {
 		name: "Recycle Bin",
 		icon: "../assets/images/desk/trash.png",
 		action: openRecycleBinWindow,
-		type: "system"
+		type: "system",
+		systemType: "recycle-bin"
 	}];
 
 	appIcons.forEach(app => {
@@ -999,7 +1001,8 @@ function renderDesktopIcons() {
 			icon: app.icon,
 			path: `app://${app.name.toLowerCase().replace(/\s/g, '-')}`,
 			type: 'application',
-			element: null
+			element: null,
+			systemType: app.systemType
 		}, app.action);
 		container.appendChild(icon);
 	});
@@ -1052,7 +1055,7 @@ function createIconElement(data, dblClickHandler) {
 	icon.title = data.name;
 
 	const img = document.createElement('img');
-	img.src = data.icon || 'https://img.icons8.com/fluency/48/file.png';
+	img.src = data.icon || '../assets/images/desk/icons/File.webp';
 	img.alt = data.name;
 	icon.appendChild(img);
 
@@ -1075,9 +1078,14 @@ function createIconElement(data, dblClickHandler) {
 			selectedIcons.add(icon);
 		}
 
-		if (window.ContextMenu && data.element) {
-			const items = window.ContextMenu.getIconItems(data.element, icon, icon.closest('.xp-window'));
-			window.ContextMenu.show(items, e.clientX, e.clientY, { element: data.element, icon });
+		if (window.ContextMenu) {
+			if (data.systemType) {
+				const items = window.ContextMenu.getSystemIconItems(data.systemType);
+				window.ContextMenu.show(items, e.clientX, e.clientY);
+			} else if (data.element) {
+				const items = window.ContextMenu.getIconItems(data.element, icon, icon.closest('.xp-window'));
+				window.ContextMenu.show(items, e.clientX, e.clientY, { element: data.element, icon });
+			}
 		}
 	});
 
@@ -1330,6 +1338,15 @@ function makeWindowDraggable(win) {
 	const overlay = document.getElementById('iframe-drag-overlay');
 	let isDragging = false;
 	let offsetX, offsetY;
+
+	header.addEventListener('contextmenu', (e) => {
+		if (e.target.closest('.xp-window-buttons')) return;
+		e.preventDefault();
+		if (window.ContextMenu) {
+			const items = window.ContextMenu.getWindowHeaderItems(win, win.id);
+			window.ContextMenu.show(items, e.clientX, e.clientY);
+		}
+	});
 
 	header.addEventListener('mousedown', (e) => {
 		bringWindowToFront(win);
@@ -2534,7 +2551,7 @@ function openFilteredProjectsFolder(category) {
 		icon.dataset.type = 'project';
 
 		const img = document.createElement('img');
-		img.src = project.icon || 'https://img.icons8.com/fluency/48/file.png';
+		img.src = project.icon || '../assets/images/desk/icons/File.webp';
 		img.alt = projectTitle;
 		icon.appendChild(img);
 
@@ -3203,6 +3220,14 @@ async function openReadOnlyTextWindow(file) {
 		}
 	});
 
+	textarea.addEventListener('contextmenu', (e) => {
+		e.preventDefault();
+		if (window.ContextMenu) {
+			const items = window.ContextMenu.getEditorItems(textarea, true);
+			window.ContextMenu.show(items, e.clientX, e.clientY);
+		}
+	});
+
 	try {
 		const response = await fetch(file.remoteUrl);
 		if (!response.ok) throw new Error('Network response was not ok.');
@@ -3301,6 +3326,14 @@ function openTextEditorWindow(file) {
 			file.write(quill.root.innerHTML);
 			fs.save();
 		}, 500);
+	});
+
+	quill.root.addEventListener('contextmenu', (e) => {
+		e.preventDefault();
+		if (window.ContextMenu) {
+			const items = window.ContextMenu.getEditorItems(quill.root, false);
+			window.ContextMenu.show(items, e.clientX, e.clientY);
+		}
 	});
 }
 
@@ -3424,7 +3457,7 @@ async function openDisplaySettings() {
 	`;
 
 	const win = createXPWindow(id, 'Wallpaper', contentHTML, 760, 540, {
-		iconSrc: 'https://img.icons8.com/fluent/48/folder-invoices.png'
+		iconSrc: '../assets/images/desk/icons/Display.webp'
 	});
 	win.querySelector('.xp-window-content').style.padding = '0';
 	win.classList.add('project-window');
@@ -3489,6 +3522,16 @@ async function openDisplaySettings() {
 		card.addEventListener('dblclick', () => {
 			updateWallpaperSelection(item);
 			applyWallpaperToDesktop(item);
+		});
+
+		card.addEventListener('contextmenu', (e) => {
+			e.preventDefault();
+			e.stopPropagation();
+			updateWallpaperSelection(item);
+			if (window.ContextMenu) {
+				const items = window.ContextMenu.getWallpaperCardItems(item);
+				window.ContextMenu.show(items, e.clientX, e.clientY);
+			}
 		});
 
 		gridContainer.appendChild(card);
@@ -3598,7 +3641,7 @@ function renderRecycleBinContent(win) {
 		icon.title = `${item.data.name}\nOriginal location: ${item.originalPath}`;
 
 		const img = document.createElement('img');
-		img.src = item.data.icon || 'https://img.icons8.com/fluency/48/file.png';
+		img.src = item.data.icon || '../assets/images/desk/icons/File.webp';
 		img.alt = item.data.name;
 		icon.appendChild(img);
 
@@ -3838,14 +3881,14 @@ function openMyComputerWindow() {
 						<div class="my-comp-group-title">Files Stored on This Computer</div>
 						<div class="my-comp-grid">
 							<div class="my-comp-item" id="mycomp-item-shared">
-								<img src="https://img.icons8.com/fluent/48/folder-invoices.png" alt="Shared Documents">
+								<img src="../assets/images/desk/icons/Folder Closed (Alt).webp" alt="Shared Documents">
 								<div class="my-comp-texts">
 									<strong>Shared Documents</strong>
 									<span>System Folder</span>
 								</div>
 							</div>
 							<div class="my-comp-item" id="mycomp-item-userdocs">
-								<img src="https://img.icons8.com/fluent/48/folder-invoices.png" alt="User's Documents">
+								<img src="../assets/images/desk/icons/My Profile Folder.webp" alt="User's Documents">
 								<div class="my-comp-texts">
 									<strong>Colin's Documents</strong>
 									<span>Personal Folder</span>
@@ -3892,7 +3935,7 @@ function openMyComputerWindow() {
 	`;
 
 	const win = createXPWindow(id, 'My Computer', contentHTML, 680, 480, {
-		iconSrc: '../assets/images/desk/XPIcon.png'
+		iconSrc: '../assets/images/desk/icons/My Computer.webp'
 	});
 	win.querySelector('.xp-window-content').style.padding = '0';
 
@@ -4015,7 +4058,7 @@ function openSearchWindow(initialQuery = '') {
 						hits.push({
 							name: title,
 							category: 'Project',
-							icon: p.icon || 'https://img.icons8.com/fluency/48/file.png',
+							icon: p.icon || '../assets/images/desk/icons/File.webp',
 							action: () => openProjectWindow(p)
 						});
 					}
@@ -4149,7 +4192,7 @@ function openNetworkPlacesWindow() {
 	`;
 
 	const win = createXPWindow(id, 'My Network Places', contentHTML, 540, 340, {
-		iconSrc: 'https://img.icons8.com/fluent/48/domain.png'
+		iconSrc: '../assets/images/desk/icons/My Network Places.webp'
 	});
 	win.querySelector('.xp-window-content').style.padding = '0';
 
@@ -4462,6 +4505,14 @@ function openInternetExplorer() {
 				backBtn.querySelector('img').src = "https://api.iconify.design/mdi/arrow-left.svg?color=%23888888";
 			}
 		} catch (e) {
+		}
+	});
+
+	ieWindow.querySelector('.ie-content-area').addEventListener('contextmenu', (e) => {
+		e.preventDefault();
+		if (window.ContextMenu) {
+			const items = window.ContextMenu.getIEAreaItems(addressBar.value);
+			window.ContextMenu.show(items, e.clientX, e.clientY);
 		}
 	});
 

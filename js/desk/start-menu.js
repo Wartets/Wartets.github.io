@@ -28,7 +28,7 @@
 
 		render() {
 			const userName = (window.SettingsApp && window.SettingsApp.get('userName')) || 'Colin B.R.';
-			const userAvatar = (window.SettingsApp && window.SettingsApp.get('userAvatar')) || 'https://api.iconify.design/ic/round-account-circle.svg';
+			const userAvatar = (window.SettingsApp && window.SettingsApp.get('userAvatar')) || '../assets/images/desk/icons/User 1.webp';
 
 			startMenuEl.innerHTML = `
 				<div class="xp-start-header" id="start-menu-profile-header" title="Click to change user account picture and settings">
@@ -68,13 +68,13 @@
 								</div>
 							</div>
 							<div class="xp-start-item" data-action="open-minesweeper">
-								<img src="../assets/images/desk/mine.webp" class="xp-start-item-icon" alt="Minesweeper">
+								<img src="../assets/images/desk/icons/Minesweeper.webp" class="xp-start-item-icon" alt="Minesweeper">
 								<div class="xp-start-item-texts">
 									<span class="xp-start-title">Minesweeper</span>
 								</div>
 							</div>
 							<div class="xp-start-item" data-action="new-text-document">
-								<img src="https://img.icons8.com/color/48/txt.png" class="xp-start-item-icon" alt="Notepad">
+								<img src="../assets/images/desk/icons/File.webp" class="xp-start-item-icon" alt="Notepad">
 								<div class="xp-start-item-texts">
 									<span class="xp-start-title">Notepad</span>
 								</div>
@@ -86,7 +86,7 @@
 								</div>
 							</div>
 							<div class="xp-start-item" data-action="control-panel-appearance">
-								<img src="https://img.icons8.com/fluent/48/paint-palette.png" class="xp-start-item-icon" alt="Appearance">
+								<img src="../assets/images/desk/icons/Display.webp" class="xp-start-item-icon" alt="Appearance">
 								<div class="xp-start-item-texts">
 									<span class="xp-start-title">Wallpaper & Themes</span>
 								</div>
@@ -109,30 +109,30 @@
 
 					<div class="xp-start-right-column">
 						<div class="xp-start-item xp-start-right-item" data-action="my-documents">
-							<img src="https://img.icons8.com/fluent/48/folder-invoices.png" class="xp-start-item-icon" alt="My Documents">
+							<img src="../assets/images/desk/icons/My Profile Folder.webp" class="xp-start-item-icon" alt="My Documents">
 							<span class="xp-start-title"><strong>My Documents</strong></span>
 						</div>
 						<div class="xp-start-item xp-start-right-item" data-action="my-pictures">
-							<img src="https://img.icons8.com/fluent/48/picture.png" class="xp-start-item-icon" alt="My Pictures">
+							<img src="../assets/images/desk/icons/Camera.webp" class="xp-start-item-icon" alt="My Pictures">
 							<span class="xp-start-title"><strong>My Pictures</strong></span>
 						</div>
 						<div class="xp-start-item xp-start-right-item" data-action="my-music">
-							<img src="https://img.icons8.com/fluent/48/music.png" class="xp-start-item-icon" alt="My Music">
+							<img src="../assets/images/desk/icons/Music File.webp" class="xp-start-item-icon" alt="My Music">
 							<span class="xp-start-title"><strong>My Music</strong></span>
 						</div>
 						<div class="xp-start-item xp-start-right-item" data-action="my-computer">
-							<img src="../assets/images/desk/XPIcon.png" class="xp-start-item-icon" alt="My Computer">
+							<img src="../assets/images/desk/icons/My Computer.webp" class="xp-start-item-icon" alt="My Computer">
 							<span class="xp-start-title"><strong>My Computer</strong></span>
 						</div>
 						<div class="xp-start-item xp-start-right-item" data-action="my-network-places">
-							<img src="https://img.icons8.com/fluent/48/domain.png" class="xp-start-item-icon" alt="My Network Places">
+							<img src="../assets/images/desk/icons/My Network Places.webp" class="xp-start-item-icon" alt="My Network Places">
 							<span class="xp-start-title">My Network Places</span>
 						</div>
 
 						<div class="xp-start-divider right-divider"></div>
 
 						<div class="xp-start-item xp-start-right-item has-flyout" id="start-control-panel-trigger" data-action="control-panel">
-							<img src="https://api.iconify.design/mdi/cog-outline.svg" class="xp-start-item-icon" alt="Control Panel">
+							<img src="../assets/images/desk/icons/System Properties.webp" class="xp-start-item-icon" alt="Control Panel">
 							<span class="xp-start-title">Control Panel</span>
 							<span class="xp-start-flyout-arrow">►</span>
 						</div>
@@ -141,7 +141,7 @@
 							<span class="xp-start-title">Printers and Faxes</span>
 						</div>
 						<div class="xp-start-item xp-start-right-item has-flyout" id="start-recent-docs-trigger">
-							<img src="https://api.iconify.design/mdi/history.svg" class="xp-start-item-icon" alt="Recent Documents">
+							<img src="../assets/images/desk/icons/List File.webp" class="xp-start-item-icon" alt="Recent Documents">
 							<span class="xp-start-title">My Recent Documents</span>
 							<span class="xp-start-flyout-arrow">►</span>
 						</div>
@@ -149,7 +149,7 @@
 						<div class="xp-start-divider right-divider"></div>
 
 						<div class="xp-start-item xp-start-right-item" data-action="help">
-							<img src="https://api.iconify.design/mdi/help-circle-outline.svg" class="xp-start-item-icon" alt="Help">
+							<img src="../assets/images/desk/icons/User Support.webp" class="xp-start-item-icon" alt="Help">
 							<span class="xp-start-title">Help and Support</span>
 						</div>
 						<div class="xp-start-item xp-start-right-item has-flyout" id="start-search-trigger" data-action="search">
@@ -224,6 +224,52 @@
 				}
 			});
 
+			startMenuEl.addEventListener('contextmenu', (e) => {
+				const item = e.target.closest('.xp-start-item');
+				if (!item) return;
+				e.preventDefault();
+				e.stopPropagation();
+				const title = item.querySelector('.xp-start-title')?.textContent || 'Program';
+				const action = item.dataset.action;
+				if (window.ContextMenu) {
+					const items = [
+						{
+							label: `Open ${title}`,
+							bold: true,
+							action: () => {
+								if (action) this.handleAction(action);
+							}
+						},
+						{
+							label: 'Pin to Start menu',
+							disabled: item.classList.contains('xp-start-pinned'),
+							action: () => {}
+						},
+						{ separator: true },
+						{
+							label: 'Create Shortcut on Desktop',
+							action: () => {
+								if (typeof fs !== 'undefined' && fs.create) {
+									fs.create('Shortcut', '/', `${title} - Shortcut`, {
+										targetPath: '/',
+										icon: item.querySelector('img')?.src || 'https://img.icons8.com/fluency/48/file.png'
+									});
+									if (typeof refreshUI === 'function') refreshUI();
+								}
+							}
+						},
+						{ separator: true },
+						{
+							label: 'Properties',
+							action: () => {
+								if (window.SettingsApp) window.SettingsApp.open('system');
+							}
+						}
+					];
+					window.ContextMenu.show(items, e.clientX, e.clientY);
+				}
+			});
+
 			this.setupAllProgramsFlyout();
 			this.setupRecentDocumentsFlyout();
 			this.setupControlPanelFlyout();
@@ -267,22 +313,22 @@
 						</div>
 						<div class="xp-start-divider"></div>
 						<div class="xp-start-flyout-item has-sub" data-sub="accessories">
-							<img src="https://img.icons8.com/fluent/48/folder-invoices.png" class="xp-start-item-icon" alt="">
+							<img src="../assets/images/desk/icons/Folder Closed.webp" class="xp-start-item-icon" alt="">
 							<span class="xp-start-title">Accessories</span>
 							<span class="xp-start-flyout-arrow">►</span>
 						</div>
 						<div class="xp-start-flyout-item has-sub" data-sub="games">
-							<img src="https://img.icons8.com/fluent/48/folder-invoices.png" class="xp-start-item-icon" alt="">
+							<img src="../assets/images/desk/icons/Game Controller.webp" class="xp-start-item-icon" alt="">
 							<span class="xp-start-title">Games</span>
 							<span class="xp-start-flyout-arrow">►</span>
 						</div>
 						<div class="xp-start-flyout-item has-sub" data-sub="media">
-							<img src="https://img.icons8.com/fluent/48/folder-invoices.png" class="xp-start-item-icon" alt="">
+							<img src="../assets/images/desk/icons/Music File.webp" class="xp-start-item-icon" alt="">
 							<span class="xp-start-title">Entertainment</span>
 							<span class="xp-start-flyout-arrow">►</span>
 						</div>
 						<div class="xp-start-flyout-item has-sub" data-sub="system-tools">
-							<img src="https://img.icons8.com/fluent/48/folder-invoices.png" class="xp-start-item-icon" alt="">
+							<img src="../assets/images/desk/icons/System Properties.webp" class="xp-start-item-icon" alt="">
 							<span class="xp-start-title">System Tools</span>
 							<span class="xp-start-flyout-arrow">►</span>
 						</div>
@@ -352,7 +398,7 @@
 						if (subKey === 'accessories') {
 							nestedFlyout.innerHTML = `
 								<div class="xp-start-flyout-item" data-action="new-text-document">
-									<img src="https://img.icons8.com/color/48/txt.png" class="xp-start-item-icon" alt="">
+									<img src="../assets/images/desk/icons/File.webp" class="xp-start-item-icon" alt="">
 									<span class="xp-start-title">Notepad</span>
 								</div>
 								<div class="xp-start-flyout-item" data-action="open-cmd">
@@ -364,18 +410,18 @@
 									<span class="xp-start-title">Daily Anecdotes</span>
 								</div>
 								<div class="xp-start-flyout-item" data-action="my-documents">
-									<img src="https://img.icons8.com/color/48/pdf.png" class="xp-start-item-icon" alt="">
+									<img src="../assets/images/desk/icons/List File.webp" class="xp-start-item-icon" alt="">
 									<span class="xp-start-title">PDF Documents Archive</span>
 								</div>
 							`;
 						} else if (subKey === 'games') {
 							nestedFlyout.innerHTML = `
 								<div class="xp-start-flyout-item" data-action="open-minesweeper">
-									<img src="../assets/images/desk/mine.webp" class="xp-start-item-icon" alt="">
+									<img src="../assets/images/desk/icons/Minesweeper.webp" class="xp-start-item-icon" alt="">
 									<span class="xp-start-title">Minesweeper</span>
 								</div>
 								<div class="xp-start-flyout-item" data-action="open-solitaire">
-									<img src="https://api.iconify.design/mdi/cards-playing-outline.svg?color=%231b4b9b" class="xp-start-item-icon" alt="">
+									<img src="../assets/images/desk/icons/Hearts.webp" class="xp-start-item-icon" alt="">
 									<span class="xp-start-title">Solitaire</span>
 								</div>
 							`;
@@ -397,7 +443,7 @@
 						} else if (subKey === 'system-tools') {
 							nestedFlyout.innerHTML = `
 								<div class="xp-start-flyout-item" data-action="control-panel">
-									<img src="https://api.iconify.design/mdi/cog-outline.svg" class="xp-start-item-icon" alt="">
+									<img src="../assets/images/desk/icons/System Properties.webp" class="xp-start-item-icon" alt="">
 									<span class="xp-start-title">Control Panel</span>
 								</div>
 								<div class="xp-start-flyout-item" data-action="recycle-bin">
@@ -405,7 +451,7 @@
 									<span class="xp-start-title">Recycle Bin</span>
 								</div>
 								<div class="xp-start-flyout-item" data-action="my-computer">
-									<img src="../assets/images/desk/XPIcon.png" class="xp-start-item-icon" alt="">
+									<img src="../assets/images/desk/icons/My Computer.webp" class="xp-start-item-icon" alt="">
 									<span class="xp-start-title">System Properties</span>
 								</div>
 							`;
@@ -562,31 +608,31 @@
 
 				flyout.innerHTML = `
 					<div class="xp-start-flyout-item" data-tab-action="system">
-						<img src="https://api.iconify.design/mdi/account-cog-outline.svg" class="xp-start-item-icon" alt="">
+						<img src="../assets/images/desk/icons/User Accounts.webp" class="xp-start-item-icon" alt="">
 						<span class="xp-start-title">User Accounts & Identity</span>
 					</div>
 					<div class="xp-start-flyout-item" data-tab-action="desktop">
-						<img src="https://api.iconify.design/mdi/monitor-screenshot.svg" class="xp-start-item-icon" alt="">
+						<img src="../assets/images/desk/icons/Monitor.webp" class="xp-start-item-icon" alt="">
 						<span class="xp-start-title">Desktop & Wallpapers</span>
 					</div>
 					<div class="xp-start-flyout-item" data-tab-action="appearance">
-						<img src="https://img.icons8.com/fluent/48/paint-palette.png" class="xp-start-item-icon" alt="">
+						<img src="../assets/images/desk/icons/Display.webp" class="xp-start-item-icon" alt="">
 						<span class="xp-start-title">Themes & Appearance</span>
 					</div>
 					<div class="xp-start-flyout-item" data-tab-action="effects">
-						<img src="https://api.iconify.design/mdi/television-classic.svg" class="xp-start-item-icon" alt="">
+						<img src="../assets/images/desk/icons/Display.webp" class="xp-start-item-icon" alt="">
 						<span class="xp-start-title">CRT & Visual Effects</span>
 					</div>
 					<div class="xp-start-flyout-item" data-tab-action="taskbar">
-						<img src="https://api.iconify.design/mdi/dock-bottom.svg" class="xp-start-item-icon" alt="">
+						<img src="../assets/images/desk/icons/User Personalization.webp" class="xp-start-item-icon" alt="">
 						<span class="xp-start-title">Taskbar & Start Menu</span>
 					</div>
 					<div class="xp-start-flyout-item" data-tab-action="audio">
-						<img src="https://api.iconify.design/mdi/volume-high.svg" class="xp-start-item-icon" alt="">
+						<img src="../assets/images/desk/icons/Sounds, Speech, and Audio Devices.webp" class="xp-start-item-icon" alt="">
 						<span class="xp-start-title">Sounds & Audio Events</span>
 					</div>
 					<div class="xp-start-flyout-item" data-tab-action="input">
-						<img src="https://api.iconify.design/mdi/mouse.svg" class="xp-start-item-icon" alt="">
+						<img src="../assets/images/desk/icons/System Properties.webp" class="xp-start-item-icon" alt="">
 						<span class="xp-start-title">Mouse & Folder Options</span>
 					</div>
 				`;
@@ -877,7 +923,7 @@
 
 		updateProfile() {
 			const userName = (window.SettingsApp && window.SettingsApp.get('userName')) || 'Colin B.R.';
-			const userAvatar = (window.SettingsApp && window.SettingsApp.get('userAvatar')) || 'https://api.iconify.design/ic/round-account-circle.svg';
+			const userAvatar = (window.SettingsApp && window.SettingsApp.get('userAvatar')) || '../assets/images/desk/icons/User 1.webp';
 
 			const usernameEl = document.getElementById('start-menu-username-text');
 			const avatarEl = document.getElementById('start-menu-avatar-img');

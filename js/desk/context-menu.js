@@ -65,19 +65,25 @@
 				if (item.disabled) li.classList.add('disabled');
 				if (item.bold) li.classList.add('default-action');
 
-				const iconContainer = document.createElement('span');
-				iconContainer.className = 'xp-menu-icon';
 				if (item.checked) {
-					iconContainer.innerHTML = '✓';
+					const check = document.createElement('span');
+					check.className = 'xp-menu-check';
+					check.textContent = '✓';
+					li.appendChild(check);
 				} else if (item.radio) {
-					iconContainer.innerHTML = '●';
+					const radio = document.createElement('span');
+					radio.className = 'xp-menu-check';
+					radio.textContent = '●';
+					li.appendChild(radio);
 				} else if (item.icon) {
+					const iconContainer = document.createElement('span');
+					iconContainer.className = 'xp-menu-icon';
 					const img = document.createElement('img');
 					img.src = item.icon;
 					img.alt = '';
 					iconContainer.appendChild(img);
+					li.appendChild(iconContainer);
 				}
-				li.appendChild(iconContainer);
 
 				const label = document.createElement('span');
 				label.className = 'xp-menu-label';
@@ -112,7 +118,7 @@
 						}, 120);
 					});
 
-					li.addEventListener('mouseleave', (e) => {
+					li.addEventListener('mouseleave', () => {
 						if (subMenuTimeout) clearTimeout(subMenuTimeout);
 						subMenuTimeout = setTimeout(() => {
 							if (openSubMenu && !openSubMenu.matches(':hover') && !li.matches(':hover')) {
@@ -196,7 +202,6 @@
 			const hasClipboard = fs && fs.clipboard && fs.clipboard.element;
 			const isHiddenShown = typeof isShowHiddenEnabled === 'function' ? isShowHiddenEnabled() : false;
 			const currentFit = (window.SettingsApp && window.SettingsApp.get('wallpaperFit')) || 'cover';
-			const currentTheme = (window.SettingsApp && window.SettingsApp.get('theme')) || 'luna-blue';
 
 			return [
 				{
@@ -305,7 +310,7 @@
 					submenu: [
 						{
 							label: 'Folder',
-							icon: 'https://img.icons8.com/fluent/48/folder-invoices.png',
+							icon: '../assets/images/desk/icons/Folder Closed.webp',
 							action: () => {
 								fs.create('Folder', destPath, 'New Folder');
 								refreshUI();
@@ -313,26 +318,26 @@
 						},
 						{
 							label: 'Shortcut',
-							icon: 'https://api.iconify.design/mdi/share-outline.svg',
+							icon: '../assets/images/desk/icons/Folder Closed.webp',
 							action: () => {
 								fs.create('Shortcut', destPath, 'New Shortcut', {
 									targetPath: '/',
-									icon: 'https://img.icons8.com/fluent/48/folder-invoices.png'
+									icon: '../assets/images/desk/icons/Folder Closed.webp'
 								});
 								refreshUI();
 							}
 						},
 						{
 							label: 'Text Document',
-							icon: 'https://img.icons8.com/color/48/txt.png',
+							icon: '../assets/images/desk/icons/File.webp',
 							action: () => {
-								const newFile = fs.create('File', destPath, 'New Text Document.txt');
+								fs.create('File', destPath, 'New Text Document.txt');
 								refreshUI();
 							}
 						},
 						{
 							label: 'Wave Sound Document',
-							icon: 'https://api.iconify.design/mdi/volume-high.svg',
+							icon: '../assets/images/desk/icons/Music File.webp',
 							action: () => {
 								fs.create('File', destPath, 'New Audio.wav');
 								refreshUI();
@@ -344,7 +349,7 @@
 				{
 					label: 'Display Properties',
 					bold: true,
-					icon: 'https://img.icons8.com/fluent/48/paint-palette.png',
+					icon: '../assets/images/desk/icons/Display.webp',
 					action: () => openDisplaySettings()
 				}
 			];
@@ -381,21 +386,15 @@
 					submenu: [
 						{
 							label: 'Name',
-							action: () => {
-								renderFolderContent(folder, win.querySelector('.folder-content'), win);
-							}
+							action: () => renderFolderContent(folder, win.querySelector('.folder-content'), win)
 						},
 						{
 							label: 'Date',
-							action: () => {
-								renderFolderContent(folder, win.querySelector('.folder-content'), win);
-							}
+							action: () => renderFolderContent(folder, win.querySelector('.folder-content'), win)
 						},
 						{
 							label: 'Type',
-							action: () => {
-								renderFolderContent(folder, win.querySelector('.folder-content'), win);
-							}
+							action: () => renderFolderContent(folder, win.querySelector('.folder-content'), win)
 						}
 					]
 				},
@@ -456,7 +455,7 @@
 					submenu: [
 						{
 							label: 'Folder',
-							icon: 'https://img.icons8.com/fluent/48/folder-invoices.png',
+							icon: '../assets/images/desk/icons/Folder Closed.webp',
 							action: () => {
 								fs.create('Folder', destPath, 'New Folder');
 								refreshUI();
@@ -467,14 +466,14 @@
 							action: () => {
 								fs.create('Shortcut', destPath, 'New Shortcut', {
 									targetPath: '/',
-									icon: 'https://img.icons8.com/fluent/48/folder-invoices.png'
+									icon: '../assets/images/desk/icons/Folder Closed.webp'
 								});
 								refreshUI();
 							}
 						},
 						{
 							label: 'Text Document',
-							icon: 'https://img.icons8.com/color/48/txt.png',
+							icon: '../assets/images/desk/icons/File.webp',
 							action: () => {
 								fs.create('File', destPath, 'New Text Document.txt');
 								refreshUI();
@@ -496,7 +495,6 @@
 			const isProject = element instanceof ProjectFile;
 			const isFolder = element instanceof Folder;
 			const isFile = element instanceof File;
-			const isShortcut = element instanceof Shortcut;
 
 			const openAction = () => {
 				if (isMultiple) {
@@ -650,6 +648,468 @@
 			});
 
 			return items;
+		},
+
+		getSystemIconItems(type) {
+			if (type === 'my-computer') {
+				return [
+					{
+						label: 'Open',
+						bold: true,
+						action: () => {
+							if (window.DeskAPI && window.DeskAPI.openMyComputer) window.DeskAPI.openMyComputer();
+						}
+					},
+					{
+						label: 'Explore',
+						action: () => {
+							if (window.DeskAPI && window.DeskAPI.openMyComputer) window.DeskAPI.openMyComputer();
+						}
+					},
+					{
+						label: 'Search...',
+						icon: 'https://api.iconify.design/mdi/magnify.svg',
+						action: () => {
+							if (window.DeskAPI && window.DeskAPI.openSearch) window.DeskAPI.openSearch('');
+						}
+					},
+					{ separator: true },
+					{
+						label: 'Manage',
+						action: () => {
+							if (window.SettingsApp) window.SettingsApp.open('system');
+						}
+					},
+					{ separator: true },
+					{
+						label: 'Create Shortcut',
+						action: () => {
+							if (typeof showXPDialog === 'function') showXPDialog('Shortcut', 'Shortcut already placed on Desktop.', 'info');
+						}
+					},
+					{ separator: true },
+					{
+						label: 'Properties',
+						bold: true,
+						action: () => {
+							if (window.SettingsApp) window.SettingsApp.open('system');
+						}
+					}
+				];
+			}
+
+			if (type === 'recycle-bin') {
+				const recycleCount = (typeof fs !== 'undefined' && fs.loadRecycleBinItems) ? fs.loadRecycleBinItems().length : 0;
+				return [
+					{
+						label: 'Open',
+						bold: true,
+						action: () => {
+							if (typeof openRecycleBinWindow === 'function') openRecycleBinWindow();
+						}
+					},
+					{
+						label: 'Explore',
+						action: () => {
+							if (typeof openRecycleBinWindow === 'function') openRecycleBinWindow();
+						}
+					},
+					{
+						label: 'Empty Recycle Bin',
+						disabled: recycleCount === 0,
+						icon: 'https://api.iconify.design/mdi/delete-sweep-outline.svg',
+						action: () => {
+							if (recycleCount === 0) return;
+							createConfirmationDialog(`Are you sure you want to permanently delete all ${recycleCount} items?`, () => {
+								if (typeof fs !== 'undefined' && fs.emptyRecycleBin) fs.emptyRecycleBin();
+								if (window.SettingsApp && window.SettingsApp.playSound) window.SettingsApp.playSound('recycle');
+								refreshUI();
+							});
+						}
+					},
+					{ separator: true },
+					{
+						label: 'Create Shortcut',
+						action: () => {
+							if (typeof showXPDialog === 'function') showXPDialog('Shortcut', 'Shortcut already exists.', 'info');
+						}
+					},
+					{ separator: true },
+					{
+						label: 'Properties',
+						bold: true,
+						action: () => {
+							if (window.SettingsApp) window.SettingsApp.open('system');
+						}
+					}
+				];
+			}
+
+			return [];
+		},
+
+		getStartButtonItems() {
+			return [
+				{
+					label: 'Open',
+					bold: true,
+					action: () => {
+						if (window.StartMenu) window.StartMenu.open();
+					}
+				},
+				{
+					label: 'Explore',
+					action: () => {
+						if (typeof openAllProjectsFolder === 'function') openAllProjectsFolder();
+					}
+				},
+				{
+					label: 'Search...',
+					icon: 'https://api.iconify.design/mdi/magnify.svg',
+					action: () => {
+						if (window.DeskAPI && window.DeskAPI.openSearch) window.DeskAPI.openSearch('');
+					}
+				},
+				{ separator: true },
+				{
+					label: 'Properties',
+					action: () => {
+						if (window.SettingsApp) window.SettingsApp.open('taskbar');
+					}
+				}
+			];
+		},
+
+		getQuickLaunchItemItems(appId, appName) {
+			return [
+				{
+					label: `Open ${appName}`,
+					bold: true,
+					action: () => {
+						const el = document.getElementById(appId);
+						if (el) el.click();
+					}
+				},
+				{ separator: true },
+				{
+					label: 'Properties',
+					action: () => {
+						if (window.SettingsApp) window.SettingsApp.open('taskbar');
+					}
+				}
+			];
+		},
+
+		getTrayItems(trayId) {
+			if (trayId === 'volume') {
+				const isMuted = window.SettingsApp ? !window.SettingsApp.get('soundEnabled') : false;
+				return [
+					{
+						label: 'Open Volume Control',
+						bold: true,
+						action: () => {
+							if (window.SettingsApp) window.SettingsApp.open('audio');
+						}
+					},
+					{
+						label: 'Adjust Audio Properties',
+						action: () => {
+							if (window.SettingsApp) window.SettingsApp.open('audio');
+						}
+					},
+					{ separator: true },
+					{
+						label: 'Mute Master Audio',
+						checked: isMuted,
+						action: () => {
+							if (window.SettingsApp) window.SettingsApp.set('soundEnabled', isMuted);
+						}
+					}
+				];
+			}
+
+			if (trayId === 'network') {
+				return [
+					{
+						label: 'Status',
+						bold: true,
+						action: () => {
+							if (typeof showXPDialog === 'function') {
+								showXPDialog('Local Area Connection', 'Status: Connected\nSpeed: 100.0 Mbps\nPackets Sent: 24,512\nPackets Received: 89,402', 'info');
+							}
+						}
+					},
+					{
+						label: 'Repair',
+						action: () => {
+							if (typeof showXPDialog === 'function') {
+								showXPDialog('Network Repair', 'Windows has renewed the IP address and cleared DNS caches.', 'info');
+							}
+						}
+					},
+					{ separator: true },
+					{
+						label: 'Open Network Connections',
+						action: () => {
+							if (window.DeskAPI && window.DeskAPI.openNetworkPlaces) window.DeskAPI.openNetworkPlaces();
+						}
+					}
+				];
+			}
+
+			if (trayId === 'clippy') {
+				const isEnabled = window.SettingsApp ? !!window.SettingsApp.get('clippyEnabled') : true;
+				return [
+					{
+						label: 'Animate Assistant',
+						bold: true,
+						action: () => {
+							if (window.ClippyAgent && window.ClippyAgent.showTip) window.ClippyAgent.showTip();
+						}
+					},
+					{
+						label: 'Options & Frequency',
+						action: () => {
+							if (window.SettingsApp) window.SettingsApp.open('taskbar');
+						}
+					},
+					{ separator: true },
+					{
+						label: isEnabled ? 'Hide Clippy' : 'Show Clippy',
+						action: () => {
+							if (window.SettingsApp) window.SettingsApp.set('clippyEnabled', !isEnabled);
+						}
+					}
+				];
+			}
+
+			if (trayId === 'clock') {
+				return [
+					{
+						label: 'Adjust Date/Time',
+						bold: true,
+						action: () => {
+							const calendarPopup = document.getElementById('calendar-popup');
+							if (calendarPopup) {
+								if (typeof renderCalendar === 'function' && typeof currentCalendarDate !== 'undefined') {
+									renderCalendar(currentCalendarDate.getFullYear(), currentCalendarDate.getMonth());
+								}
+								calendarPopup.classList.remove('hidden');
+							}
+						}
+					},
+					{
+						label: 'Customize Notifications...',
+						action: () => {
+							if (window.SettingsApp) window.SettingsApp.open('taskbar');
+						}
+					}
+				];
+			}
+
+			return [];
+		},
+
+		getWindowHeaderItems(win, id) {
+			if (!win) return [];
+			const isMin = win.classList.contains('minimized');
+			const isMax = win.classList.contains('maximized');
+
+			return [
+				{
+					label: 'Restore',
+					bold: isMin,
+					disabled: !isMin && !isMax,
+					action: () => {
+						if (isMin && typeof unminimizeWindow === 'function') unminimizeWindow(win);
+						else if (isMax && typeof maximizeWindow === 'function') maximizeWindow(win);
+						if (typeof bringWindowToFront === 'function') bringWindowToFront(win);
+					}
+				},
+				{
+					label: 'Move',
+					disabled: isMax || isMin,
+					action: () => {
+						if (typeof bringWindowToFront === 'function') bringWindowToFront(win);
+					}
+				},
+				{
+					label: 'Size',
+					disabled: isMax || isMin,
+					action: () => {
+						if (typeof bringWindowToFront === 'function') bringWindowToFront(win);
+					}
+				},
+				{
+					label: 'Minimize',
+					disabled: isMin,
+					action: () => {
+						if (typeof minimizeWindow === 'function') minimizeWindow(win, id);
+					}
+				},
+				{
+					label: 'Maximize',
+					disabled: isMax,
+					action: () => {
+						if (!isMax && typeof maximizeWindow === 'function') maximizeWindow(win);
+						if (typeof bringWindowToFront === 'function') bringWindowToFront(win);
+					}
+				},
+				{ separator: true },
+				{
+					label: 'Close',
+					bold: true,
+					shortcut: 'Alt+F4',
+					action: () => {
+						if (typeof closeWindow === 'function') closeWindow(win, id);
+					}
+				}
+			];
+		},
+
+		getEditorItems(editorElement, isReadOnly = false) {
+			return [
+				{
+					label: 'Undo',
+					shortcut: 'Ctrl+Z',
+					disabled: isReadOnly,
+					action: () => {
+						document.execCommand('undo');
+					}
+				},
+				{ separator: true },
+				{
+					label: 'Cut',
+					shortcut: 'Ctrl+X',
+					disabled: isReadOnly,
+					action: () => {
+						document.execCommand('cut');
+					}
+				},
+				{
+					label: 'Copy',
+					shortcut: 'Ctrl+C',
+					action: () => {
+						document.execCommand('copy');
+					}
+				},
+				{
+					label: 'Paste',
+					shortcut: 'Ctrl+V',
+					disabled: isReadOnly,
+					action: () => {
+						document.execCommand('paste');
+					}
+				},
+				{
+					label: 'Delete',
+					shortcut: 'Del',
+					disabled: isReadOnly,
+					action: () => {
+						document.execCommand('delete');
+					}
+				},
+				{ separator: true },
+				{
+					label: 'Select All',
+					shortcut: 'Ctrl+A',
+					action: () => {
+						if (editorElement && typeof editorElement.select === 'function') {
+							editorElement.select();
+						} else {
+							document.execCommand('selectAll');
+						}
+					}
+				}
+			];
+		},
+
+		getIEAreaItems(url = '') {
+			return [
+				{
+					label: 'Back',
+					icon: 'https://api.iconify.design/mdi/arrow-left.svg',
+					action: () => {
+						const iframe = document.getElementById('ie-iframe');
+						if (iframe && iframe.contentWindow) iframe.contentWindow.history.back();
+					}
+				},
+				{
+					label: 'Forward',
+					icon: 'https://api.iconify.design/mdi/arrow-right.svg',
+					action: () => {
+						const iframe = document.getElementById('ie-iframe');
+						if (iframe && iframe.contentWindow) iframe.contentWindow.history.forward();
+					}
+				},
+				{ separator: true },
+				{
+					label: 'Set as Desktop Background',
+					action: () => {
+						if (window.SettingsApp && url) window.SettingsApp.set('desktopBackground', url);
+					}
+				},
+				{
+					label: 'Copy Background',
+					action: () => {
+						navigator.clipboard.writeText(url);
+					}
+				},
+				{ separator: true },
+				{
+					label: 'Select All',
+					shortcut: 'Ctrl+A',
+					action: () => {
+						document.execCommand('selectAll');
+					}
+				},
+				{
+					label: 'Refresh',
+					shortcut: 'F5',
+					action: () => {
+						const iframe = document.getElementById('ie-iframe');
+						if (iframe && iframe.contentWindow) iframe.contentWindow.location.reload();
+					}
+				},
+				{ separator: true },
+				{
+					label: 'Properties',
+					action: () => {
+						if (typeof showXPDialog === 'function') {
+							showXPDialog('Properties', `Address: ${url || 'about:home'}\nType: HTML Document\nZone: Internet Zone`, 'info');
+						}
+					}
+				}
+			];
+		},
+
+		getWallpaperCardItems(item) {
+			return [
+				{
+					label: 'Set as Desktop Background',
+					bold: true,
+					action: () => {
+						if (window.SettingsApp && item.path) window.SettingsApp.set('desktopBackground', item.path);
+					}
+				},
+				{
+					label: 'Preview',
+					action: () => {
+						if (typeof createXPWindow === 'function') {
+							createXPWindow(`wp-preview-${item.id}`, item.name, `<img src="${item.path}" style="width:100%;height:100%;object-fit:contain;">`, 600, 420);
+						}
+					}
+				},
+				{ separator: true },
+				{
+					label: 'Properties',
+					action: () => {
+						if (typeof showXPDialog === 'function') {
+							showXPDialog(item.name, `File: ${item.filename}\nType: WEBP Image\nLocation: C:\\WINDOWS\\Web\\Wallpaper`, 'info');
+						}
+					}
+				}
+			];
 		},
 
 		getTaskbarItems() {

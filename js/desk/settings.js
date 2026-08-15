@@ -6,18 +6,18 @@
 	const SETTINGS_STORAGE_KEY = 'xp_system_settings';
 
 	const AVATAR_PRESETS = [
-		{ id: 'user-default', name: 'Account', url: 'https://api.iconify.design/ic/round-account-circle.svg' },
+		{ id: 'user-1', name: 'User 1', url: '../assets/images/desk/icons/User 1.webp' },
+		{ id: 'user-2', name: 'User 2', url: '../assets/images/desk/icons/User 2.webp' },
+		{ id: 'earth', name: 'Earth', url: '../assets/images/desk/icons/Earth (fixed).webp' },
+		{ id: 'camera', name: 'Camera', url: '../assets/images/desk/icons/Camera.webp' },
 		{ id: 'chess', name: 'Chess', url: 'https://api.iconify.design/mdi/chess-knight.svg?color=%231b4b9b' },
 		{ id: 'duck', name: 'Rubber Duck', url: 'https://api.iconify.design/mdi/duck.svg?color=%23e68a00' },
 		{ id: 'cat', name: 'Cat', url: 'https://api.iconify.design/mdi/cat.svg?color=%232d74da' },
 		{ id: 'dog', name: 'Dog', url: 'https://api.iconify.design/mdi/dog.svg?color=%238a5a36' },
 		{ id: 'frog', name: 'Frog', url: 'https://api.iconify.design/mdi/emoticon-happy-outline.svg?color=%232e7d32' },
 		{ id: 'butterfly', name: 'Butterfly', url: 'https://api.iconify.design/mdi/butterfly.svg?color=%239c27b0' },
-		{ id: 'airplane', name: 'Airplane', url: 'https://api.iconify.design/mdi/airplane.svg?color=%230288d1' },
 		{ id: 'ball', name: 'Soccer', url: 'https://api.iconify.design/mdi/soccer.svg?color=%23333333' },
-		{ id: 'guitar', name: 'Guitar', url: 'https://api.iconify.design/mdi/guitar-acoustic.svg?color=%23d84315' },
-		{ id: 'space', name: 'Rocket', url: 'https://api.iconify.design/mdi/rocket-launch-outline.svg?color=%23d32f2f' },
-		{ id: 'palm', name: 'Island', url: 'https://api.iconify.design/mdi/palm-tree.svg?color=%23388e3c' }
+		{ id: 'guitar', name: 'Guitar', url: 'https://api.iconify.design/mdi/guitar-acoustic.svg?color=%23d84315' }
 	];
 
 	const DEFAULT_SETTINGS = {
@@ -42,7 +42,7 @@
 		taskbarBalloons: true,
 		quickLaunchVisible: true,
 		userName: 'Wartets',
-		userAvatar: 'https://api.iconify.design/ic/round-account-circle.svg',
+		userAvatar: '../assets/images/desk/icons/User 1.webp',
 		clippyEnabled: true,
 		clippyFrequency: 'normal',
 		soundEnabled: true,
@@ -358,7 +358,7 @@
 				<div class="xp-tab-page-wrapper">
 					<div class="xp-tab-page" data-page="system">
 						<div style="display: flex; gap: 14px; margin-bottom: 10px; align-items: center;">
-							<img src="../assets/images/desk/XPIcon.png" alt="Windows XP" style="width: 48px; height: 48px; flex-shrink: 0;">
+							<img src="../assets/images/desk/icons/System Properties.webp" alt="Windows XP" style="width: 48px; height: 48px; flex-shrink: 0;">
 							<div style="font-size: 11px; line-height: 1.45;">
 								<strong>Microsoft Windows XP</strong><br>
 								Professional Version 2002 Service Pack 3<br>
@@ -631,7 +631,7 @@
 								<span style="font-size: 10px;">Fast</span>
 							</div>
 							<div class="dclick-test-area" id="settings-dclick-test-box">
-								<img src="https://img.icons8.com/fluent/48/folder-invoices.png" class="dclick-test-icon" id="settings-dclick-icon" alt="Test Folder">
+								<img src="../assets/images/desk/icons/Folder Closed.webp" class="dclick-test-icon" id="settings-dclick-icon" alt="Test Folder">
 								<div style="font-size: 10px; color: #555; margin-top: 4px;" id="settings-dclick-status">Double-click folder to open/close</div>
 							</div>
 						</fieldset>
@@ -655,7 +655,7 @@
 		`;
 
 		const win = createXPWindow(id, 'Control Panel & System Settings', contentHTML, 540, 530, {
-			iconSrc: 'https://api.iconify.design/mdi/cog-outline.svg',
+			iconSrc: '../assets/images/desk/icons/System Properties.webp',
 			resizable: false
 		});
 		win.querySelector('.xp-window-content').style.padding = '0';
@@ -1076,8 +1076,8 @@
 					isOpen = !isOpen;
 					dclickIcon.classList.toggle('popped', isOpen);
 					dclickIcon.src = isOpen 
-						? 'https://img.icons8.com/fluent/48/opened-folder.png' 
-						: 'https://img.icons8.com/fluent/48/folder-invoices.png';
+						? '../assets/images/desk/icons/Folder Open.webp' 
+						: '../assets/images/desk/icons/Folder Closed.webp';
 					if (dclickStatus) dclickStatus.textContent = isOpen ? 'Folder Opened! Double-click again to close.' : 'Folder Closed!';
 					SoundEngine.play('click');
 					lastClickTime = 0;

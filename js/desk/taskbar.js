@@ -74,12 +74,28 @@
 					e.stopPropagation();
 					this.showDesktop();
 				});
+				showDesktopBtn.addEventListener('contextmenu', (e) => {
+					e.preventDefault();
+					e.stopPropagation();
+					if (window.ContextMenu) {
+						const items = window.ContextMenu.getQuickLaunchItemItems('show-desktop-icon', 'Show Desktop');
+						window.ContextMenu.show(items, e.clientX, e.clientY);
+					}
+				});
 			}
 
 			const settingsLaunch = document.getElementById('quick-launch-settings');
 			if (settingsLaunch) {
 				settingsLaunch.addEventListener('click', () => {
 					if (window.SettingsApp) window.SettingsApp.open('system');
+				});
+				settingsLaunch.addEventListener('contextmenu', (e) => {
+					e.preventDefault();
+					e.stopPropagation();
+					if (window.ContextMenu) {
+						const items = window.ContextMenu.getQuickLaunchItemItems('quick-launch-settings', 'Control Panel');
+						window.ContextMenu.show(items, e.clientX, e.clientY);
+					}
 				});
 			}
 
@@ -88,12 +104,28 @@
 				ieLaunch.addEventListener('click', () => {
 					if (typeof openInternetExplorer === 'function') openInternetExplorer();
 				});
+				ieLaunch.addEventListener('contextmenu', (e) => {
+					e.preventDefault();
+					e.stopPropagation();
+					if (window.ContextMenu) {
+						const items = window.ContextMenu.getQuickLaunchItemItems('quick-launch-ie', 'Internet Explorer');
+						window.ContextMenu.show(items, e.clientX, e.clientY);
+					}
+				});
 			}
 
 			const oeLaunch = document.getElementById('quick-launch-oe');
 			if (oeLaunch) {
 				oeLaunch.addEventListener('click', () => {
 					if (typeof openOutlookExpress === 'function') openOutlookExpress();
+				});
+				oeLaunch.addEventListener('contextmenu', (e) => {
+					e.preventDefault();
+					e.stopPropagation();
+					if (window.ContextMenu) {
+						const items = window.ContextMenu.getQuickLaunchItemItems('quick-launch-oe', 'Outlook Express');
+						window.ContextMenu.show(items, e.clientX, e.clientY);
+					}
 				});
 			}
 
@@ -102,12 +134,39 @@
 				winampLaunch.addEventListener('click', () => {
 					if (typeof openWinamp === 'function') openWinamp();
 				});
+				winampLaunch.addEventListener('contextmenu', (e) => {
+					e.preventDefault();
+					e.stopPropagation();
+					if (window.ContextMenu) {
+						const items = window.ContextMenu.getQuickLaunchItemItems('quick-launch-winamp', 'Winamp');
+						window.ContextMenu.show(items, e.clientX, e.clientY);
+					}
+				});
 			}
 
 			const mineLaunch = document.getElementById('quick-launch-mine');
 			if (mineLaunch) {
 				mineLaunch.addEventListener('click', () => {
 					if (typeof openMinesweeper === 'function') openMinesweeper();
+				});
+				mineLaunch.addEventListener('contextmenu', (e) => {
+					e.preventDefault();
+					e.stopPropagation();
+					if (window.ContextMenu) {
+						const items = window.ContextMenu.getQuickLaunchItemItems('quick-launch-mine', 'Minesweeper');
+						window.ContextMenu.show(items, e.clientX, e.clientY);
+					}
+				});
+			}
+
+			if (startBtnEl) {
+				startBtnEl.addEventListener('contextmenu', (e) => {
+					e.preventDefault();
+					e.stopPropagation();
+					if (window.ContextMenu) {
+						const items = window.ContextMenu.getStartButtonItems();
+						window.ContextMenu.show(items, e.clientX, e.clientY);
+					}
 				});
 			}
 
@@ -124,6 +183,14 @@
 					e.stopPropagation();
 					this.toggleVolumePopup(e);
 				});
+				trayVolumeBtn.addEventListener('contextmenu', (e) => {
+					e.preventDefault();
+					e.stopPropagation();
+					if (window.ContextMenu) {
+						const items = window.ContextMenu.getTrayItems('volume');
+						window.ContextMenu.show(items, e.clientX, e.clientY);
+					}
+				});
 			}
 
 			const trayNetworkBtn = document.getElementById('tray-network-btn');
@@ -134,6 +201,14 @@
 						window.DeskAPI.openNetworkPlaces();
 					}
 				});
+				trayNetworkBtn.addEventListener('contextmenu', (e) => {
+					e.preventDefault();
+					e.stopPropagation();
+					if (window.ContextMenu) {
+						const items = window.ContextMenu.getTrayItems('network');
+						window.ContextMenu.show(items, e.clientX, e.clientY);
+					}
+				});
 			}
 
 			const trayMailBtn = document.getElementById('tray-mail-btn');
@@ -141,6 +216,23 @@
 				trayMailBtn.addEventListener('click', (e) => {
 					e.stopPropagation();
 					if (typeof openOutlookExpress === 'function') openOutlookExpress();
+				});
+				trayMailBtn.addEventListener('contextmenu', (e) => {
+					e.preventDefault();
+					e.stopPropagation();
+					if (typeof openOutlookExpress === 'function') openOutlookExpress();
+				});
+			}
+
+			const clippyTrayIcon = document.getElementById('clippy-taskbar-icon');
+			if (clippyTrayIcon) {
+				clippyTrayIcon.addEventListener('contextmenu', (e) => {
+					e.preventDefault();
+					e.stopPropagation();
+					if (window.ContextMenu) {
+						const items = window.ContextMenu.getTrayItems('clippy');
+						window.ContextMenu.show(items, e.clientX, e.clientY);
+					}
 				});
 			}
 
@@ -154,6 +246,14 @@
 							renderCalendar(currentCalendarDate.getFullYear(), currentCalendarDate.getMonth());
 						}
 						calendarPopup.classList.toggle('hidden');
+					}
+				});
+				clockEl.addEventListener('contextmenu', (e) => {
+					e.preventDefault();
+					e.stopPropagation();
+					if (window.ContextMenu) {
+						const items = window.ContextMenu.getTrayItems('clock');
+						window.ContextMenu.show(items, e.clientX, e.clientY);
 					}
 				});
 			}
@@ -245,7 +345,7 @@
 
 			const iconImg = document.createElement('img');
 			iconImg.className = 'taskbar-btn-icon';
-			iconImg.src = iconSrc || 'https://img.icons8.com/fluency/48/file.png';
+			iconImg.src = iconSrc || '../assets/images/desk/icons/File.webp';
 			iconImg.alt = '';
 
 			const labelSpan = document.createElement('span');
@@ -371,7 +471,7 @@
 			if (!win || !previewPopupEl) return;
 
 			const title = win.querySelector('.xp-window-header .title')?.textContent || 'Window';
-			const icon = win.querySelector('.xp-window-header img')?.src || 'https://img.icons8.com/fluency/48/file.png';
+			const icon = win.querySelector('.xp-window-header img')?.src || '../assets/images/desk/icons/File.webp';
 
 			previewPopupEl.innerHTML = `
 				<div class="xp-preview-header">
