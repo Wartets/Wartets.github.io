@@ -99,6 +99,36 @@
 				});
 			}
 
+			const calcLaunch = document.getElementById('quick-launch-calc');
+			if (calcLaunch) {
+				calcLaunch.addEventListener('click', () => {
+					if (window.CalculatorApp) window.CalculatorApp.open();
+				});
+				calcLaunch.addEventListener('contextmenu', (e) => {
+					e.preventDefault();
+					e.stopPropagation();
+					if (window.ContextMenu) {
+						const items = window.ContextMenu.getQuickLaunchItemItems('quick-launch-calc', 'Calculator');
+						window.ContextMenu.show(items, e.clientX, e.clientY);
+					}
+				});
+			}
+
+			const paintLaunch = document.getElementById('quick-launch-paint');
+			if (paintLaunch) {
+				paintLaunch.addEventListener('click', () => {
+					if (window.PaintApp) window.PaintApp.open();
+				});
+				paintLaunch.addEventListener('contextmenu', (e) => {
+					e.preventDefault();
+					e.stopPropagation();
+					if (window.ContextMenu) {
+						const items = window.ContextMenu.getQuickLaunchItemItems('quick-launch-paint', 'Paint');
+						window.ContextMenu.show(items, e.clientX, e.clientY);
+					}
+				});
+			}
+
 			const settingsLaunch = document.getElementById('quick-launch-settings');
 			if (settingsLaunch) {
 				settingsLaunch.addEventListener('click', () => {

@@ -555,6 +555,8 @@ window.DeskAPI = {
 	openMailApp: () => openOutlookExpress(),
 	openProjectsFolder: () => openAllProjectsFolder(),
 	openRecycleBin: () => openRecycleBinWindow(),
+	openCalculator: () => (window.CalculatorApp ? window.CalculatorApp.open() : openCalculator()),
+	openPaint: (file) => (window.PaintApp ? window.PaintApp.open(file) : openPaint(file)),
 	openMinesweeperGame: () => (window.MinesweeperApp ? window.MinesweeperApp.open() : openMinesweeper()),
 	openWinampPlayer: () => openWinamp(),
 	getMoonPhaseDay: () => (typeof getMoonPhaseDayNumber === 'function') ? getMoonPhaseDayNumber() : null,
@@ -2593,6 +2595,10 @@ function openFileSystemElement(element, windowContext = null) {
 			}
 		} else if (element.readOnly && element.remoteUrl) {
 			openReadOnlyTextWindow(element);
+		} else if (lowerName.endsWith('.png') || lowerName.endsWith('.bmp') || lowerName.endsWith('.jpg') || lowerName.endsWith('.jpeg')) {
+			if (window.PaintApp) {
+				window.PaintApp.open(element);
+			}
 		} else if (lowerName.endsWith('.pdf')) {
 			openPDFWindow(element);
 		} else if (lowerName.endsWith('.html') || lowerName.endsWith('.htm')) {
@@ -3396,8 +3402,10 @@ function processRunCommand(command) {
 		openFileSystemElement(fs.root);
 	} else if (lowerCmd === 'shutdown') {
 		openShutdownDialog();
-	} else if (lowerCmd === 'calc') {
-		showXPDialog('Run', 'Calculator is not installed.', 'warning');
+	} else if (lowerCmd === 'calc' || lowerCmd === 'calculator') {
+		if (window.CalculatorApp) window.CalculatorApp.open();
+	} else if (lowerCmd === 'mspaint' || lowerCmd === 'paint' || lowerCmd === 'pbrush') {
+		if (window.PaintApp) window.PaintApp.open();
 	} else if (lowerCmd === 'bsod') {
 		triggerBSOD();
 	} else if (lowerCmd.startsWith('www.') || lowerCmd.startsWith('http://') || lowerCmd.startsWith('https://') || lowerCmd.endsWith('.com') || lowerCmd.endsWith('.org') || lowerCmd.endsWith('.net')) {
