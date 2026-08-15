@@ -1,0 +1,146 @@
+[
+	{
+		"id": "wallpaper-default",
+		"name": "Windows XP Bliss",
+		"filename": "wallpaper-default.webp",
+		"path": "../assets/images/desk/wallpapers/wallpaper-default.webp"
+	},
+	{
+		"id": "wallpaper-default-antonov",
+		"name": "Antonov An-225 Mriya",
+		"filename": "wallpaper-default-antonov.webp",
+		"path": "../assets/images/desk/wallpapers/wallpaper-default-antonov.webp"
+	},
+	{
+		"id": "wallpaper-default-bomb",
+		"name": "Bomb",
+		"filename": "wallpaper-default-bomb.webp",
+		"path": "../assets/images/desk/wallpapers/wallpaper-default-bomb.webp"
+	},
+	{
+		"id": "wallpaper-default-breakout",
+		"name": "Breakout",
+		"filename": "wallpaper-default-breakout.webp",
+		"path": "../assets/images/desk/wallpapers/wallpaper-default-breakout.webp"
+	},
+	{
+		"id": "wallpaper-default-digital-drawing",
+		"name": "Digital Drawing",
+		"filename": "wallpaper-default-digital-drawing.webp",
+		"path": "../assets/images/desk/wallpapers/wallpaper-default-digital-drawing.webp"
+	},
+	{
+		"id": "wallpaper-default-doom",
+		"name": "DOOM",
+		"filename": "wallpaper-default-doom.webp",
+		"path": "../assets/images/desk/wallpapers/wallpaper-default-doom.webp"
+	},
+	{
+		"id": "wallpaper-default-duck",
+		"name": "Duck",
+		"filename": "wallpaper-default-duck.webp",
+		"path": "../assets/images/desk/wallpapers/wallpaper-default-duck.webp"
+	},
+	{
+		"id": "wallpaper-default-glitch",
+		"name": "Glitch",
+		"filename": "wallpaper-default-glitch.webp",
+		"path": "../assets/images/desk/wallpapers/wallpaper-default-glitch.webp"
+	},
+	{
+		"id": "wallpaper-default-goku",
+		"name": "Son Goku",
+		"filename": "wallpaper-default-goku.webp",
+		"path": "../assets/images/desk/wallpapers/wallpaper-default-goku.webp"
+	},
+	{
+		"id": "wallpaper-default-jojos",
+		"name": "JoJo's Bizarre Adventure",
+		"filename": "wallpaper-default-jojos.webp",
+		"path": "../assets/images/desk/wallpapers/wallpaper-default-jojos.webp"
+	},
+	{
+		"id": "wallpaper-default-kermit",
+		"name": "Kermit the Frog",
+		"filename": "wallpaper-default-kermit.webp",
+		"path": "../assets/images/desk/wallpapers/wallpaper-default-kermit.webp"
+	},
+	{
+		"id": "wallpaper-default-laputa",
+		"name": "Castle in the Sky",
+		"filename": "wallpaper-default-laputa.webp",
+		"path": "../assets/images/desk/wallpapers/wallpaper-default-laputa.webp"
+	},
+	{
+		"id": "wallpaper-default-lego",
+		"name": "LEGO Bricks",
+		"filename": "wallpaper-default-lego.webp",
+		"path": "../assets/images/desk/wallpapers/wallpaper-default-lego.webp"
+	},
+	{
+		"id": "wallpaper-default-linux",
+		"name": "Linux",
+		"filename": "wallpaper-default-linux.webp",
+		"path": "../assets/images/desk/wallpapers/wallpaper-default-linux.webp"
+	},
+	{
+		"id": "wallpaper-default-logo",
+		"name": "Landscape with Logo",
+		"filename": "wallpaper-default-logo.webp",
+		"path": "../assets/images/desk/wallpapers/wallpaper-default-logo.webp"
+	},
+	{
+		"id": "wallpaper-default-pixel",
+		"name": "Pixel Art",
+		"filename": "wallpaper-default-pixel.webp",
+		"path": "../assets/images/desk/wallpapers/wallpaper-default-pixel.webp"
+	},
+	{
+		"id": "wallpaper-default-pokemon",
+		"name": "Pokemon",
+		"filename": "wallpaper-default-pokemon.webp",
+		"path": "../assets/images/desk/wallpapers/wallpaper-default-pokemon.webp"
+	},
+	{
+		"id": "wallpaper-default-sahdow-of-the-colossus",
+		"name": "Shadow of the Colossus",
+		"filename": "wallpaper-default-sahdow-of-the-colossus.webp",
+		"path": "../assets/images/desk/wallpapers/wallpaper-default-sahdow-of-the-colossus.webp"
+	},
+	{
+		"id": "wallpaper-default-starwars",
+		"name": "Star Wars",
+		"filename": "wallpaper-default-starwars.webp",
+		"path": "../assets/images/desk/wallpapers/wallpaper-default-starwars.webp"
+	},
+	{
+		"id": "wallpaper-default-subaru",
+		"name": "Subaru",
+		"filename": "wallpaper-default-subaru.webp",
+		"path": "../assets/images/desk/wallpapers/wallpaper-default-subaru.webp"
+	},
+	{
+		"id": "wallpaper-default-submarine",
+		"name": "Submarine",
+		"filename": "wallpaper-default-submarine.webp",
+		"path": "../assets/images/desk/wallpapers/wallpaper-default-submarine.webp"
+	},
+	{
+		"id": "wallpaper-default-tardis",
+		"name": "Doctor Who",
+		"filename": "wallpaper-default-tardis.webp",
+		"path": "../assets/images/desk/wallpapers/wallpaper-default-tardis.webp"
+	},
+	{
+		"id": "wallpaper-default-teletubbies",
+		"name": "Teletubbies",
+		"filename": "wallpaper-default-teletubbies.webp",
+		"path": "../assets/images/desk/wallpapers/wallpaper-default-teletubbies.webp"
+	},
+	{
+		"id": "wallpaper-default-zelda",
+		"name": "The Legend of Zelda",
+		"filename": "wallpaper-default-zelda.webp",
+		"path": "../assets/images/desk/wallpapers/wallpaper-default-zelda.webp"
+	}
+]

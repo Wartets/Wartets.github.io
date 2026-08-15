@@ -68,7 +68,7 @@ body {
 	width: 100vw;
 	height: calc(100vh - 40px);
 	background: 
-		url('../assets/images/desk/windows_xp_original.jpg') center center / cover no-repeat;
+		url('../assets/images/desk/wallpapers/wallpaper-default.webp') center center / cover no-repeat;
 	background-color: var(--xp-blue-dark);
 	overflow: hidden;
 	z-index: 0;
@@ -2854,4 +2854,132 @@ body {
 
 .ie-fav-btn:hover {
 	background: var(--xp-button-hover);
+}
+
+.wallpaper-monitor-container {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	padding: 10px 4px;
+	margin-bottom: 10px;
+}
+
+.wallpaper-monitor-bezel {
+	width: 140px;
+	height: 105px;
+	background: linear-gradient(135deg, #7e8794 0%, #5a626e 100%);
+	border-radius: 6px 6px 3px 3px;
+	border: 2px solid #3c424a;
+	box-shadow: inset 1px 1px 0 rgba(255,255,255,0.4), 0 3px 6px rgba(0,0,0,0.35);
+	padding: 6px;
+	box-sizing: border-box;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.wallpaper-monitor-screen {
+	width: 100%;
+	height: 100%;
+	background-color: #000;
+	background-position: center center;
+	background-size: cover;
+	background-repeat: no-repeat;
+	border: 1px solid #23272d;
+	box-shadow: inset 0 0 4px rgba(0,0,0,0.8);
+}
+
+.wallpaper-monitor-stand {
+	width: 34px;
+	height: 12px;
+	background: linear-gradient(to right, #4f5661, #6b7482, #4f5661);
+	border: 1px solid #32373e;
+}
+
+.wallpaper-monitor-base {
+	width: 68px;
+	height: 6px;
+	background: linear-gradient(to bottom, #7e8794, #545b66);
+	border-radius: 3px;
+	border: 1px solid #32373e;
+	box-shadow: 0 2px 4px rgba(0,0,0,0.25);
+}
+
+.wallpaper-grid-view {
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+	gap: 10px;
+	padding: 10px;
+	align-content: flex-start;
+}
+
+.wallpaper-card {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	text-align: center;
+	padding: 6px 4px;
+	border: 1px solid transparent;
+	border-radius: 3px;
+	cursor: pointer;
+	user-select: none;
+	background-color: transparent;
+}
+
+.wallpaper-card:hover {
+	background-color: #e0e8f6;
+	border-color: #b8cce9;
+}
+
+.wallpaper-card.selected {
+	background-color: var(--xp-selection-blue);
+	border-color: #1f4a9b;
+	color: #ffffff;
+}
+
+.wallpaper-card-thumb-frame {
+	width: 100px;
+	height: 65px;
+	border: 1px solid var(--xp-border-light);
+	background: #000;
+	margin-bottom: 6px;
+	overflow: hidden;
+	box-shadow: 1px 1px 3px rgba(0,0,0,0.2);
+}
+
+.wallpaper-card.selected .wallpaper-card-thumb-frame {
+	border-color: #ffffff;
+}
+
+.wallpaper-card-thumb-frame img {
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+	display: block;
+}
+
+.wallpaper-card-title {
+	font-size: 11px;
+	line-height: 1.25;
+	word-break: break-word;
+	max-height: 2.5em;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	display: -webkit-box;
+	-webkit-box-orient: vertical;
+}
+
+.wallpaper-action-footer {
+	display: flex;
+	justify-content: flex-end;
+	align-items: center;
+	gap: 8px;
+	padding: 6px 10px;
+	border-top: 1px solid var(--xp-border-light);
+	background-color: var(--xp-window-bg);
+	flex-shrink: 0;
+}
+
+.wallpaper-action-footer .xp-button {
+	min-width: 75px;
 }

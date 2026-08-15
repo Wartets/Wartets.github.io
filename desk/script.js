@@ -508,6 +508,7 @@ window.DeskAPI = {
 };
 
 document.addEventListener('DOMContentLoaded', () => {
+	applyInitialDesktopBackground();
 	initializeFileSystem();
 	initDocuments();
 	renderDesktopIcons();
@@ -3779,7 +3780,7 @@ function openTextEditorWindow(file) {
 				</span>
 			</div>
 			<div class="notepad-editor-container">
-				 <div id="${uniqueId}"></div>
+				<div id="${uniqueId}"></div>
 			</div>
 		</div>
 	`;
@@ -3810,44 +3811,212 @@ function openTextEditorWindow(file) {
 	});
 }
 
-function openDisplaySettings() {
-	const id = 'window-display-settings';
-	const title = 'Display Properties';
+const DEFAULT_DESKTOP_WALLPAPER = '../assets/images/desk/wallpapers/wallpaper-default.webp';
+let desktopWallpapersRegistry = null;
+
+function applyInitialDesktopBackground() {
+	const current = localStorage.getItem('desktopBackground') || DEFAULT_DESKTOP_WALLPAPER;
+	const desktop = document.getElementById('desktop');
+	if (desktop) {
+		desktop.style.backgroundImage = `url('${current}')`;
+	}
+}
+
+async function fetchWallpaperRegistry() {
+	if (desktopWallpapersRegistry) return desktopWallpapersRegistry;
+	try {
+		const response = await fetch('../data/desk-wallpaper.json');
+		if (!response.ok) throw new Error(`HTTP error ${response.status}`);
+		desktopWallpapersRegistry = await response.json();
+		return desktopWallpapersRegistry;
+	} catch (error) {
+		console.error('Failed to load wallpaper registry:', error);
+		return [];
+	}
+}
+
+async function openDisplaySettings() {
+	const id = 'window-wallpaper-manager';
+	const existingWindow = document.getElementById(id);
+	if (existingWindow) {
+		bringWindowToFront(existingWindow);
+		return;
+	}
+
+	const wallpapers = await fetchWallpaperRegistry();
+	if (!wallpapers || wallpapers.length === 0) {
+		showXPDialog('Error', 'Unable to load wallpaper collection.', 'error');
+		return;
+	}
+
+	let currentActiveWallpaper = localStorage.getItem('desktopBackground') || DEFAULT_DESKTOP_WALLPAPER;
+	let selectedWallpaperItem = wallpapers.find(item => item.path === currentActiveWallpaper) || wallpapers[0];
+
 	const contentHTML = `
-		<div style="padding: 10px;">
-			<h4>Background</h4>
-			<div style="display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 20px;">
-				<img src="../assets/images/desk/windows_xp_original.jpg" data-wallpaper="../assets/images/desk/windows_xp_original.jpg" style="width: 100px; height: 75px; border: 1px solid var(--xp-border-dark); cursor: pointer;" class="wallpaper-thumbnail">
-				<img src="https://images7.alphacoders.com/115/thumb-1920-1158141.jpg" data-wallpaper="https://images7.alphacoders.com/115/thumb-1920-1158141.jpg" style="width: 100px; height: 75px; border: 1px solid var(--xp-border-dark); cursor: pointer;" class="wallpaper-thumbnail">
-				<img src="https://e1.pxfuel.com/desktop-wallpaper/347/445/desktop-wallpaper-classic-windows-xp-1920x1080-old-windows.jpg" data-wallpaper="https://e1.pxfuel.com/desktop-wallpaper/347/445/desktop-wallpaper-classic-windows-xp-1920x1080-old-windows.jpg" style="width: 100px; height: 75px; border: 1px solid var(--xp-border-dark); cursor: pointer;" class="wallpaper-thumbnail">
-				<img src="https://e1.pxfuel.com/desktop-wallpaper/594/212/desktop-wallpaper-the-13-best-takes-on-the-windows-xp-bliss-bliss.jpg" data-wallpaper="https://e1.pxfuel.com/desktop-wallpaper/594/212/desktop-wallpaper-the-13-best-takes-on-the-windows-xp-bliss-bliss.jpg" style="width: 100px; height: 75px; border: 1px solid var(--xp-border-dark); cursor: pointer;" class="wallpaper-thumbnail">
-				<img src="https://i.pinimg.com/736x/ea/ca/a0/eacaa04139f9524891edc3a7449bdf9f.jpg" data-wallpaper="https://i.pinimg.com/736x/ea/ca/a0/eacaa04139f9524891edc3a7449bdf9f.jpg" style="width: 100px; height: 75px; border: 1px solid var(--xp-border-dark); cursor: pointer;" class="wallpaper-thumbnail">
-				<img src="https://wallpapers.com/images/hd/hd-windows-xp-wallpaper-for-free-hd-wallpaper-5p5b68b2u7pamkc9.jpg" data-wallpaper="https://wallpapers.com/images/hd/hd-windows-xp-wallpaper-for-free-hd-wallpaper-5p5b68b2u7pamkc9.jpg" style="width: 100px; height: 75px; border: 1px solid var(--xp-border-dark); cursor: pointer;" class="wallpaper-thumbnail">
+		<div class="folder-window-layout">
+			<div class="folder-menu-bar">
+				<ul>
+					<li><u>F</u>ile</li>
+					<li><u>E</u>dit</li>
+					<li><u>V</u>iew</li>
+					<li><u>F</u>avorites</li>
+					<li><u>T</u>ools</li>
+					<li><u>H</u>elp</li>
+				</ul>
 			</div>
-			<button id="apply-wallpaper-btn" class="xp-button">Apply</button>
+			<div class="folder-toolbar">
+				<div class="folder-nav-buttons">
+					<button class="folder-nav-btn" disabled><img src="data:image/svg+xml;charset=UTF-8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%232c63c3'><path d='M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z'/></svg>" alt="Back"></button>
+					<button class="folder-nav-btn" disabled><img src="data:image/svg+xml;charset=UTF-8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%232c63c3'><path d='M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z'/></svg>" alt="Forward"></button>
+					<button class="folder-nav-btn" disabled><img src="data:image/svg+xml;charset=UTF-8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%232c63c3'><path d='M4 12l1.41 1.41L11 7.83V20h2V7.83l5.58 5.59L20 12l-8-8-8 8z'/></svg>" alt="Up"></button>
+				</div>
+				<div class="folder-toolbar-separator"></div>
+				<div class="folder-address-bar-container">
+					<span>Address</span>
+					<input type="text" class="folder-address-bar" value="C:\\WINDOWS\\Web\\Wallpaper" readonly>
+				</div>
+			</div>
+			<div class="folder-main-layout">
+				<div class="folder-sidebar">
+					<div class="sidebar-section">
+						<h3>Monitor Preview</h3>
+						<div class="wallpaper-monitor-container">
+							<div class="wallpaper-monitor-bezel">
+								<div class="wallpaper-monitor-screen" id="wallpaper-live-monitor" style="background-image: url('${selectedWallpaperItem.path}');"></div>
+							</div>
+							<div class="wallpaper-monitor-stand"></div>
+							<div class="wallpaper-monitor-base"></div>
+						</div>
+					</div>
+					<div class="sidebar-section">
+						<h3>Wallpaper Tasks</h3>
+						<ul>
+							<li><a href="#" id="wallpaper-task-set"><img src="https://api.iconify.design/mdi/monitor-screenshot.svg" style="width:16px;height:16px;"><span>Set as Desktop Background</span></a></li>
+							<li><a href="#" id="wallpaper-task-reset"><img src="https://api.iconify.design/mdi/backup-restore.svg" style="width:16px;height:16px;"><span>Restore Default Bliss</span></a></li>
+						</ul>
+					</div>
+					<div class="sidebar-section">
+						<h3>Details</h3>
+						<div class="details-content" id="wallpaper-sidebar-details">
+							<b>${selectedWallpaperItem.name}</b>
+							${selectedWallpaperItem.filename}<br>
+							Type: WEBP Image
+						</div>
+					</div>
+				</div>
+				<div class="folder-main-content">
+					<div class="folder-content-wrapper">
+						<div class="wallpaper-grid-view" id="wallpaper-grid-container"></div>
+					</div>
+					<div class="folder-status-bar">
+						<div class="status-bar-left" id="wallpaper-status-count">${wallpapers.length} wallpaper(s)</div>
+						<div class="status-bar-right">Local Intranet</div>
+					</div>
+				</div>
+			</div>
+			<div class="wallpaper-action-footer">
+				<button class="xp-button" id="wallpaper-btn-ok">OK</button>
+				<button class="xp-button" id="wallpaper-btn-cancel">Cancel</button>
+				<button class="xp-button" id="wallpaper-btn-apply">Apply</button>
+			</div>
 		</div>
 	`;
-	const displayWindow = createXPWindow(id, title, contentHTML, 400, 350, { iconSrc: 'https://api.iconify.design/mdi/monitor-screenshot.svg' });
 
-	let selectedWallpaper = localStorage.getItem('desktopBackground') || '../assets/images/desk/windows_xp_original.jpg';
-	const wallpaperThumbnails = displayWindow.querySelectorAll('.wallpaper-thumbnail');
+	const win = createXPWindow(id, 'Wallpaper', contentHTML, 760, 540, {
+		iconSrc: 'https://img.icons8.com/fluent/48/folder-invoices.png'
+	});
+	win.querySelector('.xp-window-content').style.padding = '0';
+	win.classList.add('project-window');
 
-	wallpaperThumbnails.forEach(thumbnail => {
-		if (thumbnail.dataset.wallpaper === selectedWallpaper) {
-			thumbnail.classList.add('active');
-		}
-		thumbnail.addEventListener('click', () => {
-			wallpaperThumbnails.forEach(t => t.classList.remove('active'));
-			thumbnail.classList.add('active');
-			selectedWallpaper = thumbnail.dataset.wallpaper;
+	const gridContainer = win.querySelector('#wallpaper-grid-container');
+	const monitorPreview = win.querySelector('#wallpaper-live-monitor');
+	const detailsContainer = win.querySelector('#wallpaper-sidebar-details');
+	const applyBtn = win.querySelector('#wallpaper-btn-apply');
+	const okBtn = win.querySelector('#wallpaper-btn-ok');
+	const cancelBtn = win.querySelector('#wallpaper-btn-cancel');
+	const setTaskLink = win.querySelector('#wallpaper-task-set');
+	const resetTaskLink = win.querySelector('#wallpaper-task-reset');
+
+	function updateWallpaperSelection(item) {
+		selectedWallpaperItem = item;
+		monitorPreview.style.backgroundImage = `url('${item.path}')`;
+		detailsContainer.innerHTML = `
+			<b>${item.name}</b>
+			${item.filename}<br>
+			Type: WEBP Image
+		`;
+		gridContainer.querySelectorAll('.wallpaper-card').forEach(card => {
+			card.classList.toggle('selected', card.dataset.id === item.id);
 		});
+	}
+
+	function applyWallpaperToDesktop(item) {
+		const desktop = document.getElementById('desktop');
+		if (desktop) {
+			desktop.style.backgroundImage = `url('${item.path}')`;
+		}
+		localStorage.setItem('desktopBackground', item.path);
+		currentActiveWallpaper = item.path;
+	}
+
+	wallpapers.forEach(item => {
+		const card = document.createElement('div');
+		card.className = 'wallpaper-card';
+		card.dataset.id = item.id;
+		if (item.id === selectedWallpaperItem.id) card.classList.add('selected');
+
+		const frame = document.createElement('div');
+		frame.className = 'wallpaper-card-thumb-frame';
+
+		const img = document.createElement('img');
+		img.src = item.path;
+		img.alt = item.name;
+		img.loading = 'lazy';
+		frame.appendChild(img);
+
+		const title = document.createElement('div');
+		title.className = 'wallpaper-card-title';
+		title.textContent = item.name;
+
+		card.appendChild(frame);
+		card.appendChild(title);
+
+		card.addEventListener('click', () => {
+			updateWallpaperSelection(item);
+		});
+
+		card.addEventListener('dblclick', () => {
+			updateWallpaperSelection(item);
+			applyWallpaperToDesktop(item);
+		});
+
+		gridContainer.appendChild(card);
 	});
 
-	displayWindow.querySelector('#apply-wallpaper-btn').addEventListener('click', () => {
-		document.getElementById('desktop').style.backgroundImage = `url('${selectedWallpaper}')`;
-		localStorage.setItem('desktopBackground', selectedWallpaper);
+	applyBtn.addEventListener('click', () => {
+		applyWallpaperToDesktop(selectedWallpaperItem);
 	});
-	document.getElementById('desktop').style.backgroundImage = `url('${selectedWallpaper}')`;
+
+	okBtn.addEventListener('click', () => {
+		applyWallpaperToDesktop(selectedWallpaperItem);
+		closeWindow(win, id);
+	});
+
+	cancelBtn.addEventListener('click', () => {
+		closeWindow(win, id);
+	});
+
+	setTaskLink.addEventListener('click', (e) => {
+		e.preventDefault();
+		applyWallpaperToDesktop(selectedWallpaperItem);
+	});
+
+	resetTaskLink.addEventListener('click', (e) => {
+		e.preventDefault();
+		const defaultItem = wallpapers.find(w => w.path === DEFAULT_DESKTOP_WALLPAPER) || wallpapers[0];
+		updateWallpaperSelection(defaultItem);
+		applyWallpaperToDesktop(defaultItem);
+	});
 }
 
 function openRecycleBinWindow() {
