@@ -68,13 +68,13 @@
 								</div>
 							</div>
 							<div class="xp-start-item" data-action="open-calculator">
-								<img src="https://api.iconify.design/mdi/calculator.svg?color=%231b4b9b" class="xp-start-item-icon" alt="Calculator">
+								<img src="../assets/images/desk/icons/Calculator.webp" class="xp-start-item-icon" alt="Calculator">
 								<div class="xp-start-item-texts">
 									<span class="xp-start-title">Calculator</span>
 								</div>
 							</div>
 							<div class="xp-start-item" data-action="open-paint">
-								<img src="../assets/images/desk/icons/Camera.webp" class="xp-start-item-icon" alt="Paint">
+								<img src="../assets/images/desk/icons/Paint.webp" class="xp-start-item-icon" alt="Paint">
 								<div class="xp-start-item-texts">
 									<span class="xp-start-title">Paint</span>
 								</div>
@@ -410,11 +410,11 @@
 						if (subKey === 'accessories') {
 							nestedFlyout.innerHTML = `
 								<div class="xp-start-flyout-item" data-action="open-calculator">
-									<img src="https://api.iconify.design/mdi/calculator.svg?color=%231b4b9b" class="xp-start-item-icon" alt="">
+									<img src="../assets/images/desk/icons/Calculator.webp" class="xp-start-item-icon" alt="">
 									<span class="xp-start-title">Calculator</span>
 								</div>
 								<div class="xp-start-flyout-item" data-action="open-paint">
-									<img src="../assets/images/desk/icons/Camera.webp" class="xp-start-item-icon" alt="">
+									<img src="../assets/images/desk/icons/Paint.webp" class="xp-start-item-icon" alt="">
 									<span class="xp-start-title">Paint</span>
 								</div>
 								<div class="xp-start-flyout-item" data-action="new-text-document">

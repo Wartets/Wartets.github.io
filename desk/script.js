@@ -2196,6 +2196,15 @@ function maximizeWindow(win) {
 }
 
 function closeWindow(win, id) {
+	if (!win) return;
+	if (typeof win.beforeClose === 'function') {
+		const allowClose = win.beforeClose(() => forceCloseWindow(win, id));
+		if (allowClose === false) return;
+	}
+	forceCloseWindow(win, id);
+}
+
+function forceCloseWindow(win, id) {
 	win.classList.add('minimizing');
 	win.style.opacity = '0';
 	win.style.transform = 'scale(0.1)';
@@ -2595,7 +2604,7 @@ function openFileSystemElement(element, windowContext = null) {
 			}
 		} else if (element.readOnly && element.remoteUrl) {
 			openReadOnlyTextWindow(element);
-		} else if (lowerName.endsWith('.png') || lowerName.endsWith('.bmp') || lowerName.endsWith('.jpg') || lowerName.endsWith('.jpeg')) {
+		} else if (/\.(png|jpe?g|bmp|webp|gif)$/i.test(lowerName)) {
 			if (window.PaintApp) {
 				window.PaintApp.open(element);
 			}
@@ -2944,6 +2953,65 @@ function openTextEditorWindow(file) {
 	if (window.NotepadApp) {
 		window.NotepadApp.open(file);
 	}
+}
+
+function downloadFileSystemElement(element) {
+	if (!element) return;
+	const filename = element.name || 'download';
+	let blob = null;
+
+	if (element instanceof File) {
+		const content = element.content || '';
+		if (content.startsWith('data:')) {
+			const parts = content.split(';base64,');
+			const contentType = parts[0].split(':')[1];
+			const raw = window.atob(parts[1]);
+			const rawLength = raw.length;
+			const uInt8Array = new Uint8Array(rawLength);
+			for (let i = 0; i < rawLength; ++i) {
+				uInt8Array[i] = raw.charCodeAt(i);
+			}
+			blob = new Blob([uInt8Array], { type: contentType });
+		} else if (element.remoteUrl) {
+			const a = document.createElement('a');
+			a.href = element.remoteUrl;
+			a.download = filename;
+			a.target = '_blank';
+			document.body.appendChild(a);
+			a.click();
+			a.remove();
+			return;
+		} else {
+			blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
+		}
+	} else if (element instanceof ProjectFile) {
+		const data = JSON.stringify(element.projectData || {}, null, 2);
+		blob = new Blob([data], { type: 'application/json;charset=utf-8' });
+	}
+
+	if (blob) {
+		const url = URL.createObjectURL(blob);
+		const a = document.createElement('a');
+		a.href = url;
+		a.download = filename;
+		document.body.appendChild(a);
+		a.click();
+		a.remove();
+		setTimeout(() => URL.revokeObjectURL(url), 2000);
+	}
+}
+
+function setImageAsWallpaper(source, fitMode = 'cover') {
+	const desktop = document.getElementById('desktop');
+	if (desktop) {
+		desktop.style.backgroundImage = `url('${source}')`;
+	}
+	localStorage.setItem('desktopBackground', source);
+	if (window.SettingsApp) {
+		window.SettingsApp.set('desktopBackground', source);
+		window.SettingsApp.set('wallpaperFit', fitMode);
+	}
+	if (typeof refreshUI === 'function') refreshUI();
 }
 
 const DEFAULT_DESKTOP_WALLPAPER = '../assets/images/desk/wallpapers/wallpaper-default.webp';

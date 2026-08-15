@@ -495,6 +495,7 @@
 			const isProject = element instanceof ProjectFile;
 			const isFolder = element instanceof Folder;
 			const isFile = element instanceof File;
+			const isImage = isFile && /\.(png|jpe?g|bmp|webp|gif)$/i.test(element.name);
 
 			const openAction = () => {
 				if (isMultiple) {
@@ -511,11 +512,50 @@
 
 			const items = [
 				{
-					label: isFolder ? 'Open' : (isProject ? 'Open Project Details' : 'Open'),
+					label: isFolder ? 'Open' : (isImage ? 'Edit with Paint' : (isProject ? 'Open Project Details' : 'Open')),
 					bold: true,
+					icon: isImage ? '../assets/images/desk/icons/Paint.webp' : null,
 					action: openAction
 				}
 			];
+
+			if (isImage) {
+				items.push({
+					label: 'Set as Desktop Background',
+					submenu: [
+						{
+							label: 'Stretch / Cover',
+							action: () => {
+								if (typeof setImageAsWallpaper === 'function') setImageAsWallpaper(element.content, 'cover');
+							}
+						},
+						{
+							label: 'Tile',
+							action: () => {
+								if (typeof setImageAsWallpaper === 'function') setImageAsWallpaper(element.content, 'tile');
+							}
+						},
+						{
+							label: 'Center',
+							action: () => {
+								if (typeof setImageAsWallpaper === 'function') setImageAsWallpaper(element.content, 'center');
+							}
+						}
+					]
+				});
+			}
+
+			if (isFile || isProject) {
+				items.push({
+					label: 'Save to Local Disk (Download)...',
+					icon: 'https://api.iconify.design/mdi/download.svg?color=%231b4b9b',
+					action: () => {
+						if (typeof downloadFileSystemElement === 'function') {
+							downloadFileSystemElement(element);
+						}
+					}
+				});
+			}
 
 			if (isBat) {
 				items.push({
