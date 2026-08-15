@@ -996,14 +996,112 @@
 				];
 			}
 
+			if (trayId === 'security') {
+				return [
+					{
+						label: 'Open Windows Security Center',
+						bold: true,
+						action: () => {
+							if (window.Taskbar && window.Taskbar.showSecurityAlertsPopup) window.Taskbar.showSecurityAlertsPopup();
+						}
+					},
+					{ separator: true },
+					{
+						label: 'Security Settings...',
+						action: () => {
+							if (window.SettingsApp) window.SettingsApp.open('system');
+						}
+					}
+				];
+			}
+
+			if (trayId === 'hardware') {
+				return [
+					{
+						label: 'Safely Remove USB Mass Storage Device',
+						bold: true,
+						action: () => {
+							if (window.Taskbar && window.Taskbar.showSafelyRemoveHardwareDialog) window.Taskbar.showSafelyRemoveHardwareDialog();
+						}
+					},
+					{ separator: true },
+					{
+						label: 'Hardware Properties...',
+						action: () => {
+							if (window.SettingsApp) window.SettingsApp.open('system');
+						}
+					}
+				];
+			}
+
+			if (trayId === 'update') {
+				return [
+					{
+						label: 'Check for Updates Now',
+						bold: true,
+						action: () => {
+							if (window.Taskbar && window.Taskbar.showWindowsUpdateDialog) window.Taskbar.showWindowsUpdateDialog();
+						}
+					},
+					{ separator: true },
+					{
+						label: 'Automatic Updates Settings...',
+						action: () => {
+							if (window.SettingsApp) window.SettingsApp.open('system');
+						}
+					}
+				];
+			}
+
+			if (trayId === 'power') {
+				return [
+					{
+						label: 'Power Meter',
+						bold: true,
+						action: () => {
+							if (window.Taskbar && window.Taskbar.showPowerMeterPopup) window.Taskbar.showPowerMeterPopup();
+						}
+					},
+					{ separator: true },
+					{
+						label: 'Adjust Power Properties...',
+						action: () => {
+							if (window.SettingsApp) window.SettingsApp.open('system');
+						}
+					}
+				];
+			}
+
+			if (trayId === 'lang') {
+				const currentLang = (window.SettingsApp && window.SettingsApp.get('systemLanguage')) || 'EN';
+				return [
+					{
+						label: 'English (United States)',
+						radio: currentLang === 'EN',
+						action: () => {
+							if (window.SettingsApp) window.SettingsApp.set('systemLanguage', 'EN');
+							if (window.Taskbar && window.Taskbar.renderSystemTray) window.Taskbar.renderSystemTray();
+						}
+					},
+					{
+						label: 'Français (France)',
+						radio: currentLang === 'FR',
+						action: () => {
+							if (window.SettingsApp) window.SettingsApp.set('systemLanguage', 'FR');
+							if (window.Taskbar && window.Taskbar.renderSystemTray) window.Taskbar.renderSystemTray();
+						}
+					}
+				];
+			}
+
 			if (trayId === 'network') {
 				return [
 					{
 						label: 'Status',
 						bold: true,
 						action: () => {
-							if (typeof showXPDialog === 'function') {
-								showXPDialog('Local Area Connection', 'Status: Connected\nSpeed: 100.0 Mbps\nPackets Sent: 24,512\nPackets Received: 89,402', 'info');
+							if (window.Taskbar && window.Taskbar.showNetworkStatusDialog) {
+								window.Taskbar.showNetworkStatusDialog();
 							}
 						}
 					},

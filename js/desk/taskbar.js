@@ -49,17 +49,409 @@
 			quickLaunchEl = document.getElementById('quick-launch-bar');
 			windowsContainerEl = document.getElementById('taskbar-windows');
 			systemTrayEl = document.getElementById('taskbar-system-tray');
-			clockEl = document.getElementById('taskbar-clock');
-			trayChevronEl = document.getElementById('tray-chevron-btn');
-			trayHiddenGroupEl = document.getElementById('tray-hidden-icons');
 
 			this.loadQuickLaunchItems();
 			this.createDomElements();
 			this.renderQuickLaunch();
+			this.renderSystemTray();
 			this.bindEvents();
 			this.initClock();
 			this.updateDensity();
 			this.updateUnreadBadges();
+		},
+
+		getTrayServices() {
+			const lang = (window.SettingsApp && window.SettingsApp.get('systemLanguage')) || 'EN';
+			return [
+				{
+					id: 'security',
+					name: 'Windows Security Center',
+					icon: 'https://api.iconify.design/mdi/shield-check.svg?color=%2355aa55',
+					title: 'Your computer is protected: Firewall and Antivirus active',
+					hidden: true,
+					onClick: (e) => this.showSecurityAlertsPopup(e),
+					onContextMenu: (e) => {
+						if (window.ContextMenu) {
+							window.ContextMenu.show(window.ContextMenu.getTrayItems('security'), e.clientX, e.clientY);
+						}
+					}
+				},
+				{
+					id: 'hardware',
+					name: 'Safely Remove Hardware',
+					icon: 'https://api.iconify.design/mdi/usb.svg?color=%23ffffff',
+					title: 'Safely Remove Hardware and Eject Media',
+					hidden: true,
+					onClick: (e) => this.showSafelyRemoveHardwareDialog(e),
+					onContextMenu: (e) => {
+						if (window.ContextMenu) {
+							window.ContextMenu.show(window.ContextMenu.getTrayItems('hardware'), e.clientX, e.clientY);
+						}
+					}
+				},
+				{
+					id: 'update',
+					name: 'Automatic Updates',
+					icon: 'https://api.iconify.design/mdi/shield-sync-outline.svg?color=%23ffcc00',
+					title: 'Automatic Updates are configured and active',
+					hidden: true,
+					onClick: (e) => this.showWindowsUpdateDialog(e),
+					onContextMenu: (e) => {
+						if (window.ContextMenu) {
+							window.ContextMenu.show(window.ContextMenu.getTrayItems('update'), e.clientX, e.clientY);
+						}
+					}
+				},
+				{
+					id: 'power',
+					name: 'Power Meter',
+					icon: 'https://api.iconify.design/mdi/battery-charging.svg?color=%23ffffff',
+					title: 'On AC Power - Battery remaining: 98% (Fully Charged)',
+					hidden: true,
+					onClick: (e) => this.showPowerMeterPopup(e),
+					onContextMenu: (e) => {
+						if (window.ContextMenu) {
+							window.ContextMenu.show(window.ContextMenu.getTrayItems('power'), e.clientX, e.clientY);
+						}
+					}
+				},
+				{
+					id: 'network',
+					name: 'Local Area Connection',
+					icon: 'https://api.iconify.design/mdi/lan-connect.svg?color=%23ffffff',
+					title: 'Local Area Connection - Speed: 100.0 Mbps - Status: Connected',
+					hidden: false,
+					onClick: (e) => this.showNetworkStatusDialog(e),
+					onContextMenu: (e) => {
+						if (window.ContextMenu) {
+							window.ContextMenu.show(window.ContextMenu.getTrayItems('network'), e.clientX, e.clientY);
+						}
+					}
+				},
+				{
+					id: 'mail',
+					name: 'Outlook Express Mail Notifier',
+					icon: 'https://api.iconify.design/mdi/email-outline.svg?color=%23ffffff',
+					title: 'Outlook Express - Mail Notifications',
+					hidden: false,
+					onClick: () => {
+						if (typeof openOutlookExpress === 'function') openOutlookExpress();
+					},
+					onContextMenu: () => {
+						if (typeof openOutlookExpress === 'function') openOutlookExpress();
+					}
+				},
+				{
+					id: 'volume',
+					name: 'Volume Control',
+					icon: 'https://api.iconify.design/mdi/volume-high.svg?color=%23ffffff',
+					title: 'Volume',
+					hidden: false,
+					onClick: (e) => this.toggleVolumePopup(e),
+					onContextMenu: (e) => {
+						if (window.ContextMenu) {
+							window.ContextMenu.show(window.ContextMenu.getTrayItems('volume'), e.clientX, e.clientY);
+						}
+					}
+				},
+				{
+					id: 'lang',
+					name: 'Language Bar',
+					isTextBadge: true,
+					textBadge: lang,
+					title: `Keyboard Language: ${lang === 'FR' ? 'French (France)' : 'English (United States)'}`,
+					hidden: false,
+					onClick: () => this.toggleLanguage(),
+					onContextMenu: (e) => {
+						if (window.ContextMenu) {
+							window.ContextMenu.show(window.ContextMenu.getTrayItems('lang'), e.clientX, e.clientY);
+						}
+					}
+				},
+				{
+					id: 'clippy',
+					name: 'Clippy Assistant',
+					icon: '../assets/images/desk/clippy/idle.png',
+					title: 'MacroPof Clippy Assistant',
+					hidden: false,
+					onClick: () => {
+						if (window.ClippyAgent && window.ClippyAgent.showTip) window.ClippyAgent.showTip();
+					},
+					onContextMenu: (e) => {
+						if (window.ContextMenu) {
+							window.ContextMenu.show(window.ContextMenu.getTrayItems('clippy'), e.clientX, e.clientY);
+						}
+					}
+				}
+			];
+		},
+
+		renderSystemTray() {
+			if (!systemTrayEl) return;
+			systemTrayEl.innerHTML = '';
+
+			const chevronBtn = document.createElement('button');
+			chevronBtn.type = 'button';
+			chevronBtn.id = 'tray-chevron-btn';
+			chevronBtn.className = `tray-chevron ${isTrayExpanded ? 'expanded' : ''}`;
+			chevronBtn.title = 'Show hidden notification icons';
+			chevronBtn.innerHTML = '<span class="tray-chevron-arrow">&lt;</span>';
+			chevronBtn.addEventListener('click', (e) => {
+				e.stopPropagation();
+				this.toggleTrayExpansion();
+			});
+			systemTrayEl.appendChild(chevronBtn);
+			trayChevronEl = chevronBtn;
+
+			const hiddenGroup = document.createElement('div');
+			hiddenGroup.id = 'tray-hidden-icons';
+			hiddenGroup.className = `tray-hidden-icons ${isTrayExpanded ? '' : 'hidden'}`;
+			systemTrayEl.appendChild(hiddenGroup);
+			trayHiddenGroupEl = hiddenGroup;
+
+			const services = this.getTrayServices();
+			const config = (window.SettingsApp && window.SettingsApp.get('trayConfig')) || {};
+
+			services.forEach(srv => {
+				const srvCfg = config[srv.id] || {};
+				if (srvCfg.enabled === false) return;
+
+				const isHidden = srvCfg.hidden !== undefined ? srvCfg.hidden : srv.hidden;
+				const itemEl = document.createElement('div');
+				itemEl.className = 'tray-icon-item';
+				itemEl.id = `tray-${srv.id}-btn`;
+				itemEl.title = srv.title;
+
+				if (srv.isTextBadge) {
+					const badge = document.createElement('span');
+					badge.className = 'tray-lang-indicator';
+					badge.id = 'tray-lang-badge';
+					badge.textContent = srv.textBadge;
+					itemEl.appendChild(badge);
+				} else {
+					const img = document.createElement('img');
+					img.src = srv.icon;
+					img.alt = srv.name;
+					itemEl.appendChild(img);
+				}
+
+				if (srv.id === 'mail') {
+					const countBadge = document.createElement('span');
+					countBadge.className = 'tray-icon-badge hidden';
+					countBadge.id = 'tray-mail-count-badge';
+					itemEl.appendChild(countBadge);
+				}
+
+				if (srv.onClick) {
+					itemEl.addEventListener('click', (e) => {
+						e.stopPropagation();
+						srv.onClick(e);
+					});
+				}
+
+				if (srv.onContextMenu) {
+					itemEl.addEventListener('contextmenu', (e) => {
+						e.preventDefault();
+						e.stopPropagation();
+						srv.onContextMenu(e);
+					});
+				}
+
+				if (isHidden) {
+					hiddenGroup.appendChild(itemEl);
+				} else {
+					systemTrayEl.appendChild(itemEl);
+				}
+			});
+
+			clockEl = document.createElement('div');
+			clockEl.id = 'taskbar-clock';
+			clockEl.title = 'Date and Time';
+			clockEl.addEventListener('click', (e) => {
+				e.stopPropagation();
+				this.toggleCalendar(e);
+			});
+			clockEl.addEventListener('contextmenu', (e) => {
+				e.preventDefault();
+				e.stopPropagation();
+				if (window.ContextMenu) {
+					window.ContextMenu.show(window.ContextMenu.getTrayItems('clock'), e.clientX, e.clientY);
+				}
+			});
+			systemTrayEl.appendChild(clockEl);
+			this.initClock();
+		},
+
+		showSecurityAlertsPopup(e) {
+			const id = 'window-security-center';
+			if (document.getElementById(id)) {
+				if (typeof bringWindowToFront === 'function') bringWindowToFront(document.getElementById(id));
+				return;
+			}
+
+			const contentHTML = `
+				<div style="padding: 12px; font-family: 'Tahoma', sans-serif; font-size: 11px; display: flex; flex-direction: column; gap: 10px;">
+					<div style="display: flex; align-items: center; gap: 10px;">
+						<img src="https://api.iconify.design/mdi/shield-check.svg?color=%232e7d32" style="width: 38px; height: 38px;" alt="">
+						<div>
+							<strong>Windows Security Center</strong><br>
+							<span style="color: #2e7d32; font-weight: bold;">Your computer is fully protected</span>
+						</div>
+					</div>
+					<div class="xp-security-status-card">
+						<img src="https://api.iconify.design/mdi/firewall.svg?color=%232e7d32" alt="">
+						<div>
+							<strong>Firewall</strong><br>
+							<span>Windows Firewall is active and monitoring inbound connections.</span>
+						</div>
+					</div>
+					<div class="xp-security-status-card">
+						<img src="https://api.iconify.design/mdi/shield-sync-outline.svg?color=%232e7d32" alt="">
+						<div>
+							<strong>Automatic Updates</strong><br>
+							<span>Scheduled to automatically check and download critical fixes.</span>
+						</div>
+					</div>
+					<div class="xp-security-status-card">
+						<img src="https://api.iconify.design/mdi/virus-outline.svg?color=%232e7d32" alt="">
+						<div>
+							<strong>Virus Protection</strong><br>
+							<span>MacroPof Antivirus definition set 2002.3.1 active.</span>
+						</div>
+					</div>
+					<div style="display: flex; justify-content: flex-end;">
+						<button class="xp-button" id="sec-center-ok-btn">OK</button>
+					</div>
+				</div>
+			`;
+
+			const win = createXPWindow(id, 'Windows Security Center', contentHTML, 420, 310, {
+				iconSrc: 'https://api.iconify.design/mdi/shield-check.svg?color=%232e7d32',
+				resizable: false
+			});
+			win.querySelector('.xp-window-content').style.padding = '0';
+			win.querySelector('#sec-center-ok-btn').addEventListener('click', () => {
+				if (typeof closeWindow === 'function') closeWindow(win, id);
+			});
+		},
+
+		showSafelyRemoveHardwareDialog(e) {
+			const id = 'window-safe-remove-hw';
+			if (document.getElementById(id)) {
+				if (typeof bringWindowToFront === 'function') bringWindowToFront(document.getElementById(id));
+				return;
+			}
+
+			const contentHTML = `
+				<div style="padding: 12px; font-family: 'Tahoma', sans-serif; font-size: 11px; display: flex; flex-direction: column; gap: 8px;">
+					<div>Select the device you want to unplug or eject, and then click Stop:</div>
+					<div class="xp-hardware-list" id="hw-devices-list">
+						<div class="xp-hardware-item selected" data-device="usb1">
+							<img src="https://api.iconify.design/mdi/usb-flash-drive.svg?color=%231b4b9b" alt="">
+							<span>USB Mass Storage Device - Kingston DataTraveler 2.0 (Drive E:)</span>
+						</div>
+						<div class="xp-hardware-item" data-device="usb2">
+							<img src="https://api.iconify.design/mdi/harddisk.svg?color=%231b4b9b" alt="">
+							<span>External Portable Hard Drive (Drive F:)</span>
+						</div>
+					</div>
+					<div style="display: flex; justify-content: flex-end; gap: 6px; margin-top: 4px;">
+						<button class="xp-button" id="hw-stop-btn">Stop</button>
+						<button class="xp-button" id="hw-close-btn">Close</button>
+					</div>
+				</div>
+			`;
+
+			const win = createXPWindow(id, 'Safely Remove Hardware', contentHTML, 440, 240, {
+				iconSrc: 'https://api.iconify.design/mdi/usb.svg?color=%23ffffff',
+				resizable: false
+			});
+			win.querySelector('.xp-window-content').style.padding = '0';
+
+			const list = win.querySelector('#hw-devices-list');
+			list.querySelectorAll('.xp-hardware-item').forEach(item => {
+				item.addEventListener('click', () => {
+					list.querySelectorAll('.xp-hardware-item').forEach(i => i.classList.remove('selected'));
+					item.classList.add('selected');
+				});
+			});
+
+			win.querySelector('#hw-stop-btn').addEventListener('click', () => {
+				const selected = list.querySelector('.xp-hardware-item.selected');
+				const name = selected ? selected.querySelector('span').textContent : 'USB Device';
+				if (typeof closeWindow === 'function') closeWindow(win, id);
+				this.showBalloon('Safe To Remove Hardware', `The '${name}' device can now be safely removed from the system.`, 'https://api.iconify.design/mdi/check-circle.svg?color=%232e7d32');
+			});
+
+			win.querySelector('#hw-close-btn').addEventListener('click', () => {
+				if (typeof closeWindow === 'function') closeWindow(win, id);
+			});
+		},
+
+		showWindowsUpdateDialog(e) {
+			showXPDialog('Automatic Updates', 'Windows is up to date.\nLast checked: Today at 03:00 AM.\nNo new security updates are required.', 'info');
+		},
+
+		showPowerMeterPopup(e) {
+			showXPDialog('Power Meter', 'Power status: AC Power Online\nBattery capacity: 98% (Fully Charged)\nPower scheme: Home/Office Desk', 'info');
+		},
+
+		showNetworkStatusDialog(e) {
+			const id = 'window-net-status';
+			if (document.getElementById(id)) {
+				if (typeof bringWindowToFront === 'function') bringWindowToFront(document.getElementById(id));
+				return;
+			}
+
+			const contentHTML = `
+				<div style="padding: 12px; font-family: 'Tahoma', sans-serif; font-size: 11px; display: flex; flex-direction: column; gap: 8px;">
+					<div style="display: flex; align-items: center; gap: 8px;">
+						<img src="https://api.iconify.design/mdi/lan-connect.svg?color=%231b4b9b" style="width: 32px; height: 32px;" alt="">
+						<div>
+							<strong>Local Area Connection Status</strong><br>
+							<span>Realtek RTL8139 Family Fast Ethernet NIC</span>
+						</div>
+					</div>
+					<div class="xp-netstatus-grid">
+						<div>Status:</div><div><strong>Connected</strong></div>
+						<div>Duration:</div><div>14:32:05</div>
+						<div>Speed:</div><div>100.0 Mbps</div>
+						<div>IP Address:</div><div>192.168.1.42</div>
+						<div>Subnet Mask:</div><div>255.255.255.0</div>
+						<div>Packets Sent:</div><div id="net-pk-sent">28,419</div>
+						<div>Packets Recv:</div><div id="net-pk-recv">94,182</div>
+					</div>
+					<div style="display: flex; justify-content: flex-end; gap: 6px;">
+						<button class="xp-button" id="net-repair-btn">Repair</button>
+						<button class="xp-button" id="net-close-btn">Close</button>
+					</div>
+				</div>
+			`;
+
+			const win = createXPWindow(id, 'Local Area Connection Status', contentHTML, 360, 290, {
+				iconSrc: 'https://api.iconify.design/mdi/lan-connect.svg?color=%231b4b9b',
+				resizable: false
+			});
+			win.querySelector('.xp-window-content').style.padding = '0';
+
+			win.querySelector('#net-repair-btn').addEventListener('click', () => {
+				showXPDialog('Network Repair', 'Windows has renewed the IP address and cleared the local DNS cache.', 'info');
+			});
+
+			win.querySelector('#net-close-btn').addEventListener('click', () => {
+				if (typeof closeWindow === 'function') closeWindow(win, id);
+			});
+		},
+
+		toggleLanguage() {
+			const currentLang = (window.SettingsApp && window.SettingsApp.get('systemLanguage')) || 'EN';
+			const newLang = currentLang === 'EN' ? 'FR' : 'EN';
+			if (window.SettingsApp) {
+				window.SettingsApp.set('systemLanguage', newLang);
+			}
+			const badge = document.getElementById('tray-lang-badge');
+			if (badge) badge.textContent = newLang;
+			this.showBalloon('Language Bar', `Input locale switched to: ${newLang === 'FR' ? 'French (France)' : 'English (United States)'}`, 'https://api.iconify.design/mdi/keyboard.svg?color=%231b4b9b', 3000);
 		},
 
 		loadQuickLaunchItems() {

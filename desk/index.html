@@ -75,54 +75,48 @@
 		</div>
 	</div>
 
-	<div id="desktop" class="crt-scanlines">
-		<div id="start-menu" class="xp-start-menu hidden crt-scanlines">
-			<!-- Rendered dynamically by StartMenu Engine -->
+	<div id="screen-frame">
+		<div id="desktop" class="crt-scanlines">
+			<div id="start-menu" class="xp-start-menu hidden crt-scanlines">
+				<!-- Rendered dynamically by StartMenu Engine -->
+			</div>
+
+			<div id="project-icons-container">
+				<!-- Project icons rendered here -->
+			</div>
 		</div>
 
-		<div id="project-icons-container">
-			<!-- Project icons rendered here -->
-		</div>
-	</div>
-
-	<div id="taskbar" class="crt-scanlines">
-		<button type="button" id="taskbar-start-button" class="xp-taskbar-start">
-			<span class="xp-start-flag">
-				<img src="../assets/images/desk/window_logo.png" alt="Windows Logo" class="windows-logo">
-			</span>
-			<span class="xp-start-text">start</span>
-		</button>
-
-		<div class="quick-launch" id="quick-launch-bar"></div>
-
-		<div class="taskbar-divider"></div>
-
-		<div id="taskbar-windows">
-		</div>
-
-		<div id="taskbar-system-tray">
-			<button type="button" id="tray-chevron-btn" class="tray-chevron" title="Show hidden notification icons">
-				<span class="tray-chevron-arrow">&lt;</span>
+		<div id="taskbar" class="crt-scanlines">
+			<button type="button" id="taskbar-start-button" class="xp-taskbar-start">
+				<span class="xp-start-flag">
+					<img src="../assets/images/desk/window_logo.png" alt="Windows Logo" class="windows-logo">
+				</span>
+				<span class="xp-start-text">start</span>
 			</button>
-			<div id="tray-hidden-icons" class="tray-hidden-icons hidden">
-				<div class="tray-icon-item" id="tray-network-btn" title="Local Area Connection - Speed: 100.0 Mbps">
-					<img src="https://api.iconify.design/mdi/lan-connect.svg?color=%23ffffff" alt="Network">
-				</div>
-				<div class="tray-icon-item" id="tray-mail-btn" title="New e-mail messages" style="display: none;">
-					<img src="https://api.iconify.design/mdi/email-outline.svg?color=%23ffffff" alt="Mail">
-				</div>
+
+			<div class="quick-launch" id="quick-launch-bar"></div>
+
+			<div class="taskbar-divider"></div>
+
+			<div id="taskbar-windows">
 			</div>
-			<div class="tray-icon-item" id="tray-volume-btn" title="Volume">
-				<img src="https://api.iconify.design/mdi/volume-high.svg?color=%23ffffff" alt="Volume">
+
+			<div id="taskbar-system-tray">
+				<!-- System tray rendered dynamically by Taskbar Engine -->
 			</div>
-			<div id="clippy-taskbar-icon" class="tray-icon-item clippy-taskbar-icon" title="MacroPof Clippy Assistant">
-				<img src="../assets/images/desk/clippy/idle.png" alt="Clippy" id="clippy-taskbar-img">
-			</div>
-			<div id="taskbar-clock" title="Date and Time"></div>
 		</div>
+
+		<div id="window-area"></div>
 	</div>
 
-	<div id="window-area"></div>
+	<svg id="crt-svg-engine" style="position: absolute; width: 0; height: 0; overflow: hidden; pointer-events: none;" aria-hidden="true">
+		<defs>
+			<filter id="crt-barrel-filter" x="-10%" y="-10%" width="120%" height="120%">
+				<feImage id="crt-displacement-map-image" result="dispMap" />
+				<feDisplacementMap id="crt-displacement-node" in="SourceGraphic" in2="dispMap" scale="0" xChannelSelector="R" yChannelSelector="G" />
+			</filter>
+		</defs>
+	</svg>
 
 	<script src="../data/projects.js"></script>
 	<script src="../data/library.js"></script>

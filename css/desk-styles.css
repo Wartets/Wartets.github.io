@@ -505,6 +505,70 @@ body.wallpaper-fit-tile #desktop {
 	background-position: top left !important;
 }
 
+.crt-preview-box {
+	height: 90px;
+	background: #000000;
+	border: 2px inset #ffffff;
+	border-radius: 4px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	position: relative;
+	overflow: hidden;
+	margin-bottom: 8px;
+}
+
+.crt-preview-screen {
+	width: 110px;
+	height: 75px;
+	background: linear-gradient(135deg, #1f4b9b, #3b88fd);
+	border: 1px solid #73b3ff;
+	border-radius: var(--crt-preview-radius, 8px);
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	box-shadow: inset 0 0 15px rgba(0, 0, 0, 0.6), 0 0 8px rgba(59, 136, 253, 0.5);
+	position: relative;
+	color: #ffffff;
+	font-size: 9px;
+	font-family: 'Tahoma', sans-serif;
+	transition: border-radius 0.15s ease;
+}
+
+.crt-preview-screen::before {
+	content: "";
+	position: absolute;
+	inset: 0;
+	background: radial-gradient(ellipse at center, rgba(255,255,255,0.2) 0%, rgba(0,0,0,0.5) 100%);
+	pointer-events: none;
+	border-radius: inherit;
+}
+
+.settings-tray-config-grid {
+	display: grid;
+	grid-template-columns: repeat(2, 1fr);
+	gap: 6px;
+	max-height: 140px;
+	overflow-y: auto;
+	background: #ffffff;
+	border: 1px solid var(--xp-border-dark);
+	padding: 6px;
+}
+
+.settings-tray-item-row {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	font-size: 11px;
+}
+
+.settings-tray-item-row img {
+	width: 16px;
+	height: 16px;
+	object-fit: contain;
+}
+
 body.anim-fast .xp-window.opening,
 body.anim-fast .xp-window.minimizing,
 body.anim-fast .xp-window.maximizing {

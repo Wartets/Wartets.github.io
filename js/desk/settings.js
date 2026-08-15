@@ -34,6 +34,12 @@
 		scanlinesIntensity: 0.85,
 		vignetteEnabled: true,
 		crtFlicker: false,
+		crtAspectRatio: 'fullscreen',
+		crtCurvatureEnabled: false,
+		crtCurvatureAmount: 0.18,
+		crtCornerRadius: 14,
+		crtPhosphorGlow: 0.25,
+		crtBezelColor: '#161616',
 		windowAnimations: true,
 		animationSpeed: 'normal',
 		showClockSeconds: true,
@@ -57,7 +63,20 @@
 		showFileExtensions: true,
 		doubleClickSpeed: 400,
 		startMenuRecentDocs: true,
-		startMenuSmallIcons: false
+		startMenuSmallIcons: false,
+		systemLanguage: 'EN',
+		trayConfig: {
+			security: { enabled: true, hidden: true },
+			hardware: { enabled: true, hidden: true },
+			update: { enabled: true, hidden: true },
+			power: { enabled: true, hidden: true },
+			network: { enabled: true, hidden: false },
+			mail: { enabled: true, hidden: false },
+			volume: { enabled: true, hidden: false },
+			lang: { enabled: true, hidden: false },
+			clippy: { enabled: true, hidden: false },
+			clock: { enabled: true, hidden: false }
+		}
 	};
 
 	let currentSettings = { ...DEFAULT_SETTINGS };
@@ -238,6 +257,70 @@
 		}
 	}
 
+	function generateDisplacementMapURI(width = 256, height = 256) {
+		const canvas = document.createElement('canvas');
+		canvas.width = width;
+		canvas.height = height;
+		const ctx = canvas.getContext('2d');
+		const imgData = ctx.createImageData(width, height);
+		const data = imgData.data;
+
+		const cx = width / 2;
+		const cy = height / 2;
+		const maxR = Math.sqrt(cx * cx + cy * cy);
+
+		for (let y = 0; y < height; y++) {
+			for (let x = 0; x < width; x++) {
+				const idx = (y * width + x) * 4;
+				const nx = (x - cx) / cx;
+				const ny = (y - cy) / cy;
+				const r = Math.sqrt(nx * nx + ny * ny);
+				const distortion = 1 + 0.35 * (r * r);
+
+				const targetX = nx * distortion;
+				const targetY = ny * distortion;
+
+				const shiftX = (targetX - nx) * 0.5;
+				const shiftY = (targetY - ny) * 0.5;
+
+				const rVal = Math.min(255, Math.max(0, Math.round(128 + shiftX * 127)));
+				const gVal = Math.min(255, Math.max(0, Math.round(128 + shiftY * 127)));
+
+				data[idx] = rVal;
+				data[idx + 1] = gVal;
+				data[idx + 2] = 128;
+				data[idx + 3] = 255;
+			}
+		}
+
+		ctx.putImageData(imgData, 0, 0);
+		return canvas.toDataURL();
+	}
+
+	function updateCRTFilters() {
+		const displacementNode = document.getElementById('crt-displacement-node');
+		const displacementImage = document.getElementById('crt-displacement-map-image');
+
+		if (currentSettings.crtCurvatureEnabled && currentSettings.crtCurvatureAmount > 0) {
+			document.body.classList.add('crt-curvature-active');
+			document.body.style.setProperty('--crt-corner-radius', `${currentSettings.crtCornerRadius || 14}px`);
+			document.body.style.setProperty('--crt-bezel-color', currentSettings.crtBezelColor || '#161616');
+
+			if (displacementNode && displacementImage) {
+				const scaleVal = Math.round(currentSettings.crtCurvatureAmount * 55);
+				displacementNode.setAttribute('scale', String(scaleVal));
+				if (!displacementImage.getAttribute('href') && !displacementImage.getAttribute('xlink:href')) {
+					const uri = generateDisplacementMapURI();
+					displacementImage.setAttribute('href', uri);
+				}
+				document.body.classList.toggle('crt-filter-applied', scaleVal > 0);
+			}
+		} else {
+			document.body.classList.remove('crt-curvature-active', 'crt-filter-applied');
+			if (displacementNode) displacementNode.setAttribute('scale', '0');
+		}
+	}
+
 	function applyAllSettings() {
 		document.body.classList.remove('theme-luna-blue', 'theme-royale', 'theme-silver', 'theme-olive', 'theme-classic', 'theme-zune');
 		const themeClass = currentSettings.theme === 'default' ? 'theme-luna-blue' : (currentSettings.theme.startsWith('theme-') ? currentSettings.theme : `theme-${currentSettings.theme}`);
@@ -271,6 +354,19 @@
 			desktop.classList.toggle('crt-effect', !!currentSettings.vignetteEnabled);
 		}
 		document.body.classList.toggle('crt-flicker', !!currentSettings.crtFlicker);
+
+		document.body.classList.remove('crt-aspect-4-3', 'crt-res-1024x768', 'crt-res-800x600', 'crt-res-640x480');
+		if (currentSettings.crtAspectRatio === '4-3-auto') {
+			document.body.classList.add('crt-aspect-4-3');
+		} else if (currentSettings.crtAspectRatio === '1024x768') {
+			document.body.classList.add('crt-res-1024x768');
+		} else if (currentSettings.crtAspectRatio === '800x600') {
+			document.body.classList.add('crt-res-800x600');
+		} else if (currentSettings.crtAspectRatio === '640x480') {
+			document.body.classList.add('crt-res-640x480');
+		}
+
+		updateCRTFilters();
 
 		document.body.classList.toggle('no-window-animations', !currentSettings.windowAnimations);
 		document.body.classList.remove('anim-fast', 'anim-slow');
@@ -320,6 +416,9 @@
 		if (window.StartMenu && typeof window.StartMenu.updateProfile === 'function') {
 			window.StartMenu.updateProfile();
 			window.StartMenu.updateLiveBadges();
+		}
+		if (window.Taskbar && typeof window.Taskbar.renderSystemTray === 'function') {
+			window.Taskbar.renderSystemTray();
 		}
 		if (window.Taskbar && typeof window.Taskbar.updateDensity === 'function') {
 			window.Taskbar.updateDensity();
@@ -516,40 +615,71 @@
 					</div>
 
 					<div class="xp-tab-page" data-page="effects">
+						<div class="crt-preview-box">
+							<div class="crt-preview-screen" id="settings-crt-screen-preview">
+								<span>CRT MONITOR</span>
+								<span style="font-size: 8px; opacity: 0.8;">4:3 Display</span>
+							</div>
+						</div>
+
 						<fieldset class="xp-groupbox">
-							<legend>Cathode Ray Tube (CRT) Display Simulation</legend>
-							<div class="xp-checkbox-row">
-								<input type="checkbox" id="settings-scanlines-toggle" ${pendingSettings.scanlinesEnabled ? 'checked' : ''}>
-								<label for="settings-scanlines-toggle">Enable scanlines overlay simulation</label>
-							</div>
-							<div class="xp-form-row" style="margin-top: 8px;">
-								<label for="settings-scanlines-slider">Scanline Intensity:</label>
-								<input type="range" id="settings-scanlines-slider" min="0.2" max="1" step="0.05" value="${pendingSettings.scanlinesIntensity}" class="xp-slider">
-								<span id="settings-scanlines-val" style="font-size: 11px; width: 35px;">${Math.round(pendingSettings.scanlinesIntensity * 100)}%</span>
-							</div>
-							<div class="xp-checkbox-row" style="margin-top: 8px;">
-								<input type="checkbox" id="settings-vignette-toggle" ${pendingSettings.vignetteEnabled ? 'checked' : ''}>
-								<label for="settings-vignette-toggle">Simulate CRT screen curvature and vignette darkening</label>
-							</div>
-							<div class="xp-checkbox-row" style="margin-top: 8px;">
-								<input type="checkbox" id="settings-crt-flicker-toggle" ${pendingSettings.crtFlicker ? 'checked' : ''}>
-								<label for="settings-crt-flicker-toggle">Simulate 60Hz cathode ray tube phosphor flicker</label>
+							<legend>CRT Monitor Aspect Ratio & Letterboxing</legend>
+							<div class="xp-form-row">
+								<label for="settings-aspect-ratio-select" style="width: 140px;">Screen Geometry:</label>
+								<select id="settings-aspect-ratio-select" class="xp-select" style="flex: 1;">
+									<option value="fullscreen">Full Viewport (Widescreen Stretch / Modern) [Default]</option>
+									<option value="4-3-auto">4:3 Aspect Ratio (Responsive Pillarbox / Black Bars)</option>
+									<option value="1024x768">4:3 Fixed Resolution (1024 x 768 CRT Native)</option>
+									<option value="800x600">4:3 Fixed Resolution (800 x 600 SVGA Classic)</option>
+									<option value="640x480">4:3 Fixed Resolution (640 x 480 VGA Retro)</option>
+								</select>
 							</div>
 						</fieldset>
 
 						<fieldset class="xp-groupbox" style="margin-top: 8px;">
-							<legend>Window Transitions & Performance</legend>
+							<legend>CRT Glass Curvature & Barrel Distortion</legend>
 							<div class="xp-checkbox-row">
-								<input type="checkbox" id="settings-anim-toggle" ${pendingSettings.windowAnimations ? 'checked' : ''}>
-								<label for="settings-anim-toggle">Animate windows when minimizing, maximizing and opening</label>
+								<input type="checkbox" id="settings-crt-curvature-toggle" ${pendingSettings.crtCurvatureEnabled ? 'checked' : ''}>
+								<label for="settings-crt-curvature-toggle">Enable optical spherical CRT glass curvature and barrel distortion</label>
 							</div>
 							<div class="xp-form-row" style="margin-top: 6px;">
-								<label for="settings-anim-speed">Animation Speed:</label>
-								<select id="settings-anim-speed" class="xp-select">
-									<option value="fast">Fast (Smooth 120ms)</option>
-									<option value="normal">Normal (Classic XP 250ms)</option>
-									<option value="slow">Slow Motion (500ms)</option>
+								<label for="settings-curvature-slider" style="width: 140px;">Curvature Intensity:</label>
+								<input type="range" id="settings-curvature-slider" min="0.05" max="0.5" step="0.02" value="${pendingSettings.crtCurvatureAmount}" class="xp-slider">
+								<span id="settings-curvature-val" style="font-size: 11px; width: 35px;">${Math.round(pendingSettings.crtCurvatureAmount * 100)}%</span>
+							</div>
+							<div class="xp-form-row" style="margin-top: 6px;">
+								<label for="settings-corner-radius-slider" style="width: 140px;">Glass Corner Radius:</label>
+								<input type="range" id="settings-corner-radius-slider" min="0" max="32" step="2" value="${pendingSettings.crtCornerRadius}" class="xp-slider">
+								<span id="settings-corner-radius-val" style="font-size: 11px; width: 35px;">${pendingSettings.crtCornerRadius}px</span>
+							</div>
+							<div class="xp-form-row" style="margin-top: 6px;">
+								<label for="settings-bezel-color-select" style="width: 140px;">Bezel Enclosure:</label>
+								<select id="settings-bezel-color-select" class="xp-select" style="flex: 1;">
+									<option value="#161616">Charcoal Black (Sony Trinitron)</option>
+									<option value="#d4cbba">Vintage Beige (IBM / Compaq)</option>
+									<option value="#2a323d">Dark Slate (Dell UltraScan)</option>
 								</select>
+							</div>
+						</fieldset>
+
+						<fieldset class="xp-groupbox" style="margin-top: 8px;">
+							<legend>Phosphor Scanlines & Shaders</legend>
+							<div class="xp-checkbox-row">
+								<input type="checkbox" id="settings-scanlines-toggle" ${pendingSettings.scanlinesEnabled ? 'checked' : ''}>
+								<label for="settings-scanlines-toggle">Enable scanlines overlay simulation</label>
+							</div>
+							<div class="xp-form-row" style="margin-top: 6px;">
+								<label for="settings-scanlines-slider" style="width: 140px;">Scanline Opacity:</label>
+								<input type="range" id="settings-scanlines-slider" min="0.2" max="1" step="0.05" value="${pendingSettings.scanlinesIntensity}" class="xp-slider">
+								<span id="settings-scanlines-val" style="font-size: 11px; width: 35px;">${Math.round(pendingSettings.scanlinesIntensity * 100)}%</span>
+							</div>
+							<div class="xp-checkbox-row" style="margin-top: 6px;">
+								<input type="checkbox" id="settings-vignette-toggle" ${pendingSettings.vignetteEnabled ? 'checked' : ''}>
+								<label for="settings-vignette-toggle">Simulate CRT screen curvature and vignette darkening</label>
+							</div>
+							<div class="xp-checkbox-row" style="margin-top: 6px;">
+								<input type="checkbox" id="settings-crt-flicker-toggle" ${pendingSettings.crtFlicker ? 'checked' : ''}>
+								<label for="settings-crt-flicker-toggle">Simulate 60Hz cathode ray tube phosphor flicker</label>
 							</div>
 						</fieldset>
 					</div>
@@ -956,6 +1086,55 @@
 			fontScaleSelect.value = pendingSettings.fontScale || 'normal';
 			fontScaleSelect.addEventListener('change', () => {
 				pendingSettings.fontScale = fontScaleSelect.value;
+				markDirty(win);
+			});
+		}
+
+		const aspectSelect = win.querySelector('#settings-aspect-ratio-select');
+		const crtCurvatureToggle = win.querySelector('#settings-crt-curvature-toggle');
+		const curvatureSlider = win.querySelector('#settings-curvature-slider');
+		const curvatureVal = win.querySelector('#settings-curvature-val');
+		const cornerSlider = win.querySelector('#settings-corner-radius-slider');
+		const cornerVal = win.querySelector('#settings-corner-radius-val');
+		const bezelSelect = win.querySelector('#settings-bezel-color-select');
+		const crtScreenPreview = win.querySelector('#settings-crt-screen-preview');
+
+		if (aspectSelect) {
+			aspectSelect.value = pendingSettings.crtAspectRatio || 'fullscreen';
+			aspectSelect.addEventListener('change', () => {
+				pendingSettings.crtAspectRatio = aspectSelect.value;
+				markDirty(win);
+			});
+		}
+
+		if (crtCurvatureToggle) {
+			crtCurvatureToggle.addEventListener('change', () => {
+				pendingSettings.crtCurvatureEnabled = crtCurvatureToggle.checked;
+				markDirty(win);
+			});
+		}
+
+		if (curvatureSlider) {
+			curvatureSlider.addEventListener('input', () => {
+				pendingSettings.crtCurvatureAmount = parseFloat(curvatureSlider.value);
+				if (curvatureVal) curvatureVal.textContent = `${Math.round(pendingSettings.crtCurvatureAmount * 100)}%`;
+				markDirty(win);
+			});
+		}
+
+		if (cornerSlider) {
+			cornerSlider.addEventListener('input', () => {
+				pendingSettings.crtCornerRadius = parseInt(cornerSlider.value, 10);
+				if (cornerVal) cornerVal.textContent = `${pendingSettings.crtCornerRadius}px`;
+				if (crtScreenPreview) crtScreenPreview.style.setProperty('--crt-preview-radius', `${pendingSettings.crtCornerRadius / 2}px`);
+				markDirty(win);
+			});
+		}
+
+		if (bezelSelect) {
+			bezelSelect.value = pendingSettings.crtBezelColor || '#161616';
+			bezelSelect.addEventListener('change', () => {
+				pendingSettings.crtBezelColor = bezelSelect.value;
 				markDirty(win);
 			});
 		}
