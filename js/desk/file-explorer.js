@@ -1374,6 +1374,8 @@
 				});
 
 				label.addEventListener('click', () => {
+					treeContainer.querySelectorAll('.xp-tree-label').forEach(l => l.classList.remove('active'));
+					label.classList.add('active');
 					this.navigateTo(folder, win, true);
 				});
 

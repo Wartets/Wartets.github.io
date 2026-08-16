@@ -109,6 +109,13 @@ class File extends Element {
 		}
 	}
 
+	rename(newName) {
+		super.rename(newName);
+		if (window.ShellAssociations) {
+			this.icon = window.ShellAssociations.getIcon(this);
+		}
+	}
+
 	copy() {
 		const newFile = new File(this.name, null, this.content);
 		newFile.createdAt = new Date(this.createdAt);
@@ -807,26 +814,26 @@ window.DeskAPI = {
 		if (typeof projects === 'undefined') return [];
 		return projects.flat().filter(p => p && typeof p === 'object' && p.show !== false);
 	},
-	openMailApp: () => openOutlookExpress(),
-	openProjectsFolder: () => openAllProjectsFolder(),
-	openRecycleBin: () => openRecycleBinWindow(),
-	openCalculator: () => (window.CalculatorApp ? window.CalculatorApp.open() : openCalculator()),
-	openCharacterMap: () => (window.CharacterMapApp ? window.CharacterMapApp.open() : null),
-	openPaint: (file) => (window.PaintApp ? window.PaintApp.open(file) : openPaint(file)),
-	openSoundRecorder: (file) => (window.SoundRecorderApp ? window.SoundRecorderApp.open(file) : null),
-	openMinesweeperGame: () => (window.MinesweeperApp ? window.MinesweeperApp.open() : openMinesweeper()),
-	openSolitaireGame: () => (window.SolitaireApp ? window.SolitaireApp.open() : openSolitaire()),
-	openWinampPlayer: () => openWinamp(),
+	openMailApp: () => (window.DeskAppRegistry ? window.DeskAppRegistry.launch('outlook') : openOutlookExpress()),
+	openProjectsFolder: () => (window.DeskAppRegistry ? window.DeskAppRegistry.launch('projects') : openAllProjectsFolder()),
+	openRecycleBin: () => (window.DeskAppRegistry ? window.DeskAppRegistry.launch('recyclebin') : openRecycleBinWindow()),
+	openCalculator: () => (window.DeskAppRegistry ? window.DeskAppRegistry.launch('calculator') : (window.CalculatorApp ? window.CalculatorApp.open() : openCalculator())),
+	openCharacterMap: () => (window.DeskAppRegistry ? window.DeskAppRegistry.launch('charmap') : (window.CharacterMapApp ? window.CharacterMapApp.open() : null)),
+	openPaint: (file) => (window.DeskAppRegistry ? window.DeskAppRegistry.launch('paint', file) : (window.PaintApp ? window.PaintApp.open(file) : openPaint(file))),
+	openSoundRecorder: (file) => (window.DeskAppRegistry ? window.DeskAppRegistry.launch('soundrecorder', file) : (window.SoundRecorderApp ? window.SoundRecorderApp.open(file) : null)),
+	openMinesweeperGame: () => (window.DeskAppRegistry ? window.DeskAppRegistry.launch('minesweeper') : (window.MinesweeperApp ? window.MinesweeperApp.open() : openMinesweeper())),
+	openSolitaireGame: () => (window.DeskAppRegistry ? window.DeskAppRegistry.launch('solitaire') : (window.SolitaireApp ? window.SolitaireApp.open() : openSolitaire())),
+	openWinampPlayer: () => (window.DeskAppRegistry ? window.DeskAppRegistry.launch('winamp') : openWinamp()),
 	getMoonPhaseDay: () => (typeof getMoonPhaseDayNumber === 'function') ? getMoonPhaseDayNumber() : null,
 	getRecycleBinCount: () => (typeof fs !== 'undefined' && fs) ? fs.loadRecycleBinItems().length : 0,
 	addToRecentDocs: (item) => addToRecentDocs(item),
 	getRecentDocs: () => getRecentDocs(),
 	clearRecentDocs: () => clearRecentDocs(),
-	openMyComputer: () => openMyComputerWindow(),
-	openSearch: (query) => openSearchWindow(query),
-	openPrinters: () => openPrintersWindow(),
-	openNetworkPlaces: () => openNetworkPlacesWindow(),
-	openDisplaySettings: () => openDisplaySettings(),
+	openMyComputer: () => (window.DeskAppRegistry ? window.DeskAppRegistry.launch('mycomputer') : openMyComputerWindow()),
+	openSearch: (query) => (window.DeskAppRegistry ? window.DeskAppRegistry.launch('search', { query }) : openSearchWindow(query)),
+	openPrinters: () => (window.DeskAppRegistry ? window.DeskAppRegistry.launch('printers') : openPrintersWindow()),
+	openNetworkPlaces: () => (window.DeskAppRegistry ? window.DeskAppRegistry.launch('network') : openNetworkPlacesWindow()),
+	openDisplaySettings: () => (window.DeskAppRegistry ? window.DeskAppRegistry.launch('display') : openDisplaySettings()),
 	openAchievements: (targetId = null) => {
 		if (window.AchievementsManager) return window.AchievementsManager.open(targetId);
 	},
@@ -879,6 +886,19 @@ document.addEventListener('DOMContentLoaded', () => {
 	setInterval(updateOutlookUnreadBadge, 60000);
 	if (window.ClippyAgent) window.ClippyAgent.init();
 
+	if (window.DeskEventBus) {
+		window.DeskEventBus.on('fs:changed', () => refreshUI());
+		window.DeskEventBus.on('window:focused', (payload) => {
+			activeWindow = payload.win;
+		});
+		window.DeskEventBus.on('window:closed', () => {
+			if (window.WindowManager) {
+				activeWindow = window.WindowManager.activeWindow;
+				openWindows = window.WindowManager.windows;
+			}
+		});
+	}
+
 	const bootScreen = document.getElementById('boot-screen');
 	const welcomeScreen = document.getElementById('welcome-screen');
 	const loginUser = document.getElementById('login-user');
@@ -903,17 +923,21 @@ document.addEventListener('DOMContentLoaded', () => {
 		bootLogo.title = 'Click to skip startup';
 		bootLogo.addEventListener('click', skipStartup);
 	}
-	
-	bootTimeout = setTimeout(() => {
-		if (bootScreen.style.display !== 'none') {
-			bootScreen.style.display = 'none';
-			welcomeScreen.classList.remove('hidden');
 
-			loginTimeout = setTimeout(() => {
-				if (loginUser && welcomeScreen.style.display !== 'none') loginUser.click();
-			}, 1500);
-		}
-	}, 3000);
+	if (window.SettingsApp && window.SettingsApp.get('skipBootScreen')) {
+		skipStartup();
+	} else {
+		bootTimeout = setTimeout(() => {
+			if (bootScreen.style.display !== 'none') {
+				bootScreen.style.display = 'none';
+				welcomeScreen.classList.remove('hidden');
+
+				loginTimeout = setTimeout(() => {
+					if (loginUser && welcomeScreen.style.display !== 'none') loginUser.click();
+				}, 1500);
+			}
+		}, 3000);
+	}
 
 	if (loginUser) {
 		loginUser.addEventListener('click', () => {
@@ -1436,14 +1460,17 @@ function createIconElement(data, dblClickHandler) {
 	return icon;
 }
 
-function handleIconContextMenu(e, icon, project) {
+function handleIconContextMenu(e, icon, element) {
 	e.preventDefault();
+	e.stopPropagation();
 	clearIconSelections();
 	icon.classList.add('selected');
 	selectedIcons.add(icon);
 	currentContextMenuTarget = icon;
-	showContextMenu(e);
-	updateContextMenuItems(icon);
+	if (window.ContextMenu && element) {
+		const items = window.ContextMenu.getIconItems(element, icon, icon.closest('.xp-window'));
+		window.ContextMenu.show(items, e.clientX, e.clientY, { element, icon });
+	}
 }
 
 function handleIconClick(e, icon) {
@@ -1496,8 +1523,8 @@ function handleIconClick(e, icon) {
 
 function updateFolderUISelection(win) {
 	if (!win) return;
-	if (win.classList.contains('xp-explorer-window') && window.FileExplorer && typeof window.FileExplorer.updateSelectionState === 'function') {
-		window.FileExplorer.updateSelectionState(win);
+	if (win.classList.contains('xp-explorer-window') && window.FileExplorer && typeof window.FileExplorer.updateSelectionDetails === 'function') {
+		window.FileExplorer.updateSelectionDetails(win);
 		return;
 	}
 	const content = win.querySelector('.folder-content, .folder-content-wrapper, .xp-explorer-view-container');
@@ -1521,7 +1548,7 @@ function openFolderWindow(folder) {
 }
 
 function clearIconSelections() {
-	document.querySelectorAll('.project-icon.selected').forEach(selectedIcon => {
+	document.querySelectorAll('.project-icon.selected, .xp-explorer-item.selected, .xp-details-row.selected').forEach(selectedIcon => {
 		selectedIcon.classList.remove('selected');
 	});
 	selectedIcons.clear();
@@ -2530,13 +2557,19 @@ function setupDesktopContextMenu() {
 
 function openFileSystemElement(element, windowContext = null) {
 	if (!element) return;
+	let targetElement = element;
+	if (typeof element === 'string' && fs) {
+		targetElement = fs.findByPath(element);
+	}
+	if (!targetElement) return;
+
 	if (window.ShellAssociations) {
-		window.ShellAssociations.open(element, windowContext);
+		window.ShellAssociations.open(targetElement, windowContext);
 	} else {
-		if (element instanceof Folder && window.FileExplorer) {
-			window.FileExplorer.open(element);
-		} else if (element instanceof File && window.NotepadApp) {
-			window.NotepadApp.open(element);
+		if (targetElement instanceof Folder && window.FileExplorer) {
+			window.FileExplorer.open(targetElement);
+		} else if (targetElement instanceof File && window.NotepadApp) {
+			window.NotepadApp.open(targetElement);
 		}
 	}
 }
@@ -3432,8 +3465,8 @@ function processRunCommand(command) {
 	}
 
 	if (lowerCmd.startsWith('www.') || lowerCmd.startsWith('http://') || lowerCmd.startsWith('https://') || lowerCmd.endsWith('.com') || lowerCmd.endsWith('.org') || lowerCmd.endsWith('.net')) {
-		if (window.InternetExplorerApp) {
-			window.InternetExplorerApp.open(cmd);
+		if (window.DeskAppRegistry) {
+			window.DeskAppRegistry.launch('ie', cmd);
 		} else if (typeof openInternetExplorer === 'function') {
 			openInternetExplorer(cmd);
 		}
@@ -3445,26 +3478,12 @@ function processRunCommand(command) {
 		return;
 	}
 
-	if (lowerCmd === 'cmd' || lowerCmd === 'command') {
-		if (window.CommandPrompt) {
-			window.CommandPrompt.open();
+	if (fs && fs.exists(cmd)) {
+		const el = fs.findByPath(cmd);
+		if (el) {
+			openFileSystemElement(el);
 			return;
 		}
-		const id = `window-cmd-${Date.now()}`;
-		const content = `
-			<div style="background-color: black; color: white; font-family: 'Consolas', 'Lucida Console', monospace; height: 100%; padding: 5px; overflow-y: auto;">
-				<div>Mircosoft Windows XP [Version 5.1.5627]</div>
-				<div>(C) Copyright 1985-2001 Mircosoft Corp.</div>
-				<br>
-				<div>C:\\Documents\\Wartets>${command}</div>
-				<br>
-				<div>'${command}' is not recognized as an internal or external command,<br>operable program or batch file.</div>
-				<br>
-				<div>C:\\Documents\\Wartets><span class="cursor">_</span></div>
-			</div>
-		`;
-		createXPWindow(id, 'C:\\WINDOWS\\system32\\cmd.exe', content, 600, 350, { iconSrc: 'https://api.iconify.design/mdi/console.svg' });
-		return;
 	}
 
 	showXPDialog(command, `Cannot find '${command}'. Make sure you typed the name correctly, and then try again.`, 'error');

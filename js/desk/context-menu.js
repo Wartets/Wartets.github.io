@@ -404,19 +404,53 @@
 					label: 'View',
 					submenu: [
 						{
-							label: 'Icons',
-							radio: (win.dataset.viewMode || 'icons') === 'icons',
+							label: 'Thumbnails',
+							radio: win.explorerState?.viewMode === 'thumbnails',
 							action: () => {
-								win.dataset.viewMode = 'icons';
-								renderFolderContent(folder, win.querySelector('.folder-content'), win);
+								if (win.explorerState && window.FileExplorer) {
+									win.explorerState.viewMode = 'thumbnails';
+									window.FileExplorer.updateView(win, true);
+								}
+							}
+						},
+						{
+							label: 'Tiles',
+							radio: win.explorerState?.viewMode === 'tiles',
+							action: () => {
+								if (win.explorerState && window.FileExplorer) {
+									win.explorerState.viewMode = 'tiles';
+									window.FileExplorer.updateView(win, true);
+								}
+							}
+						},
+						{
+							label: 'Icons',
+							radio: (win.explorerState?.viewMode || 'icons') === 'icons',
+							action: () => {
+								if (win.explorerState && window.FileExplorer) {
+									win.explorerState.viewMode = 'icons';
+									window.FileExplorer.updateView(win, true);
+								}
+							}
+						},
+						{
+							label: 'List',
+							radio: win.explorerState?.viewMode === 'list',
+							action: () => {
+								if (win.explorerState && window.FileExplorer) {
+									win.explorerState.viewMode = 'list';
+									window.FileExplorer.updateView(win, true);
+								}
 							}
 						},
 						{
 							label: 'Details',
-							radio: win.dataset.viewMode === 'details',
+							radio: win.explorerState?.viewMode === 'details',
 							action: () => {
-								win.dataset.viewMode = 'details';
-								renderFolderContent(folder, win.querySelector('.folder-content'), win);
+								if (win.explorerState && window.FileExplorer) {
+									win.explorerState.viewMode = 'details';
+									window.FileExplorer.updateView(win, true);
+								}
 							}
 						}
 					]
@@ -426,15 +460,39 @@
 					submenu: [
 						{
 							label: 'Name',
-							action: () => renderFolderContent(folder, win.querySelector('.folder-content'), win)
+							action: () => {
+								if (win.explorerState && window.FileExplorer) {
+									win.explorerState.sortBy = 'name';
+									window.FileExplorer.updateView(win, true);
+								}
+							}
 						},
 						{
 							label: 'Date',
-							action: () => renderFolderContent(folder, win.querySelector('.folder-content'), win)
+							action: () => {
+								if (win.explorerState && window.FileExplorer) {
+									win.explorerState.sortBy = 'date';
+									window.FileExplorer.updateView(win, true);
+								}
+							}
 						},
 						{
 							label: 'Type',
-							action: () => renderFolderContent(folder, win.querySelector('.folder-content'), win)
+							action: () => {
+								if (win.explorerState && window.FileExplorer) {
+									win.explorerState.sortBy = 'type';
+									window.FileExplorer.updateView(win, true);
+								}
+							}
+						},
+						{
+							label: 'Size',
+							action: () => {
+								if (win.explorerState && window.FileExplorer) {
+									win.explorerState.sortBy = 'size';
+									window.FileExplorer.updateView(win, true);
+								}
+							}
 						}
 					]
 				},
@@ -442,7 +500,11 @@
 					label: 'Refresh',
 					shortcut: 'F5',
 					icon: 'https://api.iconify.design/mdi/refresh.svg',
-					action: () => renderFolderContent(folder, win.querySelector('.folder-content'), win)
+					action: () => {
+						if (win.explorerState && window.FileExplorer) {
+							window.FileExplorer.updateView(win, true);
+						}
+					}
 				},
 				{ separator: true },
 				{
@@ -481,9 +543,13 @@
 					action: () => {
 						const container = win.querySelector('.folder-content');
 						if (container) {
-							container.querySelectorAll('.project-icon').forEach(icon => {
+							const items = container.querySelectorAll('.project-icon, .xp-explorer-item, .xp-details-row');
+							items.forEach(icon => {
 								icon.classList.add('selected');
 								selectedIcons.add(icon);
+								if (win.explorerState && win.explorerState.selectedItems) {
+									win.explorerState.selectedItems.add(icon);
+								}
 							});
 							updateFolderUISelection(win);
 						}

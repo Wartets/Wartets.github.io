@@ -55,6 +55,20 @@
 			this.initClock();
 			this.updateDensity();
 			this.updateUnreadBadges();
+
+			if (window.DeskEventBus) {
+				window.DeskEventBus.on('settings:changed', () => {
+					this.initClock();
+					this.updateDensity();
+					this.renderSystemTray();
+				});
+				window.DeskEventBus.on('mail:received', () => {
+					this.updateUnreadBadges();
+				});
+				window.DeskEventBus.on('mail:read', () => {
+					this.updateUnreadBadges();
+				});
+			}
 		},
 
 		getTrayServices() {
@@ -134,8 +148,37 @@
 					onClick: () => {
 						if (typeof openOutlookExpress === 'function') openOutlookExpress();
 					},
-					onContextMenu: () => {
-						if (typeof openOutlookExpress === 'function') openOutlookExpress();
+					onContextMenu: (e) => {
+						if (window.ContextMenu) {
+							const items = [
+								{
+									label: 'Open Outlook Express',
+									bold: true,
+									action: () => {
+										if (typeof openOutlookExpress === 'function') openOutlookExpress();
+									}
+								},
+								{
+									label: 'Send and Receive All',
+									action: () => {
+										if (window.MailStore) {
+											window.MailStore.ensureDailyContent().then(() => {
+												Taskbar.updateUnreadBadges();
+												showXPDialog('Outlook Express', 'All mail folders are up to date.', 'info');
+											});
+										}
+									}
+								},
+								{ separator: true },
+								{
+									label: 'Properties',
+									action: () => {
+										if (typeof openOutlookExpress === 'function') openOutlookExpress();
+									}
+								}
+							];
+							window.ContextMenu.show(items, e.clientX, e.clientY);
+						}
 					}
 				},
 				{

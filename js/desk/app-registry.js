@@ -142,7 +142,7 @@
 				subtitle: 'E-mail Client',
 				icon: '../assets/images/desk/OE2001.webp',
 				category: 'Internet',
-				aliases: ['mail', 'oe', 'email', 'inbox'],
+				aliases: ['mail', 'oe', 'email', 'inbox', 'msimn', 'msimn.exe'],
 				handler: () => {
 					if (typeof openOutlookExpress === 'function') openOutlookExpress();
 				}
@@ -154,7 +154,7 @@
 				subtitle: 'Web Browser',
 				icon: '../assets/images/desk/internet-explorer.png',
 				category: 'Internet',
-				aliases: ['internet', 'browser', 'web', 'explore'],
+				aliases: ['internet', 'browser', 'web', 'explore', 'iexplore', 'iexplore.exe'],
 				handler: (args) => {
 					const url = typeof args === 'string' ? args : (args && args.url ? args.url : 'about:home');
 					if (window.InternetExplorerApp) window.InternetExplorerApp.open(url);
@@ -167,7 +167,7 @@
 				name: 'Calculator',
 				icon: '../assets/images/desk/icons/Calculator.webp',
 				category: 'Accessories',
-				aliases: ['calc'],
+				aliases: ['calc', 'calc.exe'],
 				handler: () => {
 					if (window.CalculatorApp) window.CalculatorApp.open();
 					else if (typeof openCalculator === 'function') openCalculator();
@@ -179,7 +179,7 @@
 				name: 'Paint',
 				icon: '../assets/images/desk/icons/Paint.webp',
 				category: 'Accessories',
-				aliases: ['mspaint', 'pbrush', 'draw'],
+				aliases: ['mspaint', 'mspaint.exe', 'pbrush', 'pbrush.exe', 'draw'],
 				handler: (args) => {
 					if (window.PaintApp) window.PaintApp.open(args);
 					else if (typeof openPaint === 'function') openPaint(args);
@@ -191,7 +191,7 @@
 				name: 'Notepad',
 				icon: '../assets/images/desk/icons/Notepad.webp',
 				category: 'Accessories',
-				aliases: ['text', 'editor', 'notes'],
+				aliases: ['text', 'editor', 'notes', 'notepad.exe'],
 				handler: (args) => {
 					if (window.NotepadApp) {
 						if (args && args.name) window.NotepadApp.open(args);
@@ -207,7 +207,7 @@
 				name: 'Command Prompt',
 				icon: '../assets/images/desk/icons/Command Prompt.webp',
 				category: 'Accessories',
-				aliases: ['terminal', 'prompt', 'console', 'command'],
+				aliases: ['terminal', 'prompt', 'console', 'command', 'cmd.exe'],
 				handler: (args) => {
 					if (window.CommandPrompt) window.CommandPrompt.open(args);
 					else if (typeof processRunCommand === 'function') processRunCommand('cmd');
@@ -219,7 +219,7 @@
 				name: 'Sound Recorder',
 				icon: '../assets/images/desk/icons/Music File.webp',
 				category: 'Entertainment',
-				aliases: ['sndrec32', 'recorder', 'voice', 'audio'],
+				aliases: ['sound-recorder', 'sndrec32', 'sndrec32.exe', 'recorder', 'voice', 'audio'],
 				handler: (args) => {
 					if (window.SoundRecorderApp) window.SoundRecorderApp.open(args);
 				}
@@ -230,7 +230,7 @@
 				name: 'Character Map',
 				icon: 'https://api.iconify.design/mdi/format-font.svg?color=%231b4b9b',
 				category: 'System Tools',
-				aliases: ['charactermap', 'symbols', 'characters'],
+				aliases: ['character-map', 'charactermap', 'symbols', 'characters', 'charmap.exe'],
 				handler: () => {
 					if (window.CharacterMapApp) window.CharacterMapApp.open();
 				}
@@ -241,7 +241,7 @@
 				name: 'Winamp Media Player',
 				icon: 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/0d/Winamp-logo.svg/960px-Winamp-logo.svg.png',
 				category: 'Entertainment',
-				aliases: ['music', 'mp3', 'player', 'audio-player'],
+				aliases: ['music', 'mp3', 'player', 'audio-player', 'winamp.exe'],
 				handler: () => {
 					if (typeof openWinamp === 'function') openWinamp();
 				}
@@ -252,7 +252,7 @@
 				name: 'Minesweeper',
 				icon: '../assets/images/desk/icons/Minesweeper.webp',
 				category: 'Games',
-				aliases: ['mine', 'mines', 'winmine'],
+				aliases: ['mine', 'mines', 'winmine', 'winmine.exe'],
 				handler: () => {
 					if (window.MinesweeperApp) window.MinesweeperApp.open();
 					else if (typeof openMinesweeper === 'function') openMinesweeper();
@@ -264,7 +264,7 @@
 				name: 'Solitaire',
 				icon: '../assets/images/desk/icons/Hearts.webp',
 				category: 'Games',
-				aliases: ['sol', 'cards', 'klondike', 'patience'],
+				aliases: ['sol', 'cards', 'klondike', 'patience', 'sol.exe'],
 				handler: () => {
 					if (window.SolitaireApp) window.SolitaireApp.open();
 					else if (typeof openSolitaire === 'function') openSolitaire();
@@ -276,7 +276,7 @@
 				name: 'Control Panel',
 				icon: '../assets/images/desk/icons/System Properties.webp',
 				category: 'System Tools',
-				aliases: ['controlpanel', 'preferences', 'config'],
+				aliases: ['controlpanel', 'preferences', 'config', 'control', 'control.exe', 'msconfig'],
 				handler: (args) => {
 					const tab = typeof args === 'string' ? args : (args && args.tab ? args.tab : 'system');
 					if (window.SettingsApp) window.SettingsApp.open(tab);
@@ -288,7 +288,7 @@
 				name: 'Display & Wallpapers',
 				icon: '../assets/images/desk/icons/Display.webp',
 				category: 'Appearance',
-				aliases: ['wallpaper', 'themes', 'screensaver'],
+				aliases: ['wallpaper', 'themes', 'screensaver', 'desk.cpl'],
 				handler: () => {
 					if (typeof openDisplaySettings === 'function') openDisplaySettings();
 					else if (window.SettingsApp) window.SettingsApp.open('appearance');
@@ -300,7 +300,7 @@
 				name: 'My Computer',
 				icon: '../assets/images/desk/icons/My Computer.webp',
 				category: 'System Tools',
-				aliases: ['computer', 'explorer', 'drives'],
+				aliases: ['computer', 'explorer', 'explorer.exe', 'drives'],
 				handler: () => {
 					if (typeof openMyComputerWindow === 'function') openMyComputerWindow();
 				}
@@ -311,7 +311,7 @@
 				name: 'Printers and Faxes',
 				icon: '../assets/images/desk/icons/Fax.webp',
 				category: 'System Tools',
-				aliases: ['faxes', 'printer'],
+				aliases: ['faxes', 'printer', 'printers'],
 				handler: () => {
 					if (typeof openPrintersWindow === 'function') openPrintersWindow();
 				}
@@ -381,7 +381,7 @@
 				name: "Today's Anecdote",
 				icon: 'https://api.iconify.design/mdi/calendar-star.svg',
 				category: 'Accessories',
-				aliases: ['anecdote', 'daily'],
+				aliases: ['today-anecdote', 'anecdote', 'anecdotes', 'daily'],
 				handler: () => {
 					if (typeof openAnecdoteWindow === 'function') openAnecdoteWindow(new Date());
 				}

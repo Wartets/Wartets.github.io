@@ -471,8 +471,9 @@
 				win.dataset.restoreWidth = win.style.width;
 				win.dataset.restoreHeight = win.style.height;
 
+				const isTopTaskbar = document.body.classList.contains('taskbar-position-top');
 				win.style.transition = 'none';
-				win.style.top = '0';
+				win.style.top = isTopTaskbar ? '36px' : '0';
 				win.style.left = '0';
 				win.style.width = '100vw';
 				win.style.height = 'calc(100vh - 40px)';

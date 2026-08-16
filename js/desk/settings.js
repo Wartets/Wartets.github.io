@@ -16,7 +16,7 @@
 		{ id: 'guitar', name: 'Guitar', url: 'https://api.iconify.design/mdi/guitar-acoustic.svg?color=%23d84315' }
 	];
 
-	let DEFAULT_SETTINGS = {};
+	let DEFAULT_SETTINGS = {}; // never modifiy this directly, use data/desk-default-settings.json to change default settings
 
 	function loadDefaultSettingsSync() {
 		try {
@@ -1995,7 +1995,7 @@
 		const iconShadowToggle = win.querySelector('#settings-icon-shadow');
 		if (iconShadowToggle) {
 			iconShadowToggle.addEventListener('change', () => {
-				pendingSettings.iconTextShadow = iconShadowToggle.checked;
+				pendingSettings.iconLabelShadow = iconShadowToggle.checked;
 				markDirty(win);
 			});
 		}

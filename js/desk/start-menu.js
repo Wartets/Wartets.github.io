@@ -20,6 +20,18 @@
 			this.bindEvents();
 			this.updateProfile();
 			this.updateLiveBadges();
+
+			if (window.DeskEventBus) {
+				window.DeskEventBus.on('settings:changed', () => {
+					this.updateProfile();
+				});
+				window.DeskEventBus.on('mail:received', () => {
+					this.updateLiveBadges();
+				});
+				window.DeskEventBus.on('mail:read', () => {
+					this.updateLiveBadges();
+				});
+			}
 		},
 
 		render() {
@@ -269,7 +281,7 @@
 								if (typeof fs !== 'undefined' && fs.create) {
 									fs.create('Shortcut', '/', `${title} - Shortcut`, {
 										targetPath: '/',
-										icon: item.querySelector('img')?.src || 'https://img.icons8.com/fluency/48/file.png'
+										icon: item.querySelector('img')?.src || '../assets/images/desk/icons/File.webp'
 									});
 									if (typeof refreshUI === 'function') refreshUI();
 								}
@@ -515,7 +527,7 @@
 								const pTitle = this.resolveProjectTitle(p.title);
 								prjHtml += `
 									<div class="xp-start-flyout-item" data-project-id="${pTitle}">
-										<img src="${p.icon || 'https://img.icons8.com/fluency/48/file.png'}" class="xp-start-item-icon" alt="">
+										<img src="${p.icon || '../assets/images/desk/icons/File.webp'}" class="xp-start-item-icon" alt="">
 										<span class="xp-start-title">${pTitle}</span>
 									</div>
 								`;
@@ -581,7 +593,7 @@
 					recentDocs.forEach(doc => {
 						html += `
 							<div class="xp-start-flyout-item" data-recent-name="${doc.name}" data-recent-type="${doc.type}" data-recent-path="${doc.path || ''}">
-								<img src="${doc.icon || 'https://img.icons8.com/fluency/48/file.png'}" class="xp-start-item-icon" alt="">
+								<img src="${doc.icon || '../assets/images/desk/icons/File.webp'}" class="xp-start-item-icon" alt="">
 								<span class="xp-start-title">${doc.name}</span>
 							</div>
 						`;
@@ -805,7 +817,7 @@
 							categoriesMap.set(kw, {
 								name: kw,
 								label: kw.charAt(0).toUpperCase() + kw.slice(1),
-								icon: p.icon || 'https://img.icons8.com/fluent/48/folder-invoices.png'
+								icon: p.icon || '../assets/images/desk/icons/Folder Closed.webp'
 							});
 						}
 					});
@@ -843,37 +855,6 @@
 			switch (action) {
 				case 'open-achievements':
 					if (window.AchievementsManager) window.AchievementsManager.open();
-					break;
-				case 'open-ie':
-					if (typeof openInternetExplorer === 'function') openInternetExplorer();
-					break;
-				case 'open-outlook':
-					if (typeof openOutlookExpress === 'function') openOutlookExpress();
-					break;
-				case 'open-calculator':
-					if (window.CalculatorApp) window.CalculatorApp.open();
-					break;
-				case 'open-charmap':
-					if (window.CharacterMapApp) window.CharacterMapApp.open();
-					break;
-				case 'open-paint':
-					if (window.PaintApp) window.PaintApp.open();
-					break;
-				case 'open-sound-recorder':
-					if (window.SoundRecorderApp) window.SoundRecorderApp.open();
-					break;
-				case 'open-winamp':
-					if (typeof openWinamp === 'function') openWinamp();
-					break;
-				case 'open-minesweeper':
-					if (typeof openMinesweeper === 'function') openMinesweeper();
-					break;
-				case 'open-solitaire':
-					if (window.SolitaireApp) {
-						window.SolitaireApp.open();
-					} else if (typeof openSolitaire === 'function') {
-						openSolitaire();
-					}
 					break;
 				case 'my-projects':
 					if (typeof openAllProjectsFolder === 'function') openAllProjectsFolder();
@@ -939,14 +920,6 @@
 					} else if (typeof openDisplaySettings === 'function') {
 						openDisplaySettings();
 					}
-					break;
-				case 'open-today-anecdote':
-					if (typeof openAnecdoteWindow === 'function') {
-						openAnecdoteWindow(new Date());
-					}
-					break;
-				case 'open-cmd':
-					if (typeof processRunCommand === 'function') processRunCommand('cmd');
 					break;
 				case 'run':
 					if (typeof openRunDialog === 'function') openRunDialog();
