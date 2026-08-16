@@ -572,50 +572,49 @@
 			const currentFolder = state.currentFolder;
 			const hasSelection = state.selectedItems.size > 0;
 			const hasClipboard = fs && fs.clipboard && fs.clipboard.element;
+			const newTemplates = window.ShellAssociations ? window.ShellAssociations.getNewFileTemplates() : [];
 
 			let items = [];
 
 			if (menuType === 'file') {
+				const newSubmenu = [
+					{
+						label: 'Folder',
+						icon: '../assets/images/desk/icons/Folder Closed.webp',
+						action: () => {
+							fs.create('Folder', currentFolder.getFullPath(), 'New Folder');
+							refreshUI();
+						}
+					},
+					{
+						label: 'Shortcut',
+						icon: '../assets/images/desk/icons/Folder Closed.webp',
+						action: () => {
+							fs.create('Shortcut', currentFolder.getFullPath(), 'New Shortcut', {
+								targetPath: '/',
+								icon: '../assets/images/desk/icons/Folder Closed.webp'
+							});
+							refreshUI();
+						}
+					},
+					{ separator: true }
+				];
+
+				newTemplates.forEach(tpl => {
+					newSubmenu.push({
+						label: tpl.label,
+						icon: window.ShellAssociations ? window.ShellAssociations.getIcon({ name: tpl.defaultName }) : '../assets/images/desk/icons/File.webp',
+						action: () => {
+							fs.create('File', currentFolder.getFullPath(), tpl.defaultName, { content: tpl.content });
+							refreshUI();
+						}
+					});
+				});
+
 				items = [
 					{
 						label: 'New',
-						submenu: [
-							{
-								label: 'Folder',
-								icon: '../assets/images/desk/icons/Folder Closed.webp',
-								action: () => {
-									fs.create('Folder', currentFolder.getFullPath(), 'New Folder');
-									refreshUI();
-								}
-							},
-							{
-								label: 'Shortcut',
-								icon: '../assets/images/desk/icons/Folder Closed.webp',
-								action: () => {
-									fs.create('Shortcut', currentFolder.getFullPath(), 'New Shortcut', {
-										targetPath: '/',
-										icon: '../assets/images/desk/icons/Folder Closed.webp'
-									});
-									refreshUI();
-								}
-							},
-							{
-								label: 'Text Document',
-								icon: '../assets/images/desk/icons/File.webp',
-								action: () => {
-									fs.create('File', currentFolder.getFullPath(), 'New Text Document.txt');
-									refreshUI();
-								}
-							},
-							{
-								label: 'Wave Sound Document',
-								icon: '../assets/images/desk/icons/Music File.webp',
-								action: () => {
-									fs.create('File', currentFolder.getFullPath(), 'New Audio.wav');
-									refreshUI();
-								}
-							}
-						]
+						submenu: newSubmenu
 					},
 					{
 						label: 'Open in New Window',
@@ -680,8 +679,10 @@
 					{
 						label: 'Undo',
 						shortcut: 'Ctrl+Z',
-						disabled: true,
-						action: () => {}
+						disabled: !fs || fs.undoStack.length === 0,
+						action: () => {
+							if (fs && fs.undo()) refreshUI();
+						}
 					},
 					{ separator: true },
 					{
@@ -1214,13 +1215,19 @@
 				if (actionsContainer && el) {
 					const isFolder = el instanceof Folder;
 					const isProject = el instanceof ProjectFile;
-					let playAction = '';
+					const isZip = el instanceof File && el.name.toLowerCase().endsWith('.zip');
+					let extraTask = '';
+
 					if (isProject && el.projectData && el.projectData.link) {
-						playAction = `<a href="#" class="xp-task-link" data-action="run"><img src="https://api.iconify.design/mdi/play-box-outline.svg" alt=""><span>Run application</span></a>`;
+						extraTask = `<a href="#" class="xp-task-link" data-action="run"><img src="https://api.iconify.design/mdi/play-box-outline.svg" alt=""><span>Run application</span></a>`;
+					} else if (isZip) {
+						extraTask = `<a href="#" class="xp-task-link" data-action="extract"><img src="../assets/images/desk/icons/Folder Open.webp" alt=""><span>Extract all files</span></a>`;
+					} else if (el instanceof File) {
+						extraTask = `<a href="#" class="xp-task-link" data-action="zip"><img src="../assets/images/desk/icons/Folder Closed.webp" alt=""><span>Compress to zip</span></a>`;
 					}
 
 					actionsContainer.innerHTML = `
-						${playAction}
+						${extraTask}
 						<a href="#" class="xp-task-link" data-action="rename"><img src="../assets/images/desk/icons/File.webp" alt=""><span>Rename this ${isFolder ? 'folder' : 'file'}</span></a>
 						<a href="#" class="xp-task-link" data-action="move"><img src="https://api.iconify.design/mdi/folder-move-outline.svg" alt=""><span>Move this ${isFolder ? 'folder' : 'file'}</span></a>
 						<a href="#" class="xp-task-link" data-action="copy"><img src="https://api.iconify.design/mdi/content-copy.svg" alt=""><span>Copy this ${isFolder ? 'folder' : 'file'}</span></a>
@@ -1289,6 +1296,20 @@
 							}
 						} else if (act === 'email') {
 							if (typeof openOutlookExpress === 'function') openOutlookExpress();
+						} else if (act === 'extract') {
+							const icon = Array.from(state.selectedItems)[0];
+							const el = fs.findByPath(icon.dataset.path);
+							if (el) {
+								fs.extractZip(el.getFullPath(), state.currentFolder.getFullPath());
+								refreshUI();
+							}
+						} else if (act === 'zip') {
+							const icon = Array.from(state.selectedItems)[0];
+							const el = fs.findByPath(icon.dataset.path);
+							if (el) {
+								fs.compressToZip(el.getFullPath(), state.currentFolder.getFullPath());
+								refreshUI();
+							}
 						} else if (act === 'publish' || act === 'share') {
 							showXPDialog('Web Publishing Wizard', 'This feature requires an active network connection to MSN or an FTP host.', 'info');
 						}

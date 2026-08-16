@@ -3,29 +3,34 @@ class Element {
 		if (typeof name !== 'string' || name.trim() === '') {
 			throw new Error('Element name must be a non-empty string.');
 		}
-		this.name = name;
+		this.name = name.trim();
 		this.parent = parent;
 		this.createdAt = new Date();
 		this.modifiedAt = new Date();
 		this.hidden = false;
+		this.attributes = {
+			archive: true,
+			system: false
+		};
 	}
 
 	rename(newName) {
 		if (typeof newName !== 'string' || newName.trim() === '') {
 			throw new Error('New name must be a non-empty string.');
 		}
+		const sanitized = newName.trim();
 		const parent = this.parent;
 		if (parent) {
-			if (parent.children.has(newName)) {
-				throw new Error(`An element named "${newName}" already exists in this folder.`);
+			if (parent.children.has(sanitized) && sanitized.toLowerCase() !== this.name.toLowerCase()) {
+				throw new Error(`An element named "${sanitized}" already exists in this folder.`);
 			}
 			const oldName = this.name;
 			parent.children.delete(oldName);
-			this.name = newName;
+			this.name = sanitized;
 			parent.children.set(this.name, this);
 			parent.modifiedAt = new Date();
 		} else {
-			this.name = newName;
+			this.name = sanitized;
 		}
 		this.modifiedAt = new Date();
 	}
@@ -36,20 +41,31 @@ class Element {
 		}
 		let path = '';
 		let current = this;
-		while (current.parent) {
+		while (current && current.parent) {
 			path = `/${current.name}${path}`;
 			current = current.parent;
 		}
-		return path;
+		return path || '/';
+	}
+
+	getDepth() {
+		let depth = 0;
+		let current = this;
+		while (current && current.parent) {
+			depth++;
+			current = current.parent;
+		}
+		return depth;
 	}
 
 	toJSON() {
 		return {
 			name: this.name,
-			createdAt: this.createdAt,
-			modifiedAt: this.modifiedAt,
+			createdAt: this.createdAt.toISOString ? this.createdAt.toISOString() : this.createdAt,
+			modifiedAt: this.modifiedAt.toISOString ? this.modifiedAt.toISOString() : this.modifiedAt,
 			type: this.constructor.name,
-			hidden: this.hidden
+			hidden: this.hidden,
+			attributes: this.attributes
 		};
 	}
 }
@@ -59,7 +75,7 @@ class File extends Element {
 		super(name, parent);
 		this.content = content;
 		this.size = new TextEncoder().encode(content).length;
-		this.icon = '../assets/images/desk/icons/File.webp';
+		this.icon = window.ShellAssociations ? window.ShellAssociations.getIcon(this) : '../assets/images/desk/icons/File.webp';
 		this.readOnly = false;
 		this.remoteUrl = null;
 		this.savedFromNotepad = false;
@@ -81,13 +97,28 @@ class File extends Element {
 		}
 	}
 
+	async calculateChecksum() {
+		try {
+			if (!window.crypto || !window.crypto.subtle) return 'N/A';
+			const msgUint8 = new TextEncoder().encode(this.content || '');
+			const hashBuffer = await window.crypto.subtle.digest('SHA-256', msgUint8);
+			const hashArray = Array.from(new Uint8Array(hashBuffer));
+			return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+		} catch (e) {
+			return 'N/A';
+		}
+	}
+
 	copy() {
 		const newFile = new File(this.name, null, this.content);
-		newFile.createdAt = this.createdAt;
-		newFile.modifiedAt = this.modifiedAt;
+		newFile.createdAt = new Date(this.createdAt);
+		newFile.modifiedAt = new Date(this.modifiedAt);
 		newFile.readOnly = this.readOnly;
+		newFile.hidden = this.hidden;
 		newFile.remoteUrl = this.remoteUrl;
 		newFile.savedFromNotepad = this.savedFromNotepad;
+		newFile.icon = this.icon;
+		newFile.attributes = Object.assign({}, this.attributes);
 		return newFile;
 	}
 
@@ -138,12 +169,66 @@ class Folder extends Element {
 	listContent() {
 		return Array.from(this.children.values());
 	}
-	
+
+	calculateSize() {
+		let total = 0;
+		for (const child of this.children.values()) {
+			if (child instanceof Folder) {
+				total += child.calculateSize();
+			} else if (child instanceof File) {
+				total += (child.size || 0);
+			}
+		}
+		return total;
+	}
+
+	countItems(recursive = false) {
+		if (!recursive) {
+			return { files: this.listContent().filter(c => !(c instanceof Folder)).length, folders: this.listContent().filter(c => c instanceof Folder).length };
+		}
+		let files = 0;
+		let folders = 0;
+		for (const child of this.children.values()) {
+			if (child instanceof Folder) {
+				folders++;
+				const sub = child.countItems(true);
+				files += sub.files;
+				folders += sub.folders;
+			} else {
+				files++;
+			}
+		}
+		return { files, folders };
+	}
+
+	getAllDescendants() {
+		const result = [];
+		for (const child of this.children.values()) {
+			result.push(child);
+			if (child instanceof Folder) {
+				result.push(...child.getAllDescendants());
+			}
+		}
+		return result;
+	}
+
+	getUniqueName(baseName, extension = '') {
+		let finalName = `${baseName}${extension}`;
+		let counter = 1;
+		while (this.children.has(finalName)) {
+			finalName = `${baseName} (${counter})${extension}`;
+			counter++;
+		}
+		return finalName;
+	}
+
 	copy() {
 		const newFolder = new Folder(this.name, null);
-		newFolder.createdAt = this.createdAt;
-		newFolder.modifiedAt = this.modifiedAt;
+		newFolder.createdAt = new Date(this.createdAt);
+		newFolder.modifiedAt = new Date(this.modifiedAt);
 		newFolder.hidden = this.hidden;
+		newFolder.icon = this.icon;
+		newFolder.attributes = Object.assign({}, this.attributes);
 		for (const child of this.children.values()) {
 			const childCopy = child.copy();
 			newFolder.add(childCopy);
@@ -164,13 +249,22 @@ class Shortcut extends Element {
 	constructor(name, parent = null, targetPath, icon) {
 		super(name, parent);
 		this.targetPath = targetPath;
-		this.icon = icon;
+		this.icon = icon || '../assets/images/desk/icons/Folder Closed.webp';
+	}
+
+	resolve() {
+		if (typeof fs !== 'undefined' && fs) {
+			return fs.findByPath(this.targetPath);
+		}
+		return null;
 	}
 
 	copy() {
 		const newShortcut = new Shortcut(this.name, null, this.targetPath, this.icon);
-		newShortcut.createdAt = this.createdAt;
-		newShortcut.modifiedAt = this.modifiedAt;
+		newShortcut.createdAt = new Date(this.createdAt);
+		newShortcut.modifiedAt = new Date(this.modifiedAt);
+		newShortcut.hidden = this.hidden;
+		newShortcut.attributes = Object.assign({}, this.attributes);
 		return newShortcut;
 	}
 
@@ -183,6 +277,31 @@ class Shortcut extends Element {
 	}
 }
 
+class ProjectFile extends Element {
+	constructor(name, parent = null, projectData = {}) {
+		super(name, parent);
+		this.projectData = projectData;
+		this.icon = projectData.icon || '../assets/images/desk/icons/File.webp';
+	}
+
+	copy() {
+		const newProject = new ProjectFile(this.name, null, this.projectData);
+		newProject.createdAt = new Date(this.createdAt);
+		newProject.modifiedAt = new Date(this.modifiedAt);
+		newProject.hidden = this.hidden;
+		newProject.attributes = Object.assign({}, this.attributes);
+		return newProject;
+	}
+
+	toJSON() {
+		return {
+			...super.toJSON(),
+			projectData: this.projectData,
+			icon: this.icon,
+		};
+	}
+}
+
 class FileSystemManager {
 	constructor() {
 		this.root = new Folder('Desktop');
@@ -190,10 +309,15 @@ class FileSystemManager {
 			mode: null,
 			element: null
 		};
+		this.undoStack = [];
+	}
+
+	exists(path) {
+		return this.findByPath(path) !== null;
 	}
 
 	findByPath(path) {
-		if (path === '/') {
+		if (!path || path === '/' || path === '') {
 			return this.root;
 		}
 		const parts = path.split('/').filter(p => p);
@@ -212,28 +336,30 @@ class FileSystemManager {
 		if (!(parentFolder instanceof Folder)) {
 			throw new Error(`Invalid path: ${path}`);
 		}
-		let finalName = name;
-		let counter = 1;
 
 		const getBaseNameAndExtension = (filename) => {
 			const lastDot = filename.lastIndexOf('.');
-			if (lastDot === -1) return [filename, ''];
+			if (lastDot === -1 || lastDot === 0) return [filename, ''];
 			return [filename.substring(0, lastDot), filename.substring(lastDot)];
 		};
 
-		while (parentFolder.children.has(finalName)) {
-			if (type === 'File' || type === 'Shortcut') {
-				const [baseName, ext] = getBaseNameAndExtension(name);
-				finalName = `${baseName} (${counter})${ext}`;
-			} else {
-				finalName = `${name} (${counter})`;
-			}
-			counter++;
+		let [baseName, ext] = getBaseNameAndExtension(name);
+		let finalName = parentFolder.getUniqueName(baseName, ext);
+
+		let newElement;
+		if (type === 'Folder') {
+			newElement = new Folder(finalName);
+			if (options.icon) newElement.icon = options.icon;
+		} else if (type === 'Shortcut') {
+			newElement = new Shortcut(finalName, null, options.targetPath || '/', options.icon || '../assets/images/desk/icons/Folder Closed.webp');
+		} else if (type === 'ProjectFile') {
+			newElement = new ProjectFile(finalName, null, options.projectData || {});
+		} else {
+			newElement = new File(finalName, null, options.content || '');
+			if (options.icon) newElement.icon = options.icon;
+			else if (window.ShellAssociations) newElement.icon = window.ShellAssociations.getIcon(newElement);
 		}
 
-		const newElement = type === 'Folder' ? new Folder(finalName) :
-			type === 'Shortcut' ? new Shortcut(finalName, null, options.targetPath, options.icon) :
-			new File(finalName);
 		parentFolder.add(newElement);
 		this.save();
 
@@ -252,6 +378,7 @@ class FileSystemManager {
 				window.AchievementsManager.progress('deep_folders', 1);
 			}
 		}
+
 		return newElement;
 	}
 
@@ -265,6 +392,13 @@ class FileSystemManager {
 		}
 		element.parent.remove(element.name);
 		this.save();
+	}
+
+	duplicate(path) {
+		const element = this.findByPath(path);
+		if (!element || !element.parent) throw new Error('Cannot duplicate non-existent or root element.');
+		const parent = element.parent;
+		return this.copy(element.getFullPath(), parent.getFullPath());
 	}
 
 	move(sourcePath, destPath) {
@@ -282,34 +416,34 @@ class FileSystemManager {
 			checkParent = checkParent.parent;
 		}
 
-		let finalName = element.name;
-		let counter = 2;
+		if (element.parent === destFolder) return;
+
 		const getBaseNameAndExtension = (filename) => {
 			const lastDot = filename.lastIndexOf('.');
-			if (lastDot === -1) return [filename, ''];
+			if (lastDot === -1 || lastDot === 0) return [filename, ''];
 			return [filename.substring(0, lastDot), filename.substring(lastDot)];
 		};
 
-		const originalElementName = element.name;
-		while (destFolder.children.has(finalName)) {
-			if (element instanceof File) {
-				const [baseName, ext] = getBaseNameAndExtension(originalElementName);
-				finalName = `${baseName} (${counter})${ext}`;
-			} else {
-				finalName = `${originalElementName} (${counter})`;
-			}
-			counter++;
-		}
-		
+		const [baseName, ext] = getBaseNameAndExtension(element.name);
+		const finalName = destFolder.getUniqueName(baseName, ext);
+
+		const originalParent = element.parent;
 		const originalName = element.name;
-		element.parent.remove(originalName);
-		
+		originalParent.remove(originalName);
+
 		element.name = finalName;
 		destFolder.add(element);
-		
+
+		this.undoStack.push({
+			type: 'move',
+			sourcePath: `${destFolder.getFullPath() === '/' ? '' : destFolder.getFullPath()}/${finalName}`,
+			destPath: originalParent.getFullPath(),
+			originalName
+		});
+
 		this.save();
 	}
-	
+
 	copy(sourcePath, destPath) {
 		const elementToCopy = this.findByPath(sourcePath);
 		const destFolder = this.findByPath(destPath);
@@ -319,46 +453,66 @@ class FileSystemManager {
 
 		const getBaseNameAndExtension = (filename) => {
 			const lastDot = filename.lastIndexOf('.');
-			if (lastDot === -1) return [filename, ''];
+			if (lastDot === -1 || lastDot === 0) return [filename, ''];
 			return [filename.substring(0, lastDot), filename.substring(lastDot)];
 		};
 
-		let finalName = elementToCopy.name;
-		let counter = 1;
-		let baseNameForCopy, extForCopy;
-
-		if (elementToCopy instanceof File) {
-			[baseNameForCopy, extForCopy] = getBaseNameAndExtension(elementToCopy.name);
-		} else {
-			baseNameForCopy = elementToCopy.name;
-			extForCopy = '';
-		}
-
+		const [baseName, ext] = getBaseNameAndExtension(elementToCopy.name);
+		let finalName = `Copy of ${baseName}${ext}`;
+		let counter = 2;
 		while (destFolder.children.has(finalName)) {
-			if (counter === 1) {
-				finalName = `Copy of ${baseNameForCopy}${extForCopy}`;
-			} else {
-				finalName = `Copy of ${baseNameForCopy} (${counter - 1})${extForCopy}`;
-			}
-			if (!destFolder.children.has(finalName)) break;
-
-			finalName = `${baseNameForCopy} (${counter})${extForCopy}`;
-			if (destFolder.children.has(finalName)) {
-				let copyCounter = 2;
-				finalName = `Copy of ${baseNameForCopy} (${copyCounter})${extForCopy}`;
-				while(destFolder.children.has(finalName)) {
-					copyCounter++;
-					finalName = `Copy of ${baseNameForCopy} (${copyCounter})${extForCopy}`;
-				}
-			}
+			finalName = `Copy (${counter}) of ${baseName}${ext}`;
 			counter++;
 		}
-		
+
 		const newElement = elementToCopy.copy();
 		newElement.name = finalName;
 		destFolder.add(newElement);
 		this.save();
 		return newElement;
+	}
+
+	compressToZip(sourcePath, destPath = null) {
+		const element = this.findByPath(sourcePath);
+		if (!element || !element.parent) throw new Error('Cannot compress root or non-existent element.');
+		const targetFolder = destPath ? this.findByPath(destPath) : element.parent;
+		if (!(targetFolder instanceof Folder)) throw new Error('Target destination is not a valid folder.');
+
+		const zipName = `${element.name}.zip`;
+		const serializedData = JSON.stringify(element.toJSON());
+		const zipFile = new File(zipName, null, serializedData);
+		zipFile.icon = '../assets/images/desk/icons/Folder Closed.webp';
+
+		const [base, ext] = [element.name, '.zip'];
+		zipFile.name = targetFolder.getUniqueName(base, ext);
+		targetFolder.add(zipFile);
+		this.save();
+		return zipFile;
+	}
+
+	extractZip(zipFilePath, destPath = null) {
+		const zipFile = this.findByPath(zipFilePath);
+		if (!zipFile || !(zipFile instanceof File)) throw new Error('Invalid archive file.');
+		const targetFolder = destPath ? this.findByPath(destPath) : (zipFile.parent || this.root);
+		if (!(targetFolder instanceof Folder)) throw new Error('Extraction folder is invalid.');
+
+		try {
+			const parsed = JSON.parse(zipFile.content);
+			const extracted = this.rehydrate(parsed, null);
+			const baseName = extracted.name;
+			const lastDot = baseName.lastIndexOf('.');
+			const [bName, ext] = (lastDot > 0) ? [baseName.substring(0, lastDot), baseName.substring(lastDot)] : [baseName, ''];
+			extracted.name = targetFolder.getUniqueName(bName, ext);
+			targetFolder.add(extracted);
+			this.save();
+			return extracted;
+		} catch (e) {
+			const fallbackName = targetFolder.getUniqueName('Extracted Text', '.txt');
+			const txtFile = new File(fallbackName, null, zipFile.content);
+			targetFolder.add(txtFile);
+			this.save();
+			return txtFile;
+		}
 	}
 
 	moveToRecycleBin(path) {
@@ -409,13 +563,9 @@ class FileSystemManager {
 			destFolder = this.root;
 		}
 		const restored = this.rehydrate(item.data, null);
-		let finalName = restored.name;
-		let counter = 1;
-		while (destFolder.children.has(finalName)) {
-			finalName = `${restored.name} (${counter})`;
-			counter++;
-		}
-		restored.name = finalName;
+		const lastDot = restored.name.lastIndexOf('.');
+		const [bName, ext] = (lastDot > 0 && !(restored instanceof Folder)) ? [restored.name.substring(0, lastDot), restored.name.substring(lastDot)] : [restored.name, ''];
+		restored.name = destFolder.getUniqueName(bName, ext);
 		destFolder.add(restored);
 		items.splice(index, 1);
 		this.saveRecycleBinItems(items);
@@ -437,6 +587,23 @@ class FileSystemManager {
 		this.saveRecycleBinItems([]);
 	}
 
+	undo() {
+		if (this.undoStack.length === 0) return false;
+		const op = this.undoStack.pop();
+		if (op.type === 'move') {
+			const el = this.findByPath(op.sourcePath);
+			const dest = this.findByPath(op.destPath);
+			if (el && dest instanceof Folder) {
+				el.parent.remove(el.name);
+				el.name = op.originalName;
+				dest.add(el);
+				this.save();
+				return true;
+			}
+		}
+		return false;
+	}
+
 	save() {
 		localStorage.setItem('fileSystem', JSON.stringify(this.root.toJSON()));
 	}
@@ -444,8 +611,12 @@ class FileSystemManager {
 	load() {
 		const savedData = localStorage.getItem('fileSystem');
 		if (savedData) {
-			const data = JSON.parse(savedData);
-			this.root = this.rehydrate(data, null);
+			try {
+				const data = JSON.parse(savedData);
+				this.root = this.rehydrate(data, null);
+			} catch (e) {
+				this.root = new Folder('Desktop');
+			}
 		}
 	}
 
@@ -469,36 +640,16 @@ class FileSystemManager {
 			element.remoteUrl = data.remoteUrl || null;
 			element.savedFromNotepad = !!data.savedFromNotepad;
 		}
-		element.createdAt = new Date(data.createdAt);
-		element.modifiedAt = new Date(data.modifiedAt);
+		element.createdAt = new Date(data.createdAt || Date.now());
+		element.modifiedAt = new Date(data.modifiedAt || Date.now());
 		element.hidden = !!data.hidden;
+		if (data.attributes) element.attributes = Object.assign({}, data.attributes);
 		if (data.icon) {
 			element.icon = data.icon;
+		} else if (window.ShellAssociations) {
+			element.icon = window.ShellAssociations.getIcon(element);
 		}
 		return element;
-	}
-}
-
-class ProjectFile extends Element {
-	constructor(name, parent = null, projectData = {}) {
-		super(name, parent);
-		this.projectData = projectData;
-		this.icon = projectData.icon;
-	}
-
-	copy() {
-		const newProject = new ProjectFile(this.name, null, this.projectData);
-		newProject.createdAt = this.createdAt;
-		newProject.modifiedAt = this.modifiedAt;
-		return newProject;
-	}
-
-	toJSON() {
-		return {
-			...super.toJSON(),
-			projectData: this.projectData,
-			icon: this.icon,
-		};
 	}
 }
 
@@ -2099,13 +2250,13 @@ function buildInfoRow(label, value) {
 	return `<div class="info-row"><span class="info-label">${label}</span><span class="info-value">${value}</span></div>`;
 }
 
-function openElementInfoWindow(element) {
+async function openElementInfoWindow(element) {
 	if (!element) return;
 
-	let type = 'File';
-	if (element instanceof Folder) type = 'Folder';
-	else if (element instanceof Shortcut) type = 'Shortcut';
-	else if (element instanceof ProjectFile) type = 'Project';
+	let typeLabel = window.ShellAssociations ? window.ShellAssociations.getTypeLabel(element) : 'File';
+	if (element instanceof Folder) typeLabel = 'File Folder';
+	else if (element instanceof Shortcut) typeLabel = 'Shortcut';
+	else if (element instanceof ProjectFile) typeLabel = 'Project Application';
 
 	const id = `window-info-${element.getFullPath().replace(/[^\w-]/g, '_')}`;
 	const existingWindow = document.getElementById(id);
@@ -2117,17 +2268,25 @@ function openElementInfoWindow(element) {
 	let previewHtml = '';
 	let extraRows = '';
 
-	if (type === 'Folder') {
-		extraRows += buildInfoRow('Items', String(element.listContent().length));
-	} else if (type === 'File') {
-		extraRows += buildInfoRow('Size', formatBytes(element.size));
+	if (element instanceof Folder) {
+		const counts = element.countItems(true);
+		const folderSize = element.calculateSize();
+		extraRows += buildInfoRow('Size', `${formatBytes(folderSize)} (${folderSize.toLocaleString()} bytes)`);
+		extraRows += buildInfoRow('Contains', `${counts.files} Files, ${counts.folders} Folders`);
+	} else if (element instanceof File) {
+		extraRows += buildInfoRow('Opens with', window.ShellAssociations ? (window.ShellAssociations.getConfig(element.name)?.typeLabel || 'Notepad') : 'Notepad');
+		extraRows += buildInfoRow('Size', `${formatBytes(element.size)} (${element.size.toLocaleString()} bytes)`);
+		extraRows += buildInfoRow('Size on disk', `${formatBytes(Math.ceil(element.size / 4096) * 4096)}`);
 		if (!element.readOnly) {
 			const preview = (element.content || '').replace(/<[^>]*>/g, ' ').trim().slice(0, 240);
 			if (preview) previewHtml = `<div class="info-preview">${preview}${element.content.length > 240 ? '…' : ''}</div>`;
 		}
-	} else if (type === 'Shortcut') {
-		extraRows += buildInfoRow('Target', element.targetPath);
-	} else if (type === 'Project') {
+	} else if (element instanceof Shortcut) {
+		const resolved = element.resolve();
+		extraRows += buildInfoRow('Target type', resolved ? (window.ShellAssociations ? window.ShellAssociations.getTypeLabel(resolved) : 'Item') : 'File or Folder');
+		extraRows += buildInfoRow('Target location', resolved && resolved.parent ? resolved.parent.getFullPath() : '/');
+		extraRows += buildInfoRow('Target', `<input type="text" class="xp-input" value="${element.targetPath}" readonly style="width: 100%; font-size: 11px;">`);
+	} else if (element instanceof ProjectFile) {
 		const project = element.projectData || {};
 		extraRows += buildInfoRow('Category', (project.keywords || []).join(', ') || 'N/A');
 		if (project.languages && project.languages.length) {
@@ -2144,26 +2303,36 @@ function openElementInfoWindow(element) {
 		? `<label class="xp-checkbox-row" style="margin: 0;"><input type="checkbox" id="prop-readonly-check" ${element.readOnly ? 'checked' : ''}> Read-only</label>`
 		: '';
 
+	const shortcutFindTargetBtn = (element instanceof Shortcut)
+		? `<button type="button" class="xp-button-small" id="prop-btn-find-target" style="margin-top: 4px;">Find Target...</button>`
+		: '';
+
 	const contentHTML = `
 		<div class="info-window-body" style="display: flex; flex-direction: column; height: 100%; box-sizing: border-box;">
 			<div class="info-header">
 				<img src="${element.icon}" alt="${element.name}" class="info-icon">
-				<div class="info-title">${element.name}</div>
+				<div class="info-title" style="flex: 1;">
+					<input type="text" id="prop-filename-input" class="xp-input" value="${element.name}" style="width: 100%; font-weight: bold;">
+				</div>
 			</div>
 			${previewHtml}
 			<div class="info-rows" style="flex: 1;">
-				${buildInfoRow('Type', type)}
+				${buildInfoRow('Type of file', typeLabel)}
 				${buildInfoRow('Location', element.parent ? element.parent.getFullPath() : '/')}
 				${buildInfoRow('Created', formatFullDate(element.createdAt))}
 				${buildInfoRow('Modified', formatFullDate(element.modifiedAt))}
 				${extraRows}
 			</div>
+			${shortcutFindTargetBtn}
 			<fieldset class="xp-groupbox" style="margin-top: 8px; padding: 6px 10px;">
 				<legend>Attributes</legend>
-				<div style="display: flex; gap: 16px; align-items: center;">
+				<div style="display: flex; gap: 16px; align-items: center; flex-wrap: wrap;">
 					${readOnlyCheckbox}
 					<label class="xp-checkbox-row" style="margin: 0;">
 						<input type="checkbox" id="prop-hidden-check" ${element.hidden ? 'checked' : ''}> Hidden
+					</label>
+					<label class="xp-checkbox-row" style="margin: 0;">
+						<input type="checkbox" id="prop-archive-check" ${element.attributes?.archive ? 'checked' : ''}> Archive
 					</label>
 				</div>
 			</fieldset>
@@ -2175,14 +2344,17 @@ function openElementInfoWindow(element) {
 		</div>
 	`;
 
-	const win = createXPWindow(id, `${element.name} Properties`, contentHTML, 380, 460, {
+	const win = createXPWindow(id, `${element.name} Properties`, contentHTML, 400, 500, {
 		iconSrc: element.icon,
 		resizable: false
 	});
 	win.querySelector('.xp-window-content').style.padding = '0';
 
+	const filenameInput = win.querySelector('#prop-filename-input');
 	const hiddenCheck = win.querySelector('#prop-hidden-check');
 	const readOnlyCheck = win.querySelector('#prop-readonly-check');
+	const archiveCheck = win.querySelector('#prop-archive-check');
+	const findTargetBtn = win.querySelector('#prop-btn-find-target');
 	const okBtn = win.querySelector('#prop-btn-ok');
 	const cancelBtn = win.querySelector('#prop-btn-cancel');
 	const applyBtn = win.querySelector('#prop-btn-apply');
@@ -2191,22 +2363,54 @@ function openElementInfoWindow(element) {
 		if (applyBtn) applyBtn.disabled = false;
 	};
 
+	if (filenameInput) filenameInput.addEventListener('input', onChange);
 	if (hiddenCheck) hiddenCheck.addEventListener('change', onChange);
 	if (readOnlyCheck) readOnlyCheck.addEventListener('change', onChange);
+	if (archiveCheck) archiveCheck.addEventListener('change', onChange);
+
+	if (findTargetBtn && element instanceof Shortcut) {
+		findTargetBtn.addEventListener('click', () => {
+			const resolved = element.resolve();
+			if (resolved) {
+				if (resolved.parent && window.FileExplorer) {
+					window.FileExplorer.open(resolved.parent);
+				} else {
+					openFileSystemElement(resolved);
+				}
+			} else {
+				showXPDialog('Find Target', 'Target could not be located.', 'warning');
+			}
+		});
+	}
 
 	const applyProperties = () => {
+		const newName = filenameInput ? filenameInput.value.trim() : element.name;
+		if (newName && newName !== element.name) {
+			try {
+				element.rename(newName);
+			} catch (e) {
+				showXPDialog('Rename Error', e.message, 'error');
+				return false;
+			}
+		}
 		if (hiddenCheck) element.hidden = hiddenCheck.checked;
 		if (readOnlyCheck && element instanceof File) element.readOnly = readOnlyCheck.checked;
+		if (archiveCheck) {
+			if (!element.attributes) element.attributes = {};
+			element.attributes.archive = archiveCheck.checked;
+		}
 		fs.save();
 		refreshUI();
 		if (applyBtn) applyBtn.disabled = true;
+		return true;
 	};
 
 	if (applyBtn) applyBtn.addEventListener('click', applyProperties);
 	if (okBtn) {
 		okBtn.addEventListener('click', () => {
-			applyProperties();
-			closeWindow(win, id);
+			if (applyProperties()) {
+				closeWindow(win, id);
+			}
 		});
 	}
 	if (cancelBtn) {
@@ -2775,58 +2979,14 @@ function setupDesktopContextMenu() {
 }
 
 function openFileSystemElement(element, windowContext = null) {
-	if (element instanceof Folder) {
-		if (windowContext && windowContext.classList.contains('xp-explorer-window') && window.FileExplorer) {
-			window.FileExplorer.navigateTo(element, windowContext, true);
-		} else if (window.FileExplorer) {
+	if (!element) return;
+	if (window.ShellAssociations) {
+		window.ShellAssociations.open(element, windowContext);
+	} else {
+		if (element instanceof Folder && window.FileExplorer) {
 			window.FileExplorer.open(element);
-		}
-	} else if (element instanceof Shortcut) {
-		const target = fs.findByPath(element.targetPath);
-		if (target) {
-			openFileSystemElement(target, windowContext);
-		} else if (element.targetPath.startsWith('http://') || element.targetPath.startsWith('https://') || element.targetPath.startsWith('about:')) {
-			if (window.InternetExplorerApp) {
-				window.InternetExplorerApp.open(element.targetPath);
-			}
-		} else if (element.targetPath.startsWith('project://')) {
-			showXPDialog('Shortcut Error', 'Legacy project shortcut format is no longer supported.', 'error');
-		} else {
-			showXPDialog('Shortcut Error', 'The item that this shortcut refers to has been changed or moved.', 'error');
-		}
-	} else if (element instanceof ProjectFile) {
-		openProjectWindow(element.projectData);
-	} else if (element instanceof File) {
-		const lowerName = element.name.toLowerCase();
-		if (lowerName.endsWith('.bat') || lowerName.endsWith('.cmd')) {
-			if (window.AchievementsManager) {
-				window.AchievementsManager.progress('bat_runner', 1);
-			}
-			if (window.CommandPrompt) {
-				window.CommandPrompt.open({
-					script: element.content,
-					title: element.name,
-					initialFolder: element.parent || fs.root
-				});
-			}
-		} else if (element.readOnly && element.remoteUrl) {
-			openReadOnlyTextWindow(element);
-		} else if (/\.(png|jpe?g|bmp|webp|gif)$/i.test(lowerName)) {
-			if (window.PaintApp) {
-				window.PaintApp.open(element);
-			}
-		} else if (/\.(wav|wave|mp3|ogg|m4a)$/i.test(lowerName)) {
-			if (window.SoundRecorderApp) {
-				window.SoundRecorderApp.open(element);
-			}
-		} else if (lowerName.endsWith('.pdf')) {
-			openPDFWindow(element);
-		} else if (lowerName.endsWith('.html') || lowerName.endsWith('.htm')) {
-			if (window.InternetExplorerApp) {
-				window.InternetExplorerApp.open(`file://${element.getFullPath()}`);
-			}
-		} else {
-			openTextEditorWindow(element);
+		} else if (element instanceof File && window.NotepadApp) {
+			window.NotepadApp.open(element);
 		}
 	}
 }
@@ -2908,7 +3068,7 @@ function clearAllDropTargets() {
 }
 
 function handleDragStart(e) {
-	const icon = e.target.closest('.project-icon');
+	const icon = e.target.closest('.project-icon, .xp-details-row, .xp-explorer-item');
 	if (!icon) return;
 
 	if (!icon.classList.contains('selected') && !e.ctrlKey) {
@@ -2918,7 +3078,11 @@ function handleDragStart(e) {
 	}
 
 	const pathsToDrag = [];
-	selectedIcons.forEach(selected => {
+	const win = icon.closest('.xp-window');
+	const state = win && win.explorerState ? win.explorerState : null;
+	const selectedSet = state && state.selectedItems ? state.selectedItems : selectedIcons;
+
+	selectedSet.forEach(selected => {
 		const p = selected.dataset.path;
 		if (p && !p.startsWith('app://')) {
 			pathsToDrag.push(p);
@@ -2939,27 +3103,31 @@ function handleDragStart(e) {
 		return;
 	}
 
-	e.dataTransfer.effectAllowed = 'move';
+	e.dataTransfer.effectAllowed = 'copyMove';
 	e.dataTransfer.setData('text/plain', JSON.stringify(pathsToDrag));
 }
 
 function handleDragOver(e) {
-	const pathsRaw = e.dataTransfer.types.includes('text/plain');
-	if (!pathsRaw) return;
+	const hasPaths = e.dataTransfer.types.includes('text/plain');
+	if (!hasPaths) return;
 
 	e.preventDefault();
 	e.stopPropagation();
-	e.dataTransfer.dropEffect = 'move';
+	e.dataTransfer.dropEffect = e.ctrlKey ? 'copy' : 'move';
 
-	const iconTarget = e.target.closest('.project-icon');
+	const iconTarget = e.target.closest('.project-icon, .xp-details-row, .xp-explorer-item');
+	const treeNode = e.target.closest('.xp-tree-node');
 	const folderContent = e.target.closest('.folder-content');
-	const folderWrapper = e.target.closest('.folder-content-wrapper');
+	const folderWrapper = e.target.closest('.folder-content-wrapper, .xp-explorer-view-container');
 	const desktopTarget = e.target.closest('#desktop, #project-icons-container');
+	const recycleWindow = e.target.closest('#window-recycle-bin');
 
 	let dropCandidate = null;
 
-	if (iconTarget) {
-		const isFolder = iconTarget.dataset.type === 'folder';
+	if (treeNode) {
+		dropCandidate = treeNode;
+	} else if (iconTarget) {
+		const isFolder = iconTarget.dataset.type === 'folder' || (iconTarget.dataset.path && fs.findByPath(iconTarget.dataset.path) instanceof Folder);
 		const isRecycle = iconTarget.dataset.systemType === 'recycle-bin';
 		if (isFolder || isRecycle) {
 			dropCandidate = iconTarget;
@@ -2968,6 +3136,8 @@ function handleDragOver(e) {
 		} else {
 			dropCandidate = document.getElementById('project-icons-container');
 		}
+	} else if (recycleWindow) {
+		dropCandidate = recycleWindow.querySelector('#recycle-bin-content') || recycleWindow;
 	} else if (folderContent) {
 		dropCandidate = folderContent;
 	} else if (folderWrapper) {
@@ -3013,7 +3183,7 @@ function resolveDropDestination(dropTarget) {
 		if (treePath) return { type: 'folder', path: treePath };
 	}
 
-	const iconCandidate = dropTarget.closest('.project-icon, .xp-details-row');
+	const iconCandidate = dropTarget.closest('.project-icon, .xp-details-row, .xp-explorer-item');
 	if (iconCandidate) {
 		if (iconCandidate.dataset.systemType === 'recycle-bin') {
 			return { type: 'recycle' };
@@ -3021,6 +3191,15 @@ function resolveDropDestination(dropTarget) {
 		if (iconCandidate.dataset.type === 'folder' || iconCandidate.querySelector('.col-type')?.textContent.includes('Folder')) {
 			return { type: 'folder', path: iconCandidate.dataset.path };
 		}
+		const el = iconCandidate.dataset.path ? fs.findByPath(iconCandidate.dataset.path) : null;
+		if (el instanceof Folder) {
+			return { type: 'folder', path: el.getFullPath() };
+		}
+	}
+
+	const recycleWin = dropTarget.closest('#window-recycle-bin');
+	if (recycleWin) {
+		return { type: 'recycle' };
 	}
 
 	const folderContent = dropTarget.closest('.folder-content');
@@ -3050,7 +3229,7 @@ function resolveDropDestination(dropTarget) {
 		}
 	}
 
-	if (dropTarget.id === 'desktop' || dropTarget.id === 'project-icons-container') {
+	if (dropTarget.id === 'desktop' || dropTarget.id === 'project-icons-container' || dropTarget.closest('#desktop')) {
 		return { type: 'folder', path: '/' };
 	}
 
@@ -3101,17 +3280,22 @@ function handleDrop(e) {
 		return;
 	}
 
+	const isCopy = e.ctrlKey;
 	const destFullPath = destFolder.getFullPath();
 
 	sourcePaths.forEach(src => {
 		const element = fs.findByPath(src);
-		if (!element || !element.parent) return;
-		if (element.parent.getFullPath() === destFullPath) return;
+		if (!element) return;
+		if (!isCopy && element.parent && element.parent.getFullPath() === destFullPath) return;
 
 		try {
-			fs.move(src, destFullPath);
+			if (isCopy) {
+				fs.copy(src, destFullPath);
+			} else {
+				fs.move(src, destFullPath);
+			}
 		} catch (err) {
-			showXPDialog('Move Error', err.message, 'error');
+			showXPDialog(isCopy ? 'Copy Error' : 'Move Error', err.message, 'error');
 		}
 	});
 
@@ -3126,9 +3310,11 @@ function setupDesktopDropzone() {
 	const desktop = document.getElementById('desktop');
 	const iconsContainer = document.getElementById('project-icons-container');
 	[desktop, iconsContainer].forEach(zone => {
-		zone.addEventListener('dragover', handleDragOver);
-		zone.addEventListener('dragleave', handleDragLeave);
-		zone.addEventListener('drop', handleDrop);
+		if (zone) {
+			zone.addEventListener('dragover', handleDragOver);
+			zone.addEventListener('dragleave', handleDragLeave);
+			zone.addEventListener('drop', handleDrop);
+		}
 	});
 }
 

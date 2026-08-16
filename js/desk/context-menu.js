@@ -201,12 +201,53 @@
 		getDesktopItems(destPath = '/') {
 			const hasClipboard = fs && fs.clipboard && fs.clipboard.element;
 			const isHiddenShown = typeof isShowHiddenEnabled === 'function' ? isShowHiddenEnabled() : false;
-			const currentFit = (window.SettingsApp && window.SettingsApp.get('wallpaperFit')) || 'cover';
+			const newTemplates = window.ShellAssociations ? window.ShellAssociations.getNewFileTemplates() : [];
+
+			const newSubmenu = [
+				{
+					label: 'Folder',
+					icon: '../assets/images/desk/icons/Folder Closed.webp',
+					action: () => {
+						fs.create('Folder', destPath, 'New Folder');
+						refreshUI();
+					}
+				},
+				{
+					label: 'Shortcut',
+					icon: '../assets/images/desk/icons/Folder Closed.webp',
+					action: () => {
+						fs.create('Shortcut', destPath, 'New Shortcut', {
+							targetPath: '/',
+							icon: '../assets/images/desk/icons/Folder Closed.webp'
+						});
+						refreshUI();
+					}
+				},
+				{ separator: true }
+			];
+
+			newTemplates.forEach(tpl => {
+				newSubmenu.push({
+					label: tpl.label,
+					icon: window.ShellAssociations ? window.ShellAssociations.getIcon({ name: tpl.defaultName }) : '../assets/images/desk/icons/File.webp',
+					action: () => {
+						fs.create('File', destPath, tpl.defaultName, { content: tpl.content });
+						refreshUI();
+					}
+				});
+			});
 
 			return [
 				{
 					label: 'View',
 					submenu: [
+						{
+							label: 'Extra Large Icons',
+							radio: (window.SettingsApp && window.SettingsApp.get('iconSize')) === 'xlarge',
+							action: () => {
+								if (window.SettingsApp) window.SettingsApp.set('iconSize', 'xlarge');
+							}
+						},
 						{
 							label: 'Large Icons',
 							radio: (window.SettingsApp && window.SettingsApp.get('iconSize')) === 'large',
@@ -215,7 +256,7 @@
 							}
 						},
 						{
-							label: 'Medium Icons',
+							label: 'Medium Icons (Normal)',
 							radio: (window.SettingsApp && window.SettingsApp.get('iconSize')) === 'normal',
 							action: () => {
 								if (window.SettingsApp) window.SettingsApp.set('iconSize', 'normal');
@@ -226,6 +267,17 @@
 							radio: (window.SettingsApp && window.SettingsApp.get('iconSize')) === 'small',
 							action: () => {
 								if (window.SettingsApp) window.SettingsApp.set('iconSize', 'small');
+							}
+						},
+						{ separator: true },
+						{
+							label: 'Show Desktop Icons',
+							checked: (window.SettingsApp && window.SettingsApp.get('showDesktopIcons') !== false),
+							action: () => {
+								if (window.SettingsApp) {
+									const curr = window.SettingsApp.get('showDesktopIcons') !== false;
+									window.SettingsApp.set('showDesktopIcons', !curr);
+								}
 							}
 						}
 					]
@@ -242,7 +294,7 @@
 							action: () => arrangeIcons('type')
 						},
 						{
-							label: 'Type',
+							label: 'Item Type',
 							action: () => arrangeIcons('type')
 						},
 						{
@@ -299,55 +351,43 @@
 						refreshUI();
 					}
 				},
+				{
+					label: 'Undo Move',
+					shortcut: 'Ctrl+Z',
+					disabled: !fs || fs.undoStack.length === 0,
+					action: () => {
+						if (fs && fs.undo()) refreshUI();
+					}
+				},
 				{ separator: true },
 				{
-					label: isHiddenShown ? 'Hide Hidden Items' : 'Show Hidden Items',
+					label: isHiddenShown ? 'Hide Hidden Files' : 'Show Hidden Files',
 					checked: isHiddenShown,
 					action: () => toggleShowHidden()
 				},
 				{
 					label: 'New',
-					submenu: [
-						{
-							label: 'Folder',
-							icon: '../assets/images/desk/icons/Folder Closed.webp',
-							action: () => {
-								fs.create('Folder', destPath, 'New Folder');
-								refreshUI();
-							}
-						},
-						{
-							label: 'Shortcut',
-							icon: '../assets/images/desk/icons/Folder Closed.webp',
-							action: () => {
-								fs.create('Shortcut', destPath, 'New Shortcut', {
-									targetPath: '/',
-									icon: '../assets/images/desk/icons/Folder Closed.webp'
-								});
-								refreshUI();
-							}
-						},
-						{
-							label: 'Text Document',
-							icon: '../assets/images/desk/icons/File.webp',
-							action: () => {
-								fs.create('File', destPath, 'New Text Document.txt');
-								refreshUI();
-							}
-						},
-						{
-							label: 'Wave Sound Document',
-							icon: '../assets/images/desk/icons/Music File.webp',
-							action: () => {
-								fs.create('File', destPath, 'New Audio.wav');
-								refreshUI();
-							}
-						}
-					]
+					submenu: newSubmenu
 				},
 				{ separator: true },
 				{
-					label: 'Display Properties',
+					label: 'Next Desktop Background',
+					action: async () => {
+						if (typeof fetchWallpaperRegistry === 'function') {
+							const list = await fetchWallpaperRegistry();
+							if (list && list.length > 0) {
+								const curr = localStorage.getItem('desktopBackground');
+								const idx = list.findIndex(w => w.path === curr);
+								const next = list[(idx + 1) % list.length];
+								if (next && window.SettingsApp) {
+									window.SettingsApp.set('desktopBackground', next.path);
+								}
+							}
+						}
+					}
+				},
+				{
+					label: 'Properties',
 					bold: true,
 					icon: '../assets/images/desk/icons/Display.webp',
 					action: () => openDisplaySettings()
@@ -494,8 +534,11 @@
 			const isMultiple = selectedIcons.size > 1;
 			const isProject = element instanceof ProjectFile;
 			const isFolder = element instanceof Folder;
+			const isShortcut = element instanceof Shortcut;
 			const isFile = element instanceof File;
 			const isImage = isFile && /\.(png|jpe?g|bmp|webp|gif)$/i.test(element.name);
+			const isZip = isFile && /\.zip$/i.test(element.name);
+			const isBat = isFile && (element.name.toLowerCase().endsWith('.bat') || element.name.toLowerCase().endsWith('.cmd'));
 
 			const openAction = () => {
 				if (isMultiple) {
@@ -508,42 +551,141 @@
 				}
 			};
 
-			const isBat = isFile && (element.name.toLowerCase().endsWith('.bat') || element.name.toLowerCase().endsWith('.cmd'));
+			const items = [];
 
-			const items = [
-				{
-					label: isFolder ? 'Open' : (isImage ? 'Edit with Paint' : (isProject ? 'Open Project Details' : 'Open')),
+			if (isFolder) {
+				items.push({
+					label: 'Open',
 					bold: true,
-					icon: isImage ? '../assets/images/desk/icons/Paint.webp' : null,
 					action: openAction
+				});
+				items.push({
+					label: 'Explore',
+					action: () => openFolderWindow(element)
+				});
+				items.push({
+					label: 'Search...',
+					icon: 'https://api.iconify.design/mdi/magnify.svg',
+					action: () => {
+						if (window.DeskAPI && window.DeskAPI.openSearch) window.DeskAPI.openSearch('');
+					}
+				});
+			} else if (isProject) {
+				items.push({
+					label: 'Open Project Details',
+					bold: true,
+					action: openAction
+				});
+				if (element.projectData && element.projectData.link) {
+					items.push({
+						label: 'Run Application',
+						icon: 'https://api.iconify.design/mdi/play-box-outline.svg',
+						action: () => {
+							const p = element.projectData;
+							const title = resolveProjectTitle(p.title);
+							const appId = `app-running-${title.replace(/\s/g, '-')}-${Date.now()}`;
+							const appContent = `<iframe src="${p.link}" style="width: 100%; height: 100%; border: none;"></iframe>`;
+							const appWin = createXPWindow(appId, title, appContent, 800, 600, { iconSrc: p.icon });
+							appWin.querySelector('.xp-window-content').style.padding = '0';
+							appWin.querySelector('.xp-window-content').style.overflow = 'hidden';
+						}
+					});
 				}
-			];
+			} else if (isShortcut) {
+				items.push({
+					label: 'Open',
+					bold: true,
+					action: openAction
+				});
+				items.push({
+					label: 'Open File Location',
+					action: () => {
+						const resolved = element.resolve();
+						if (resolved && resolved.parent) {
+							openFolderWindow(resolved.parent);
+						}
+					}
+				});
+			} else if (isZip) {
+				items.push({
+					label: 'Extract All...',
+					bold: true,
+					icon: '../assets/images/desk/icons/Folder Open.webp',
+					action: () => {
+						fs.extractZip(element.getFullPath(), element.parent ? element.parent.getFullPath() : '/');
+						refreshUI();
+					}
+				});
+				items.push({
+					label: 'Open',
+					action: openAction
+				});
+			} else {
+				items.push({
+					label: isImage ? 'Preview / Edit' : 'Open',
+					bold: true,
+					action: openAction
+				});
+
+				if (isBat) {
+					items.push({
+						label: 'Edit',
+						icon: '../assets/images/desk/icons/Notepad.webp',
+						action: () => {
+							if (window.NotepadApp) window.NotepadApp.open(element);
+						}
+					});
+				}
+			}
+
+			if (isFile) {
+				const openWithHandlers = window.ShellAssociations ? window.ShellAssociations.getOpenWithHandlers(element, winContext) : [];
+				if (openWithHandlers.length > 0) {
+					items.push({
+						label: 'Open With',
+						submenu: openWithHandlers.map(h => ({
+							label: h.name,
+							icon: h.icon,
+							action: h.action
+						}))
+					});
+				}
+			}
 
 			if (isImage) {
 				items.push({
 					label: 'Set as Desktop Background',
+					icon: '../assets/images/desk/icons/Display.webp',
 					submenu: [
 						{
 							label: 'Stretch / Cover',
 							action: () => {
-								if (typeof setImageAsWallpaper === 'function') setImageAsWallpaper(element.content, 'cover');
+								if (typeof setImageAsWallpaper === 'function') setImageAsWallpaper(element.content || element.remoteUrl, 'cover');
+							}
+						},
+						{
+							label: 'Fit to Screen',
+							action: () => {
+								if (typeof setImageAsWallpaper === 'function') setImageAsWallpaper(element.content || element.remoteUrl, 'stretch');
 							}
 						},
 						{
 							label: 'Tile',
 							action: () => {
-								if (typeof setImageAsWallpaper === 'function') setImageAsWallpaper(element.content, 'tile');
+								if (typeof setImageAsWallpaper === 'function') setImageAsWallpaper(element.content || element.remoteUrl, 'tile');
 							}
 						},
 						{
 							label: 'Center',
 							action: () => {
-								if (typeof setImageAsWallpaper === 'function') setImageAsWallpaper(element.content, 'center');
+								if (typeof setImageAsWallpaper === 'function') setImageAsWallpaper(element.content || element.remoteUrl, 'center');
 							}
 						}
 					]
 				});
 			}
+
+			items.push({ separator: true });
 
 			if (isFile || isProject) {
 				items.push({
@@ -556,43 +698,6 @@
 					}
 				});
 			}
-
-			if (isBat) {
-				items.push({
-					label: 'Edit',
-					icon: '../assets/images/desk/icons/Notepad.webp',
-					action: () => {
-						if (window.NotepadApp) {
-							window.NotepadApp.open(element);
-						}
-					}
-				});
-			}
-
-			if (isFolder) {
-				items.push({
-					label: 'Explore',
-					action: () => openFolderWindow(element)
-				});
-			}
-
-			if (isProject && element.projectData && element.projectData.link) {
-				items.push({
-					label: 'Run Application',
-					icon: 'https://api.iconify.design/mdi/play-box-outline.svg',
-					action: () => {
-						const p = element.projectData;
-						const title = resolveProjectTitle(p.title);
-						const appId = `app-running-${title.replace(/\s/g, '-')}-${Date.now()}`;
-						const appContent = `<iframe src="${p.link}" style="width: 100%; height: 100%; border: none;"></iframe>`;
-						const appWin = createXPWindow(appId, title, appContent, 800, 600, { iconSrc: p.icon });
-						appWin.querySelector('.xp-window-content').style.padding = '0';
-						appWin.querySelector('.xp-window-content').style.overflow = 'hidden';
-					}
-				});
-			}
-
-			items.push({ separator: true });
 
 			items.push({
 				label: 'Pin to Quick Launch',
@@ -613,6 +718,14 @@
 				label: 'Send To',
 				submenu: [
 					{
+						label: 'Compressed (zipped) Folder',
+						icon: '../assets/images/desk/icons/Folder Closed.webp',
+						action: () => {
+							fs.compressToZip(element.getFullPath());
+							refreshUI();
+						}
+					},
+					{
 						label: 'Desktop (create shortcut)',
 						action: () => {
 							fs.create('Shortcut', '/', `${element.name} - Shortcut`, {
@@ -623,33 +736,33 @@
 						}
 					},
 					{
-						label: 'Quick Launch',
-						action: () => {
-							if (window.Taskbar && window.Taskbar.addQuickLaunchItem) {
-								window.Taskbar.addQuickLaunchItem({
-									name: element.name,
-									icon: element.icon,
-									action: 'open-path',
-									path: element.getFullPath()
-								});
-							}
-						}
-					},
-					{
-						label: 'My Documents',
-						action: () => {
-							const pdfs = fs.root.getByName('PDFs');
-							if (pdfs) {
-								fs.copy(element.getFullPath(), pdfs.getFullPath());
-								refreshUI();
-							}
-						}
-					},
-					{
 						label: 'Mail Recipient',
 						icon: 'https://api.iconify.design/mdi/email-outline.svg',
 						action: () => {
 							if (typeof openOutlookExpress === 'function') openOutlookExpress();
+						}
+					},
+					{
+						label: 'My Documents',
+						icon: '../assets/images/desk/icons/My Profile Folder.webp',
+						action: () => {
+							const pdfs = fs.root.getByName('PDFs') || fs.root;
+							fs.copy(element.getFullPath(), pdfs.getFullPath());
+							refreshUI();
+						}
+					},
+					{
+						label: '3½ Floppy (A:)',
+						icon: 'https://api.iconify.design/mdi/floppy.svg',
+						action: () => {
+							showXPDialog('Drive A:', 'Please insert a disk into drive A:.', 'error');
+						}
+					},
+					{ separator: true },
+					{
+						label: 'Clipboard as Path',
+						action: () => {
+							if (navigator.clipboard) navigator.clipboard.writeText(element.getFullPath());
 						}
 					}
 				]
@@ -675,6 +788,14 @@
 				}
 			});
 
+			items.push({
+				label: 'Duplicate',
+				action: () => {
+					fs.duplicate(element.getFullPath());
+					refreshUI();
+				}
+			});
+
 			items.push({ separator: true });
 
 			items.push({
@@ -696,7 +817,7 @@
 				action: () => {
 					const count = selectedIcons.size;
 					const message = count > 1
-						? `Are you sure you want to move ${count} items to the Recycle Bin?`
+						? `Are you sure you want to move these ${count} items to the Recycle Bin?`
 						: `Are you sure you want to move '${element.name}' to the Recycle Bin?`;
 
 					createConfirmationDialog(message, () => {
@@ -755,7 +876,6 @@
 							if (window.DeskAPI && window.DeskAPI.openSearch) window.DeskAPI.openSearch('');
 						}
 					},
-					{ separator: true },
 					{
 						label: 'Manage',
 						action: () => {
@@ -764,9 +884,21 @@
 					},
 					{ separator: true },
 					{
+						label: 'Map Network Drive...',
+						action: () => {
+							if (typeof showXPDialog === 'function') showXPDialog('Map Network Drive', 'Specify the drive letter and network path to mount.', 'info');
+						}
+					},
+					{
+						label: 'Disconnect Network Drive...',
+						disabled: true,
+						action: () => {}
+					},
+					{ separator: true },
+					{
 						label: 'Create Shortcut',
 						action: () => {
-							if (typeof showXPDialog === 'function') showXPDialog('Shortcut', 'Shortcut already placed on Desktop.', 'info');
+							if (typeof showXPDialog === 'function') showXPDialog('Shortcut', 'Shortcut already exists on Desktop.', 'info');
 						}
 					},
 					{ separator: true },
@@ -821,7 +953,33 @@
 						label: 'Properties',
 						bold: true,
 						action: () => {
-							if (window.SettingsApp) window.SettingsApp.open('system');
+							const count = fs ? fs.loadRecycleBinItems().length : 0;
+							showXPDialog('Recycle Bin Properties', `Recycle Bin is located on Local Disk (C:).\nCurrent items in bin: ${count}`, 'info');
+						}
+					}
+				];
+			}
+
+			if (type === 'achievements') {
+				return [
+					{
+						label: 'Open Achievements',
+						bold: true,
+						action: () => {
+							if (window.AchievementsManager) window.AchievementsManager.open();
+						}
+					},
+					{
+						label: 'Reset Progress',
+						action: () => {
+							if (window.AchievementsManager) window.AchievementsManager.reset(true);
+						}
+					},
+					{ separator: true },
+					{
+						label: 'Properties',
+						action: () => {
+							if (window.AchievementsManager) window.AchievementsManager.open();
 						}
 					}
 				];
