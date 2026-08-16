@@ -83,6 +83,12 @@
 						<div class="xp-start-divider"></div>
 
 						<div class="xp-start-frequent-section">
+							<div class="xp-start-item" data-action="open-media-player">
+								<img src="../assets/images/desk/icons/Video File.webp" class="xp-start-item-icon" alt="Media Player">
+								<div class="xp-start-item-texts">
+									<span class="xp-start-title">Windows Media Player</span>
+								</div>
+							</div>
 							<div class="xp-start-item" data-action="open-winamp">
 								<img src="https://upload.wikimedia.org/wikipedia/commons/thumb/0/0d/Winamp-logo.svg/960px-Winamp-logo.svg.png" class="xp-start-item-icon" alt="Winamp">
 								<div class="xp-start-item-texts">
@@ -117,12 +123,6 @@
 								<img src="../assets/images/desk/icons/Command Prompt.webp" class="xp-start-item-icon" alt="Command Prompt">
 								<div class="xp-start-item-texts">
 									<span class="xp-start-title">Command Prompt</span>
-								</div>
-							</div>
-							<div class="xp-start-item" data-action="control-panel-appearance">
-								<img src="../assets/images/desk/icons/Display.webp" class="xp-start-item-icon" alt="Appearance">
-								<div class="xp-start-item-texts">
-									<span class="xp-start-title">Wallpaper & Themes</span>
 								</div>
 							</div>
 							<div class="xp-start-item" data-action="open-today-anecdote">
@@ -370,7 +370,7 @@
 							<span class="xp-start-flyout-arrow">►</span>
 						</div>
 						<div class="xp-start-flyout-item has-sub" data-sub="media">
-							<img src="../assets/images/desk/icons/Music File.webp" class="xp-start-item-icon" alt="">
+							<img src="../assets/images/desk/icons/Video File.webp" class="xp-start-item-icon" alt="">
 							<span class="xp-start-title">Entertainment</span>
 							<span class="xp-start-flyout-arrow">►</span>
 						</div>
@@ -491,9 +491,17 @@
 							`;
 						} else if (subKey === 'media') {
 							nestedFlyout.innerHTML = `
+								<div class="xp-start-flyout-item" data-action="open-media-player">
+									<img src="../assets/images/desk/icons/Video File.webp" class="xp-start-item-icon" alt="">
+									<span class="xp-start-title">Windows Media Player</span>
+								</div>
 								<div class="xp-start-flyout-item" data-action="open-winamp">
 									<img src="https://upload.wikimedia.org/wikipedia/commons/thumb/0/0d/Winamp-logo.svg/960px-Winamp-logo.svg.png" class="xp-start-item-icon" alt="">
 									<span class="xp-start-title">Winamp Media Player</span>
+								</div>
+								<div class="xp-start-flyout-item" data-action="open-sound-recorder">
+									<img src="../assets/images/desk/icons/Music File.webp" class="xp-start-item-icon" alt="">
+									<span class="xp-start-title">Sound Recorder</span>
 								</div>
 								<div class="xp-start-flyout-item" data-action="link-soundcloud">
 									<img src="https://api.iconify.design/mdi/soundcloud.svg" class="xp-start-item-icon" alt="">
@@ -873,12 +881,29 @@
 					}
 					break;
 				case 'my-pictures':
+					if (typeof fs !== 'undefined') {
+						const musicFolder = fs.root.getByName('Music');
+						if (musicFolder && typeof openFolderWindow === 'function') {
+							openFolderWindow(musicFolder);
+							break;
+						}
+					}
 					if (window.DeskAppRegistry) window.DeskAppRegistry.launch('display');
 					else if (typeof openDisplaySettings === 'function') openDisplaySettings();
 					break;
 				case 'my-music':
-					if (window.DeskAppRegistry) window.DeskAppRegistry.launch('winamp');
+					if (typeof fs !== 'undefined') {
+						const musicFolder = fs.root.getByName('Music');
+						if (musicFolder && typeof openFolderWindow === 'function') {
+							openFolderWindow(musicFolder);
+							break;
+						}
+					}
+					if (window.MediaPlayerApp) window.MediaPlayerApp.open();
 					else if (typeof openWinamp === 'function') openWinamp();
+					break;
+				case 'open-media-player':
+					if (window.MediaPlayerApp) window.MediaPlayerApp.open();
 					break;
 				case 'my-computer':
 					if (window.DeskAppRegistry) window.DeskAppRegistry.launch('mycomputer');

@@ -11,6 +11,7 @@
 		{ id: 'ql-notepad', name: 'Notepad', icon: '../assets/images/desk/icons/Notepad.webp', action: 'open-notepad' },
 		{ id: 'ql-calc', name: 'Calculator', icon: '../assets/images/desk/icons/Calculator.webp', action: 'open-calc' },
 		{ id: 'ql-paint', name: 'Paint', icon: '../assets/images/desk/icons/Paint.webp', action: 'open-paint' },
+		{ id: 'ql-wmp', name: 'Windows Media Player', icon: '../assets/images/desk/icons/Video File.webp', action: 'open-media-player' },
 		{ id: 'ql-winamp', name: 'Winamp Media Player', icon: 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/0d/Winamp-logo.svg/960px-Winamp-logo.svg.png', action: 'open-winamp' },
 		{ id: 'ql-mine', name: 'Minesweeper', icon: '../assets/images/desk/icons/Minesweeper.webp', action: 'open-mine' },
 	];

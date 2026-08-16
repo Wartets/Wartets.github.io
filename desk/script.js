@@ -252,10 +252,27 @@ class Folder extends Element {
 	}
 
 	toJSON() {
+		let isInsideMusic = false;
+		let curr = this;
+		while (curr) {
+			if (curr.name === 'Music') {
+				isInsideMusic = true;
+				break;
+			}
+			curr = curr.parent;
+		}
+		if (isInsideMusic && this.name !== 'Music') {
+			return {
+				...super.toJSON(),
+				icon: this.icon,
+				isDynamicLibrary: true,
+				children: []
+			};
+		}
 		return {
 			...super.toJSON(),
 			icon: this.icon,
-			children: Array.from(this.children.values()).map(child => child.toJSON()),
+			children: Array.from(this.children.values()).filter(c => c.name !== 'Music').map(child => child.toJSON()),
 		};
 	}
 }
@@ -923,9 +940,11 @@ window.DeskAPI = {
 	openCharacterMap: () => (window.DeskAppRegistry ? window.DeskAppRegistry.launch('charmap') : (window.CharacterMapApp ? window.CharacterMapApp.open() : null)),
 	openPaint: (file) => (window.DeskAppRegistry ? window.DeskAppRegistry.launch('paint', file) : (window.PaintApp ? window.PaintApp.open(file) : openPaint(file))),
 	openSoundRecorder: (file) => (window.DeskAppRegistry ? window.DeskAppRegistry.launch('soundrecorder', file) : (window.SoundRecorderApp ? window.SoundRecorderApp.open(file) : null)),
+	openMediaPlayer: (track) => (window.MediaPlayerApp ? window.MediaPlayerApp.open(track) : null),
+	openPictureViewer: (file) => (window.PictureViewerApp ? window.PictureViewerApp.open(file) : null),
 	openMinesweeperGame: () => (window.DeskAppRegistry ? window.DeskAppRegistry.launch('minesweeper') : (window.MinesweeperApp ? window.MinesweeperApp.open() : openMinesweeper())),
 	openSolitaireGame: () => (window.DeskAppRegistry ? window.DeskAppRegistry.launch('solitaire') : (window.SolitaireApp ? window.SolitaireApp.open() : openSolitaire())),
-	openWinampPlayer: () => (window.DeskAppRegistry ? window.DeskAppRegistry.launch('winamp') : openWinamp()),
+	openWinampPlayer: (track) => (window.DeskAppRegistry ? window.DeskAppRegistry.launch('winamp', track) : openWinamp(track)),
 	getMoonPhaseDay: () => (typeof getMoonPhaseDayNumber === 'function') ? getMoonPhaseDayNumber() : null,
 	getRecycleBinCount: () => (typeof fs !== 'undefined' && fs) ? fs.loadRecycleBinItems().length : 0,
 	addToRecentDocs: (item) => addToRecentDocs(item),
@@ -971,6 +990,9 @@ window.DeskAPI = {
 document.addEventListener('DOMContentLoaded', () => {
 	initializeFileSystem();
 	initDocuments();
+	if (window.MusicStore) {
+		window.MusicStore.init();
+	}
 	applyInitialDesktopBackground();
 	renderDesktopIcons();
 	if (window.Taskbar) {
@@ -1356,6 +1378,13 @@ function initializeFileSystem() {
 	fs = new FileSystemManager();
 	window.fs = fs;
 	fs.load();
+
+	let musicFolder = fs.root.getByName('Music');
+	if (!musicFolder) {
+		musicFolder = new Folder('Music');
+		musicFolder.icon = '../assets/images/desk/icons/Folder Closed.webp';
+		fs.root.add(musicFolder);
+	}
 
 	let othersFolder = fs.root.getByName('Others');
 	if (!othersFolder) {
@@ -2133,7 +2162,19 @@ async function openElementInfoWindow(element) {
 		extraRows += buildInfoRow('Opens with', window.ShellAssociations ? (window.ShellAssociations.getConfig(element.name)?.typeLabel || 'Notepad') : 'Notepad');
 		extraRows += buildInfoRow('Size', `${formatBytes(element.size)} (${element.size.toLocaleString()} bytes)`);
 		extraRows += buildInfoRow('Size on disk', `${formatBytes(Math.ceil(element.size / 4096) * 4096)}`);
-		if (!element.readOnly) {
+		if (element.musicTrack) {
+			const mt = element.musicTrack;
+			const artists = window.MusicStore ? window.MusicStore.normalizeArtists(mt.metadata?.artists) : (mt.metadata?.artists || []);
+			if (artists.length) extraRows += buildInfoRow('Artist', artists.join(', '));
+			if (mt.metadata?.album) extraRows += buildInfoRow('Album', mt.metadata.album);
+			if (mt.metadata?.year) extraRows += buildInfoRow('Year', String(mt.metadata.year));
+			if (mt.metadata?.genre) extraRows += buildInfoRow('Genre', mt.metadata.genre);
+			if (mt.audio_specs?.duration) extraRows += buildInfoRow('Duration', mt.audio_specs.duration);
+			if (mt.audio_specs?.bitrate) extraRows += buildInfoRow('Bitrate', mt.audio_specs.bitrate);
+			if (mt.audio_specs?.sample_rate) extraRows += buildInfoRow('Sample Rate', mt.audio_specs.sample_rate);
+			if (mt.metadata?.bpm) extraRows += buildInfoRow('BPM', String(mt.metadata.bpm));
+		}
+		if (!element.readOnly && !element.musicTrack) {
 			const preview = (element.content || '').replace(/<[^>]*>/g, ' ').trim().slice(0, 240);
 			if (preview) previewHtml = `<div class="info-preview">${preview}${element.content.length > 240 ? '…' : ''}</div>`;
 		}
@@ -2477,41 +2518,121 @@ function setupCalendar() {
 	}
 }
 
-function openWinamp() {
+async function openWinamp(targetTrack = null) {
+	if (window.MusicStore && !window.MusicStore.isReady()) {
+		try {
+			await window.MusicStore.init();
+		} catch (e) {}
+	}
+
+	let trackToPlay = null;
+	if (targetTrack && window.MusicStore) {
+		trackToPlay = window.MusicStore.resolveWebampTrack(targetTrack);
+	}
+
 	if (webampInstance) {
-		webampInstance.reopen();
-		return;
+		try {
+			webampInstance.reopen();
+			if (trackToPlay) {
+				if (typeof webampInstance.setTracksToPlay === 'function') {
+					webampInstance.setTracksToPlay([trackToPlay]);
+				} else if (typeof webampInstance.appendTracks === 'function') {
+					webampInstance.appendTracks([trackToPlay]);
+				}
+				if (typeof webampInstance.play === 'function') {
+					webampInstance.play();
+				}
+			}
+			return;
+		} catch (e) {
+			webampInstance = null;
+		}
 	}
 
 	const Webamp = window.Webamp;
 	if (!Webamp) {
+		if (window.MediaPlayerApp) {
+			window.MediaPlayerApp.open(targetTrack);
+			return;
+		}
 		showXPDialog('Error', 'Winamp library failed to load.', 'error');
 		return;
 	}
 
-	webampInstance = new Webamp({
-		initialTracks: [{
-			metaData: {
-				artist: "Wartets",
-				title: "Projet 8.4"
-			},
-			url: "assets/musics/Projet_8.4.mp3",
-			duration: 4.333
-		}],
-		zIndex: 9000
-	});
+	let initialTracks = [];
+	if (window.MusicStore) {
+		const all = window.MusicStore.getAllWebampTracks(false);
+		if (trackToPlay) {
+			initialTracks.push(trackToPlay);
+			all.forEach(t => {
+				if (t.url !== trackToPlay.url) {
+					initialTracks.push(t);
+				}
+			});
+		} else {
+			initialTracks = all;
+		}
+	}
 
-	webampInstance.onClose(() => {
-		webampInstance.dispose();
+	if (initialTracks.length === 0) {
+		if (trackToPlay) {
+			initialTracks.push(trackToPlay);
+		} else {
+			initialTracks = [{
+				metaData: {
+					artist: "Wartets",
+					title: "Projet 8.4"
+				},
+				url: "assets/musics/Projet_8.4.mp3",
+				duration: 4.333
+			}];
+		}
+	}
+
+	let webampHolder = document.getElementById('webamp-holder');
+	if (!webampHolder) {
+		webampHolder = document.createElement('div');
+		webampHolder.id = 'webamp-holder';
+		webampHolder.style.position = 'absolute';
+		webampHolder.style.zIndex = '9000';
+		document.body.appendChild(webampHolder);
+	}
+
+	try {
+		webampInstance = new Webamp({
+			initialTracks: initialTracks,
+			zIndex: 9000
+		});
+
+		webampInstance.onClose(() => {
+			if (webampInstance) {
+				webampInstance.dispose();
+				webampInstance = null;
+			}
+		});
+
+		webampInstance.onMinimize(() => {
+			if (webampInstance) {
+				webampInstance.dispose();
+				webampInstance = null;
+			}
+		});
+
+		webampInstance.renderWhenReady(webampHolder);
+	} catch (err) {
 		webampInstance = null;
-	});
+		if (window.MediaPlayerApp) {
+			window.MediaPlayerApp.open(targetTrack);
+		}
+	}
 
-	webampInstance.onMinimize(() => {
-		webampInstance.dispose(); 
-		webampInstance = null;
-	});
-
-	webampInstance.renderWhenReady(document.getElementById('window-area'));
+	if (trackToPlay) {
+		setTimeout(() => {
+			if (webampInstance && typeof webampInstance.play === 'function') {
+				webampInstance.play();
+			}
+		}, 300);
+	}
 }
 
 function openMinesweeper() {
@@ -2710,16 +2831,17 @@ function refreshUI() {
 		if (win.classList.contains('xp-explorer-window') && win.explorerState && window.FileExplorer) {
 			if (win.explorerState.isRecycleBin) {
 				window.FileExplorer.updateView(win, true);
-			} else {
-				const folder = fs.findByPath(win.explorerState.currentFolder.getFullPath());
+			} else if (win.explorerState.currentFolder) {
+				const currentPath = typeof win.explorerState.currentFolder.getFullPath === 'function' 
+					? win.explorerState.currentFolder.getFullPath() 
+					: '/';
+				const folder = fs.findByPath(currentPath);
 				if (folder) {
 					win.explorerState.currentFolder = folder;
-					window.FileExplorer.updateView(win, true);
-					if (win.explorerState.sidebarMode === 'tree') {
-						window.FileExplorer.renderFolderTree(win);
-					}
-				} else {
-					closeWindow(win, win.id);
+				}
+				window.FileExplorer.updateView(win, true);
+				if (win.explorerState.sidebarMode === 'tree') {
+					window.FileExplorer.renderFolderTree(win);
 				}
 			}
 		}

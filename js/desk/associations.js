@@ -89,14 +89,26 @@
 				}
 			});
 
-			this.register(['.png', '.jpg', '.jpeg', '.bmp', '.webp', '.gif'], {
-				typeLabel: 'Bitmap Image',
-				defaultIcon: '../assets/images/desk/icons/Paint.webp',
-				defaultApp: 'paint',
+			this.register(['.png', '.jpg', '.jpeg', '.bmp', '.webp', '.gif', '.ico', '.tiff', '.tif'], {
+				typeLabel: 'Image File',
+				defaultIcon: '../assets/images/desk/icons/Picture.webp',
+				defaultApp: 'pictureviewer',
 				openHandler: (file) => {
-					if (window.PaintApp) window.PaintApp.open(file);
+					if (window.PictureViewerApp) {
+						window.PictureViewerApp.open(file);
+					} else if (window.PaintApp) {
+						window.PaintApp.open(file);
+					}
 				},
 				openWith: [
+					{
+						id: 'pictureviewer',
+						name: 'Windows Picture and Fax Viewer',
+						icon: '../assets/images/desk/icons/Picture.webp',
+						action: (file) => {
+							if (window.PictureViewerApp) window.PictureViewerApp.open(file);
+						}
+					},
 					{
 						id: 'paint',
 						name: 'Paint',
@@ -110,7 +122,7 @@
 						name: 'Internet Explorer',
 						icon: '../assets/images/desk/internet-explorer.png',
 						action: (file) => {
-							if (window.InternetExplorerApp) window.InternetExplorerApp.open(`file://${file.getFullPath()}`);
+							if (window.InternetExplorerApp) window.InternetExplorerApp.open(file.remoteUrl || file.content || `file://${file.getFullPath()}`);
 						}
 					}
 				],
@@ -122,14 +134,34 @@
 				}
 			});
 
-			this.register(['.wav', '.wave', '.mp3', '.ogg', '.m4a'], {
-				typeLabel: 'Wave Sound',
+			this.register(['.wav', '.wave', '.mp3', '.ogg', '.m4a', '.flac', '.aif', '.aiff', '.wma', '.aac', '.alac', '.opus'], {
+				typeLabel: 'Audio Track',
 				defaultIcon: '../assets/images/desk/icons/Music File.webp',
-				defaultApp: 'soundrecorder',
+				defaultApp: 'mediaplayer',
 				openHandler: (file) => {
-					if (window.SoundRecorderApp) window.SoundRecorderApp.open(file);
+					if (window.MediaPlayerApp) {
+						window.MediaPlayerApp.open(file);
+					} else if (typeof openWinamp === 'function') {
+						openWinamp(file);
+					}
 				},
 				openWith: [
+					{
+						id: 'mediaplayer',
+						name: 'Windows Media Player',
+						icon: '../assets/images/desk/icons/Video File.webp',
+						action: (file) => {
+							if (window.MediaPlayerApp) window.MediaPlayerApp.open(file);
+						}
+					},
+					{
+						id: 'winamp',
+						name: 'Winamp Media Player',
+						icon: 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/0d/Winamp-logo.svg/960px-Winamp-logo.svg.png',
+						action: (file) => {
+							if (typeof openWinamp === 'function') openWinamp(file);
+						}
+					},
 					{
 						id: 'soundrecorder',
 						name: 'Sound Recorder',
@@ -139,11 +171,11 @@
 						}
 					},
 					{
-						id: 'winamp',
-						name: 'Winamp Media Player',
-						icon: 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/0d/Winamp-logo.svg/960px-Winamp-logo.svg.png',
-						action: () => {
-							if (typeof openWinamp === 'function') openWinamp();
+						id: 'ie',
+						name: 'Internet Explorer',
+						icon: '../assets/images/desk/internet-explorer.png',
+						action: (file) => {
+							if (window.InternetExplorerApp) window.InternetExplorerApp.open(file.remoteUrl || file.content);
 						}
 					}
 				],
@@ -153,6 +185,37 @@
 					content: '',
 					label: 'Wave Sound'
 				}
+			});
+
+			this.register(['.mp4', '.avi', '.wmv', '.mkv', '.mov', '.mpg', '.webm'], {
+				typeLabel: 'Video Clip',
+				defaultIcon: '../assets/images/desk/icons/Video File.webp',
+				defaultApp: 'mediaplayer',
+				openHandler: (file) => {
+					if (window.MediaPlayerApp) {
+						window.MediaPlayerApp.open(file);
+					} else if (window.InternetExplorerApp) {
+						window.InternetExplorerApp.open(file.content || file.remoteUrl || `file://${file.getFullPath()}`);
+					}
+				},
+				openWith: [
+					{
+						id: 'mediaplayer',
+						name: 'Windows Media Player',
+						icon: '../assets/images/desk/icons/Video File.webp',
+						action: (file) => {
+							if (window.MediaPlayerApp) window.MediaPlayerApp.open(file);
+						}
+					},
+					{
+						id: 'ie',
+						name: 'Internet Explorer',
+						icon: '../assets/images/desk/internet-explorer.png',
+						action: (file) => {
+							if (window.InternetExplorerApp) window.InternetExplorerApp.open(file.content || file.remoteUrl || `file://${file.getFullPath()}`);
+						}
+					}
+				]
 			});
 
 			this.register(['.pdf'], {
@@ -286,17 +349,6 @@
 				openHandler: (file) => {
 					if (typeof showXPDialog === 'function') {
 						showXPDialog('Disc Image', `Mounted virtual volume "${file.name}" to Drive D:.`, 'info');
-					}
-				}
-			});
-
-			this.register(['.mp4', '.avi', '.wmv', '.mkv', '.mov', '.mpg'], {
-				typeLabel: 'Video Clip',
-				defaultIcon: '../assets/images/desk/icons/Video File.webp',
-				defaultApp: 'ie',
-				openHandler: (file) => {
-					if (window.InternetExplorerApp) {
-						window.InternetExplorerApp.open(file.content || file.remoteUrl || `file://${file.getFullPath()}`);
 					}
 				}
 			});
@@ -440,16 +492,16 @@
 			}
 
 			if (element instanceof File) {
+				const cfg = this.getConfig(element.name);
+				if (cfg && typeof cfg.openHandler === 'function') {
+					cfg.openHandler(element, windowContext, options);
+					return;
+				}
+
 				if (element.readOnly && element.remoteUrl) {
 					if (typeof openReadOnlyTextWindow === 'function') {
 						openReadOnlyTextWindow(element);
 					}
-					return;
-				}
-
-				const cfg = this.getConfig(element.name);
-				if (cfg && typeof cfg.openHandler === 'function') {
-					cfg.openHandler(element, windowContext, options);
 					return;
 				}
 
