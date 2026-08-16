@@ -377,7 +377,7 @@ const projects = [
 		link: "https://wartets.github.io/Procedural-Art/",
 		keywords: ["generative-art", "art", "procedural-generation", "creative-coding", "fractals"],
 		languages: ["en"],
-		show: true
+		show: false
 	},
 	[
 		{
