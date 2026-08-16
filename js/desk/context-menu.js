@@ -291,7 +291,7 @@
 						},
 						{
 							label: 'Size',
-							action: () => arrangeIcons('type')
+							action: () => arrangeIcons('size')
 						},
 						{
 							label: 'Item Type',
@@ -1379,12 +1379,8 @@
 						label: 'Adjust Date/Time',
 						bold: true,
 						action: () => {
-							const calendarPopup = document.getElementById('calendar-popup');
-							if (calendarPopup) {
-								if (typeof renderCalendar === 'function' && typeof currentCalendarDate !== 'undefined') {
-									renderCalendar(currentCalendarDate.getFullYear(), currentCalendarDate.getMonth());
-								}
-								calendarPopup.classList.remove('hidden');
+							if (window.Taskbar && typeof window.Taskbar.toggleCalendar === 'function') {
+								window.Taskbar.toggleCalendar();
 							}
 						}
 					},

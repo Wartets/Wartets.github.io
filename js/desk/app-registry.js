@@ -117,6 +117,10 @@
 			if (!app) return false;
 			this.recordLaunch(app.id);
 
+			if (window.DeskAPI && typeof window.DeskAPI.addToRecentDocs === 'function' && app.id !== 'settings' && app.id !== 'recyclebin') {
+				window.DeskAPI.addToRecentDocs({ name: app.name, icon: app.icon, type: 'application', path: `app://${app.id}` });
+			}
+
 			if (window.DeskEventBus) {
 				window.DeskEventBus.emit('app:before-launch', { id: app.id, args });
 			}
@@ -276,7 +280,7 @@
 				name: 'Control Panel',
 				icon: '../assets/images/desk/icons/System Properties.webp',
 				category: 'System Tools',
-				aliases: ['controlpanel', 'preferences', 'config', 'control', 'control.exe', 'msconfig'],
+				aliases: ['controlpanel', 'preferences', 'config', 'control', 'control.exe', 'msconfig', 'sysdm.cpl', 'taskmgr', 'taskmgr.exe', 'regedit', 'regedit.exe'],
 				handler: (args) => {
 					const tab = typeof args === 'string' ? args : (args && args.tab ? args.tab : 'system');
 					if (window.SettingsApp) window.SettingsApp.open(tab);

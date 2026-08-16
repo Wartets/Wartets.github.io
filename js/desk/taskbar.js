@@ -1247,9 +1247,13 @@
 			if (previewPopupEl) previewPopupEl.classList.add('hidden');
 		},
 
-		showBalloon(title, message, iconSrc = 'https://api.iconify.design/mdi/information.svg?color=%23245edc', duration = 6000, onClick = null) {
+		showBalloon(title, message, iconSrc = 'https://api.iconify.design/mdi/information.svg?color=%23245edc', duration = null, onClick = null) {
 			if (window.SettingsApp && !window.SettingsApp.get('taskbarBalloons')) return;
 			if (!balloonContainerEl) this.createDomElements();
+
+			const resolvedDuration = (duration !== null && duration !== undefined)
+				? duration
+				: ((window.SettingsApp && window.SettingsApp.get('balloonDuration')) || 6000);
 
 			const balloon = document.createElement('div');
 			balloon.className = 'xp-taskbar-balloon';
@@ -1287,10 +1291,10 @@
 
 			balloonContainerEl.appendChild(balloon);
 
-			if (duration > 0) {
+			if (resolvedDuration > 0) {
 				setTimeout(() => {
 					if (balloon.parentElement) removeBalloon();
-				}, duration);
+				}, resolvedDuration);
 			}
 		},
 
@@ -1342,67 +1346,37 @@
 		},
 
 		showDesktop() {
-			if (typeof openWindows === 'undefined') return;
-			const windows = Object.values(openWindows);
-			const visibleCount = windows.filter(w => !w.classList.contains('minimized') && !w.classList.contains('xp-modal-overlay')).length;
+			const windowsList = window.WindowManager ? Object.values(window.WindowManager.windows) : (typeof openWindows !== 'undefined' ? Object.values(openWindows) : []);
+			if (windowsList.length === 0) return;
+			const visibleCount = windowsList.filter(w => !w.classList.contains('minimized') && !w.classList.contains('xp-modal-overlay')).length;
 			if (visibleCount >= 10 && window.AchievementsManager) {
 				window.AchievementsManager.progress('desktop_boss_key', 1);
 			}
-			const allMinimized = windows.every(w => w.classList.contains('minimized'));
+			const allMinimized = windowsList.every(w => w.classList.contains('minimized'));
 
-			windows.forEach(win => {
+			windowsList.forEach(win => {
 				if (allMinimized) {
-					if (typeof unminimizeWindow === 'function') unminimizeWindow(win);
+					if (window.WindowManager) window.WindowManager.unminimize(win);
+					else if (typeof unminimizeWindow === 'function') unminimizeWindow(win);
 				} else {
-					if (!win.classList.contains('minimized') && typeof minimizeWindow === 'function') {
-						minimizeWindow(win, win.id);
+					if (!win.classList.contains('minimized')) {
+						if (window.WindowManager) window.WindowManager.minimize(win, win.id);
+						else if (typeof minimizeWindow === 'function') minimizeWindow(win, win.id);
 					}
 				}
 			});
 		},
 
 		cascadeWindows() {
-			if (typeof openWindows === 'undefined') return;
-			const visibleWins = Object.values(openWindows).filter(w => !w.classList.contains('minimized') && !w.classList.contains('xp-modal-overlay'));
-			let offset = 20;
-			visibleWins.forEach((win, idx) => {
-				if (win.classList.contains('maximized') && typeof maximizeWindow === 'function') {
-					maximizeWindow(win);
-				}
-				win.style.left = `${offset * idx + 20}px`;
-				win.style.top = `${offset * idx + 20}px`;
-				if (typeof bringWindowToFront === 'function') bringWindowToFront(win);
-			});
+			if (window.WindowManager && typeof window.WindowManager.cascade === 'function') {
+				window.WindowManager.cascade();
+			}
 		},
 
 		tileWindows(horizontal = true) {
-			if (typeof openWindows === 'undefined') return;
-			const visibleWins = Object.values(openWindows).filter(w => !w.classList.contains('minimized') && !w.classList.contains('xp-modal-overlay'));
-			const count = visibleWins.length;
-			if (count === 0) return;
-
-			const screenW = window.innerWidth;
-			const screenH = window.innerHeight - 30;
-
-			visibleWins.forEach((win, idx) => {
-				if (win.classList.contains('maximized') && typeof maximizeWindow === 'function') {
-					maximizeWindow(win);
-				}
-				if (horizontal) {
-					const h = screenH / count;
-					win.style.left = '0px';
-					win.style.top = `${idx * h}px`;
-					win.style.width = `${screenW}px`;
-					win.style.height = `${h}px`;
-				} else {
-					const w = screenW / count;
-					win.style.left = `${idx * w}px`;
-					win.style.top = '0px';
-					win.style.width = `${w}px`;
-					win.style.height = `${screenH}px`;
-				}
-				if (typeof bringWindowToFront === 'function') bringWindowToFront(win);
-			});
+			if (window.WindowManager && typeof window.WindowManager.tile === 'function') {
+				window.WindowManager.tile(horizontal);
+			}
 		},
 
 		toggleTrayExpansion() {

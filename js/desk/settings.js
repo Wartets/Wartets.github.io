@@ -2448,6 +2448,9 @@
 			currentSettings = { ...pendingSettings };
 			saveCurrentSettings();
 			applyAllSettings();
+			if (window.DeskEventBus) {
+				window.DeskEventBus.emit('settings:changed', { settings: currentSettings });
+			}
 			if (applyBtn) applyBtn.disabled = true;
 			SoundEngine.play('click');
 		};
@@ -2476,7 +2479,7 @@
 
 	window.SettingsApp = {
 		open: (tab = 'system') => openSettingsDialog(tab),
-		get: (key) => (currentSettings ? currentSettings[key] : (DEFAULT_SETTINGS ? DEFAULT_SETTINGS[key] : undefined)),
+		get: (key) => (currentSettings && currentSettings[key] !== undefined ? currentSettings[key] : (DEFAULT_SETTINGS ? DEFAULT_SETTINGS[key] : undefined)),
 		getAll: () => Object.assign({}, currentSettings),
 		set: (key, value) => {
 			if (!currentSettings) currentSettings = Object.assign({}, DEFAULT_SETTINGS);

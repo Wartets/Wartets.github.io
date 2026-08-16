@@ -137,12 +137,27 @@
 			return win;
 		}
 
+		getTopmostWindow() {
+			const openWins = Object.values(this.windows).filter(w => !w.classList.contains('minimized') && !w.classList.contains('xp-modal-overlay') && w.style.display !== 'none');
+			if (openWins.length === 0) return null;
+			openWins.sort((a, b) => parseInt(b.style.zIndex || '0', 10) - parseInt(a.style.zIndex || '0', 10));
+			return openWins[0];
+		}
+
 		makeDraggable(win) {
 			const header = win.querySelector('.xp-window-header');
 			const overlay = document.getElementById('iframe-drag-overlay');
 			let isDragging = false;
 			let offsetX = 0;
 			let offsetY = 0;
+
+			header.addEventListener('dblclick', (e) => {
+				if (e.target.closest('.xp-window-buttons') || win.classList.contains('xp-modal-overlay')) return;
+				const maxBtn = win.querySelector('.maximize-btn');
+				if (maxBtn && maxBtn.style.display !== 'none') {
+					this.maximize(win);
+				}
+			});
 
 			header.addEventListener('contextmenu', (e) => {
 				if (e.target.closest('.xp-window-buttons')) return;
@@ -337,9 +352,7 @@
 
 		bringToFront(win) {
 			if (!win) return;
-			if (parseInt(win.style.zIndex || '0', 10) < this.zIndexCounter) {
-				win.style.zIndex = String(++this.zIndexCounter);
-			}
+			win.style.zIndex = String(++this.zIndexCounter);
 			this.setActive(win);
 		}
 
@@ -381,6 +394,8 @@
 				}
 				if (this.activeWindow === win) {
 					this.activeWindow = null;
+					const nextTop = this.getTopmostWindow();
+					if (nextTop) this.setActive(nextTop);
 				}
 				if (window.DeskEventBus) {
 					window.DeskEventBus.emit('window:minimized', { id, win });
@@ -506,10 +521,10 @@
 
 		forceClose(win, id) {
 			let cleanedUp = false;
+			const overlay = document.getElementById(`overlay-${id}`);
 			const cleanup = () => {
 				if (cleanedUp) return;
 				cleanedUp = true;
-				const overlay = document.getElementById(`overlay-${id}`);
 				if (overlay) {
 					overlay.remove();
 				} else if (win.parentElement) {
@@ -521,6 +536,8 @@
 				}
 				if (this.activeWindow === win) {
 					this.activeWindow = null;
+					const nextTop = this.getTopmostWindow();
+					if (nextTop) this.setActive(nextTop);
 				}
 				if (window.DeskEventBus) {
 					window.DeskEventBus.emit('window:closed', { id });
@@ -528,7 +545,7 @@
 			};
 
 			const hasAnim = !document.body.classList.contains('no-window-animations') && !document.body.classList.contains('anim-instant');
-			if (!hasAnim) {
+			if (!hasAnim || overlay) {
 				cleanup();
 				return;
 			}
@@ -560,6 +577,51 @@
 				if (win && !win.classList.contains('minimized')) {
 					this.minimize(win, id);
 				}
+			});
+		}
+
+		cascade() {
+			const visibleWins = Object.values(this.windows).filter(w => !w.classList.contains('minimized') && !w.classList.contains('xp-modal-overlay') && w.style.display !== 'none');
+			if (visibleWins.length === 0) return;
+			const offset = 26;
+			visibleWins.forEach((win, idx) => {
+				if (win.classList.contains('maximized')) {
+					this.maximize(win);
+				}
+				win.style.left = `${offset * (idx % 10) + 20}px`;
+				win.style.top = `${offset * (idx % 10) + 20}px`;
+				this.bringToFront(win);
+			});
+		}
+
+		tile(horizontal = true) {
+			const visibleWins = Object.values(this.windows).filter(w => !w.classList.contains('minimized') && !w.classList.contains('xp-modal-overlay') && w.style.display !== 'none');
+			const count = visibleWins.length;
+			if (count === 0) return;
+
+			const isTopTaskbar = document.body.classList.contains('taskbar-position-top');
+			const startTop = isTopTaskbar ? 36 : 0;
+			const screenW = window.innerWidth;
+			const screenH = window.innerHeight - 36;
+
+			visibleWins.forEach((win, idx) => {
+				if (win.classList.contains('maximized')) {
+					this.maximize(win);
+				}
+				if (horizontal) {
+					const h = screenH / count;
+					win.style.left = '0px';
+					win.style.top = `${startTop + idx * h}px`;
+					win.style.width = `${screenW}px`;
+					win.style.height = `${h}px`;
+				} else {
+					const w = screenW / count;
+					win.style.left = `${idx * w}px`;
+					win.style.top = `${startTop}px`;
+					win.style.width = `${w}px`;
+					win.style.height = `${screenH}px`;
+				}
+				this.bringToFront(win);
 			});
 		}
 

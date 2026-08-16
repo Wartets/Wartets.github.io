@@ -8,7 +8,7 @@
 		},
 
 		registerDefaults() {
-			this.register(['.txt', '.text', '.log', '.ini', '.cfg'], {
+			this.register(['.txt', '.text', '.log', '.ini', '.cfg', '.md', '.js', '.css', '.xml', '.csv', '.ts', '.py', '.c', '.cpp', '.h', '.sql'], {
 				typeLabel: 'Text Document',
 				defaultIcon: '../assets/images/desk/icons/File.webp',
 				defaultApp: 'notepad',
@@ -276,6 +276,28 @@
 					defaultName: 'New Configuration.json',
 					content: '{\n  "version": "1.0",\n  "created": "' + new Date().toISOString() + '"\n}',
 					label: 'JSON Document'
+				}
+			});
+
+			this.register(['.iso', '.img', '.vhd'], {
+				typeLabel: 'Disc Image File',
+				defaultIcon: '../assets/images/desk/icons/Disk Image File.webp',
+				defaultApp: 'explorer',
+				openHandler: (file) => {
+					if (typeof showXPDialog === 'function') {
+						showXPDialog('Disc Image', `Mounted virtual volume "${file.name}" to Drive D:.`, 'info');
+					}
+				}
+			});
+
+			this.register(['.mp4', '.avi', '.wmv', '.mkv', '.mov', '.mpg'], {
+				typeLabel: 'Video Clip',
+				defaultIcon: '../assets/images/desk/icons/Video File.webp',
+				defaultApp: 'ie',
+				openHandler: (file) => {
+					if (window.InternetExplorerApp) {
+						window.InternetExplorerApp.open(file.content || file.remoteUrl || `file://${file.getFullPath()}`);
+					}
 				}
 			});
 		},

@@ -21,6 +21,8 @@
 			this.updateProfile();
 			this.updateLiveBadges();
 
+			this.renderFrequentApps();
+
 			if (window.DeskEventBus) {
 				window.DeskEventBus.on('settings:changed', () => {
 					this.updateProfile();
@@ -30,6 +32,9 @@
 				});
 				window.DeskEventBus.on('mail:read', () => {
 					this.updateLiveBadges();
+				});
+				window.DeskEventBus.on('app:launched', () => {
+					this.renderFrequentApps();
 				});
 			}
 		},
@@ -854,10 +859,12 @@
 
 			switch (action) {
 				case 'open-achievements':
-					if (window.AchievementsManager) window.AchievementsManager.open();
+					if (window.DeskAppRegistry) window.DeskAppRegistry.launch('achievements');
+					else if (window.AchievementsManager) window.AchievementsManager.open();
 					break;
 				case 'my-projects':
-					if (typeof openAllProjectsFolder === 'function') openAllProjectsFolder();
+					if (window.DeskAppRegistry) window.DeskAppRegistry.launch('projects');
+					else if (typeof openAllProjectsFolder === 'function') openAllProjectsFolder();
 					break;
 				case 'my-documents':
 					if (typeof fs !== 'undefined') {
@@ -866,33 +873,32 @@
 					}
 					break;
 				case 'my-pictures':
-					if (typeof openDisplaySettings === 'function') openDisplaySettings();
+					if (window.DeskAppRegistry) window.DeskAppRegistry.launch('display');
+					else if (typeof openDisplaySettings === 'function') openDisplaySettings();
 					break;
 				case 'my-music':
-					if (typeof openWinamp === 'function') openWinamp();
+					if (window.DeskAppRegistry) window.DeskAppRegistry.launch('winamp');
+					else if (typeof openWinamp === 'function') openWinamp();
 					break;
 				case 'my-computer':
-					if (window.DeskAPI && window.DeskAPI.openMyComputer) {
-						window.DeskAPI.openMyComputer();
-					}
+					if (window.DeskAppRegistry) window.DeskAppRegistry.launch('mycomputer');
+					else if (window.DeskAPI && window.DeskAPI.openMyComputer) window.DeskAPI.openMyComputer();
 					break;
 				case 'my-network-places':
-					if (window.DeskAPI && window.DeskAPI.openNetworkPlaces) {
-						window.DeskAPI.openNetworkPlaces();
-					}
+					if (window.DeskAppRegistry) window.DeskAppRegistry.launch('network');
+					else if (window.DeskAPI && window.DeskAPI.openNetworkPlaces) window.DeskAPI.openNetworkPlaces();
 					break;
 				case 'printers-faxes':
-					if (window.DeskAPI && window.DeskAPI.openPrinters) {
-						window.DeskAPI.openPrinters();
-					}
+					if (window.DeskAppRegistry) window.DeskAppRegistry.launch('printers');
+					else if (window.DeskAPI && window.DeskAPI.openPrinters) window.DeskAPI.openPrinters();
 					break;
 				case 'search':
-					if (window.DeskAPI && window.DeskAPI.openSearch) {
-						window.DeskAPI.openSearch('');
-					}
+					if (window.DeskAppRegistry) window.DeskAppRegistry.launch('search');
+					else if (window.DeskAPI && window.DeskAPI.openSearch) window.DeskAPI.openSearch('');
 					break;
 				case 'recycle-bin':
-					if (typeof openRecycleBinWindow === 'function') openRecycleBinWindow();
+					if (window.DeskAppRegistry) window.DeskAppRegistry.launch('recyclebin');
+					else if (typeof openRecycleBinWindow === 'function') openRecycleBinWindow();
 					break;
 				case 'new-text-document':
 					if (window.NotepadApp) {
@@ -908,18 +914,12 @@
 					}
 					break;
 				case 'control-panel':
-					if (window.SettingsApp) {
-						window.SettingsApp.open('system');
-					} else if (typeof openDisplaySettings === 'function') {
-						openDisplaySettings();
-					}
+					if (window.DeskAppRegistry) window.DeskAppRegistry.launch('settings', 'system');
+					else if (window.SettingsApp) window.SettingsApp.open('system');
 					break;
 				case 'control-panel-appearance':
-					if (window.SettingsApp) {
-						window.SettingsApp.open('appearance');
-					} else if (typeof openDisplaySettings === 'function') {
-						openDisplaySettings();
-					}
+					if (window.DeskAppRegistry) window.DeskAppRegistry.launch('display');
+					else if (window.SettingsApp) window.SettingsApp.open('appearance');
 					break;
 				case 'run':
 					if (typeof openRunDialog === 'function') openRunDialog();
@@ -966,6 +966,36 @@
 
 			if (usernameEl) usernameEl.textContent = userName;
 			if (avatarEl) avatarEl.src = userAvatar;
+		},
+
+		renderFrequentApps() {
+			if (!startMenuEl) return;
+			const container = startMenuEl.querySelector('.xp-start-frequent-section');
+			if (!container) return;
+
+			let apps = [];
+			if (window.DeskAppRegistry) {
+				apps = window.DeskAppRegistry.getFrequentApps(8);
+			}
+
+			if (apps.length === 0 && window.DeskAppRegistry) {
+				const defaults = ['winamp', 'calculator', 'paint', 'minesweeper', 'notepad', 'cmd', 'display', 'todayanecdote'];
+				apps = defaults.map(id => window.DeskAppRegistry.get(id)).filter(Boolean);
+			}
+
+			container.innerHTML = '';
+			apps.forEach(app => {
+				const item = document.createElement('div');
+				item.className = 'xp-start-item';
+				item.dataset.action = `open-${app.id}`;
+				item.innerHTML = `
+					<img src="${app.icon}" class="xp-start-item-icon" alt="${app.name}">
+					<div class="xp-start-item-texts">
+						<span class="xp-start-title">${app.name}</span>
+					</div>
+				`;
+				container.appendChild(item);
+			});
 		},
 
 		updateLiveBadges() {

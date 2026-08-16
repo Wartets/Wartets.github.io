@@ -393,6 +393,10 @@
 				window.SettingsApp.playSound('asterisk');
 			}
 
+			if (window.DeskEventBus) {
+				window.DeskEventBus.emit('achievement:unlocked', achievement);
+			}
+
 			this.showNotificationToast(achievement);
 
 			const win = document.getElementById('window-achievements-vault');
@@ -586,7 +590,6 @@
 					if (window.ContextMenu) {
 						const rect = optMenu.getBoundingClientRect();
 						const items = [
-							{ separator: true },
 							{
 								label: 'Reset All Achievements...',
 								action: () => this.reset(true)

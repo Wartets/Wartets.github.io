@@ -260,8 +260,9 @@ class Shortcut extends Element {
 	}
 
 	resolve() {
-		if (typeof fs !== 'undefined' && fs) {
-			return fs.findByPath(this.targetPath);
+		const fsInstance = (typeof fs !== 'undefined' && fs) ? fs : window.fs;
+		if (fsInstance) {
+			return fsInstance.findByPath(this.targetPath);
 		}
 		return null;
 	}
@@ -616,6 +617,7 @@ class FileSystemManager {
 		const items = this.loadRecycleBinItems();
 		const filtered = items.filter(item => item.uid !== uid);
 		this.saveRecycleBinItems(filtered);
+		this.emitEvent('fs:changed', { uid });
 	}
 
 	emptyRecycleBin() {
@@ -639,6 +641,7 @@ class FileSystemManager {
 				dest.add(el);
 				this.save();
 				this.emitEvent('fs:moved', { element: el, sourcePath: op.sourcePath, destPath: el.getFullPath() });
+				this.emitEvent('fs:changed', {});
 				return true;
 			}
 		}
@@ -747,7 +750,8 @@ function addToRecentDocs(item) {
 			targetId: item.targetId || null,
 			timestamp: Date.now()
 		});
-		if (list.length > 15) list = list.slice(0, 15);
+		const maxDocs = (window.SettingsApp && window.SettingsApp.get('startMenuRecentDocsCount')) || 15;
+		if (list.length > maxDocs) list = list.slice(0, maxDocs);
 		localStorage.setItem(RECENT_DOCUMENTS_STORAGE_KEY, JSON.stringify(list));
 	} catch (e) {
 		console.warn('Failed to save recent document:', e);
@@ -781,6 +785,10 @@ window.DeskAPI = {
 			.map(w => w.querySelector('.xp-window-header .title')?.textContent || 'Window');
 	},
 	closeAllWindows: () => {
+		if (window.WindowManager) {
+			window.WindowManager.closeAll();
+			return;
+		}
 		if (typeof openWindows === 'undefined') return;
 		Object.keys(openWindows).forEach(id => {
 			const w = openWindows[id];
@@ -788,6 +796,10 @@ window.DeskAPI = {
 		});
 	},
 	minimizeAllWindows: () => {
+		if (window.WindowManager) {
+			window.WindowManager.minimizeAll();
+			return;
+		}
 		if (typeof openWindows === 'undefined') return;
 		Object.keys(openWindows).forEach(id => {
 			const w = openWindows[id];
@@ -888,6 +900,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 	if (window.DeskEventBus) {
 		window.DeskEventBus.on('fs:changed', () => refreshUI());
+		window.DeskEventBus.on('settings:changed', () => arrangeIcons('none'));
 		window.DeskEventBus.on('window:focused', (payload) => {
 			activeWindow = payload.win;
 		});
@@ -1249,6 +1262,7 @@ function migrateProjectFileLocations(othersFolder, othersProjectsFolder) {
 
 function initializeFileSystem() {
 	fs = new FileSystemManager();
+	window.fs = fs;
 	fs.load();
 
 	let othersFolder = fs.root.getByName('Others');
@@ -1389,13 +1403,21 @@ function renderDesktopIcons() {
 }
 
 function isShowHiddenEnabled() {
+	if (window.SettingsApp && typeof window.SettingsApp.get === 'function') {
+		const val = window.SettingsApp.get('showHiddenFiles');
+		if (val !== undefined) return !!val;
+	}
 	return localStorage.getItem('desktopShowHidden') === 'true';
 }
 
 function toggleShowHidden() {
 	const current = isShowHiddenEnabled();
-	localStorage.setItem('desktopShowHidden', (!current).toString());
-	if (!current && window.AchievementsManager) {
+	const nextVal = !current;
+	localStorage.setItem('desktopShowHidden', nextVal.toString());
+	if (window.SettingsApp && typeof window.SettingsApp.set === 'function') {
+		window.SettingsApp.set('showHiddenFiles', nextVal);
+	}
+	if (nextVal && window.AchievementsManager) {
 		window.AchievementsManager.progress('hidden_revealer', 1);
 	}
 	refreshUI();
@@ -2563,6 +2585,10 @@ function openFileSystemElement(element, windowContext = null) {
 	}
 	if (!targetElement) return;
 
+	if (targetElement instanceof File) {
+		addToRecentDocs({ name: targetElement.name, icon: targetElement.icon, type: 'file', path: targetElement.getFullPath() });
+	}
+
 	if (window.ShellAssociations) {
 		window.ShellAssociations.open(targetElement, windowContext);
 	} else {
@@ -2612,6 +2638,10 @@ function arrangeIcons(sortBy) {
 			return elementA.name.localeCompare(elementB.name);
 		} else if (sortBy === 'date') {
 			return new Date(elementB.createdAt) - new Date(elementA.createdAt);
+		} else if (sortBy === 'size') {
+			const sizeA = elementA.calculateSize ? elementA.calculateSize() : (elementA.size || 0);
+			const sizeB = elementB.calculateSize ? elementB.calculateSize() : (elementB.size || 0);
+			return sizeB - sizeA || elementA.name.localeCompare(elementB.name);
 		} else if (sortBy === 'type') {
 			const typeRank = { folder: 0, project: 1, shortcut: 2, file: 3, application: 4 };
 			const rankA = typeRank[a.dataset.type] ?? 5;
@@ -3451,11 +3481,25 @@ function openRunDialog() {
 }
 
 function processRunCommand(command) {
-	const cmd = command.trim();
+	const raw = command.trim();
+	if (!raw) return;
+	const parts = raw.split(/\s+/);
+	const cmd = parts[0];
 	const lowerCmd = cmd.toLowerCase();
+	const args = raw.substring(cmd.length).trim();
 
 	if (lowerCmd === 'shutdown') {
 		openShutdownDialog();
+		return;
+	}
+
+	if (lowerCmd === 'logoff') {
+		const welcome = document.getElementById('welcome-screen');
+		if (welcome) {
+			welcome.classList.remove('hidden');
+			welcome.style.opacity = '1';
+			welcome.style.display = 'flex';
+		}
 		return;
 	}
 
@@ -3464,22 +3508,41 @@ function processRunCommand(command) {
 		return;
 	}
 
+	if (lowerCmd === 'sysdm.cpl' || lowerCmd === 'timedate.cpl' || lowerCmd === 'appwiz.cpl' || lowerCmd === 'desk.cpl' || lowerCmd === 'mmsys.cpl' || lowerCmd === 'main.cpl') {
+		const tabMap = {
+			'sysdm.cpl': 'system',
+			'desk.cpl': 'appearance',
+			'timedate.cpl': 'taskbar',
+			'mmsys.cpl': 'audio',
+			'main.cpl': 'input',
+			'appwiz.cpl': 'system'
+		};
+		if (window.SettingsApp) {
+			window.SettingsApp.open(tabMap[lowerCmd] || 'system');
+			return;
+		}
+	}
+
 	if (lowerCmd.startsWith('www.') || lowerCmd.startsWith('http://') || lowerCmd.startsWith('https://') || lowerCmd.endsWith('.com') || lowerCmd.endsWith('.org') || lowerCmd.endsWith('.net')) {
 		if (window.DeskAppRegistry) {
-			window.DeskAppRegistry.launch('ie', cmd);
+			window.DeskAppRegistry.launch('ie', raw);
 		} else if (typeof openInternetExplorer === 'function') {
-			openInternetExplorer(cmd);
+			openInternetExplorer(raw);
 		}
 		return;
 	}
 
 	if (window.DeskAppRegistry && window.DeskAppRegistry.get(lowerCmd)) {
-		window.DeskAppRegistry.launch(lowerCmd);
+		window.DeskAppRegistry.launch(lowerCmd, args || undefined);
 		return;
 	}
 
-	if (fs && fs.exists(cmd)) {
-		const el = fs.findByPath(cmd);
+	let pathCandidate = raw;
+	if (pathCandidate.startsWith('C:\\') || pathCandidate.startsWith('c:\\')) {
+		pathCandidate = pathCandidate.substring(2).replace(/\\/g, '/');
+	}
+	if (fs && fs.exists(pathCandidate)) {
+		const el = fs.findByPath(pathCandidate);
 		if (el) {
 			openFileSystemElement(el);
 			return;
@@ -4162,7 +4225,7 @@ function openShutdownDialog() {
 				<img src="../assets/images/desk/window_logo.png" style="height: 20px; opacity: 0.8;">
 			</div>
 			<div style="flex-grow: 1; display: flex; justify-content: center; align-items: center; gap: 20px; padding: 20px;">
-				<div class="shutdown-option" style="text-align: center; cursor: pointer; opacity: 0.7;">
+				<div class="shutdown-option" id="btn-standby-action" style="text-align: center; cursor: pointer;">
 					<div style="width: 35px; height: 35px; background-color: #eebb00; border-radius: 50%; border: 2px solid white; margin: 0 auto 5px; display: flex; align-items: center; justify-content: center; box-shadow: 0 0 5px rgba(0,0,0,0.3);">
 						<img src="https://api.iconify.design/mdi/sleep.svg?color=white" style="width: 20px;">
 					</div>
@@ -4197,6 +4260,16 @@ function openShutdownDialog() {
 
 	overlay.querySelector('#btn-shutdown-cancel').addEventListener('click', closeOverlay);
 	
+	overlay.querySelector('#btn-standby-action').addEventListener('click', () => {
+		closeOverlay();
+		const welcome = document.getElementById('welcome-screen');
+		if (welcome) {
+			welcome.classList.remove('hidden');
+			welcome.style.opacity = '1';
+			welcome.style.display = 'flex';
+		}
+	});
+
 	overlay.querySelector('#btn-restart-action').addEventListener('click', () => {
 		closeOverlay();
 		location.reload();
@@ -4251,6 +4324,14 @@ function triggerBSOD() {
 }
 
 function showDesktop() {
+	if (window.Taskbar && typeof window.Taskbar.showDesktop === 'function') {
+		window.Taskbar.showDesktop();
+		return;
+	}
+	if (window.WindowManager) {
+		window.WindowManager.minimizeAll();
+		return;
+	}
 	Object.values(openWindows).forEach(win => {
 		if (!win.classList.contains('minimized')) {
 			minimizeWindow(win, win.id);
