@@ -3,6 +3,9 @@
 
 	const FileExplorer = {
 		open(folder, initialOptions = {}) {
+			if (folder === 'recycle-bin' || folder === 'Recycle Bin' || initialOptions.isRecycleBin) {
+				return this.openRecycleBin(initialOptions);
+			}
 			if (!folder) return null;
 			let targetFolder = null;
 			if (typeof folder === 'string') {
@@ -50,6 +53,199 @@
 			this.bindWindowEvents(win);
 			this.updateView(win, false);
 			return win;
+		},
+
+		openRecycleBin(initialOptions = {}) {
+			const windowId = 'window-recycle-bin';
+			const existingWin = document.getElementById(windowId);
+			if (existingWin) {
+				if (typeof bringWindowToFront === 'function') bringWindowToFront(existingWin);
+				if (existingWin.classList.contains('minimized') && typeof unminimizeWindow === 'function') {
+					unminimizeWindow(existingWin);
+				}
+				this.updateView(existingWin, true);
+				return existingWin;
+			}
+
+			const contentHTML = this.buildRecycleBinWindowTemplate();
+			const win = createXPWindow(windowId, 'Recycle Bin', contentHTML, 780, 520, {
+				iconSrc: '../assets/images/desk/trash.png'
+			});
+
+			win.classList.add('project-window');
+			win.classList.add('xp-explorer-window');
+			win.classList.add('xp-recycle-bin-window');
+			win.querySelector('.xp-window-content').style.padding = '0';
+
+			win.explorerState = {
+				isRecycleBin: true,
+				currentFolder: {
+					name: 'Recycle Bin',
+					getFullPath: () => 'Recycle Bin',
+					icon: '../assets/images/desk/trash.png',
+					listContent: () => (typeof fs !== 'undefined' && fs) ? fs.loadRecycleBinItems() : []
+				},
+				history: ['Recycle Bin'],
+				historyIndex: 0,
+				viewMode: initialOptions.viewMode || 'details',
+				sidebarMode: 'tasks',
+				sortBy: 'deleted',
+				sortAsc: false,
+				selectedItems: new Set()
+			};
+
+			this.bindWindowEvents(win);
+			this.updateView(win, false);
+			return win;
+		},
+
+		buildRecycleBinWindowTemplate() {
+			return `
+				<div class="xp-explorer-layout">
+					<div class="xp-explorer-menubar">
+						<ul class="xp-menubar-list">
+							<li class="xp-menubar-item" data-menu="file"><u>F</u>ile</li>
+							<li class="xp-menubar-item" data-menu="edit"><u>E</u>dit</li>
+							<li class="xp-menubar-item" data-menu="view"><u>V</u>iew</li>
+							<li class="xp-menubar-item" data-menu="favorites"><u>F</u>avorites</li>
+							<li class="xp-menubar-item" data-menu="tools"><u>T</u>ools</li>
+							<li class="xp-menubar-item" data-menu="help"><u>H</u>elp</li>
+						</ul>
+						<div class="xp-menubar-brand">
+							<img src="../assets/images/desk/window_logo.png" alt="XP">
+						</div>
+					</div>
+
+					<div class="xp-explorer-toolbar">
+						<div class="xp-tb-group xp-tb-nav">
+							<button type="button" class="xp-tb-btn xp-tb-btn-labeled tb-back" title="Back" disabled>
+								<div class="xp-tb-icon-back"></div>
+								<span>Back</span>
+								<div class="xp-tb-drop-arrow tb-back-arrow" title="History"></div>
+							</button>
+							<button type="button" class="xp-tb-btn tb-forward" title="Forward" disabled>
+								<div class="xp-tb-icon-forward"></div>
+								<div class="xp-tb-drop-arrow tb-forward-arrow" title="History"></div>
+							</button>
+							<button type="button" class="xp-tb-btn tb-up" title="Up One Level (Desktop)">
+								<div class="xp-tb-icon-up"></div>
+							</button>
+						</div>
+
+						<div class="xp-tb-sep"></div>
+
+						<div class="xp-tb-group">
+							<button type="button" class="xp-tb-btn xp-tb-btn-labeled tb-search" title="Search">
+								<img src="https://api.iconify.design/mdi/magnify.svg?color=%231b4b9b" alt="">
+								<span>Search</span>
+							</button>
+							<button type="button" class="xp-tb-btn xp-tb-btn-labeled tb-folders" title="Folders">
+								<img src="../assets/images/desk/icons/Folder Closed.webp" alt="">
+								<span>Folders</span>
+							</button>
+						</div>
+
+						<div class="xp-tb-sep"></div>
+
+						<div class="xp-tb-group">
+							<button type="button" class="xp-tb-btn tb-cut" title="Cut" disabled>
+								<img src="https://api.iconify.design/mdi/content-cut.svg?color=%231b4b9b" alt="">
+							</button>
+							<button type="button" class="xp-tb-btn tb-copy" title="Copy" disabled>
+								<img src="https://api.iconify.design/mdi/content-copy.svg?color=%231b4b9b" alt="">
+							</button>
+							<button type="button" class="xp-tb-btn tb-paste" title="Paste" disabled>
+								<img src="https://api.iconify.design/mdi/content-paste.svg?color=%231b4b9b" alt="">
+							</button>
+							<button type="button" class="xp-tb-btn tb-delete" title="Delete Permanently">
+								<img src="https://api.iconify.design/mdi/delete-outline.svg?color=%23cc3333" alt="">
+							</button>
+						</div>
+
+						<div class="xp-tb-sep"></div>
+
+						<div class="xp-tb-group">
+							<button type="button" class="xp-tb-btn xp-tb-btn-labeled tb-views" title="Change View Mode">
+								<img src="https://api.iconify.design/mdi/view-grid-outline.svg?color=%231b4b9b" alt="">
+								<div class="xp-tb-drop-arrow"></div>
+							</button>
+						</div>
+					</div>
+
+					<div class="xp-explorer-addressbar-row">
+						<span class="xp-address-label">Address</span>
+						<div class="xp-address-combo">
+							<img src="../assets/images/desk/trash.png" class="xp-address-icon" alt="">
+							<input type="text" class="xp-address-input" value="Recycle Bin" readonly>
+							<div class="xp-address-dropdown-arrow" title="Address Bar Locations">▼</div>
+						</div>
+						<button type="button" class="xp-address-go-btn" title="Go to Address">
+							<div class="xp-go-icon">➔</div>
+							<span>Go</span>
+						</button>
+					</div>
+
+					<div class="xp-explorer-body">
+						<div class="xp-explorer-sidebar">
+							<div class="xp-sidebar-tasks-view">
+								<div class="xp-task-box xp-tasks-file">
+									<div class="xp-task-header">
+										<span>Recycle Bin Tasks</span>
+										<button type="button" class="xp-task-chevron"></button>
+									</div>
+									<div class="xp-task-content" id="xp-task-content-actions"></div>
+								</div>
+
+								<div class="xp-task-box xp-tasks-places">
+									<div class="xp-task-header">
+										<span>Other Places</span>
+										<button type="button" class="xp-task-chevron"></button>
+									</div>
+									<div class="xp-task-content">
+										<a href="#" class="xp-task-link" data-place="desktop"><img src="../assets/images/desk/icons/Display.webp" alt=""><span>Desktop</span></a>
+										<a href="#" class="xp-task-link" data-place="my-documents"><img src="../assets/images/desk/icons/My Profile Folder.webp" alt=""><span>My Documents</span></a>
+										<a href="#" class="xp-task-link" data-place="my-computer"><img src="../assets/images/desk/icons/My Computer.webp" alt=""><span>My Computer</span></a>
+										<a href="#" class="xp-task-link" data-place="my-network"><img src="../assets/images/desk/icons/My Network Places.webp" alt=""><span>My Network Places</span></a>
+									</div>
+								</div>
+
+								<div class="xp-task-box xp-tasks-details">
+									<div class="xp-task-header">
+										<span>Details</span>
+										<button type="button" class="xp-task-chevron"></button>
+									</div>
+									<div class="xp-task-content xp-task-details-body"></div>
+								</div>
+							</div>
+
+							<div class="xp-sidebar-tree-view" style="display: none;">
+								<div class="xp-tree-header">
+									<span>Folders</span>
+									<button type="button" class="xp-tree-close">×</button>
+								</div>
+								<div class="xp-tree-content"></div>
+							</div>
+						</div>
+
+						<div class="xp-explorer-splitter"></div>
+
+						<div class="xp-explorer-main">
+							<div class="xp-explorer-view-container">
+								<div class="folder-content xp-file-grid" data-path="recycle-bin"></div>
+							</div>
+						</div>
+					</div>
+
+					<div class="xp-explorer-statusbar">
+						<div class="xp-sb-pane xp-sb-count">0 objects</div>
+						<div class="xp-sb-pane xp-sb-size">0 KB</div>
+						<div class="xp-sb-pane xp-sb-zone">
+							<img src="../assets/images/desk/trash.png" alt="">
+							<span>Recycle Bin</span>
+						</div>
+					</div>
+				</div>
+			`;
 		},
 
 		buildWindowTemplate(folder) {
@@ -249,6 +445,12 @@
 			});
 
 			upBtn.addEventListener('click', () => {
+				if (state.isRecycleBin) {
+					if (window.FileExplorer && fs) {
+						this.navigateTo(fs.root, win, true);
+					}
+					return;
+				}
 				if (state.currentFolder && state.currentFolder.parent) {
 					this.navigateTo(state.currentFolder.parent, win, true);
 				}
@@ -401,6 +603,27 @@
 			deleteBtn.addEventListener('click', () => {
 				const count = state.selectedItems.size;
 				if (count === 0) return;
+
+				if (state.isRecycleBin) {
+					const message = count > 1
+						? `Are you sure you want to permanently delete these ${count} items?`
+						: `Are you sure you want to permanently delete this item?`;
+
+					createConfirmationDialog(message, () => {
+						state.selectedItems.forEach(icon => {
+							const uid = icon.dataset.recycleUid;
+							if (uid) {
+								try {
+									fs.deletePermanentlyFromRecycleBin(uid);
+								} catch (err) {}
+							}
+						});
+						state.selectedItems.clear();
+						refreshUI();
+					});
+					return;
+				}
+
 				const message = count > 1
 					? `Are you sure you want to move these ${count} items to the Recycle Bin?`
 					: `Are you sure you want to move this item to the Recycle Bin?`;
@@ -510,7 +733,9 @@
 					state.selectedItems.clear();
 					this.updateSelectionDetails(win);
 					if (window.ContextMenu) {
-						const items = window.ContextMenu.getFolderAreaItems(state.currentFolder, win);
+						const items = state.isRecycleBin 
+							? window.ContextMenu.getRecycleBinAreaItems(win)
+							: window.ContextMenu.getFolderAreaItems(state.currentFolder, win);
 						window.ContextMenu.show(items, e.clientX, e.clientY);
 					}
 				}
@@ -575,6 +800,165 @@
 			const newTemplates = window.ShellAssociations ? window.ShellAssociations.getNewFileTemplates() : [];
 
 			let items = [];
+
+			if (state.isRecycleBin) {
+				const recycleItems = fs.loadRecycleBinItems();
+				if (menuType === 'file') {
+					items = [
+						{
+							label: 'Restore',
+							disabled: !hasSelection,
+							action: () => {
+								state.selectedItems.forEach(icon => {
+									const uid = icon.dataset.recycleUid;
+									if (uid) fs.restoreFromRecycleBin(uid);
+								});
+								state.selectedItems.clear();
+								refreshUI();
+							}
+						},
+						{
+							label: 'Empty Recycle Bin',
+							disabled: recycleItems.length === 0,
+							action: () => {
+								createConfirmationDialog(`Are you sure you want to permanently delete all ${recycleItems.length} items?`, () => {
+									fs.emptyRecycleBin();
+									refreshUI();
+								});
+							}
+						},
+						{ separator: true },
+						{
+							label: 'Delete Permanently',
+							disabled: !hasSelection,
+							action: () => {
+								const delBtn = win.querySelector('.tb-delete');
+								if (delBtn) delBtn.click();
+							}
+						},
+						{
+							label: 'Properties',
+							bold: true,
+							action: () => {
+								if (hasSelection && state.selectedItems.size === 1) {
+									const icon = Array.from(state.selectedItems)[0];
+									const uid = icon.dataset.recycleUid;
+									const target = recycleItems.find(i => i.uid === uid);
+									if (target) {
+										showXPDialog('Properties', `${target.data.name}\nOriginal location: ${target.originalPath}\nDate Deleted: ${new Date(target.deletedAt).toLocaleString()}`, 'info');
+										return;
+									}
+								}
+								showXPDialog('Recycle Bin Properties', `Recycle Bin is located on Local Disk (C:).\nCurrent items in bin: ${recycleItems.length}`, 'info');
+							}
+						},
+						{ separator: true },
+						{ label: 'Close', action: () => closeWindow(win, win.id) }
+					];
+				} else if (menuType === 'edit') {
+					items = [
+						{ label: 'Undo', disabled: true },
+						{ separator: true },
+						{ label: 'Cut', disabled: true },
+						{ label: 'Copy', disabled: true },
+						{ label: 'Paste', disabled: true },
+						{ separator: true },
+						{
+							label: 'Select All',
+							shortcut: 'Ctrl+A',
+							action: () => {
+								const icons = win.querySelectorAll('.project-icon, .xp-details-row');
+								icons.forEach(i => {
+									i.classList.add('selected');
+									state.selectedItems.add(i);
+								});
+								this.updateSelectionDetails(win);
+							}
+						},
+						{
+							label: 'Invert Selection',
+							action: () => {
+								const icons = win.querySelectorAll('.project-icon, .xp-details-row');
+								icons.forEach(i => {
+									if (state.selectedItems.has(i)) {
+										i.classList.remove('selected');
+										state.selectedItems.delete(i);
+									} else {
+										i.classList.add('selected');
+										state.selectedItems.add(i);
+									}
+								});
+								this.updateSelectionDetails(win);
+							}
+						}
+					];
+				} else if (menuType === 'view') {
+					items = [
+						{
+							label: 'Thumbnails',
+							radio: state.viewMode === 'thumbnails',
+							action: () => { state.viewMode = 'thumbnails'; this.updateView(win, false); }
+						},
+						{
+							label: 'Tiles',
+							radio: state.viewMode === 'tiles',
+							action: () => { state.viewMode = 'tiles'; this.updateView(win, false); }
+						},
+						{
+							label: 'Icons',
+							radio: state.viewMode === 'icons',
+							action: () => { state.viewMode = 'icons'; this.updateView(win, false); }
+						},
+						{
+							label: 'List',
+							radio: state.viewMode === 'list',
+							action: () => { state.viewMode = 'list'; this.updateView(win, false); }
+						},
+						{
+							label: 'Details',
+							radio: state.viewMode === 'details',
+							action: () => { state.viewMode = 'details'; this.updateView(win, false); }
+						},
+						{ separator: true },
+						{
+							label: 'Arrange Icons By',
+							submenu: [
+								{ label: 'Name', radio: state.sortBy === 'name', action: () => { state.sortBy = 'name'; this.updateView(win, false); } },
+								{ label: 'Original Location', radio: state.sortBy === 'location', action: () => { state.sortBy = 'location'; this.updateView(win, false); } },
+								{ label: 'Date Deleted', radio: state.sortBy === 'deleted', action: () => { state.sortBy = 'deleted'; this.updateView(win, false); } },
+								{ label: 'Size', radio: state.sortBy === 'size', action: () => { state.sortBy = 'size'; this.updateView(win, false); } },
+								{ label: 'Item Type', radio: state.sortBy === 'type', action: () => { state.sortBy = 'type'; this.updateView(win, false); } },
+								{ separator: true },
+								{ label: 'Ascending', radio: state.sortAsc, action: () => { state.sortAsc = true; this.updateView(win, false); } },
+								{ label: 'Descending', radio: !state.sortAsc, action: () => { state.sortAsc = false; this.updateView(win, false); } }
+							]
+						},
+						{ separator: true },
+						{ label: 'Refresh', shortcut: 'F5', action: () => this.updateView(win, false) }
+					];
+				} else if (menuType === 'favorites') {
+					items = [
+						{ label: 'Desktop', icon: '../assets/images/desk/icons/Display.webp', action: () => this.navigateTo(fs.root, win, true) },
+						{ label: 'My Documents', icon: '../assets/images/desk/icons/My Profile Folder.webp', action: () => this.navigateTo(fs.root.getByName('PDFs') || fs.root, win, true) },
+						{ label: 'My Computer', icon: '../assets/images/desk/icons/My Computer.webp', action: () => { if (window.DeskAPI && window.DeskAPI.openMyComputer) window.DeskAPI.openMyComputer(); } }
+					];
+				} else if (menuType === 'tools') {
+					items = [
+						{ label: 'Folder Options...', action: () => { if (window.SettingsApp) window.SettingsApp.open('input'); } }
+					];
+				} else if (menuType === 'help') {
+					items = [
+						{ label: 'Help and Support Center', action: () => window.open('https://github.com/wartets/Wartets.github.io', '_blank') },
+						{ separator: true },
+						{ label: 'About Windows XP', bold: true, action: () => { if (window.SettingsApp) window.SettingsApp.open('system'); } }
+					];
+				}
+
+				if (window.ContextMenu) {
+					window.ContextMenu.show(items, x, y);
+				}
+				return;
+			}
 
 			if (menuType === 'file') {
 				const newSubmenu = [
@@ -864,8 +1248,12 @@
 		},
 
 		navigateTo(folder, win, pushHistory = true) {
+			if (folder === 'recycle-bin' || folder === 'Recycle Bin') {
+				return this.openRecycleBin();
+			}
 			if (!folder || !(folder instanceof Folder)) return;
 			const state = win.explorerState;
+			state.isRecycleBin = false;
 			state.currentFolder = folder;
 			state.selectedItems.clear();
 
@@ -895,6 +1283,63 @@
 			const backBtn = win.querySelector('.tb-back');
 			const forwardBtn = win.querySelector('.tb-forward');
 			const upBtn = win.querySelector('.tb-up');
+
+			if (state.isRecycleBin) {
+				if (titleEl) titleEl.textContent = 'Recycle Bin';
+				if (addressInput) addressInput.value = 'Recycle Bin';
+				contentContainer.dataset.path = 'recycle-bin';
+
+				backBtn.disabled = true;
+				forwardBtn.disabled = true;
+				upBtn.disabled = false;
+
+				if (!keepSelection) {
+					state.selectedItems.clear();
+				}
+
+				contentContainer.className = `folder-content xp-file-grid view-${state.viewMode}`;
+				contentContainer.innerHTML = '';
+
+				const rawRecycleItems = (typeof fs !== 'undefined' && fs) ? fs.loadRecycleBinItems() : [];
+				let items = rawRecycleItems.map(item => ({
+					uid: item.uid,
+					name: item.data.name,
+					originalPath: item.originalPath,
+					deletedAt: new Date(item.deletedAt),
+					size: item.data.size || 0,
+					icon: item.data.icon || (window.ShellAssociations ? window.ShellAssociations.getIcon(item.data) : '../assets/images/desk/icons/File.webp'),
+					type: item.data.type === 'Folder' ? 'File Folder' : (window.ShellAssociations ? window.ShellAssociations.getTypeLabel(item.data) : (item.data.type || 'File')),
+					data: item.data
+				}));
+
+				items.sort((a, b) => {
+					let result = 0;
+					if (state.sortBy === 'name') {
+						result = a.name.localeCompare(b.name);
+					} else if (state.sortBy === 'location') {
+						result = a.originalPath.localeCompare(b.originalPath);
+					} else if (state.sortBy === 'deleted' || state.sortBy === 'date') {
+						result = a.deletedAt - b.deletedAt;
+					} else if (state.sortBy === 'size') {
+						result = (a.size || 0) - (b.size || 0);
+					} else if (state.sortBy === 'type') {
+						result = a.type.localeCompare(b.type) || a.name.localeCompare(b.name);
+					}
+					return state.sortAsc ? result : -result;
+				});
+
+				if (state.viewMode === 'details') {
+					this.renderRecycleBinDetailsView(win, items, contentContainer);
+				} else {
+					items.forEach(el => {
+						const iconEl = this.createRecycleBinIcon(el, win);
+						contentContainer.appendChild(iconEl);
+					});
+				}
+
+				this.updateSelectionDetails(win);
+				return;
+			}
 
 			if (titleEl) titleEl.textContent = folder.name;
 			if (addressInput) addressInput.value = folder.getFullPath();
@@ -953,6 +1398,172 @@
 			}
 
 			this.updateSelectionDetails(win);
+		},
+
+		renderRecycleBinDetailsView(win, items, container) {
+			const state = win.explorerState;
+			const table = document.createElement('div');
+			table.className = 'xp-details-table';
+
+			const getSortGlyph = (col) => {
+				if (state.sortBy !== col) return '';
+				return state.sortAsc ? ' ▲' : ' ▼';
+			};
+
+			const header = document.createElement('div');
+			header.className = 'xp-details-header-row rb-details-columns';
+			header.innerHTML = `
+				<div class="xp-details-th col-name" data-sort="name"><span>Name${getSortGlyph('name')}</span></div>
+				<div class="xp-details-th col-location" data-sort="location"><span>Original Location${getSortGlyph('location')}</span></div>
+				<div class="xp-details-th col-deleted" data-sort="deleted"><span>Date Deleted${getSortGlyph('deleted')}</span></div>
+				<div class="xp-details-th col-size" data-sort="size"><span>Size${getSortGlyph('size')}</span></div>
+				<div class="xp-details-th col-type" data-sort="type"><span>Item Type${getSortGlyph('type')}</span></div>
+			`;
+
+			header.querySelectorAll('.xp-details-th').forEach(th => {
+				th.addEventListener('click', () => {
+					const col = th.dataset.sort;
+					if (state.sortBy === col) {
+						state.sortAsc = !state.sortAsc;
+					} else {
+						state.sortBy = col;
+						state.sortAsc = true;
+					}
+					this.updateView(win, true);
+				});
+			});
+
+			table.appendChild(header);
+
+			items.forEach(el => {
+				const row = document.createElement('div');
+				row.className = 'xp-details-row rb-details-columns';
+				row.dataset.recycleUid = el.uid;
+				row.title = `${el.name}\nOriginal location: ${el.originalPath}`;
+
+				const sizeStr = el.size !== undefined && el.type !== 'File Folder' ? `${Math.ceil(el.size / 1024)} KB` : '';
+				const delStr = el.deletedAt ? el.deletedAt.toLocaleString() : '';
+
+				row.innerHTML = `
+					<div class="xp-details-td col-name">
+						<img src="${el.icon || '../assets/images/desk/icons/File.webp'}" alt="">
+						<span>${el.name}</span>
+					</div>
+					<div class="xp-details-td col-location">${el.originalPath}</div>
+					<div class="xp-details-td col-deleted">${delStr}</div>
+					<div class="xp-details-td col-size">${sizeStr}</div>
+					<div class="xp-details-td col-type">${el.type}</div>
+				`;
+
+				row.addEventListener('click', (e) => {
+					this.handleItemSelection(row, win, e);
+				});
+
+				row.addEventListener('dblclick', () => {
+					this.handleRecycleItemExecute(el);
+				});
+
+				row.addEventListener('contextmenu', (e) => {
+					e.preventDefault();
+					e.stopPropagation();
+					if (!row.classList.contains('selected')) {
+						this.handleItemSelection(row, win, { ctrlKey: false, shiftKey: false });
+					}
+					if (window.ContextMenu) {
+						const menuItems = window.ContextMenu.getRecycleBinItemItems(el, row, win);
+						window.ContextMenu.show(menuItems, e.clientX, e.clientY);
+					}
+				});
+
+				table.appendChild(row);
+			});
+
+			container.appendChild(table);
+		},
+
+		createRecycleBinIcon(element, win) {
+			const state = win.explorerState;
+			const icon = document.createElement('div');
+			icon.className = 'project-icon xp-explorer-item';
+			icon.dataset.recycleUid = element.uid;
+			icon.dataset.type = 'recycle-item';
+			icon.title = `${element.name}\nOriginal location: ${element.originalPath}`;
+
+			if (state.viewMode === 'thumbnails') {
+				icon.classList.add('mode-thumbnail');
+				const thumbFrame = document.createElement('div');
+				thumbFrame.className = 'xp-thumb-frame';
+				const img = document.createElement('img');
+				img.src = element.icon || '../assets/images/desk/icons/File.webp';
+				img.alt = element.name;
+				thumbFrame.appendChild(img);
+				icon.appendChild(thumbFrame);
+
+				const label = document.createElement('span');
+				label.textContent = element.name;
+				icon.appendChild(label);
+			} else if (state.viewMode === 'tiles') {
+				icon.classList.add('mode-tile');
+				const img = document.createElement('img');
+				img.src = element.icon || '../assets/images/desk/icons/File.webp';
+				img.alt = element.name;
+				icon.appendChild(img);
+
+				const texts = document.createElement('div');
+				texts.className = 'xp-tile-texts';
+				const titleSpan = document.createElement('strong');
+				titleSpan.textContent = element.name;
+				const subSpan = document.createElement('span');
+				subSpan.textContent = element.originalPath;
+				texts.appendChild(titleSpan);
+				texts.appendChild(subSpan);
+				icon.appendChild(texts);
+			} else {
+				const img = document.createElement('img');
+				img.src = element.icon || '../assets/images/desk/icons/File.webp';
+				img.alt = element.name;
+				icon.appendChild(img);
+
+				const span = document.createElement('span');
+				span.textContent = element.name;
+				icon.appendChild(span);
+			}
+
+			icon.addEventListener('click', (e) => {
+				this.handleItemSelection(icon, win, e);
+			});
+
+			icon.addEventListener('dblclick', () => {
+				this.handleRecycleItemExecute(element);
+			});
+
+			icon.addEventListener('contextmenu', (e) => {
+				e.preventDefault();
+				e.stopPropagation();
+				if (!icon.classList.contains('selected')) {
+					this.handleItemSelection(icon, win, { ctrlKey: false, shiftKey: false });
+				}
+				if (window.ContextMenu) {
+					const items = window.ContextMenu.getRecycleBinItemItems(element, icon, win);
+					window.ContextMenu.show(items, e.clientX, e.clientY);
+				}
+			});
+
+			return icon;
+		},
+
+		handleRecycleItemExecute(item) {
+			if (item.data && item.data.name && item.data.name.toLowerCase() === 'matrix.bat') {
+				if (window.AchievementsManager) window.AchievementsManager.progress('matrix_recycle_run', 1);
+				if (window.CommandPrompt) {
+					window.CommandPrompt.open({
+						script: item.data.content || '@echo off\ncolor 0a\n:loop\necho %random% %random% %random% %random%\ngoto loop',
+						title: 'matrix.bat (Recycle Bin)'
+					});
+					return;
+				}
+			}
+			showXPDialog(item.name || 'Item', 'This item is in the Recycle Bin. You must restore it to open or execute it.', 'warning');
 		},
 
 		renderDetailsView(win, items, container) {
@@ -1161,12 +1772,113 @@
 		updateSelectionDetails(win) {
 			const state = win.explorerState;
 			const selectedCount = state.selectedItems.size;
-			const totalCount = state.currentFolder.listContent().length;
-
 			const sbCount = win.querySelector('.xp-sb-count');
 			const sbSize = win.querySelector('.xp-sb-size');
 			const detailsBody = win.querySelector('.xp-task-details-body');
 			const actionsContainer = win.querySelector('#xp-task-content-actions');
+
+			if (state.isRecycleBin) {
+				const recycleItems = (typeof fs !== 'undefined' && fs) ? fs.loadRecycleBinItems() : [];
+				const totalCount = recycleItems.length;
+
+				if (selectedCount === 0) {
+					if (sbCount) sbCount.textContent = `${totalCount} objects`;
+					let totalBytes = 0;
+					recycleItems.forEach(item => { totalBytes += (item.data.size || 0); });
+					if (sbSize) sbSize.textContent = `${Math.ceil(totalBytes / 1024)} KB`;
+					if (detailsBody) {
+						detailsBody.innerHTML = `
+							<div class="xp-details-preview-frame"><img src="../assets/images/desk/trash.png" alt=""></div>
+							<div class="xp-details-name"><b>Recycle Bin</b></div>
+							<div class="xp-details-type">System Folder</div>
+							<div>Contains ${totalCount} deleted item(s)</div>
+						`;
+					}
+					if (actionsContainer) {
+						actionsContainer.innerHTML = `
+							<a href="#" class="xp-task-link ${totalCount === 0 ? 'disabled' : ''}" data-action="rb-empty"><img src="https://api.iconify.design/mdi/delete-sweep-outline.svg" alt=""><span>Empty the Recycle Bin</span></a>
+							<a href="#" class="xp-task-link ${totalCount === 0 ? 'disabled' : ''}" data-action="rb-restore-all"><img src="https://api.iconify.design/mdi/backup-restore.svg" alt=""><span>Restore all items</span></a>
+						`;
+					}
+				} else if (selectedCount === 1) {
+					const itemEl = Array.from(state.selectedItems)[0];
+					const uid = itemEl.dataset.recycleUid;
+					const target = recycleItems.find(i => i.uid === uid);
+					if (sbCount) sbCount.textContent = `1 object selected`;
+					if (sbSize && target) sbSize.textContent = `${Math.ceil((target.data.size || 0) / 1024)} KB`;
+					if (detailsBody && target) {
+						const previewImg = target.data.icon || (window.ShellAssociations ? window.ShellAssociations.getIcon(target.data) : '../assets/images/desk/icons/File.webp');
+						detailsBody.innerHTML = `
+							<div class="xp-details-preview-frame"><img src="${previewImg}" alt=""></div>
+							<div class="xp-details-name"><b>${target.data.name}</b></div>
+							<div class="xp-details-type">Original Location: ${target.originalPath}</div>
+							<div>Size: ${Math.ceil((target.data.size || 0) / 1024)} KB</div>
+							<div class="xp-details-modified">Deleted: ${new Date(target.deletedAt).toLocaleDateString()}</div>
+						`;
+					}
+					if (actionsContainer) {
+						actionsContainer.innerHTML = `
+							<a href="#" class="xp-task-link" data-action="rb-restore-sel"><img src="https://api.iconify.design/mdi/backup-restore.svg" alt=""><span>Restore this item</span></a>
+							<a href="#" class="xp-task-link" data-action="rb-empty"><img src="https://api.iconify.design/mdi/delete-sweep-outline.svg" alt=""><span>Empty the Recycle Bin</span></a>
+						`;
+					}
+				} else {
+					if (sbCount) sbCount.textContent = `${selectedCount} objects selected`;
+					let selBytes = 0;
+					state.selectedItems.forEach(i => {
+						const uid = i.dataset.recycleUid;
+						const target = recycleItems.find(item => item.uid === uid);
+						if (target && target.data.size) selBytes += target.data.size;
+					});
+					if (sbSize) sbSize.textContent = `${Math.ceil(selBytes / 1024)} KB`;
+					if (detailsBody) {
+						detailsBody.innerHTML = `
+							<div class="xp-details-name"><b>${selectedCount} items selected.</b></div>
+							<div>Total size: ${Math.ceil(selBytes / 1024)} KB</div>
+						`;
+					}
+					if (actionsContainer) {
+						actionsContainer.innerHTML = `
+							<a href="#" class="xp-task-link" data-action="rb-restore-sel"><img src="https://api.iconify.design/mdi/backup-restore.svg" alt=""><span>Restore the selected items</span></a>
+							<a href="#" class="xp-task-link" data-action="rb-empty"><img src="https://api.iconify.design/mdi/delete-sweep-outline.svg" alt=""><span>Empty the Recycle Bin</span></a>
+						`;
+					}
+				}
+
+				if (actionsContainer) {
+					actionsContainer.querySelectorAll('.xp-task-link').forEach(link => {
+						link.addEventListener('click', (e) => {
+							e.preventDefault();
+							const act = link.dataset.action;
+							if (act === 'rb-empty') {
+								const items = fs.loadRecycleBinItems();
+								if (items.length === 0) return;
+								createConfirmationDialog(`Are you sure you want to permanently delete all ${items.length} items?`, () => {
+									fs.emptyRecycleBin();
+									refreshUI();
+								});
+							} else if (act === 'rb-restore-all') {
+								const items = fs.loadRecycleBinItems();
+								if (items.length === 0) return;
+								createConfirmationDialog(`Are you sure you want to restore all ${items.length} items in the Recycle Bin?`, () => {
+									items.forEach(i => fs.restoreFromRecycleBin(i.uid));
+									refreshUI();
+								});
+							} else if (act === 'rb-restore-sel') {
+								state.selectedItems.forEach(i => {
+									const uid = i.dataset.recycleUid;
+									if (uid) fs.restoreFromRecycleBin(uid);
+								});
+								state.selectedItems.clear();
+								refreshUI();
+							}
+						});
+					});
+				}
+				return;
+			}
+
+			const totalCount = state.currentFolder.listContent().length;
 
 			if (selectedCount === 0) {
 				if (sbCount) sbCount.textContent = `${totalCount} objects`;

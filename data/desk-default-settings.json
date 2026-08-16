@@ -41,6 +41,8 @@
 	"showDesktopIcons": true,
 	"desktopGridSpacingX": 75,
 	"desktopGridSpacingY": 100,
+	"desktopAutoArrange": false,
+	"desktopAlignToGrid": true,
 	"selectionBoxColor": "#316ac5",
 	"selectionBoxOpacity": 0.3,
 	"singleClickOpen": false,

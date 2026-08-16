@@ -24,11 +24,19 @@ class Element {
 			if (parent.children.has(sanitized) && sanitized.toLowerCase() !== this.name.toLowerCase()) {
 				throw new Error(`An element named "${sanitized}" already exists in this folder.`);
 			}
+			const oldPath = this.getFullPath();
 			const oldName = this.name;
 			parent.children.delete(oldName);
 			this.name = sanitized;
 			parent.children.set(this.name, this);
 			parent.modifiedAt = new Date();
+			const newPath = this.getFullPath();
+			const posMap = loadDesktopIconPositions();
+			if (posMap[oldPath]) {
+				posMap[newPath] = posMap[oldPath];
+				delete posMap[oldPath];
+				saveDesktopIconPositions(posMap);
+			}
 		} else {
 			this.name = sanitized;
 		}
@@ -420,6 +428,12 @@ class FileSystemManager {
 		if (element instanceof File && element.savedFromNotepad && window.AchievementsManager) {
 			window.AchievementsManager.progress('notepad_save_delete', 1);
 		}
+		const fullPath = element.getFullPath();
+		const posMap = loadDesktopIconPositions();
+		if (posMap[fullPath]) {
+			delete posMap[fullPath];
+			saveDesktopIconPositions(posMap);
+		}
 		const parent = element.parent;
 		const name = element.name;
 		parent.remove(name);
@@ -574,6 +588,9 @@ class FileSystemManager {
 		});
 		this.saveRecycleBinItems(recycleItems);
 		this.save();
+		if (window.SettingsApp && typeof window.SettingsApp.playSound === 'function') {
+			window.SettingsApp.playSound('recycle');
+		}
 		this.emitEvent('fs:recycled', { path, originalPath });
 	}
 
@@ -609,6 +626,9 @@ class FileSystemManager {
 		items.splice(index, 1);
 		this.saveRecycleBinItems(items);
 		this.save();
+		if (window.SettingsApp && typeof window.SettingsApp.playSound === 'function') {
+			window.SettingsApp.playSound('window');
+		}
 		this.emitEvent('fs:restored', { element: restored, path: restored.getFullPath() });
 		return restored;
 	}
@@ -617,6 +637,9 @@ class FileSystemManager {
 		const items = this.loadRecycleBinItems();
 		const filtered = items.filter(item => item.uid !== uid);
 		this.saveRecycleBinItems(filtered);
+		if (window.SettingsApp && typeof window.SettingsApp.playSound === 'function') {
+			window.SettingsApp.playSound('recycle');
+		}
 		this.emitEvent('fs:changed', { uid });
 	}
 
@@ -626,6 +649,9 @@ class FileSystemManager {
 			window.AchievementsManager.progress('recycle_cleaner', 1);
 		}
 		this.saveRecycleBinItems([]);
+		if (window.SettingsApp && typeof window.SettingsApp.playSound === 'function') {
+			window.SettingsApp.playSound('recycle');
+		}
 		this.emitEvent('fs:recycle-emptied', {});
 	}
 
@@ -727,6 +753,70 @@ let isContextMenuVisible = false;
 let customIcons = JSON.parse(localStorage.getItem('customIcons')) || [];
 let webampInstance = null;
 let lastClickedIconForRange = null;
+let desktopDragOffset = { x: 0, y: 0 };
+
+function loadDesktopIconPositions() {
+	try {
+		const raw = localStorage.getItem('desktopIconPositions');
+		return raw ? JSON.parse(raw) : {};
+	} catch (e) {
+		return {};
+	}
+}
+
+function saveDesktopIconPositions(positions) {
+	try {
+		localStorage.setItem('desktopIconPositions', JSON.stringify(positions));
+	} catch (e) {}
+}
+
+function isAutoArrangeEnabled() {
+	if (window.SettingsApp && typeof window.SettingsApp.get === 'function') {
+		const val = window.SettingsApp.get('desktopAutoArrange');
+		if (val !== undefined) return !!val;
+	}
+	return localStorage.getItem('desktopAutoArrange') === 'true';
+}
+
+function toggleAutoArrange() {
+	const current = isAutoArrangeEnabled();
+	const nextVal = !current;
+	localStorage.setItem('desktopAutoArrange', nextVal.toString());
+	if (window.SettingsApp && typeof window.SettingsApp.set === 'function') {
+		window.SettingsApp.set('desktopAutoArrange', nextVal);
+	}
+	if (nextVal) {
+		arrangeIcons('name');
+	} else {
+		arrangeIcons('none');
+	}
+}
+
+function isAlignToGridEnabled() {
+	if (window.SettingsApp && typeof window.SettingsApp.get === 'function') {
+		const val = window.SettingsApp.get('desktopAlignToGrid');
+		if (val !== undefined) return !!val;
+	}
+	const stored = localStorage.getItem('desktopAlignToGrid');
+	return stored === null ? true : stored === 'true';
+}
+
+function toggleAlignToGrid() {
+	const current = isAlignToGridEnabled();
+	const nextVal = !current;
+	localStorage.setItem('desktopAlignToGrid', nextVal.toString());
+	if (window.SettingsApp && typeof window.SettingsApp.set === 'function') {
+		window.SettingsApp.set('desktopAlignToGrid', nextVal);
+	}
+	arrangeIcons('none');
+}
+
+window.isAutoArrangeEnabled = isAutoArrangeEnabled;
+window.toggleAutoArrange = toggleAutoArrange;
+window.isAlignToGridEnabled = isAlignToGridEnabled;
+window.toggleAlignToGrid = toggleAlignToGrid;
+window.loadDesktopIconPositions = loadDesktopIconPositions;
+window.saveDesktopIconPositions = saveDesktopIconPositions;
 
 function getNextWindowPosition(width, height) {
 	if (window.WindowManager) {
@@ -1428,6 +1518,9 @@ function createIconElement(data, dblClickHandler) {
 	icon.className = 'project-icon';
 	icon.dataset.path = data.path;
 	icon.dataset.type = data.type;
+	if (data.systemType) {
+		icon.dataset.systemType = data.systemType;
+	}
 	icon.draggable = true;
 	icon.title = data.name;
 
@@ -2605,51 +2698,26 @@ function refreshUI() {
 	renderDesktopIcons();
 	Object.values(openWindows).forEach(win => {
 		if (win.classList.contains('xp-explorer-window') && win.explorerState && window.FileExplorer) {
-			const folder = fs.findByPath(win.explorerState.currentFolder.getFullPath());
-			if (folder) {
-				win.explorerState.currentFolder = folder;
+			if (win.explorerState.isRecycleBin) {
 				window.FileExplorer.updateView(win, true);
 			} else {
-				closeWindow(win, win.id);
+				const folder = fs.findByPath(win.explorerState.currentFolder.getFullPath());
+				if (folder) {
+					win.explorerState.currentFolder = folder;
+					window.FileExplorer.updateView(win, true);
+				} else {
+					closeWindow(win, win.id);
+				}
 			}
 		}
 	});
 }
 
-function arrangeIcons(sortBy) {
+function arrangeIcons(sortBy = 'none') {
 	const container = document.getElementById('project-icons-container');
-	const icons = Array.from(container.children);
-	
-	const getElement = (icon) => {
-		const path = icon.dataset.path;
-		if (path.startsWith('app://')) {
-			return { name: icon.querySelector('span').textContent, createdAt: new Date(0) };
-		}
-		return fs.findByPath(path);
-	};
-
-	icons.sort((a, b) => {
-		const elementA = getElement(a);
-		const elementB = getElement(b);
-
-		if (!elementA || !elementB) return 0;
-
-		if (sortBy === 'name') {
-			return elementA.name.localeCompare(elementB.name);
-		} else if (sortBy === 'date') {
-			return new Date(elementB.createdAt) - new Date(elementA.createdAt);
-		} else if (sortBy === 'size') {
-			const sizeA = elementA.calculateSize ? elementA.calculateSize() : (elementA.size || 0);
-			const sizeB = elementB.calculateSize ? elementB.calculateSize() : (elementB.size || 0);
-			return sizeB - sizeA || elementA.name.localeCompare(elementB.name);
-		} else if (sortBy === 'type') {
-			const typeRank = { folder: 0, project: 1, shortcut: 2, file: 3, application: 4 };
-			const rankA = typeRank[a.dataset.type] ?? 5;
-			const rankB = typeRank[b.dataset.type] ?? 5;
-			return (rankA - rankB) || elementA.name.localeCompare(elementB.name);
-		}
-		return 0;
-	});
+	if (!container) return;
+	const icons = Array.from(container.children).filter(el => el.classList.contains('project-icon'));
+	if (icons.length === 0) return;
 
 	const customGapX = (window.SettingsApp && window.SettingsApp.get('desktopGridSpacingX')) || 75;
 	const customGapY = (window.SettingsApp && window.SettingsApp.get('desktopGridSpacingY')) || 100;
@@ -2657,20 +2725,109 @@ function arrangeIcons(sortBy) {
 	const iconHeight = customGapY;
 	const startX = 10;
 	const startY = 10;
-	
 	const desktopHeight = window.innerHeight - 40;
 	const iconsPerColumn = Math.max(1, Math.floor((desktopHeight - startY) / iconHeight));
-	
-	container.innerHTML = '';
-	icons.forEach((icon, index) => {
-		const col = Math.floor(index / iconsPerColumn);
-		const row = index % iconsPerColumn;
 
-		icon.style.position = 'absolute';
-		icon.style.left = `${startX + col * (iconWidth + 10)}px`;
-		icon.style.top = `${startY + row * iconHeight}px`;
-		container.appendChild(icon);
-	});
+	const autoArrange = isAutoArrangeEnabled();
+	const alignGrid = isAlignToGridEnabled();
+	const positions = loadDesktopIconPositions();
+
+	if (sortBy !== 'none' || autoArrange) {
+		const getElement = (icon) => {
+			const path = icon.dataset.path;
+			if (path && path.startsWith('app://')) {
+				return { name: icon.querySelector('span')?.textContent || '', createdAt: new Date(0) };
+			}
+			return fs ? fs.findByPath(path) : null;
+		};
+
+		const effectiveSort = (sortBy !== 'none') ? sortBy : 'name';
+
+		icons.sort((a, b) => {
+			const elementA = getElement(a);
+			const elementB = getElement(b);
+			if (!elementA || !elementB) return 0;
+
+			if (effectiveSort === 'name') {
+				return elementA.name.localeCompare(elementB.name);
+			} else if (effectiveSort === 'date') {
+				return new Date(elementB.createdAt) - new Date(elementA.createdAt);
+			} else if (effectiveSort === 'size') {
+				const sizeA = elementA.calculateSize ? elementA.calculateSize() : (elementA.size || 0);
+				const sizeB = elementB.calculateSize ? elementB.calculateSize() : (elementB.size || 0);
+				return sizeB - sizeA || elementA.name.localeCompare(elementB.name);
+			} else if (effectiveSort === 'type') {
+				const typeRank = { folder: 0, project: 1, shortcut: 2, file: 3, application: 4 };
+				const rankA = typeRank[a.dataset.type] ?? 5;
+				const rankB = typeRank[b.dataset.type] ?? 5;
+				return (rankA - rankB) || elementA.name.localeCompare(elementB.name);
+			}
+			return 0;
+		});
+
+		const newPositions = {};
+		icons.forEach((icon, index) => {
+			const col = Math.floor(index / iconsPerColumn);
+			const row = index % iconsPerColumn;
+			const posX = startX + col * (iconWidth + 10);
+			const posY = startY + row * iconHeight;
+
+			icon.style.position = 'absolute';
+			icon.style.left = `${posX}px`;
+			icon.style.top = `${posY}px`;
+
+			if (icon.dataset.path) {
+				newPositions[icon.dataset.path] = { x: posX, y: posY };
+			}
+		});
+		saveDesktopIconPositions(newPositions);
+	} else {
+		const occupiedGridSlots = new Set();
+		let unpositionedIndex = 0;
+
+		icons.forEach((icon) => {
+			const path = icon.dataset.path;
+			let pos = path ? positions[path] : null;
+
+			if (pos && typeof pos.x === 'number' && typeof pos.y === 'number') {
+				let posX = pos.x;
+				let posY = pos.y;
+				if (alignGrid) {
+					posX = startX + Math.round((posX - startX) / (iconWidth + 10)) * (iconWidth + 10);
+					posY = startY + Math.round((posY - startY) / iconHeight) * iconHeight;
+				}
+				posX = Math.max(10, Math.min(posX, window.innerWidth - iconWidth - 10));
+				posY = Math.max(10, Math.min(posY, desktopHeight - iconHeight - 10));
+
+				icon.style.position = 'absolute';
+				icon.style.left = `${posX}px`;
+				icon.style.top = `${posY}px`;
+
+				const colSlot = Math.round((posX - startX) / (iconWidth + 10));
+				const rowSlot = Math.round((posY - startY) / iconHeight);
+				occupiedGridSlots.add(`${colSlot},${rowSlot}`);
+			} else {
+				while (occupiedGridSlots.has(`${Math.floor(unpositionedIndex / iconsPerColumn)},${unpositionedIndex % iconsPerColumn}`)) {
+					unpositionedIndex++;
+				}
+				const col = Math.floor(unpositionedIndex / iconsPerColumn);
+				const row = unpositionedIndex % iconsPerColumn;
+				const posX = startX + col * (iconWidth + 10);
+				const posY = startY + row * iconHeight;
+
+				icon.style.position = 'absolute';
+				icon.style.left = `${posX}px`;
+				icon.style.top = `${posY}px`;
+
+				occupiedGridSlots.add(`${col},${row}`);
+				if (path) {
+					positions[path] = { x: posX, y: posY };
+				}
+				unpositionedIndex++;
+			}
+		});
+		saveDesktopIconPositions(positions);
+	}
 }
 
 let currentDragTargetElement = null;
@@ -2690,6 +2847,12 @@ function handleDragStart(e) {
 		selectedIcons.add(icon);
 	}
 
+	const iconRect = icon.getBoundingClientRect();
+	desktopDragOffset = {
+		x: e.clientX - iconRect.left,
+		y: e.clientY - iconRect.top
+	};
+
 	const pathsToDrag = [];
 	const win = icon.closest('.xp-window');
 	const state = win && win.explorerState ? win.explorerState : null;
@@ -2697,7 +2860,7 @@ function handleDragStart(e) {
 
 	selectedSet.forEach(selected => {
 		const p = selected.dataset.path;
-		if (p && !p.startsWith('app://')) {
+		if (p) {
 			pathsToDrag.push(p);
 			selected.classList.add('dragging-icon');
 		}
@@ -2705,7 +2868,7 @@ function handleDragStart(e) {
 
 	if (pathsToDrag.length === 0) {
 		const singlePath = icon.dataset.path;
-		if (singlePath && !singlePath.startsWith('app://')) {
+		if (singlePath) {
 			pathsToDrag.push(singlePath);
 			icon.classList.add('dragging-icon');
 		}
@@ -2740,8 +2903,8 @@ function handleDragOver(e) {
 	if (treeNode) {
 		dropCandidate = treeNode;
 	} else if (iconTarget) {
-		const isFolder = iconTarget.dataset.type === 'folder' || (iconTarget.dataset.path && fs.findByPath(iconTarget.dataset.path) instanceof Folder);
-		const isRecycle = iconTarget.dataset.systemType === 'recycle-bin';
+		const isFolder = iconTarget.dataset.type === 'folder' || (iconTarget.dataset.path && fs && fs.findByPath(iconTarget.dataset.path) instanceof Folder);
+		const isRecycle = iconTarget.dataset.systemType === 'recycle-bin' || iconTarget.dataset.path === 'app://recycle-bin';
 		if (isFolder || isRecycle) {
 			dropCandidate = iconTarget;
 		} else if (folderContent) {
@@ -2798,7 +2961,7 @@ function resolveDropDestination(dropTarget) {
 
 	const iconCandidate = dropTarget.closest('.project-icon, .xp-details-row, .xp-explorer-item');
 	if (iconCandidate) {
-		if (iconCandidate.dataset.systemType === 'recycle-bin') {
+		if (iconCandidate.dataset.systemType === 'recycle-bin' || iconCandidate.dataset.path === 'app://recycle-bin') {
 			return { type: 'recycle' };
 		}
 		if (iconCandidate.dataset.type === 'folder' || iconCandidate.querySelector('.col-type')?.textContent.includes('Folder')) {
@@ -2873,6 +3036,7 @@ function handleDrop(e) {
 
 	if (destination.type === 'recycle') {
 		sourcePaths.forEach(src => {
+			if (src.startsWith('app://')) return;
 			try {
 				fs.moveToRecycleBin(src);
 			} catch (err) {
@@ -2888,6 +3052,7 @@ function handleDrop(e) {
 		return;
 	}
 
+	const isDesktopDrop = (target.id === 'desktop' || target.id === 'project-icons-container' || target.closest('#desktop'));
 	const destFolder = fs.findByPath(destination.path);
 	if (!destFolder || !(destFolder instanceof Folder)) {
 		return;
@@ -2896,21 +3061,74 @@ function handleDrop(e) {
 	const isCopy = e.ctrlKey;
 	const destFullPath = destFolder.getFullPath();
 
-	sourcePaths.forEach(src => {
-		const element = fs.findByPath(src);
-		if (!element) return;
-		if (!isCopy && element.parent && element.parent.getFullPath() === destFullPath) return;
+	const desktopContainer = document.getElementById('project-icons-container');
+	const containerRect = desktopContainer ? desktopContainer.getBoundingClientRect() : { left: 0, top: 0, width: window.innerWidth, height: window.innerHeight - 40 };
+
+	const customGapX = (window.SettingsApp && window.SettingsApp.get('desktopGridSpacingX')) || 75;
+	const customGapY = (window.SettingsApp && window.SettingsApp.get('desktopGridSpacingY')) || 100;
+	const iconWidth = customGapX;
+	const iconHeight = customGapY;
+
+	let baseDropX = e.clientX - containerRect.left - (desktopDragOffset.x || Math.round(iconWidth / 2));
+	let baseDropY = e.clientY - containerRect.top - (desktopDragOffset.y || 20);
+
+	baseDropX = Math.max(10, Math.min(baseDropX, containerRect.width - iconWidth - 10));
+	baseDropY = Math.max(10, Math.min(baseDropY, containerRect.height - iconHeight - 10));
+
+	if (isAlignToGridEnabled()) {
+		const startX = 10;
+		const startY = 10;
+		baseDropX = startX + Math.round((baseDropX - startX) / (iconWidth + 10)) * (iconWidth + 10);
+		baseDropY = startY + Math.round((baseDropY - startY) / iconHeight) * iconHeight;
+		baseDropX = Math.max(10, Math.min(baseDropX, containerRect.width - iconWidth - 10));
+		baseDropY = Math.max(10, Math.min(baseDropY, containerRect.height - iconHeight - 10));
+	}
+
+	const positions = loadDesktopIconPositions();
+
+	sourcePaths.forEach((src, idx) => {
+		const isAppIcon = src.startsWith('app://');
+		let element = null;
+		if (!isAppIcon) {
+			element = fs.findByPath(src);
+			if (!element) return;
+		}
+
+		const itemX = baseDropX + idx * (isAlignToGridEnabled() ? 0 : 15);
+		const itemY = baseDropY + idx * (isAlignToGridEnabled() ? iconHeight : 15);
+
+		if (isAppIcon) {
+			if (isDesktopDrop) {
+				positions[src] = { x: itemX, y: itemY };
+			}
+			return;
+		}
+
+		if (!isCopy && element.parent && element.parent.getFullPath() === destFullPath) {
+			if (isDesktopDrop && destFullPath === '/') {
+				positions[element.getFullPath()] = { x: itemX, y: itemY };
+			}
+			return;
+		}
 
 		try {
+			let resultElement;
 			if (isCopy) {
-				fs.copy(src, destFullPath);
+				resultElement = fs.copy(src, destFullPath);
 			} else {
-				fs.move(src, destFullPath);
+				resultElement = fs.move(src, destFullPath);
+			}
+			if (isDesktopDrop && destFullPath === '/' && resultElement) {
+				positions[resultElement.getFullPath()] = { x: itemX, y: itemY };
 			}
 		} catch (err) {
 			showXPDialog(isCopy ? 'Copy Error' : 'Move Error', err.message, 'error');
 		}
 	});
+
+	if (isDesktopDrop && destFullPath === '/') {
+		saveDesktopIconPositions(positions);
+	}
 
 	if (window.SettingsApp && window.SettingsApp.playSound) {
 		window.SettingsApp.playSound('click');
@@ -3264,154 +3482,15 @@ async function openDisplaySettings() {
 }
 
 function openRecycleBinWindow() {
-	const id = 'window-recycle-bin';
-	const existingWindow = document.getElementById(id);
-	if (existingWindow) {
-		bringWindowToFront(existingWindow);
-		renderRecycleBinContent(existingWindow);
-		return;
+	if (window.FileExplorer && typeof window.FileExplorer.openRecycleBin === 'function') {
+		return window.FileExplorer.openRecycleBin();
 	}
-
-	const contentHTML = `
-		<div class="folder-window-layout">
-			<div class="folder-toolbar">
-				<button class="folder-nav-btn" id="recycle-empty-btn" title="Empty Recycle Bin">
-					<img src="https://api.iconify.design/mdi/delete-sweep-outline.svg" alt="Empty">
-				</button>
-				<div class="folder-toolbar-separator"></div>
-				<button class="folder-nav-btn" id="recycle-restore-btn" title="Restore Selected" disabled>
-					<img src="https://api.iconify.design/mdi/backup-restore.svg" alt="Restore">
-				</button>
-			</div>
-			<div class="folder-main-content">
-				<div class="folder-content-wrapper">
-					<div class="folder-content" id="recycle-bin-content"></div>
-				</div>
-				<div class="folder-status-bar">
-					<div class="status-bar-left" id="recycle-status"></div>
-					<div class="status-bar-right"></div>
-				</div>
-			</div>
-		</div>
-	`;
-
-	const win = createXPWindow(id, 'Recycle Bin', contentHTML, 600, 420, { iconSrc: '../assets/images/desk/trash.png' });
-	win.querySelector('.xp-window-content').style.padding = '0';
-	win.classList.add('project-window');
-
-	win.querySelector('#recycle-empty-btn').addEventListener('click', () => {
-		const items = fs.loadRecycleBinItems();
-		if (items.length === 0) return;
-		createConfirmationDialog(`Are you sure you want to permanently delete ${items.length} item(s)?`, () => {
-			fs.emptyRecycleBin();
-			renderRecycleBinContent(win);
-		});
-	});
-
-	win.querySelector('#recycle-restore-btn').addEventListener('click', () => {
-		const selected = win.querySelector('.project-icon.selected');
-		if (!selected) return;
-		try {
-			fs.restoreFromRecycleBin(selected.dataset.recycleUid);
-			renderRecycleBinContent(win);
-			refreshUI();
-		} catch (e) {
-			showXPDialog('Error', e.message, 'error');
-		}
-	});
-
-	renderRecycleBinContent(win);
 }
 
 function renderRecycleBinContent(win) {
-	const container = win.querySelector('#recycle-bin-content');
-	const statusEl = win.querySelector('#recycle-status');
-	const restoreBtn = win.querySelector('#recycle-restore-btn');
-	if (!container) return;
-
-	container.innerHTML = '';
-	const items = fs.loadRecycleBinItems();
-	statusEl.textContent = `${items.length} item(s)`;
-	if (restoreBtn) restoreBtn.disabled = true;
-
-	items.forEach(item => {
-		const icon = document.createElement('div');
-		icon.className = 'project-icon';
-		icon.dataset.recycleUid = item.uid;
-		icon.title = `${item.data.name}\nOriginal location: ${item.originalPath}`;
-
-		const img = document.createElement('img');
-		img.src = item.data.icon || '../assets/images/desk/icons/File.webp';
-		img.alt = item.data.name;
-		icon.appendChild(img);
-
-		const span = document.createElement('span');
-		span.textContent = item.data.name;
-		icon.appendChild(span);
-
-		icon.addEventListener('click', () => {
-			container.querySelectorAll('.project-icon.selected').forEach(el => el.classList.remove('selected'));
-			icon.classList.add('selected');
-			if (restoreBtn) restoreBtn.disabled = false;
-		});
-
-		icon.addEventListener('dblclick', () => {
-			if (item.data.name.toLowerCase() === 'matrix.bat') {
-				if (window.AchievementsManager) window.AchievementsManager.progress('matrix_recycle_run', 1);
-				if (window.CommandPrompt) {
-					window.CommandPrompt.open({
-						script: item.data.content || '@echo off\ncolor 0a\n:loop\necho %random% %random% %random% %random%\ngoto loop',
-						title: 'matrix.bat (Recycle Bin)'
-					});
-					return;
-				}
-			}
-			showXPDialog(item.data.name, 'This item is in the Recycle Bin. You must restore it to open or execute it.', 'warning');
-		});
-
-		icon.addEventListener('contextmenu', (e) => {
-			e.preventDefault();
-			e.stopPropagation();
-			container.querySelectorAll('.project-icon.selected').forEach(el => el.classList.remove('selected'));
-			icon.classList.add('selected');
-			if (restoreBtn) restoreBtn.disabled = false;
-
-			if (window.ContextMenu) {
-				const items = [
-					{
-						label: 'Restore',
-						bold: true,
-						action: () => {
-							try {
-								fs.restoreFromRecycleBin(item.uid);
-								renderRecycleBinContent(win);
-								refreshUI();
-							} catch (err) {
-								showXPDialog('Error', err.message, 'error');
-							}
-						}
-					},
-					{
-						label: 'Delete Permanently',
-						action: () => {
-							fs.deletePermanentlyFromRecycleBin(item.uid);
-							renderRecycleBinContent(win);
-						}
-					},
-					{ separator: true },
-					{
-						label: 'Properties',
-						action: () => {
-							showXPDialog('Properties', `${item.data.name}\nOriginal location: ${item.originalPath}`, 'info');
-						}
-					}
-				];
-				window.ContextMenu.show(items, e.clientX, e.clientY);
-			}
-		});
-
-		container.appendChild(icon);
-	});
+	if (win && win.classList.contains('xp-explorer-window') && window.FileExplorer) {
+		window.FileExplorer.updateView(win, true);
+	}
 }
 
 function openRunDialog() {

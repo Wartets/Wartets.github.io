@@ -304,13 +304,17 @@
 						{ separator: true },
 						{
 							label: 'Auto Arrange',
-							checked: true,
-							action: () => arrangeIcons('none')
+							checked: typeof isAutoArrangeEnabled === 'function' ? isAutoArrangeEnabled() : false,
+							action: () => {
+								if (typeof toggleAutoArrange === 'function') toggleAutoArrange();
+							}
 						},
 						{
 							label: 'Align to Grid',
-							checked: true,
-							action: () => arrangeIcons('none')
+							checked: typeof isAlignToGridEnabled === 'function' ? isAlignToGridEnabled() : true,
+							action: () => {
+								if (typeof toggleAlignToGrid === 'function') toggleAlignToGrid();
+							}
 						}
 					]
 				},
@@ -395,7 +399,180 @@
 			];
 		},
 
+		getRecycleBinAreaItems(win) {
+			const recycleItems = (typeof fs !== 'undefined' && fs) ? fs.loadRecycleBinItems() : [];
+			const state = win.explorerState;
+
+			return [
+				{
+					label: 'View',
+					submenu: [
+						{
+							label: 'Thumbnails',
+							radio: state.viewMode === 'thumbnails',
+							action: () => {
+								state.viewMode = 'thumbnails';
+								if (window.FileExplorer) window.FileExplorer.updateView(win, true);
+							}
+						},
+						{
+							label: 'Tiles',
+							radio: state.viewMode === 'tiles',
+							action: () => {
+								state.viewMode = 'tiles';
+								if (window.FileExplorer) window.FileExplorer.updateView(win, true);
+							}
+						},
+						{
+							label: 'Icons',
+							radio: state.viewMode === 'icons',
+							action: () => {
+								state.viewMode = 'icons';
+								if (window.FileExplorer) window.FileExplorer.updateView(win, true);
+							}
+						},
+						{
+							label: 'List',
+							radio: state.viewMode === 'list',
+							action: () => {
+								state.viewMode = 'list';
+								if (window.FileExplorer) window.FileExplorer.updateView(win, true);
+							}
+						},
+						{
+							label: 'Details',
+							radio: state.viewMode === 'details',
+							action: () => {
+								state.viewMode = 'details';
+								if (window.FileExplorer) window.FileExplorer.updateView(win, true);
+							}
+						}
+					]
+				},
+				{
+					label: 'Arrange Icons By',
+					submenu: [
+						{
+							label: 'Name',
+							action: () => {
+								state.sortBy = 'name';
+								if (window.FileExplorer) window.FileExplorer.updateView(win, true);
+							}
+						},
+						{
+							label: 'Original Location',
+							action: () => {
+								state.sortBy = 'location';
+								if (window.FileExplorer) window.FileExplorer.updateView(win, true);
+							}
+						},
+						{
+							label: 'Date Deleted',
+							action: () => {
+								state.sortBy = 'deleted';
+								if (window.FileExplorer) window.FileExplorer.updateView(win, true);
+							}
+						},
+						{
+							label: 'Size',
+							action: () => {
+								state.sortBy = 'size';
+								if (window.FileExplorer) window.FileExplorer.updateView(win, true);
+							}
+						},
+						{
+							label: 'Item Type',
+							action: () => {
+								state.sortBy = 'type';
+								if (window.FileExplorer) window.FileExplorer.updateView(win, true);
+							}
+						}
+					]
+				},
+				{
+					label: 'Refresh',
+					shortcut: 'F5',
+					icon: 'https://api.iconify.design/mdi/refresh.svg',
+					action: () => {
+						if (window.FileExplorer) window.FileExplorer.updateView(win, true);
+					}
+				},
+				{ separator: true },
+				{
+					label: 'Empty Recycle Bin',
+					disabled: recycleItems.length === 0,
+					icon: 'https://api.iconify.design/mdi/delete-sweep-outline.svg',
+					action: () => {
+						if (recycleItems.length === 0) return;
+						if (typeof createConfirmationDialog === 'function') {
+							createConfirmationDialog(`Are you sure you want to permanently delete all ${recycleItems.length} items?`, () => {
+								if (fs) fs.emptyRecycleBin();
+								if (typeof refreshUI === 'function') refreshUI();
+							});
+						}
+					}
+				},
+				{
+					label: 'Paste',
+					disabled: true
+				},
+				{ separator: true },
+				{
+					label: 'Properties',
+					bold: true,
+					action: () => {
+						if (typeof showXPDialog === 'function') {
+							showXPDialog('Recycle Bin Properties', `Recycle Bin is located on Local Disk (C:).\nCurrent items in bin: ${recycleItems.length}`, 'info');
+						}
+					}
+				}
+			];
+		},
+
+		getRecycleBinItemItems(item, iconEl, winContext = null) {
+			return [
+				{
+					label: 'Restore',
+					bold: true,
+					action: () => {
+						if (fs) {
+							fs.restoreFromRecycleBin(item.uid);
+							if (typeof refreshUI === 'function') refreshUI();
+						}
+					}
+				},
+				{
+					label: 'Cut',
+					disabled: true
+				},
+				{
+					label: 'Delete Permanently',
+					icon: 'https://api.iconify.design/mdi/delete-outline.svg',
+					action: () => {
+						if (typeof createConfirmationDialog === 'function') {
+							createConfirmationDialog(`Are you sure you want to permanently delete '${item.name}'?`, () => {
+								if (fs) fs.deletePermanentlyFromRecycleBin(item.uid);
+								if (typeof refreshUI === 'function') refreshUI();
+							});
+						}
+					}
+				},
+				{ separator: true },
+				{
+					label: 'Properties',
+					action: () => {
+						if (typeof showXPDialog === 'function') {
+							showXPDialog(`${item.name} Properties`, `File: ${item.name}\nOriginal location: ${item.originalPath}\nDate Deleted: ${new Date(item.deletedAt).toLocaleString()}\nSize: ${Math.ceil((item.size || 0) / 1024)} KB\nType: ${item.type}`, 'info');
+						}
+					}
+				}
+			];
+		},
+
 		getFolderAreaItems(folder, win) {
+			if (win && win.explorerState && win.explorerState.isRecycleBin) {
+				return this.getRecycleBinAreaItems(win);
+			}
 			const destPath = folder.getFullPath();
 			const hasClipboard = fs && fs.clipboard && fs.clipboard.element;
 
@@ -597,6 +774,9 @@
 		},
 
 		getIconItems(element, iconEl, winContext = null) {
+			if (winContext && winContext.explorerState && winContext.explorerState.isRecycleBin) {
+				return this.getRecycleBinItemItems(element, iconEl, winContext);
+			}
 			const isMultiple = selectedIcons.size > 1;
 			const isProject = element instanceof ProjectFile;
 			const isFolder = element instanceof Folder;

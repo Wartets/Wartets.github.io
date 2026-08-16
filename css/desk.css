@@ -1597,6 +1597,45 @@ body.theme-zune .xp-context-menu li.separator {
 	z-index: 10;
 }
 
+.project-icon[data-type="project"] img {
+	border: 1px solid #7f9db9;
+	background: #ffffff28;
+	padding: 2px;
+	border-radius: 3px;
+	box-shadow: 2px 3px 6px rgba(0, 0, 0, 0.45);
+	transform: perspective(300px) rotateX(-15deg) rotateY(36.5deg) rotateZ(0deg);
+	transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.project-icon[data-type="project"]:hover img {
+	transform: perspective(350px) rotateX(5deg) rotateY(-10deg) rotateZ(1deg) scale(1.06);
+	box-shadow: 3px 5px 10px rgba(0, 0, 0, 0.55);
+}
+
+.project-icon[data-type="project"].selected img {
+	transform: perspective(350px) rotateX(0deg) rotateY(0deg) rotateZ(0deg) scale(1.02);
+	box-shadow: 0 0 6px var(--xp-selection-blue);
+}
+
+.xp-explorer-item[data-type="project"] img {
+	border: 1px solid #7f9db9;
+	background: #ffffff28;
+	padding: 1px;
+	border-radius: 3px;
+	box-shadow: 1px 2px 4px rgba(0, 0, 0, 0.35);
+	transform: perspective(300px) rotateX(-15deg) rotateY(36.5deg) rotateZ(0deg);
+	transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.xp-explorer-item[data-type="project"]:hover img {
+	transform: perspective(350px) rotateX(5deg) rotateY(-10deg) rotateZ(1deg) scale(1.05);
+	box-shadow: 2px 4px 6px rgba(0, 0, 0, 0.45);
+}
+
+.xp-explorer-item[data-type="project"].selected img {
+	transform: perspective(350px) rotateX(0deg) rotateY(0deg) rotateZ(0deg);
+}
+
 .project-icon span {
 	font-size: 11px;
 	color: inherit;
@@ -2844,6 +2883,11 @@ body.theme-zune .xp-context-menu li.separator {
 	z-index: 2;
 }
 
+.xp-details-header-row.rb-details-columns,
+.xp-details-row.rb-details-columns {
+	grid-template-columns: 200px 180px 140px 90px 1fr;
+}
+
 .xp-details-th {
 	padding: 3px 6px;
 	border-right: 1px solid #aca899;
@@ -2908,7 +2952,9 @@ body.theme-zune .xp-context-menu li.separator {
 }
 
 .xp-details-td.col-type,
-.xp-details-td.col-modified {
+.xp-details-td.col-modified,
+.xp-details-td.col-location,
+.xp-details-td.col-deleted {
 	overflow: hidden;
 	text-overflow: ellipsis;
 	white-space: nowrap;
