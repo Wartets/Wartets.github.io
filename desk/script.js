@@ -937,6 +937,7 @@ window.DeskAPI = {
 	openNetworkPlaces: () => (window.DeskAppRegistry ? window.DeskAppRegistry.launch('network') : openNetworkPlacesWindow()),
 	openDisplaySettings: () => (window.DeskAppRegistry ? window.DeskAppRegistry.launch('display') : openDisplaySettings()),
 	openAchievements: (targetId = null) => {
+		if (window.DeskAppRegistry) return window.DeskAppRegistry.launch('achievements', { targetId });
 		if (window.AchievementsManager) return window.AchievementsManager.open(targetId);
 	},
 	getNowPlaying: () => {
@@ -1280,6 +1281,7 @@ function startInlineRename(iconElement) {
 					fs.save();
 					span.textContent = newName;
 					success = true;
+					refreshUI();
 				} catch (e) {
 					showXPDialog('Error Renaming File', e.message, 'error');
 					input.focus();
@@ -1878,6 +1880,14 @@ function setupGlobalKeyboardShortcuts() {
 
 		const isEditable = e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.isContentEditable;
 		const ctrlOrMeta = e.ctrlKey || e.metaKey;
+
+		if (e.altKey && e.key === 'F4' && !isEditable) {
+			e.preventDefault();
+			if (activeWindow && typeof closeWindow === 'function') {
+				closeWindow(activeWindow, activeWindow.id);
+			}
+			return;
+		}
 
 		if (e.key === 'Alt') {
 			return;
@@ -2705,6 +2715,9 @@ function refreshUI() {
 				if (folder) {
 					win.explorerState.currentFolder = folder;
 					window.FileExplorer.updateView(win, true);
+					if (win.explorerState.sidebarMode === 'tree') {
+						window.FileExplorer.renderFolderTree(win);
+					}
 				} else {
 					closeWindow(win, win.id);
 				}

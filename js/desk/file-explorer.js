@@ -1456,6 +1456,11 @@
 				`;
 
 				row.addEventListener('click', (e) => {
+					const isSingleClick = window.SettingsApp && window.SettingsApp.get('singleClickOpen');
+					if (isSingleClick && e.button === 0 && !e.ctrlKey && !e.shiftKey) {
+						this.handleRecycleItemExecute(el);
+						return;
+					}
 					this.handleItemSelection(row, win, e);
 				});
 
@@ -1530,6 +1535,11 @@
 			}
 
 			icon.addEventListener('click', (e) => {
+				const isSingleClick = window.SettingsApp && window.SettingsApp.get('singleClickOpen');
+				if (isSingleClick && e.button === 0 && !e.ctrlKey && !e.shiftKey) {
+					this.handleRecycleItemExecute(element);
+					return;
+				}
 				this.handleItemSelection(icon, win, e);
 			});
 
@@ -1624,6 +1634,11 @@
 				`;
 
 				row.addEventListener('click', (e) => {
+					const isSingleClick = window.SettingsApp && window.SettingsApp.get('singleClickOpen');
+					if (isSingleClick && e.button === 0 && !e.ctrlKey && !e.shiftKey) {
+						this.handleRecycleItemExecute(el);
+						return;
+					}
 					this.handleItemSelection(row, win, e);
 				});
 
@@ -1704,6 +1719,11 @@
 			}
 
 			icon.addEventListener('click', (e) => {
+				const isSingleClick = window.SettingsApp && window.SettingsApp.get('singleClickOpen');
+				if (isSingleClick && e.button === 0 && !e.ctrlKey && !e.shiftKey) {
+					openFileSystemElement(element, win);
+					return;
+				}
 				this.handleItemSelection(icon, win, e);
 			});
 
@@ -1776,6 +1796,17 @@
 			const sbSize = win.querySelector('.xp-sb-size');
 			const detailsBody = win.querySelector('.xp-task-details-body');
 			const actionsContainer = win.querySelector('#xp-task-content-actions');
+
+			const cutBtn = win.querySelector('.tb-cut');
+			const copyBtn = win.querySelector('.tb-copy');
+			const pasteBtn = win.querySelector('.tb-paste');
+			const deleteBtn = win.querySelector('.tb-delete');
+			const hasClipboard = fs && fs.clipboard && fs.clipboard.element;
+
+			if (cutBtn) cutBtn.disabled = selectedCount === 0 || state.isRecycleBin;
+			if (copyBtn) copyBtn.disabled = selectedCount === 0 || state.isRecycleBin;
+			if (pasteBtn) pasteBtn.disabled = !hasClipboard || state.isRecycleBin;
+			if (deleteBtn) deleteBtn.disabled = selectedCount === 0;
 
 			if (state.isRecycleBin) {
 				const recycleItems = (typeof fs !== 'undefined' && fs) ? fs.loadRecycleBinItems() : [];

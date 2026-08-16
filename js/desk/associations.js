@@ -459,6 +459,21 @@
 			}
 		},
 
+		getDisplayName(element) {
+			if (!element) return '';
+			const fullName = typeof element === 'string' ? element : element.name;
+			const showExt = window.SettingsApp ? (window.SettingsApp.get('showFileExtensions') !== false) : true;
+			if (showExt) return fullName;
+			const cfg = this.getConfig(fullName);
+			if (cfg) {
+				const ext = this.getExtension(fullName);
+				if (ext && fullName.toLowerCase().endsWith(ext)) {
+					return fullName.substring(0, fullName.length - ext.length);
+				}
+			}
+			return fullName;
+		},
+
 		getNewFileTemplates() {
 			return newFileTemplates;
 		}

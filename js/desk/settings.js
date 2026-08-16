@@ -2333,6 +2333,14 @@
 			});
 		}
 
+		const showExtToggle = win.querySelector('#settings-show-ext');
+		if (showExtToggle) {
+			showExtToggle.addEventListener('change', () => {
+				pendingSettings.showFileExtensions = showExtToggle.checked;
+				markDirty(win);
+			});
+		}
+
 		const exportBtn = win.querySelector('#settings-export-btn');
 		if (exportBtn) {
 			exportBtn.addEventListener('click', () => {
