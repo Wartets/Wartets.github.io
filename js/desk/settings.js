@@ -1218,6 +1218,28 @@
 						</fieldset>
 
 						<fieldset class="xp-groupbox" style="margin-top: 8px;">
+							<legend>Digital Media & Default Audio Player</legend>
+							<div class="xp-form-row">
+								<label for="settings-default-player" style="width: 140px;">Preferred Player:</label>
+								<select id="settings-default-player" class="xp-select" style="flex: 1;">
+									<option value="mediaplayer">Windows Media Player 9 Series</option>
+									<option value="winamp">Winamp 2.9 (Classic Retro Player)</option>
+								</select>
+							</div>
+							<div class="xp-form-row" style="margin-top: 6px;">
+								<label for="settings-default-viz" style="width: 140px;">Default Visualizer:</label>
+								<select id="settings-default-viz" class="xp-select" style="flex: 1;">
+									<option value="albumart">Album Art Display</option>
+									<option value="bars">Spectrum Bars</option>
+									<option value="wave">Oscilloscope Waveform</option>
+									<option value="spectrum">Radial Spectrum</option>
+									<option value="particles">Starfield Particles</option>
+									<option value="flame">Fire Flame</option>
+								</select>
+							</div>
+						</fieldset>
+
+						<fieldset class="xp-groupbox" style="margin-top: 8px;">
 							<legend>Individual System Sound Event Toggles</legend>
 							<div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 4px; font-size: 11px;">
 								<label class="xp-checkbox-row"><input type="checkbox" id="snd-evt-startup" ${pendingSettings.soundEventStartup ? 'checked' : ''}> Startup / Log On</label>
@@ -2126,6 +2148,24 @@
 		if (singleClickToggle) {
 			singleClickToggle.addEventListener('change', () => {
 				pendingSettings.singleClickOpen = singleClickToggle.checked;
+				markDirty(win);
+			});
+		}
+
+		const defaultPlayerSelect = win.querySelector('#settings-default-player');
+		if (defaultPlayerSelect) {
+			defaultPlayerSelect.value = pendingSettings.defaultAudioPlayer || 'mediaplayer';
+			defaultPlayerSelect.addEventListener('change', () => {
+				pendingSettings.defaultAudioPlayer = defaultPlayerSelect.value;
+				markDirty(win);
+			});
+		}
+
+		const defaultVizSelect = win.querySelector('#settings-default-viz');
+		if (defaultVizSelect) {
+			defaultVizSelect.value = pendingSettings.mediaPlayerVizPreset || 'albumart';
+			defaultVizSelect.addEventListener('change', () => {
+				pendingSettings.mediaPlayerVizPreset = defaultVizSelect.value;
 				markDirty(win);
 			});
 		}

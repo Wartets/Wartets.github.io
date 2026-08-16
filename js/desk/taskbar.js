@@ -723,6 +723,7 @@
 		},
 
 		executeQuickLaunchItem(item) {
+			if (!item) return;
 			if (item.action === 'show-desktop') {
 				this.showDesktop();
 				return;
@@ -731,6 +732,93 @@
 			if (item.action === 'open-path' && item.path && typeof fs !== 'undefined') {
 				const el = fs.findByPath(item.path);
 				if (el && typeof openFileSystemElement === 'function') openFileSystemElement(el);
+				return;
+			}
+
+			const actionMap = {
+				'open-media-player': () => {
+					if (window.MediaPlayerApp) window.MediaPlayerApp.open();
+					else if (window.DeskAppRegistry) window.DeskAppRegistry.launch('mediaplayer');
+					else if (window.DeskAPI && window.DeskAPI.openMediaPlayer) window.DeskAPI.openMediaPlayer();
+				},
+				'open-wmp': () => {
+					if (window.MediaPlayerApp) window.MediaPlayerApp.open();
+					else if (window.DeskAppRegistry) window.DeskAppRegistry.launch('mediaplayer');
+					else if (window.DeskAPI && window.DeskAPI.openMediaPlayer) window.DeskAPI.openMediaPlayer();
+				},
+				'open-mediaplayer': () => {
+					if (window.MediaPlayerApp) window.MediaPlayerApp.open();
+					else if (window.DeskAppRegistry) window.DeskAppRegistry.launch('mediaplayer');
+					else if (window.DeskAPI && window.DeskAPI.openMediaPlayer) window.DeskAPI.openMediaPlayer();
+				},
+				'open-winamp': () => {
+					if (window.DeskAPI && window.DeskAPI.openWinampPlayer) window.DeskAPI.openWinampPlayer();
+					else if (typeof openWinamp === 'function') openWinamp();
+					else if (window.DeskAppRegistry) window.DeskAppRegistry.launch('winamp');
+				},
+				'open-ie': () => {
+					if (window.DeskAppRegistry) window.DeskAppRegistry.launch('ie');
+					else if (typeof openInternetExplorer === 'function') openInternetExplorer();
+				},
+				'open-oe': () => {
+					if (window.DeskAppRegistry) window.DeskAppRegistry.launch('outlook');
+					else if (typeof openOutlookExpress === 'function') openOutlookExpress();
+				},
+				'open-outlook': () => {
+					if (window.DeskAppRegistry) window.DeskAppRegistry.launch('outlook');
+					else if (typeof openOutlookExpress === 'function') openOutlookExpress();
+				},
+				'open-cmd': () => {
+					if (window.DeskAppRegistry) window.DeskAppRegistry.launch('cmd');
+				},
+				'open-notepad': () => {
+					if (window.NotepadApp) window.NotepadApp.openNew();
+					else if (window.DeskAppRegistry) window.DeskAppRegistry.launch('notepad');
+				},
+				'open-calc': () => {
+					if (window.DeskAppRegistry) window.DeskAppRegistry.launch('calculator');
+					else if (typeof openCalculator === 'function') openCalculator();
+				},
+				'open-calculator': () => {
+					if (window.DeskAppRegistry) window.DeskAppRegistry.launch('calculator');
+					else if (typeof openCalculator === 'function') openCalculator();
+				},
+				'open-paint': () => {
+					if (window.DeskAppRegistry) window.DeskAppRegistry.launch('paint');
+					else if (typeof openPaint === 'function') openPaint();
+				},
+				'open-mine': () => {
+					if (window.DeskAppRegistry) window.DeskAppRegistry.launch('minesweeper');
+					else if (typeof openMinesweeper === 'function') openMinesweeper();
+				},
+				'open-minesweeper': () => {
+					if (window.DeskAppRegistry) window.DeskAppRegistry.launch('minesweeper');
+					else if (typeof openMinesweeper === 'function') openMinesweeper();
+				},
+				'open-solitaire': () => {
+					if (window.DeskAppRegistry) window.DeskAppRegistry.launch('solitaire');
+					else if (typeof openSolitaire === 'function') openSolitaire();
+				},
+				'open-achievements': () => {
+					if (window.DeskAPI && window.DeskAPI.openAchievements) window.DeskAPI.openAchievements();
+					else if (window.AchievementsManager) window.AchievementsManager.open();
+				},
+				'open-settings': () => {
+					if (window.SettingsApp) window.SettingsApp.open('system');
+					else if (window.DeskAppRegistry) window.DeskAppRegistry.launch('settings');
+				},
+				'open-sound-recorder': () => {
+					if (window.SoundRecorderApp) window.SoundRecorderApp.open();
+					else if (window.DeskAppRegistry) window.DeskAppRegistry.launch('soundrecorder');
+				},
+				'open-charmap': () => {
+					if (window.CharacterMapApp) window.CharacterMapApp.open();
+					else if (window.DeskAppRegistry) window.DeskAppRegistry.launch('charmap');
+				}
+			};
+
+			if (actionMap[item.action]) {
+				actionMap[item.action]();
 				return;
 			}
 

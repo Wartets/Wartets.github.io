@@ -134,12 +134,17 @@
 				}
 			});
 
-			this.register(['.wav', '.wave', '.mp3', '.ogg', '.m4a', '.flac', '.aif', '.aiff', '.wma', '.aac', '.alac', '.opus'], {
+			this.register(['.wav', '.wave', '.mp3', '.ogg', '.m4a', '.flac', '.aif', '.aiff', '.wma', '.aac', '.alac', '.opus', '.mid', '.midi'], {
 				typeLabel: 'Audio Track',
 				defaultIcon: '../assets/images/desk/icons/Music File.webp',
 				defaultApp: 'mediaplayer',
 				openHandler: (file) => {
-					if (window.MediaPlayerApp) {
+					const defaultPlayer = (window.SettingsApp && typeof window.SettingsApp.get === 'function')
+						? (window.SettingsApp.get('defaultAudioPlayer') || 'mediaplayer')
+						: 'mediaplayer';
+					if (defaultPlayer === 'winamp' && typeof openWinamp === 'function') {
+						openWinamp(file);
+					} else if (window.MediaPlayerApp) {
 						window.MediaPlayerApp.open(file);
 					} else if (typeof openWinamp === 'function') {
 						openWinamp(file);
@@ -185,6 +190,48 @@
 					content: '',
 					label: 'Wave Sound'
 				}
+			});
+
+			this.register(['.m3u', '.pls'], {
+				typeLabel: 'Media Playlist File',
+				defaultIcon: '../assets/images/desk/icons/Video File.webp',
+				defaultApp: 'mediaplayer',
+				openHandler: (file) => {
+					const defaultPlayer = (window.SettingsApp && typeof window.SettingsApp.get === 'function')
+						? (window.SettingsApp.get('defaultAudioPlayer') || 'mediaplayer')
+						: 'mediaplayer';
+					if (defaultPlayer === 'winamp' && typeof openWinamp === 'function') {
+						openWinamp(file);
+					} else if (window.MediaPlayerApp) {
+						window.MediaPlayerApp.open(file);
+					}
+				},
+				openWith: [
+					{
+						id: 'mediaplayer',
+						name: 'Windows Media Player',
+						icon: '../assets/images/desk/icons/Video File.webp',
+						action: (file) => {
+							if (window.MediaPlayerApp) window.MediaPlayerApp.open(file);
+						}
+					},
+					{
+						id: 'winamp',
+						name: 'Winamp Media Player',
+						icon: 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/0d/Winamp-logo.svg/960px-Winamp-logo.svg.png',
+						action: (file) => {
+							if (typeof openWinamp === 'function') openWinamp(file);
+						}
+					},
+					{
+						id: 'notepad',
+						name: 'Notepad',
+						icon: '../assets/images/desk/icons/Notepad.webp',
+						action: (file) => {
+							if (window.NotepadApp) window.NotepadApp.open(file);
+						}
+					}
+				]
 			});
 
 			this.register(['.mp4', '.avi', '.wmv', '.mkv', '.mov', '.mpg', '.webm'], {

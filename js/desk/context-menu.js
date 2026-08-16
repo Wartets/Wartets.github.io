@@ -1917,6 +1917,507 @@
 					}
 				}
 			];
+		},
+
+		getMediaPlayerScreenItems(mediaPlayerApp, activeTrack, win) {
+			const isCurrentlyPlaying = activeTrack && mediaPlayerApp && mediaPlayerApp.isPlaying;
+			const isVideo = activeTrack && activeTrack.isVideo;
+
+			return [
+				{
+					label: isCurrentlyPlaying ? 'Pause' : 'Play',
+					bold: true,
+					action: () => mediaPlayerApp.togglePlay()
+				},
+				{
+					label: 'Stop',
+					action: () => mediaPlayerApp.stop()
+				},
+				{ separator: true },
+				{
+					label: 'Previous Track',
+					shortcut: 'Ctrl+B',
+					action: () => mediaPlayerApp.playPrevious()
+				},
+				{
+					label: 'Next Track',
+					shortcut: 'Ctrl+F',
+					action: () => mediaPlayerApp.playNext()
+				},
+				{ separator: true },
+				{
+					label: 'Visualizations',
+					submenu: [
+						{
+							label: 'Album Art Stage',
+							radio: mediaPlayerApp.currentVisualization === 'albumart',
+							action: () => {
+								mediaPlayerApp.currentVisualization = 'albumart';
+								mediaPlayerApp.updateVisualizationModeUI(win);
+								const lbl = win.querySelector('#wmp-viz-label');
+								if (lbl) lbl.textContent = 'Viz: Album Art';
+							}
+						},
+						{
+							label: 'Spectrum Bars',
+							radio: mediaPlayerApp.currentVisualization === 'bars',
+							action: () => {
+								mediaPlayerApp.currentVisualization = 'bars';
+								mediaPlayerApp.updateVisualizationModeUI(win);
+								const lbl = win.querySelector('#wmp-viz-label');
+								if (lbl) lbl.textContent = 'Viz: Bars';
+							}
+						},
+						{
+							label: 'Oscilloscope Waveform',
+							radio: mediaPlayerApp.currentVisualization === 'wave',
+							action: () => {
+								mediaPlayerApp.currentVisualization = 'wave';
+								mediaPlayerApp.updateVisualizationModeUI(win);
+								const lbl = win.querySelector('#wmp-viz-label');
+								if (lbl) lbl.textContent = 'Viz: Waveform';
+							}
+						},
+						{
+							label: 'Radial Spectrum',
+							radio: mediaPlayerApp.currentVisualization === 'spectrum',
+							action: () => {
+								mediaPlayerApp.currentVisualization = 'spectrum';
+								mediaPlayerApp.updateVisualizationModeUI(win);
+								const lbl = win.querySelector('#wmp-viz-label');
+								if (lbl) lbl.textContent = 'Viz: Spectrum';
+							}
+						},
+						{
+							label: 'Starfield Particles',
+							radio: mediaPlayerApp.currentVisualization === 'particles',
+							action: () => {
+								mediaPlayerApp.currentVisualization = 'particles';
+								mediaPlayerApp.updateVisualizationModeUI(win);
+								const lbl = win.querySelector('#wmp-viz-label');
+								if (lbl) lbl.textContent = 'Viz: Particles';
+							}
+						},
+						{
+							label: 'Fire Flame',
+							radio: mediaPlayerApp.currentVisualization === 'flame',
+							action: () => {
+								mediaPlayerApp.currentVisualization = 'flame';
+								mediaPlayerApp.updateVisualizationModeUI(win);
+								const lbl = win.querySelector('#wmp-viz-label');
+								if (lbl) lbl.textContent = 'Viz: Fire Flame';
+							}
+						}
+					]
+				},
+				{
+					label: 'Enhancements',
+					submenu: [
+						{
+							label: 'Graphic Equalizer...',
+							action: () => {
+								const btn = win.querySelector('#wmp-btn-enhancements');
+								if (btn && !mediaPlayerApp.isEnhancementsOpen) btn.click();
+								const eqTab = win.querySelector('.wmp-enh-tab-btn[data-enh-tab="eq"]');
+								if (eqTab) eqTab.click();
+							}
+						},
+						{
+							label: 'SRS WOW Effects...',
+							action: () => {
+								const btn = win.querySelector('#wmp-btn-enhancements');
+								if (btn && !mediaPlayerApp.isEnhancementsOpen) btn.click();
+								const srsTab = win.querySelector('.wmp-enh-tab-btn[data-enh-tab="srs"]');
+								if (srsTab) srsTab.click();
+							}
+						},
+						{
+							label: 'Play Speed & Balance...',
+							action: () => {
+								const btn = win.querySelector('#wmp-btn-enhancements');
+								if (btn && !mediaPlayerApp.isEnhancementsOpen) btn.click();
+								const speedTab = win.querySelector('.wmp-enh-tab-btn[data-enh-tab="speed"]');
+								if (speedTab) speedTab.click();
+							}
+						},
+						{
+							label: 'Video Settings...',
+							action: () => {
+								const btn = win.querySelector('#wmp-btn-enhancements');
+								if (btn && !mediaPlayerApp.isEnhancementsOpen) btn.click();
+								const videoTab = win.querySelector('.wmp-enh-tab-btn[data-enh-tab="video"]');
+								if (videoTab) videoTab.click();
+							}
+						}
+					]
+				},
+				{
+					label: 'Video Aspect Ratio',
+					visible: !!isVideo,
+					submenu: [
+						{
+							label: 'Automatic Fit',
+							radio: mediaPlayerApp.videoAspectRatio === 'auto',
+							action: () => {
+								mediaPlayerApp.videoAspectRatio = 'auto';
+								mediaPlayerApp.applyVideoFilters(win.querySelector('#wmp-video-player'));
+							}
+						},
+						{
+							label: '4:3 Standard Television',
+							radio: mediaPlayerApp.videoAspectRatio === '4:3',
+							action: () => {
+								mediaPlayerApp.videoAspectRatio = '4:3';
+								mediaPlayerApp.applyVideoFilters(win.querySelector('#wmp-video-player'));
+							}
+						},
+						{
+							label: '16:9 Widescreen Cinema',
+							radio: mediaPlayerApp.videoAspectRatio === '16:9',
+							action: () => {
+								mediaPlayerApp.videoAspectRatio = '16:9';
+								mediaPlayerApp.applyVideoFilters(win.querySelector('#wmp-video-player'));
+							}
+						},
+						{
+							label: 'Stretch to Screen',
+							radio: mediaPlayerApp.videoAspectRatio === 'stretch',
+							action: () => {
+								mediaPlayerApp.videoAspectRatio = 'stretch';
+								mediaPlayerApp.applyVideoFilters(win.querySelector('#wmp-video-player'));
+							}
+						}
+					]
+				},
+				{ separator: true },
+				{
+					label: 'Shuffle',
+					checked: !!mediaPlayerApp.isShuffle,
+					action: () => {
+						const btn = win.querySelector('#wmp-btn-shuffle');
+						if (btn) btn.click();
+					}
+				},
+				{
+					label: 'Repeat Mode',
+					submenu: [
+						{
+							label: 'Off',
+							radio: mediaPlayerApp.repeatMode === 'off',
+							action: () => {
+								mediaPlayerApp.repeatMode = 'off';
+								win.querySelector('#wmp-repeat-label').textContent = 'Repeat: OFF';
+								win.querySelector('#wmp-btn-repeat').classList.remove('active');
+							}
+						},
+						{
+							label: 'Repeat All',
+							radio: mediaPlayerApp.repeatMode === 'all',
+							action: () => {
+								mediaPlayerApp.repeatMode = 'all';
+								win.querySelector('#wmp-repeat-label').textContent = 'Repeat: ALL';
+								win.querySelector('#wmp-btn-repeat').classList.add('active');
+							}
+						},
+						{
+							label: 'Repeat Current Track',
+							radio: mediaPlayerApp.repeatMode === 'one',
+							action: () => {
+								mediaPlayerApp.repeatMode = 'one';
+								win.querySelector('#wmp-repeat-label').textContent = 'Repeat: ONE';
+								win.querySelector('#wmp-btn-repeat').classList.add('active');
+							}
+						}
+					]
+				},
+				{
+					label: 'Playlist Pane',
+					checked: !!mediaPlayerApp.isPlaylistVisible,
+					action: () => {
+						const btn = win.querySelector('#wmp-btn-toggle-playlist');
+						if (btn) btn.click();
+					}
+				},
+				{
+					label: 'Full Screen',
+					action: () => {
+						if (typeof maximizeWindow === 'function') maximizeWindow(win);
+					}
+				},
+				{ separator: true },
+				{
+					label: 'Properties',
+					bold: true,
+					disabled: !activeTrack,
+					action: () => {
+						if (!activeTrack) return;
+						if (activeTrack.raw instanceof File) {
+							openElementInfoWindow(activeTrack.raw);
+							return;
+						}
+						const artists = activeTrack.artist || 'Wartets';
+						const album = activeTrack.album || 'Windows Media Library';
+						const dur = activeTrack.duration || '00:00';
+						const msg = `Title: ${activeTrack.title}\nArtist: ${artists}\nAlbum: ${album}\nDuration: ${dur}\nType: ${activeTrack.isVideo ? 'Video Clip' : 'Audio Track'}\nLocation: ${activeTrack.url}`;
+						showXPDialog(`${activeTrack.title} Properties`, msg, 'info');
+					}
+				}
+			];
+		},
+
+		getMediaPlayerPlaylistItemItems(track, realIndex, mediaPlayerApp, win) {
+			const isCurrent = realIndex === mediaPlayerApp.currentTrackIndex;
+			return [
+				{
+					label: 'Play',
+					bold: true,
+					action: () => mediaPlayerApp.playIndex(realIndex)
+				},
+				{
+					label: 'Play in Winamp',
+					icon: 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/0d/Winamp-logo.svg/960px-Winamp-logo.svg.png',
+					action: () => {
+						if (typeof openWinamp === 'function') openWinamp(track);
+					}
+				},
+				{ separator: true },
+				{
+					label: 'Move Up',
+					disabled: realIndex === 0,
+					action: () => {
+						const moved = mediaPlayerApp.currentPlaylist.splice(realIndex, 1)[0];
+						mediaPlayerApp.currentPlaylist.splice(realIndex - 1, 0, moved);
+						if (mediaPlayerApp.currentTrackIndex === realIndex) mediaPlayerApp.currentTrackIndex--;
+						mediaPlayerApp.renderPlaylist(win);
+					}
+				},
+				{
+					label: 'Move Down',
+					disabled: realIndex === mediaPlayerApp.currentPlaylist.length - 1,
+					action: () => {
+						const moved = mediaPlayerApp.currentPlaylist.splice(realIndex, 1)[0];
+						mediaPlayerApp.currentPlaylist.splice(realIndex + 1, 0, moved);
+						if (mediaPlayerApp.currentTrackIndex === realIndex) mediaPlayerApp.currentTrackIndex++;
+						mediaPlayerApp.renderPlaylist(win);
+					}
+				},
+				{
+					label: 'Find in File Explorer',
+					icon: '../assets/images/desk/icons/Folder Open.webp',
+					action: () => {
+						if (typeof fs !== 'undefined' && fs) {
+							let target = fs.findByPath(`/Music/${track.title}`);
+							if (!target) target = fs.root.getByName('Music') || fs.root;
+							if (window.FileExplorer) window.FileExplorer.open(target instanceof Folder ? target : target.parent || fs.root);
+						}
+					}
+				},
+				{ separator: true },
+				{
+					label: 'Remove from Playlist',
+					action: () => {
+						mediaPlayerApp.currentPlaylist.splice(realIndex, 1);
+						if (mediaPlayerApp.currentTrackIndex === realIndex) {
+							mediaPlayerApp.playIndex(Math.min(realIndex, mediaPlayerApp.currentPlaylist.length - 1));
+						} else if (mediaPlayerApp.currentTrackIndex > realIndex) {
+							mediaPlayerApp.currentTrackIndex--;
+						}
+						mediaPlayerApp.renderPlaylist(win);
+					}
+				},
+				{
+					label: 'Clear Playlist',
+					action: () => {
+						mediaPlayerApp.currentPlaylist = [];
+						mediaPlayerApp.stop();
+						mediaPlayerApp.renderPlaylist(win);
+					}
+				},
+				{ separator: true },
+				{
+					label: 'Properties',
+					bold: isCurrent,
+					action: () => {
+						if (track.raw instanceof File) {
+							openElementInfoWindow(track.raw);
+							return;
+						}
+						const artists = track.artist || 'Wartets';
+						const album = track.album || 'Windows Media Library';
+						const dur = track.duration || '00:00';
+						const msg = `Title: ${track.title}\nArtist: ${artists}\nAlbum: ${album}\nDuration: ${dur}\nLocation: ${track.url}`;
+						showXPDialog(`${track.title} Properties`, msg, 'info');
+					}
+				}
+			];
+		},
+
+		getPictureViewerItems(viewerApp, currentImage, win) {
+			return [
+				{
+					label: 'Actual Size (100%)',
+					bold: true,
+					action: () => viewerApp.setZoom(1.0)
+				},
+				{
+					label: 'Best Fit',
+					action: () => viewerApp.fitToWindow(win)
+				},
+				{
+					label: 'Zoom In (+)',
+					shortcut: '+',
+					icon: 'https://api.iconify.design/mdi/magnify-plus-outline.svg',
+					action: () => viewerApp.setZoom(viewerApp.currentZoom * 1.25)
+				},
+				{
+					label: 'Zoom Out (-)',
+					shortcut: '-',
+					icon: 'https://api.iconify.design/mdi/magnify-minus-outline.svg',
+					action: () => viewerApp.setZoom(viewerApp.currentZoom / 1.25)
+				},
+				{ separator: true },
+				{
+					label: 'Rotate Clockwise (90°)',
+					shortcut: 'Ctrl+K',
+					icon: 'https://api.iconify.design/mdi/rotate-right.svg',
+					action: () => {
+						viewerApp.currentRotation = (viewerApp.currentRotation + 90) % 360;
+						viewerApp.applyTransform();
+					}
+				},
+				{
+					label: 'Rotate Counterclockwise (90°)',
+					shortcut: 'Ctrl+L',
+					icon: 'https://api.iconify.design/mdi/rotate-left.svg',
+					action: () => {
+						viewerApp.currentRotation = (viewerApp.currentRotation - 90 + 360) % 360;
+						viewerApp.applyTransform();
+					}
+				},
+				{
+					label: viewerApp.isSlideshow ? 'Stop Slide Show' : 'Start Slide Show',
+					shortcut: 'F11',
+					icon: 'https://api.iconify.design/mdi/presentation-play.svg',
+					action: () => viewerApp.toggleSlideshow(win)
+				},
+				{ separator: true },
+				{
+					label: 'Set as Desktop Background',
+					icon: '../assets/images/desk/icons/Display.webp',
+					submenu: [
+						{
+							label: 'Stretch / Cover',
+							action: () => {
+								if (typeof setImageAsWallpaper === 'function') setImageAsWallpaper(currentImage.src, 'cover');
+								showXPDialog('Desktop Background', `"${currentImage.name}" is now set as desktop wallpaper.`, 'info');
+							}
+						},
+						{
+							label: 'Fit to Screen',
+							action: () => {
+								if (typeof setImageAsWallpaper === 'function') setImageAsWallpaper(currentImage.src, 'stretch');
+								showXPDialog('Desktop Background', `"${currentImage.name}" is now set as desktop wallpaper.`, 'info');
+							}
+						},
+						{
+							label: 'Tile',
+							action: () => {
+								if (typeof setImageAsWallpaper === 'function') setImageAsWallpaper(currentImage.src, 'tile');
+								showXPDialog('Desktop Background', `"${currentImage.name}" is now set as desktop wallpaper.`, 'info');
+							}
+						},
+						{
+							label: 'Center',
+							action: () => {
+								if (typeof setImageAsWallpaper === 'function') setImageAsWallpaper(currentImage.src, 'center');
+								showXPDialog('Desktop Background', `"${currentImage.name}" is now set as desktop wallpaper.`, 'info');
+							}
+						}
+					]
+				},
+				{
+					label: 'Edit in Paint',
+					icon: '../assets/images/desk/icons/Paint.webp',
+					action: () => {
+						if (window.PaintApp) {
+							window.PaintApp.open(currentImage.fileObj || currentImage.src);
+						}
+					}
+				},
+				{
+					label: 'Save Copy As...',
+					shortcut: 'Ctrl+S',
+					icon: 'https://api.iconify.design/mdi/content-save-outline.svg',
+					action: () => {
+						const a = document.createElement('a');
+						a.href = currentImage.src;
+						a.download = currentImage.name;
+						document.body.appendChild(a);
+						a.click();
+						a.remove();
+					}
+				},
+				{
+					label: 'Print...',
+					shortcut: 'Ctrl+P',
+					icon: 'https://api.iconify.design/mdi/printer.svg',
+					action: () => {
+						const pWin = window.open('', '_blank');
+						if (pWin) {
+							pWin.document.write(`<html><head><title>${currentImage.name}</title></head><body style="margin:0;display:flex;align-items:center;justify-content:center;"><img src="${currentImage.src}" style="max-width:100%;height:auto;" onload="window.print();window.close();"></body></html>`);
+							pWin.document.close();
+						}
+					}
+				},
+				{ separator: true },
+				{
+					label: 'Open File Location',
+					icon: '../assets/images/desk/icons/Folder Open.webp',
+					action: () => {
+						if (currentImage.parent && window.FileExplorer) {
+							window.FileExplorer.open(currentImage.parent);
+						}
+					}
+				},
+				{
+					label: 'Delete',
+					shortcut: 'Del',
+					icon: 'https://api.iconify.design/mdi/delete-outline.svg',
+					action: () => {
+						if (!currentImage.fileObj) return;
+						createConfirmationDialog(`Are you sure you want to move '${currentImage.name}' to the Recycle Bin?`, () => {
+							try {
+								if (fs) fs.moveToRecycleBin(currentImage.fileObj.getFullPath());
+								viewerApp.currentFolderImages.splice(viewerApp.currentImageIndex, 1);
+								if (viewerApp.currentFolderImages.length === 0) {
+									closeWindow(win, win.id);
+								} else {
+									viewerApp.currentImageIndex = Math.min(viewerApp.currentImageIndex, viewerApp.currentFolderImages.length - 1);
+									viewerApp.displayImage(win, viewerApp.currentFolderImages[viewerApp.currentImageIndex]);
+								}
+								if (typeof refreshUI === 'function') refreshUI();
+							} catch (e) {
+								showXPDialog('Error', e.message, 'error');
+							}
+						});
+					}
+				},
+				{ separator: true },
+				{
+					label: 'Properties',
+					bold: true,
+					action: () => {
+						if (currentImage.fileObj instanceof File) {
+							openElementInfoWindow(currentImage.fileObj);
+							return;
+						}
+						const imgEl = win.querySelector('#picview-image-el');
+						const dims = imgEl && imgEl.naturalWidth ? `${imgEl.naturalWidth} x ${imgEl.naturalHeight} pixels` : 'Unknown';
+						const msg = `File Name: ${currentImage.name}\nDimensions: ${dims}\nLocation: ${currentImage.src}`;
+						showXPDialog(`${currentImage.name} Properties`, msg, 'info');
+					}
+				}
+			];
 		}
 	};
 

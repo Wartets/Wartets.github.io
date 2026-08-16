@@ -252,16 +252,16 @@ class Folder extends Element {
 	}
 
 	toJSON() {
-		let isInsideMusic = false;
+		let isInsideDynamic = false;
 		let curr = this;
 		while (curr) {
-			if (curr.name === 'Music') {
-				isInsideMusic = true;
+			if (curr.name === 'Music' || curr.name === 'PDFs') {
+				isInsideDynamic = true;
 				break;
 			}
 			curr = curr.parent;
 		}
-		if (isInsideMusic && this.name !== 'Music') {
+		if (isInsideDynamic && this.name !== 'Music' && this.name !== 'PDFs') {
 			return {
 				...super.toJSON(),
 				icon: this.icon,
@@ -272,7 +272,7 @@ class Folder extends Element {
 		return {
 			...super.toJSON(),
 			icon: this.icon,
-			children: Array.from(this.children.values()).filter(c => c.name !== 'Music').map(child => child.toJSON()),
+			children: Array.from(this.children.values()).filter(c => c.name !== 'Music' && c.name !== 'PDFs').map(child => child.toJSON()),
 		};
 	}
 }
@@ -960,12 +960,20 @@ window.DeskAPI = {
 		if (window.AchievementsManager) return window.AchievementsManager.open(targetId);
 	},
 	getNowPlaying: () => {
+		if (window.MediaPlayerApp && typeof window.MediaPlayerApp.getNowPlaying === 'function') {
+			const current = window.MediaPlayerApp.getNowPlaying();
+			if (current) return current;
+		}
 		if (webampInstance) {
 			return { title: "Projet 8.4", artist: "Wartets" };
 		}
 		return null;
 	},
 	toggleMusicPlayback: () => {
+		if (window.MediaPlayerApp && typeof window.MediaPlayerApp.togglePlay === 'function') {
+			window.MediaPlayerApp.togglePlay();
+			return true;
+		}
 		if (!webampInstance) {
 			openWinamp();
 			return true;
@@ -973,6 +981,10 @@ window.DeskAPI = {
 		return true;
 	},
 	nextMusicTrack: () => {
+		if (window.MediaPlayerApp && typeof window.MediaPlayerApp.playNext === 'function') {
+			window.MediaPlayerApp.playNext();
+			return true;
+		}
 		if (webampInstance) {
 			return true;
 		}
@@ -1384,6 +1396,13 @@ function initializeFileSystem() {
 		musicFolder = new Folder('Music');
 		musicFolder.icon = '../assets/images/desk/icons/Folder Closed.webp';
 		fs.root.add(musicFolder);
+	}
+
+	let docFolder = fs.root.getByName('PDFs');
+	if (!docFolder) {
+		docFolder = new Folder('PDFs');
+		docFolder.icon = '../assets/images/desk/icons/Folder Closed.webp';
+		fs.root.add(docFolder);
 	}
 
 	let othersFolder = fs.root.getByName('Others');
@@ -2162,8 +2181,11 @@ async function openElementInfoWindow(element) {
 		extraRows += buildInfoRow('Opens with', window.ShellAssociations ? (window.ShellAssociations.getConfig(element.name)?.typeLabel || 'Notepad') : 'Notepad');
 		extraRows += buildInfoRow('Size', `${formatBytes(element.size)} (${element.size.toLocaleString()} bytes)`);
 		extraRows += buildInfoRow('Size on disk', `${formatBytes(Math.ceil(element.size / 4096) * 4096)}`);
-		if (element.musicTrack) {
-			const mt = element.musicTrack;
+		let mt = element.musicTrack;
+		if (!mt && window.MusicStore) {
+			mt = window.MusicStore.resolveRawItem(element.name || element.remoteUrl);
+		}
+		if (mt) {
 			const artists = window.MusicStore ? window.MusicStore.normalizeArtists(mt.metadata?.artists) : (mt.metadata?.artists || []);
 			if (artists.length) extraRows += buildInfoRow('Artist', artists.join(', '));
 			if (mt.metadata?.album) extraRows += buildInfoRow('Album', mt.metadata.album);
@@ -2172,7 +2194,16 @@ async function openElementInfoWindow(element) {
 			if (mt.audio_specs?.duration) extraRows += buildInfoRow('Duration', mt.audio_specs.duration);
 			if (mt.audio_specs?.bitrate) extraRows += buildInfoRow('Bitrate', mt.audio_specs.bitrate);
 			if (mt.audio_specs?.sample_rate) extraRows += buildInfoRow('Sample Rate', mt.audio_specs.sample_rate);
+			if (mt.audio_specs?.codec) extraRows += buildInfoRow('Audio Codec', mt.audio_specs.codec);
+			if (mt.audio_specs?.is_lossless !== undefined) extraRows += buildInfoRow('Lossless', mt.audio_specs.is_lossless ? 'Yes (Lossless Master)' : 'No (Compressed Audio)');
 			if (mt.metadata?.bpm) extraRows += buildInfoRow('BPM', String(mt.metadata.bpm));
+			if (mt.metadata?.key) extraRows += buildInfoRow('Musical Key', String(mt.metadata.key));
+
+			const art = window.MusicStore ? window.MusicStore.getBestArtwork(mt) : null;
+			if (art) {
+				const artUrl = window.MusicStore.toMediaUrl(art.path, 'media');
+				previewHtml += `<img src="${artUrl}" class="info-thumbnail" alt="${element.name}">`;
+			}
 		}
 		if (!element.readOnly && !element.musicTrack) {
 			const preview = (element.content || '').replace(/<[^>]*>/g, ' ').trim().slice(0, 240);
@@ -2543,6 +2574,9 @@ async function openWinamp(targetTrack = null) {
 					webampInstance.play();
 				}
 			}
+			if (window.Taskbar) {
+				window.Taskbar.setActiveButton('window-winamp');
+			}
 			return;
 		} catch (e) {
 			webampInstance = null;
@@ -2604,7 +2638,22 @@ async function openWinamp(targetTrack = null) {
 			zIndex: 9000
 		});
 
+		if (window.Taskbar) {
+			const btn = window.Taskbar.addWindowButton('window-winamp', 'Winamp', 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/0d/Winamp-logo.svg/960px-Winamp-logo.svg.png');
+			if (btn) {
+				btn.addEventListener('click', () => {
+					if (webampInstance) {
+						webampInstance.reopen();
+						window.Taskbar.setActiveButton('window-winamp');
+					}
+				});
+			}
+		}
+
 		webampInstance.onClose(() => {
+			if (window.Taskbar) {
+				window.Taskbar.removeWindowButton('window-winamp');
+			}
 			if (webampInstance) {
 				webampInstance.dispose();
 				webampInstance = null;
@@ -2612,9 +2661,18 @@ async function openWinamp(targetTrack = null) {
 		});
 
 		webampInstance.onMinimize(() => {
-			if (webampInstance) {
-				webampInstance.dispose();
-				webampInstance = null;
+			if (window.Taskbar) {
+				const btn = document.querySelector('.taskbar-window-btn[data-window-id="window-winamp"]');
+				if (btn) btn.classList.remove('active');
+			}
+		});
+
+		webampInstance.onTrackDidChange((track) => {
+			if (track && track.title && window.Taskbar) {
+				window.Taskbar.updateWindowButton('window-winamp', `${track.title} - Winamp`, 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/0d/Winamp-logo.svg/960px-Winamp-logo.svg.png');
+			}
+			if (window.AchievementsManager) {
+				window.AchievementsManager.progress('winamp_master', 1);
 			}
 		});
 

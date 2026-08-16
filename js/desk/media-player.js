@@ -4,6 +4,15 @@
 	let currentVideoElement = null;
 	let animationFrameId = null;
 
+	let audioCtx = null;
+	let mediaSourceNode = null;
+	let eqFilters = [];
+	let pannerNode = null;
+	let bassGainNode = null;
+	let masterGainNode = null;
+	let analyserNode = null;
+	let audioNodeConnected = false;
+
 	let currentPlaylist = [];
 	let currentTrackIndex = -1;
 	let currentCandidateIndex = 0;
@@ -14,8 +23,37 @@
 	let repeatMode = 'off';
 	let currentVisualization = 'albumart';
 	let isPlaylistVisible = true;
+	let isEnhancementsOpen = false;
+	let activeEnhancementTab = 'eq';
+	let isEqEnabled = true;
+	let currentEqPreset = 'Flat';
+	let playbackSpeed = 1.0;
+	let stereoBalance = 0;
+	let srsWowAmount = 0.3;
+	let trubassAmount = 0.3;
+	let isSrsEnabled = false;
 
-	const VISUALIZATIONS = ['albumart', 'bars', 'wave', 'spectrum', 'particles'];
+	let videoAspectRatio = 'auto';
+	let videoBrightness = 100;
+	let videoContrast = 100;
+	let videoSaturation = 100;
+
+	const EQ_FREQUENCIES = [31, 62, 125, 250, 500, 1000, 2000, 4000, 8000, 16000];
+	const EQ_PRESETS = {
+		'Flat': [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+		'Rock': [4.5, 3.0, 1.5, 0, -1.0, -0.5, 1.5, 3.0, 4.0, 4.5],
+		'Pop': [-1.5, -0.5, 2.0, 3.5, 4.0, 3.0, 1.0, -0.5, -1.0, -1.5],
+		'Jazz': [3.0, 2.0, 1.0, 2.0, -1.5, -1.5, 0, 1.5, 2.5, 3.5],
+		'Classical': [4.0, 3.0, 2.5, 2.0, -1.0, -1.0, 0, 2.0, 3.0, 3.5],
+		'Techno': [5.0, 4.0, 2.0, 0, -2.0, 0, 2.5, 4.0, 4.5, 4.0],
+		'Full Bass': [7.0, 6.0, 5.0, 3.0, 1.0, 0, -1.0, -2.0, -3.0, -4.0],
+		'Full Treble': [-4.0, -3.0, -2.0, -1.0, 0, 1.5, 4.0, 6.0, 7.0, 8.0],
+		'Vocal': [-2.0, -3.0, -1.0, 2.0, 4.5, 4.5, 3.0, 1.0, 0, -1.0],
+		'Club': [0, 0, 2.0, 3.0, 3.0, 3.0, 2.0, 0, 0, 0]
+	};
+	let currentEqGains = [...EQ_PRESETS['Flat']];
+
+	const VISUALIZATIONS = ['albumart', 'bars', 'wave', 'spectrum', 'particles', 'flame'];
 
 	function formatTime(seconds) {
 		if (!seconds || isNaN(seconds) || seconds < 0) return '00:00';
@@ -47,7 +85,7 @@
 			}
 
 			const contentHTML = this.buildPlayerTemplate();
-			const win = createXPWindow(id, 'Windows Media Player', contentHTML, 800, 530, {
+			const win = createXPWindow(id, 'Windows Media Player', contentHTML, 840, 560, {
 				iconSrc: '../assets/images/desk/icons/Video File.webp',
 				resizable: true
 			});
@@ -90,14 +128,14 @@
 						</ul>
 						<div class="wmp-brand-logo">
 							<img src="../assets/images/desk/icons/Video File.webp" alt="">
-							<span>Windows Media Player</span>
+							<span>Windows Media Player 9 Series</span>
 						</div>
 					</div>
 
 					<div class="wmp-main-workspace">
-						<div class="wmp-screen-area">
+						<div class="wmp-screen-area" id="wmp-screen-area">
 							<div class="wmp-artwork-overlay" id="wmp-artwork-backdrop"></div>
-							<div class="wmp-video-container" style="display: none;">
+							<div class="wmp-video-container" id="wmp-video-box" style="display: none;">
 								<video id="wmp-video-player" playsinline></video>
 							</div>
 							<div class="wmp-visualizer-container" id="wmp-viz-box">
@@ -117,6 +155,80 @@
 									<div class="wmp-hud-artist" id="wmp-hud-artist">Ready</div>
 								</div>
 							</div>
+
+							<div class="wmp-enhancements-drawer" id="wmp-enhancements-drawer" style="display: none;">
+								<div class="wmp-enh-header">
+									<div class="wmp-enh-tabs">
+										<button type="button" class="wmp-enh-tab-btn active" data-enh-tab="eq">Graphic Equalizer</button>
+										<button type="button" class="wmp-enh-tab-btn" data-enh-tab="srs">SRS WOW Effects</button>
+										<button type="button" class="wmp-enh-tab-btn" data-enh-tab="speed">Play Speed & Balance</button>
+										<button type="button" class="wmp-enh-tab-btn" data-enh-tab="video">Video Settings</button>
+									</div>
+									<button type="button" class="wmp-enh-close" id="wmp-enh-close" title="Close Enhancements">×</button>
+								</div>
+								<div class="wmp-enh-body" id="wmp-enh-body-eq">
+									<div class="wmp-eq-toolbar">
+										<label class="xp-checkbox-row" style="margin: 0;"><input type="checkbox" id="wmp-eq-toggle" checked> Equalizer On</label>
+										<select id="wmp-eq-preset-select" class="xp-select" style="margin-left: 12px; font-size: 11px;"></select>
+										<button type="button" class="xp-button-small" id="wmp-eq-reset-btn" style="margin-left: 6px;">Reset</button>
+									</div>
+									<div class="wmp-eq-sliders-grid" id="wmp-eq-sliders-container"></div>
+								</div>
+								<div class="wmp-enh-body" id="wmp-enh-body-srs" style="display: none;">
+									<div class="wmp-srs-panel">
+										<label class="xp-checkbox-row"><input type="checkbox" id="wmp-srs-toggle"> Turn On SRS WOW Effects</label>
+										<div class="xp-form-row" style="margin-top: 6px;">
+											<label style="width: 120px;">TruBass Boost:</label>
+											<input type="range" id="wmp-srs-trubass" min="0" max="1" step="0.05" value="0.3" class="xp-slider">
+										</div>
+										<div class="xp-form-row" style="margin-top: 6px;">
+											<label style="width: 120px;">WOW Ambience:</label>
+											<input type="range" id="wmp-srs-ambience" min="0" max="1" step="0.05" value="0.3" class="xp-slider">
+										</div>
+									</div>
+								</div>
+								<div class="wmp-enh-body" id="wmp-enh-body-speed" style="display: none;">
+									<div class="wmp-speed-panel">
+										<div class="xp-form-row">
+											<label style="width: 110px;">Playback Speed:</label>
+											<input type="range" id="wmp-speed-slider" min="0.5" max="2.0" step="0.25" value="1.0" class="xp-slider">
+											<span id="wmp-speed-val" style="font-size: 11px; width: 45px;">1.0x</span>
+										</div>
+										<div class="xp-form-row" style="margin-top: 8px;">
+											<label style="width: 110px;">Stereo Balance:</label>
+											<span style="font-size: 10px;">L</span>
+											<input type="range" id="wmp-balance-slider" min="-1" max="1" step="0.1" value="0" class="xp-slider">
+											<span style="font-size: 10px;">R</span>
+											<button type="button" class="xp-button-small" id="wmp-balance-center" style="margin-left: 6px;">Center</button>
+										</div>
+									</div>
+								</div>
+								<div class="wmp-enh-body" id="wmp-enh-body-video" style="display: none;">
+									<div class="wmp-video-enh-panel">
+										<div class="xp-form-row">
+											<label style="width: 100px;">Aspect Ratio:</label>
+											<select id="wmp-aspect-select" class="xp-select" style="flex: 1;">
+												<option value="auto">Automatic Fit</option>
+												<option value="4:3">4:3 Standard Television</option>
+												<option value="16:9">16:9 Widescreen Cinema</option>
+												<option value="stretch">Stretch to Screen</option>
+											</select>
+										</div>
+										<div class="xp-form-row" style="margin-top: 6px;">
+											<label style="width: 100px;">Brightness:</label>
+											<input type="range" id="wmp-vid-bright" min="50" max="150" value="100" class="xp-slider">
+										</div>
+										<div class="xp-form-row" style="margin-top: 6px;">
+											<label style="width: 100px;">Contrast:</label>
+											<input type="range" id="wmp-vid-contrast" min="50" max="150" value="100" class="xp-slider">
+										</div>
+										<div class="xp-form-row" style="margin-top: 6px;">
+											<label style="width: 100px;">Saturation:</label>
+											<input type="range" id="wmp-vid-sat" min="0" max="200" value="100" class="xp-slider">
+										</div>
+									</div>
+								</div>
+							</div>
 						</div>
 
 						<div class="wmp-playlist-sidebar" id="wmp-playlist-sidebar">
@@ -129,12 +241,13 @@
 									<input type="text" id="wmp-playlist-search" placeholder="Search playlist..." class="wmp-search-input">
 								</div>
 							</div>
-							<div class="wmp-playlist-list-wrap">
+							<div class="wmp-playlist-list-wrap" id="wmp-playlist-drop-zone">
 								<ul class="wmp-playlist-items" id="wmp-playlist-items"></ul>
 							</div>
 							<div class="wmp-playlist-footer">
+								<button type="button" class="xp-button-small" id="wmp-pl-presets-btn">Quick Lists</button>
+								<button type="button" class="xp-button-small" id="wmp-pl-add-btn">Add Track...</button>
 								<button type="button" class="xp-button-small" id="wmp-pl-clear-btn">Clear</button>
-								<button type="button" class="xp-button-small" id="wmp-pl-add-btn">Add More...</button>
 							</div>
 						</div>
 					</div>
@@ -156,7 +269,7 @@
 								<button type="button" class="wmp-tool-btn wmp-btn-primary" id="wmp-btn-play" title="Play / Pause (Space)">
 									<div class="wmp-icon-play" id="wmp-play-icon-shape"></div>
 								</button>
-								<button type="button" class="wmp-tool-btn" id="wmp-btn-stop" title="Stop">
+								<button type="button" class="wmp-tool-btn" id="wmp-btn-stop" title="Stop (Ctrl+S)">
 									<div class="wmp-icon-stop"></div>
 								</button>
 								<button type="button" class="wmp-tool-btn" id="wmp-btn-next" title="Next Track (Ctrl+F)">
@@ -165,11 +278,11 @@
 							</div>
 
 							<div class="wmp-btn-cluster-center">
-								<button type="button" class="wmp-toggle-btn" id="wmp-btn-shuffle" title="Turn Shuffle On/Off">
+								<button type="button" class="wmp-toggle-btn" id="wmp-btn-shuffle" title="Turn Shuffle On/Off (Ctrl+H)">
 									<img src="https://api.iconify.design/mdi/shuffle-variant.svg?color=%231b4b9b" alt="">
 									<span>Shuffle</span>
 								</button>
-								<button type="button" class="wmp-toggle-btn" id="wmp-btn-repeat" title="Repeat Mode">
+								<button type="button" class="wmp-toggle-btn" id="wmp-btn-repeat" title="Repeat Mode (Ctrl+T)">
 									<img src="https://api.iconify.design/mdi/repeat.svg?color=%231b4b9b" alt="">
 									<span id="wmp-repeat-label">Repeat: Off</span>
 								</button>
@@ -177,14 +290,18 @@
 									<img src="https://api.iconify.design/mdi/chart-bell-curve-cumulative.svg?color=%231b4b9b" alt="">
 									<span id="wmp-viz-label">Viz: Album Art</span>
 								</button>
+								<button type="button" class="wmp-toggle-btn" id="wmp-btn-enhancements" title="Equalizer & Audio Enhancements (Ctrl+E)">
+									<img src="https://api.iconify.design/mdi/tune-vertical.svg?color=%231b4b9b" alt="">
+									<span>Enhancements</span>
+								</button>
 							</div>
 
 							<div class="wmp-btn-cluster-right">
-								<button type="button" class="wmp-tool-btn" id="wmp-btn-mute" title="Mute Volume">
+								<button type="button" class="wmp-tool-btn" id="wmp-btn-mute" title="Mute Volume (Ctrl+M)">
 									<div class="wmp-icon-vol" id="wmp-vol-icon-shape"></div>
 								</button>
 								<input type="range" id="wmp-volume-slider" min="0" max="1" step="0.05" value="0.8" class="wmp-slider wmp-vol-slider" title="Volume">
-								<button type="button" class="wmp-toggle-btn active" id="wmp-btn-toggle-playlist" title="Show/Hide Playlist Pane">
+								<button type="button" class="wmp-toggle-btn active" id="wmp-btn-toggle-playlist" title="Show/Hide Playlist Pane (Ctrl+L)">
 									<img src="https://api.iconify.design/mdi/playlist-music.svg?color=%231b4b9b" alt="">
 									<span>Playlist</span>
 								</button>
@@ -200,6 +317,92 @@
 					<audio id="wmp-audio-player" preload="metadata"></audio>
 				</div>
 			`;
+		},
+
+		initAudioContext(audioEl) {
+			if (audioCtx && mediaSourceNode) return;
+			try {
+				const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+				if (!AudioContextClass) return;
+				audioCtx = new AudioContextClass();
+
+				analyserNode = audioCtx.createAnalyser();
+				analyserNode.fftSize = 256;
+				analyserNode.smoothingTimeConstant = 0.8;
+
+				masterGainNode = audioCtx.createGain();
+				masterGainNode.gain.value = isMuted ? 0 : currentVolume;
+
+				bassGainNode = audioCtx.createGain();
+				bassGainNode.gain.value = 1.0;
+
+				if (audioCtx.createStereoPanner) {
+					pannerNode = audioCtx.createStereoPanner();
+					pannerNode.pan.value = stereoBalance;
+				}
+
+				eqFilters = EQ_FREQUENCIES.map((freq, idx) => {
+					const filter = audioCtx.createBiquadFilter();
+					if (idx === 0) filter.type = 'lowshelf';
+					else if (idx === EQ_FREQUENCIES.length - 1) filter.type = 'highshelf';
+					else filter.type = 'peaking';
+					filter.frequency.value = freq;
+					filter.gain.value = isEqEnabled ? currentEqGains[idx] : 0;
+					return filter;
+				});
+
+				mediaSourceNode = audioCtx.createMediaElementSource(audioEl);
+
+				let previousNode = mediaSourceNode;
+				for (let i = 0; i < eqFilters.length; i++) {
+					previousNode.connect(eqFilters[i]);
+					previousNode = eqFilters[i];
+				}
+
+				if (pannerNode) {
+					previousNode.connect(pannerNode);
+					previousNode = pannerNode;
+				}
+
+				previousNode.connect(bassGainNode);
+				bassGainNode.connect(masterGainNode);
+				masterGainNode.connect(analyserNode);
+				analyserNode.connect(audioCtx.destination);
+
+				audioNodeConnected = true;
+			} catch (e) {
+				audioNodeConnected = false;
+			}
+		},
+
+		applyEqualizerSettings() {
+			if (!eqFilters || eqFilters.length === 0) return;
+			eqFilters.forEach((filter, idx) => {
+				filter.gain.value = isEqEnabled ? (currentEqGains[idx] || 0) : 0;
+			});
+		},
+
+		applyEnhancementEffects() {
+			if (pannerNode && audioCtx) {
+				pannerNode.pan.setValueAtTime(stereoBalance, audioCtx.currentTime);
+			}
+			if (bassGainNode && audioCtx) {
+				const boost = isSrsEnabled ? (1.0 + trubassAmount * 1.5) : 1.0;
+				bassGainNode.gain.setValueAtTime(boost, audioCtx.currentTime);
+			}
+			const activeMedia = this.getActiveMedia();
+			if (activeMedia) {
+				activeMedia.playbackRate = playbackSpeed;
+			}
+		},
+
+		applyVideoFilters(videoEl) {
+			if (!videoEl) return;
+			videoEl.style.filter = `brightness(${videoBrightness}%) contrast(${videoContrast}%) saturate(${videoSaturation}%)`;
+			videoEl.style.objectFit = videoAspectRatio === 'stretch' ? 'fill' : (videoAspectRatio === 'auto' ? 'contain' : 'contain');
+			if (videoAspectRatio === '4:3') videoEl.style.aspectRatio = '4 / 3';
+			else if (videoAspectRatio === '16:9') videoEl.style.aspectRatio = '16 / 9';
+			else videoEl.style.aspectRatio = 'auto';
 		},
 
 		bindPlayerEvents(win) {
@@ -218,10 +421,15 @@
 			const shuffleBtn = win.querySelector('#wmp-btn-shuffle');
 			const repeatBtn = win.querySelector('#wmp-btn-repeat');
 			const vizBtn = win.querySelector('#wmp-btn-viz');
+			const enhBtn = win.querySelector('#wmp-btn-enhancements');
+			const enhDrawer = win.querySelector('#wmp-enhancements-drawer');
+			const enhClose = win.querySelector('#wmp-enh-close');
 			const togglePlBtn = win.querySelector('#wmp-btn-toggle-playlist');
 			const searchInput = win.querySelector('#wmp-playlist-search');
 			const clearPlBtn = win.querySelector('#wmp-pl-clear-btn');
 			const addPlBtn = win.querySelector('#wmp-pl-add-btn');
+			const presetsBtn = win.querySelector('#wmp-pl-presets-btn');
+			const screenArea = win.querySelector('#wmp-screen-area');
 
 			const savedVol = (window.SettingsApp && typeof window.SettingsApp.get === 'function')
 				? window.SettingsApp.get('soundVolume')
@@ -242,6 +450,8 @@
 				video.muted = isMuted;
 			}
 			this.updateMuteUI(win);
+
+			this.renderEqualizerUI(win);
 
 			playBtn.addEventListener('click', () => this.togglePlay());
 			stopBtn.addEventListener('click', () => this.stop());
@@ -269,6 +479,9 @@
 				currentVolume = parseFloat(volSlider.value);
 				if (audio) audio.volume = isMuted ? 0 : currentVolume;
 				if (video) video.volume = isMuted ? 0 : currentVolume;
+				if (masterGainNode && audioCtx) {
+					masterGainNode.gain.setValueAtTime(isMuted ? 0 : currentVolume, audioCtx.currentTime);
+				}
 				if (currentVolume > 0 && isMuted) {
 					isMuted = false;
 					if (audio) audio.muted = false;
@@ -284,6 +497,9 @@
 				isMuted = !isMuted;
 				if (audio) audio.muted = isMuted;
 				if (video) video.muted = isMuted;
+				if (masterGainNode && audioCtx) {
+					masterGainNode.gain.setValueAtTime(isMuted ? 0 : currentVolume, audioCtx.currentTime);
+				}
 				if (window.SettingsApp && typeof window.SettingsApp.set === 'function') {
 					window.SettingsApp.set('soundEnabled', !isMuted);
 				}
@@ -311,10 +527,36 @@
 					bars: 'Bars',
 					wave: 'Waveform',
 					spectrum: 'Spectrum',
-					particles: 'Particles'
+					particles: 'Particles',
+					flame: 'Fire Flame'
 				};
 				win.querySelector('#wmp-viz-label').textContent = `Viz: ${labelMap[currentVisualization] || 'Bars'}`;
 				this.updateVisualizationModeUI(win);
+			});
+
+			enhBtn.addEventListener('click', () => {
+				isEnhancementsOpen = !isEnhancementsOpen;
+				enhDrawer.style.display = isEnhancementsOpen ? 'flex' : 'none';
+				enhBtn.classList.toggle('active', isEnhancementsOpen);
+			});
+
+			if (enhClose) {
+				enhClose.addEventListener('click', () => {
+					isEnhancementsOpen = false;
+					enhDrawer.style.display = 'none';
+					enhBtn.classList.remove('active');
+				});
+			}
+
+			win.querySelectorAll('.wmp-enh-tab-btn').forEach(tabBtn => {
+				tabBtn.addEventListener('click', () => {
+					const tabKey = tabBtn.dataset.enhTab;
+					activeEnhancementTab = tabKey;
+					win.querySelectorAll('.wmp-enh-tab-btn').forEach(b => b.classList.toggle('active', b === tabBtn));
+					win.querySelectorAll('.wmp-enh-body').forEach(body => {
+						body.style.display = body.id === `wmp-enh-body-${tabKey}` ? 'flex' : 'none';
+					});
+				});
 			});
 
 			togglePlBtn.addEventListener('click', () => {
@@ -343,6 +585,83 @@
 					}
 				});
 			}
+
+			if (presetsBtn) {
+				presetsBtn.addEventListener('click', (e) => {
+					e.stopPropagation();
+					const rect = presetsBtn.getBoundingClientRect();
+					const items = [
+						{ label: 'All Library Tracks', bold: true, action: () => this.loadDefaultLibrary() },
+						{ separator: true },
+						{ label: 'Singles Collection', action: () => this.filterLibraryByFolder('single') },
+						{ label: 'Sort: Alphabetical Title', action: () => this.sortCurrentPlaylist('title') },
+						{ label: 'Sort: Artist Name', action: () => this.sortCurrentPlaylist('artist') },
+						{ label: 'Sort: Duration', action: () => this.sortCurrentPlaylist('duration') },
+						{ separator: true },
+						{ label: 'Export Playlist (.m3u)', action: () => this.exportPlaylistM3U() }
+					];
+					if (window.ContextMenu) {
+						window.ContextMenu.show(items, rect.left, rect.top - 180);
+					}
+				});
+			}
+
+			screenArea.addEventListener('dblclick', (e) => {
+				if (e.target.closest('.wmp-enhancements-drawer')) return;
+				if (typeof maximizeWindow === 'function') maximizeWindow(win);
+			});
+
+			const onScreenContextMenu = (e) => {
+				if (e.target.closest('.wmp-enhancements-drawer') || e.target.closest('button') || e.target.closest('input')) return;
+				e.preventDefault();
+				e.stopPropagation();
+				if (window.ContextMenu) {
+					const activeTrack = currentPlaylist[currentTrackIndex] || null;
+					const items = window.ContextMenu.getMediaPlayerScreenItems(this, activeTrack, win);
+					window.ContextMenu.show(items, e.clientX, e.clientY);
+				}
+			};
+
+			screenArea.addEventListener('contextmenu', onScreenContextMenu);
+			const vizBox = win.querySelector('#wmp-viz-box');
+			if (vizBox) vizBox.addEventListener('contextmenu', onScreenContextMenu);
+			const vidBox = win.querySelector('#wmp-video-box');
+			if (vidBox) vidBox.addEventListener('contextmenu', onScreenContextMenu);
+			const artStage = win.querySelector('#wmp-albumart-stage');
+			if (artStage) artStage.addEventListener('contextmenu', onScreenContextMenu);
+
+			const dropZone = win.querySelector('#wmp-playlist-drop-zone');
+			if (dropZone) {
+				dropZone.addEventListener('dragover', (e) => {
+					e.preventDefault();
+					e.stopPropagation();
+					dropZone.classList.add('wmp-drop-active');
+				});
+				dropZone.addEventListener('dragleave', (e) => {
+					if (!dropZone.contains(e.relatedTarget)) {
+						dropZone.classList.remove('wmp-drop-active');
+					}
+				});
+				dropZone.addEventListener('drop', (e) => {
+					e.preventDefault();
+					e.stopPropagation();
+					dropZone.classList.remove('wmp-drop-active');
+					const raw = e.dataTransfer.getData('text/plain');
+					if (raw && typeof fs !== 'undefined') {
+						try {
+							const paths = JSON.parse(raw);
+							if (Array.isArray(paths)) {
+								paths.forEach(p => {
+									const el = fs.findByPath(p);
+									if (el) this.appendTrack(el);
+								});
+							}
+						} catch (err) {}
+					}
+				});
+			}
+
+			this.bindEnhancementFormControls(win);
 
 			const onTimeUpdate = (el) => {
 				if (isSeeking) return;
@@ -438,7 +757,208 @@
 				});
 			});
 
+			win.addEventListener('keydown', (e) => {
+				if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+				if (e.code === 'Space') {
+					e.preventDefault();
+					this.togglePlay();
+				} else if (e.ctrlKey && e.code === 'KeyB') {
+					e.preventDefault();
+					this.playPrevious();
+				} else if (e.ctrlKey && e.code === 'KeyF') {
+					e.preventDefault();
+					this.playNext();
+				} else if (e.ctrlKey && e.code === 'KeyS') {
+					e.preventDefault();
+					this.stop();
+				} else if (e.ctrlKey && e.code === 'KeyM') {
+					e.preventDefault();
+					muteBtn.click();
+				} else if (e.ctrlKey && e.code === 'KeyH') {
+					e.preventDefault();
+					shuffleBtn.click();
+				} else if (e.ctrlKey && e.code === 'KeyT') {
+					e.preventDefault();
+					repeatBtn.click();
+				} else if (e.ctrlKey && e.code === 'KeyE') {
+					e.preventDefault();
+					enhBtn.click();
+				} else if (e.ctrlKey && e.code === 'KeyL') {
+					e.preventDefault();
+					togglePlBtn.click();
+				} else if (e.key === 'ArrowRight') {
+					const activeMedia = this.getActiveMedia();
+					if (activeMedia && activeMedia.duration) {
+						activeMedia.currentTime = Math.min(activeMedia.duration, activeMedia.currentTime + 5);
+					}
+				} else if (e.key === 'ArrowLeft') {
+					const activeMedia = this.getActiveMedia();
+					if (activeMedia) {
+						activeMedia.currentTime = Math.max(0, activeMedia.currentTime - 5);
+					}
+				}
+			});
+
 			this.updateVisualizationModeUI(win);
+		},
+
+		renderEqualizerUI(win) {
+			const container = win.querySelector('#wmp-eq-sliders-container');
+			const presetSelect = win.querySelector('#wmp-eq-preset-select');
+			if (!container || !presetSelect) return;
+
+			presetSelect.innerHTML = '';
+			Object.keys(EQ_PRESETS).forEach(presetName => {
+				const opt = document.createElement('option');
+				opt.value = presetName;
+				opt.textContent = presetName;
+				if (presetName === currentEqPreset) opt.selected = true;
+				presetSelect.appendChild(opt);
+			});
+
+			container.innerHTML = '';
+			EQ_FREQUENCIES.forEach((freq, idx) => {
+				const label = freq >= 1000 ? `${freq / 1000}k` : `${freq}`;
+				const col = document.createElement('div');
+				col.className = 'wmp-eq-col';
+				col.innerHTML = `
+					<span class="wmp-eq-gain-val" id="wmp-eq-gain-${idx}">0dB</span>
+					<input type="range" class="wmp-slider wmp-eq-slider" orient="vertical" min="-12" max="12" step="0.5" value="${currentEqGains[idx]}" data-band="${idx}">
+					<span class="wmp-eq-freq-label">${label}</span>
+				`;
+
+				const slider = col.querySelector('input');
+				slider.addEventListener('input', () => {
+					currentEqGains[idx] = parseFloat(slider.value);
+					const valSpan = col.querySelector(`#wmp-eq-gain-${idx}`);
+					if (valSpan) valSpan.textContent = `${currentEqGains[idx] > 0 ? '+' : ''}${currentEqGains[idx]}dB`;
+					currentEqPreset = 'Custom';
+					presetSelect.value = 'Custom';
+					this.applyEqualizerSettings();
+					if (window.AchievementsManager) {
+						window.AchievementsManager.progress('equalizer_tuner', 1);
+					}
+				});
+
+				container.appendChild(col);
+			});
+		},
+
+		bindEnhancementFormControls(win) {
+			const eqToggle = win.querySelector('#wmp-eq-toggle');
+			const presetSelect = win.querySelector('#wmp-eq-preset-select');
+			const resetBtn = win.querySelector('#wmp-eq-reset-btn');
+			const srsToggle = win.querySelector('#wmp-srs-toggle');
+			const trubassSlider = win.querySelector('#wmp-srs-trubass');
+			const ambienceSlider = win.querySelector('#wmp-srs-ambience');
+			const speedSlider = win.querySelector('#wmp-speed-slider');
+			const speedVal = win.querySelector('#wmp-speed-val');
+			const balanceSlider = win.querySelector('#wmp-balance-slider');
+			const balanceCenter = win.querySelector('#wmp-balance-center');
+			const aspectSelect = win.querySelector('#wmp-aspect-select');
+			const vidBright = win.querySelector('#wmp-vid-bright');
+			const vidContrast = win.querySelector('#wmp-vid-contrast');
+			const vidSat = win.querySelector('#wmp-vid-sat');
+			const video = win.querySelector('#wmp-video-player');
+
+			if (eqToggle) {
+				eqToggle.addEventListener('change', () => {
+					isEqEnabled = eqToggle.checked;
+					this.applyEqualizerSettings();
+				});
+			}
+
+			if (presetSelect) {
+				presetSelect.addEventListener('change', () => {
+					const preset = presetSelect.value;
+					if (EQ_PRESETS[preset]) {
+						currentEqGains = [...EQ_PRESETS[preset]];
+						currentEqPreset = preset;
+						win.querySelectorAll('.wmp-eq-slider').forEach((sl, idx) => {
+							sl.value = String(currentEqGains[idx]);
+							const valSpan = win.querySelector(`#wmp-eq-gain-${idx}`);
+							if (valSpan) valSpan.textContent = `${currentEqGains[idx] > 0 ? '+' : ''}${currentEqGains[idx]}dB`;
+						});
+						this.applyEqualizerSettings();
+					}
+				});
+			}
+
+			if (resetBtn) {
+				resetBtn.addEventListener('click', () => {
+					currentEqGains = [...EQ_PRESETS['Flat']];
+					currentEqPreset = 'Flat';
+					presetSelect.value = 'Flat';
+					win.querySelectorAll('.wmp-eq-slider').forEach((sl, idx) => {
+						sl.value = '0';
+						const valSpan = win.querySelector(`#wmp-eq-gain-${idx}`);
+						if (valSpan) valSpan.textContent = '0dB';
+					});
+					this.applyEqualizerSettings();
+				});
+			}
+
+			if (srsToggle) {
+				srsToggle.addEventListener('change', () => {
+					isSrsEnabled = srsToggle.checked;
+					this.applyEnhancementEffects();
+				});
+			}
+
+			if (trubassSlider) {
+				trubassSlider.addEventListener('input', () => {
+					trubassAmount = parseFloat(trubassSlider.value);
+					this.applyEnhancementEffects();
+				});
+			}
+
+			if (ambienceSlider) {
+				ambienceSlider.addEventListener('input', () => {
+					srsWowAmount = parseFloat(ambienceSlider.value);
+					this.applyEnhancementEffects();
+				});
+			}
+
+			if (speedSlider) {
+				speedSlider.addEventListener('input', () => {
+					playbackSpeed = parseFloat(speedSlider.value);
+					if (speedVal) speedVal.textContent = `${playbackSpeed.toFixed(2)}x`;
+					this.applyEnhancementEffects();
+				});
+			}
+
+			if (balanceSlider) {
+				balanceSlider.addEventListener('input', () => {
+					stereoBalance = parseFloat(balanceSlider.value);
+					this.applyEnhancementEffects();
+				});
+			}
+
+			if (balanceCenter) {
+				balanceCenter.addEventListener('click', () => {
+					stereoBalance = 0;
+					if (balanceSlider) balanceSlider.value = '0';
+					this.applyEnhancementEffects();
+				});
+			}
+
+			if (aspectSelect) {
+				aspectSelect.addEventListener('change', () => {
+					videoAspectRatio = aspectSelect.value;
+					this.applyVideoFilters(video);
+				});
+			}
+
+			const updateVid = () => {
+				videoBrightness = parseInt(vidBright.value, 10);
+				videoContrast = parseInt(vidContrast.value, 10);
+				videoSaturation = parseInt(vidSat.value, 10);
+				this.applyVideoFilters(video);
+			};
+
+			if (vidBright) vidBright.addEventListener('input', updateVid);
+			if (vidContrast) vidContrast.addEventListener('input', updateVid);
+			if (vidSat) vidSat.addEventListener('input', updateVid);
 		},
 
 		updateVisualizationModeUI(win) {
@@ -463,12 +983,83 @@
 			return currentAudioElement;
 		},
 
+		getNowPlaying() {
+			if (currentTrackIndex >= 0 && currentPlaylist[currentTrackIndex]) {
+				const t = currentPlaylist[currentTrackIndex];
+				return {
+					title: t.title,
+					artist: t.artist,
+					album: t.album,
+					isPlaying: isPlaying
+				};
+			}
+			return null;
+		},
+
 		async loadDefaultLibrary() {
 			if (window.MusicStore) {
 				const primaries = await window.MusicStore.init();
 				if (primaries && primaries.length > 0) {
 					this.setPlaylist(primaries.map(p => this.normalizeTrack(p)), 0, false);
 				}
+			}
+		},
+
+		filterLibraryByFolder(folderQuery) {
+			if (!window.MusicStore) return;
+			const primaries = window.MusicStore.getPrimaries() || [];
+			const filtered = primaries.filter(p => {
+				const isSingle = window.MusicStore.isSingleTrack(p);
+				if (folderQuery === 'single') return isSingle;
+				return !isSingle;
+			});
+			if (filtered.length > 0) {
+				this.setPlaylist(filtered.map(p => this.normalizeTrack(p)), 0, true);
+			}
+		},
+
+		sortCurrentPlaylist(criteria) {
+			if (!currentPlaylist || currentPlaylist.length === 0) return;
+			const active = currentPlaylist[currentTrackIndex];
+			currentPlaylist.sort((a, b) => {
+				if (criteria === 'title') return a.title.localeCompare(b.title);
+				if (criteria === 'artist') return a.artist.localeCompare(b.artist);
+				if (criteria === 'duration') return (a.duration || '').localeCompare(b.duration || '');
+				return 0;
+			});
+			if (active) {
+				currentTrackIndex = currentPlaylist.indexOf(active);
+			}
+			if (activePlayerWindow) {
+				this.renderPlaylist(activePlayerWindow);
+			}
+		},
+
+		exportPlaylistM3U() {
+			if (!currentPlaylist || currentPlaylist.length === 0) return;
+			let m3u = '#EXTM3U\r\n';
+			currentPlaylist.forEach(t => {
+				m3u += `#EXTINF:-1,${t.artist} - ${t.title}\r\n${t.url}\r\n`;
+			});
+			const blob = new Blob([m3u], { type: 'audio/x-mpegurl;charset=utf-8' });
+			const url = URL.createObjectURL(blob);
+			const a = document.createElement('a');
+			a.href = url;
+			a.download = 'NowPlaying.m3u';
+			document.body.appendChild(a);
+			a.click();
+			a.remove();
+		},
+
+		appendTrack(item) {
+			const normalized = this.normalizeTrack(item);
+			if (!normalized) return;
+			currentPlaylist.push(normalized);
+			if (activePlayerWindow) {
+				this.renderPlaylist(activePlayerWindow);
+			}
+			if (currentPlaylist.length === 1) {
+				this.playIndex(0);
 			}
 		},
 
@@ -638,12 +1229,21 @@
 
 			const audio = activePlayerWindow.querySelector('#wmp-audio-player');
 			const video = activePlayerWindow.querySelector('#wmp-video-player');
-			const videoBox = activePlayerWindow.querySelector('.wmp-video-container');
-			const visualizerBox = activePlayerWindow.querySelector('.wmp-visualizer-container');
+			const videoBox = activePlayerWindow.querySelector('#wmp-video-box');
+			const visualizerBox = activePlayerWindow.querySelector('#wmp-viz-box');
 			const sbStatus = activePlayerWindow.querySelector('#wmp-sb-status');
 
 			this.updateTrackInfoUI(activePlayerWindow, track);
 			if (sbStatus) sbStatus.textContent = `Connecting: ${track.title}`;
+
+			if (typeof addToRecentDocs === 'function') {
+				addToRecentDocs({
+					name: track.title,
+					type: track.isVideo ? 'video' : 'music',
+					icon: track.artwork || '../assets/images/desk/icons/Music File.webp',
+					path: track.url
+				});
+			}
 
 			if (track.isVideo) {
 				if (audio) {
@@ -656,10 +1256,14 @@
 					video.src = track.url;
 					video.volume = isMuted ? 0 : currentVolume;
 					video.muted = isMuted;
+					this.applyVideoFilters(video);
 					video.play().then(() => {
 						isPlaying = true;
 						if (sbStatus) sbStatus.textContent = 'Playing';
 						this.updatePlayStateUI(activePlayerWindow, true);
+						if (window.AchievementsManager) {
+							window.AchievementsManager.progress('video_watcher', 1);
+						}
 					}).catch(() => {
 						if (sbStatus) sbStatus.textContent = 'Ready';
 						this.updatePlayStateUI(activePlayerWindow, false);
@@ -692,11 +1296,17 @@
 			const sbStatus = activePlayerWindow.querySelector('#wmp-sb-status');
 			if (!audio) return;
 
+			this.initAudioContext(audio);
+			if (audioCtx && audioCtx.state === 'suspended') {
+				audioCtx.resume();
+			}
+
 			audio.pause();
 			audio.removeAttribute('crossorigin');
 			audio.src = url;
 			audio.volume = isMuted ? 0 : currentVolume;
 			audio.muted = isMuted;
+			audio.playbackRate = playbackSpeed;
 			audio.load();
 
 			const playPromise = audio.play();
@@ -706,7 +1316,12 @@
 					this._isRecovering = false;
 					if (sbStatus) sbStatus.textContent = 'Playing';
 					this.updatePlayStateUI(activePlayerWindow, true);
+					this.applyEqualizerSettings();
+					this.applyEnhancementEffects();
 					this.startVisualizer(activePlayerWindow);
+					if (window.AchievementsManager) {
+						window.AchievementsManager.progress('music_enthusiast', 1);
+					}
 				}).catch((err) => {
 					if (err && err.name !== 'AbortError') {
 						this.handlePlaybackError(activePlayerWindow);
@@ -727,6 +1342,10 @@
 			if (!activeMedia.src || activeMedia.src === '' || activeMedia.src === window.location.href) {
 				this.playIndex(currentTrackIndex >= 0 ? currentTrackIndex : 0);
 				return;
+			}
+
+			if (audioCtx && audioCtx.state === 'suspended') {
+				audioCtx.resume();
 			}
 
 			if (activeMedia.paused) {
@@ -866,6 +1485,7 @@
 				const li = document.createElement('li');
 				li.className = `wmp-playlist-row ${realIndex === currentTrackIndex ? 'active' : ''}`;
 				li.dataset.index = String(realIndex);
+				li.draggable = true;
 
 				li.innerHTML = `
 					<div class="wmp-pl-col-idx">${realIndex + 1}</div>
@@ -880,28 +1500,46 @@
 					this.playIndex(realIndex);
 				});
 
+				li.addEventListener('dragstart', (e) => {
+					e.dataTransfer.effectAllowed = 'move';
+					e.dataTransfer.setData('text/wmp-track-index', String(realIndex));
+					li.classList.add('wmp-pl-dragging');
+				});
+
+				li.addEventListener('dragover', (e) => {
+					e.preventDefault();
+					li.classList.add('wmp-pl-dragover');
+				});
+
+				li.addEventListener('dragleave', () => {
+					li.classList.remove('wmp-pl-dragover');
+				});
+
+				li.addEventListener('drop', (e) => {
+					e.preventDefault();
+					e.stopPropagation();
+					li.classList.remove('wmp-pl-dragover');
+					const fromIdx = parseInt(e.dataTransfer.getData('text/wmp-track-index'), 10);
+					if (!isNaN(fromIdx) && fromIdx !== realIndex) {
+						const moved = currentPlaylist.splice(fromIdx, 1)[0];
+						currentPlaylist.splice(realIndex, 0, moved);
+						if (currentTrackIndex === fromIdx) currentTrackIndex = realIndex;
+						else if (fromIdx < currentTrackIndex && realIndex >= currentTrackIndex) currentTrackIndex--;
+						else if (fromIdx > currentTrackIndex && realIndex <= currentTrackIndex) currentTrackIndex++;
+						this.renderPlaylist(win);
+					}
+				});
+
+				li.addEventListener('dragend', () => {
+					li.classList.remove('wmp-pl-dragging');
+					win.querySelectorAll('.wmp-playlist-row').forEach(r => r.classList.remove('wmp-pl-dragover'));
+				});
+
 				li.addEventListener('contextmenu', (e) => {
 					e.preventDefault();
 					e.stopPropagation();
 					if (window.ContextMenu) {
-						const menuItems = [
-							{ label: 'Play Now', bold: true, action: () => this.playIndex(realIndex) },
-							{ separator: true },
-							{ label: 'Remove from Playlist', action: () => {
-								currentPlaylist.splice(realIndex, 1);
-								if (currentTrackIndex === realIndex) {
-									this.playIndex(Math.min(realIndex, currentPlaylist.length - 1));
-								} else if (currentTrackIndex > realIndex) {
-									currentTrackIndex--;
-								}
-								this.renderPlaylist(win);
-							}},
-							{ label: 'Clear Entire Playlist', action: () => {
-								currentPlaylist = [];
-								this.stop();
-								this.renderPlaylist(win);
-							}}
-						];
+						const menuItems = window.ContextMenu.getMediaPlayerPlaylistItemItems(track, realIndex, this, win);
 						window.ContextMenu.show(menuItems, e.clientX, e.clientY);
 					}
 				});
@@ -924,8 +1562,9 @@
 			const ctx = canvas.getContext('2d');
 
 			let phase = 0;
+			const barPeaks = new Array(32).fill(0);
 			const particles = [];
-			for (let i = 0; i < 48; i++) {
+			for (let i = 0; i < 50; i++) {
 				particles.push({
 					x: Math.random() * 400,
 					y: Math.random() * 300,
@@ -941,6 +1580,14 @@
 					return;
 				}
 				if (currentVisualization === 'albumart') {
+					const artFrame = win.querySelector('.wmp-art-frame');
+					if (artFrame && isPlaying && analyserNode && audioNodeConnected) {
+						const timeData = new Uint8Array(32);
+						analyserNode.getByteFrequencyData(timeData);
+						const bass = (timeData[0] + timeData[1] + timeData[2] + timeData[3]) / 4;
+						const scale = 1 + (bass / 255) * 0.08;
+						artFrame.style.transform = `scale(${scale.toFixed(3)})`;
+					}
 					animationFrameId = requestAnimationFrame(renderLoop);
 					return;
 				}
@@ -955,12 +1602,18 @@
 				ctx.clearRect(0, 0, width, height);
 
 				const freqData = new Uint8Array(64);
-				if (isPlaying) {
+				const timeDomainData = new Uint8Array(64);
+
+				if (isPlaying && analyserNode && audioNodeConnected) {
+					analyserNode.getByteFrequencyData(freqData);
+					analyserNode.getByteTimeDomainData(timeDomainData);
+				} else if (isPlaying) {
 					for (let i = 0; i < 64; i++) {
-						const freq1 = Math.sin(phase * 1.5 + i * 0.25) * 45;
-						const freq2 = Math.cos(phase * 0.8 + i * 0.12) * 35;
-						const freq3 = Math.sin(phase * 2.2 + i * 0.4) * 25;
-						freqData[i] = Math.max(10, Math.min(250, 90 + freq1 + freq2 + freq3));
+						const f1 = Math.sin(phase * 1.5 + i * 0.25) * 45;
+						const f2 = Math.cos(phase * 0.8 + i * 0.12) * 35;
+						const f3 = Math.sin(phase * 2.2 + i * 0.4) * 25;
+						freqData[i] = Math.max(10, Math.min(250, 90 + f1 + f2 + f3));
+						timeDomainData[i] = 128 + Math.sin(phase * 2 + i * 0.2) * 40;
 					}
 				}
 
@@ -975,6 +1628,12 @@
 						const x = i * (barWidth + 2);
 						const y = height - barHeight - 10;
 
+						if (barHeight > barPeaks[i]) {
+							barPeaks[i] = barHeight;
+						} else {
+							barPeaks[i] = Math.max(0, barPeaks[i] - 1.5);
+						}
+
 						const grad = ctx.createLinearGradient(0, y, 0, height);
 						grad.addColorStop(0, '#00d2ff');
 						grad.addColorStop(0.5, '#0055ff');
@@ -984,22 +1643,25 @@
 						ctx.fillRect(x, y, barWidth, barHeight);
 
 						ctx.fillStyle = '#ffffff';
-						ctx.fillRect(x, y - 2, barWidth, 1.5);
+						ctx.fillRect(x, height - barPeaks[i] - 12, barWidth, 2);
 					}
 				} else if (currentVisualization === 'wave') {
 					ctx.beginPath();
 					ctx.lineWidth = 2.5;
 					ctx.strokeStyle = '#00f0ff';
+					ctx.shadowBlur = 8;
+					ctx.shadowColor = '#0088ff';
 					const sliceWidth = width / 64;
 					let x = 0;
 					for (let i = 0; i < 64; i++) {
-						const v = (freqData[i] || 128) / 128.0;
+						const v = (timeDomainData[i] || 128) / 128.0;
 						const y = (v * height) / 2;
 						if (i === 0) ctx.moveTo(x, y);
 						else ctx.lineTo(x, y);
 						x += sliceWidth;
 					}
 					ctx.stroke();
+					ctx.shadowBlur = 0;
 				} else if (currentVisualization === 'spectrum') {
 					const cx = width / 2;
 					const cy = height / 2;
@@ -1013,7 +1675,7 @@
 					for (let i = 0; i < 32; i++) {
 						const angle = (i / 32) * Math.PI * 2;
 						const val = (freqData[i] || 0) / 255;
-						const r2 = radius + val * 60;
+						const r2 = radius + val * 65;
 						const x1 = cx + Math.cos(angle) * radius;
 						const y1 = cy + Math.sin(angle) * radius;
 						const x2 = cx + Math.cos(angle) * r2;
@@ -1022,28 +1684,47 @@
 						ctx.beginPath();
 						ctx.moveTo(x1, y1);
 						ctx.lineTo(x2, y2);
-						ctx.strokeStyle = `hsl(${200 + i * 3}, 100%, 65%)`;
+						ctx.strokeStyle = `hsl(${190 + i * 4}, 100%, 60%)`;
 						ctx.lineWidth = 3;
 						ctx.stroke();
 					}
 				} else if (currentVisualization === 'particles') {
+					const bassEnergy = (freqData[0] + freqData[1] + freqData[2]) / 765;
 					particles.forEach((p, idx) => {
 						const energy = (freqData[idx % 32] || 50) / 255;
-						p.x += p.vx * (1 + energy * 2);
-						p.y += p.vy * (1 + energy * 2);
+						p.x += p.vx * (1 + energy * 3 + bassEnergy * 2);
+						p.y += p.vy * (1 + energy * 3 + bassEnergy * 2);
 						if (p.x < 0) p.x = width;
 						if (p.x > width) p.x = 0;
 						if (p.y < 0) p.y = height;
 						if (p.y > height) p.y = 0;
 
 						ctx.beginPath();
-						ctx.arc(p.x, p.y, p.radius * (1 + energy), 0, Math.PI * 2);
+						ctx.arc(p.x, p.y, p.radius * (1 + energy * 1.5), 0, Math.PI * 2);
 						ctx.fillStyle = `hsla(${p.hue}, 90%, 60%, ${0.5 + energy * 0.5})`;
-						ctx.shadowBlur = 8;
+						ctx.shadowBlur = 10;
 						ctx.shadowColor = '#00aaff';
 						ctx.fill();
 						ctx.shadowBlur = 0;
 					});
+				} else if (currentVisualization === 'flame') {
+					const barCount = 32;
+					const barWidth = width / barCount;
+					for (let i = 0; i < barCount; i++) {
+						const val = (freqData[i] || 0) / 255;
+						const barHeight = val * height * 0.85;
+						const x = i * barWidth;
+						const y = height - barHeight;
+
+						const grad = ctx.createLinearGradient(0, y, 0, height);
+						grad.addColorStop(0, '#ffff00');
+						grad.addColorStop(0.3, '#ff6600');
+						grad.addColorStop(0.7, '#cc0000');
+						grad.addColorStop(1, '#330000');
+
+						ctx.fillStyle = grad;
+						ctx.fillRect(x + 1, y, barWidth - 2, barHeight);
+					}
 				}
 
 				animationFrameId = requestAnimationFrame(renderLoop);
@@ -1068,7 +1749,7 @@
 						if (url) this.loadAndPlay(url);
 					}},
 					{ separator: true },
-					{ label: 'Save Playlist As...', action: () => showXPDialog('Save Playlist', 'Current playlist saved to Library.', 'info') },
+					{ label: 'Save Playlist As (.m3u)...', action: () => this.exportPlaylistM3U() },
 					{ separator: true },
 					{ label: 'Exit', action: () => closeWindow(win, win.id) }
 				];
@@ -1079,6 +1760,10 @@
 						const btn = win.querySelector('#wmp-btn-toggle-playlist');
 						if (btn) btn.click();
 					}},
+					{ label: 'Enhancements Drawer', checked: isEnhancementsOpen, action: () => {
+						const btn = win.querySelector('#wmp-btn-enhancements');
+						if (btn) btn.click();
+					}},
 					{ separator: true },
 					{
 						label: 'Visualizations',
@@ -1087,7 +1772,8 @@
 							{ label: 'Spectrum Bars', radio: currentVisualization === 'bars', action: () => { currentVisualization = 'bars'; this.updateVisualizationModeUI(win); win.querySelector('#wmp-viz-label').textContent = 'Viz: Bars'; } },
 							{ label: 'Oscilloscope Waveform', radio: currentVisualization === 'wave', action: () => { currentVisualization = 'wave'; this.updateVisualizationModeUI(win); win.querySelector('#wmp-viz-label').textContent = 'Viz: Waveform'; } },
 							{ label: 'Radial Spectrum', radio: currentVisualization === 'spectrum', action: () => { currentVisualization = 'spectrum'; this.updateVisualizationModeUI(win); win.querySelector('#wmp-viz-label').textContent = 'Viz: Spectrum'; } },
-							{ label: 'Starfield Particles', radio: currentVisualization === 'particles', action: () => { currentVisualization = 'particles'; this.updateVisualizationModeUI(win); win.querySelector('#wmp-viz-label').textContent = 'Viz: Particles'; } }
+							{ label: 'Starfield Particles', radio: currentVisualization === 'particles', action: () => { currentVisualization = 'particles'; this.updateVisualizationModeUI(win); win.querySelector('#wmp-viz-label').textContent = 'Viz: Particles'; } },
+							{ label: 'Fire Flame', radio: currentVisualization === 'flame', action: () => { currentVisualization = 'flame'; this.updateVisualizationModeUI(win); win.querySelector('#wmp-viz-label').textContent = 'Viz: Fire Flame'; } }
 						]
 					}
 				];
@@ -1111,7 +1797,26 @@
 				];
 			} else if (menuType === 'tools') {
 				items = [
-					{ label: 'Options...', action: () => { if (window.SettingsApp) window.SettingsApp.open('audio'); } }
+					{ label: 'Graphic Equalizer...', action: () => {
+						const btn = win.querySelector('#wmp-btn-enhancements');
+						if (btn && !isEnhancementsOpen) btn.click();
+						const eqTab = win.querySelector('.wmp-enh-tab-btn[data-enh-tab="eq"]');
+						if (eqTab) eqTab.click();
+					}},
+					{ label: 'SRS WOW Effects...', action: () => {
+						const btn = win.querySelector('#wmp-btn-enhancements');
+						if (btn && !isEnhancementsOpen) btn.click();
+						const srsTab = win.querySelector('.wmp-enh-tab-btn[data-enh-tab="srs"]');
+						if (srsTab) srsTab.click();
+					}},
+					{ label: 'Play Speed & Balance Settings...', action: () => {
+						const btn = win.querySelector('#wmp-btn-enhancements');
+						if (btn && !isEnhancementsOpen) btn.click();
+						const speedTab = win.querySelector('.wmp-enh-tab-btn[data-enh-tab="speed"]');
+						if (speedTab) speedTab.click();
+					}},
+					{ separator: true },
+					{ label: 'System Audio Properties...', action: () => { if (window.SettingsApp) window.SettingsApp.open('audio'); } }
 				];
 			} else if (menuType === 'help') {
 				items = [

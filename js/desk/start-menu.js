@@ -893,8 +893,13 @@
 					break;
 				case 'my-music':
 					if (typeof fs !== 'undefined') {
-						const musicFolder = fs.root.getByName('Music');
-						if (musicFolder && typeof openFolderWindow === 'function') {
+						let musicFolder = fs.root.getByName('Music');
+						if (!musicFolder) {
+							musicFolder = new Folder('Music');
+							musicFolder.icon = '../assets/images/desk/icons/Folder Closed.webp';
+							fs.root.add(musicFolder);
+						}
+						if (typeof openFolderWindow === 'function') {
 							openFolderWindow(musicFolder);
 							break;
 						}

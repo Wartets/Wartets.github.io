@@ -296,6 +296,20 @@
 				}
 			});
 
+			const onPictureContextMenu = (e) => {
+				e.preventDefault();
+				e.stopPropagation();
+				const current = currentFolderImages[currentImageIndex] || currentImageFile;
+				if (window.ContextMenu && current) {
+					const items = window.ContextMenu.getPictureViewerItems(this, current, win);
+					window.ContextMenu.show(items, e.clientX, e.clientY);
+				}
+			};
+
+			viewport.addEventListener('contextmenu', onPictureContextMenu);
+			imgEl.addEventListener('contextmenu', onPictureContextMenu);
+			stage.addEventListener('contextmenu', onPictureContextMenu);
+
 			document.addEventListener('keydown', (e) => {
 				if (!activeViewerWindow || document.activeElement.tagName === 'INPUT') return;
 				if (e.key === 'ArrowLeft') {
