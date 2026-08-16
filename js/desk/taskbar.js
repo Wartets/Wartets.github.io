@@ -175,7 +175,9 @@
 					title: 'MacroPof Clippy Assistant',
 					hidden: false,
 					onClick: () => {
-						if (window.ClippyAgent && window.ClippyAgent.showTip) window.ClippyAgent.showTip();
+						if (window.ClippyAgent && typeof window.ClippyAgent.toggle === 'function') {
+							window.ClippyAgent.toggle();
+						}
 					},
 					onContextMenu: (e) => {
 						if (window.ContextMenu) {
@@ -219,7 +221,7 @@
 				const isHidden = srvCfg.hidden !== undefined ? srvCfg.hidden : srv.hidden;
 				const itemEl = document.createElement('div');
 				itemEl.className = 'tray-icon-item';
-				itemEl.id = `tray-${srv.id}-btn`;
+				itemEl.id = srv.id === 'clippy' ? 'clippy-taskbar-icon' : `tray-${srv.id}-btn`;
 				itemEl.title = srv.title;
 
 				if (srv.isTextBadge) {
@@ -1070,6 +1072,7 @@
 				const is12h = window.SettingsApp ? (window.SettingsApp.get('clockFormat') === '12h') : false;
 				const showSeconds = window.SettingsApp ? (window.SettingsApp.get('showClockSeconds') !== false) : true;
 				const showDate = window.SettingsApp ? (window.SettingsApp.get('showClockDate') !== false) : true;
+				const showDay = window.SettingsApp ? (window.SettingsApp.get('showClockDay') !== false) : true;
 				const dateFormat = window.SettingsApp ? (window.SettingsApp.get('dateFormat') || 'dd/mm/yyyy') : 'dd/mm/yyyy';
 
 				let hoursNum = now.getHours();
@@ -1086,16 +1089,18 @@
 				const day = String(now.getDate()).padStart(2, '0');
 				const month = String(now.getMonth() + 1).padStart(2, '0');
 				const year = String(now.getFullYear());
+				const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+				const dayPrefix = showDay ? `${dayNames[now.getDay()]} ` : '';
 
 				let dateStr = '';
 				if (dateFormat === 'mm/dd/yyyy') {
-					dateStr = `${month}/${day}/${year}`;
+					dateStr = `${dayPrefix}${month}/${day}/${year}`;
 				} else if (dateFormat === 'yyyy-mm-dd') {
-					dateStr = `${year}-${month}-${day}`;
+					dateStr = `${dayPrefix}${year}-${month}-${day}`;
 				} else if (dateFormat === 'dd.mm.yyyy') {
-					dateStr = `${day}.${month}.${year}`;
+					dateStr = `${dayPrefix}${day}.${month}.${year}`;
 				} else {
-					dateStr = `${day}/${month}/${year}`;
+					dateStr = `${dayPrefix}${day}/${month}/${year}`;
 				}
 
 				if (showDate) {
@@ -1118,6 +1123,7 @@
 				const is12h = window.SettingsApp ? (window.SettingsApp.get('clockFormat') === '12h') : false;
 				const showSeconds = window.SettingsApp ? (window.SettingsApp.get('showClockSeconds') !== false) : true;
 				const showDate = window.SettingsApp ? (window.SettingsApp.get('showClockDate') !== false) : true;
+				const showDay = window.SettingsApp ? (window.SettingsApp.get('showClockDay') !== false) : true;
 				const dateFormat = window.SettingsApp ? (window.SettingsApp.get('dateFormat') || 'dd/mm/yyyy') : 'dd/mm/yyyy';
 
 				let hoursNum = now.getHours();
@@ -1134,16 +1140,18 @@
 				const day = String(now.getDate()).padStart(2, '0');
 				const month = String(now.getMonth() + 1).padStart(2, '0');
 				const year = String(now.getFullYear());
+				const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+				const dayPrefix = showDay ? `${dayNames[now.getDay()]} ` : '';
 
 				let dateStr = '';
 				if (dateFormat === 'mm/dd/yyyy') {
-					dateStr = `${month}/${day}/${year}`;
+					dateStr = `${dayPrefix}${month}/${day}/${year}`;
 				} else if (dateFormat === 'yyyy-mm-dd') {
-					dateStr = `${year}-${month}-${day}`;
+					dateStr = `${dayPrefix}${year}-${month}-${day}`;
 				} else if (dateFormat === 'dd.mm.yyyy') {
-					dateStr = `${day}.${month}.${year}`;
+					dateStr = `${dayPrefix}${day}.${month}.${year}`;
 				} else {
-					dateStr = `${day}/${month}/${year}`;
+					dateStr = `${dayPrefix}${day}/${month}/${year}`;
 				}
 
 				if (showDate) {

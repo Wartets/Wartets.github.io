@@ -546,11 +546,45 @@ window.DeskAPI = {
 	},
 	getDesktopItemCount: () => (typeof fs !== 'undefined' && fs) ? fs.root.listContent().filter(el => !el.hidden).length : 0,
 	getOpenWindowCount: () => (typeof openWindows !== 'undefined') ? Object.keys(openWindows).length : 0,
+	getOpenWindowTitles: () => {
+		if (typeof openWindows === 'undefined') return [];
+		return Object.values(openWindows)
+			.filter(w => !w.classList.contains('minimized') && !w.classList.contains('xp-modal-overlay'))
+			.map(w => w.querySelector('.xp-window-header .title')?.textContent || 'Window');
+	},
+	closeAllWindows: () => {
+		if (typeof openWindows === 'undefined') return;
+		Object.keys(openWindows).forEach(id => {
+			const w = openWindows[id];
+			if (w && typeof closeWindow === 'function') closeWindow(w, id);
+		});
+	},
+	minimizeAllWindows: () => {
+		if (typeof openWindows === 'undefined') return;
+		Object.keys(openWindows).forEach(id => {
+			const w = openWindows[id];
+			if (w && !w.classList.contains('minimized') && typeof minimizeWindow === 'function') minimizeWindow(w, id);
+		});
+	},
+	emptyRecycleBin: () => {
+		if (typeof fs !== 'undefined' && fs.emptyRecycleBin) {
+			fs.emptyRecycleBin();
+			if (typeof refreshUI === 'function') refreshUI();
+			const rbWindow = document.getElementById('window-recycle-bin');
+			if (rbWindow && typeof renderRecycleBinContent === 'function') renderRecycleBinContent(rbWindow);
+			return true;
+		}
+		return false;
+	},
 	getRandomProject: () => {
 		if (typeof projects === 'undefined') return null;
 		const list = projects.flat().filter(p => p && typeof p === 'object' && p.show !== false);
 		if (list.length === 0) return null;
 		return list[Math.floor(Math.random() * list.length)];
+	},
+	getAllProjects: () => {
+		if (typeof projects === 'undefined') return [];
+		return projects.flat().filter(p => p && typeof p === 'object' && p.show !== false);
 	},
 	openMailApp: () => openOutlookExpress(),
 	openProjectsFolder: () => openAllProjectsFolder(),
@@ -567,7 +601,66 @@ window.DeskAPI = {
 	openMyComputer: () => openMyComputerWindow(),
 	openSearch: (query) => openSearchWindow(query),
 	openPrinters: () => openPrintersWindow(),
-	openNetworkPlaces: () => openNetworkPlacesWindow()
+	openNetworkPlaces: () => openNetworkPlacesWindow(),
+	openDisplaySettings: () => openDisplaySettings(),
+	getNowPlaying: () => {
+		if (webampInstance) {
+			return { title: "Projet 8.4", artist: "Wartets" };
+		}
+		return null;
+	},
+	toggleMusicPlayback: () => {
+		if (!webampInstance) {
+			openWinamp();
+			return true;
+		}
+		return true;
+	},
+	nextMusicTrack: () => {
+		if (webampInstance) {
+			return true;
+		}
+		openWinamp();
+		return true;
+	},
+	openApp: (appId) => {
+		const key = String(appId).toLowerCase();
+		if (key === 'mail' || key === 'outlook' || key === 'oe') {
+			if (typeof openOutlookExpress === 'function') openOutlookExpress();
+		} else if (key === 'projects' || key === 'portfolio') {
+			if (typeof openAllProjectsFolder === 'function') openAllProjectsFolder();
+		} else if (key === 'recyclebin' || key === 'trash') {
+			if (typeof openRecycleBinWindow === 'function') openRecycleBinWindow();
+		} else if (key === 'calculator' || key === 'calc') {
+			if (window.CalculatorApp) window.CalculatorApp.open();
+		} else if (key === 'paint' || key === 'mspaint') {
+			if (window.PaintApp) window.PaintApp.open();
+		} else if (key === 'minesweeper' || key === 'mine') {
+			if (typeof openMinesweeper === 'function') openMinesweeper();
+		} else if (key === 'musicplayer' || key === 'winamp' || key === 'music') {
+			if (typeof openWinamp === 'function') openWinamp();
+		} else if (key === 'terminal' || key === 'cmd' || key === 'prompt') {
+			if (window.CommandPrompt) window.CommandPrompt.open();
+			else if (typeof processRunCommand === 'function') processRunCommand('cmd');
+		} else if (key === 'notepad' || key === 'text') {
+			if (window.NotepadApp) window.NotepadApp.openNew();
+		} else if (key === 'settings' || key === 'controlpanel') {
+			if (window.SettingsApp) window.SettingsApp.open('system');
+		} else if (key === 'mycomputer' || key === 'computer') {
+			if (typeof openMyComputerWindow === 'function') openMyComputerWindow();
+		} else if (key === 'search') {
+			if (typeof openSearchWindow === 'function') openSearchWindow('');
+		} else if (key === 'printers') {
+			if (typeof openPrintersWindow === 'function') openPrintersWindow();
+		} else if (key === 'networkplaces' || key === 'network') {
+			if (typeof openNetworkPlacesWindow === 'function') openNetworkPlacesWindow();
+		} else if (key === 'display' || key === 'wallpaper') {
+			if (typeof openDisplaySettings === 'function') openDisplaySettings();
+		} else if (key === 'internet' || key === 'ie' || key === 'browser') {
+			if (typeof openInternetExplorer === 'function') openInternetExplorer();
+		}
+		return true;
+	}
 };
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -970,13 +1063,6 @@ function initializeFileSystem() {
 
 	initPoemsFolder(othersFolder);
 
-	let matrixFile = fs.root.getByName('matrix.bat');
-	if (!matrixFile) {
-		matrixFile = new File('matrix.bat', null, '@echo off\ntitle Matrix Digital Rain\ncolor 0a\ncls\necho Initializing Matrix stream...\nmatrix\n');
-		matrixFile.icon = '../assets/images/desk/icons/Command Prompt.webp';
-		fs.root.add(matrixFile);
-	}
-
 	fs.save();
 }
 
@@ -1092,7 +1178,14 @@ function createIconElement(data, dblClickHandler) {
 	span.textContent = data.name;
 	icon.appendChild(span);
 
-	icon.addEventListener('click', (e) => handleIconClick(e, icon));
+	icon.addEventListener('click', (e) => {
+		const isSingleClick = window.SettingsApp && window.SettingsApp.get('singleClickOpen');
+		if (isSingleClick && e.button === 0 && !e.ctrlKey && !e.shiftKey) {
+			dblClickHandler(data.element);
+			return;
+		}
+		handleIconClick(e, icon);
+	});
 	icon.addEventListener('dblclick', () => dblClickHandler(data.element));
 	icon.addEventListener('contextmenu', (e) => {
 		e.preventDefault();
@@ -2530,6 +2623,10 @@ function openFileSystemElement(element, windowContext = null) {
 		const target = fs.findByPath(element.targetPath);
 		if (target) {
 			openFileSystemElement(target, windowContext);
+		} else if (element.targetPath.startsWith('http://') || element.targetPath.startsWith('https://') || element.targetPath.startsWith('about:')) {
+			if (window.InternetExplorerApp) {
+				window.InternetExplorerApp.open(element.targetPath);
+			}
 		} else if (element.targetPath.startsWith('project://')) {
 			showXPDialog('Shortcut Error', 'Legacy project shortcut format is no longer supported.', 'error');
 		} else {
@@ -2556,23 +2653,8 @@ function openFileSystemElement(element, windowContext = null) {
 		} else if (lowerName.endsWith('.pdf')) {
 			openPDFWindow(element);
 		} else if (lowerName.endsWith('.html') || lowerName.endsWith('.htm')) {
-			openInternetExplorer();
-			const ieWindow = document.getElementById('window-internet-explorer');
-			if (ieWindow) {
-				const iframe = ieWindow.querySelector('iframe');
-				const addressBar = ieWindow.querySelector('#ie-address-bar');
-				const homePage = ieWindow.querySelector('#ie-homepage');
-				
-				homePage.style.display = 'none';
-				iframe.style.display = 'block';
-				
-				let contentUrl = element.content; 
-				if (!contentUrl.startsWith('http') && !contentUrl.startsWith('data:')) {
-					contentUrl = 'data:text/html;charset=utf-8,' + encodeURIComponent(element.content);
-				}
-				
-				iframe.src = contentUrl;
-				addressBar.value = element.name;
+			if (window.InternetExplorerApp) {
+				window.InternetExplorerApp.open(`file://${element.getFullPath()}`);
 			}
 		} else {
 			openTextEditorWindow(element);
@@ -2627,13 +2709,15 @@ function arrangeIcons(sortBy) {
 		return 0;
 	});
 
-	const iconWidth = 75;
-	const iconHeight = 100;
+	const customGapX = (window.SettingsApp && window.SettingsApp.get('desktopGridSpacingX')) || 75;
+	const customGapY = (window.SettingsApp && window.SettingsApp.get('desktopGridSpacingY')) || 100;
+	const iconWidth = customGapX;
+	const iconHeight = customGapY;
 	const startX = 10;
 	const startY = 10;
 	
 	const desktopHeight = window.innerHeight - 40;
-	const iconsPerColumn = Math.floor((desktopHeight - startY) / iconHeight);
+	const iconsPerColumn = Math.max(1, Math.floor((desktopHeight - startY) / iconHeight));
 	
 	container.innerHTML = '';
 	icons.forEach((icon, index) => {
@@ -3422,22 +3506,10 @@ function processRunCommand(command) {
 	} else if (lowerCmd === 'bsod') {
 		triggerBSOD();
 	} else if (lowerCmd.startsWith('www.') || lowerCmd.startsWith('http://') || lowerCmd.startsWith('https://') || lowerCmd.endsWith('.com') || lowerCmd.endsWith('.org') || lowerCmd.endsWith('.net')) {
-		openInternetExplorer();
-		const ieWindow = document.getElementById('window-internet-explorer');
-		if (ieWindow) {
-			const iframe = ieWindow.querySelector('iframe');
-			const addressBar = ieWindow.querySelector('#ie-address-bar');
-			const homePage = ieWindow.querySelector('#ie-homepage');
-			if (iframe && addressBar) {
-				homePage.style.display = 'none';
-				iframe.style.display = 'block';
-				let url = cmd;
-				if (!url.startsWith('http://') && !url.startsWith('https://')) {
-					url = 'https://' + url;
-				}
-				iframe.src = url;
-				addressBar.value = url;
-			}
+		if (window.InternetExplorerApp) {
+			window.InternetExplorerApp.open(cmd);
+		} else if (typeof openInternetExplorer === 'function') {
+			openInternetExplorer(cmd);
 		}
 	} else {
 		showXPDialog(command, `Cannot find '${command}'. Make sure you typed the name correctly, and then try again.`, 'error');
@@ -4184,195 +4256,10 @@ function showDesktop() {
 	});
 }
 
-const IE_EASTER_EGG_HOSTS = {
-	'geocities.wartets': () => `<!DOCTYPE html><html><head><meta charset="utf-8"><title>Colin's Homepage</title><style>
-		body{background:#000080;color:#00ff00;font-family:'Comic Sans MS',cursive;text-align:center;padding:30px;}
-		h1{color:#ffff00;text-shadow:2px 2px #ff00ff;}
-		marquee{color:#ff0000;font-weight:bold;}
-		.badge{display:inline-block;margin:4px;padding:4px 8px;background:#fff;color:#000;border:2px outset #ccc;font-size:11px;}
-	</style></head><body>
-		<h1>Welcome to Colin's Homepage!</h1>
-		<marquee>Under construction since 1999! Best viewed at 800x600!</marquee>
-		<p>Hit counter: 005627</p>
-		<div class="badge">Netscape Now!</div>
-		<div class="badge">Made with Notepad</div>
-		<p>Sign my guestbook!</p>
-	</body></html>`,
-	'wartex.search': () => buildIESearchPage('')
-};
-
-function normalizeIEHost(input) {
-	let value = input.trim();
-	if (!value.startsWith('http://') && !value.startsWith('https://') && !value.startsWith('about:')) {
-		value = 'https://' + value;
+function openInternetExplorer(url = 'about:home') {
+	if (window.InternetExplorerApp) {
+		return window.InternetExplorerApp.open(url);
 	}
-	try {
-		return new URL(value).hostname.replace(/^www\./, '');
-	} catch (error) {
-		return null;
-	}
-}
-
-function buildIEErrorPage(url) {
-	return `<!DOCTYPE html><html><head><meta charset="utf-8"><style>body{font-family:Verdana,sans-serif;background:#fff;color:#000;padding:40px;} h1{font-size:20px;} .url{color:#0000cc;} hr{margin:20px 0;}</style></head><body>
-		<h1>The page cannot be displayed</h1>
-		<p>The page you are looking for is currently unavailable. The web site might be experiencing technical difficulties, or you may need to adjust your browser settings.</p>
-		<p class="url">${url}</p>
-		<hr>
-		<p>Please try the following:</p>
-		<ul>
-			<li>Open the <b>geocities.wartets</b> home page, and then look for links to the information you want.</li>
-			<li>Click the Refresh button, or try again later.</li>
-		</ul>
-		<p><i>Cannot find server or DNS Error</i><br>Internet Explorer</p>
-	</body></html>`;
-}
-
-function buildIESearchPage(query) {
-	const escaped = (query || '').replace(/</g, '&lt;');
-	return `<!DOCTYPE html><html><head><meta charset="utf-8"><style>
-		body{font-family:Arial,sans-serif;background:#fff;color:#000;padding:20px;}
-		.logo{font-size:32px;font-weight:bold;color:#3b88fd;margin-bottom:20px;}
-		.logo span{color:#245edc;}
-		.result{margin-bottom:16px;}
-		.result a{color:#0000cc;font-size:14px;text-decoration:none;}
-		.result a:hover{text-decoration:underline;}
-		.result .desc{color:#333;font-size:12px;}
-		.result .link-url{color:#009933;font-size:11px;}
-	</style></head><body>
-		<div class="logo">Wart<span>ex</span></div>
-		<p>Results for "<b>${escaped}</b>"</p>
-		<div class="result"><a href="#">Wartets - Personal Portfolio</a><div class="link-url">wartets.github.io</div><div class="desc">Interactive simulations, physics research, software engineering, and digital creations.</div></div>
-		<div class="result"><a href="#">Why can't I access the real internet?</a><div class="link-url">wartex.help/sandbox</div><div class="desc">This browser is a sandboxed recreation running inside a portfolio site. External sites cannot be reached.</div></div>
-		<div class="result"><a href="#">GeoCities Revival - Personal Homepages</a><div class="link-url">geocities.wartets</div><div class="desc">Browse the archive of retro personal home pages.</div></div>
-	</body></html>`;
-}
-
-function openInternetExplorer() {
-	const id = 'window-internet-explorer';
-	if (document.getElementById(id)) {
-		bringWindowToFront(document.getElementById(id));
-		return;
-	}
-
-	const contentHTML = `
-		<div class="ie-window-layout">
-			<div class="ie-toolbar">
-				<button class="ie-nav-btn" id="ie-back" title="Back" disabled><img src="https://api.iconify.design/mdi/arrow-left.svg?color=%23888888" alt="Back"></button>
-				<button class="ie-nav-btn" id="ie-forward" title="Forward" disabled><img src="https://api.iconify.design/mdi/arrow-right.svg?color=%23888888" alt="Forward"></button>
-				<button class="ie-nav-btn" id="ie-stop" title="Stop"><img src="https://api.iconify.design/mdi/close.svg" alt="Stop"></button>
-				<button class="ie-nav-btn" id="ie-refresh" title="Refresh"><img src="https://api.iconify.design/mdi/refresh.svg" alt="Refresh"></button>
-				<button class="ie-nav-btn" id="ie-home" title="Home"><img src="https://api.iconify.design/mdi/home.svg" alt="Home"></button>
-			</div>
-			<div class="ie-address-bar-container">
-				<span>Address</span>
-				<input type="text" id="ie-address-bar" value="about:home">
-				<button id="ie-go-btn">Go</button>
-			</div>
-			<div class="ie-favorites-bar">
-				<button type="button" class="ie-fav-btn" data-fav="geocities.wartets">GeoCities Archive</button>
-				<button type="button" class="ie-fav-btn" data-fav="wartex.search">Wartex Search</button>
-			</div>
-			<div class="ie-content-area">
-				<iframe id="ie-iframe" src="about:blank" sandbox="allow-scripts allow-same-origin allow-forms"></iframe>
-				<div id="ie-homepage" class="ie-homepage-content">
-					<img src="internet-explorer.png" alt="Internet Explorer">
-					<h1>Welcome to Internet Explorer</h1>
-					<p>Type a web address in the Address bar and click Go.</p>
-				</div>
-			</div>
-		</div>
-	`;
-
-	const ieWindow = createXPWindow(id, 'Internet Explorer', contentHTML, 600, 400, { iconSrc: '../assets/images/desk/internet-explorer.png' });
-	ieWindow.querySelector('.xp-window-content').style.padding = '0';
-
-	const iframe = ieWindow.querySelector('#ie-iframe');
-	const addressBar = ieWindow.querySelector('#ie-address-bar');
-	const goBtn = ieWindow.querySelector('#ie-go-btn');
-	const homePage = ieWindow.querySelector('#ie-homepage');
-
-	const backBtn = ieWindow.querySelector('#ie-back');
-	const forwardBtn = ieWindow.querySelector('#ie-forward');
-	const stopBtn = ieWindow.querySelector('#ie-stop');
-	const refreshBtn = ieWindow.querySelector('#ie-refresh');
-	const homeBtn = ieWindow.querySelector('#ie-home');
-
-	function navigateTo(url) {
-		homePage.style.display = 'none';
-		iframe.style.display = 'block';
-
-		if (url === 'about:home') {
-			showHome();
-			return;
-		}
-
-		const rawQuery = url.trim();
-		const host = normalizeIEHost(rawQuery);
-
-		if (host && IE_EASTER_EGG_HOSTS[host]) {
-			iframe.src = 'data:text/html;charset=utf-8,' + encodeURIComponent(IE_EASTER_EGG_HOSTS[host]());
-			addressBar.value = `http://${host}/`;
-			return;
-		}
-
-		if (!rawQuery.includes('.') || rawQuery.includes(' ')) {
-			iframe.src = 'data:text/html;charset=utf-8,' + encodeURIComponent(buildIESearchPage(rawQuery));
-			addressBar.value = `http://wartex.search/?q=${encodeURIComponent(rawQuery)}`;
-			return;
-		}
-
-		iframe.src = 'data:text/html;charset=utf-8,' + encodeURIComponent(buildIEErrorPage(host ? `http://${host}/` : rawQuery));
-		addressBar.value = host ? `http://${host}/` : rawQuery;
-	}
-
-	function showHome() {
-		iframe.src = 'about:blank';
-		iframe.style.display = 'none';
-		homePage.style.display = 'flex';
-		addressBar.value = 'about:home';
-	}
-
-	goBtn.addEventListener('click', () => navigateTo(addressBar.value));
-	addressBar.addEventListener('keydown', (e) => {
-		if (e.key === 'Enter') navigateTo(addressBar.value);
-	});
-
-	ieWindow.querySelectorAll('.ie-fav-btn').forEach(btn => {
-		btn.addEventListener('click', () => navigateTo(btn.dataset.fav));
-	});
-
-	backBtn.addEventListener('click', () => iframe.contentWindow.history.back());
-	forwardBtn.addEventListener('click', () => iframe.contentWindow.history.forward());
-	stopBtn.addEventListener('click', () => iframe.contentWindow.stop());
-	refreshBtn.addEventListener('click', () => {
-		if (iframe.style.display !== 'none') iframe.contentWindow.location.reload();
-	});
-	homeBtn.addEventListener('click', showHome);
-
-	iframe.addEventListener('load', () => {
-		try {
-			addressBar.value = iframe.contentWindow.location.href;
-			if (iframe.contentWindow.history.length > 1) {
-				backBtn.disabled = false;
-				backBtn.querySelector('img').src = "https://api.iconify.design/mdi/arrow-left.svg";
-			} else {
-				backBtn.disabled = true;
-				backBtn.querySelector('img').src = "https://api.iconify.design/mdi/arrow-left.svg?color=%23888888";
-			}
-		} catch (e) {
-		}
-	});
-
-	ieWindow.querySelector('.ie-content-area').addEventListener('contextmenu', (e) => {
-		e.preventDefault();
-		if (window.ContextMenu) {
-			const items = window.ContextMenu.getIEAreaItems(addressBar.value);
-			window.ContextMenu.show(items, e.clientX, e.clientY);
-		}
-	});
-
-	showHome();
 }
 
 async function openOutlookExpress() {

@@ -29,10 +29,12 @@
 		render() {
 			const userName = (window.SettingsApp && window.SettingsApp.get('userName')) || 'Colin B.R.';
 			const userAvatar = (window.SettingsApp && window.SettingsApp.get('userAvatar')) || '../assets/images/desk/icons/User 1.webp';
+			const avatarShape = (window.SettingsApp && window.SettingsApp.get('userAvatarShape')) || 'square';
+			const shapeClass = avatarShape === 'circle' ? 'xp-start-avatar-circle' : (avatarShape === 'round' ? 'xp-start-avatar-round' : 'xp-start-avatar-square');
 
 			startMenuEl.innerHTML = `
 				<div class="xp-start-header" id="start-menu-profile-header" title="Click to change user account picture and settings">
-					<div class="xp-start-user-frame">
+					<div class="xp-start-user-frame ${shapeClass}">
 						<img src="${userAvatar}" alt="${userName}" class="xp-start-avatar" id="start-menu-avatar-img">
 					</div>
 					<span class="xp-start-username" id="start-menu-username-text">${userName}</span>
@@ -709,7 +711,7 @@
 					</div>
 					<div class="xp-start-flyout-item" data-search-target="web">
 						<img src="../assets/images/desk/internet-explorer.png" class="xp-start-item-icon" alt="">
-						<span class="xp-start-title">On the Internet (Wartex)...</span>
+						<span class="xp-start-title">On the Internet (Web Search)...</span>
 					</div>
 				`;
 
@@ -786,7 +788,7 @@
 			if (typeof projects === 'undefined') return [];
 			const categoriesMap = new Map();
 			projects.flat().forEach(p => {
-				if (p && p.keywords && Array.isArray(p.keywords)) {
+				if (p && p.show !== false && p.keywords && Array.isArray(p.keywords)) {
 					p.keywords.forEach(kw => {
 						if (!categoriesMap.has(kw)) {
 							categoriesMap.set(kw, {
@@ -803,7 +805,7 @@
 
 		getProjectsByCategory(category) {
 			if (typeof projects === 'undefined') return [];
-			return projects.flat().filter(p => p && p.keywords && p.keywords.includes(category));
+			return projects.flat().filter(p => p && p.show !== false && p.keywords && p.keywords.includes(category));
 		},
 
 		resolveProjectTitle(title) {

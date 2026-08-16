@@ -2389,11 +2389,14 @@
 	}
 
 	function init() {
-		const icon = document.getElementById('clippy-taskbar-icon');
-		if (!icon) return;
-
-		icon.removeEventListener('click', togglePopup);
-		icon.addEventListener('click', togglePopup);
+		const icon = document.getElementById('clippy-taskbar-icon') || document.getElementById('tray-clippy-btn');
+		if (icon) {
+			icon.removeEventListener('click', togglePopup);
+			icon.addEventListener('click', (e) => {
+				e.stopPropagation();
+				togglePopup();
+			});
+		}
 		startIdleLoop();
 	}
 

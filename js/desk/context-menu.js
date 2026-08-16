@@ -1296,27 +1296,33 @@
 					label: 'Back',
 					icon: 'https://api.iconify.design/mdi/arrow-left.svg',
 					action: () => {
-						const iframe = document.getElementById('ie-iframe');
-						if (iframe && iframe.contentWindow) iframe.contentWindow.history.back();
+						const win = document.getElementById('window-internet-explorer');
+						if (win) {
+							const backBtn = win.querySelector('.tb-ie-back');
+							if (backBtn && !backBtn.disabled) backBtn.click();
+						}
 					}
 				},
 				{
 					label: 'Forward',
 					icon: 'https://api.iconify.design/mdi/arrow-right.svg',
 					action: () => {
-						const iframe = document.getElementById('ie-iframe');
-						if (iframe && iframe.contentWindow) iframe.contentWindow.history.forward();
+						const win = document.getElementById('window-internet-explorer');
+						if (win) {
+							const fwdBtn = win.querySelector('.tb-ie-forward');
+							if (fwdBtn && !fwdBtn.disabled) fwdBtn.click();
+						}
 					}
 				},
 				{ separator: true },
 				{
 					label: 'Set as Desktop Background',
 					action: () => {
-						if (window.SettingsApp && url) window.SettingsApp.set('desktopBackground', url);
+						if (typeof setImageAsWallpaper === 'function') setImageAsWallpaper(url, 'cover');
 					}
 				},
 				{
-					label: 'Copy Background',
+					label: 'Copy Page Address',
 					action: () => {
 						navigator.clipboard.writeText(url);
 					}
@@ -1330,11 +1336,21 @@
 					}
 				},
 				{
+					label: 'View Source',
+					shortcut: 'Ctrl+U',
+					action: () => {
+						if (window.InternetExplorerApp) window.InternetExplorerApp.viewActiveTabSource();
+					}
+				},
+				{
 					label: 'Refresh',
 					shortcut: 'F5',
 					action: () => {
-						const iframe = document.getElementById('ie-iframe');
-						if (iframe && iframe.contentWindow) iframe.contentWindow.location.reload();
+						const win = document.getElementById('window-internet-explorer');
+						if (win) {
+							const refreshBtn = win.querySelector('.tb-ie-refresh');
+							if (refreshBtn) refreshBtn.click();
+						}
 					}
 				},
 				{ separator: true },
