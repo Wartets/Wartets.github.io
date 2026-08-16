@@ -62,6 +62,7 @@ class File extends Element {
 		this.icon = '../assets/images/desk/icons/File.webp';
 		this.readOnly = false;
 		this.remoteUrl = null;
+		this.savedFromNotepad = false;
 	}
 
 	read() {
@@ -86,6 +87,7 @@ class File extends Element {
 		newFile.modifiedAt = this.modifiedAt;
 		newFile.readOnly = this.readOnly;
 		newFile.remoteUrl = this.remoteUrl;
+		newFile.savedFromNotepad = this.savedFromNotepad;
 		return newFile;
 	}
 
@@ -97,6 +99,7 @@ class File extends Element {
 			icon: this.icon,
 			readOnly: this.readOnly,
 			remoteUrl: this.remoteUrl,
+			savedFromNotepad: this.savedFromNotepad,
 		};
 	}
 }
@@ -233,6 +236,22 @@ class FileSystemManager {
 			new File(finalName);
 		parentFolder.add(newElement);
 		this.save();
+
+		if (type === 'Folder' && window.AchievementsManager) {
+			let depth = 0;
+			let curr = newElement;
+			const names = new Set();
+			let hasDefault = false;
+			while (curr && curr.parent) {
+				depth++;
+				if (curr.name.toLowerCase().startsWith('new folder')) hasDefault = true;
+				names.add(curr.name.toLowerCase());
+				curr = curr.parent;
+			}
+			if (depth >= 4 && !hasDefault && names.size >= 4) {
+				window.AchievementsManager.progress('deep_folders', 1);
+			}
+		}
 		return newElement;
 	}
 
@@ -240,6 +259,9 @@ class FileSystemManager {
 		const element = this.findByPath(path);
 		if (!element || !element.parent) {
 			throw new Error('Cannot delete root or non-existent element.');
+		}
+		if (element instanceof File && element.savedFromNotepad && window.AchievementsManager) {
+			window.AchievementsManager.progress('notepad_save_delete', 1);
 		}
 		element.parent.remove(element.name);
 		this.save();
@@ -344,6 +366,9 @@ class FileSystemManager {
 		if (!element || !element.parent) {
 			throw new Error('Cannot recycle root or non-existent element.');
 		}
+		if (element instanceof File && element.savedFromNotepad && window.AchievementsManager) {
+			window.AchievementsManager.progress('notepad_save_delete', 1);
+		}
 		const originalPath = element.parent.getFullPath();
 		const serialized = element.toJSON();
 		element.parent.remove(element.name);
@@ -405,6 +430,10 @@ class FileSystemManager {
 	}
 
 	emptyRecycleBin() {
+		const items = this.loadRecycleBinItems();
+		if (items.length > 0 && window.AchievementsManager) {
+			window.AchievementsManager.progress('recycle_cleaner', 1);
+		}
 		this.saveRecycleBinItems([]);
 	}
 
@@ -438,6 +467,7 @@ class FileSystemManager {
 			element = new File(data.name, parent, data.content || '');
 			element.readOnly = !!data.readOnly;
 			element.remoteUrl = data.remoteUrl || null;
+			element.savedFromNotepad = !!data.savedFromNotepad;
 		}
 		element.createdAt = new Date(data.createdAt);
 		element.modifiedAt = new Date(data.modifiedAt);
@@ -604,6 +634,9 @@ window.DeskAPI = {
 	openPrinters: () => openPrintersWindow(),
 	openNetworkPlaces: () => openNetworkPlacesWindow(),
 	openDisplaySettings: () => openDisplaySettings(),
+	openAchievements: (targetId = null) => {
+		if (window.AchievementsManager) return window.AchievementsManager.open(targetId);
+	},
 	getNowPlaying: () => {
 		if (webampInstance) {
 			return { title: "Projet 8.4", artist: "Wartets" };
@@ -660,6 +693,8 @@ window.DeskAPI = {
 			if (typeof openNetworkPlacesWindow === 'function') openNetworkPlacesWindow();
 		} else if (key === 'display' || key === 'wallpaper') {
 			if (typeof openDisplaySettings === 'function') openDisplaySettings();
+		} else if (key === 'achievements' || key === 'trophies' || key === 'quests') {
+			if (window.AchievementsManager) window.AchievementsManager.open();
 		} else if (key === 'internet' || key === 'ie' || key === 'browser') {
 			if (typeof openInternetExplorer === 'function') openInternetExplorer();
 		}
@@ -697,6 +732,9 @@ document.addEventListener('DOMContentLoaded', () => {
 	let loginTimeout;
 
 	function skipStartup() {
+		if (window.AchievementsManager) {
+			window.AchievementsManager.progress('boot_skipper', 1);
+		}
 		if (bootTimeout) clearTimeout(bootTimeout);
 		if (loginTimeout) clearTimeout(loginTimeout);
 		
@@ -881,6 +919,9 @@ function setupDesktopSelection() {
 
 	document.addEventListener('mouseup', () => {
 		if (isSelecting) {
+			if (selectedIcons.size > 10 && window.AchievementsManager) {
+				window.AchievementsManager.progress('lasso_master', 1);
+			}
 			isSelecting = false;
 			if (selectionBox) {
 				selectionBox.remove();
@@ -1116,6 +1157,14 @@ function renderDesktopIcons() {
 		action: openRecycleBinWindow,
 		type: "system",
 		systemType: "recycle-bin"
+	}, {
+		name: "Milestones",
+		icon: "../assets/images/desk/icons/Trophy.webp",
+		action: () => {
+			if (window.AchievementsManager) window.AchievementsManager.open();
+		},
+		type: "application",
+		systemType: "achievements"
 	}];
 
 	appIcons.forEach(app => {
@@ -1166,6 +1215,9 @@ function isShowHiddenEnabled() {
 function toggleShowHidden() {
 	const current = isShowHiddenEnabled();
 	localStorage.setItem('desktopShowHidden', (!current).toString());
+	if (!current && window.AchievementsManager) {
+		window.AchievementsManager.progress('hidden_revealer', 1);
+	}
 	refreshUI();
 }
 
@@ -2290,6 +2342,9 @@ function maximizeWindow(win) {
 		win.classList.add('maximized');
 		maxBtn.textContent = '❐';
 		maxBtn.title = "Restore Down";
+		if (window.AchievementsManager) {
+			window.AchievementsManager.progress('maximize_window', 1);
+		}
 		setTimeout(() => {
 			win.style.transition = '';
 		}, 50);
@@ -2412,6 +2467,16 @@ function openProjectWindow(project) {
 	`;
 
 	addToRecentDocs({ name: projectTitle, icon: project.icon, type: 'project', path: `project://${projectTitle}` });
+	try {
+		const viewed = JSON.parse(localStorage.getItem('xp_viewed_projects') || '[]');
+		if (!viewed.includes(projectTitle)) {
+			viewed.push(projectTitle);
+			localStorage.setItem('xp_viewed_projects', JSON.stringify(viewed));
+		}
+		if (window.AchievementsManager) {
+			window.AchievementsManager.setProgress('portfolio_explorer', viewed.length);
+		}
+	} catch (e) {}
 	const projectWindow = createXPWindow(id, projectTitle, content, 700, 500, { iconSrc: project.icon });
 	projectWindow.querySelector('.xp-window-content').style.padding = '0';
 	projectWindow.classList.add('project-window');
@@ -2503,6 +2568,12 @@ function toISODateKeyUTC(dateUTC) {
 }
 
 async function openAnecdoteWindow(dateUTC) {
+	if (window.AchievementsManager) {
+		window.AchievementsManager.progress('anecdote_reader', 1);
+		if (dateUTC.getUTCFullYear() === 2005 && dateUTC.getUTCMonth() === 4 && dateUTC.getUTCDate() === 30) {
+			window.AchievementsManager.progress('calendar_secret_date', 1);
+		}
+	}
 	const id = `window-anecdote-${toISODateKeyUTC(dateUTC)}`;
 	const existingWindow = document.getElementById(id);
 	if (existingWindow) {
@@ -2656,6 +2727,9 @@ function openFileSystemElement(element, windowContext = null) {
 	} else if (element instanceof File) {
 		const lowerName = element.name.toLowerCase();
 		if (lowerName.endsWith('.bat') || lowerName.endsWith('.cmd')) {
+			if (window.AchievementsManager) {
+				window.AchievementsManager.progress('bat_runner', 1);
+			}
 			if (window.CommandPrompt) {
 				window.CommandPrompt.open({
 					script: element.content,
@@ -2993,7 +3067,23 @@ async function openReadOnlyTextWindow(file) {
 		} catch (error) {}
 	}
 	if (window.NotepadApp) {
-		window.NotepadApp.open(file, { readOnly: true });
+		const win = window.NotepadApp.open(file, { readOnly: true });
+		if (win && ((file.remoteUrl || '').includes('poem') || (file.parent && file.parent.name === 'Poems'))) {
+			let readTimer = 0;
+			const interval = setInterval(() => {
+				if (!document.getElementById(win.id)) {
+					clearInterval(interval);
+					return;
+				}
+				if (typeof activeWindow !== 'undefined' && activeWindow === win) {
+					readTimer++;
+					if (readTimer >= 25) {
+						clearInterval(interval);
+						if (window.AchievementsManager) window.AchievementsManager.progress('poetry_enthusiast', 1);
+					}
+				}
+			}, 1000);
+		}
 	}
 }
 
@@ -3199,6 +3289,16 @@ async function openDisplaySettings() {
 	function updateWallpaperSelection(item) {
 		selectedWallpaperItem = item;
 		monitorPreview.style.backgroundImage = `url('${item.path}')`;
+		try {
+			const viewed = JSON.parse(localStorage.getItem('xp_previewed_wallpapers') || '[]');
+			if (!viewed.includes(item.id)) {
+				viewed.push(item.id);
+				localStorage.setItem('xp_previewed_wallpapers', JSON.stringify(viewed));
+			}
+			if (window.AchievementsManager) {
+				window.AchievementsManager.setProgress('wallpaper_collector', viewed.length);
+			}
+		} catch (e) {}
 		detailsContainer.innerHTML = `
 			<b>${item.name}</b>
 			${item.filename}<br>
@@ -3381,6 +3481,16 @@ function renderRecycleBinContent(win) {
 		});
 
 		icon.addEventListener('dblclick', () => {
+			if (item.data.name.toLowerCase() === 'matrix.bat') {
+				if (window.AchievementsManager) window.AchievementsManager.progress('matrix_recycle_run', 1);
+				if (window.CommandPrompt) {
+					window.CommandPrompt.open({
+						script: item.data.content || '@echo off\ncolor 0a\n:loop\necho %random% %random% %random% %random%\ngoto loop',
+						title: 'matrix.bat (Recycle Bin)'
+					});
+					return;
+				}
+			}
 			showXPDialog(item.data.name, 'This item is in the Recycle Bin. You must restore it to open or execute it.', 'warning');
 		});
 
@@ -4860,6 +4970,15 @@ async function openOutlookExpress() {
 		previewDate.textContent = formatMessageDate(message.date);
 		previewSubject.textContent = message.subject;
 		previewBody.innerHTML = message.body;
+		previewBody.querySelectorAll('a').forEach(link => {
+			link.addEventListener('click', () => {
+				if (message.folderId === 'spam' || message.id === 'fixed-100' || (message.from && message.from.toLowerCase().includes('milfeuille'))) {
+					if (window.AchievementsManager) {
+						window.AchievementsManager.progress('mail_spam_click', 1);
+					}
+				}
+			});
+		});
 	}
 
 	function htmlToPlainText(html) {
@@ -4899,6 +5018,15 @@ async function openOutlookExpress() {
 		`;
 		const win = createXPWindow(mid, message.subject, html, 520, 380, { iconSrc: '../assets/images/desk/OE2001.webp' });
 		win.querySelector('.xp-window-content').style.padding = '0';
+		win.querySelectorAll('a').forEach(link => {
+			link.addEventListener('click', () => {
+				if (message.folderId === 'spam' || message.id === 'fixed-100' || (message.from && message.from.toLowerCase().includes('milfeuille'))) {
+					if (window.AchievementsManager) {
+						window.AchievementsManager.progress('mail_spam_click', 1);
+					}
+				}
+			});
+		});
 	}
 
 	function openComposeWindow(prefill = {}) {
@@ -4945,6 +5073,7 @@ async function openOutlookExpress() {
 			try {
 				MailStore.sendMessage({ to: toInput.value, subject: subjectInput.value, body: bodyInput.value });
 				if (prefill.draftId) MailStore.deleteDraft(prefill.draftId);
+				if (window.AchievementsManager) window.AchievementsManager.progress('mail_sender', 1);
 				showXPDialog('Message Sent', `Your message has been sent to ${toInput.value}.`, 'info');
 				closeWindow(win, composeId);
 				if (currentFolderId === 'sent' || currentFolderId === 'drafts') renderMessageList();

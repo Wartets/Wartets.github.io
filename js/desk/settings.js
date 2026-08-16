@@ -2005,6 +2005,16 @@
 			themeSelect.value = pendingSettings.theme;
 			themeSelect.addEventListener('change', () => {
 				pendingSettings.theme = themeSelect.value;
+				try {
+					const tested = JSON.parse(localStorage.getItem('xp_tested_themes') || '[]');
+					if (!tested.includes(themeSelect.value)) {
+						tested.push(themeSelect.value);
+						localStorage.setItem('xp_tested_themes', JSON.stringify(tested));
+					}
+					if (window.AchievementsManager) {
+						window.AchievementsManager.setProgress('themes_connoisseur', tested.length);
+					}
+				} catch (e) {}
 				updateThemePreviewBox(win);
 				markDirty(win);
 			});
@@ -2247,8 +2257,20 @@
 			});
 		}
 
+		let soundSpamCount = 0;
+		let lastSoundSpamTime = 0;
 		win.querySelectorAll('.sound-test-row button[data-sound]').forEach(btn => {
 			btn.addEventListener('click', () => {
+				const now = Date.now();
+				if (now - lastSoundSpamTime < 1500) {
+					soundSpamCount++;
+				} else {
+					soundSpamCount = 1;
+				}
+				lastSoundSpamTime = now;
+				if (soundSpamCount >= 10 && window.AchievementsManager) {
+					window.AchievementsManager.progress('soundboard_spammer', 1);
+				}
 				const soundType = btn.dataset.sound;
 				const oldVol = currentSettings.soundVolume;
 				const oldSound = currentSettings.soundEnabled;
@@ -2382,7 +2404,10 @@
 						buttons: ['Yes', 'No'],
 						callback: (res) => {
 							if (res === 'Yes') {
+								if (window.AchievementsManager) window.AchievementsManager.progress('factory_reset', 1);
+								const achState = localStorage.getItem('xp_achievements_state');
 								localStorage.clear();
+								if (achState) localStorage.setItem('xp_achievements_state', achState);
 								SoundEngine.play('startup');
 								location.reload();
 							}
@@ -2397,6 +2422,20 @@
 		const cancelBtn = win.querySelector('#settings-btn-cancel');
 
 		const commitChanges = () => {
+			if (window.AchievementsManager) {
+				if (pendingSettings.userName !== DEFAULT_SETTINGS.userName && pendingSettings.userAvatar !== DEFAULT_SETTINGS.userAvatar) {
+					window.AchievementsManager.progress('identity_crisis', 1);
+				}
+				if (pendingSettings.startButtonText && pendingSettings.startButtonText.toLowerCase() !== 'start') {
+					window.AchievementsManager.progress('start_btn_custom', 1);
+				}
+				if (pendingSettings.animationSpeed === 'cinematic') {
+					window.AchievementsManager.progress('cinematic_speed', 1);
+				}
+				if (pendingSettings.crtAspectRatio && pendingSettings.crtAspectRatio !== 'fullscreen') {
+					window.AchievementsManager.progress('crt_aspect_changer', 1);
+				}
+			}
 			currentSettings = { ...pendingSettings };
 			saveCurrentSettings();
 			applyAllSettings();

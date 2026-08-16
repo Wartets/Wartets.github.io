@@ -1067,6 +1067,9 @@
 		if (winner === 'X') {
 			setVisualState('surprise');
 			playRetroSound('win');
+			if (window.AchievementsManager) {
+				window.AchievementsManager.progress('clippy_tictactoe_win', 1);
+			}
 			typeWriterMessage('assistant', "[VICTORY] Outstanding strategy. You defeated the decision heuristic algorithm! Would you like a rematch?", null, [
 				{ label: "Play Again", onClick: () => startTicTacToe() }
 			]);
@@ -2270,6 +2273,8 @@
 		typeWriterMessage('assistant', defaultText, null, fallbackActions);
 	}
 
+	let chatMarathonInterval = null;
+
 	function openPopup() {
 		const isFirstBuild = !popupElement;
 		buildPopup();
@@ -2277,6 +2282,13 @@
 		isOpen = true;
 		hideBubble();
 		playRetroSound('popup');
+		if (!chatMarathonInterval) {
+			chatMarathonInterval = setInterval(() => {
+				if (isOpen && window.AchievementsManager) {
+					window.AchievementsManager.progress('clippy_chat_marathon', 1);
+				}
+			}, 1000);
+		}
 		if (!isFirstBuild && logElement && logElement.children.length === 0) {
 			renderGraphEntryPoint();
 		}
@@ -2286,6 +2298,10 @@
 	function closePopup() {
 		if (popupElement) popupElement.classList.add('hidden');
 		isOpen = false;
+		if (chatMarathonInterval) {
+			clearInterval(chatMarathonInterval);
+			chatMarathonInterval = null;
+		}
 		activeGameContext = null;
 		setVisualState('idle');
 	}

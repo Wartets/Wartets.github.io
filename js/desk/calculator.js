@@ -174,7 +174,12 @@
 				const numB = parseFloat(b);
 				let res = 0;
 				switch (op) {
-					case '+': res = numA + numB; break;
+					case '+':
+						res = numA + numB;
+						if (window.AchievementsManager) {
+							window.AchievementsManager.progress('calc_addition', 1);
+						}
+						break;
 					case '-': res = numA - numB; break;
 					case '*': res = numA * numB; break;
 					case '/':

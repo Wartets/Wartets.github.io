@@ -1163,12 +1163,23 @@
 				mode = modes[Math.floor(Math.random() * modes.length)];
 			}
 
-			if (mode === 'fountain') {
-				this.runFountainAnimation(canvas, board);
-			} else if (mode === 'fireworks') {
+			try {
+				const seen = JSON.parse(localStorage.getItem('xp_solitaire_seen_anims') || '[]');
+				if (!seen.includes(mode)) {
+					seen.push(mode);
+					localStorage.setItem('xp_solitaire_seen_anims', JSON.stringify(seen));
+				}
+				if (window.AchievementsManager) {
+					window.AchievementsManager.setProgress('solitaire_animations', seen.length);
+				}
+			} catch (e) {}
+
+			if (mode === 'fireworks') {
 				this.runFireworksAnimation(canvas, board);
 			} else if (mode === 'spiral') {
 				this.runVortexSpiralAnimation(canvas, board);
+			} else if (mode === 'fountain') {
+				this.runFountainAnimation(canvas, board);
 			} else {
 				this.runBouncingCascadeAnimation(canvas, board);
 			}

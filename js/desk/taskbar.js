@@ -7,6 +7,7 @@
 
 	const DEFAULT_QUICK_LAUNCH = [
 		{ id: 'ql-show-desktop', name: 'Show Desktop', icon: '../assets/images/desk/XPIcon.png', action: 'show-desktop', system: true },
+		{ id: 'ql-achievements', name: 'Milestones & Achievements', icon: '../assets/images/desk/icons/Trophy.webp', action: 'open-achievements' },
 		{ id: 'ql-settings', name: 'Control Panel & Settings', icon: '../assets/images/desk/icons/System Properties.webp', action: 'open-settings' },
 		{ id: 'ql-ie', name: 'Internet Explorer', icon: '../assets/images/desk/internet-explorer.png', action: 'open-ie' },
 		{ id: 'ql-oe', name: 'Outlook Express', icon: '../assets/images/desk/OE2001.webp', action: 'open-oe', hasBadge: true },
@@ -381,6 +382,9 @@
 			win.querySelector('#hw-stop-btn').addEventListener('click', () => {
 				const selected = list.querySelector('.xp-hardware-item.selected');
 				const name = selected ? selected.querySelector('span').textContent : 'USB Device';
+				if (window.AchievementsManager && selected && selected.dataset.device === 'usb1') {
+					window.AchievementsManager.progress('safe_hardware_eject', 1);
+				}
 				if (typeof closeWindow === 'function') closeWindow(win, id);
 				this.showBalloon('Safe To Remove Hardware', `The '${name}' device can now be safely removed from the system.`, 'https://api.iconify.design/mdi/check-circle.svg?color=%232e7d32');
 			});
@@ -391,6 +395,7 @@
 		},
 
 		showWindowsUpdateDialog(e) {
+			if (window.AchievementsManager) window.AchievementsManager.progress('update_checker', 1);
 			showXPDialog('Automatic Updates', 'Windows is up to date.\nLast checked: Today at 03:00 AM.\nNo new security updates are required.', 'info');
 		},
 
@@ -451,6 +456,9 @@
 			if (window.SettingsApp) {
 				window.SettingsApp.set('systemLanguage', newLang);
 			}
+			if (window.AchievementsManager) {
+				window.AchievementsManager.progress('lang_switcher', 1);
+			}
 			const badge = document.getElementById('tray-lang-badge');
 			if (badge) badge.textContent = newLang;
 			this.showBalloon('Language Bar', `Input locale switched to: ${newLang === 'FR' ? 'French (France)' : 'English (United States)'}`, 'https://api.iconify.design/mdi/keyboard.svg?color=%231b4b9b', 3000);
@@ -492,6 +500,14 @@
 			quickLaunchItems.push(newItem);
 			this.saveQuickLaunchItems();
 			this.renderQuickLaunch();
+			try {
+				let adds = parseInt(localStorage.getItem('xp_ql_adds') || '0', 10) + 1;
+				localStorage.setItem('xp_ql_adds', String(adds));
+				let removes = parseInt(localStorage.getItem('xp_ql_removes') || '0', 10);
+				if (adds >= 2 && removes >= 3 && window.AchievementsManager) {
+					window.AchievementsManager.progress('quicklaunch_customizer', 1);
+				}
+			} catch (e) {}
 			if (window.SettingsApp && window.SettingsApp.playSound) {
 				window.SettingsApp.playSound('click');
 			}
@@ -501,6 +517,14 @@
 			quickLaunchItems = quickLaunchItems.filter(item => item.id !== id);
 			this.saveQuickLaunchItems();
 			this.renderQuickLaunch();
+			try {
+				let removes = parseInt(localStorage.getItem('xp_ql_removes') || '0', 10) + 1;
+				localStorage.setItem('xp_ql_removes', String(removes));
+				let adds = parseInt(localStorage.getItem('xp_ql_adds') || '0', 10);
+				if (adds >= 2 && removes >= 3 && window.AchievementsManager) {
+					window.AchievementsManager.progress('quicklaunch_customizer', 1);
+				}
+			} catch (e) {}
 			if (window.SettingsApp && window.SettingsApp.playSound) {
 				window.SettingsApp.playSound('recycle');
 			}
@@ -663,6 +687,9 @@
 			switch (action) {
 				case 'show-desktop':
 					this.showDesktop();
+					break;
+				case 'open-achievements':
+					if (window.AchievementsManager) window.AchievementsManager.open();
 					break;
 				case 'open-ie':
 					if (typeof openInternetExplorer === 'function') openInternetExplorer();
@@ -1018,6 +1045,10 @@
 			if (!calendarPopupEl) return;
 			const year = calendarCurrentDate.getFullYear();
 			const month = calendarCurrentDate.getMonth();
+
+			if (year === 2001 && month === 9 && window.AchievementsManager) {
+				window.AchievementsManager.progress('calendar_time_traveler', 1);
+			}
 
 			const monthYearEl = calendarPopupEl.querySelector('#calendar-month-year');
 			const gridEl = calendarPopupEl.querySelector('#calendar-grid');
@@ -1383,6 +1414,10 @@
 		showDesktop() {
 			if (typeof openWindows === 'undefined') return;
 			const windows = Object.values(openWindows);
+			const visibleCount = windows.filter(w => !w.classList.contains('minimized') && !w.classList.contains('xp-modal-overlay')).length;
+			if (visibleCount >= 10 && window.AchievementsManager) {
+				window.AchievementsManager.progress('desktop_boss_key', 1);
+			}
 			const allMinimized = windows.every(w => w.classList.contains('minimized'));
 
 			windows.forEach(win => {

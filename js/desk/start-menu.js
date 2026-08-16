@@ -43,6 +43,13 @@
 				<div class="xp-start-body">
 					<div class="xp-start-left-column">
 						<div class="xp-start-pinned-section">
+							<div class="xp-start-item xp-start-pinned" data-action="open-achievements">
+								<img src="../assets/images/desk/icons/Trophy.webp" class="xp-start-item-icon" alt="Achievements">
+								<div class="xp-start-item-texts">
+									<strong class="xp-start-title">Milestones & Trophies</strong>
+									<span class="xp-start-subtitle">Desktop Quests</span>
+								</div>
+							</div>
 							<div class="xp-start-item xp-start-pinned" data-action="open-ie">
 								<img src="../assets/images/desk/internet-explorer.png" class="xp-start-item-icon" alt="Internet">
 								<div class="xp-start-item-texts">
@@ -824,6 +831,9 @@
 			}
 
 			switch (action) {
+				case 'open-achievements':
+					if (window.AchievementsManager) window.AchievementsManager.open();
+					break;
 				case 'open-ie':
 					if (typeof openInternetExplorer === 'function') openInternetExplorer();
 					break;
@@ -926,6 +936,7 @@
 					if (typeof openRunDialog === 'function') openRunDialog();
 					break;
 				case 'turn-off':
+					if (window.AchievementsManager) window.AchievementsManager.progress('turn_off_action', 1);
 					if (typeof openShutdownDialog === 'function') openShutdownDialog();
 					break;
 				case 'log-off':
@@ -984,6 +995,9 @@
 
 		open() {
 			if (!startMenuEl) return;
+			if (window.AchievementsManager) {
+				window.AchievementsManager.progress('start_menu_open', 1);
+			}
 			startMenuEl.classList.remove('hidden');
 			if (startButtonEl) startButtonEl.classList.add('active');
 			if (taskbarStartButtonEl) taskbarStartButtonEl.classList.add('active');

@@ -1,0 +1,472 @@
+[
+	{
+		"id": "first_boot",
+		"title": "Welcome to the Machine",
+		"description": "Log in and initiate your first interactive session on the desktop.",
+		"category": "system",
+		"icon": "../assets/images/desk/icons/User 1.webp",
+		"hideIconWhenLocked": true,
+		"maxProgress": 1,
+		"points": 10
+	},
+	{
+		"id": "solitaire_animations",
+		"title": "Very Solitaire Master",
+		"description": "Witness all 4 distinct victory celebration animations in Solitaire.",
+		"category": "games",
+		"icon": "../assets/images/desk/icons/Hearts.webp",
+		"hideIconWhenLocked": true,
+		"maxProgress": 4,
+		"points": 50
+	},
+	{
+		"id": "minesweeper_triathlon",
+		"title": "Minefield Master",
+		"description": "Clear the grid and win a game on Beginner, Intermediate, and Expert difficulties.",
+		"category": "games",
+		"icon": "../assets/images/desk/icons/Minesweeper.webp",
+		"hideIconWhenLocked": true,
+		"maxProgress": 3,
+		"points": 45
+	},
+	{
+		"id": "portfolio_explorer",
+		"title": "Dedicated Recruiter",
+		"description": "Open and inspect every public portfolio showcase project.",
+		"category": "projects",
+		"icon": "../assets/images/desk/icons/Folder Open.webp",
+		"hideIconWhenLocked": false,
+		"maxProgress": 8,
+		"points": 60
+	},
+	{
+		"id": "hidden_revealer",
+		"title": "Through the Looking Glass",
+		"description": "Toggle the display of hidden desktop files and system folders via context menu.",
+		"category": "system",
+		"icon": "https://api.iconify.design/mdi/eye-outline.svg?color=%231b4b9b",
+		"hideIconWhenLocked": false,
+		"maxProgress": 1,
+		"points": 15
+	},
+	{
+		"id": "paint_artist",
+		"title": "Digital Da Vinci",
+		"description": "Draw and save your own custom artwork to the desktop file system in Paint.",
+		"category": "creativity",
+		"icon": "../assets/images/desk/icons/Paint.webp",
+		"hideIconWhenLocked": false,
+		"maxProgress": 1,
+		"points": 20
+	},
+	{
+		"id": "recycle_cleaner",
+		"title": "Environmentalist",
+		"description": "Empty the Recycle Bin to permanently purge deleted files.",
+		"category": "maintenance",
+		"icon": "../assets/images/desk/trash.png",
+		"hideIconWhenLocked": true,
+		"maxProgress": 1,
+		"points": 15
+	},
+	{
+		"id": "start_menu_open",
+		"title": "Starting Point",
+		"description": "Open the Windows XP Start Menu for the first time.",
+		"category": "system",
+		"icon": "../assets/images/desk/window_logo.png",
+		"hideIconWhenLocked": false,
+		"maxProgress": 1,
+		"points": 5
+	},
+	{
+		"id": "anecdote_reader",
+		"title": "Learn a few things",
+		"description": "Open and read today's historical anecdote from the calendar repository.",
+		"category": "exploration",
+		"icon": "../assets/images/desk/icons/Calendar.webp",
+		"hideIconWhenLocked": false,
+		"maxProgress": 1,
+		"points": 15
+	},
+	{
+		"id": "mail_sender",
+		"title": "Pen Pal",
+		"description": "Compose and dispatch an e-mail message using Outlook Express.",
+		"category": "communication",
+		"icon": "../assets/images/desk/OE2001.webp",
+		"hideIconWhenLocked": false,
+		"maxProgress": 1,
+		"points": 20
+	},
+	{
+		"id": "deep_folders",
+		"title": "Folder Architect",
+		"description": "Create a nested hierarchy of four directories deep with unique custom names.",
+		"category": "management",
+		"icon": "../assets/images/desk/icons/Folder Closed.webp",
+		"hideIconWhenLocked": false,
+		"maxProgress": 1,
+		"points": 30
+	},
+	{
+		"id": "bat_runner",
+		"title": "Script Connoisseur",
+		"description": "Create and execute a batch script file directly from the filesystem.",
+		"category": "terminal",
+		"icon": "../assets/images/desk/icons/Command Prompt.webp",
+		"hideIconWhenLocked": false,
+		"maxProgress": 1,
+		"points": 25
+	},
+	{
+		"id": "matrix_recycle_run",
+		"title": "Escaping the Matrix through the Trash Can",
+		"description": "Execute the matrix batch script located inside the Recycle Bin.",
+		"category": "secrets",
+		"icon": "https://api.iconify.design/mdi/matrix.svg?color=%232e7d32",
+		"hideIconWhenLocked": false,
+		"maxProgress": 1,
+		"points": 35
+	},
+	{
+		"id": "lang_switcher",
+		"title": "Polyglot Typist",
+		"description": "Switch the active keyboard layout using the Language Bar in the system tray.",
+		"category": "system",
+		"icon": "https://api.iconify.design/mdi/keyboard.svg?color=%231b4b9b",
+		"hideIconWhenLocked": false,
+		"maxProgress": 1,
+		"points": 15
+	},
+	{
+		"id": "identity_crisis",
+		"title": "Identity Crisis",
+		"description": "Customize both your user name and account profile portrait in User Accounts.",
+		"category": "personalization",
+		"icon": "../assets/images/desk/icons/User Accounts.webp",
+		"hideIconWhenLocked": false,
+		"maxProgress": 1,
+		"points": 20
+	},
+	{
+		"id": "start_btn_custom",
+		"title": "Fresh Paint",
+		"description": "Customize the caption label of the Start button in Taskbar settings.",
+		"category": "personalization",
+		"icon": "../assets/images/desk/icons/User Personalization.webp",
+		"hideIconWhenLocked": false,
+		"maxProgress": 1,
+		"points": 15
+	},
+	{
+		"id": "factory_reset",
+		"title": "Tabula Rasa",
+		"description": "Reset the entire desktop state and user preferences to factory defaults.",
+		"category": "maintenance",
+		"icon": "https://api.iconify.design/mdi/backup-restore.svg?color=%23cc3333",
+		"hideIconWhenLocked": false,
+		"maxProgress": 1,
+		"points": 30
+	},
+	{
+		"id": "themes_connoisseur",
+		"title": "Style Fashionista",
+		"description": "Try out every available visual style preset in Appearance properties.",
+		"category": "personalization",
+		"icon": "../assets/images/desk/icons/Display.webp",
+		"hideIconWhenLocked": false,
+		"maxProgress": 9,
+		"points": 40
+	},
+	{
+		"id": "wallpaper_collector",
+		"title": "Wallpaper Gallerist",
+		"description": "Inspect and test every background picture from the desktop collection.",
+		"category": "personalization",
+		"icon": "../assets/images/desk/icons/Monitor.webp",
+		"hideIconWhenLocked": false,
+		"maxProgress": 10,
+		"points": 35
+	},
+	{
+		"id": "paint_wallpaper",
+		"title": "Custom Decorator",
+		"description": "Set a bitmap created directly in Paint as your desktop wallpaper.",
+		"category": "creativity",
+		"icon": "https://api.iconify.design/mdi/monitor-screenshot.svg?color=%231b4b9b",
+		"hideIconWhenLocked": false,
+		"maxProgress": 1,
+		"points": 25
+	},
+	{
+		"id": "soundboard_spammer",
+		"title": "Spam of Sounds",
+		"description": "Rapidly trigger sound events on the Program Events Soundboard 10 times in a row.",
+		"category": "audio",
+		"icon": "../assets/images/desk/icons/Sounds, Speech, and Audio Devices.webp",
+		"hideIconWhenLocked": true,
+		"maxProgress": 1,
+		"points": 20
+	},
+	{
+		"id": "crt_aspect_changer",
+		"title": "Tube Geometry",
+		"description": "Change the CRT screen geometry aspect ratio to a retro resolution.",
+		"category": "display",
+		"icon": "https://api.iconify.design/mdi/television.svg?color=%231b4b9b",
+		"hideIconWhenLocked": false,
+		"maxProgress": 1,
+		"points": 15
+	},
+	{
+		"id": "safe_hardware_eject",
+		"title": "Safety Exit First",
+		"description": "Safely remove the Kingston USB storage drive from the notification tray.",
+		"category": "system",
+		"icon": "https://api.iconify.design/mdi/usb.svg?color=%231b4b9b",
+		"hideIconWhenLocked": false,
+		"maxProgress": 1,
+		"points": 20
+	},
+	{
+		"id": "desktop_boss_key",
+		"title": "Boss Key",
+		"description": "Use the Show Desktop action while having 10 or more active windows open.",
+		"category": "productivity",
+		"icon": "../assets/images/desk/XPIcon.png",
+		"hideIconWhenLocked": false,
+		"maxProgress": 1,
+		"points": 30
+	},
+	{
+		"id": "cinematic_speed",
+		"title": "Dramatic Effect",
+		"description": "Set window animation transition speed to Cinematic Demonstration mode.",
+		"category": "visuals",
+		"icon": "https://api.iconify.design/mdi/movie-open.svg?color=%231b4b9b",
+		"hideIconWhenLocked": false,
+		"maxProgress": 1,
+		"points": 15
+	},
+	{
+		"id": "quicklaunch_customizer",
+		"title": "Speed Launcher",
+		"description": "Pin at least 2 custom shortcuts and remove at least 3 from the Quick Launch toolbar.",
+		"category": "productivity",
+		"icon": "https://api.iconify.design/mdi/rocket-launch-outline.svg?color=%231b4b9b",
+		"hideIconWhenLocked": false,
+		"maxProgress": 1,
+		"points": 25
+	},
+	{
+		"id": "poetry_enthusiast",
+		"title": "Deep Contemplation",
+		"description": "Spend over 25 seconds reading a poem in the active document viewer.",
+		"category": "literature",
+		"icon": "../assets/images/desk/icons/List File.webp",
+		"hideIconWhenLocked": true,
+		"maxProgress": 1,
+		"points": 25
+	},
+	{
+		"id": "update_checker",
+		"title": "Vigilant Administrator",
+		"description": "Check the status of Windows Automatic Updates from the notification tray.",
+		"category": "maintenance",
+		"icon": "https://api.iconify.design/mdi/shield-sync-outline.svg?color=%23ffcc00",
+		"hideIconWhenLocked": false,
+		"maxProgress": 1,
+		"points": 15
+	},
+	{
+		"id": "calendar_time_traveler",
+		"title": "YXP Archaeologist",
+		"description": "Navigate the taskbar calendar view back to October 2001.",
+		"category": "exploration",
+		"icon": "../assets/images/desk/icons/Calendar.webp",
+		"hideIconWhenLocked": false,
+		"maxProgress": 1,
+		"points": 30
+	},
+	{
+		"id": "calendar_secret_date",
+		"title": "Long After the Big Bang",
+		"description": "Inspect the archive entry dated May 30, 2005. Yeah that's my birthday.",
+		"category": "secrets",
+		"icon": "https://api.iconify.design/mdi/calendar-heart.svg?color=%23cc3333",
+		"hideIconWhenLocked": false,
+		"maxProgress": 1,
+		"points": 25
+	},
+	{
+		"id": "lasso_master",
+		"title": "Desktop Lasso",
+		"description": "Enclose and select more than 10 desktop elements simultaneously with the selection box.",
+		"category": "desktop",
+		"icon": "https://api.iconify.design/mdi/selection-drag.svg?color=%231b4b9b",
+		"hideIconWhenLocked": true,
+		"maxProgress": 1,
+		"points": 20
+	},
+	{
+		"id": "maximize_window",
+		"title": "Broad Horizons",
+		"description": "Maximize a window to encompass the entire screen viewport.",
+		"category": "system",
+		"icon": "https://api.iconify.design/mdi/window-maximize.svg?color=%231b4b9b",
+		"hideIconWhenLocked": true,
+		"maxProgress": 1,
+		"points": 10
+	},
+	{
+		"id": "turn_off_action",
+		"title": "Calling It a Day",
+		"description": "Open the Turn Off Computer dialog directly from the Start Menu.",
+		"category": "system",
+		"icon": "https://api.iconify.design/mdi/power.svg?color=%23cc3333",
+		"hideIconWhenLocked": false,
+		"maxProgress": 1,
+		"points": 10
+	},
+	{
+		"id": "boot_skipper",
+		"title": "In a Hurry",
+		"description": "Bypass the startup boot screen by clicking the animated Windows XP logo.",
+		"category": "secrets",
+		"icon": "https://api.iconify.design/mdi/fast-forward.svg?color=%231b4b9b",
+		"hideIconWhenLocked": true,
+		"maxProgress": 1,
+		"points": 15
+	},
+	{
+		"id": "cmd_master",
+		"title": "Command Line Guru",
+		"description": "Execute every supported command in Command Prompt.",
+		"category": "terminal",
+		"icon": "../assets/images/desk/icons/Command Prompt.webp",
+		"hideIconWhenLocked": false,
+		"maxProgress": 10,
+		"points": 40
+	},
+	{
+		"id": "cmd_help_spammer",
+		"title": "RTFM",
+		"description": "Run the help command inside Command Prompt 3 times.",
+		"category": "terminal",
+		"icon": "https://api.iconify.design/mdi/help-box.svg?color=%231b4b9b",
+		"hideIconWhenLocked": false,
+		"maxProgress": 3,
+		"points": 15
+	},
+	{
+		"id": "clippy_chat_marathon",
+		"title": "Is this ChatGPT?",
+		"description": "Spend over 2 minutes in active dialogue with Clippy.",
+		"category": "assistant",
+		"icon": "../assets/images/desk/clippy/idle.png",
+		"hideIconWhenLocked": true,
+		"maxProgress": 120,
+		"points": 35
+	},
+	{
+		"id": "clippy_tictactoe_win",
+		"title": "Stone VS Paperclip",
+		"description": "Defeat Clippy in a match of Tic-Tac-Toe.",
+		"category": "games",
+		"icon": "https://api.iconify.design/mdi/close-circle-outline.svg?color=%232e7d32",
+		"hideIconWhenLocked": false,
+		"maxProgress": 1,
+		"points": 30
+	},
+	{
+		"id": "ie_visit_site",
+		"title": "Portfolio Inception",
+		"description": "Navigate to wartets.github.io inside Internet Explorer.",
+		"category": "internet",
+		"icon": "../assets/images/desk/internet-explorer.png",
+		"hideIconWhenLocked": false,
+		"maxProgress": 1,
+		"points": 15
+	},
+	{
+		"id": "ie_launch_project",
+		"title": "Web-Web App Launcher",
+		"description": "Launch a project directly from the Project Directory webpage in Internet Explorer.",
+		"category": "internet",
+		"icon": "https://api.iconify.design/mdi/play-network.svg?color=%231b4b9b",
+		"hideIconWhenLocked": false,
+		"maxProgress": 1,
+		"points": 20
+	},
+	{
+		"id": "ie_view_source",
+		"title": "Source Code Inspector",
+		"description": "Inspect the HTML source code of any web page in Notepad from Internet Explorer.",
+		"category": "internet",
+		"icon": "../assets/images/desk/icons/Notepad.webp",
+		"hideIconWhenLocked": false,
+		"maxProgress": 1,
+		"points": 15
+	},
+	{
+		"id": "ie_fullscreen_f11",
+		"title": "Immersive Surfing",
+		"description": "Toggle full screen kiosk browsing using F11 in Internet Explorer.",
+		"category": "internet",
+		"icon": "https://api.iconify.design/mdi/fullscreen.svg?color=%231b4b9b",
+		"hideIconWhenLocked": true,
+		"maxProgress": 1,
+		"points": 15
+	},
+	{
+		"id": "mail_spam_click",
+		"title": "Sweet Delicacy",
+		"description": "Click the hyperlink inside the Mille-Feuille spam message in Outlook Express.",
+		"category": "secrets",
+		"icon": "https://api.iconify.design/mdi/cake.svg?color=%23e68a00",
+		"hideIconWhenLocked": false,
+		"maxProgress": 1,
+		"points": 25
+	},
+	{
+		"id": "calc_addition",
+		"title": "Number Cruncher",
+		"description": "Perform an addition equation inside the Calculator.",
+		"category": "productivity",
+		"icon": "../assets/images/desk/icons/Calculator.webp",
+		"hideIconWhenLocked": true,
+		"maxProgress": 1,
+		"points": 10
+	},
+	{
+		"id": "notepad_save_delete",
+		"title": "Ephemeral Writer",
+		"description": "Write a document in Notepad, save it to disk, and then delete it.",
+		"category": "creativity",
+		"icon": "../assets/images/desk/icons/File.webp",
+		"hideIconWhenLocked": false,
+		"maxProgress": 1,
+		"points": 25
+	},
+	{
+		"id": "explorer_view_modes",
+		"title": "Perspectives",
+		"description": "Cycle through all view layout presentations in File Explorer.",
+		"category": "management",
+		"icon": "https://api.iconify.design/mdi/view-grid.svg?color=%231b4b9b",
+		"hideIconWhenLocked": false,
+		"maxProgress": 5,
+		"points": 20
+	},
+	{
+		"id": "grand_explorer",
+		"title": "The Ultimate Explorer",
+		"description": "Unlock 20 distinct milestones across the entire interactive desktop.",
+		"category": "meta",
+		"icon": "https://api.iconify.design/mdi/trophy-award.svg?color=%23e68a00",
+		"hideIconWhenLocked": false,
+		"maxProgress": 20,
+		"points": 100
+	}
+]

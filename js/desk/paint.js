@@ -1322,6 +1322,7 @@
 				fs.save();
 				isDirty = false;
 				updateWindowTitle();
+				if (window.AchievementsManager) window.AchievementsManager.progress('paint_artist', 1);
 				if (typeof refreshUI === 'function') refreshUI();
 				if (window.SettingsApp && window.SettingsApp.playSound) window.SettingsApp.playSound('asterisk');
 				if (cb) cb(true);
@@ -1358,6 +1359,7 @@
 							fs.save();
 							isDirty = false;
 							updateWindowTitle();
+							if (window.AchievementsManager) window.AchievementsManager.progress('paint_artist', 1);
 							if (typeof refreshUI === 'function') refreshUI();
 							if (window.SettingsApp && window.SettingsApp.playSound) window.SettingsApp.playSound('asterisk');
 							if (cb) cb(true);
@@ -1928,6 +1930,7 @@
 									commitSelection();
 									commitText();
 									const dataUrl = mainCanvas.toDataURL('image/png');
+									if (window.AchievementsManager) window.AchievementsManager.progress('paint_wallpaper', 1);
 									if (typeof setImageAsWallpaper === 'function') setImageAsWallpaper(dataUrl, 'tile');
 								}
 							},
@@ -1937,6 +1940,7 @@
 									commitSelection();
 									commitText();
 									const dataUrl = mainCanvas.toDataURL('image/png');
+									if (window.AchievementsManager) window.AchievementsManager.progress('paint_wallpaper', 1);
 									if (typeof setImageAsWallpaper === 'function') setImageAsWallpaper(dataUrl, 'center');
 								}
 							},
@@ -1946,6 +1950,7 @@
 									commitSelection();
 									commitText();
 									const dataUrl = mainCanvas.toDataURL('image/png');
+									if (window.AchievementsManager) window.AchievementsManager.progress('paint_wallpaper', 1);
 									if (typeof setImageAsWallpaper === 'function') setImageAsWallpaper(dataUrl, 'cover');
 								}
 							},

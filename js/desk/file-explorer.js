@@ -907,6 +907,17 @@
 				state.selectedItems.clear();
 			}
 
+			if (window.AchievementsManager && state.viewMode) {
+				try {
+					let tested = JSON.parse(localStorage.getItem('xp_tested_view_modes') || '[]');
+					if (!tested.includes(state.viewMode)) {
+						tested.push(state.viewMode);
+						localStorage.setItem('xp_tested_view_modes', JSON.stringify(tested));
+					}
+					window.AchievementsManager.setProgress('explorer_view_modes', tested.length);
+				} catch (e) {}
+			}
+
 			contentContainer.className = `folder-content xp-file-grid view-${state.viewMode}`;
 			contentContainer.innerHTML = '';
 

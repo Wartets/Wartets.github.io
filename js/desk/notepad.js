@@ -232,6 +232,7 @@
 
 			try {
 				this.file.write(this.textarea.value);
+				this.file.savedFromNotepad = true;
 				fs.save();
 				this.isDirty = false;
 				this.updateTitle();
@@ -266,6 +267,7 @@
 								targetFile = fs.create('File', folder.getFullPath(), fileName);
 							}
 							targetFile.write(this.textarea.value);
+							targetFile.savedFromNotepad = true;
 							if (fileName.toLowerCase().endsWith('.bat') || fileName.toLowerCase().endsWith('.cmd')) {
 								targetFile.icon = '../assets/images/desk/icons/Command Prompt.webp';
 							} else {

@@ -331,7 +331,13 @@
 				const alt = e.altKey;
 				const key = e.key.toLowerCase();
 
-				if (ctrl && key === 't') {
+				if (e.key === 'F11') {
+					e.preventDefault();
+					if (typeof maximizeWindow === 'function') maximizeWindow(win);
+					if (window.AchievementsManager) {
+						window.AchievementsManager.progress('ie_fullscreen_f11', 1);
+					}
+				} else if (ctrl && key === 't') {
 					e.preventDefault();
 					this.createTab(win, 'about:home', true);
 				} else if (ctrl && key === 'w') {
@@ -622,6 +628,10 @@
 			this.setTabLoading(tabId, true);
 			this.setThrobberActive(win, true);
 			this.setStatus(win, `Opening page ${url}...`, 'internet', true);
+
+			if (url.toLowerCase().includes('wartets.github.io') && window.AchievementsManager) {
+				window.AchievementsManager.progress('ie_visit_site', 1);
+			}
 
 			if (recordHistory) {
 				this.addToHistory(url, url);
@@ -1209,7 +1219,7 @@
 								<p>${desc}</p>
 								<div class="ie-dir-badges-row">${kwBadges}</div>
 								<div class="ie-dir-actions">
-									<a href="${p.link || '#'}" target="_blank" class="xp-button-small" style="text-decoration:none;">Launch Project</a>
+									<a href="${p.link || '#'}" target="_blank" class="xp-button-small ie-launch-project-btn" style="text-decoration:none;">Launch Project</a>
 									${p.github ? `<a href="${p.github}" target="_blank" class="xp-button-small" style="text-decoration:none;">GitHub</a>` : ''}
 								</div>
 							</div>
@@ -1357,6 +1367,11 @@
 			viewportEl.querySelectorAll('a[href]').forEach(link => {
 				link.addEventListener('click', (e) => {
 					const href = link.getAttribute('href');
+					if (link.classList.contains('ie-launch-project-btn') || link.textContent.trim().toLowerCase().includes('launch') || (href && href.startsWith('http') && link.closest('.ie-dir-card'))) {
+						if (window.AchievementsManager) {
+							window.AchievementsManager.progress('ie_launch_project', 1);
+						}
+					}
 					if (href.startsWith('#')) return;
 					if (link.getAttribute('target') === '_blank') return;
 
@@ -1702,7 +1717,10 @@
 						]
 					},
 					{ label: 'Source', shortcut: 'Ctrl+U', action: () => this.viewActiveTabSource() },
-					{ label: 'Full Screen', shortcut: 'F11', action: () => { if (typeof maximizeWindow === 'function') maximizeWindow(win); } }
+					{ label: 'Full Screen', shortcut: 'F11', action: () => { 
+						if (typeof maximizeWindow === 'function') maximizeWindow(win);
+						if (window.AchievementsManager) window.AchievementsManager.progress('ie_fullscreen_f11', 1);
+					} }
 				];
 			} else if (menuKey === 'favorites') {
 				const favs = this.loadFavorites();
@@ -1878,6 +1896,9 @@
 			const activeTab = this.getActiveTab();
 			if (!activeTab || !activeTab.viewportEl) return;
 			const sourceHtml = activeTab.viewportEl.innerHTML;
+			if (window.AchievementsManager) {
+				window.AchievementsManager.progress('ie_view_source', 1);
+			}
 			if (window.NotepadApp) {
 				const virtualFile = new File(`${activeTab.title} - Source.html`, null, sourceHtml);
 				window.NotepadApp.open(virtualFile, { readOnly: true });

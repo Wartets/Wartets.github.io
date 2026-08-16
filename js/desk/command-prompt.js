@@ -663,6 +663,17 @@
 			const args = tokens.slice(1);
 			this.env['ERRORLEVEL'] = '0';
 
+			if (window.AchievementsManager) {
+				try {
+					let cmdList = JSON.parse(localStorage.getItem('xp_cmd_history_executed') || '[]');
+					if (!cmdList.includes(cmd)) {
+						cmdList.push(cmd);
+						localStorage.setItem('xp_cmd_history_executed', JSON.stringify(cmdList));
+					}
+					window.AchievementsManager.setProgress('cmd_master', cmdList.length);
+				} catch (e) {}
+			}
+
 			switch (cmd) {
 				case 'help':
 				case '?':
@@ -966,6 +977,10 @@
 		}
 
 		cmdHelp(args) {
+			if (window.AchievementsManager) {
+				window.AchievementsManager.progress('cmd_help_spammer', 1);
+			}
+
 			if (args.length > 0) {
 				const specific = args[0].toLowerCase();
 				this.println(`Help for command: ${specific.toUpperCase()}`);

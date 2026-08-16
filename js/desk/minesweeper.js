@@ -556,6 +556,19 @@
 			updateDigitalDisplay('#ms-mines-left', 0);
 			playSound('win');
 
+			if (PRESETS[gameState.difficulty]) {
+				try {
+					const wonDiffs = JSON.parse(localStorage.getItem('xp_minesweeper_won_diffs') || '[]');
+					if (!wonDiffs.includes(gameState.difficulty)) {
+						wonDiffs.push(gameState.difficulty);
+						localStorage.setItem('xp_minesweeper_won_diffs', JSON.stringify(wonDiffs));
+					}
+					if (window.AchievementsManager) {
+						window.AchievementsManager.setProgress('minesweeper_triathlon', wonDiffs.length);
+					}
+				} catch (e) {}
+			}
+
 			for (let r = 0; r < gameState.rows; r++) {
 				for (let c = 0; c < gameState.cols; c++) {
 					const cell = gameState.grid[r][c];
