@@ -2166,7 +2166,8 @@
 		},
 
 		getMediaPlayerPlaylistItemItems(track, realIndex, mediaPlayerApp, win) {
-			const isCurrent = realIndex === mediaPlayerApp.currentTrackIndex;
+			const playlist = (mediaPlayerApp && mediaPlayerApp.currentPlaylist) || [];
+			const isCurrent = realIndex === mediaPlayerApp?.currentTrackIndex;
 			return [
 				{
 					label: 'Play',
@@ -2183,22 +2184,26 @@
 				{ separator: true },
 				{
 					label: 'Move Up',
-					disabled: realIndex === 0,
+					disabled: realIndex <= 0,
 					action: () => {
-						const moved = mediaPlayerApp.currentPlaylist.splice(realIndex, 1)[0];
-						mediaPlayerApp.currentPlaylist.splice(realIndex - 1, 0, moved);
-						if (mediaPlayerApp.currentTrackIndex === realIndex) mediaPlayerApp.currentTrackIndex--;
-						mediaPlayerApp.renderPlaylist(win);
+						if (playlist.length > 1 && realIndex > 0) {
+							const moved = playlist.splice(realIndex, 1)[0];
+							playlist.splice(realIndex - 1, 0, moved);
+							if (mediaPlayerApp.currentTrackIndex === realIndex) mediaPlayerApp.currentTrackIndex--;
+							mediaPlayerApp.renderPlaylist(win);
+						}
 					}
 				},
 				{
 					label: 'Move Down',
-					disabled: realIndex === mediaPlayerApp.currentPlaylist.length - 1,
+					disabled: realIndex >= playlist.length - 1,
 					action: () => {
-						const moved = mediaPlayerApp.currentPlaylist.splice(realIndex, 1)[0];
-						mediaPlayerApp.currentPlaylist.splice(realIndex + 1, 0, moved);
-						if (mediaPlayerApp.currentTrackIndex === realIndex) mediaPlayerApp.currentTrackIndex++;
-						mediaPlayerApp.renderPlaylist(win);
+						if (playlist.length > 1 && realIndex < playlist.length - 1) {
+							const moved = playlist.splice(realIndex, 1)[0];
+							playlist.splice(realIndex + 1, 0, moved);
+							if (mediaPlayerApp.currentTrackIndex === realIndex) mediaPlayerApp.currentTrackIndex++;
+							mediaPlayerApp.renderPlaylist(win);
+						}
 					}
 				},
 				{
@@ -2216,13 +2221,19 @@
 				{
 					label: 'Remove from Playlist',
 					action: () => {
-						mediaPlayerApp.currentPlaylist.splice(realIndex, 1);
-						if (mediaPlayerApp.currentTrackIndex === realIndex) {
-							mediaPlayerApp.playIndex(Math.min(realIndex, mediaPlayerApp.currentPlaylist.length - 1));
-						} else if (mediaPlayerApp.currentTrackIndex > realIndex) {
-							mediaPlayerApp.currentTrackIndex--;
+						if (playlist.length > 0) {
+							playlist.splice(realIndex, 1);
+							if (mediaPlayerApp.currentTrackIndex === realIndex) {
+								if (playlist.length > 0) {
+									mediaPlayerApp.playIndex(Math.min(realIndex, playlist.length - 1));
+								} else {
+									mediaPlayerApp.stop();
+								}
+							} else if (mediaPlayerApp.currentTrackIndex > realIndex) {
+								mediaPlayerApp.currentTrackIndex--;
+							}
+							mediaPlayerApp.renderPlaylist(win);
 						}
-						mediaPlayerApp.renderPlaylist(win);
 					}
 				},
 				{
@@ -2238,15 +2249,15 @@
 					label: 'Properties',
 					bold: isCurrent,
 					action: () => {
-						if (track.raw instanceof File) {
+						if (track && track.raw instanceof File) {
 							openElementInfoWindow(track.raw);
 							return;
 						}
-						const artists = track.artist || 'Wartets';
-						const album = track.album || 'Windows Media Library';
-						const dur = track.duration || '00:00';
-						const msg = `Title: ${track.title}\nArtist: ${artists}\nAlbum: ${album}\nDuration: ${dur}\nLocation: ${track.url}`;
-						showXPDialog(`${track.title} Properties`, msg, 'info');
+						const artists = track?.artist || 'Wartets';
+						const album = track?.album || 'Windows Media Library';
+						const dur = track?.duration || '00:00';
+						const msg = `Title: ${track?.title || 'Unknown'}\nArtist: ${artists}\nAlbum: ${album}\nDuration: ${dur}\nLocation: ${track?.url || ''}`;
+						showXPDialog(`${track?.title || 'Track'} Properties`, msg, 'info');
 					}
 				}
 			];
@@ -2308,29 +2319,33 @@
 						{
 							label: 'Stretch / Cover',
 							action: () => {
-								if (typeof setImageAsWallpaper === 'function') setImageAsWallpaper(currentImage.src, 'cover');
-								showXPDialog('Desktop Background', `"${currentImage.name}" is now set as desktop wallpaper.`, 'info');
+								if (typeof window.setImageAsWallpaper === 'function') window.setImageAsWallpaper(currentImage.src, 'cover');
+								else if (window.SettingsApp) window.SettingsApp.set('desktopBackground', currentImage.src);
+								if (typeof showXPDialog === 'function') showXPDialog('Desktop Background', `"${currentImage.name}" is now set as desktop wallpaper.`, 'info');
 							}
 						},
 						{
 							label: 'Fit to Screen',
 							action: () => {
-								if (typeof setImageAsWallpaper === 'function') setImageAsWallpaper(currentImage.src, 'stretch');
-								showXPDialog('Desktop Background', `"${currentImage.name}" is now set as desktop wallpaper.`, 'info');
+								if (typeof window.setImageAsWallpaper === 'function') window.setImageAsWallpaper(currentImage.src, 'stretch');
+								else if (window.SettingsApp) window.SettingsApp.set('desktopBackground', currentImage.src);
+								if (typeof showXPDialog === 'function') showXPDialog('Desktop Background', `"${currentImage.name}" is now set as desktop wallpaper.`, 'info');
 							}
 						},
 						{
 							label: 'Tile',
 							action: () => {
-								if (typeof setImageAsWallpaper === 'function') setImageAsWallpaper(currentImage.src, 'tile');
-								showXPDialog('Desktop Background', `"${currentImage.name}" is now set as desktop wallpaper.`, 'info');
+								if (typeof window.setImageAsWallpaper === 'function') window.setImageAsWallpaper(currentImage.src, 'tile');
+								else if (window.SettingsApp) window.SettingsApp.set('desktopBackground', currentImage.src);
+								if (typeof showXPDialog === 'function') showXPDialog('Desktop Background', `"${currentImage.name}" is now set as desktop wallpaper.`, 'info');
 							}
 						},
 						{
 							label: 'Center',
 							action: () => {
-								if (typeof setImageAsWallpaper === 'function') setImageAsWallpaper(currentImage.src, 'center');
-								showXPDialog('Desktop Background', `"${currentImage.name}" is now set as desktop wallpaper.`, 'info');
+								if (typeof window.setImageAsWallpaper === 'function') window.setImageAsWallpaper(currentImage.src, 'center');
+								else if (window.SettingsApp) window.SettingsApp.set('desktopBackground', currentImage.src);
+								if (typeof showXPDialog === 'function') showXPDialog('Desktop Background', `"${currentImage.name}" is now set as desktop wallpaper.`, 'info');
 							}
 						}
 					]

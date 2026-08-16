@@ -1,15 +1,5 @@
 [
 	{
-		"id": "first_boot",
-		"title": "Welcome to the Machine",
-		"description": "Log in and initiate your first interactive session on the desktop.",
-		"category": "system",
-		"icon": "../assets/images/desk/icons/User 1.webp",
-		"hideIconWhenLocked": true,
-		"maxProgress": 1,
-		"points": 10
-	},
-	{
 		"id": "solitaire_animations",
 		"title": "Very Solitaire Master",
 		"description": "Witness all 4 distinct victory celebration animations in Solitaire.",

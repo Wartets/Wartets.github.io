@@ -83,8 +83,28 @@
 			currentFolderImages = [current];
 			currentImageIndex = 0;
 
-			if (current.parent && typeof current.parent.listContent === 'function') {
-				const siblings = current.parent.listContent();
+			let folder = current.parent;
+			if (!folder && typeof fs !== 'undefined' && fs.root) {
+				const allFiles = fs.root.getAllDescendants ? fs.root.getAllDescendants() : [];
+				const imgFiles = allFiles.filter(el => el instanceof File && /\.(png|jpe?g|bmp|webp|gif|ico|tiff?)$/i.test(el.name));
+				if (imgFiles.length > 0) {
+					currentFolderImages = imgFiles.map(el => ({
+						name: el.name,
+						src: el.remoteUrl || el.content || '',
+						parent: el.parent,
+						fileObj: el
+					}));
+					currentImageIndex = currentFolderImages.findIndex(img => img.name === current.name || img.src === current.src);
+					if (currentImageIndex === -1) {
+						currentFolderImages.unshift(current);
+						currentImageIndex = 0;
+					}
+					return;
+				}
+			}
+
+			if (folder && typeof folder.listContent === 'function') {
+				const siblings = folder.listContent();
 				const imageSiblings = siblings.filter(el => {
 					if (!(el instanceof File)) return false;
 					return /\.(png|jpe?g|bmp|webp|gif|ico|tiff?)$/i.test(el.name);
@@ -257,9 +277,16 @@
 			wpBtn.addEventListener('click', () => {
 				const current = currentFolderImages[currentImageIndex];
 				if (!current) return;
-				if (typeof setImageAsWallpaper === 'function') {
-					setImageAsWallpaper(current.src, 'cover');
-					showXPDialog('Desktop Wallpaper', `"${current.name}" has been set as your desktop background.`, 'info');
+				if (typeof window.setImageAsWallpaper === 'function') {
+					window.setImageAsWallpaper(current.src, 'cover');
+					if (typeof showXPDialog === 'function') {
+						showXPDialog('Desktop Wallpaper', `"${current.name}" has been set as your desktop background.`, 'info');
+					}
+				} else if (window.SettingsApp) {
+					window.SettingsApp.set('desktopBackground', current.src);
+					if (typeof showXPDialog === 'function') {
+						showXPDialog('Desktop Wallpaper', `"${current.name}" has been set as your desktop background.`, 'info');
+					}
 				}
 			});
 
@@ -443,6 +470,28 @@
 			}
 		}
 	};
+
+	Object.defineProperties(PictureViewerApp, {
+		currentImageIndex: {
+			get: () => currentImageIndex,
+			set: (val) => { currentImageIndex = val; }
+		},
+		currentFolderImages: {
+			get: () => currentFolderImages,
+			set: (val) => { currentFolderImages = val; }
+		},
+		currentZoom: {
+			get: () => currentZoom,
+			set: (val) => { currentZoom = val; }
+		},
+		currentRotation: {
+			get: () => currentRotation,
+			set: (val) => { currentRotation = val; }
+		},
+		isSlideshow: {
+			get: () => isSlideshow
+		}
+	});
 
 	window.PictureViewerApp = PictureViewerApp;
 })();

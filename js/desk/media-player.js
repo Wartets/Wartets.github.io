@@ -815,15 +815,23 @@
 				if (presetName === currentEqPreset) opt.selected = true;
 				presetSelect.appendChild(opt);
 			});
+			const customOpt = document.createElement('option');
+			customOpt.value = 'Custom';
+			customOpt.textContent = 'Custom';
+			if (currentEqPreset === 'Custom') customOpt.selected = true;
+			presetSelect.appendChild(customOpt);
 
 			container.innerHTML = '';
 			EQ_FREQUENCIES.forEach((freq, idx) => {
 				const label = freq >= 1000 ? `${freq / 1000}k` : `${freq}`;
 				const col = document.createElement('div');
 				col.className = 'wmp-eq-col';
+				const currentGain = currentEqGains[idx] || 0;
 				col.innerHTML = `
-					<span class="wmp-eq-gain-val" id="wmp-eq-gain-${idx}">0dB</span>
-					<input type="range" class="wmp-slider wmp-eq-slider" orient="vertical" min="-12" max="12" step="0.5" value="${currentEqGains[idx]}" data-band="${idx}">
+					<span class="wmp-eq-gain-val" id="wmp-eq-gain-${idx}">${currentGain > 0 ? '+' : ''}${currentGain}dB</span>
+					<div class="wmp-eq-slider-wrapper">
+						<input type="range" class="wmp-eq-slider" orient="vertical" min="-12" max="12" step="0.5" value="${currentGain}" data-band="${idx}">
+					</div>
 					<span class="wmp-eq-freq-label">${label}</span>
 				`;
 
@@ -966,12 +974,26 @@
 			const artStage = win.querySelector('#wmp-albumart-stage');
 			if (!canvas || !artStage) return;
 
+			const labelMap = {
+				albumart: 'Album Art',
+				bars: 'Bars',
+				wave: 'Waveform',
+				spectrum: 'Spectrum',
+				particles: 'Particles',
+				flame: 'Fire Flame'
+			};
+			const vizLbl = win.querySelector('#wmp-viz-label');
+			if (vizLbl) {
+				vizLbl.textContent = `Viz: ${labelMap[currentVisualization] || 'Bars'}`;
+			}
+
 			if (currentVisualization === 'albumart') {
 				canvas.style.display = 'none';
 				artStage.style.display = 'flex';
 			} else {
 				canvas.style.display = 'block';
 				artStage.style.display = 'none';
+				this.startVisualizer(win);
 			}
 		},
 
@@ -1331,6 +1353,11 @@
 		},
 
 		togglePlay() {
+			if (!currentPlaylist || currentPlaylist.length === 0) {
+				const sbStatus = activePlayerWindow ? activePlayerWindow.querySelector('#wmp-sb-status') : null;
+				if (sbStatus) sbStatus.textContent = 'Playlist is empty. Add a track to begin playback.';
+				return;
+			}
 			const activeMedia = this.getActiveMedia();
 			if (!activeMedia) return;
 
@@ -1562,32 +1589,43 @@
 			const ctx = canvas.getContext('2d');
 
 			let phase = 0;
-			const barPeaks = new Array(32).fill(0);
+			const barCount = 32;
+			const barPeaks = new Float32Array(barCount);
+			const freqData = new Uint8Array(64);
+			const timeDomainData = new Uint8Array(64);
 			const particles = [];
-			for (let i = 0; i < 50; i++) {
+			for (let i = 0; i < 45; i++) {
 				particles.push({
-					x: Math.random() * 400,
-					y: Math.random() * 300,
-					vx: (Math.random() - 0.5) * 2,
-					vy: (Math.random() - 0.5) * 2,
-					radius: Math.random() * 3 + 1,
-					hue: Math.random() * 60 + 190
+					x: Math.random() * 500,
+					y: Math.random() * 350,
+					vx: (Math.random() - 0.5) * 2.0,
+					vy: (Math.random() - 0.5) * 2.0,
+					baseRadius: Math.random() * 2.5 + 1.5,
+					hue: Math.random() * 50 + 190
 				});
 			}
 
 			const renderLoop = () => {
 				if (!activePlayerWindow || !document.getElementById(activePlayerWindow.id)) {
+					animationFrameId = null;
 					return;
 				}
+
 				if (currentVisualization === 'albumart') {
 					const artFrame = win.querySelector('.wmp-art-frame');
-					if (artFrame && isPlaying && analyserNode && audioNodeConnected) {
-						const timeData = new Uint8Array(32);
-						analyserNode.getByteFrequencyData(timeData);
-						const bass = (timeData[0] + timeData[1] + timeData[2] + timeData[3]) / 4;
-						const scale = 1 + (bass / 255) * 0.08;
+					if (artFrame && isPlaying) {
+						let bass = 0;
+						if (analyserNode && audioNodeConnected) {
+							analyserNode.getByteFrequencyData(freqData);
+							bass = (freqData[0] + freqData[1] + freqData[2] + freqData[3]) / 4;
+						}
+						if (bass === 0) {
+							bass = (Math.sin(phase * 3.5) * 0.5 + 0.5) * 170;
+						}
+						const scale = 1 + (bass / 255) * 0.055;
 						artFrame.style.transform = `scale(${scale.toFixed(3)})`;
 					}
+					phase += 0.04;
 					animationFrameId = requestAnimationFrame(renderLoop);
 					return;
 				}
@@ -1599,131 +1637,152 @@
 					canvas.height = height;
 				}
 
-				ctx.clearRect(0, 0, width, height);
+				ctx.fillStyle = '#030813';
+				ctx.fillRect(0, 0, width, height);
 
-				const freqData = new Uint8Array(64);
-				const timeDomainData = new Uint8Array(64);
-
+				let hasRealSignal = false;
 				if (isPlaying && analyserNode && audioNodeConnected) {
 					analyserNode.getByteFrequencyData(freqData);
 					analyserNode.getByteTimeDomainData(timeDomainData);
-				} else if (isPlaying) {
+					for (let i = 0; i < 16; i++) {
+						if (freqData[i] > 2) {
+							hasRealSignal = true;
+							break;
+						}
+					}
+				}
+
+				if (isPlaying && !hasRealSignal) {
+					const activeMedia = this.getActiveMedia();
+					const curTime = activeMedia ? (activeMedia.currentTime || 0) : 0;
+					const beat1 = Math.pow(Math.sin(curTime * 4.2), 4);
+					const beat2 = Math.pow(Math.sin(curTime * 8.4 + 1.2), 2);
 					for (let i = 0; i < 64; i++) {
-						const f1 = Math.sin(phase * 1.5 + i * 0.25) * 45;
-						const f2 = Math.cos(phase * 0.8 + i * 0.12) * 35;
-						const f3 = Math.sin(phase * 2.2 + i * 0.4) * 25;
-						freqData[i] = Math.max(10, Math.min(250, 90 + f1 + f2 + f3));
-						timeDomainData[i] = 128 + Math.sin(phase * 2 + i * 0.2) * 40;
+						const freqRatio = i / 64;
+						const waveA = Math.sin(phase * 3.2 + i * 0.35) * 45;
+						const waveB = Math.cos(phase * 2.1 + i * 0.55) * 35;
+						const waveC = Math.sin(phase * 5.5 + i * 0.2) * 30 * beat1;
+						const bassPeak = (1 - freqRatio) * (140 * beat1 + 40 * beat2);
+						const trebleSpark = freqRatio * (60 + Math.sin(phase * 9 + i) * 30);
+						const finalVal = Math.max(8, Math.min(255, 60 + waveA + waveB + waveC + bassPeak + trebleSpark));
+						freqData[i] = Math.floor(finalVal);
+						timeDomainData[i] = Math.floor(128 + Math.sin(phase * 4.0 + i * 0.3) * (30 + beat1 * 35));
+					}
+				} else if (!isPlaying) {
+					for (let i = 0; i < 64; i++) {
+						freqData[i] = Math.max(0, freqData[i] * 0.85);
+						timeDomainData[i] = 128;
 					}
 				}
 
 				phase += 0.05;
 
 				if (currentVisualization === 'bars') {
-					const barCount = 32;
-					const barWidth = width / barCount - 2;
+					const gap = 3;
+					const barW = Math.max(2, (width - (barCount + 1) * gap) / barCount);
 					for (let i = 0; i < barCount; i++) {
 						const val = (freqData[i] || 0) / 255;
-						const barHeight = Math.max(4, val * (height * 0.75));
-						const x = i * (barWidth + 2);
-						const y = height - barHeight - 10;
+						const targetH = Math.max(3, val * (height * 0.82));
+						const x = gap + i * (barW + gap);
+						const y = height - targetH - 8;
 
-						if (barHeight > barPeaks[i]) {
-							barPeaks[i] = barHeight;
+						if (targetH > barPeaks[i]) {
+							barPeaks[i] = targetH;
 						} else {
-							barPeaks[i] = Math.max(0, barPeaks[i] - 1.5);
+							barPeaks[i] = Math.max(0, barPeaks[i] - 2.2);
 						}
 
 						const grad = ctx.createLinearGradient(0, y, 0, height);
-						grad.addColorStop(0, '#00d2ff');
-						grad.addColorStop(0.5, '#0055ff');
-						grad.addColorStop(1, '#001166');
+						grad.addColorStop(0, '#00f6ff');
+						grad.addColorStop(0.3, '#0088ff');
+						grad.addColorStop(0.7, '#0033cc');
+						grad.addColorStop(1, '#001144');
 
 						ctx.fillStyle = grad;
-						ctx.fillRect(x, y, barWidth, barHeight);
+						ctx.fillRect(x, y, barW, targetH);
 
 						ctx.fillStyle = '#ffffff';
-						ctx.fillRect(x, height - barPeaks[i] - 12, barWidth, 2);
+						ctx.fillRect(x, height - barPeaks[i] - 10, barW, 2);
 					}
 				} else if (currentVisualization === 'wave') {
 					ctx.beginPath();
 					ctx.lineWidth = 2.5;
 					ctx.strokeStyle = '#00f0ff';
-					ctx.shadowBlur = 8;
-					ctx.shadowColor = '#0088ff';
-					const sliceWidth = width / 64;
-					let x = 0;
+					ctx.shadowBlur = 10;
+					ctx.shadowColor = '#00aaff';
+					const sliceW = width / 63;
 					for (let i = 0; i < 64; i++) {
 						const v = (timeDomainData[i] || 128) / 128.0;
 						const y = (v * height) / 2;
+						const x = i * sliceW;
 						if (i === 0) ctx.moveTo(x, y);
 						else ctx.lineTo(x, y);
-						x += sliceWidth;
 					}
 					ctx.stroke();
 					ctx.shadowBlur = 0;
 				} else if (currentVisualization === 'spectrum') {
 					const cx = width / 2;
 					const cy = height / 2;
-					const radius = Math.min(width, height) * 0.28;
+					const baseR = Math.min(width, height) * 0.26;
+
 					ctx.beginPath();
-					ctx.arc(cx, cy, radius, 0, Math.PI * 2);
-					ctx.strokeStyle = 'rgba(0, 160, 255, 0.4)';
+					ctx.arc(cx, cy, baseR, 0, Math.PI * 2);
+					ctx.strokeStyle = 'rgba(0, 190, 255, 0.45)';
 					ctx.lineWidth = 2;
 					ctx.stroke();
 
-					for (let i = 0; i < 32; i++) {
-						const angle = (i / 32) * Math.PI * 2;
+					for (let i = 0; i < barCount; i++) {
+						const angle = (i / barCount) * Math.PI * 2 - Math.PI / 2;
 						const val = (freqData[i] || 0) / 255;
-						const r2 = radius + val * 65;
-						const x1 = cx + Math.cos(angle) * radius;
-						const y1 = cy + Math.sin(angle) * radius;
+						const r2 = baseR + val * (Math.min(width, height) * 0.32);
+						const x1 = cx + Math.cos(angle) * baseR;
+						const y1 = cy + Math.sin(angle) * baseR;
 						const x2 = cx + Math.cos(angle) * r2;
 						const y2 = cy + Math.sin(angle) * r2;
 
 						ctx.beginPath();
 						ctx.moveTo(x1, y1);
 						ctx.lineTo(x2, y2);
-						ctx.strokeStyle = `hsl(${190 + i * 4}, 100%, 60%)`;
-						ctx.lineWidth = 3;
+						ctx.strokeStyle = `hsl(${180 + i * 5}, 100%, 65%)`;
+						ctx.lineWidth = 3.5;
+						ctx.lineCap = 'round';
 						ctx.stroke();
 					}
 				} else if (currentVisualization === 'particles') {
-					const bassEnergy = (freqData[0] + freqData[1] + freqData[2]) / 765;
+					const bassEnergy = ((freqData[0] || 0) + (freqData[1] || 0) + (freqData[2] || 0)) / 765;
 					particles.forEach((p, idx) => {
-						const energy = (freqData[idx % 32] || 50) / 255;
-						p.x += p.vx * (1 + energy * 3 + bassEnergy * 2);
-						p.y += p.vy * (1 + energy * 3 + bassEnergy * 2);
+						const energy = (freqData[idx % barCount] || 40) / 255;
+						p.x += p.vx * (1 + energy * 3.5 + bassEnergy * 2.5);
+						p.y += p.vy * (1 + energy * 3.5 + bassEnergy * 2.5);
 						if (p.x < 0) p.x = width;
 						if (p.x > width) p.x = 0;
 						if (p.y < 0) p.y = height;
 						if (p.y > height) p.y = 0;
 
 						ctx.beginPath();
-						ctx.arc(p.x, p.y, p.radius * (1 + energy * 1.5), 0, Math.PI * 2);
-						ctx.fillStyle = `hsla(${p.hue}, 90%, 60%, ${0.5 + energy * 0.5})`;
-						ctx.shadowBlur = 10;
-						ctx.shadowColor = '#00aaff';
+						ctx.arc(p.x, p.y, p.baseRadius * (1 + energy * 1.8), 0, Math.PI * 2);
+						ctx.fillStyle = `hsla(${p.hue}, 95%, 65%, ${0.4 + energy * 0.6})`;
+						ctx.shadowBlur = 8;
+						ctx.shadowColor = '#00e1ff';
 						ctx.fill();
 						ctx.shadowBlur = 0;
 					});
 				} else if (currentVisualization === 'flame') {
-					const barCount = 32;
-					const barWidth = width / barCount;
+					const colW = width / barCount;
 					for (let i = 0; i < barCount; i++) {
 						const val = (freqData[i] || 0) / 255;
-						const barHeight = val * height * 0.85;
-						const x = i * barWidth;
-						const y = height - barHeight;
+						const barH = val * height * 0.88;
+						const x = i * colW;
+						const y = height - barH;
 
 						const grad = ctx.createLinearGradient(0, y, 0, height);
-						grad.addColorStop(0, '#ffff00');
-						grad.addColorStop(0.3, '#ff6600');
-						grad.addColorStop(0.7, '#cc0000');
-						grad.addColorStop(1, '#330000');
+						grad.addColorStop(0, '#ffff55');
+						grad.addColorStop(0.25, '#ff8800');
+						grad.addColorStop(0.65, '#dd1100');
+						grad.addColorStop(1, '#220000');
 
 						ctx.fillStyle = grad;
-						ctx.fillRect(x + 1, y, barWidth - 2, barHeight);
+						ctx.fillRect(x + 1, y, colW - 2, barH);
 					}
 				}
 
@@ -1831,6 +1890,44 @@
 			}
 		}
 	};
+
+	Object.defineProperties(MediaPlayerApp, {
+		currentPlaylist: {
+			get: () => currentPlaylist,
+			set: (val) => { currentPlaylist = Array.isArray(val) ? val : []; }
+		},
+		currentTrackIndex: {
+			get: () => currentTrackIndex,
+			set: (val) => { currentTrackIndex = typeof val === 'number' ? val : -1; }
+		},
+		isPlaying: {
+			get: () => isPlaying
+		},
+		isEnhancementsOpen: {
+			get: () => isEnhancementsOpen,
+			set: (val) => { isEnhancementsOpen = !!val; }
+		},
+		isPlaylistVisible: {
+			get: () => isPlaylistVisible,
+			set: (val) => { isPlaylistVisible = !!val; }
+		},
+		currentVisualization: {
+			get: () => currentVisualization,
+			set: (val) => { currentVisualization = val; }
+		},
+		repeatMode: {
+			get: () => repeatMode,
+			set: (val) => { repeatMode = val; }
+		},
+		isShuffle: {
+			get: () => isShuffle,
+			set: (val) => { isShuffle = !!val; }
+		},
+		videoAspectRatio: {
+			get: () => videoAspectRatio,
+			set: (val) => { videoAspectRatio = val; }
+		}
+	});
 
 	window.MediaPlayerApp = MediaPlayerApp;
 })();

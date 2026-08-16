@@ -2628,14 +2628,30 @@ async function openWinamp(targetTrack = null) {
 		webampHolder = document.createElement('div');
 		webampHolder.id = 'webamp-holder';
 		webampHolder.style.position = 'absolute';
-		webampHolder.style.zIndex = '9000';
+		const baseZ = Math.min(48000, (window.WindowManager ? window.WindowManager.zIndexCounter + 1 : 200));
+		webampHolder.style.zIndex = String(baseZ);
 		document.body.appendChild(webampHolder);
+
+		webampHolder.addEventListener('mousedown', () => {
+			if (window.WindowManager) {
+				window.WindowManager.zIndexCounter = Math.min(48000, window.WindowManager.zIndexCounter + 1);
+				webampHolder.style.zIndex = String(window.WindowManager.zIndexCounter);
+				if (webampInstance && typeof webampInstance.reopen === 'function') {
+					const rootWebamp = document.getElementById('webamp');
+					if (rootWebamp) rootWebamp.style.zIndex = String(window.WindowManager.zIndexCounter);
+				}
+			}
+		});
 	}
 
 	try {
+		const currentZ = Math.min(48000, (window.WindowManager ? window.WindowManager.zIndexCounter + 1 : 200));
+		if (window.WindowManager) window.WindowManager.zIndexCounter = currentZ;
+		webampHolder.style.zIndex = String(currentZ);
+
 		webampInstance = new Webamp({
 			initialTracks: initialTracks,
-			zIndex: 9000
+			zIndex: currentZ
 		});
 
 		if (window.Taskbar) {
@@ -3437,6 +3453,8 @@ function setImageAsWallpaper(source, fitMode = 'cover') {
 	}
 	if (typeof refreshUI === 'function') refreshUI();
 }
+
+window.setImageAsWallpaper = setImageAsWallpaper;
 
 const DEFAULT_DESKTOP_WALLPAPER = '../assets/images/desk/wallpapers/wallpaper-default.webp';
 let desktopWallpapersRegistry = null;

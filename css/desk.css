@@ -455,7 +455,7 @@ body.taskbar-autohide #desktop {
 	align-items: center;
 	padding: 0;
 	box-sizing: border-box;
-	z-index: 1000;
+	z-index: 50000;
 	font-family: 'Tahoma', 'Segoe UI', sans-serif;
 	font-size: 11px;
 	user-select: none;
@@ -6076,106 +6076,160 @@ body.theme-zune .xp-start-all-programs-arrow {
 	bottom: 0;
 	left: 0;
 	right: 0;
-	background: #17202d;
-	border-top: 2px solid #2f405c;
-	box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.7);
-	z-index: 10;
+	background: #131b26;
+	border-top: 2px solid #3d4f6c;
+	box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.85);
+	z-index: 25;
 	display: flex;
 	flex-direction: column;
-	max-height: 180px;
+	height: 195px;
+	max-height: 195px;
+	box-sizing: border-box;
 }
 
 .wmp-enh-header {
-	height: 24px;
-	background: #232f42;
+	height: 26px;
+	background: linear-gradient(to bottom, #2b384c 0%, #1c2534 100%);
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
-	padding: 0 6px;
+	padding: 0 8px;
 	border-bottom: 1px solid #364761;
+	flex-shrink: 0;
 }
 
 .wmp-enh-tabs {
 	display: flex;
-	gap: 2px;
+	gap: 3px;
 }
 
 .wmp-enh-tab-btn {
-	background: #1b2433;
+	background: #182230;
 	border: 1px solid #3b4d6a;
 	border-bottom: none;
 	border-radius: 3px 3px 0 0;
-	color: #a0b2cc;
-	font-family: inherit;
-	font-size: 10px;
-	padding: 2px 8px;
+	color: #8fa3c0;
+	font-family: 'Tahoma', sans-serif;
+	font-size: 11px;
+	padding: 3px 10px;
 	cursor: pointer;
+	line-height: 1.2;
+}
+
+.wmp-enh-tab-btn:hover {
+	background: #222f42;
+	color: #ffffff;
 }
 
 .wmp-enh-tab-btn.active {
-	background: #17202d;
-	color: #ffffff;
+	background: #131b26;
+	color: #00f0ff;
 	font-weight: bold;
-	border-color: #587399;
+	border-color: #557299;
+	border-bottom: 1px solid #131b26;
 }
 
 .wmp-enh-close {
-	background: none;
-	border: none;
-	color: #ffffff;
-	font-size: 13px;
+	background: #233044;
+	border: 1px solid #415574;
+	border-radius: 2px;
+	color: #dce6f5;
+	font-size: 12px;
 	font-weight: bold;
 	cursor: pointer;
-	padding: 0 4px;
+	width: 18px;
+	height: 18px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	padding: 0;
+}
+
+.wmp-enh-close:hover {
+	background: #cc3333;
+	border-color: #ffffff;
+	color: #ffffff;
 }
 
 .wmp-enh-body {
-	padding: 8px 12px;
+	padding: 8px 14px;
 	display: flex;
 	flex-direction: column;
 	gap: 6px;
 	overflow-y: auto;
 	flex: 1;
+	box-sizing: border-box;
+	background: #131b26;
 }
 
 .wmp-eq-toolbar {
 	display: flex;
 	align-items: center;
+	flex-shrink: 0;
+	gap: 12px;
+	padding-bottom: 4px;
+	border-bottom: 1px solid #233044;
 }
 
 .wmp-eq-sliders-grid {
 	display: flex;
-	justify-content: space-between;
-	align-items: flex-end;
-	height: 105px;
-	padding: 0 10px;
+	justify-content: space-around;
+	align-items: center;
+	height: 125px;
+	padding: 4px 6px;
+	box-sizing: border-box;
+	background: #0d131c;
+	border: 1px solid #253346;
+	border-radius: 3px;
 }
 
 .wmp-eq-col {
 	display: flex;
 	flex-direction: column;
 	align-items: center;
-	gap: 2px;
+	justify-content: space-between;
+	height: 100%;
 	width: 32px;
+	box-sizing: border-box;
+	padding: 2px 0;
 }
 
 .wmp-eq-gain-val {
 	font-size: 9px;
 	color: #00f0ff;
-	font-family: monospace;
+	font-family: 'Lucida Console', monospace;
+	line-height: 1;
+	text-align: center;
+}
+
+.wmp-eq-slider-wrapper {
+	position: relative;
+	height: 84px;
+	width: 24px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
 }
 
 .wmp-eq-slider {
-	writing-mode: bt-lr;
+	writing-mode: vertical-lr;
+	direction: rtl;
 	-webkit-appearance: slider-vertical;
 	appearance: slider-vertical;
-	height: 68px;
-	width: 12px;
+	height: 78px;
+	width: 14px;
+	padding: 0;
+	margin: 0;
+	cursor: pointer;
+	accent-color: #00b4d8;
 }
 
 .wmp-eq-freq-label {
 	font-size: 9px;
-	color: #8da4c4;
+	color: #8fa3c0;
+	font-family: 'Tahoma', sans-serif;
+	line-height: 1;
+	text-align: center;
 }
 
 .wmp-srs-panel,
@@ -6183,7 +6237,11 @@ body.theme-zune .xp-start-all-programs-arrow {
 .wmp-video-enh-panel {
 	display: flex;
 	flex-direction: column;
-	gap: 4px;
+	gap: 8px;
+	padding: 6px;
+	background: #0d131c;
+	border: 1px solid #253346;
+	border-radius: 3px;
 }
 
 .wmp-playlist-list-wrap.wmp-drop-active {
@@ -6424,16 +6482,74 @@ body.theme-zune .xp-start-all-programs-arrow {
 
 .wmp-slider {
 	width: 100%;
-	height: 6px;
-	accent-color: #00b4d8;
+	height: 8px;
+	-webkit-appearance: none;
+	appearance: none;
 	cursor: pointer;
 	background: #090e17;
 	border-radius: 3px;
 	border: 1px solid #3b475c;
+	box-shadow: inset 1px 1px 2px rgba(0, 0, 0, 0.7);
+	outline: none;
+}
+
+.wmp-slider::-webkit-slider-thumb {
+	-webkit-appearance: none;
+	appearance: none;
+	width: 12px;
+	height: 16px;
+	background: linear-gradient(to bottom, #ffffff 0%, #d4d0c8 45%, #a8a49c 100%);
+	border: 1px solid #404040;
+	border-radius: 2px;
+	box-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+	cursor: pointer;
+}
+
+.wmp-slider::-webkit-slider-thumb:hover {
+	background: linear-gradient(to bottom, #ffffff 0%, #e0e8f6 45%, #7fa2d4 100%);
+	border-color: #003399;
+}
+
+.wmp-slider::-moz-range-thumb {
+	width: 12px;
+	height: 16px;
+	background: linear-gradient(to bottom, #ffffff 0%, #d4d0c8 45%, #a8a49c 100%);
+	border: 1px solid #404040;
+	border-radius: 2px;
+	box-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+	cursor: pointer;
 }
 
 .wmp-vol-slider {
-	width: 70px;
+	width: 80px;
+}
+
+.xp-slider {
+	-webkit-appearance: none;
+	appearance: none;
+	height: 6px;
+	background: #ffffff;
+	border: 1px solid #7f9db9;
+	border-radius: 2px;
+	box-shadow: inset 1px 1px 1px rgba(0, 0, 0, 0.2);
+	outline: none;
+}
+
+.xp-slider::-webkit-slider-thumb {
+	-webkit-appearance: none;
+	appearance: none;
+	width: 10px;
+	height: 18px;
+	background: linear-gradient(to bottom, #ece9d8 0%, #c4c0b4 100%);
+	border: 1px solid #707070;
+	border-radius: 2px;
+	box-shadow: 1px 1px 2px rgba(0, 0, 0, 0.35);
+	cursor: pointer;
+}
+
+.xp-slider::-webkit-slider-thumb:hover {
+	background: linear-gradient(to bottom, #ffffff 0%, #d8e4f8 100%);
+	border-color: #316ac5;
 }
 
 .wmp-buttons-row {
@@ -8846,7 +8962,7 @@ body.theme-zune .xp-start-all-programs-arrow {
 }
 
 #webamp {
-	z-index: 9000 !important;
+	z-index: inherit;
 }
 
 #taskbar-context-menu {

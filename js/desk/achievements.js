@@ -56,13 +56,6 @@
 			}
 
 			initialized = true;
-			this.checkInitialAchievements();
-		},
-
-		checkInitialAchievements() {
-			setTimeout(() => {
-				this.progress('first_boot', 1);
-			}, 1200);
 		},
 
 		getAll() {
@@ -168,7 +161,6 @@
 				if (window.SettingsApp && window.SettingsApp.playSound) {
 					window.SettingsApp.playSound('recycle');
 				}
-				this.checkInitialAchievements();
 			};
 
 			if (showConfirmation && typeof showXPDialog === 'function') {

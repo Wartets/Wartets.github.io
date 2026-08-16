@@ -1619,6 +1619,9 @@
 				if (el instanceof Folder) typeStr = 'File Folder';
 				else if (el instanceof Shortcut) typeStr = 'Shortcut';
 				else if (el instanceof ProjectFile) typeStr = 'Project File';
+				else if (el.musicTrack || /\.(mp3|flac|wav|m4a|ogg|wma)$/i.test(el.name)) typeStr = 'Audio Track';
+				else if (/\.(mp4|avi|wmv|mkv|webm)$/i.test(el.name)) typeStr = 'Video Clip';
+				else if (/\.(png|jpe?g|bmp|webp|gif)$/i.test(el.name)) typeStr = 'Image File';
 
 				const sizeStr = el.size !== undefined && !(el instanceof Folder) ? `${Math.ceil(el.size / 1024)} KB` : '';
 				const modStr = el.modifiedAt ? el.modifiedAt.toLocaleString() : '';

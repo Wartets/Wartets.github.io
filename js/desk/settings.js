@@ -18,27 +18,21 @@
 
 	let DEFAULT_SETTINGS = {}; // never modifiy this directly, use data/desk-default-settings.json to change default settings
 
-	function loadDefaultSettingsSync() {
-		try {
-			const xhr = new XMLHttpRequest();
-			xhr.open('GET', '../data/desk-default-settings.json', false);
-			xhr.send(null);
-			if (xhr.status === 200 || xhr.status === 0) {
-				DEFAULT_SETTINGS = JSON.parse(xhr.responseText);
-			}
-		} catch (e) {
-			fetch('../data/desk-default-settings.json')
-				.then(r => r.json())
-				.then(data => {
-					DEFAULT_SETTINGS = data;
-					loadSavedSettings();
-					applyAllSettings();
-				})
-				.catch(() => {});
-		}
+	function loadDefaultSettingsAsync() {
+		fetch('../data/desk-default-settings.json')
+			.then(r => r.json())
+			.then(data => {
+				DEFAULT_SETTINGS = data;
+				loadSavedSettings();
+				applyAllSettings();
+			})
+			.catch(() => {
+				loadSavedSettings();
+				applyAllSettings();
+			});
 	}
 
-	loadDefaultSettingsSync();
+	loadDefaultSettingsAsync();
 
 	let currentSettings = { ...DEFAULT_SETTINGS };
 	let pendingSettings = { ...DEFAULT_SETTINGS };
