@@ -75,7 +75,8 @@
 						timed: true,
 						statusBar: true,
 						cardBack: 'classic-blue',
-						vegasCumulative: false
+						vegasCumulative: false,
+						victoryAnimation: 'random'
 					}, JSON.parse(raw));
 				}
 			} catch (e) {}
@@ -86,7 +87,8 @@
 				timed: true,
 				statusBar: true,
 				cardBack: 'classic-blue',
-				vegasCumulative: false
+				vegasCumulative: false,
+				victoryAnimation: 'random'
 			};
 		},
 
@@ -164,11 +166,12 @@
 		},
 
 		initSession(win, options) {
+			this.stopVictoryAnimation();
 			if (activeSession && activeSession.timerInterval) {
 				clearInterval(activeSession.timerInterval);
 			}
-			if (activeSession && activeSession.winAnimationInterval) {
-				clearInterval(activeSession.winAnimationInterval);
+			if (activeSession && activeSession.autoCompleteInterval) {
+				clearInterval(activeSession.autoCompleteInterval);
 			}
 
 			activeSession = {
@@ -188,13 +191,28 @@
 				selectedCardData: null,
 				dragState: null,
 				isWon: false,
-				winAnimationInterval: null
+				autoCompleting: false,
+				autoCompleteInterval: null,
+				winAnimationId: null,
+				spriteCache: new Map()
 			};
 
 			this.bindMenuCommands(win);
 			this.bindGlobalKeyboard(win);
 			this.bindBoardInteractions(win);
 			this.startNewDeal();
+		},
+
+		stopVictoryAnimation() {
+			if (!activeSession) return;
+			if (activeSession.winAnimationId) {
+				cancelAnimationFrame(activeSession.winAnimationId);
+				activeSession.winAnimationId = null;
+			}
+			if (activeSession.win) {
+				const existingCanvas = activeSession.win.querySelector('.solitaire-win-canvas');
+				if (existingCanvas) existingCanvas.remove();
+			}
 		},
 
 		buildFullShuffledDeck() {
@@ -226,11 +244,12 @@
 
 		startNewDeal() {
 			if (!activeSession) return;
+			this.stopVictoryAnimation();
 			if (activeSession.timerInterval) clearInterval(activeSession.timerInterval);
-			if (activeSession.winAnimationInterval) clearInterval(activeSession.winAnimationInterval);
+			if (activeSession.autoCompleteInterval) clearInterval(activeSession.autoCompleteInterval);
 
-			const existingCanvas = activeSession.win.querySelector('.solitaire-win-canvas');
-			if (existingCanvas) existingCanvas.remove();
+			const existingAutoBtn = activeSession.win.querySelector('#sol-btn-autocomplete');
+			if (existingAutoBtn) existingAutoBtn.remove();
 
 			const stats = this.loadStatistics();
 			stats.played++;
@@ -250,6 +269,7 @@
 			activeSession.passesCount = 0;
 			activeSession.selectedCardData = null;
 			activeSession.isWon = false;
+			activeSession.autoCompleting = false;
 
 			let cardPointer = 0;
 			for (let col = 0; col < 7; col++) {
@@ -271,6 +291,85 @@
 
 			const sb = activeSession.win.querySelector('#sol-statusbar');
 			if (sb) sb.style.display = activeSession.options.statusBar ? 'flex' : 'none';
+		},
+
+		canAutoComplete() {
+			if (!activeSession || activeSession.isWon || activeSession.autoCompleting) return false;
+			if (activeSession.stock.length > 0 || activeSession.waste.length > 0) return false;
+
+			let totalTableauCards = 0;
+			for (let col = 0; col < 7; col++) {
+				const pile = activeSession.tableau[col];
+				for (let i = 0; i < pile.length; i++) {
+					if (!pile[i].faceUp) return false;
+					totalTableauCards++;
+				}
+			}
+
+			return totalTableauCards > 0;
+		},
+
+		triggerAutoComplete() {
+			if (!this.canAutoComplete()) return;
+			activeSession.autoCompleting = true;
+
+			const btn = activeSession.win.querySelector('#sol-btn-autocomplete');
+			if (btn) btn.remove();
+
+			this.startClock();
+
+			activeSession.autoCompleteInterval = setInterval(() => {
+				let moved = false;
+
+				for (let col = 0; col < 7; col++) {
+					const pile = activeSession.tableau[col];
+					if (pile.length === 0) continue;
+					const card = pile[pile.length - 1];
+
+					for (let fIdx = 0; fIdx < 4; fIdx++) {
+						if (this.isFoundationMoveValid(card, fIdx)) {
+							const sourceLoc = { type: 'tableau', col: col, index: pile.length - 1 };
+							const destLoc = { type: 'foundation', index: fIdx };
+							this.applyCardMovement(sourceLoc, destLoc, [card]);
+							moved = true;
+							break;
+						}
+					}
+					if (moved) break;
+				}
+
+				if (!moved || activeSession.isWon) {
+					clearInterval(activeSession.autoCompleteInterval);
+					activeSession.autoCompleteInterval = null;
+					activeSession.autoCompleting = false;
+					this.verifyVictoryState();
+				}
+			}, 90);
+		},
+
+		updateAutoCompleteButton() {
+			if (!activeSession || !activeSession.win) return;
+			const board = activeSession.win.querySelector('#sol-board');
+			if (!board) return;
+
+			let btn = board.querySelector('#sol-btn-autocomplete');
+
+			if (this.canAutoComplete()) {
+				if (!btn) {
+					btn = document.createElement('button');
+					btn.type = 'button';
+					btn.id = 'sol-btn-autocomplete';
+					btn.className = 'solitaire-autocomplete-btn';
+					btn.innerHTML = '<span>⚡ Auto-Complete</span>';
+					btn.onclick = (e) => {
+						e.stopPropagation();
+						this.triggerAutoComplete();
+					};
+					board.appendChild(btn);
+				}
+			} else {
+				if (btn) btn.remove();
+			}
 		},
 
 		startClock() {
@@ -479,6 +578,8 @@
 				const selEl = board.querySelector(`.solitaire-card[data-card-id="${selectedId}"]`);
 				if (selEl) selEl.classList.add('selected');
 			}
+
+			this.updateAutoCompleteButton();
 		},
 
 		bindBoardInteractions(win) {
@@ -494,10 +595,12 @@
 			let grabbedSource = null;
 			let dragOffsetLeft = 0;
 			let dragOffsetTop = 0;
-			let draggedCardElements = [];
+			let hiddenSourceElements = [];
+			let lastTapTime = 0;
+			let lastTapCardId = null;
 
 			const onPointerDown = (e) => {
-				if (e.button !== 0 || activeSession.isWon) return;
+				if (e.button !== 0 || activeSession.isWon || activeSession.autoCompleting) return;
 
 				const stockTarget = e.target.closest('#sol-slot-stock');
 				if (stockTarget) {
@@ -560,6 +663,21 @@
 					return;
 				}
 
+				const now = Date.now();
+				if (lastTapCardId === cardId && (now - lastTapTime) < 350) {
+					lastTapCardId = null;
+					lastTapTime = 0;
+					isMouseDown = false;
+					isDragging = false;
+					grabbedCards = [];
+					grabbedSource = null;
+					activeSession.selectedCardData = null;
+					this.executeSmartAutoMove(cardLookup);
+					return;
+				}
+				lastTapCardId = cardId;
+				lastTapTime = now;
+
 				if (srcType === 'waste') {
 					const wasteCount = activeSession.waste.length;
 					if (cardLookup.location.index !== wasteCount - 1) return;
@@ -587,52 +705,54 @@
 			};
 
 			const onPointerMove = (e) => {
-				if (!isMouseDown) return;
+				if (!isMouseDown || !grabbedSource) return;
 
 				const dist = Math.hypot(e.clientX - startX, e.clientY - startY);
-				if (!isDragging && dist > 4) {
+				if (!isDragging && dist > 3) {
 					isDragging = true;
-					dragContainer = document.createElement('div');
-					dragContainer.className = 'solitaire-drag-container';
-					dragContainer.style.cssText = 'position:fixed; pointer-events:none; z-index:999999; top:0; left:0;';
-
-					draggedCardElements = [];
-					let stackTop = 0;
-					grabbedCards.forEach((c) => {
-						const ghost = this.createCardElement(c, { type: 'drag' });
-						ghost.style.position = 'absolute';
-						ghost.style.top = `${stackTop}px`;
-						ghost.style.left = '0px';
-						dragContainer.appendChild(ghost);
-						draggedCardElements.push(ghost);
-						stackTop += 18;
-					});
-
-					document.body.appendChild(dragContainer);
+					hiddenSourceElements = [];
 
 					if (grabbedSource.type === 'tableau') {
 						const colContainer = board.querySelector(`.solitaire-column[data-col="${grabbedSource.col}"]`);
 						if (colContainer) {
 							const domCards = Array.from(colContainer.children);
 							for (let i = grabbedSource.index; i < domCards.length; i++) {
-								domCards[i].style.visibility = 'hidden';
+								domCards[i].classList.add('hidden-drag-source');
+								hiddenSourceElements.push(domCards[i]);
 							}
 						}
 					} else if (grabbedSource.type === 'waste') {
 						const wasteSlot = board.querySelector('#sol-slot-waste');
 						if (wasteSlot && wasteSlot.lastElementChild) {
-							wasteSlot.lastElementChild.style.visibility = 'hidden';
+							wasteSlot.lastElementChild.classList.add('hidden-drag-source');
+							hiddenSourceElements.push(wasteSlot.lastElementChild);
 						}
 					} else if (grabbedSource.type === 'foundation') {
 						const fSlot = board.querySelector(`#sol-f-${grabbedSource.index}`);
 						if (fSlot && fSlot.lastElementChild) {
-							fSlot.lastElementChild.style.visibility = 'hidden';
+							fSlot.lastElementChild.classList.add('hidden-drag-source');
+							hiddenSourceElements.push(fSlot.lastElementChild);
 						}
 					}
+
+					dragContainer = document.createElement('div');
+					dragContainer.className = 'solitaire-drag-container';
+
+					let stackTop = 0;
+					grabbedCards.forEach((c) => {
+						const ghost = this.createCardElement(c, { type: 'drag' });
+						ghost.style.top = `${stackTop}px`;
+						ghost.style.left = '0px';
+						dragContainer.appendChild(ghost);
+						stackTop += 18;
+					});
+
+					document.body.appendChild(dragContainer);
 				}
 
 				if (isDragging && dragContainer) {
-					dragContainer.style.transform = `translate(${e.clientX - dragOffsetLeft}px, ${e.clientY - dragOffsetTop}px)`;
+					dragContainer.style.left = `${e.clientX - dragOffsetLeft}px`;
+					dragContainer.style.top = `${e.clientY - dragOffsetTop}px`;
 				}
 			};
 
@@ -644,6 +764,9 @@
 					dragContainer.remove();
 					dragContainer = null;
 					isDragging = false;
+
+					hiddenSourceElements.forEach(el => el.classList.remove('hidden-drag-source'));
+					hiddenSourceElements = [];
 
 					const dropPoint = { x: e.clientX, y: e.clientY };
 					const destination = this.resolveDropTarget(dropPoint, grabbedCards[0]);
@@ -659,6 +782,8 @@
 				}
 
 				if (!isDragging && grabbedSource) {
+					hiddenSourceElements.forEach(el => el.classList.remove('hidden-drag-source'));
+					hiddenSourceElements = [];
 					this.handleCardClickAndSelection(grabbedSource);
 					grabbedCards = [];
 					grabbedSource = null;
@@ -670,6 +795,7 @@
 			document.addEventListener('mouseup', onPointerUp);
 
 			board.addEventListener('dblclick', (e) => {
+				if (activeSession.isWon || activeSession.autoCompleting) return;
 				const cardEl = e.target.closest('.solitaire-card.face-up');
 				if (!cardEl) return;
 				const cardLookup = this.locateCardById(cardEl.dataset.cardId);
@@ -729,28 +855,67 @@
 		},
 
 		executeSmartAutoMove(cardLookup) {
+			if (!cardLookup || !cardLookup.card || !cardLookup.card.faceUp) return;
 			const card = cardLookup.card;
+			const loc = cardLookup.location;
 
-			for (let fIdx = 0; fIdx < 4; fIdx++) {
-				if (this.isFoundationMoveValid(card, fIdx)) {
-					const movingStack = [card];
-					this.applyCardMovement(cardLookup.location, { type: 'foundation', index: fIdx }, movingStack);
-					return;
+			const movingStack = this.extractStackFromSource({
+				type: loc.type,
+				col: loc.col,
+				index: loc.index,
+				card: card
+			});
+
+			if (movingStack.length === 1) {
+				for (let fIdx = 0; fIdx < 4; fIdx++) {
+					if (this.isFoundationMoveValid(card, fIdx)) {
+						this.applyCardMovement(loc, { type: 'foundation', index: fIdx }, [card]);
+						return;
+					}
 				}
 			}
 
+			let bestTableauCol = -1;
+			let bestScore = -Infinity;
+
 			for (let col = 0; col < 7; col++) {
-				if (cardLookup.location && cardLookup.location.type === 'tableau' && cardLookup.location.col === col) continue;
+				if (loc.type === 'tableau' && loc.col === col) continue;
+
 				if (this.isTableauMoveValid(card, col)) {
-					const movingStack = this.extractStackFromSource({
-						type: cardLookup.location.type,
-						col: cardLookup.location.col,
-						index: cardLookup.location.index,
-						card: card
-					});
-					this.applyCardMovement(cardLookup.location, { type: 'tableau', col: col }, movingStack);
-					return;
+					const targetPile = activeSession.tableau[col];
+					let moveScore = 10;
+
+					if (loc.type === 'tableau') {
+						const srcPile = activeSession.tableau[loc.col];
+						if (loc.index > 0 && !srcPile[loc.index - 1].faceUp) {
+							moveScore += 100;
+						}
+					} else if (loc.type === 'waste') {
+						moveScore += 70;
+					}
+
+					if (targetPile.length > 0) {
+						moveScore += 30;
+						moveScore += targetPile.length;
+					} else {
+						if (card.rank === 13) {
+							if (loc.type === 'tableau' && loc.index === 0) {
+								moveScore = -100;
+							} else {
+								moveScore += 20;
+							}
+						}
+					}
+
+					if (moveScore > bestScore) {
+						bestScore = moveScore;
+						bestTableauCol = col;
+					}
 				}
+			}
+
+			if (bestTableauCol !== -1 && bestScore > 0) {
+				this.applyCardMovement(loc, { type: 'tableau', col: bestTableauCol }, movingStack);
 			}
 		},
 
@@ -885,9 +1050,76 @@
 			}
 		},
 
+		getCardSprite(rankVal, rankLabel, suitSymbol, color) {
+			const spriteKey = `${rankVal}_${suitSymbol}_${color}`;
+			if (activeSession.spriteCache && activeSession.spriteCache.has(spriteKey)) {
+				return activeSession.spriteCache.get(spriteKey);
+			}
+
+			const canvas = document.createElement('canvas');
+			const w = 72;
+			const h = 96;
+			const r = 4;
+			canvas.width = w;
+			canvas.height = h;
+			const ctx = canvas.getContext('2d');
+
+			ctx.beginPath();
+			ctx.moveTo(r, 0);
+			ctx.lineTo(w - r, 0);
+			ctx.quadraticCurveTo(w, 0, w, r);
+			ctx.lineTo(w, h - r);
+			ctx.quadraticCurveTo(w, h, w - r, h);
+			ctx.lineTo(r, h);
+			ctx.quadraticCurveTo(0, h, 0, h - r);
+			ctx.lineTo(0, r);
+			ctx.quadraticCurveTo(0, 0, r, 0);
+			ctx.closePath();
+
+			ctx.fillStyle = '#ffffff';
+			ctx.fill();
+			ctx.lineWidth = 1;
+			ctx.strokeStyle = '#222222';
+			ctx.stroke();
+
+			const textColor = color === 'red' ? '#d00000' : '#000000';
+			ctx.fillStyle = textColor;
+
+			ctx.font = 'bold 11px Arial, Tahoma, sans-serif';
+			ctx.textAlign = 'left';
+			ctx.textBaseline = 'top';
+			ctx.fillText(rankLabel, 4, 3);
+			ctx.font = '10px Arial, Tahoma, sans-serif';
+			ctx.fillText(suitSymbol, 4, 15);
+
+			ctx.save();
+			ctx.translate(w, h);
+			ctx.rotate(Math.PI);
+			ctx.font = 'bold 11px Arial, Tahoma, sans-serif';
+			ctx.fillText(rankLabel, 4, 3);
+			ctx.font = '10px Arial, Tahoma, sans-serif';
+			ctx.fillText(suitSymbol, 4, 15);
+			ctx.restore();
+
+			ctx.font = '24px Arial, Tahoma, sans-serif';
+			ctx.textAlign = 'center';
+			ctx.textBaseline = 'middle';
+			ctx.fillText(suitSymbol, w / 2, h / 2 + 1);
+
+			if (activeSession.spriteCache) {
+				activeSession.spriteCache.set(spriteKey, canvas);
+			}
+			return canvas;
+		},
+
 		triggerVictorySequence() {
 			activeSession.isWon = true;
+			this.stopVictoryAnimation();
 			if (activeSession.timerInterval) clearInterval(activeSession.timerInterval);
+			if (activeSession.autoCompleteInterval) clearInterval(activeSession.autoCompleteInterval);
+
+			const btn = activeSession.win.querySelector('#sol-btn-autocomplete');
+			if (btn) btn.remove();
 
 			const stats = this.loadStatistics();
 			stats.won++;
@@ -911,10 +1143,6 @@
 				window.SettingsApp.playSound('startup');
 			}
 
-			this.runBouncingCardsCanvasAnimation();
-		},
-
-		runBouncingCardsCanvasAnimation() {
 			const board = activeSession.win.querySelector('#sol-board');
 			if (!board) return;
 
@@ -924,100 +1152,293 @@
 			canvas.height = board.clientHeight;
 			board.appendChild(canvas);
 
+			canvas.addEventListener('click', () => {
+				this.stopVictoryAnimation();
+				showXPDialog('Solitaire', `Game Complete!\nFinal Score: ${activeSession.score}\nTime: ${activeSession.timeElapsed}s`, 'info');
+			});
+
+			let mode = activeSession.options.victoryAnimation || 'bouncing';
+			if (mode === 'random') {
+				const modes = ['bouncing', 'fountain', 'fireworks', 'spiral'];
+				mode = modes[Math.floor(Math.random() * modes.length)];
+			}
+
+			if (mode === 'fountain') {
+				this.runFountainAnimation(canvas, board);
+			} else if (mode === 'fireworks') {
+				this.runFireworksAnimation(canvas, board);
+			} else if (mode === 'spiral') {
+				this.runVortexSpiralAnimation(canvas, board);
+			} else {
+				this.runBouncingCascadeAnimation(canvas, board);
+			}
+		},
+
+		runBouncingCascadeAnimation(canvas, board) {
 			const ctx = canvas.getContext('2d');
-			const cardsToBounce = [];
+			const bRect = board.getBoundingClientRect();
+			const cardsQueue = [];
 
 			for (let f = 0; f < 4; f++) {
 				const fEl = board.querySelector(`#sol-f-${f}`);
 				const rect = fEl ? fEl.getBoundingClientRect() : null;
-				const bRect = board.getBoundingClientRect();
 				const startX = rect ? (rect.left - bRect.left) : (340 + f * 84);
 				const startY = rect ? (rect.top - bRect.top) : 12;
+				const suit = SUIT_LIST[f];
 
 				for (let rank = 13; rank >= 1; rank--) {
-					const suit = SUIT_LIST[f];
 					const rankDef = RANKS[rank - 1];
-					cardsToBounce.push({
-						suitSymbol: suit.symbol,
-						color: suit.color,
-						rankLabel: rankDef.label,
+					const sprite = this.getCardSprite(rank, rankDef.label, suit.symbol, suit.color);
+					cardsQueue.push({
+						sprite: sprite,
+						startX: startX,
+						startY: startY,
 						x: startX,
 						y: startY,
-						vx: (Math.random() * 8 - 4),
-						vy: -(Math.random() * 6 + 2),
-						active: false
+						vx: (Math.random() * 4 + 2) * (f < 2 ? -1 : 1),
+						vy: -(Math.random() * 3 + 1.5),
+						gravity: 0.65,
+						bounce: -0.84
 					});
 				}
 			}
 
-			let activeIndex = 0;
-			if (cardsToBounce[0]) cardsToBounce[0].active = true;
+			let currentCardIndex = 0;
+			const cardW = 72;
+			const cardH = 96;
 
-			const renderCardFrame = (c) => {
-				ctx.fillStyle = '#ffffff';
-				ctx.strokeStyle = '#000000';
-				ctx.lineWidth = 1;
+			const renderFrame = () => {
+				if (!activeSession || !activeSession.isWon) return;
 
-				const w = 72;
-				const h = 96;
-				const r = 4;
+				if (currentCardIndex < cardsQueue.length) {
+					const card = cardsQueue[currentCardIndex];
+					ctx.drawImage(card.sprite, Math.round(card.x), Math.round(card.y));
 
-				ctx.beginPath();
-				ctx.moveTo(c.x + r, c.y);
-				ctx.lineTo(c.x + w - r, c.y);
-				ctx.quadraticCurveTo(c.x + w, c.y, c.x + w, c.y + r);
-				ctx.lineTo(c.x + w, c.y + h - r);
-				ctx.quadraticCurveTo(c.x + w, c.y + h, c.x + w - r, c.y + h);
-				ctx.lineTo(c.x + r, c.y + h);
-				ctx.quadraticCurveTo(c.x, c.y + h, c.x, c.y + h - r);
-				ctx.lineTo(c.x, c.y + r);
-				ctx.quadraticCurveTo(c.x, c.y, c.x + r, c.y);
-				ctx.closePath();
-				ctx.fill();
-				ctx.stroke();
+					card.x += card.vx;
+					card.y += card.vy;
+					card.vy += card.gravity;
 
-				ctx.fillStyle = c.color === 'red' ? '#d00000' : '#000000';
-				ctx.font = 'bold 11px Arial';
-				ctx.fillText(c.rankLabel, c.x + 4, c.y + 13);
-				ctx.font = '10px Arial';
-				ctx.fillText(c.suitSymbol, c.x + 4, c.y + 24);
-
-				ctx.font = '22px Arial';
-				ctx.textAlign = 'center';
-				ctx.fillText(c.suitSymbol, c.x + w / 2, c.y + h / 2 + 7);
-				ctx.textAlign = 'left';
-			};
-
-			activeSession.winAnimationInterval = setInterval(() => {
-				cardsToBounce.forEach((c) => {
-					if (!c.active) return;
-					renderCardFrame(c);
-
-					c.x += c.vx;
-					c.y += c.vy;
-					c.vy += 0.45;
-
-					if (c.y + 96 >= canvas.height) {
-						c.y = canvas.height - 96;
-						c.vy = -c.vy * 0.85;
-						if (Math.abs(c.vy) < 1) c.vy = 0;
+					if (card.y + cardH >= canvas.height) {
+						card.y = canvas.height - cardH;
+						card.vy *= card.bounce;
+						if (Math.abs(card.vy) < 1.2) card.vy = 0;
 					}
 
-					if (c.x <= -72 || c.x >= canvas.width + 72) {
-						c.active = false;
+					if (card.x <= -cardW || card.x >= canvas.width + cardW || (card.y >= canvas.height - cardH && Math.abs(card.vy) < 0.1)) {
+						currentCardIndex++;
+					}
+				}
+
+				if (currentCardIndex < cardsQueue.length) {
+					activeSession.winAnimationId = requestAnimationFrame(renderFrame);
+				} else {
+					activeSession.winAnimationId = null;
+					showXPDialog('Solitaire', `Congratulations! You won the game!\nFinal Score: ${activeSession.score}\nTime: ${activeSession.timeElapsed}s`, 'info');
+				}
+			};
+
+			activeSession.winAnimationId = requestAnimationFrame(renderFrame);
+		},
+
+		runFountainAnimation(canvas, board) {
+			const ctx = canvas.getContext('2d');
+			const bRect = board.getBoundingClientRect();
+			const streams = [[], [], [], []];
+
+			for (let f = 0; f < 4; f++) {
+				const fEl = board.querySelector(`#sol-f-${f}`);
+				const rect = fEl ? fEl.getBoundingClientRect() : null;
+				const startX = rect ? (rect.left - bRect.left) : (340 + f * 84);
+				const startY = rect ? (rect.top - bRect.top) : 12;
+				const suit = SUIT_LIST[f];
+
+				for (let rank = 13; rank >= 1; rank--) {
+					const rankDef = RANKS[rank - 1];
+					const sprite = this.getCardSprite(rank, rankDef.label, suit.symbol, suit.color);
+					streams[f].push({
+						sprite: sprite,
+						x: startX,
+						y: startY,
+						vx: (Math.random() * 5 + 2) * (f < 2 ? -1 : 1),
+						vy: -(Math.random() * 4 + 2),
+						gravity: 0.65,
+						bounce: -0.82
+					});
+				}
+			}
+
+			const streamIndices = [0, 0, 0, 0];
+			const cardW = 72;
+			const cardH = 96;
+
+			const renderFrame = () => {
+				if (!activeSession || !activeSession.isWon) return;
+
+				let anyActive = false;
+
+				for (let f = 0; f < 4; f++) {
+					const idx = streamIndices[f];
+					if (idx < streams[f].length) {
+						anyActive = true;
+						const card = streams[f][idx];
+						ctx.drawImage(card.sprite, Math.round(card.x), Math.round(card.y));
+
+						card.x += card.vx;
+						card.y += card.vy;
+						card.vy += card.gravity;
+
+						if (card.y + cardH >= canvas.height) {
+							card.y = canvas.height - cardH;
+							card.vy *= card.bounce;
+							if (Math.abs(card.vy) < 1.2) card.vy = 0;
+						}
+
+						if (card.x <= -cardW || card.x >= canvas.width + cardW || (card.y >= canvas.height - cardH && Math.abs(card.vy) < 0.1)) {
+							streamIndices[f]++;
+						}
+					}
+				}
+
+				if (anyActive) {
+					activeSession.winAnimationId = requestAnimationFrame(renderFrame);
+				} else {
+					activeSession.winAnimationId = null;
+					showXPDialog('Solitaire', `Congratulations! You won the game!\nFinal Score: ${activeSession.score}\nTime: ${activeSession.timeElapsed}s`, 'info');
+				}
+			};
+
+			activeSession.winAnimationId = requestAnimationFrame(renderFrame);
+		},
+
+		runFireworksAnimation(canvas, board) {
+			const ctx = canvas.getContext('2d');
+			const burstCards = [];
+			const centerX = canvas.width / 2 - 36;
+			const centerY = canvas.height / 2 - 48;
+			let count = 0;
+
+			for (let f = 0; f < 4; f++) {
+				const suit = SUIT_LIST[f];
+				for (let rank = 13; rank >= 1; rank--) {
+					const rankDef = RANKS[rank - 1];
+					const sprite = this.getCardSprite(rank, rankDef.label, suit.symbol, suit.color);
+					const angle = (Math.PI * 2 / 52) * count;
+					const speed = (count % 4 + 2) * 2.2;
+					burstCards.push({
+						sprite: sprite,
+						x: centerX,
+						y: centerY,
+						vx: Math.cos(angle) * speed,
+						vy: Math.sin(angle) * speed - 4,
+						gravity: 0.35,
+						bounce: -0.8,
+						active: false,
+						delay: Math.floor(count / 4) * 6
+					});
+					count++;
+				}
+			}
+
+			let frame = 0;
+			const cardW = 72;
+			const cardH = 96;
+
+			const renderFrame = () => {
+				if (!activeSession || !activeSession.isWon) return;
+				frame++;
+
+				let allFinished = true;
+
+				burstCards.forEach(card => {
+					if (frame >= card.delay) {
+						card.active = true;
+					}
+
+					if (card.active) {
+						ctx.drawImage(card.sprite, Math.round(card.x), Math.round(card.y));
+
+						card.x += card.vx;
+						card.y += card.vy;
+						card.vy += card.gravity;
+
+						if (card.y + cardH >= canvas.height) {
+							card.y = canvas.height - cardH;
+							card.vy *= card.bounce;
+							card.vx *= 0.96;
+							if (Math.abs(card.vy) < 0.8) card.vy = 0;
+						}
+
+						if (card.x <= -cardW || card.x >= canvas.width + cardW) {
+							card.active = false;
+						} else {
+							allFinished = false;
+						}
+					} else if (frame < card.delay) {
+						allFinished = false;
 					}
 				});
 
-				if (Math.random() < 0.28 && activeIndex < cardsToBounce.length - 1) {
-					activeIndex++;
-					cardsToBounce[activeIndex].active = true;
-				}
-
-				if (cardsToBounce.every(c => !c.active && c.y >= canvas.height - 96)) {
-					clearInterval(activeSession.winAnimationInterval);
+				if (!allFinished && frame < 360) {
+					activeSession.winAnimationId = requestAnimationFrame(renderFrame);
+				} else {
+					activeSession.winAnimationId = null;
 					showXPDialog('Solitaire', `Congratulations! You won the game!\nFinal Score: ${activeSession.score}\nTime: ${activeSession.timeElapsed}s`, 'info');
 				}
-			}, 25);
+			};
+
+			activeSession.winAnimationId = requestAnimationFrame(renderFrame);
+		},
+
+		runVortexSpiralAnimation(canvas, board) {
+			const ctx = canvas.getContext('2d');
+			const allCards = [];
+			let count = 0;
+
+			for (let f = 0; f < 4; f++) {
+				const suit = SUIT_LIST[f];
+				for (let rank = 13; rank >= 1; rank--) {
+					const rankDef = RANKS[rank - 1];
+					const sprite = this.getCardSprite(rank, rankDef.label, suit.symbol, suit.color);
+					allCards.push({
+						sprite: sprite,
+						index: count,
+						fIndex: f,
+						x: 0,
+						y: 0
+					});
+					count++;
+				}
+			}
+
+			let frame = 0;
+			const totalFrames = 320;
+			const centerX = canvas.width / 2 - 36;
+			const centerY = canvas.height / 2 - 48;
+			const maxRadius = Math.min(canvas.width, canvas.height) * 0.42;
+
+			const renderFrame = () => {
+				if (!activeSession || !activeSession.isWon) return;
+				frame++;
+
+				const angleBase = frame * 0.04;
+				const currentCard = allCards[frame % allCards.length];
+				const currentAngle = angleBase + (currentCard.index * 0.22);
+				const radius = maxRadius * (0.4 + 0.6 * Math.sin(frame * 0.02));
+
+				currentCard.x = centerX + Math.cos(currentAngle) * radius;
+				currentCard.y = centerY + Math.sin(currentAngle) * (radius * 0.6);
+
+				ctx.drawImage(currentCard.sprite, Math.round(currentCard.x), Math.round(currentCard.y));
+
+				if (frame < totalFrames) {
+					activeSession.winAnimationId = requestAnimationFrame(renderFrame);
+				} else {
+					activeSession.winAnimationId = null;
+					showXPDialog('Solitaire', `Congratulations! You won the game!\nFinal Score: ${activeSession.score}\nTime: ${activeSession.timeElapsed}s`, 'info');
+				}
+			};
+
+			activeSession.winAnimationId = requestAnimationFrame(renderFrame);
 		},
 
 		updateStatusBar() {
@@ -1084,7 +1505,12 @@
 			if (!window.ContextMenu) return;
 			const items = [
 				{ label: 'Deal', shortcut: 'F2', bold: true, action: () => this.startNewDeal() },
-				{ label: 'Undo', shortcut: 'Ctrl+Z', disabled: activeSession.history.length === 0, action: () => this.executeUndo() },
+				{ label: 'Undo', shortcut: 'Ctrl+Z', disabled: activeSession.history.length === 0 || activeSession.isWon, action: () => this.executeUndo() },
+				{
+					label: 'Auto Complete',
+					disabled: !this.canAutoComplete(),
+					action: () => this.triggerAutoComplete()
+				},
 				{ separator: true },
 				{ label: 'Deck...', action: () => this.showCardBackSelectorDialog() },
 				{ label: 'Options...', action: () => this.showOptionsDialog() },
@@ -1183,6 +1609,7 @@
 			if (existing) return;
 
 			const cur = activeSession.options;
+			const winAnim = cur.victoryAnimation || 'random';
 
 			const contentHTML = `
 				<div style="padding:14px; display:flex; flex-direction:column; gap:10px; font-family:'Tahoma',sans-serif; font-size:11px;">
@@ -1206,6 +1633,20 @@
 						<label class="xp-checkbox-row"><input type="checkbox" id="sol_opt_vegas_cum" ${cur.vegasCumulative ? 'checked' : ''}> Cumulative score (Vegas)</label>
 					</fieldset>
 
+					<fieldset class="xp-groupbox">
+						<legend>Victory Animation</legend>
+						<div class="xp-form-row">
+							<label for="sol_opt_anim" style="width: 110px;">Animation:</label>
+							<select id="sol_opt_anim" class="xp-select" style="flex: 1;">
+								<option value="random" ${winAnim === 'random' ? 'selected' : ''}>Random Selection</option>
+								<option value="bouncing" ${winAnim === 'bouncing' ? 'selected' : ''}>Classic Cascade Waterfall</option>
+								<option value="fountain" ${winAnim === 'fountain' ? 'selected' : ''}>Quad Foundation Cascade</option>
+								<option value="fireworks" ${winAnim === 'fireworks' ? 'selected' : ''}>Radial Burst Cascade</option>
+								<option value="spiral" ${winAnim === 'spiral' ? 'selected' : ''}>Wave Ribbon Stream</option>
+							</select>
+						</div>
+					</fieldset>
+
 					<div style="display:flex; justify-content:flex-end; gap:6px; margin-top:6px;">
 						<button type="button" class="xp-button" id="sol_opt_btn_ok">OK</button>
 						<button type="button" class="xp-button" id="sol_opt_btn_cancel">Cancel</button>
@@ -1213,7 +1654,7 @@
 				</div>
 			`;
 
-			const dlg = createXPWindow(id, 'Options', contentHTML, 320, 340, {
+			const dlg = createXPWindow(id, 'Options', contentHTML, 340, 420, {
 				iconSrc: '../assets/images/desk/icons/Hearts.webp',
 				resizable: false,
 				isModal: true
@@ -1225,6 +1666,7 @@
 				const timed = dlg.querySelector('#sol_opt_timed').checked;
 				const statusBar = dlg.querySelector('#sol_opt_status').checked;
 				const vegasCumulative = dlg.querySelector('#sol_opt_vegas_cum').checked;
+				const victoryAnimation = dlg.querySelector('#sol_opt_anim').value;
 
 				const restartRequired = (drawMode !== cur.drawMode || scoring !== cur.scoring);
 
@@ -1233,6 +1675,7 @@
 				activeSession.options.timed = timed;
 				activeSession.options.statusBar = statusBar;
 				activeSession.options.vegasCumulative = vegasCumulative;
+				activeSession.options.victoryAnimation = victoryAnimation;
 
 				const sb = activeSession.win.querySelector('#sol-statusbar');
 				if (sb) sb.style.display = statusBar ? 'flex' : 'none';
@@ -1286,9 +1729,77 @@
 			dlg.querySelector('#sol-stats-ok').onclick = () => {
 				closeWindow(dlg, 'dialog-sol-stats');
 			};
+		},
+
+		cheatWin(animationType) {
+			this.open();
+			if (!activeSession) return;
+
+			this.stopVictoryAnimation();
+			if (activeSession.timerInterval) clearInterval(activeSession.timerInterval);
+			if (activeSession.autoCompleteInterval) clearInterval(activeSession.autoCompleteInterval);
+
+			activeSession.stock = [];
+			activeSession.waste = [];
+			activeSession.tableau = [[], [], [], [], [], [], []];
+			activeSession.foundations = [[], [], [], []];
+
+			for (let f = 0; f < 4; f++) {
+				const suit = SUIT_LIST[f];
+				for (let rank = 1; rank <= 13; rank++) {
+					const rankDef = RANKS[rank - 1];
+					activeSession.foundations[f].push({
+						id: `c_${suit.id}_${rank}`,
+						suit: suit.id,
+						suitSymbol: suit.symbol,
+						color: suit.color,
+						rank: rank,
+						rankLabel: rankDef.label,
+						faceUp: true
+					});
+				}
+			}
+
+			const animMap = {
+				cascade: 'bouncing',
+				bouncing: 'bouncing',
+				waterfall: 'bouncing',
+				classic: 'bouncing',
+				fountain: 'fountain',
+				quad: 'fountain',
+				volcano: 'fountain',
+				fireworks: 'fireworks',
+				burst: 'fireworks',
+				radial: 'fireworks',
+				spiral: 'spiral',
+				vortex: 'spiral',
+				wave: 'spiral',
+				stream: 'spiral',
+				ribbon: 'spiral',
+				random: 'random'
+			};
+
+			let selectedAnim = 'random';
+			if (typeof animationType === 'string') {
+				const key = animationType.toLowerCase().trim();
+				if (animMap[key]) {
+					selectedAnim = animMap[key];
+				}
+			}
+
+			activeSession.options.victoryAnimation = selectedAnim;
+			activeSession.score = 7500;
+			if (activeSession.timeElapsed === 0) activeSession.timeElapsed = 42;
+
+			this.renderFullBoard();
+			this.updateStatusBar();
+			this.triggerVictorySequence();
 		}
 	};
 
 	window.SolitaireApp = SolitaireEngine;
 	window.openSolitaire = () => SolitaireEngine.open();
+	window.cheatSolitaire = (anim) => SolitaireEngine.cheatWin(anim);
+	window.winSolitaire = (anim) => SolitaireEngine.cheatWin(anim);
+	window.solitaireCheat = (anim) => SolitaireEngine.cheatWin(anim);
 })();

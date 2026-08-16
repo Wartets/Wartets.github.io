@@ -6742,63 +6742,73 @@ body.theme-zune .xp-start-all-programs-arrow {
 }
 
 .solitaire-card.back-castle {
-	background: linear-gradient(180deg, #1b4b9b 0%, #4682b4 40%, #2e8b57 100%);
+	background: linear-gradient(135deg, #1b2838 0%, #2a475e 50%, #171a21 100%);
+	border: 1px solid #0d1217;
+	position: absolute;
 }
 .solitaire-card.back-castle::before {
-	content: "🏰";
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	height: 100%;
-	font-size: 26px;
+	content: "";
+	position: absolute;
+	inset: 3px;
+	border: 1px solid rgba(102, 192, 244, 0.4);
+	background: repeating-linear-gradient(0deg, rgba(102, 192, 244, 0.08) 0, rgba(102, 192, 244, 0.08) 2px, transparent 2px, transparent 6px);
+	border-radius: 2px;
 }
 
 .solitaire-card.back-beach {
-	background: linear-gradient(180deg, #e65100 0%, #ffb74d 40%, #0288d1 100%);
+	background: linear-gradient(135deg, #b83a00 0%, #e65100 50%, #f57c00 100%);
+	border: 1px solid #7a2600;
+	position: absolute;
 }
 .solitaire-card.back-beach::before {
-	content: "🌴";
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	height: 100%;
-	font-size: 26px;
+	content: "";
+	position: absolute;
+	inset: 3px;
+	border: 1px solid rgba(255, 235, 59, 0.45);
+	background: repeating-linear-gradient(60deg, rgba(255, 255, 255, 0.1) 0, rgba(255, 255, 255, 0.1) 2px, transparent 2px, transparent 5px);
+	border-radius: 2px;
 }
 
 .solitaire-card.back-hand {
-	background: #3e2723;
+	background: linear-gradient(135deg, #4a121a 0%, #800020 50%, #300a10 100%);
+	border: 1px solid #200408;
+	position: absolute;
 }
 .solitaire-card.back-hand::before {
-	content: "🃏";
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	height: 100%;
-	font-size: 28px;
+	content: "";
+	position: absolute;
+	inset: 3px;
+	border: 1px solid rgba(255, 215, 0, 0.45);
+	background: repeating-linear-gradient(-45deg, rgba(255, 215, 0, 0.08) 0, rgba(255, 215, 0, 0.08) 2px, transparent 2px, transparent 6px);
+	border-radius: 2px;
 }
 
 .solitaire-card.back-robot {
-	background: #37474f;
+	background: linear-gradient(135deg, #263238 0%, #455a64 50%, #1c2428 100%);
+	border: 1px solid #10171a;
+	position: absolute;
 }
 .solitaire-card.back-robot::before {
-	content: "🤖";
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	height: 100%;
-	font-size: 26px;
+	content: "";
+	position: absolute;
+	inset: 3px;
+	border: 1px solid rgba(0, 230, 118, 0.4);
+	background: repeating-radial-gradient(circle at center, rgba(0, 230, 118, 0.08) 0, rgba(0, 230, 118, 0.08) 2px, transparent 2px, transparent 6px);
+	border-radius: 2px;
 }
 
 .solitaire-card.back-fish {
-	background: linear-gradient(180deg, #006064 0%, #00acc1 60%, #004d40 100%);
+	background: linear-gradient(135deg, #004d40 0%, #00897b 50%, #00251a 100%);
+	border: 1px solid #001f18;
+	position: absolute;
 }
 .solitaire-card.back-fish::before {
-	content: "🐠";
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	height: 100%;
-	font-size: 26px;
+	content: "";
+	position: absolute;
+	inset: 3px;
+	border: 1px solid rgba(128, 222, 234, 0.45);
+	background: repeating-linear-gradient(90deg, rgba(128, 222, 234, 0.08) 0, rgba(128, 222, 234, 0.08) 2px, transparent 2px, transparent 5px);
+	border-radius: 2px;
 }
 
 .solitaire-card.selected {
@@ -6806,9 +6816,67 @@ body.theme-zune .xp-start-all-programs-arrow {
 	outline-offset: 1px;
 }
 
-.solitaire-card.dragging {
-	opacity: 0.85;
-	z-index: 1000 !important;
+.solitaire-card.hidden-drag-source {
+	visibility: hidden !important;
+	opacity: 0 !important;
+}
+
+.solitaire-drag-container {
+	position: fixed;
+	pointer-events: none;
+	z-index: 999999;
+	top: 0;
+	left: 0;
+	transition: none;
+}
+
+.solitaire-drag-container .solitaire-card {
+	position: absolute;
+	opacity: 0.82;
+	box-shadow: 3px 6px 16px rgba(0, 0, 0, 0.45);
+	pointer-events: none;
+	cursor: grabbing;
+}
+
+.solitaire-autocomplete-btn {
+	position: absolute;
+	top: 10px;
+	left: 50%;
+	transform: translateX(-50%);
+	z-index: 450;
+	background: linear-gradient(to bottom, #ffffff 0%, #ece9d8 45%, #dcd7c6 100%);
+	border: 2px outset #ffffff;
+	border-radius: 3px;
+	padding: 4px 14px;
+	font-family: 'Tahoma', 'Segoe UI', sans-serif;
+	font-size: 11px;
+	font-weight: bold;
+	color: #0b3b7a;
+	cursor: pointer;
+	box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.4);
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	user-select: none;
+	animation: solPulseBtn 1.6s infinite;
+}
+
+.solitaire-autocomplete-btn:hover {
+	background: linear-gradient(to bottom, #ffffff 0%, #f5f4ef 45%, #e8e4d8 100%);
+	border-color: #316ac5;
+	color: #1a54bf;
+}
+
+.solitaire-autocomplete-btn:active {
+	border-style: inset;
+	background: #d4d0c8;
+	transform: translateX(-50%) translateY(1px);
+}
+
+@keyframes solPulseBtn {
+	0% { box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.7); }
+	70% { box-shadow: 0 0 0 8px rgba(255, 255, 255, 0); }
+	100% { box-shadow: 0 0 0 0 rgba(255, 255, 255, 0); }
 }
 
 .solitaire-statusbar {
@@ -6851,12 +6919,12 @@ body.theme-zune .xp-start-all-programs-arrow {
 
 .solitaire-win-canvas {
 	position: absolute;
-	top: 20px;
-	left: 0;
+	inset: 0;
 	width: 100%;
-	height: calc(100% - 40px);
+	height: 100%;
 	pointer-events: auto;
 	z-index: 500;
+	cursor: pointer;
 }
 
 .solitaire-cardbacks-grid {

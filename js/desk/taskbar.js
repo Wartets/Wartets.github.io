@@ -1115,57 +1115,6 @@
 			clockInterval = setInterval(update, 1000);
 		},
 
-		initClock() {
-			if (clockInterval) clearInterval(clockInterval);
-			const update = () => {
-				if (!clockEl) return;
-				const now = new Date();
-				const is12h = window.SettingsApp ? (window.SettingsApp.get('clockFormat') === '12h') : false;
-				const showSeconds = window.SettingsApp ? (window.SettingsApp.get('showClockSeconds') !== false) : true;
-				const showDate = window.SettingsApp ? (window.SettingsApp.get('showClockDate') !== false) : true;
-				const showDay = window.SettingsApp ? (window.SettingsApp.get('showClockDay') !== false) : true;
-				const dateFormat = window.SettingsApp ? (window.SettingsApp.get('dateFormat') || 'dd/mm/yyyy') : 'dd/mm/yyyy';
-
-				let hoursNum = now.getHours();
-				let ampm = '';
-				if (is12h) {
-					ampm = hoursNum >= 12 ? ' PM' : ' AM';
-					hoursNum = hoursNum % 12 || 12;
-				}
-				const hours = String(hoursNum).padStart(2, '0');
-				const minutes = String(now.getMinutes()).padStart(2, '0');
-				const seconds = String(now.getSeconds()).padStart(2, '0');
-				const timeStr = showSeconds ? `${hours}:${minutes}:${seconds}${ampm}` : `${hours}:${minutes}${ampm}`;
-
-				const day = String(now.getDate()).padStart(2, '0');
-				const month = String(now.getMonth() + 1).padStart(2, '0');
-				const year = String(now.getFullYear());
-				const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-				const dayPrefix = showDay ? `${dayNames[now.getDay()]} ` : '';
-
-				let dateStr = '';
-				if (dateFormat === 'mm/dd/yyyy') {
-					dateStr = `${dayPrefix}${month}/${day}/${year}`;
-				} else if (dateFormat === 'yyyy-mm-dd') {
-					dateStr = `${dayPrefix}${year}-${month}-${day}`;
-				} else if (dateFormat === 'dd.mm.yyyy') {
-					dateStr = `${dayPrefix}${day}.${month}.${year}`;
-				} else {
-					dateStr = `${dayPrefix}${day}/${month}/${year}`;
-				}
-
-				if (showDate) {
-					clockEl.innerHTML = `<span class="taskbar-clock-time">${timeStr}</span><span class="taskbar-clock-date">${dateStr}</span>`;
-				} else {
-					clockEl.innerHTML = `<span class="taskbar-clock-time">${timeStr}</span>`;
-				}
-
-				clockEl.title = now.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
-			};
-			update();
-			clockInterval = setInterval(update, 1000);
-		},
-
 		addWindowButton(id, title, iconSrc) {
 			if (!windowsContainerEl) return null;
 			let btn = windowsContainerEl.querySelector(`.taskbar-window-btn[data-window-id="${id}"]`);
