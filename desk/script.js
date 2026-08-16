@@ -303,6 +303,12 @@ class ProjectFile extends Element {
 }
 
 class FileSystemManager {
+	static typeRegistry = new Map();
+
+	static registerType(type, constructorRef) {
+		FileSystemManager.typeRegistry.set(type, constructorRef);
+	}
+
 	constructor() {
 		this.root = new Folder('Desktop');
 		this.clipboard = {
@@ -310,6 +316,21 @@ class FileSystemManager {
 			element: null
 		};
 		this.undoStack = [];
+		this.initTypeRegistry();
+	}
+
+	initTypeRegistry() {
+		FileSystemManager.registerType('Folder', Folder);
+		FileSystemManager.registerType('File', File);
+		FileSystemManager.registerType('Shortcut', Shortcut);
+		FileSystemManager.registerType('ProjectFile', ProjectFile);
+	}
+
+	emitEvent(eventName, payload) {
+		if (window.DeskEventBus) {
+			window.DeskEventBus.emit(eventName, payload);
+			window.DeskEventBus.emit('fs:changed', payload);
+		}
 	}
 
 	exists(path) {
@@ -362,6 +383,7 @@ class FileSystemManager {
 
 		parentFolder.add(newElement);
 		this.save();
+		this.emitEvent('fs:created', { element: newElement, path: newElement.getFullPath() });
 
 		if (type === 'Folder' && window.AchievementsManager) {
 			let depth = 0;
@@ -390,8 +412,11 @@ class FileSystemManager {
 		if (element instanceof File && element.savedFromNotepad && window.AchievementsManager) {
 			window.AchievementsManager.progress('notepad_save_delete', 1);
 		}
-		element.parent.remove(element.name);
+		const parent = element.parent;
+		const name = element.name;
+		parent.remove(name);
 		this.save();
+		this.emitEvent('fs:deleted', { path, name });
 	}
 
 	duplicate(path) {
@@ -442,6 +467,7 @@ class FileSystemManager {
 		});
 
 		this.save();
+		this.emitEvent('fs:moved', { element, sourcePath, destPath: element.getFullPath() });
 	}
 
 	copy(sourcePath, destPath) {
@@ -469,6 +495,7 @@ class FileSystemManager {
 		newElement.name = finalName;
 		destFolder.add(newElement);
 		this.save();
+		this.emitEvent('fs:created', { element: newElement, path: newElement.getFullPath() });
 		return newElement;
 	}
 
@@ -487,6 +514,7 @@ class FileSystemManager {
 		zipFile.name = targetFolder.getUniqueName(base, ext);
 		targetFolder.add(zipFile);
 		this.save();
+		this.emitEvent('fs:created', { element: zipFile, path: zipFile.getFullPath() });
 		return zipFile;
 	}
 
@@ -505,12 +533,14 @@ class FileSystemManager {
 			extracted.name = targetFolder.getUniqueName(bName, ext);
 			targetFolder.add(extracted);
 			this.save();
+			this.emitEvent('fs:created', { element: extracted, path: extracted.getFullPath() });
 			return extracted;
 		} catch (e) {
 			const fallbackName = targetFolder.getUniqueName('Extracted Text', '.txt');
 			const txtFile = new File(fallbackName, null, zipFile.content);
 			targetFolder.add(txtFile);
 			this.save();
+			this.emitEvent('fs:created', { element: txtFile, path: txtFile.getFullPath() });
 			return txtFile;
 		}
 	}
@@ -536,6 +566,7 @@ class FileSystemManager {
 		});
 		this.saveRecycleBinItems(recycleItems);
 		this.save();
+		this.emitEvent('fs:recycled', { path, originalPath });
 	}
 
 	loadRecycleBinItems() {
@@ -570,6 +601,7 @@ class FileSystemManager {
 		items.splice(index, 1);
 		this.saveRecycleBinItems(items);
 		this.save();
+		this.emitEvent('fs:restored', { element: restored, path: restored.getFullPath() });
 		return restored;
 	}
 
@@ -585,6 +617,7 @@ class FileSystemManager {
 			window.AchievementsManager.progress('recycle_cleaner', 1);
 		}
 		this.saveRecycleBinItems([]);
+		this.emitEvent('fs:recycle-emptied', {});
 	}
 
 	undo() {
@@ -598,10 +631,29 @@ class FileSystemManager {
 				el.name = op.originalName;
 				dest.add(el);
 				this.save();
+				this.emitEvent('fs:moved', { element: el, sourcePath: op.sourcePath, destPath: el.getFullPath() });
 				return true;
 			}
 		}
 		return false;
+	}
+
+	search(query) {
+		if (!query || typeof query !== 'string') return [];
+		const q = query.toLowerCase().trim();
+		const results = [];
+		const walk = (folder) => {
+			for (const child of folder.children.values()) {
+				if (child.name.toLowerCase().includes(q)) {
+					results.push(child);
+				}
+				if (child instanceof Folder) {
+					walk(child);
+				}
+			}
+		};
+		walk(this.root);
+		return results;
 	}
 
 	save() {
@@ -622,8 +674,9 @@ class FileSystemManager {
 
 	rehydrate(data, parent) {
 		let element;
+		const ConstructorClass = FileSystemManager.typeRegistry.get(data.type) || File;
 		if (data.type === 'Folder') {
-			element = new Folder(data.name, parent);
+			element = new ConstructorClass(data.name, parent);
 			if (data.children) {
 				data.children.forEach(childData => {
 					const childElement = this.rehydrate(childData, element);
@@ -631,11 +684,11 @@ class FileSystemManager {
 				});
 			}
 		} else if (data.type === 'Shortcut') {
-			element = new Shortcut(data.name, parent, data.targetPath, data.icon);
+			element = new ConstructorClass(data.name, parent, data.targetPath, data.icon);
 		} else if (data.type === 'ProjectFile') {
-			element = new ProjectFile(data.name, parent, data.projectData);
+			element = new ConstructorClass(data.name, parent, data.projectData);
 		} else {
-			element = new File(data.name, parent, data.content || '');
+			element = new ConstructorClass(data.name, parent, data.content || '');
 			element.readOnly = !!data.readOnly;
 			element.remoteUrl = data.remoteUrl || null;
 			element.savedFromNotepad = !!data.savedFromNotepad;
@@ -653,7 +706,7 @@ class FileSystemManager {
 	}
 }
 
-let openWindows = {};
+let openWindows = window.WindowManager ? window.WindowManager.windows : {};
 let zIndexCounter = 100;
 let activeWindow = null;
 let selectedIcons = new Set();
@@ -664,25 +717,12 @@ let isContextMenuVisible = false;
 let customIcons = JSON.parse(localStorage.getItem('customIcons')) || [];
 let webampInstance = null;
 let lastClickedIconForRange = null;
-let nextWindowCascadeIndex = 0;
 
 function getNextWindowPosition(width, height) {
-	const startX = 24;
-	const startY = 24;
-	const step = 26;
-	const maxSteps = 10;
-
-	let posX = startX + (nextWindowCascadeIndex % maxSteps) * step;
-	let posY = startY + (nextWindowCascadeIndex % maxSteps) * step;
-
-	if (posX + width > window.innerWidth - 20 || posY + height > window.innerHeight - 60) {
-		nextWindowCascadeIndex = 0;
-		posX = startX;
-		posY = startY;
+	if (window.WindowManager) {
+		return window.WindowManager.getNextPosition(width, height);
 	}
-
-	nextWindowCascadeIndex++;
-	return { x: Math.max(10, posX), y: Math.max(10, posY) };
+	return { x: 24, y: 24 };
 }
 
 const RECENT_DOCUMENTS_STORAGE_KEY = 'xp_recent_documents';
@@ -810,52 +850,11 @@ window.DeskAPI = {
 		openWinamp();
 		return true;
 	},
-	openApp: (appId) => {
-		const key = String(appId).toLowerCase();
-		if (key === 'mail' || key === 'outlook' || key === 'oe') {
-			if (typeof openOutlookExpress === 'function') openOutlookExpress();
-		} else if (key === 'projects' || key === 'portfolio') {
-			if (typeof openAllProjectsFolder === 'function') openAllProjectsFolder();
-		} else if (key === 'recyclebin' || key === 'trash') {
-			if (typeof openRecycleBinWindow === 'function') openRecycleBinWindow();
-		} else if (key === 'calculator' || key === 'calc') {
-			if (window.CalculatorApp) window.CalculatorApp.open();
-		} else if (key === 'charmap' || key === 'charactermap' || key === 'characters') {
-			if (window.CharacterMapApp) window.CharacterMapApp.open();
-		} else if (key === 'paint' || key === 'mspaint') {
-			if (window.PaintApp) window.PaintApp.open();
-		} else if (key === 'minesweeper' || key === 'mine') {
-			if (typeof openMinesweeper === 'function') openMinesweeper();
-		} else if (key === 'solitaire' || key === 'sol' || key === 'cards' || key === 'klondike') {
-			if (window.SolitaireApp) window.SolitaireApp.open();
-			else if (typeof openSolitaire === 'function') openSolitaire();
-		} else if (key === 'soundrecorder' || key === 'sndrec32' || key === 'recorder' || key === 'voice') {
-			if (window.SoundRecorderApp) window.SoundRecorderApp.open();
-		} else if (key === 'musicplayer' || key === 'winamp' || key === 'music') {
-			if (typeof openWinamp === 'function') openWinamp();
-		} else if (key === 'terminal' || key === 'cmd' || key === 'prompt') {
-			if (window.CommandPrompt) window.CommandPrompt.open();
-			else if (typeof processRunCommand === 'function') processRunCommand('cmd');
-		} else if (key === 'notepad' || key === 'text') {
-			if (window.NotepadApp) window.NotepadApp.openNew();
-		} else if (key === 'settings' || key === 'controlpanel') {
-			if (window.SettingsApp) window.SettingsApp.open('system');
-		} else if (key === 'mycomputer' || key === 'computer') {
-			if (typeof openMyComputerWindow === 'function') openMyComputerWindow();
-		} else if (key === 'search') {
-			if (typeof openSearchWindow === 'function') openSearchWindow('');
-		} else if (key === 'printers') {
-			if (typeof openPrintersWindow === 'function') openPrintersWindow();
-		} else if (key === 'networkplaces' || key === 'network') {
-			if (typeof openNetworkPlacesWindow === 'function') openNetworkPlacesWindow();
-		} else if (key === 'display' || key === 'wallpaper') {
-			if (typeof openDisplaySettings === 'function') openDisplaySettings();
-		} else if (key === 'achievements' || key === 'trophies' || key === 'quests') {
-			if (window.AchievementsManager) window.AchievementsManager.open();
-		} else if (key === 'internet' || key === 'ie' || key === 'browser') {
-			if (typeof openInternetExplorer === 'function') openInternetExplorer();
+	openApp: (appId, args) => {
+		if (window.DeskAppRegistry) {
+			return window.DeskAppRegistry.launch(appId, args);
 		}
-		return true;
+		return false;
 	}
 };
 
@@ -1533,339 +1532,44 @@ const APP_WINDOW_BASE_SIZES = {
 };
 
 function computeXPWindowDimensions(preferredWidth, preferredHeight, isCompact = false) {
-	const availableWidth = window.innerWidth;
-	const availableHeight = window.innerHeight - 40;
-	const maxWidth = availableWidth * 0.92;
-	const maxHeight = availableHeight * 0.88;
-	const minW = isCompact ? 160 : Math.max(240, Math.min(preferredWidth, maxWidth));
-	const minH = isCompact ? 120 : Math.max(150, Math.min(preferredHeight, maxHeight));
-	const width = Math.max(minW, Math.min(preferredWidth, maxWidth));
-	const height = Math.max(minH, Math.min(preferredHeight, maxHeight));
-	return { width, height };
+	if (window.WindowManager) {
+		return window.WindowManager.computeDimensions(preferredWidth, preferredHeight, isCompact);
+	}
+	return { width: preferredWidth, height: preferredHeight };
 }
 
 function createXPWindow(id, title, contentHTML, initialWidth = 600, initialHeight = 400, options = {}) {
-	const windowArea = document.getElementById('window-area');
-	const existingWindow = document.getElementById(id);
-	if (existingWindow) {
-		bringWindowToFront(existingWindow);
-		if (existingWindow.classList.contains('minimized')) {
-			unminimizeWindow(existingWindow);
-		}
-		return existingWindow;
+	if (window.WindowManager) {
+		const win = window.WindowManager.createWindow(id, title, contentHTML, initialWidth, initialHeight, options);
+		openWindows = window.WindowManager.windows;
+		return win;
 	}
-
-	if (window.SettingsApp && window.SettingsApp.playSound) {
-		window.SettingsApp.playSound('window');
-	}
-
-	const win = document.createElement('div');
-	win.id = id;
-	win.className = 'xp-window opening';
-	
-	if (options.isModal) {
-		win.style.width = `${initialWidth}px`;
-		win.style.height = 'auto';
-		win.style.position = 'relative';
-		win.style.boxShadow = '4px 4px 15px rgba(0,0,0,0.5)';
-	} else if (!options.isMenu) {
-		const isCompact = options.resizable === false;
-		const { width, height } = computeXPWindowDimensions(initialWidth, initialHeight, isCompact);
-		const pos = getNextWindowPosition(width, height);
-		win.style.width = `${width}px`;
-		win.style.height = `${height}px`;
-		win.style.left = `${pos.x}px`;
-		win.style.top = `${pos.y}px`;
-	}
-	
-	win.style.opacity = '0';
-	win.style.zIndex = ++zIndexCounter;
-
-	const minimizeBtnHTML = options.isModal ? '<div class="xp-window-button minimize-btn" style="display: none;">_</div>' : '<div class="xp-window-button minimize-btn" title="Minimize">_</div>';
-	const maximizeBtnHTML = (options.resizable === false || options.isModal) ? '<div class="xp-window-button maximize-btn" style="display: none;">□</div>' : '<div class="xp-window-button maximize-btn" title="Maximize">□</div>';
-
-	win.innerHTML = `
-		<div class="xp-window-header">
-			<div style="display: flex; align-items: center; overflow: hidden;">
-				${options.iconSrc ? `<img src="${options.iconSrc}" style="width: 16px; height: 16px; margin-right: 4px; pointer-events: none;">` : ''}
-				<span class="title">${title}</span>
-			</div>
-			<div class="xp-window-buttons">
-				${minimizeBtnHTML}
-				${maximizeBtnHTML}
-				<div class="xp-window-button close-btn" title="Close">X</div>
-			</div>
-		</div>
-		<div class="xp-window-content">${contentHTML}</div>
-	`;
-
-	if (options.isModal) {
-		const overlay = document.createElement('div');
-		overlay.className = 'xp-modal-overlay';
-		overlay.id = `overlay-${id}`;
-		overlay.appendChild(win);
-		document.body.appendChild(overlay);
-		openWindows[id] = win;
-	} else {
-		windowArea.appendChild(win);
-		openWindows[id] = win;
-		makeWindowDraggable(win);
-	}
-	
-	if (options.resizable !== false && !options.isModal) {
-		makeWindowResizable(win);
-	}
-
-	setupWindowButtons(win, id);
-
-	setTimeout(() => {
-		win.classList.remove('opening');
-		win.classList.add('opened');
-		win.style.opacity = '1';
-	}, 50);
-
-	if (!options.isModal) {
-		win.addEventListener('mousedown', (e) => {
-			if (!e.target.closest('.xp-window-buttons')) {
-				bringWindowToFront(win);
-			}
-		});
-		setActiveWindow(win);
-		if (window.Taskbar) {
-			window.Taskbar.addWindowButton(id, title, options.iconSrc);
-		}
-	}
-
-	return win;
+	return null;
 }
 
 function showXPDialog(title, message, type = 'info', options = {}) {
-	const id = `dialog-${Date.now()}`;
-	let iconSrc = '';
-	
-	if (window.SettingsApp && window.SettingsApp.playSound) {
-		if (type === 'error') window.SettingsApp.playSound('error');
-		else if (type === 'warning') window.SettingsApp.playSound('exclamation');
-		else if (type === 'question') window.SettingsApp.playSound('question');
-		else window.SettingsApp.playSound('asterisk');
+	if (window.WindowManager) {
+		return window.WindowManager.showDialog(title, message, type, options);
 	}
-
-	switch (type) {
-		case 'error':
-			iconSrc = 'https://api.iconify.design/mdi/close-circle.svg?color=red';
-			break;
-		case 'warning':
-			iconSrc = 'https://api.iconify.design/mdi/alert.svg?color=orange';
-			break;
-		case 'question':
-			iconSrc = 'https://api.iconify.design/mdi/help-circle.svg?color=blue';
-			break;
-		default:
-			iconSrc = 'https://api.iconify.design/mdi/information.svg?color=blue';
-	}
-
-	const buttons = options.buttons || ['OK'];
-	const buttonsHTML = buttons.map(btn => `<button class="xp-button" data-result="${btn}">${btn}</button>`).join('');
-
-	const contentHTML = `
-		<div class="xp-dialog-content">
-			<img src="${iconSrc}" class="xp-dialog-icon" alt="${type}">
-			<div style="font-size: 11px; line-height: 1.5; align-self: center;">${message}</div>
-		</div>
-		<div class="xp-dialog-buttons">
-			${buttonsHTML}
-		</div>
-	`;
-
-	const dialog = createXPWindow(id, title, contentHTML, 350, 150, { 
-		resizable: false, 
-		isModal: true
-	});
-	
-	dialog.querySelector('.xp-window-content').style.padding = '0';
-	dialog.querySelector('.xp-window-content').style.display = 'flex';
-	dialog.querySelector('.xp-window-content').style.flexDirection = 'column';
-
-	const btnElements = dialog.querySelectorAll('.xp-dialog-buttons .xp-button');
-	btnElements.forEach(btn => {
-		btn.addEventListener('click', () => {
-			const result = btn.dataset.result;
-			closeWindow(dialog, id);
-			if (options.callback) options.callback(result);
-		});
-		
-		if (buttons.length === 1 || btn.dataset.result === 'Yes' || btn.dataset.result === 'OK') {
-			btn.focus();
-		}
-	});
-	
-	return dialog;
+	return null;
 }
 
 function makeWindowDraggable(win) {
-	const header = win.querySelector('.xp-window-header');
-	const overlay = document.getElementById('iframe-drag-overlay');
-	let isDragging = false;
-	let offsetX, offsetY;
-
-	header.addEventListener('contextmenu', (e) => {
-		if (e.target.closest('.xp-window-buttons')) return;
-		e.preventDefault();
-		if (window.ContextMenu) {
-			const items = window.ContextMenu.getWindowHeaderItems(win, win.id);
-			window.ContextMenu.show(items, e.clientX, e.clientY);
-		}
-	});
-
-	header.addEventListener('mousedown', (e) => {
-		bringWindowToFront(win);
-		if (e.target.closest('.xp-window-buttons')) return;
-		if (win.classList.contains('maximized')) return;
-
-		isDragging = true;
-		if (overlay) overlay.style.display = 'block';
-		document.body.classList.add('iframe-overlay-active');
-		
-		win.style.cursor = 'grabbing';
-		win.style.transition = 'none';
-
-		const rect = win.getBoundingClientRect();
-		offsetX = e.clientX - rect.left;
-		offsetY = e.clientY - rect.top;
-	});
-
-	document.addEventListener('mousemove', (e) => {
-		if (!isDragging) return;
-
-		let newLeft = e.clientX - offsetX;
-		let newTop = e.clientY - offsetY;
-
-		const desktop = document.getElementById('desktop');
-		const desktopRect = desktop.getBoundingClientRect();
-		const winRect = win.getBoundingClientRect();
-
-		newLeft = Math.max(desktopRect.left - winRect.width + 30, Math.min(newLeft, desktopRect.right - 30));
-		newTop = Math.max(desktopRect.top, Math.min(newTop, desktopRect.bottom - 30));
-
-		win.style.left = `${newLeft}px`;
-		win.style.top = `${newTop}px`;
-		win.style.transform = 'none';
-	});
-
-	document.addEventListener('mouseup', () => {
-		if (isDragging) {
-			isDragging = false;
-			if (overlay) overlay.style.display = 'none';
-			document.body.classList.remove('iframe-overlay-active');
-			win.style.cursor = 'default';
-			win.style.transition = '';
-		}
-	});
+	if (window.WindowManager) {
+		window.WindowManager.makeDraggable(win);
+	}
 }
 
 function makeWindowResizable(win) {
-	const BORDER_SIZE = 6;
-	const overlay = document.getElementById('iframe-drag-overlay');
-	let isResizing = false;
-	let resizeDir = '';
-
-	win.addEventListener('mousemove', (e) => {
-		if (win.classList.contains('maximized') || isResizing) {
-			win.style.cursor = '';
-			return;
-		}
-
-		const rect = win.getBoundingClientRect();
-		const x = e.clientX - rect.left;
-		const y = e.clientY - rect.top;
-
-		const onRight = x >= rect.width - BORDER_SIZE;
-		const onLeft = x <= BORDER_SIZE;
-		const onBottom = y >= rect.height - BORDER_SIZE;
-		const onTop = y <= BORDER_SIZE;
-
-		if (onRight && onBottom) win.style.cursor = 'nwse-resize';
-		else if (onLeft && onBottom) win.style.cursor = 'nesw-resize';
-		else if (onLeft && onTop) win.style.cursor = 'nwse-resize';
-		else if (onRight && onTop) win.style.cursor = 'nesw-resize';
-		else if (onRight) win.style.cursor = 'ew-resize';
-		else if (onLeft) win.style.cursor = 'ew-resize';
-		else if (onBottom) win.style.cursor = 'ns-resize';
-		else if (onTop) win.style.cursor = 'ns-resize';
-		else win.style.cursor = '';
-	});
-
-	win.addEventListener('mousedown', (e) => {
-		if (win.classList.contains('maximized')) return;
-
-		const rect = win.getBoundingClientRect();
-		const x = e.clientX - rect.left;
-		const y = e.clientY - rect.top;
-
-		const onRight = x >= rect.width - BORDER_SIZE;
-		const onLeft = x <= BORDER_SIZE;
-		const onBottom = y >= rect.height - BORDER_SIZE;
-		const onTop = y <= BORDER_SIZE;
-
-		if (!onRight && !onLeft && !onBottom && !onTop) return;
-
-		isResizing = true;
-		if (overlay) overlay.style.display = 'block';
-		document.body.classList.add('iframe-overlay-active');
-		document.body.style.userSelect = 'none';
-		
-		resizeDir = '';
-		if (onTop) resizeDir += 'n';
-		if (onBottom) resizeDir += 's';
-		if (onLeft) resizeDir += 'w';
-		if (onRight) resizeDir += 'e';
-
-		const startX = e.clientX;
-		const startY = e.clientY;
-		const startWidth = rect.width;
-		const startHeight = rect.height;
-		const startLeft = rect.left;
-		const startTop = rect.top;
-
-		const handleResize = (e) => {
-			if (!isResizing) return;
-
-			if (resizeDir.includes('e')) {
-				win.style.width = `${Math.max(200, startWidth + e.clientX - startX)}px`;
-			}
-			if (resizeDir.includes('s')) {
-				win.style.height = `${Math.max(100, startHeight + e.clientY - startY)}px`;
-			}
-			if (resizeDir.includes('w')) {
-				const width = Math.max(200, startWidth - (e.clientX - startX));
-				win.style.width = `${width}px`;
-				win.style.left = `${startLeft + (startWidth - width)}px`;
-			}
-			if (resizeDir.includes('n')) {
-				const height = Math.max(100, startHeight - (e.clientY - startY));
-				win.style.height = `${height}px`;
-				win.style.top = `${startTop + (startHeight - height)}px`;
-			}
-		};
-
-		const stopResize = () => {
-			isResizing = false;
-			if (overlay) overlay.style.display = 'none';
-			document.body.classList.remove('iframe-overlay-active');
-			document.body.style.userSelect = '';
-			document.removeEventListener('mousemove', handleResize);
-			document.removeEventListener('mouseup', stopResize);
-		};
-
-		document.addEventListener('mousemove', handleResize);
-		document.addEventListener('mouseup', stopResize);
-	});
+	if (window.WindowManager) {
+		window.WindowManager.makeResizable(win);
+	}
 }
 
 function setupWindowButtons(win, id) {
-	win.querySelector('.minimize-btn').addEventListener('click', () => minimizeWindow(win, id));
-	win.querySelector('.maximize-btn').addEventListener('click', () => maximizeWindow(win));
-	win.querySelector('.close-btn').addEventListener('click', () => closeWindow(win, id));
+	if (window.WindowManager) {
+		window.WindowManager.setupButtons(win, id);
+	}
 }
 
 function setupKeyboardNavigation() {
@@ -2458,206 +2162,52 @@ function updateOutlookUnreadBadge() {
 }
 
 function setActiveWindow(win) {
-	const allWindows = document.querySelectorAll('.xp-window');
-	allWindows.forEach(w => {
-		const header = w.querySelector('.xp-window-header');
-		if (header) header.classList.add('inactive');
-	});
-
-	activeWindow = win;
-	const currentHeader = win ? win.querySelector('.xp-window-header') : null;
-	if (currentHeader) currentHeader.classList.remove('inactive');
-
-	if (window.Taskbar) {
-		window.Taskbar.setActiveButton(win ? win.id : null);
+	if (window.WindowManager) {
+		window.WindowManager.setActive(win);
+		activeWindow = window.WindowManager.activeWindow;
 	}
 }
 
 function bringWindowToFront(win) {
-	if (parseInt(win.style.zIndex) < zIndexCounter) {
-		win.style.zIndex = ++zIndexCounter;
+	if (window.WindowManager) {
+		window.WindowManager.bringToFront(win);
+		activeWindow = window.WindowManager.activeWindow;
+		zIndexCounter = window.WindowManager.zIndexCounter;
 	}
-	setActiveWindow(win);
 }
 
 function minimizeWindow(win, id) {
-	if (window.SettingsApp && window.SettingsApp.playSound) {
-		window.SettingsApp.playSound('window');
+	if (window.WindowManager) {
+		window.WindowManager.minimize(win, id);
+		activeWindow = window.WindowManager.activeWindow;
 	}
-
-	win.dataset.originalLeft = win.style.left;
-	win.dataset.originalTop = win.style.top;
-	win.dataset.originalWidth = win.style.width;
-	win.dataset.originalHeight = win.style.height;
-
-	const taskbarBtn = document.querySelector(`.taskbar-window-btn[data-window-id="${id}"]`);
-	let targetLeft = 0;
-	let targetTop = window.innerHeight;
-	let targetWidth = 0;
-	let targetHeight = 0;
-
-	if (taskbarBtn) {
-		const taskbarRect = taskbarBtn.getBoundingClientRect();
-		targetLeft = taskbarRect.left;
-		targetTop = taskbarRect.top;
-		targetWidth = taskbarRect.width;
-		targetHeight = taskbarRect.height;
-	}
-
-	let finalized = false;
-	const finalizeMinimize = () => {
-		if (finalized) return;
-		finalized = true;
-		win.classList.add('hidden');
-		win.classList.remove('minimizing');
-		win.classList.add('minimized');
-		const taskbarBtnElement = document.querySelector(`#taskbar-windows .taskbar-window-btn[data-window-id="${id}"]`);
-		if (taskbarBtnElement) {
-			taskbarBtnElement.classList.remove('active');
-		}
-		if (activeWindow === win) {
-			activeWindow = null;
-		}
-	};
-
-	const hasAnim = !document.body.classList.contains('no-window-animations') && !document.body.classList.contains('anim-instant');
-	if (!hasAnim) {
-		finalizeMinimize();
-		return;
-	}
-
-	win.classList.add('minimizing');
-	win.style.left = `${targetLeft}px`;
-	win.style.top = `${targetTop}px`;
-	win.style.width = `${targetWidth}px`;
-	win.style.height = `${targetHeight}px`;
-	win.style.opacity = '0';
-	win.style.transform = 'scale(0.1)';
-
-	const handler = (e) => {
-		if (e.target === win) {
-			win.removeEventListener('transitionend', handler);
-			finalizeMinimize();
-		}
-	};
-	win.addEventListener('transitionend', handler);
-	setTimeout(finalizeMinimize, 400);
 }
 
 function unminimizeWindow(win) {
-	if (window.SettingsApp && window.SettingsApp.playSound) {
-		window.SettingsApp.playSound('window');
+	if (window.WindowManager) {
+		window.WindowManager.unminimize(win);
+		activeWindow = window.WindowManager.activeWindow;
 	}
-	win.classList.remove('hidden', 'minimized');
-
-	win.style.left = win.dataset.originalLeft || '50px';
-	win.style.top = win.dataset.originalTop || '50px';
-	win.style.width = win.dataset.originalWidth || '600px';
-	win.style.height = win.dataset.originalHeight || '400px';
-	win.style.opacity = '1';
-	win.style.transform = 'none';
-
-	const hasAnim = !document.body.classList.contains('no-window-animations') && !document.body.classList.contains('anim-instant');
-	if (hasAnim) {
-		win.classList.add('opening');
-		const handler = (e) => {
-			if (e.target === win) {
-				win.classList.remove('opening');
-				win.removeEventListener('transitionend', handler);
-			}
-		};
-		win.addEventListener('transitionend', handler);
-		setTimeout(() => win.classList.remove('opening'), 350);
-	}
-	bringWindowToFront(win);
 }
 
 function maximizeWindow(win) {
-	const maxBtn = win.querySelector('.maximize-btn');
-
-	if (win.classList.contains('maximized')) {
-		win.style.transition = 'none';
-		win.style.top = win.dataset.restoreTop;
-		win.style.left = win.dataset.restoreLeft;
-		win.style.width = win.dataset.restoreWidth;
-		win.style.height = win.dataset.restoreHeight;
-		win.classList.remove('maximized');
-		maxBtn.textContent = '□';
-		maxBtn.title = "Maximize";
-		setTimeout(() => {
-			win.style.transition = '';
-		}, 50);
-	} else {
-		win.dataset.restoreTop = win.style.top;
-		win.dataset.restoreLeft = win.style.left;
-		win.dataset.restoreWidth = win.style.width;
-		win.dataset.restoreHeight = win.style.height;
-
-		win.style.transition = 'none';
-		win.style.top = '0';
-		win.style.left = '0';
-		win.style.width = '100vw';
-		win.style.height = 'calc(100vh - 40px)';
-		win.style.transform = 'none';
-		win.classList.add('maximized');
-		maxBtn.textContent = '❐';
-		maxBtn.title = "Restore Down";
-		if (window.AchievementsManager) {
-			window.AchievementsManager.progress('maximize_window', 1);
-		}
-		setTimeout(() => {
-			win.style.transition = '';
-		}, 50);
+	if (window.WindowManager) {
+		window.WindowManager.maximize(win);
 	}
 }
 
 function closeWindow(win, id) {
-	if (!win) return;
-	if (typeof win.beforeClose === 'function') {
-		const allowClose = win.beforeClose(() => forceCloseWindow(win, id));
-		if (allowClose === false) return;
+	if (window.WindowManager) {
+		window.WindowManager.close(win, id);
+		activeWindow = window.WindowManager.activeWindow;
 	}
-	forceCloseWindow(win, id);
 }
 
 function forceCloseWindow(win, id) {
-	let cleanedUp = false;
-	const cleanup = () => {
-		if (cleanedUp) return;
-		cleanedUp = true;
-		const overlay = document.getElementById(`overlay-${id}`);
-		if (overlay) {
-			overlay.remove();
-		} else if (win.parentElement) {
-			win.remove();
-		}
-		delete openWindows[id];
-		if (window.Taskbar) {
-			window.Taskbar.removeWindowButton(id);
-		}
-		if (activeWindow === win) {
-			activeWindow = null;
-		}
-	};
-
-	const hasAnim = !document.body.classList.contains('no-window-animations') && !document.body.classList.contains('anim-instant');
-	if (!hasAnim) {
-		cleanup();
-		return;
+	if (window.WindowManager) {
+		window.WindowManager.forceClose(win, id);
+		activeWindow = window.WindowManager.activeWindow;
 	}
-
-	win.classList.add('minimizing');
-	win.style.opacity = '0';
-	win.style.transform = 'scale(0.1)';
-
-	const handler = (e) => {
-		if (e.target === win) {
-			win.removeEventListener('transitionend', handler);
-			cleanup();
-		}
-	};
-	win.addEventListener('transitionend', handler);
-	setTimeout(cleanup, 400);
 }
 
 function openProjectWindow(project) {
@@ -3870,8 +3420,36 @@ function openRunDialog() {
 function processRunCommand(command) {
 	const cmd = command.trim();
 	const lowerCmd = cmd.toLowerCase();
-	
+
+	if (lowerCmd === 'shutdown') {
+		openShutdownDialog();
+		return;
+	}
+
+	if (lowerCmd === 'bsod') {
+		triggerBSOD();
+		return;
+	}
+
+	if (lowerCmd.startsWith('www.') || lowerCmd.startsWith('http://') || lowerCmd.startsWith('https://') || lowerCmd.endsWith('.com') || lowerCmd.endsWith('.org') || lowerCmd.endsWith('.net')) {
+		if (window.InternetExplorerApp) {
+			window.InternetExplorerApp.open(cmd);
+		} else if (typeof openInternetExplorer === 'function') {
+			openInternetExplorer(cmd);
+		}
+		return;
+	}
+
+	if (window.DeskAppRegistry && window.DeskAppRegistry.get(lowerCmd)) {
+		window.DeskAppRegistry.launch(lowerCmd);
+		return;
+	}
+
 	if (lowerCmd === 'cmd' || lowerCmd === 'command') {
+		if (window.CommandPrompt) {
+			window.CommandPrompt.open();
+			return;
+		}
 		const id = `window-cmd-${Date.now()}`;
 		const content = `
 			<div style="background-color: black; color: white; font-family: 'Consolas', 'Lucida Console', monospace; height: 100%; padding: 5px; overflow-y: auto;">
@@ -3886,32 +3464,10 @@ function processRunCommand(command) {
 			</div>
 		`;
 		createXPWindow(id, 'C:\\WINDOWS\\system32\\cmd.exe', content, 600, 350, { iconSrc: 'https://api.iconify.design/mdi/console.svg' });
-	} else if (lowerCmd === 'explorer') {
-		openFileSystemElement(fs.root);
-	} else if (lowerCmd === 'shutdown') {
-		openShutdownDialog();
-	} else if (lowerCmd === 'calc' || lowerCmd === 'calculator') {
-		if (window.CalculatorApp) window.CalculatorApp.open();
-	} else if (lowerCmd === 'charmap' || lowerCmd === 'charactermap') {
-		if (window.CharacterMapApp) window.CharacterMapApp.open();
-	} else if (lowerCmd === 'mspaint' || lowerCmd === 'paint' || lowerCmd === 'pbrush') {
-		if (window.PaintApp) window.PaintApp.open();
-	} else if (lowerCmd === 'sndrec32' || lowerCmd === 'soundrecorder' || lowerCmd === 'sndrec') {
-		if (window.SoundRecorderApp) window.SoundRecorderApp.open();
-	} else if (lowerCmd === 'sol' || lowerCmd === 'solitaire' || lowerCmd === 'cards') {
-		if (window.SolitaireApp) window.SolitaireApp.open();
-		else if (typeof openSolitaire === 'function') openSolitaire();
-	} else if (lowerCmd === 'bsod') {
-		triggerBSOD();
-	} else if (lowerCmd.startsWith('www.') || lowerCmd.startsWith('http://') || lowerCmd.startsWith('https://') || lowerCmd.endsWith('.com') || lowerCmd.endsWith('.org') || lowerCmd.endsWith('.net')) {
-		if (window.InternetExplorerApp) {
-			window.InternetExplorerApp.open(cmd);
-		} else if (typeof openInternetExplorer === 'function') {
-			openInternetExplorer(cmd);
-		}
-	} else {
-		showXPDialog(command, `Cannot find '${command}'. Make sure you typed the name correctly, and then try again.`, 'error');
+		return;
 	}
+
+	showXPDialog(command, `Cannot find '${command}'. Make sure you typed the name correctly, and then try again.`, 'error');
 }
 
 function openMyComputerWindow() {
@@ -4190,20 +3746,15 @@ function openSearchWindow(initialQuery = '') {
 
 		if (type === 'all' || type === 'files') {
 			if (typeof fs !== 'undefined') {
-				const scanFolder = (folder) => {
-					folder.listContent().forEach(child => {
-						if (child.name.toLowerCase().includes(q)) {
-							hits.push({
-								name: child.name,
-								category: child instanceof Folder ? 'Folder' : 'File',
-								icon: child.icon,
-								action: () => openFileSystemElement(child)
-							});
-						}
-						if (child instanceof Folder) scanFolder(child);
+				const matches = fs.search(q);
+				matches.forEach(child => {
+					hits.push({
+						name: child.name,
+						category: child instanceof Folder ? 'Folder' : 'File',
+						icon: child.icon,
+						action: () => openFileSystemElement(child)
 					});
-				};
-				scanFolder(fs.root);
+				});
 			}
 		}
 

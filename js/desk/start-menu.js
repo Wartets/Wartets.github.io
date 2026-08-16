@@ -1,7 +1,3 @@
-/**
- * Authentic Windows XP Start Menu Engine
- * Highly extensible, modular two-column layout with cascading multi-level flyout menus, dynamic project indexing, live unread counts, and full OS theme integration.
- */
 (function () {
 	let startMenuEl = null;
 	let startButtonEl = null;
@@ -836,6 +832,12 @@
 
 			if (window.SettingsApp && window.SettingsApp.playSound) {
 				window.SettingsApp.playSound('click');
+			}
+
+			const directApp = window.DeskAppRegistry ? window.DeskAppRegistry.get(action.replace(/^(open-|link-)/, '')) : null;
+			if (directApp) {
+				window.DeskAppRegistry.launch(directApp.id);
+				return;
 			}
 
 			switch (action) {

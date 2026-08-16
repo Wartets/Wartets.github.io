@@ -1,7 +1,3 @@
-/**
- * Authentic Windows XP Settings & Control Panel Engine
- * Deep system customization, retro visual styles, sound synthesis and environment maintenance
- */
 (function () {
 	const SETTINGS_STORAGE_KEY = 'xp_system_settings';
 
@@ -2481,6 +2477,7 @@
 	window.SettingsApp = {
 		open: (tab = 'system') => openSettingsDialog(tab),
 		get: (key) => (currentSettings ? currentSettings[key] : (DEFAULT_SETTINGS ? DEFAULT_SETTINGS[key] : undefined)),
+		getAll: () => Object.assign({}, currentSettings),
 		set: (key, value) => {
 			if (!currentSettings) currentSettings = Object.assign({}, DEFAULT_SETTINGS);
 			if (!pendingSettings) pendingSettings = Object.assign({}, currentSettings);
@@ -2488,6 +2485,17 @@
 			pendingSettings[key] = value;
 			saveCurrentSettings();
 			applyAllSettings();
+			if (window.DeskEventBus) {
+				window.DeskEventBus.emit('settings:changed', { key, value, settings: currentSettings });
+			}
+		},
+		subscribe: (key, handler) => {
+			if (!window.DeskEventBus) return () => {};
+			return window.DeskEventBus.on('settings:changed', (payload) => {
+				if (!key || payload.key === key) {
+					handler(payload.value, payload.settings);
+				}
+			});
 		},
 		playSound: (type) => SoundEngine.play(type)
 	};

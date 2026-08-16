@@ -1,7 +1,3 @@
-/**
- * Authentic Windows XP Taskbar Engine
- * Highly extensible, modular taskbar with quick launch, system tray, and clock integration.
- */
 (function () {
 	const QUICK_LAUNCH_STORAGE_KEY = 'xp_quick_launch_items';
 
@@ -683,57 +679,26 @@
 		},
 
 		executeQuickLaunchItem(item) {
-			const action = item.action;
-			switch (action) {
-				case 'show-desktop':
-					this.showDesktop();
-					break;
-				case 'open-achievements':
-					if (window.AchievementsManager) window.AchievementsManager.open();
-					break;
-				case 'open-ie':
-					if (typeof openInternetExplorer === 'function') openInternetExplorer();
-					break;
-				case 'open-oe':
-					if (typeof openOutlookExpress === 'function') openOutlookExpress();
-					break;
-				case 'open-cmd':
-					if (window.CommandPrompt) window.CommandPrompt.open();
-					else if (typeof processRunCommand === 'function') processRunCommand('cmd');
-					break;
-				case 'open-notepad':
-					if (window.NotepadApp) window.NotepadApp.openNew();
-					break;
-				case 'open-calc':
-					if (window.CalculatorApp) window.CalculatorApp.open();
-					break;
-				case 'open-charmap':
-					if (window.CharacterMapApp) window.CharacterMapApp.open();
-					break;
-				case 'open-paint':
-					if (window.PaintApp) window.PaintApp.open();
-					break;
-				case 'open-winamp':
-					if (typeof openWinamp === 'function') openWinamp();
-					break;
-				case 'open-mine':
-					if (typeof openMinesweeper === 'function') openMinesweeper();
-					break;
-				case 'open-settings':
-					if (window.SettingsApp) window.SettingsApp.open('system');
-					break;
-				case 'open-path':
-					if (item.path && typeof fs !== 'undefined') {
-						const el = fs.findByPath(item.path);
-						if (el && typeof openFileSystemElement === 'function') openFileSystemElement(el);
-					}
-					break;
-				default:
-					if (item.path && typeof fs !== 'undefined') {
-						const el = fs.findByPath(item.path);
-						if (el && typeof openFileSystemElement === 'function') openFileSystemElement(el);
-					}
-					break;
+			if (item.action === 'show-desktop') {
+				this.showDesktop();
+				return;
+			}
+
+			if (item.action === 'open-path' && item.path && typeof fs !== 'undefined') {
+				const el = fs.findByPath(item.path);
+				if (el && typeof openFileSystemElement === 'function') openFileSystemElement(el);
+				return;
+			}
+
+			const normalizedAppId = item.action.replace(/^open-/, '');
+			if (window.DeskAppRegistry && window.DeskAppRegistry.get(normalizedAppId)) {
+				window.DeskAppRegistry.launch(normalizedAppId);
+				return;
+			}
+
+			if (item.path && typeof fs !== 'undefined') {
+				const el = fs.findByPath(item.path);
+				if (el && typeof openFileSystemElement === 'function') openFileSystemElement(el);
 			}
 		},
 

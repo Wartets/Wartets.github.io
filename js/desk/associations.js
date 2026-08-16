@@ -293,6 +293,10 @@
 					newFileTemplates.push(config.newTemplate);
 				}
 			}
+
+			if (window.DeskEventBus) {
+				window.DeskEventBus.emit('association:registered', { extensions: extList, config });
+			}
 		},
 
 		getExtension(filename) {
