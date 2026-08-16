@@ -39,14 +39,14 @@
 	<div id="boot-screen">
 		<div class="boot-logo-container">
 			<img src="../assets/images/desk/window_logo.png" alt="Windows XP" class="boot-logo">
-			<div class="boot-text">MacroPof<br>Windows<span>XP</span></div>
+			<div class="boot-text">Mircosoft<br>Windows<span>XP</span></div>
 		</div>
 		<div class="boot-loading-bar">
 			<div class="boot-loading-progress"></div>
 			<div class="boot-loading-progress"></div>
 			<div class="boot-loading-progress"></div>
 		</div>
-		<div class="boot-copyright">Copyright © 1985-2001<br>MacroPof Corporation</div>
+		<div class="boot-copyright">Copyright © 1985-2001<br>Mircosoft Corporation</div>
 	</div>
 
 	<div id="welcome-screen" class="hidden">
@@ -54,7 +54,7 @@
 		<div class="welcome-content">
 			<div class="welcome-logo">
 				<img src="../assets/images/desk/window_logo.png" alt="Windows Logo">
-				<span>MacroPof<br>Windows<span>XP</span></span>
+				<span>Mircosoft<br>Windows<span>XP</span></span>
 			</div>
 			<div class="welcome-divider"></div>
 			<div class="welcome-users">
@@ -77,14 +77,16 @@
 
 	<div id="screen-frame">
 		<div id="desktop" class="crt-scanlines">
-			<div id="start-menu" class="xp-start-menu hidden crt-scanlines">
-				<!-- Rendered dynamically by StartMenu Engine -->
-			</div>
-
 			<div id="project-icons-container">
 				<!-- Project icons rendered here -->
 			</div>
 		</div>
+
+		<div id="start-menu" class="xp-start-menu hidden crt-scanlines">
+			<!-- Rendered dynamically by StartMenu Engine -->
+		</div>
+
+		<div id="achievement-toast-container" class="xp-achievement-toast-container"></div>
 
 		<div id="taskbar" class="crt-scanlines">
 			<button type="button" id="taskbar-start-button" class="xp-taskbar-start">
@@ -126,6 +128,7 @@
 	<script src="../js/desk/calculator.js"></script>
 	<script src="../js/desk/paint.js"></script>
 	<script src="../js/desk/notepad.js"></script>
+	<script src="../js/desk/character-map.js"></script>
 	<script src="../js/desk/command-prompt.js"></script>
 	<script src="../js/desk/file-explorer.js"></script>
 	<script src="../js/desk/file-dialog.js"></script>

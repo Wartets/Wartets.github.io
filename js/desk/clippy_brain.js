@@ -44,7 +44,7 @@
 		{ topic: 'RELATIVITY', keywords: ['relativity', 'einstein', 'spacetime', 'gravity', 'black hole', 'speed of light'] },
 		{ topic: 'THERMODYNAMICS', keywords: ['entropy', 'thermodynamics', 'heat death', 'landauer', 'arrow of time'] },
 		{ topic: 'PROGRAMMING', keywords: ['programming', 'code', 'javascript', 'c++', 'python', 'rust', 'assembly', 'compiler', 'debugging'] },
-		{ topic: 'OFFICE_LORE', keywords: ['clippy', 'office 97', 'kevan', 'merlin', 'rover', 'the dot', 'MacroPof bob'] }
+		{ topic: 'OFFICE_LORE', keywords: ['clippy', 'office 97', 'kevan', 'merlin', 'rover', 'the dot', 'Mircosoft bob'] }
 	];
 
 	class ClippyBrainEngine {

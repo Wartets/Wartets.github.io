@@ -731,7 +731,7 @@
 			if (cleanUrl === 'about:projects' || cleanUrl === 'http://portfolio/projects' || cleanUrl === 'http://portfolio.wartets/projects') {
 				return { title: 'Portfolio Project Catalog - Colin B.R.', element: this.buildPortfolioWebDirectory(tabId), zone: 'local' };
 			}
-			if (cleanUrl.startsWith('http://windowsupdate.microsoft.com') || cleanUrl.startsWith('http://windowsupdate.macropof.com')) {
+			if (cleanUrl.startsWith('http://windowsupdate.microsoft.com') || cleanUrl.startsWith('http://windowsupdate.Mircosoft.com')) {
 				return { title: 'Windows Update Catalog', element: this.buildWindowsUpdatePage(tabId), zone: 'trusted' };
 			}
 			if (cleanUrl.startsWith('http://msdn.microsoft.com') || cleanUrl.startsWith('http://msdn.wartets.dev')) {
@@ -1080,7 +1080,7 @@
 				<div class="ie-winupdate-header">
 					<img src="https://api.iconify.design/mdi/shield-sync-outline.svg?color=%232e7d32" style="width:40px; height:40px;">
 					<div>
-						<h2>MacroPof Windows Update</h2>
+						<h2>Mircosoft Windows Update</h2>
 						<span>Windows XP Professional Service Pack 3 Catalog</span>
 					</div>
 				</div>
@@ -1127,7 +1127,7 @@
 						<div class="ie-msdn-node">└─ Outlook MailStore Protocol</div>
 					</div>
 					<div class="ie-msdn-article">
-						<h2>MacroPof Windows XP Web Architecture</h2>
+						<h2>Mircosoft Windows XP Web Architecture</h2>
 						<p>The desktop environment simulates a complete Windows XP workstation running directly inside the browser using modern vanilla JavaScript, WebAudio API, HTML5 Canvas, and flexible CSS variable theme matrices.</p>
 						<h3>Key Design Principles</h3>
 						<ul>
@@ -1744,7 +1744,7 @@
 						]
 					},
 					{ label: 'Synchronize All...', action: () => showXPDialog('Synchronize', 'Offline web pages are synchronized.', 'info') },
-					{ label: 'Windows Update', action: () => { if (activeTab) this.navigateTab(activeTab.id, 'http://windowsupdate.macropof.com/'); } },
+					{ label: 'Windows Update', action: () => { if (activeTab) this.navigateTab(activeTab.id, 'http://windowsupdate.Mircosoft.com/'); } },
 					{ separator: true },
 					{ label: 'Internet Options...', bold: true, action: () => { if (window.SettingsApp) window.SettingsApp.open('system'); } }
 				];

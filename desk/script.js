@@ -620,6 +620,7 @@ window.DeskAPI = {
 	openProjectsFolder: () => openAllProjectsFolder(),
 	openRecycleBin: () => openRecycleBinWindow(),
 	openCalculator: () => (window.CalculatorApp ? window.CalculatorApp.open() : openCalculator()),
+	openCharacterMap: () => (window.CharacterMapApp ? window.CharacterMapApp.open() : null),
 	openPaint: (file) => (window.PaintApp ? window.PaintApp.open(file) : openPaint(file)),
 	openMinesweeperGame: () => (window.MinesweeperApp ? window.MinesweeperApp.open() : openMinesweeper()),
 	openSolitaireGame: () => (window.SolitaireApp ? window.SolitaireApp.open() : openSolitaire()),
@@ -667,6 +668,8 @@ window.DeskAPI = {
 			if (typeof openRecycleBinWindow === 'function') openRecycleBinWindow();
 		} else if (key === 'calculator' || key === 'calc') {
 			if (window.CalculatorApp) window.CalculatorApp.open();
+		} else if (key === 'charmap' || key === 'charactermap' || key === 'characters') {
+			if (window.CharacterMapApp) window.CharacterMapApp.open();
 		} else if (key === 'paint' || key === 'mspaint') {
 			if (window.PaintApp) window.PaintApp.open();
 		} else if (key === 'minesweeper' || key === 'mine') {
@@ -1335,6 +1338,32 @@ function handleIconClick(e, icon) {
 
 	if (win && win.classList.contains('project-window')) {
 		updateFolderUISelection(win);
+	}
+}
+
+function updateFolderUISelection(win) {
+	if (!win) return;
+	if (win.classList.contains('xp-explorer-window') && window.FileExplorer && typeof window.FileExplorer.updateSelectionState === 'function') {
+		window.FileExplorer.updateSelectionState(win);
+		return;
+	}
+	const content = win.querySelector('.folder-content, .folder-content-wrapper, .xp-explorer-view-container');
+	if (!content) return;
+	const selected = content.querySelectorAll('.project-icon.selected, .xp-explorer-item.selected, .xp-details-row.selected');
+	const statusCount = win.querySelector('.status-bar-left, .xp-sb-count');
+	if (statusCount) {
+		if (selected.length === 0) {
+			const total = content.querySelectorAll('.project-icon, .xp-explorer-item, .xp-details-row').length;
+			statusCount.textContent = `${total} objects`;
+		} else {
+			statusCount.textContent = `${selected.length} object(s) selected`;
+		}
+	}
+}
+
+function openFolderWindow(folder) {
+	if (window.FileExplorer) {
+		window.FileExplorer.open(folder);
 	}
 }
 
@@ -2248,7 +2277,7 @@ function minimizeWindow(win, id) {
 	if (window.SettingsApp && window.SettingsApp.playSound) {
 		window.SettingsApp.playSound('window');
 	}
-	win.classList.add('minimizing');
+
 	win.dataset.originalLeft = win.style.left;
 	win.dataset.originalTop = win.style.top;
 	win.dataset.originalWidth = win.style.width;
@@ -2268,6 +2297,29 @@ function minimizeWindow(win, id) {
 		targetHeight = taskbarRect.height;
 	}
 
+	let finalized = false;
+	const finalizeMinimize = () => {
+		if (finalized) return;
+		finalized = true;
+		win.classList.add('hidden');
+		win.classList.remove('minimizing');
+		win.classList.add('minimized');
+		const taskbarBtnElement = document.querySelector(`#taskbar-windows .taskbar-window-btn[data-window-id="${id}"]`);
+		if (taskbarBtnElement) {
+			taskbarBtnElement.classList.remove('active');
+		}
+		if (activeWindow === win) {
+			activeWindow = null;
+		}
+	};
+
+	const hasAnim = !document.body.classList.contains('no-window-animations') && !document.body.classList.contains('anim-instant');
+	if (!hasAnim) {
+		finalizeMinimize();
+		return;
+	}
+
+	win.classList.add('minimizing');
 	win.style.left = `${targetLeft}px`;
 	win.style.top = `${targetTop}px`;
 	win.style.width = `${targetWidth}px`;
@@ -2275,20 +2327,14 @@ function minimizeWindow(win, id) {
 	win.style.opacity = '0';
 	win.style.transform = 'scale(0.1)';
 
-	win.addEventListener('transitionend', function handler() {
-		win.classList.add('hidden');
-		win.classList.remove('minimizing');
-		win.classList.add('minimized');
-		win.removeEventListener('transitionend', handler);
-	});
-
-	const taskbarBtnElement = document.querySelector(`#taskbar-windows .taskbar-window-btn[data-window-id="${id}"]`);
-	if (taskbarBtnElement) {
-		taskbarBtnElement.classList.remove('active');
-	}
-	if (activeWindow === win) {
-		activeWindow = null;
-	}
+	const handler = (e) => {
+		if (e.target === win) {
+			win.removeEventListener('transitionend', handler);
+			finalizeMinimize();
+		}
+	};
+	win.addEventListener('transitionend', handler);
+	setTimeout(finalizeMinimize, 400);
 }
 
 function unminimizeWindow(win) {
@@ -2296,19 +2342,26 @@ function unminimizeWindow(win) {
 		window.SettingsApp.playSound('window');
 	}
 	win.classList.remove('hidden', 'minimized');
-	win.classList.add('opening');
 
-	win.style.left = win.dataset.originalLeft;
-	win.style.top = win.dataset.originalTop;
-	win.style.width = win.dataset.originalWidth;
-	win.style.height = win.dataset.originalHeight;
+	win.style.left = win.dataset.originalLeft || '50px';
+	win.style.top = win.dataset.originalTop || '50px';
+	win.style.width = win.dataset.originalWidth || '600px';
+	win.style.height = win.dataset.originalHeight || '400px';
 	win.style.opacity = '1';
 	win.style.transform = 'none';
 
-	win.addEventListener('transitionend', function handler() {
-		win.classList.remove('opening');
-		win.removeEventListener('transitionend', handler);
-	});
+	const hasAnim = !document.body.classList.contains('no-window-animations') && !document.body.classList.contains('anim-instant');
+	if (hasAnim) {
+		win.classList.add('opening');
+		const handler = (e) => {
+			if (e.target === win) {
+				win.classList.remove('opening');
+				win.removeEventListener('transitionend', handler);
+			}
+		};
+		win.addEventListener('transitionend', handler);
+		setTimeout(() => win.classList.remove('opening'), 350);
+	}
 	bringWindowToFront(win);
 }
 
@@ -2361,18 +2414,16 @@ function closeWindow(win, id) {
 }
 
 function forceCloseWindow(win, id) {
-	win.classList.add('minimizing');
-	win.style.opacity = '0';
-	win.style.transform = 'scale(0.1)';
-
-	win.addEventListener('transitionend', function handler() {
+	let cleanedUp = false;
+	const cleanup = () => {
+		if (cleanedUp) return;
+		cleanedUp = true;
 		const overlay = document.getElementById(`overlay-${id}`);
 		if (overlay) {
 			overlay.remove();
-		} else {
+		} else if (win.parentElement) {
 			win.remove();
 		}
-		
 		delete openWindows[id];
 		if (window.Taskbar) {
 			window.Taskbar.removeWindowButton(id);
@@ -2380,8 +2431,26 @@ function forceCloseWindow(win, id) {
 		if (activeWindow === win) {
 			activeWindow = null;
 		}
-		win.removeEventListener('transitionend', handler);
-	});
+	};
+
+	const hasAnim = !document.body.classList.contains('no-window-animations') && !document.body.classList.contains('anim-instant');
+	if (!hasAnim) {
+		cleanup();
+		return;
+	}
+
+	win.classList.add('minimizing');
+	win.style.opacity = '0';
+	win.style.transform = 'scale(0.1)';
+
+	const handler = (e) => {
+		if (e.target === win) {
+			win.removeEventListener('transitionend', handler);
+			cleanup();
+		}
+	};
+	win.addEventListener('transitionend', handler);
+	setTimeout(cleanup, 400);
 }
 
 function openProjectWindow(project) {
@@ -3613,8 +3682,8 @@ function processRunCommand(command) {
 		const id = `window-cmd-${Date.now()}`;
 		const content = `
 			<div style="background-color: black; color: white; font-family: 'Consolas', 'Lucida Console', monospace; height: 100%; padding: 5px; overflow-y: auto;">
-				<div>MacroPof Windows XP [Version 5.1.5627]</div>
-				<div>(C) Copyright 1985-2001 MacroPof Corp.</div>
+				<div>Mircosoft Windows XP [Version 5.1.5627]</div>
+				<div>(C) Copyright 1985-2001 Mircosoft Corp.</div>
 				<br>
 				<div>C:\\Documents\\Wartets>${command}</div>
 				<br>
@@ -3630,6 +3699,8 @@ function processRunCommand(command) {
 		openShutdownDialog();
 	} else if (lowerCmd === 'calc' || lowerCmd === 'calculator') {
 		if (window.CalculatorApp) window.CalculatorApp.open();
+	} else if (lowerCmd === 'charmap' || lowerCmd === 'charactermap') {
+		if (window.CharacterMapApp) window.CharacterMapApp.open();
 	} else if (lowerCmd === 'mspaint' || lowerCmd === 'paint' || lowerCmd === 'pbrush') {
 		if (window.PaintApp) window.PaintApp.open();
 	} else if (lowerCmd === 'sol' || lowerCmd === 'solitaire' || lowerCmd === 'cards') {
@@ -3657,106 +3728,133 @@ function openMyComputerWindow() {
 	}
 
 	const contentHTML = `
-		<div class="folder-window-layout">
-			<div class="folder-menu-bar">
-				<ul><li><u>F</u>ile</li><li><u>E</u>dit</li><li><u>V</u>iew</li><li><u>F</u>avorites</li><li><u>T</u>ools</li><li><u>H</u>elp</li></ul>
-			</div>
-			<div class="folder-toolbar">
-				<div class="folder-nav-buttons">
-					<button class="folder-nav-btn" disabled><img src="data:image/svg+xml;charset=UTF-8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%232c63c3'><path d='M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z'/></svg>" alt="Back"></button>
-					<button class="folder-nav-btn" disabled><img src="data:image/svg+xml;charset=UTF-8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%232c63c3'><path d='M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z'/></svg>" alt="Forward"></button>
-					<button class="folder-nav-btn" disabled><img src="data:image/svg+xml;charset=UTF-8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%232c63c3'><path d='M4 12l1.41 1.41L11 7.83V20h2V7.83l5.58 5.59L20 12l-8-8-8 8z'/></svg>" alt="Up"></button>
-				</div>
-				<div class="folder-toolbar-separator"></div>
-				<div class="folder-address-bar-container">
-					<span>Address</span>
-					<input type="text" class="folder-address-bar" value="My Computer" readonly>
+		<div class="xp-explorer-layout">
+			<div class="xp-explorer-menubar">
+				<ul class="xp-menubar-list">
+					<li class="xp-menubar-item"><u>F</u>ile</li>
+					<li class="xp-menubar-item"><u>E</u>dit</li>
+					<li class="xp-menubar-item"><u>V</u>iew</li>
+					<li class="xp-menubar-item"><u>F</u>avorites</li>
+					<li class="xp-menubar-item"><u>T</u>ools</li>
+					<li class="xp-menubar-item"><u>H</u>elp</li>
+				</ul>
+				<div class="xp-menubar-brand">
+					<img src="../assets/images/desk/window_logo.png" alt="XP">
 				</div>
 			</div>
-			<div class="folder-main-layout">
-				<div class="folder-sidebar">
-					<div class="sidebar-section">
-						<h3>System Tasks</h3>
-						<ul>
-							<li><a href="#" id="mycomp-task-info"><span>View system information</span></a></li>
-							<li><a href="#" id="mycomp-task-ctrl"><span>Change a setting</span></a></li>
-						</ul>
-					</div>
-					<div class="sidebar-section">
-						<h3>Other Places</h3>
-						<ul>
-							<li><a href="#" id="mycomp-place-network"><span>My Network Places</span></a></li>
-							<li><a href="#" id="mycomp-place-docs"><span>My Documents</span></a></li>
-							<li><a href="#" id="mycomp-place-projects"><span>My Projects</span></a></li>
-						</ul>
-					</div>
-					<div class="sidebar-section details">
-						<h3>Details</h3>
-						<div class="details-content">
-							<b>My Computer</b><br>
-							System Folder
-						</div>
-					</div>
+			<div class="xp-explorer-toolbar">
+				<div class="xp-tb-group">
+					<button type="button" class="xp-tb-btn tb-back" disabled><div class="xp-tb-icon-back"></div><span>Back</span></button>
+					<button type="button" class="xp-tb-btn tb-forward" disabled><div class="xp-tb-icon-forward"></div></button>
+					<button type="button" class="xp-tb-btn tb-up" disabled><div class="xp-tb-icon-up"></div></button>
 				</div>
-				<div class="folder-main-content" style="padding: 12px; overflow-y: auto;">
-					<div class="my-comp-group">
-						<div class="my-comp-group-title">Files Stored on This Computer</div>
-						<div class="my-comp-grid">
-							<div class="my-comp-item" id="mycomp-item-shared">
-								<img src="../assets/images/desk/icons/Folder Closed (Alt).webp" alt="Shared Documents">
-								<div class="my-comp-texts">
-									<strong>Shared Documents</strong>
-									<span>System Folder</span>
-								</div>
-							</div>
-							<div class="my-comp-item" id="mycomp-item-userdocs">
-								<img src="../assets/images/desk/icons/My Profile Folder.webp" alt="User's Documents">
-								<div class="my-comp-texts">
-									<strong>Colin's Documents</strong>
-									<span>Personal Folder</span>
-								</div>
-							</div>
-						</div>
-					</div>
-
-					<div class="my-comp-group">
-						<div class="my-comp-group-title">Hard Disk Drives</div>
-						<div class="my-comp-grid">
-							<div class="my-comp-item" id="mycomp-item-drive-c">
-								<img src="https://api.iconify.design/mdi/harddisk.svg?color=%231b4b9b" alt="Drive C">
-								<div class="my-comp-texts">
-									<strong>Local Disk (C:)</strong>
-									<span>24.8 GB free of 40.0 GB</span>
-								</div>
+				<div class="xp-tb-sep"></div>
+				<div class="xp-tb-group">
+					<button type="button" class="xp-tb-btn tb-search" id="mycomp-tb-search"><img src="https://api.iconify.design/mdi/magnify.svg?color=%231b4b9b" alt=""><span>Search</span></button>
+					<button type="button" class="xp-tb-btn" id="mycomp-tb-folders"><img src="../assets/images/desk/icons/Folder Closed.webp" alt=""><span>Folders</span></button>
+				</div>
+			</div>
+			<div class="xp-explorer-addressbar-row">
+				<span class="xp-address-label">Address</span>
+				<div class="xp-address-combo">
+					<img src="../assets/images/desk/icons/My Computer.webp" class="xp-address-icon" alt="">
+					<input type="text" class="xp-address-input" value="My Computer" readonly>
+				</div>
+				<button type="button" class="xp-address-go-btn"><div class="xp-go-icon">➔</div><span>Go</span></button>
+			</div>
+			<div class="xp-explorer-body">
+				<div class="xp-explorer-sidebar">
+					<div class="xp-sidebar-tasks-view">
+						<div class="xp-task-box">
+							<div class="xp-task-header"><span>System Tasks</span><button type="button" class="xp-task-chevron"></button></div>
+							<div class="xp-task-content">
+								<a href="#" class="xp-task-link" id="mycomp-task-info"><img src="../assets/images/desk/icons/System Properties.webp" alt=""><span>View system information</span></a>
+								<a href="#" class="xp-task-link" id="mycomp-task-ctrl"><img src="../assets/images/desk/icons/Display.webp" alt=""><span>Change a setting</span></a>
 							</div>
 						</div>
-					</div>
-
-					<div class="my-comp-group">
-						<div class="my-comp-group-title">Devices with Removable Storage</div>
-						<div class="my-comp-grid">
-							<div class="my-comp-item" id="mycomp-item-floppy">
-								<img src="https://api.iconify.design/mdi/floppy.svg?color=%23555555" alt="Floppy A">
-								<div class="my-comp-texts">
-									<strong>3½ Floppy (A:)</strong>
-									<span>3½-Inch Floppy Disk</span>
-								</div>
+						<div class="xp-task-box">
+							<div class="xp-task-header"><span>Other Places</span><button type="button" class="xp-task-chevron"></button></div>
+							<div class="xp-task-content">
+								<a href="#" class="xp-task-link" id="mycomp-place-network"><img src="../assets/images/desk/icons/My Network Places.webp" alt=""><span>My Network Places</span></a>
+								<a href="#" class="xp-task-link" id="mycomp-place-docs"><img src="../assets/images/desk/icons/My Profile Folder.webp" alt=""><span>My Documents</span></a>
+								<a href="#" class="xp-task-link" id="mycomp-place-projects"><img src="../assets/images/desk/icons/Folder Open.webp" alt=""><span>My Projects</span></a>
 							</div>
-							<div class="my-comp-item" id="mycomp-item-cdrom">
-								<img src="https://api.iconify.design/mdi/disc.svg?color=%23555555" alt="CD Drive D">
-								<div class="my-comp-texts">
-									<strong>CD Drive (D:) XP_SP3</strong>
-									<span>Compact Disc</span>
-								</div>
+						</div>
+						<div class="xp-task-box">
+							<div class="xp-task-header"><span>Details</span><button type="button" class="xp-task-chevron"></button></div>
+							<div class="xp-task-content xp-task-details-body">
+								<b>My Computer</b><br>
+								System Folder
 							</div>
 						</div>
 					</div>
 				</div>
+				<div class="xp-explorer-splitter"></div>
+				<div class="xp-explorer-main">
+					<div class="xp-explorer-view-container" style="padding: 12px;">
+						<div class="my-comp-group">
+							<div class="my-comp-group-title">Files Stored on This Computer</div>
+							<div class="my-comp-grid">
+								<div class="my-comp-item" id="mycomp-item-shared">
+									<img src="../assets/images/desk/icons/Folder Closed (Alt).webp" alt="Shared Documents">
+									<div class="my-comp-texts">
+										<strong>Shared Documents</strong>
+										<span>System Folder</span>
+									</div>
+								</div>
+								<div class="my-comp-item" id="mycomp-item-userdocs">
+									<img src="../assets/images/desk/icons/My Profile Folder.webp" alt="User's Documents">
+									<div class="my-comp-texts">
+										<strong>Colin's Documents</strong>
+										<span>Personal Folder</span>
+									</div>
+								</div>
+							</div>
+						</div>
+
+						<div class="my-comp-group">
+							<div class="my-comp-group-title">Hard Disk Drives</div>
+							<div class="my-comp-grid">
+								<div class="my-comp-item" id="mycomp-item-drive-c">
+									<img src="https://api.iconify.design/mdi/harddisk.svg?color=%231b4b9b" alt="Drive C">
+									<div class="my-comp-texts">
+										<strong>Local Disk (C:)</strong>
+										<span>24.8 GB free of 40.0 GB</span>
+									</div>
+								</div>
+							</div>
+						</div>
+
+						<div class="my-comp-group">
+							<div class="my-comp-group-title">Devices with Removable Storage</div>
+							<div class="my-comp-grid">
+								<div class="my-comp-item" id="mycomp-item-floppy">
+									<img src="https://api.iconify.design/mdi/floppy.svg?color=%23555555" alt="Floppy A">
+									<div class="my-comp-texts">
+										<strong>3½ Floppy (A:)</strong>
+										<span>3½-Inch Floppy Disk</span>
+									</div>
+								</div>
+								<div class="my-comp-item" id="mycomp-item-cdrom">
+									<img src="https://api.iconify.design/mdi/disc.svg?color=%23555555" alt="CD Drive D">
+									<div class="my-comp-texts">
+										<strong>CD Drive (D:) XP_SP3</strong>
+										<span>Compact Disc</span>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="xp-explorer-statusbar">
+				<div class="xp-sb-pane xp-sb-count">5 objects</div>
+				<div class="xp-sb-pane xp-sb-zone"><img src="../assets/images/desk/icons/My Computer.webp" alt=""><span>Local Computer</span></div>
 			</div>
 		</div>
 	`;
 
-	const win = createXPWindow(id, 'My Computer', contentHTML, 680, 480, {
+	const win = createXPWindow(id, 'My Computer', contentHTML, 720, 500, {
 		iconSrc: '../assets/images/desk/icons/My Computer.webp'
 	});
 	win.querySelector('.xp-window-content').style.padding = '0';
@@ -3767,7 +3865,7 @@ function openMyComputerWindow() {
 	});
 	win.querySelector('#mycomp-task-ctrl').addEventListener('click', (e) => {
 		e.preventDefault();
-		if (window.SettingsApp) window.SettingsApp.open('system');
+		if (window.SettingsApp) window.SettingsApp.open('appearance');
 	});
 	win.querySelector('#mycomp-place-network').addEventListener('click', (e) => {
 		e.preventDefault();
@@ -3795,7 +3893,14 @@ function openMyComputerWindow() {
 		showXPDialog('Drive A:', 'Please insert a disk into drive A:.', 'error');
 	});
 	win.querySelector('#mycomp-item-cdrom').addEventListener('dblclick', () => {
-		showXPDialog('CD Drive (D:)', 'MacroPof Windows XP Professional SP3 Installation Media.', 'info');
+		showXPDialog('CD Drive (D:)', 'Mircosoft Windows XP Professional SP3 Installation Media.', 'info');
+	});
+
+	win.querySelectorAll('.xp-task-header').forEach(header => {
+		header.addEventListener('click', () => {
+			const box = header.closest('.xp-task-box');
+			if (box) box.classList.toggle('collapsed');
+		});
 	});
 }
 
@@ -4165,7 +4270,7 @@ function openNetworkPlacesWindow() {
 								<img src="../assets/images/desk/icons/Earth (fixed).webp" alt="">
 								<div class="xp-tile-texts">
 									<strong>Entire Network</strong>
-									<span>MacroPof Windows Network</span>
+									<span>Mircosoft Windows Network</span>
 								</div>
 							</div>
 							<div class="xp-explorer-item mode-tile net-card-item" id="net-item-workgroup" style="cursor: pointer;">
@@ -4237,7 +4342,7 @@ function openNetworkPlacesWindow() {
 		showXPDialog('Network Setup Wizard', 'Your home network is configured with IP 192.168.1.1 gateway.', 'info');
 	});
 
-	win.querySelector('#net-item-entire').addEventListener('dblclick', () => showXPDialog('Entire Network', 'Scanning MacroPof Windows Network domains... (MSHOME)', 'info'));
+	win.querySelector('#net-item-entire').addEventListener('dblclick', () => showXPDialog('Entire Network', 'Scanning Mircosoft Windows Network domains... (MSHOME)', 'info'));
 	win.querySelector('#net-item-workgroup').addEventListener('dblclick', () => showXPDialog('Workgroup (MSHOME)', 'Found hosts: Colin-Laptop, Router-Gateway.', 'info'));
 	win.querySelector('#net-item-laptop').addEventListener('dblclick', () => showXPDialog('Colin-Laptop', 'Shared resources:\n\\\\Colin-Laptop\\Public\n\\\\Colin-Laptop\\Projects', 'info'));
 
@@ -4640,10 +4745,10 @@ async function openOutlookExpress() {
 					{ label: 'Contents and Index', action: () => window.open('https://github.com/wartets/Wartets.github.io', '_blank') },
 					{ separator: true },
 					{
-						label: 'About MacroPof Outlook Express',
+						label: 'About Mircosoft Outlook Express',
 						bold: true,
 						action: () => {
-							showXPDialog('About Outlook Express', 'MacroPof Outlook Express 6.0\nRunning on Windows XP Professional\nPortfolio Communications Client', 'info');
+							showXPDialog('About Outlook Express', 'Mircosoft Outlook Express 6.0\nRunning on Windows XP Professional\nPortfolio Communications Client', 'info');
 						}
 					}
 				];

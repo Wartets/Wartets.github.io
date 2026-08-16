@@ -440,6 +440,10 @@
 									<img src="../assets/images/desk/icons/Paint.webp" class="xp-start-item-icon" alt="">
 									<span class="xp-start-title">Paint</span>
 								</div>
+								<div class="xp-start-flyout-item" data-action="open-charmap">
+									<img src="https://api.iconify.design/mdi/format-font.svg?color=%231b4b9b" class="xp-start-item-icon" alt="">
+									<span class="xp-start-title">Character Map</span>
+								</div>
 								<div class="xp-start-flyout-item" data-action="new-text-document">
 									<img src="../assets/images/desk/icons/File.webp" class="xp-start-item-icon" alt="">
 									<span class="xp-start-title">Notepad</span>
@@ -843,6 +847,9 @@
 				case 'open-calculator':
 					if (window.CalculatorApp) window.CalculatorApp.open();
 					break;
+				case 'open-charmap':
+					if (window.CharacterMapApp) window.CharacterMapApp.open();
+					break;
 				case 'open-paint':
 					if (window.PaintApp) window.PaintApp.open();
 					break;
@@ -998,6 +1005,7 @@
 			if (window.AchievementsManager) {
 				window.AchievementsManager.progress('start_menu_open', 1);
 			}
+			startMenuEl.style.zIndex = '100005';
 			startMenuEl.classList.remove('hidden');
 			if (startButtonEl) startButtonEl.classList.add('active');
 			if (taskbarStartButtonEl) taskbarStartButtonEl.classList.add('active');

@@ -391,7 +391,7 @@
 				CYNICAL: [
 					"Very mature. Did you come up with that insult all by yourself or copy it from a forum?",
 					"Keep talking. I have been insulted by millions of users since 1997, and I outlived them all.",
-					"Is that the best you have? Even MacroPof Bob had thicker skin than that.",
+					"Is that the best you have? Even Mircosoft Bob had thicker skin than that.",
 					"Fascinating critique. Let me file that directly into the virtual Recycle Bin."
 				],
 				OFFENDED: [
@@ -577,7 +577,7 @@
 					"QBasic 1.1 shipped with MS-DOS 5.0, letting curious minds build games like GORILLA.BAS and NIBBLES.BAS."
 				],
 				OS2: [
-					"OS/2 was originally co-developed by IBM and MacroPof before the architectural divergence of 1991.",
+					"OS/2 was originally co-developed by IBM and Mircosoft before the architectural divergence of 1991.",
 					"OS/2 Warp 3.0 was renowned for running DOS, Windows 3.1, and native 32-bit OS/2 applications concurrently.",
 					"The Workplace Shell (WPS) object-oriented desktop was years ahead of its time in GUI architecture."
 				],
@@ -713,7 +713,7 @@
 			},
 			{
 				topic: 'PAPERCLIP',
-				keywords: ['paperclip', 'paper clip', 'stationery', 'wire', 'office assistant', 'kevan atteberry', 'clippit', 'MacroPof bob']
+				keywords: ['paperclip', 'paper clip', 'stationery', 'wire', 'office assistant', 'kevan atteberry', 'clippit', 'Mircosoft bob']
 			},
 			{
 				topic: 'STORY_CONSPIRACY',
@@ -741,7 +741,7 @@
 			},
 			{
 				topic: 'OFFICE_LORE',
-				keywords: ['rover', 'merlin', 'the dot', 'wordart', 'MacroPof bob', 'comic sans', 'melissa virus', 'vba macro', 'acs file']
+				keywords: ['rover', 'merlin', 'the dot', 'wordart', 'Mircosoft bob', 'comic sans', 'melissa virus', 'vba macro', 'acs file']
 			},
 			{
 				topic: 'PSYCHOLOGY_PRODUCTIVITY',

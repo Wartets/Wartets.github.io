@@ -108,10 +108,95 @@
 		},
 
 		unlock(id) {
-			const achievement = achievementsData.find(a => a.id === id);
-			if (achievement) {
-				this.progress(id, achievement.maxProgress);
+			if (!initialized) {
+				this.init().then(() => this.unlock(id));
+				return null;
 			}
+			const achievement = achievementsData.find(a => a.id === id || a.title.toLowerCase() === String(id).toLowerCase());
+			if (!achievement) return null;
+			if (!stateCache[achievement.id]) {
+				stateCache[achievement.id] = { progress: 0, unlocked: false, unlockedAt: null };
+			}
+			const state = stateCache[achievement.id];
+			state.progress = achievement.maxProgress;
+			if (!state.unlocked) {
+				state.unlocked = true;
+				state.unlockedAt = new Date().toISOString();
+				saveCurrentState();
+				this.onUnlock(achievement);
+			} else {
+				saveCurrentState();
+			}
+			this.checkMetaAchievements();
+			const win = document.getElementById('window-achievements-vault');
+			if (win) this.renderWindowContent(win, achievement.id);
+			return this.getById(achievement.id);
+		},
+
+		validate(id) {
+			return this.unlock(id);
+		},
+
+		unlockAll() {
+			if (!initialized) {
+				this.init().then(() => this.unlockAll());
+				return [];
+			}
+			achievementsData.forEach(item => {
+				if (!stateCache[item.id]) {
+					stateCache[item.id] = { progress: 0, unlocked: false, unlockedAt: null };
+				}
+				stateCache[item.id].progress = item.maxProgress;
+				stateCache[item.id].unlocked = true;
+				stateCache[item.id].unlockedAt = stateCache[item.id].unlockedAt || new Date().toISOString();
+			});
+			saveCurrentState();
+			if (window.SettingsApp && window.SettingsApp.playSound) {
+				window.SettingsApp.playSound('asterisk');
+			}
+			const win = document.getElementById('window-achievements-vault');
+			if (win) this.renderWindowContent(win);
+			return this.getAll();
+		},
+
+		reset(showConfirmation = false) {
+			const executeReset = () => {
+				stateCache = {};
+				saveCurrentState();
+				const win = document.getElementById('window-achievements-vault');
+				if (win) this.renderWindowContent(win);
+				if (window.SettingsApp && window.SettingsApp.playSound) {
+					window.SettingsApp.playSound('recycle');
+				}
+				this.checkInitialAchievements();
+			};
+
+			if (showConfirmation && typeof showXPDialog === 'function') {
+				showXPDialog('Reset Milestones', 'Are you sure you want to reset all achievement progress? All earned points and unlocked trophies will be permanently cleared.', 'warning', {
+					buttons: ['Yes', 'No'],
+					callback: (result) => {
+						if (result === 'Yes') {
+							executeReset();
+						}
+					}
+				});
+			} else {
+				executeReset();
+			}
+		},
+
+		list() {
+			const all = this.getAll();
+			if (typeof console !== 'undefined' && console.table) {
+				console.table(all.map(a => ({
+					ID: a.id,
+					Title: a.title,
+					Progress: `${a.currentProgress}/${a.maxProgress}`,
+					Points: a.points,
+					Unlocked: a.unlocked ? 'Yes' : 'No'
+				})));
+			}
+			return all;
 		},
 
 		exportProgress() {
@@ -234,20 +319,81 @@
 			}
 		},
 
+		showNotificationToast(achievement) {
+			let container = document.getElementById('achievement-toast-container');
+			if (!container) {
+				container = document.createElement('div');
+				container.id = 'achievement-toast-container';
+				container.className = 'xp-achievement-toast-container';
+				const screenFrame = document.getElementById('screen-frame') || document.body;
+				screenFrame.appendChild(container);
+			}
+
+			const toast = document.createElement('div');
+			toast.className = 'xp-achievement-toast';
+			toast.dataset.achId = achievement.id;
+
+			const iconSrc = achievement.icon || 'https://api.iconify.design/mdi/trophy-award.svg?color=%23e68a00';
+
+			toast.innerHTML = `
+				<div class="xp-toast-header">
+					<div class="xp-toast-header-title">
+						<img src="../assets/images/desk/window_logo.png" alt="" class="xp-toast-flag">
+						<span>Milestone Unlocked!</span>
+					</div>
+					<button type="button" class="xp-toast-close" title="Close">×</button>
+				</div>
+				<div class="xp-toast-body">
+					<div class="xp-toast-icon-frame">
+						<img src="${iconSrc}" alt="" class="xp-toast-icon">
+						<div class="xp-toast-check">✓</div>
+					</div>
+					<div class="xp-toast-content">
+						<div class="xp-toast-title">${achievement.title}</div>
+						<div class="xp-toast-meta">
+							<span class="xp-toast-pts">+${achievement.points} PTS</span>
+							<span class="xp-toast-cat">[${(achievement.category || 'System').toUpperCase()}]</span>
+						</div>
+					</div>
+				</div>
+			`;
+
+			const closeBtn = toast.querySelector('.xp-toast-close');
+			const dismiss = () => {
+				toast.classList.remove('visible');
+				toast.classList.add('dismissing');
+				setTimeout(() => toast.remove(), 390);
+			};
+
+			closeBtn.addEventListener('click', (e) => {
+				e.stopPropagation();
+				dismiss();
+			});
+
+			toast.addEventListener('click', () => {
+				dismiss();
+				this.open(achievement.id);
+			});
+
+			container.appendChild(toast);
+
+			requestAnimationFrame(() => {
+				toast.classList.add('visible');
+			});
+
+			setTimeout(() => {
+				if (toast.parentElement) {
+					dismiss();
+				}
+			}, 7000);
+		},
+
 		onUnlock(achievement) {
 			if (window.SettingsApp && window.SettingsApp.playSound) {
 				window.SettingsApp.playSound('asterisk');
 			}
 
-			const iconSrc = achievement.icon || 'https://api.iconify.design/mdi/trophy-award.svg';
-			const title = `Achievement Unlocked: ${achievement.title}`;
-			const message = `[+${achievement.points} pts] ${achievement.description}`;
-
-			if (window.Taskbar && typeof window.Taskbar.showBalloon === 'function') {
-				window.Taskbar.showBalloon(title, message, iconSrc, 8000, () => {
-					this.open(achievement.id);
-				});
-			}
+			this.showNotificationToast(achievement);
 
 			const win = document.getElementById('window-achievements-vault');
 			if (win) {
@@ -440,21 +586,10 @@
 					if (window.ContextMenu) {
 						const rect = optMenu.getBoundingClientRect();
 						const items = [
+							{ separator: true },
 							{
-								label: 'Reset All Achievements',
-								action: () => {
-									showXPDialog('Reset Milestones', 'Are you sure you want to reset all achievement progress?', 'warning', {
-										buttons: ['Yes', 'No'],
-										callback: (result) => {
-											if (result === 'Yes') {
-												stateCache = {};
-												saveCurrentState();
-												this.renderWindowContent(win);
-												this.checkInitialAchievements();
-											}
-										}
-									});
-								}
+								label: 'Reset All Achievements...',
+								action: () => this.reset(true)
 							}
 						];
 						window.ContextMenu.show(items, rect.left, rect.bottom + 2);
@@ -614,4 +749,13 @@
 
 	window.AchievementsManager = AchievementsManager;
 	window.Achievements = AchievementsManager;
+	window.achievements = AchievementsManager;
+
+	window.unlockAllAchievements = () => AchievementsManager.unlockAll();
+	window.unlockAchievement = (id) => AchievementsManager.unlock(id);
+	window.validateAchievement = (id) => AchievementsManager.validate(id);
+	window.progressAchievement = (id, amt) => AchievementsManager.progress(id, amt);
+	window.setAchievementProgress = (id, val) => AchievementsManager.setProgress(id, val);
+	window.resetAchievements = (confirm = false) => AchievementsManager.reset(confirm);
+	window.listAchievements = () => AchievementsManager.list();
 })();

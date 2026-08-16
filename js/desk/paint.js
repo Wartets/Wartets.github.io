@@ -2238,7 +2238,7 @@
 								label: 'About Paint',
 								bold: true,
 								action: () => {
-									showXPDialog('About Paint', 'MacroPof Windows XP Paint\nVersion 5.1 (Build 2600.xpsp_sp3_gdr)\nBitmap Graphics Editor Engine', 'info');
+									showXPDialog('About Paint', 'Mircosoft Windows XP Paint\nVersion 5.1 (Build 2600.xpsp_sp3_gdr)\nBitmap Graphics Editor Engine', 'info');
 								}
 							}
 						];

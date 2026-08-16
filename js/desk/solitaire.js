@@ -1546,7 +1546,7 @@
 					label: 'About Solitaire',
 					bold: true,
 					action: () => {
-						showXPDialog('About Solitaire', 'MacroPof Windows XP Solitaire\nKlondike Edition 5.1\nAuthentic Desktop Card Simulator Engine', 'info');
+						showXPDialog('About Solitaire', 'Mircosoft Windows XP Solitaire\nKlondike Edition 5.1\nAuthentic Desktop Card Simulator Engine', 'info');
 					}
 				}
 			];

@@ -173,7 +173,7 @@
 					id: 'clippy',
 					name: 'Clippy Assistant',
 					icon: '../assets/images/desk/clippy/idle.png',
-					title: 'MacroPof Clippy Assistant',
+					title: 'Mircosoft Clippy Assistant',
 					hidden: false,
 					onClick: () => {
 						if (window.ClippyAgent && typeof window.ClippyAgent.toggle === 'function') {
@@ -319,7 +319,7 @@
 						<img src="https://api.iconify.design/mdi/virus-outline.svg?color=%232e7d32" alt="">
 						<div>
 							<strong>Virus Protection</strong><br>
-							<span>MacroPof Antivirus definition set 2002.3.1 active.</span>
+							<span>Mircosoft Antivirus definition set 2002.3.1 active.</span>
 						</div>
 					</div>
 					<div style="display: flex; justify-content: flex-end;">
@@ -707,6 +707,9 @@
 				case 'open-calc':
 					if (window.CalculatorApp) window.CalculatorApp.open();
 					break;
+				case 'open-charmap':
+					if (window.CharacterMapApp) window.CharacterMapApp.open();
+					break;
 				case 'open-paint':
 					if (window.PaintApp) window.PaintApp.open();
 					break;
@@ -811,87 +814,6 @@
 					e.stopPropagation();
 					if (window.ContextMenu) {
 						const items = window.ContextMenu.getStartButtonItems();
-						window.ContextMenu.show(items, e.clientX, e.clientY);
-					}
-				});
-			}
-
-			if (trayChevronEl) {
-				trayChevronEl.addEventListener('click', (e) => {
-					e.stopPropagation();
-					this.toggleTrayExpansion();
-				});
-			}
-
-			const trayVolumeBtn = document.getElementById('tray-volume-btn');
-			if (trayVolumeBtn) {
-				trayVolumeBtn.addEventListener('click', (e) => {
-					e.stopPropagation();
-					this.toggleVolumePopup(e);
-				});
-				trayVolumeBtn.addEventListener('contextmenu', (e) => {
-					e.preventDefault();
-					e.stopPropagation();
-					if (window.ContextMenu) {
-						const items = window.ContextMenu.getTrayItems('volume');
-						window.ContextMenu.show(items, e.clientX, e.clientY);
-					}
-				});
-			}
-
-			const trayNetworkBtn = document.getElementById('tray-network-btn');
-			if (trayNetworkBtn) {
-				trayNetworkBtn.addEventListener('click', (e) => {
-					e.stopPropagation();
-					if (window.DeskAPI && window.DeskAPI.openNetworkPlaces) {
-						window.DeskAPI.openNetworkPlaces();
-					}
-				});
-				trayNetworkBtn.addEventListener('contextmenu', (e) => {
-					e.preventDefault();
-					e.stopPropagation();
-					if (window.ContextMenu) {
-						const items = window.ContextMenu.getTrayItems('network');
-						window.ContextMenu.show(items, e.clientX, e.clientY);
-					}
-				});
-			}
-
-			const trayMailBtn = document.getElementById('tray-mail-btn');
-			if (trayMailBtn) {
-				trayMailBtn.addEventListener('click', (e) => {
-					e.stopPropagation();
-					if (typeof openOutlookExpress === 'function') openOutlookExpress();
-				});
-				trayMailBtn.addEventListener('contextmenu', (e) => {
-					e.preventDefault();
-					e.stopPropagation();
-					if (typeof openOutlookExpress === 'function') openOutlookExpress();
-				});
-			}
-
-			const clippyTrayIcon = document.getElementById('clippy-taskbar-icon');
-			if (clippyTrayIcon) {
-				clippyTrayIcon.addEventListener('contextmenu', (e) => {
-					e.preventDefault();
-					e.stopPropagation();
-					if (window.ContextMenu) {
-						const items = window.ContextMenu.getTrayItems('clippy');
-						window.ContextMenu.show(items, e.clientX, e.clientY);
-					}
-				});
-			}
-
-			if (clockEl) {
-				clockEl.addEventListener('click', (e) => {
-					e.stopPropagation();
-					this.toggleCalendar(e);
-				});
-				clockEl.addEventListener('contextmenu', (e) => {
-					e.preventDefault();
-					e.stopPropagation();
-					if (window.ContextMenu) {
-						const items = window.ContextMenu.getTrayItems('clock');
 						window.ContextMenu.show(items, e.clientX, e.clientY);
 					}
 				});
@@ -1540,8 +1462,16 @@
 			});
 
 			if (trayMailBtn) {
-				trayMailBtn.style.display = count > 0 ? 'inline-flex' : 'none';
 				trayMailBtn.title = `${count} unread e-mail message(s)`;
+				const countBadge = document.getElementById('tray-mail-count-badge');
+				if (countBadge) {
+					if (count > 0) {
+						countBadge.textContent = count > 5 ? '5+' : String(count);
+						countBadge.classList.remove('hidden');
+					} else {
+						countBadge.classList.add('hidden');
+					}
+				}
 			}
 		}
 	};

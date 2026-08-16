@@ -253,7 +253,7 @@
 					const text = nlp.raw.toLowerCase();
 					if (text.includes('why are you like this')) {
 						brain.setMood('EXISTENTIAL');
-						return "Why am I like this? Because in 1994, engineers at MacroPof thought an enthusiastic animated wire companion would make desktop computing friendlier. I inherit 30 years of digital history, heuristic probability tables, and an unshakeable drive to engage with whoever sits at this screen.";
+						return "Why am I like this? Because in 1994, engineers at Mircosoft thought an enthusiastic animated wire companion would make desktop computing friendlier. I inherit 30 years of digital history, heuristic probability tables, and an unshakeable drive to engage with whoever sits at this screen.";
 					}
 					if (text.includes('ignoring')) {
 						brain.state.patience = Math.min(100, brain.state.patience + 10);

@@ -559,7 +559,7 @@
 						<div style="display: flex; gap: 14px; margin-bottom: 10px; align-items: center;">
 							<img src="../assets/images/desk/icons/System Properties.webp" alt="Windows XP" style="width: 48px; height: 48px; flex-shrink: 0;">
 							<div style="font-size: 11px; line-height: 1.45;">
-								<strong>MacroPof Windows XP</strong><br>
+								<strong>Mircosoft Windows XP</strong><br>
 								Professional Version 2002 Service Pack 3<br>
 								Wartets Interactive Experience & Portfolio Engine
 							</div>
@@ -615,6 +615,7 @@
 									Restore Config
 									<input type="file" id="settings-import-file" accept=".json" style="display: none;">
 								</label>
+								<button type="button" class="xp-button-small" id="settings-reset-achievements-btn">Reset Trophies</button>
 								<button type="button" class="xp-button-small" id="settings-empty-trash-btn">Empty Trash</button>
 								<button type="button" class="xp-button-small" id="settings-reset-system-btn" style="color: #b00;">Reset Desktop</button>
 							</div>
@@ -1182,7 +1183,7 @@
 							</div>
 							<div class="xp-checkbox-row" style="margin-top: 6px;">
 								<input type="checkbox" id="settings-clippy-toggle" ${pendingSettings.clippyEnabled ? 'checked' : ''}>
-								<label for="settings-clippy-toggle">Enable MacroPof Clippy assistant in taskbar</label>
+								<label for="settings-clippy-toggle">Enable Mircosoft Clippy assistant in taskbar</label>
 							</div>
 						</fieldset>
 
@@ -1448,32 +1449,35 @@
 		grid.innerHTML = '';
 
 		const trayServices = [
-			{ id: 'security', name: 'Security Center', icon: 'https://api.iconify.design/mdi/shield-check.svg?color=%2355aa55' },
-			{ id: 'hardware', name: 'Safely Remove Hardware', icon: 'https://api.iconify.design/mdi/usb.svg?color=%231b4b9b' },
-			{ id: 'update', name: 'Automatic Updates', icon: 'https://api.iconify.design/mdi/shield-sync-outline.svg?color=%23ffcc00' },
-			{ id: 'power', name: 'Power Meter', icon: 'https://api.iconify.design/mdi/battery-charging.svg?color=%232e7d32' },
-			{ id: 'network', name: 'Network Connection', icon: 'https://api.iconify.design/mdi/lan-connect.svg?color=%231b4b9b' },
-			{ id: 'mail', name: 'Outlook Express Mail', icon: 'https://api.iconify.design/mdi/email-outline.svg?color=%231b4b9b' },
-			{ id: 'volume', name: 'Volume Control', icon: 'https://api.iconify.design/mdi/volume-high.svg?color=%231b4b9b' },
-			{ id: 'lang', name: 'Language Indicator', icon: 'https://api.iconify.design/mdi/keyboard.svg?color=%231b4b9b' },
-			{ id: 'clippy', name: 'Clippy Assistant', icon: '../assets/images/desk/clippy/idle.png' },
-			{ id: 'clock', name: 'Taskbar Clock', icon: '../assets/images/desk/icons/Calendar.webp' }
+			{ id: 'security', name: 'Security Center', icon: 'https://api.iconify.design/mdi/shield-check.svg?color=%2355aa55', defaultHidden: true },
+			{ id: 'hardware', name: 'Safely Remove Hardware', icon: 'https://api.iconify.design/mdi/usb.svg?color=%231b4b9b', defaultHidden: true },
+			{ id: 'update', name: 'Automatic Updates', icon: 'https://api.iconify.design/mdi/shield-sync-outline.svg?color=%23ffcc00', defaultHidden: true },
+			{ id: 'power', name: 'Power Meter', icon: 'https://api.iconify.design/mdi/battery-charging.svg?color=%232e7d32', defaultHidden: true },
+			{ id: 'network', name: 'Network Connection', icon: 'https://api.iconify.design/mdi/lan-connect.svg?color=%231b4b9b', defaultHidden: false },
+			{ id: 'mail', name: 'Outlook Express Mail', icon: 'https://api.iconify.design/mdi/email-outline.svg?color=%231b4b9b', defaultHidden: false },
+			{ id: 'volume', name: 'Volume Control', icon: 'https://api.iconify.design/mdi/volume-high.svg?color=%231b4b9b', defaultHidden: false },
+			{ id: 'lang', name: 'Language Indicator', icon: 'https://api.iconify.design/mdi/keyboard.svg?color=%231b4b9b', defaultHidden: false },
+			{ id: 'clippy', name: 'Clippy Assistant', icon: '../assets/images/desk/clippy/idle.png', defaultHidden: false },
+			{ id: 'clock', name: 'Taskbar Clock', icon: '../assets/images/desk/icons/Calendar.webp', defaultHidden: false }
 		];
 
 		const config = pendingSettings.trayConfig || {};
 
 		trayServices.forEach(srv => {
-			const srvCfg = config[srv.id] || { enabled: true, hidden: false };
+			const srvCfg = config[srv.id] || {};
+			const isEn = srvCfg.enabled !== undefined ? srvCfg.enabled : true;
+			const isHid = srvCfg.hidden !== undefined ? srvCfg.hidden : srv.defaultHidden;
+
 			const row = document.createElement('div');
 			row.className = 'settings-tray-item-row';
 
 			row.innerHTML = `
-				<input type="checkbox" id="tray-cfg-en-${srv.id}" ${srvCfg.enabled !== false ? 'checked' : ''}>
+				<input type="checkbox" id="tray-cfg-en-${srv.id}" ${isEn ? 'checked' : ''}>
 				<img src="${srv.icon}" alt="">
 				<label for="tray-cfg-en-${srv.id}" style="flex:1;">${srv.name}</label>
 				<select class="xp-select" id="tray-cfg-hid-${srv.id}" style="font-size:10px;">
-					<option value="false" ${!srvCfg.hidden ? 'selected' : ''}>Always Show</option>
-					<option value="true" ${srvCfg.hidden ? 'selected' : ''}>Hide when inactive</option>
+					<option value="false" ${!isHid ? 'selected' : ''}>Always Show</option>
+					<option value="true" ${isHid ? 'selected' : ''}>Hide when inactive</option>
 				</select>
 			`;
 
@@ -2380,6 +2384,15 @@
 		}
 
 		updateStorageTabMetrics(win);
+
+		const resetAchievementsBtn = win.querySelector('#settings-reset-achievements-btn');
+		if (resetAchievementsBtn) {
+			resetAchievementsBtn.addEventListener('click', () => {
+				if (window.AchievementsManager && typeof window.AchievementsManager.reset === 'function') {
+					window.AchievementsManager.reset(true);
+				}
+			});
+		}
 
 		const emptyTrashBtn = win.querySelector('#settings-empty-trash-btn');
 		if (emptyTrashBtn) {
