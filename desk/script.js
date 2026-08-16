@@ -592,6 +592,7 @@ window.DeskAPI = {
 	openCalculator: () => (window.CalculatorApp ? window.CalculatorApp.open() : openCalculator()),
 	openPaint: (file) => (window.PaintApp ? window.PaintApp.open(file) : openPaint(file)),
 	openMinesweeperGame: () => (window.MinesweeperApp ? window.MinesweeperApp.open() : openMinesweeper()),
+	openSolitaireGame: () => (window.SolitaireApp ? window.SolitaireApp.open() : openSolitaire()),
 	openWinampPlayer: () => openWinamp(),
 	getMoonPhaseDay: () => (typeof getMoonPhaseDayNumber === 'function') ? getMoonPhaseDayNumber() : null,
 	getRecycleBinCount: () => (typeof fs !== 'undefined' && fs) ? fs.loadRecycleBinItems().length : 0,
@@ -637,6 +638,9 @@ window.DeskAPI = {
 			if (window.PaintApp) window.PaintApp.open();
 		} else if (key === 'minesweeper' || key === 'mine') {
 			if (typeof openMinesweeper === 'function') openMinesweeper();
+		} else if (key === 'solitaire' || key === 'sol' || key === 'cards' || key === 'klondike') {
+			if (window.SolitaireApp) window.SolitaireApp.open();
+			else if (typeof openSolitaire === 'function') openSolitaire();
 		} else if (key === 'musicplayer' || key === 'winamp' || key === 'music') {
 			if (typeof openWinamp === 'function') openWinamp();
 		} else if (key === 'terminal' || key === 'cmd' || key === 'prompt') {
@@ -984,12 +988,16 @@ function startInlineRename(iconElement) {
 	});
 }
 
-function resolveProjectTitle(title) {
-	if (typeof title === 'string') return title;
-	if (title && typeof title === 'object') {
-		return title.en || title.fr || Object.values(title)[0] || '';
+function resolveLocalizedText(field) {
+	if (typeof field === 'string') return field;
+	if (field && typeof field === 'object') {
+		return field.en || field.fr || Object.values(field)[0] || '';
 	}
 	return '';
+}
+
+function resolveProjectTitle(title) {
+	return resolveLocalizedText(title);
 }
 
 function relocateElement(element, destinationFolder) {
@@ -2043,8 +2051,8 @@ function openElementInfoWindow(element) {
 		}
 		if (project.link) extraRows += buildInfoRow('Link', `<a href="${project.link}" target="_blank">${project.link}</a>`);
 		if (project.github) extraRows += buildInfoRow('GitHub', `<a href="${project.github}" target="_blank">${project.github}</a>`);
-		const description = project.description || project.longDescription || project.longDescrition || '';
-		if (project.icon) previewHtml += `<img src="${project.icon}" class="info-thumbnail" alt="${element.name}">`;
+		const description = resolveLocalizedText(project.longDescription) || resolveLocalizedText(project.longDescrition) || resolveLocalizedText(project.description) || '';
+		if (project.icon || project.image) previewHtml += `<img src="${project.icon || project.image}" class="info-thumbnail" alt="${element.name}">`;
 		if (description) previewHtml += `<div class="info-preview">${description}</div>`;
 	}
 
@@ -2356,23 +2364,28 @@ function openProjectWindow(project) {
 			<span>GitHub</span>
 		</a>` : '';
 
-	const projectLink = `
+	const projectLink = project.link ? `
 		<a href="${project.link}" target="_blank" class="xp-button project-link-button">
 			<img src="https://www.svgrepo.com/show/326731/open-outline.svg" alt="Open">
 			<span>Open in New Tab</span>
-		</a>`;
+		</a>` : '';
 
-	const runLink = `
+	const runLink = project.link ? `
 		<button class="xp-button project-link-button run-project-btn">
 			<img src="https://api.iconify.design/mdi/play-box-outline.svg" alt="Run">
 			<span>Run Application</span>
-		</button>`;
+		</button>` : '';
+
+	const fullDescription = resolveLocalizedText(project.longDescription) 
+		|| resolveLocalizedText(project.longDescrition) 
+		|| resolveLocalizedText(project.description) 
+		|| 'No description available.';
 
 	const content = `
 		<div class="project-view-layout">
 			<div class="project-view-sidebar">
 				<div class="project-view-image-container">
-					<img src="${project.icon}" alt="${project.title}" class="project-view-image">
+					<img src="${project.icon || project.image || '../assets/images/desk/icons/File.webp'}" alt="${projectTitle}" class="project-view-image">
 				</div>
 				<h4>Quick Links</h4>
 				<div class="project-view-links">
@@ -2388,7 +2401,7 @@ function openProjectWindow(project) {
 			</div>
 			<div class="project-view-main">
 				<h2>${projectTitle}</h2>
-				<p class="project-long-description">${project.longDescription || project.longDescrition || project.description || 'No description available.'}</p>
+				<p class="project-long-description">${fullDescription}</p>
 			</div>
 			<div class="project-view-statusbar">
 				<span>Ready</span>
@@ -2461,6 +2474,12 @@ function openWinamp() {
 function openMinesweeper() {
 	if (window.MinesweeperApp && typeof window.MinesweeperApp.open === 'function') {
 		return window.MinesweeperApp.open();
+	}
+}
+
+function openSolitaire() {
+	if (window.SolitaireApp && typeof window.SolitaireApp.open === 'function') {
+		return window.SolitaireApp.open();
 	}
 }
 
@@ -3503,6 +3522,9 @@ function processRunCommand(command) {
 		if (window.CalculatorApp) window.CalculatorApp.open();
 	} else if (lowerCmd === 'mspaint' || lowerCmd === 'paint' || lowerCmd === 'pbrush') {
 		if (window.PaintApp) window.PaintApp.open();
+	} else if (lowerCmd === 'sol' || lowerCmd === 'solitaire' || lowerCmd === 'cards') {
+		if (window.SolitaireApp) window.SolitaireApp.open();
+		else if (typeof openSolitaire === 'function') openSolitaire();
 	} else if (lowerCmd === 'bsod') {
 		triggerBSOD();
 	} else if (lowerCmd.startsWith('www.') || lowerCmd.startsWith('http://') || lowerCmd.startsWith('https://') || lowerCmd.endsWith('.com') || lowerCmd.endsWith('.org') || lowerCmd.endsWith('.net')) {
@@ -3741,8 +3763,8 @@ function openSearchWindow(initialQuery = '') {
 			if (typeof projects !== 'undefined') {
 				projects.flat().forEach(p => {
 					if (!p) return;
-					const title = (typeof p.title === 'string') ? p.title : (p.title?.en || p.title?.fr || '');
-					const desc = p.description || p.longDescription || '';
+					const title = resolveProjectTitle(p.title);
+					const desc = resolveLocalizedText(p.longDescription) || resolveLocalizedText(p.longDescrition) || resolveLocalizedText(p.description) || '';
 					const kw = (p.keywords || []).join(' ');
 					if (title.toLowerCase().includes(q) || desc.toLowerCase().includes(q) || kw.toLowerCase().includes(q)) {
 						hits.push({

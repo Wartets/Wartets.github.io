@@ -762,13 +762,15 @@
 			const resolveTitle = (item) => {
 				if (!item || !item.title) return '';
 				if (typeof item.title === 'string') return item.title;
-				return item.title.en || item.title.fr || '';
+				return item.title.en || item.title.fr || Object.values(item.title)[0] || '';
 			};
 
 			const resolveDesc = (item) => {
-				if (!item || !item.description) return '';
-				if (typeof item.description === 'string') return item.description;
-				return item.description.en || item.description.fr || '';
+				if (!item) return '';
+				const target = item.longDescription || item.longDescrition || item.description || '';
+				if (typeof target === 'string') return target;
+				if (typeof target === 'object') return target.en || target.fr || Object.values(target)[0] || '';
+				return '';
 			};
 
 			container.innerHTML = `
@@ -894,8 +896,9 @@
 			if (typeof projects !== 'undefined') {
 				projects.flat().forEach(p => {
 					if (!p || p.show === false) return;
-					const title = typeof p.title === 'string' ? p.title : (p.title.en || p.title.fr || '');
-					const desc = p.description ? (typeof p.description === 'string' ? p.description : (p.description.en || p.description.fr || '')) : '';
+					const title = typeof p.title === 'string' ? p.title : (p.title.en || p.title.fr || Object.values(p.title)[0] || '');
+					const rawDesc = p.longDescription || p.longDescrition || p.description || '';
+					const desc = typeof rawDesc === 'string' ? rawDesc : (rawDesc.en || rawDesc.fr || Object.values(rawDesc)[0] || '');
 					const kw = (p.keywords || []).join(' ');
 					const langs = (p.languages || []).join(' ');
 
@@ -1167,13 +1170,15 @@
 			const resolveTitle = (item) => {
 				if (!item || !item.title) return '';
 				if (typeof item.title === 'string') return item.title;
-				return item.title.en || item.title.fr || '';
+				return item.title.en || item.title.fr || Object.values(item.title)[0] || '';
 			};
 
 			const resolveDesc = (item) => {
-				if (!item || !item.description) return '';
-				if (typeof item.description === 'string') return item.description;
-				return item.description.en || item.description.fr || '';
+				if (!item) return '';
+				const target = item.longDescription || item.longDescrition || item.description || '';
+				if (typeof target === 'string') return target;
+				if (typeof target === 'object') return target.en || target.fr || Object.values(target)[0] || '';
+				return '';
 			};
 
 			const categories = [

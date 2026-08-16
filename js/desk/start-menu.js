@@ -843,8 +843,10 @@
 					if (typeof openMinesweeper === 'function') openMinesweeper();
 					break;
 				case 'open-solitaire':
-					if (typeof showXPDialog === 'function') {
-						showXPDialog('Solitaire', 'Classic Windows XP Klondike Solitaire is getting ready!', 'info');
+					if (window.SolitaireApp) {
+						window.SolitaireApp.open();
+					} else if (typeof openSolitaire === 'function') {
+						openSolitaire();
 					}
 					break;
 				case 'my-projects':
