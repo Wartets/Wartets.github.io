@@ -622,6 +622,7 @@ window.DeskAPI = {
 	openCalculator: () => (window.CalculatorApp ? window.CalculatorApp.open() : openCalculator()),
 	openCharacterMap: () => (window.CharacterMapApp ? window.CharacterMapApp.open() : null),
 	openPaint: (file) => (window.PaintApp ? window.PaintApp.open(file) : openPaint(file)),
+	openSoundRecorder: (file) => (window.SoundRecorderApp ? window.SoundRecorderApp.open(file) : null),
 	openMinesweeperGame: () => (window.MinesweeperApp ? window.MinesweeperApp.open() : openMinesweeper()),
 	openSolitaireGame: () => (window.SolitaireApp ? window.SolitaireApp.open() : openSolitaire()),
 	openWinampPlayer: () => openWinamp(),
@@ -677,6 +678,8 @@ window.DeskAPI = {
 		} else if (key === 'solitaire' || key === 'sol' || key === 'cards' || key === 'klondike') {
 			if (window.SolitaireApp) window.SolitaireApp.open();
 			else if (typeof openSolitaire === 'function') openSolitaire();
+		} else if (key === 'soundrecorder' || key === 'sndrec32' || key === 'recorder' || key === 'voice') {
+			if (window.SoundRecorderApp) window.SoundRecorderApp.open();
 		} else if (key === 'musicplayer' || key === 'winamp' || key === 'music') {
 			if (typeof openWinamp === 'function') openWinamp();
 		} else if (key === 'terminal' || key === 'cmd' || key === 'prompt') {
@@ -2812,6 +2815,10 @@ function openFileSystemElement(element, windowContext = null) {
 			if (window.PaintApp) {
 				window.PaintApp.open(element);
 			}
+		} else if (/\.(wav|wave|mp3|ogg|m4a)$/i.test(lowerName)) {
+			if (window.SoundRecorderApp) {
+				window.SoundRecorderApp.open(element);
+			}
 		} else if (lowerName.endsWith('.pdf')) {
 			openPDFWindow(element);
 		} else if (lowerName.endsWith('.html') || lowerName.endsWith('.htm')) {
@@ -3703,6 +3710,8 @@ function processRunCommand(command) {
 		if (window.CharacterMapApp) window.CharacterMapApp.open();
 	} else if (lowerCmd === 'mspaint' || lowerCmd === 'paint' || lowerCmd === 'pbrush') {
 		if (window.PaintApp) window.PaintApp.open();
+	} else if (lowerCmd === 'sndrec32' || lowerCmd === 'soundrecorder' || lowerCmd === 'sndrec') {
+		if (window.SoundRecorderApp) window.SoundRecorderApp.open();
 	} else if (lowerCmd === 'sol' || lowerCmd === 'solitaire' || lowerCmd === 'cards') {
 		if (window.SolitaireApp) window.SolitaireApp.open();
 		else if (typeof openSolitaire === 'function') openSolitaire();

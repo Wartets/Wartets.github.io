@@ -440,6 +440,10 @@
 									<img src="../assets/images/desk/icons/Paint.webp" class="xp-start-item-icon" alt="">
 									<span class="xp-start-title">Paint</span>
 								</div>
+								<div class="xp-start-flyout-item" data-action="open-sound-recorder">
+									<img src="../assets/images/desk/icons/Music File.webp" class="xp-start-item-icon" alt="">
+									<span class="xp-start-title">Sound Recorder</span>
+								</div>
 								<div class="xp-start-flyout-item" data-action="open-charmap">
 									<img src="https://api.iconify.design/mdi/format-font.svg?color=%231b4b9b" class="xp-start-item-icon" alt="">
 									<span class="xp-start-title">Character Map</span>
@@ -852,6 +856,9 @@
 					break;
 				case 'open-paint':
 					if (window.PaintApp) window.PaintApp.open();
+					break;
+				case 'open-sound-recorder':
+					if (window.SoundRecorderApp) window.SoundRecorderApp.open();
 					break;
 				case 'open-winamp':
 					if (typeof openWinamp === 'function') openWinamp();
