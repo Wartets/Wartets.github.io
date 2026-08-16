@@ -445,6 +445,9 @@ class FileSystemManager {
 		if (element instanceof File && element.savedFromNotepad && window.AchievementsManager) {
 			window.AchievementsManager.progress('notepad_save_delete', 1);
 		}
+		if (element instanceof Folder && (element.name.toLowerCase() === 'music' || element.getFullPath() === '/Music') && window.AchievementsManager) {
+			window.AchievementsManager.progress('delete_music_library', 1);
+		}
 		const fullPath = element.getFullPath();
 		const posMap = loadDesktopIconPositions();
 		if (posMap[fullPath]) {
@@ -591,6 +594,9 @@ class FileSystemManager {
 		}
 		if (element instanceof File && element.savedFromNotepad && window.AchievementsManager) {
 			window.AchievementsManager.progress('notepad_save_delete', 1);
+		}
+		if (element instanceof Folder && (element.name.toLowerCase() === 'music' || element.getFullPath() === '/Music') && window.AchievementsManager) {
+			window.AchievementsManager.progress('delete_music_library', 1);
 		}
 		const originalPath = element.parent.getFullPath();
 		const serialized = element.toJSON();
@@ -2689,8 +2695,24 @@ async function openWinamp(targetTrack = null) {
 			}
 			if (window.AchievementsManager) {
 				window.AchievementsManager.progress('winamp_master', 1);
+				window.AchievementsManager.progress('first_music_track', 1);
 			}
 		});
+
+		let winampPlayTimer = setInterval(() => {
+			if (!webampInstance) {
+				clearInterval(winampPlayTimer);
+				return;
+			}
+			if (webampInstance.getMediaStatus && webampInstance.getMediaStatus() === 'PLAYING') {
+				let totalSecs = parseInt(localStorage.getItem('xp_music_playback_seconds') || '0', 10) + 1;
+				localStorage.setItem('xp_music_playback_seconds', String(totalSecs));
+				if (window.AchievementsManager) {
+					window.AchievementsManager.setProgress('music_ten_minutes', totalSecs);
+					window.AchievementsManager.progress('first_music_track', 1);
+				}
+			}
+		}, 1000);
 
 		webampInstance.renderWhenReady(webampHolder);
 	} catch (err) {
@@ -3450,6 +3472,9 @@ function setImageAsWallpaper(source, fitMode = 'cover') {
 	if (window.SettingsApp) {
 		window.SettingsApp.set('desktopBackground', source);
 		window.SettingsApp.set('wallpaperFit', fitMode);
+	}
+	if (window.AchievementsManager && (source.includes('artwork') || source.includes('/music/') || source.includes('track_artwork') || source.includes('album_artwork'))) {
+		window.AchievementsManager.progress('artwork_wallpaper', 1);
 	}
 	if (typeof refreshUI === 'function') refreshUI();
 }

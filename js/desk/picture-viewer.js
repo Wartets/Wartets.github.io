@@ -5,6 +5,7 @@
 	let currentImageIndex = 0;
 	let currentZoom = 1.0;
 	let currentRotation = 0;
+	let accumulatedRotationDegrees = 0;
 	let isPanning = false;
 	let panStartX = 0;
 	let panStartY = 0;
@@ -226,10 +227,18 @@
 
 			rotCwBtn.addEventListener('click', () => {
 				currentRotation = (currentRotation + 90) % 360;
+				accumulatedRotationDegrees += 90;
+				if (accumulatedRotationDegrees >= 360 && currentRotation === 0 && window.AchievementsManager) {
+					window.AchievementsManager.progress('image_full_rotation', 1);
+				}
 				this.applyTransform();
 			});
 			rotCcwBtn.addEventListener('click', () => {
 				currentRotation = (currentRotation - 90 + 360) % 360;
+				accumulatedRotationDegrees += 90;
+				if (accumulatedRotationDegrees >= 360 && currentRotation === 0 && window.AchievementsManager) {
+					window.AchievementsManager.progress('image_full_rotation', 1);
+				}
 				this.applyTransform();
 			});
 
@@ -277,6 +286,9 @@
 			wpBtn.addEventListener('click', () => {
 				const current = currentFolderImages[currentImageIndex];
 				if (!current) return;
+				if (window.AchievementsManager && (current.src.includes('artwork') || (current.fileObj && current.fileObj.musicTrack) || (current.fileObj && current.fileObj.parent && current.fileObj.parent.name === 'Music') || (current.parent && current.parent.name === 'Music'))) {
+					window.AchievementsManager.progress('artwork_wallpaper', 1);
+				}
 				if (typeof window.setImageAsWallpaper === 'function') {
 					window.setImageAsWallpaper(current.src, 'cover');
 					if (typeof showXPDialog === 'function') {
@@ -360,6 +372,7 @@
 			currentImageFile = imageItem;
 			currentZoom = 1.0;
 			currentRotation = 0;
+			accumulatedRotationDegrees = 0;
 			panOffsetX = 0;
 			panOffsetY = 0;
 

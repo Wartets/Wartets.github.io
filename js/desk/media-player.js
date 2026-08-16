@@ -699,11 +699,27 @@
 				this._isRecovering = false;
 				this.updatePlayStateUI(win, true);
 				this.startVisualizer(win);
+				if (window.AchievementsManager) {
+					window.AchievementsManager.progress('first_music_track', 1);
+				}
 			});
 			video.addEventListener('play', () => {
 				isPlaying = true;
 				this.updatePlayStateUI(win, true);
+				if (window.AchievementsManager) {
+					window.AchievementsManager.progress('first_music_track', 1);
+				}
 			});
+
+			let playbackAccumulatorTimer = setInterval(() => {
+				if (isPlaying && activePlayerWindow && document.getElementById(activePlayerWindow.id)) {
+					let totalSecs = parseInt(localStorage.getItem('xp_music_playback_seconds') || '0', 10) + 1;
+					localStorage.setItem('xp_music_playback_seconds', String(totalSecs));
+					if (window.AchievementsManager) {
+						window.AchievementsManager.setProgress('music_ten_minutes', totalSecs);
+					}
+				}
+			}, 1000);
 
 			audio.addEventListener('playing', () => {
 				isPlaying = true;

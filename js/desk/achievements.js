@@ -409,6 +409,10 @@
 				return existing;
 			}
 
+			let visits = parseInt(localStorage.getItem('xp_achievements_open_count') || '0', 10) + 1;
+			localStorage.setItem('xp_achievements_open_count', String(visits));
+			this.setProgress('achievements_frequent_visitor', visits);
+
 			const layoutMarkup = `
 				<div class="xp-explorer-layout achievements-layout">
 					<input type="file" id="ach-file-importer" accept=".json" style="display: none;">

@@ -1291,6 +1291,11 @@
 			const win = document.getElementById(id);
 			if (!win) return;
 
+			if (win.classList.contains('window-detached')) {
+				if (window.WindowManager) window.WindowManager.reattachFromPopout(win, id);
+				return;
+			}
+
 			if (win.classList.contains('minimized')) {
 				if (typeof unminimizeWindow === 'function') unminimizeWindow(win);
 				if (typeof bringWindowToFront === 'function') bringWindowToFront(win);

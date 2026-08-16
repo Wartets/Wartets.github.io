@@ -1580,6 +1580,8 @@
 			if (!win) return [];
 			const isMin = win.classList.contains('minimized');
 			const isMax = win.classList.contains('maximized');
+			const isPinned = win.classList.contains('window-always-on-top');
+			const isRolledUp = win.classList.contains('window-rolled-up');
 
 			return [
 				{
@@ -1619,6 +1621,104 @@
 					action: () => {
 						if (!isMax && typeof maximizeWindow === 'function') maximizeWindow(win);
 						if (typeof bringWindowToFront === 'function') bringWindowToFront(win);
+					}
+				},
+				{ separator: true },
+				{
+					label: 'Pop Out to Floating Window',
+					icon: 'https://api.iconify.design/mdi/open-in-new.svg?color=%231b4b9b',
+					action: () => {
+						if (window.WindowManager) window.WindowManager.detachToPopout(win, id);
+					}
+				},
+				{
+					label: isRolledUp ? 'Unroll Window' : 'Roll Up (Shade Window)',
+					checked: isRolledUp,
+					action: () => {
+						if (window.WindowManager) window.WindowManager.toggleRollup(win);
+					}
+				},
+				{
+					label: 'Transparency',
+					submenu: [
+						{ label: '100% (Solid)', radio: !win.dataset.customOpacity || win.dataset.customOpacity === '1', action: () => { if (window.WindowManager) window.WindowManager.setOpacity(win, 1.0); } },
+						{ label: '90%', radio: win.dataset.customOpacity === '0.9', action: () => { if (window.WindowManager) window.WindowManager.setOpacity(win, 0.9); } },
+						{ label: '75%', radio: win.dataset.customOpacity === '0.75', action: () => { if (window.WindowManager) window.WindowManager.setOpacity(win, 0.75); } },
+						{ label: '50% (Translucent)', radio: win.dataset.customOpacity === '0.5', action: () => { if (window.WindowManager) window.WindowManager.setOpacity(win, 0.5); } }
+					]
+				},
+				{ separator: true },
+				{
+					label: 'Snap & Layout',
+					disabled: isMin,
+					submenu: [
+						{
+							label: 'Left Half (50%)',
+							icon: 'https://api.iconify.design/mdi/dock-left.svg?color=%231b4b9b',
+							action: () => {
+								if (window.WindowManager) window.WindowManager.snap(win, 'left');
+							}
+						},
+						{
+							label: 'Right Half (50%)',
+							icon: 'https://api.iconify.design/mdi/dock-right.svg?color=%231b4b9b',
+							action: () => {
+								if (window.WindowManager) window.WindowManager.snap(win, 'right');
+							}
+						},
+						{
+							label: 'Top Half (50%)',
+							icon: 'https://api.iconify.design/mdi/dock-top.svg?color=%231b4b9b',
+							action: () => {
+								if (window.WindowManager) window.WindowManager.snap(win, 'top');
+							}
+						},
+						{
+							label: 'Bottom Half (50%)',
+							icon: 'https://api.iconify.design/mdi/dock-bottom.svg?color=%231b4b9b',
+							action: () => {
+								if (window.WindowManager) window.WindowManager.snap(win, 'bottom');
+							}
+						},
+						{ separator: true },
+						{
+							label: 'Top-Left Corner',
+							action: () => {
+								if (window.WindowManager) window.WindowManager.snap(win, 'top-left');
+							}
+						},
+						{
+							label: 'Top-Right Corner',
+							action: () => {
+								if (window.WindowManager) window.WindowManager.snap(win, 'top-right');
+							}
+						},
+						{
+							label: 'Bottom-Left Corner',
+							action: () => {
+								if (window.WindowManager) window.WindowManager.snap(win, 'bottom-left');
+							}
+						},
+						{
+							label: 'Bottom-Right Corner',
+							action: () => {
+								if (window.WindowManager) window.WindowManager.snap(win, 'bottom-right');
+							}
+						},
+						{ separator: true },
+						{
+							label: 'Center Window',
+							action: () => {
+								if (window.WindowManager) window.WindowManager.snap(win, 'center');
+							}
+						}
+					]
+				},
+				{
+					label: 'Always on Top',
+					checked: isPinned,
+					action: () => {
+						if (window.WindowManager) window.WindowManager.toggleAlwaysOnTop(win);
 					}
 				},
 				{ separator: true },
@@ -1866,45 +1966,91 @@
 			if (!win) return [];
 			const isMin = win.classList.contains('minimized');
 			const isMax = win.classList.contains('maximized');
+			const isPinned = win.classList.contains('window-always-on-top');
+			const isDetached = win.classList.contains('window-detached');
 
 			return [
 				{
-					label: 'Restore',
-					bold: isMin,
-					disabled: !isMin && !isMax,
+					label: isDetached ? 'Re-dock to Desktop' : 'Restore',
+					bold: isMin || isDetached,
+					disabled: !isMin && !isMax && !isDetached,
 					action: () => {
-						if (isMin && typeof unminimizeWindow === 'function') unminimizeWindow(win);
-						else if (isMax && typeof maximizeWindow === 'function') maximizeWindow(win);
-						if (typeof bringWindowToFront === 'function') bringWindowToFront(win);
+						if (isDetached && window.WindowManager) {
+							window.WindowManager.reattachFromPopout(win, id);
+						} else {
+							if (isMin && typeof unminimizeWindow === 'function') unminimizeWindow(win);
+							else if (isMax && typeof maximizeWindow === 'function') maximizeWindow(win);
+							if (typeof bringWindowToFront === 'function') bringWindowToFront(win);
+						}
 					}
 				},
 				{
-					label: 'Move',
-					disabled: isMax || isMin,
+					label: 'Pop Out to Standalone Window',
+					disabled: isDetached,
+					icon: 'https://api.iconify.design/mdi/open-in-new.svg?color=%231b4b9b',
 					action: () => {
-						if (typeof bringWindowToFront === 'function') bringWindowToFront(win);
-					}
-				},
-				{
-					label: 'Size',
-					disabled: isMax || isMin,
-					action: () => {
-						if (typeof bringWindowToFront === 'function') bringWindowToFront(win);
+						if (window.WindowManager) window.WindowManager.detachToPopout(win, id);
 					}
 				},
 				{
 					label: 'Minimize',
-					disabled: isMin,
+					disabled: isMin || isDetached,
 					action: () => {
 						if (typeof minimizeWindow === 'function') minimizeWindow(win, id);
 					}
 				},
 				{
 					label: 'Maximize',
-					disabled: isMax,
+					disabled: isMax || isDetached,
 					action: () => {
 						if (!isMax && typeof maximizeWindow === 'function') maximizeWindow(win);
 						if (typeof bringWindowToFront === 'function') bringWindowToFront(win);
+					}
+				},
+				{ separator: true },
+				{
+					label: 'Snap & Layout',
+					disabled: isMin || isDetached,
+					submenu: [
+						{
+							label: 'Left Half',
+							action: () => {
+								if (window.WindowManager) window.WindowManager.snap(win, 'left');
+							}
+						},
+						{
+							label: 'Right Half',
+							action: () => {
+								if (window.WindowManager) window.WindowManager.snap(win, 'right');
+							}
+						},
+						{
+							label: 'Top Half',
+							action: () => {
+								if (window.WindowManager) window.WindowManager.snap(win, 'top');
+							}
+						},
+						{
+							label: 'Bottom Half',
+							action: () => {
+								if (window.WindowManager) window.WindowManager.snap(win, 'bottom');
+							}
+						},
+						{ separator: true },
+						{
+							label: 'Center Window',
+							action: () => {
+								if (window.WindowManager) window.WindowManager.snap(win, 'center');
+							}
+						}
+					]
+				},
+				{
+					label: 'Always on Top',
+					checked: isPinned,
+					disabled: isDetached,
+					action: () => {
+						if (window.WindowManager) window.WindowManager.toggleAlwaysOnTop(win);
 					}
 				},
 				{ separator: true },

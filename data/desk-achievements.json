@@ -450,6 +450,66 @@
 		"points": 20
 	},
 	{
+		"id": "image_full_rotation",
+		"title": "360 No Scope",
+		"description": "Perform a full 360-degree rotation on an image in the Picture Viewer to return to its original orientation.",
+		"category": "creativity",
+		"icon": "https://api.iconify.design/mdi/rotate-360.svg?color=%231b4b9b",
+		"hideIconWhenLocked": true,
+		"maxProgress": 1,
+		"points": 20
+	},
+	{
+		"id": "first_music_track",
+		"title": "First Beat",
+		"description": "Listen to your first music track in Windows Media Player or Winamp.",
+		"category": "audio",
+		"icon": "../assets/images/desk/icons/Music File.webp",
+		"hideIconWhenLocked": false,
+		"maxProgress": 1,
+		"points": 10
+	},
+	{
+		"id": "artwork_wallpaper",
+		"title": "AMy Favorite Tune",
+		"description": "Set an album or music track artwork as your desktop wallpaper.",
+		"category": "personalization",
+		"icon": "../assets/images/desk/icons/Display.webp",
+		"hideIconWhenLocked": false,
+		"maxProgress": 1,
+		"points": 20
+	},
+	{
+		"id": "achievements_frequent_visitor",
+		"title": "Trophy Addict",
+		"description": "Open the Milestones & Achievements application 12 distinct times.",
+		"category": "meta",
+		"icon": "../assets/images/desk/icons/Trophy.webp",
+		"hideIconWhenLocked": false,
+		"maxProgress": 12,
+		"points": 30
+	},
+	{
+		"id": "music_ten_minutes",
+		"title": "10 out of 10 feel good",
+		"description": "Accumulate at least 10 minutes of audio playback across media players.",
+		"category": "audio",
+		"icon": "../assets/images/desk/icons/Sounds, Speech, and Audio Devices.webp",
+		"hideIconWhenLocked": false,
+		"maxProgress": 600,
+		"points": 35
+	},
+	{
+		"id": "delete_music_library",
+		"title": "Silence of the Hard Drive",
+		"description": "Delete the entire Music folder from the file system.",
+		"category": "maintenance",
+		"icon": "https://api.iconify.design/mdi/folder-remove-outline.svg?color=%23cc3333",
+		"hideIconWhenLocked": true,
+		"maxProgress": 1,
+		"points": 25
+	},
+	{
 		"id": "grand_explorer",
 		"title": "The Ultimate Explorer",
 		"description": "Unlock 20 distinct milestones across the entire interactive desktop.",

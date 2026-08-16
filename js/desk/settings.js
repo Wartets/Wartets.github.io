@@ -1053,6 +1053,36 @@
 								</select>
 							</div>
 						</fieldset>
+
+						<fieldset class="xp-groupbox" style="margin-top: 8px;">
+							<legend>Window Management & Edge Snapping</legend>
+							<div class="xp-form-row">
+								<label for="settings-placement-mode-select" style="width: 150px;">Initial Placement:</label>
+								<select id="settings-placement-mode-select" class="xp-select" style="flex: 1;">
+									<option value="smart">Smart (Least Overlap Grid)</option>
+									<option value="cascade">Cascade Diagonally</option>
+									<option value="center">Centered on Screen</option>
+									<option value="remember">Remember Last Position</option>
+								</select>
+							</div>
+							<div class="xp-checkbox-row" style="margin-top: 6px;">
+								<input type="checkbox" id="settings-snap-toggle" ${pendingSettings.windowEdgeSnapping !== false ? 'checked' : ''}>
+								<label for="settings-snap-toggle">Enable desktop edge and corner window snapping</label>
+							</div>
+							<div class="xp-checkbox-row" style="margin-top: 4px;">
+								<input type="checkbox" id="settings-snap-preview-toggle" ${pendingSettings.windowSnapPreview !== false ? 'checked' : ''}>
+								<label for="settings-snap-preview-toggle">Show translucent snap layout ghost preview</label>
+							</div>
+							<div class="xp-form-row" style="margin-top: 6px;">
+								<label for="settings-snap-threshold-slider" style="width: 150px;">Snap Sensitivity (Margin):</label>
+								<input type="range" id="settings-snap-threshold-slider" min="10" max="48" step="2" value="${pendingSettings.windowSnapThreshold || 24}" class="xp-slider">
+								<span id="settings-snap-threshold-val" style="font-size: 11px; width: 35px;">${pendingSettings.windowSnapThreshold || 24}px</span>
+							</div>
+							<div class="xp-checkbox-row" style="margin-top: 4px;">
+								<input type="checkbox" id="settings-remember-pos-toggle" ${pendingSettings.windowRememberPositions !== false ? 'checked' : ''}>
+								<label for="settings-remember-pos-toggle">Remember window dimensions and positions across sessions</label>
+							</div>
+						</fieldset>
 					</div>
 
 					<div class="xp-tab-page" data-page="taskbar">
@@ -1748,6 +1778,49 @@
 			scrollbarWidthSelect.value = String(pendingSettings.scrollbarWidth || 16);
 			scrollbarWidthSelect.addEventListener('change', () => {
 				pendingSettings.scrollbarWidth = parseInt(scrollbarWidthSelect.value, 10);
+				markDirty(win);
+			});
+		}
+
+		const placementModeSelect = win.querySelector('#settings-placement-mode-select');
+		if (placementModeSelect) {
+			placementModeSelect.value = pendingSettings.windowPlacementMode || 'smart';
+			placementModeSelect.addEventListener('change', () => {
+				pendingSettings.windowPlacementMode = placementModeSelect.value;
+				markDirty(win);
+			});
+		}
+
+		const snapToggle = win.querySelector('#settings-snap-toggle');
+		if (snapToggle) {
+			snapToggle.addEventListener('change', () => {
+				pendingSettings.windowEdgeSnapping = snapToggle.checked;
+				markDirty(win);
+			});
+		}
+
+		const snapPreviewToggle = win.querySelector('#settings-snap-preview-toggle');
+		if (snapPreviewToggle) {
+			snapPreviewToggle.addEventListener('change', () => {
+				pendingSettings.windowSnapPreview = snapPreviewToggle.checked;
+				markDirty(win);
+			});
+		}
+
+		const snapThresholdSlider = win.querySelector('#settings-snap-threshold-slider');
+		const snapThresholdVal = win.querySelector('#settings-snap-threshold-val');
+		if (snapThresholdSlider) {
+			snapThresholdSlider.addEventListener('input', () => {
+				pendingSettings.windowSnapThreshold = parseInt(snapThresholdSlider.value, 10);
+				if (snapThresholdVal) snapThresholdVal.textContent = `${pendingSettings.windowSnapThreshold}px`;
+				markDirty(win);
+			});
+		}
+
+		const rememberPosToggle = win.querySelector('#settings-remember-pos-toggle');
+		if (rememberPosToggle) {
+			rememberPosToggle.addEventListener('change', () => {
+				pendingSettings.windowRememberPositions = rememberPosToggle.checked;
 				markDirty(win);
 			});
 		}
