@@ -1122,6 +1122,8 @@ function initDocuments() {
 			docFolder.add(file);
 		}
 
+		const resolvedSize = doc.size || doc.fileSize || (doc.filePath ? Math.floor(180000 + (Math.abs(doc.filePath.split('').reduce((acc, c) => acc + c.charCodeAt(0), 0)) * 9271) % 2400000) : 245000);
+		file.size = resolvedSize;
 		file.createdAt = new Date(doc.timestamp);
 		file.modifiedAt = new Date(doc.timestamp);
 	});
@@ -1451,8 +1453,72 @@ function initializeFileSystem() {
 	});
 
 	initPoemsFolder(othersFolder);
+	initWallpaperFolder();
 
 	fs.save();
+}
+
+let wallpaperMetadataMap = new Map();
+
+function loadWallpaperMetadata() {
+	fetch('../data/desk-wallpaper.json')
+		.then(r => r.ok ? r.json() : [])
+		.then(items => {
+			if (Array.isArray(items)) {
+				items.forEach(item => {
+					if (item.filename) wallpaperMetadataMap.set(item.filename.toLowerCase(), item.name);
+					if (item.path) {
+						const fname = item.path.split('/').pop().toLowerCase();
+						wallpaperMetadataMap.set(fname, item.name);
+						wallpaperMetadataMap.set(item.path, item.name);
+					}
+				});
+			}
+		})
+		.catch(() => {});
+}
+
+function initWallpaperFolder() {
+	loadWallpaperMetadata();
+	let winFolder = fs.root.getByName('WINDOWS');
+	if (!winFolder) {
+		winFolder = new Folder('WINDOWS');
+		winFolder.icon = '../assets/images/desk/icons/Folder Closed.webp';
+		fs.root.add(winFolder);
+	}
+	winFolder.hidden = true;
+
+	let webFolder = winFolder.getByName('Web');
+	if (!webFolder) {
+		webFolder = new Folder('Web');
+		webFolder.icon = '../assets/images/desk/icons/Folder Closed.webp';
+		winFolder.add(webFolder);
+	}
+	let wpFolder = webFolder.getByName('Wallpaper');
+	if (!wpFolder) {
+		wpFolder = new Folder('Wallpaper');
+		wpFolder.icon = '../assets/images/desk/icons/Folder Closed.webp';
+		webFolder.add(wpFolder);
+	}
+
+	fetch('../data/desk-wallpaper.json')
+		.then(r => r.ok ? r.json() : [])
+		.then(items => {
+			if (Array.isArray(items)) {
+				items.forEach(item => {
+					const fileName = item.filename || `${item.name}.webp`;
+					if (!wpFolder.children.has(fileName)) {
+						const file = new File(fileName, null, item.path);
+						file.remoteUrl = item.path;
+						file.icon = '../assets/images/desk/icons/Picture.webp';
+						file.size = 285000;
+						wpFolder.add(file);
+					}
+				});
+				fs.save();
+			}
+		})
+		.catch(() => {});
 }
 
 function initPoemsFolder(othersFolder) {
@@ -2278,11 +2344,12 @@ async function openElementInfoWindow(element) {
 		</div>
 	`;
 
-	const win = createXPWindow(id, `${element.name} Properties`, contentHTML, 400, 500, {
+	const win = createXPWindow(id, `${element.name} Properties`, contentHTML, 450, 520, {
 		iconSrc: element.icon,
 		resizable: false
 	});
 	win.querySelector('.xp-window-content').style.padding = '0';
+	win.querySelector('.xp-window-content').style.overflowX = 'hidden';
 
 	const filenameInput = win.querySelector('#prop-filename-input');
 	const hiddenCheck = win.querySelector('#prop-hidden-check');
@@ -3084,7 +3151,11 @@ function handleDragStart(e) {
 		y: e.clientY - iconRect.top
 	};
 
-	const pathsToDrag = [];
+	const dragAnchorPath = icon.dataset.path;
+	const positions = loadDesktopIconPositions();
+	const anchorPos = positions[dragAnchorPath] || { x: iconRect.left, y: iconRect.top };
+
+	const dragItems = [];
 	const win = icon.closest('.xp-window');
 	const state = win && win.explorerState ? win.explorerState : null;
 	const selectedSet = state && state.selectedItems ? state.selectedItems : selectedIcons;
@@ -3092,26 +3163,35 @@ function handleDragStart(e) {
 	selectedSet.forEach(selected => {
 		const p = selected.dataset.path;
 		if (p) {
-			pathsToDrag.push(p);
 			selected.classList.add('dragging-icon');
+			const pos = positions[p] || { x: selected.offsetLeft || 0, y: selected.offsetTop || 0 };
+			dragItems.push({
+				path: p,
+				relX: pos.x - anchorPos.x,
+				relY: pos.y - anchorPos.y
+			});
 		}
 	});
 
-	if (pathsToDrag.length === 0) {
+	if (dragItems.length === 0) {
 		const singlePath = icon.dataset.path;
 		if (singlePath) {
-			pathsToDrag.push(singlePath);
 			icon.classList.add('dragging-icon');
+			dragItems.push({ path: singlePath, relX: 0, relY: 0 });
 		}
 	}
 
-	if (pathsToDrag.length === 0) {
+	if (dragItems.length === 0) {
 		e.preventDefault();
 		return;
 	}
 
 	e.dataTransfer.effectAllowed = 'copyMove';
-	e.dataTransfer.setData('text/plain', JSON.stringify(pathsToDrag));
+	e.dataTransfer.setData('text/plain', JSON.stringify(dragItems.map(d => d.path)));
+	e.dataTransfer.setData('application/json', JSON.stringify({
+		anchorPath: dragAnchorPath,
+		items: dragItems
+	}));
 }
 
 function handleDragOver(e) {
@@ -3316,8 +3396,60 @@ function handleDrop(e) {
 	}
 
 	const positions = loadDesktopIconPositions();
+	let geometryPayload = null;
+	try {
+		const jsonRaw = e.dataTransfer.getData('application/json');
+		if (jsonRaw) geometryPayload = JSON.parse(jsonRaw);
+	} catch (err) {}
 
-	sourcePaths.forEach((src, idx) => {
+	const gridStepX = iconWidth + 10;
+	const gridStepY = iconHeight;
+	const startX = 10;
+	const startY = 10;
+	const maxX = containerRect.width - iconWidth - 10;
+	const maxY = containerRect.height - iconHeight - 10;
+
+	const occupiedSlots = new Set();
+	Object.entries(positions).forEach(([p, pos]) => {
+		if (!sourcePaths.includes(p) && typeof pos.x === 'number' && typeof pos.y === 'number') {
+			const col = Math.round((pos.x - startX) / gridStepX);
+			const row = Math.round((pos.y - startY) / gridStepY);
+			occupiedSlots.add(`${col},${row}`);
+		}
+	});
+
+	const findNearestFreeSlot = (initX, initY) => {
+		let col = Math.round((initX - startX) / gridStepX);
+		let row = Math.round((initY - startY) / gridStepY);
+		const maxRows = Math.max(1, Math.floor((maxY - startY) / gridStepY));
+
+		if (!occupiedSlots.has(`${col},${row}`)) {
+			occupiedSlots.add(`${col},${row}`);
+			const clampedX = Math.max(startX, Math.min(startX + col * gridStepX, maxX));
+			const clampedY = Math.max(startY, Math.min(startY + row * gridStepY, maxY));
+			return { x: clampedX, y: clampedY };
+		}
+
+		for (let dist = 1; dist < 50; dist++) {
+			for (let dRow = -dist; dRow <= dist; dRow++) {
+				for (let dCol = -dist; dCol <= dist; dCol++) {
+					const c = col + dCol;
+					const r = row + dRow;
+					if (c >= 0 && r >= 0 && r <= maxRows && !occupiedSlots.has(`${c},${r}`)) {
+						occupiedSlots.add(`${c},${r}`);
+						const finalX = Math.max(startX, Math.min(startX + c * gridStepX, maxX));
+						const finalY = Math.max(startY, Math.min(startY + r * gridStepY, maxY));
+						return { x: finalX, y: finalY };
+					}
+				}
+			}
+		}
+		return { x: initX, y: initY };
+	};
+
+	const alignGrid = isAlignToGridEnabled();
+
+	sourcePaths.forEach((src) => {
 		const isAppIcon = src.startsWith('app://');
 		let element = null;
 		if (!isAppIcon) {
@@ -3325,19 +3457,39 @@ function handleDrop(e) {
 			if (!element) return;
 		}
 
-		const itemX = baseDropX + idx * (isAlignToGridEnabled() ? 0 : 15);
-		const itemY = baseDropY + idx * (isAlignToGridEnabled() ? iconHeight : 15);
+		let relX = 0;
+		let relY = 0;
+		if (geometryPayload && Array.isArray(geometryPayload.items)) {
+			const match = geometryPayload.items.find(i => i.path === src);
+			if (match) {
+				relX = match.relX || 0;
+				relY = match.relY || 0;
+			}
+		}
+
+		let targetX = baseDropX + relX;
+		let targetY = baseDropY + relY;
+
+		if (alignGrid) {
+			targetX = startX + Math.round((targetX - startX) / gridStepX) * gridStepX;
+			targetY = startY + Math.round((targetY - startY) / gridStepY) * gridStepY;
+		}
+
+		targetX = Math.max(startX, Math.min(targetX, maxX));
+		targetY = Math.max(startY, Math.min(targetY, maxY));
+
+		const resolvedPos = (isDesktopDrop && alignGrid) ? findNearestFreeSlot(targetX, targetY) : { x: targetX, y: targetY };
 
 		if (isAppIcon) {
 			if (isDesktopDrop) {
-				positions[src] = { x: itemX, y: itemY };
+				positions[src] = resolvedPos;
 			}
 			return;
 		}
 
 		if (!isCopy && element.parent && element.parent.getFullPath() === destFullPath) {
 			if (isDesktopDrop && destFullPath === '/') {
-				positions[element.getFullPath()] = { x: itemX, y: itemY };
+				positions[element.getFullPath()] = resolvedPos;
 			}
 			return;
 		}
@@ -3350,7 +3502,7 @@ function handleDrop(e) {
 				resultElement = fs.move(src, destFullPath);
 			}
 			if (isDesktopDrop && destFullPath === '/' && resultElement) {
-				positions[resultElement.getFullPath()] = { x: itemX, y: itemY };
+				positions[resultElement.getFullPath()] = resolvedPos;
 			}
 		} catch (err) {
 			showXPDialog(isCopy ? 'Copy Error' : 'Move Error', err.message, 'error');
@@ -3486,235 +3638,505 @@ let desktopWallpapersRegistry = null;
 
 const preloadedWallpapers = new Map();
 
+let wallpaperSlideshowTimer = null;
+
+function updateWallpaperSlideshow() {
+	if (wallpaperSlideshowTimer) {
+		clearInterval(wallpaperSlideshowTimer);
+		wallpaperSlideshowTimer = null;
+	}
+
+	const mode = (window.SettingsApp && window.SettingsApp.get('wallpaperMode')) || localStorage.getItem('wallpaperMode') || 'picture';
+	if (mode !== 'slideshow') return;
+
+	let intervalSec = parseFloat((window.SettingsApp && window.SettingsApp.get('wallpaperSlideshowInterval')) || localStorage.getItem('wallpaperSlideshowInterval') || '30');
+	if (isNaN(intervalSec) || intervalSec < 3) intervalSec = 30;
+
+	wallpaperSlideshowTimer = setInterval(async () => {
+		const list = await fetchWallpaperRegistry();
+		if (!list || list.length === 0) return;
+		const isRandom = (window.SettingsApp && window.SettingsApp.get('wallpaperSlideshowRandom')) || localStorage.getItem('wallpaperSlideshowRandom') === 'true';
+		let nextWp;
+		if (isRandom) {
+			nextWp = list[Math.floor(Math.random() * list.length)];
+		} else {
+			const curr = (window.SettingsApp && window.SettingsApp.get('desktopBackground')) || localStorage.getItem('desktopBackground');
+			const idx = list.findIndex(w => w.path === curr);
+			nextWp = list[(idx + 1) % list.length];
+		}
+		if (nextWp) {
+			const fit = (window.SettingsApp && window.SettingsApp.get('wallpaperFit')) || localStorage.getItem('wallpaperFit') || 'cover';
+			setImageAsWallpaper(nextWp.path, fit);
+		}
+	}, intervalSec * 1000);
+}
+
 function applyInitialDesktopBackground() {
-	const current = localStorage.getItem('desktopBackground') || DEFAULT_DESKTOP_WALLPAPER;
+	const mode = (window.SettingsApp && window.SettingsApp.get('wallpaperMode')) || localStorage.getItem('wallpaperMode') || 'picture';
+	const bgColor = (window.SettingsApp && window.SettingsApp.get('desktopBackgroundColor')) || localStorage.getItem('desktopBackgroundColor') || '#004e98';
+	const current = (window.SettingsApp && window.SettingsApp.get('desktopBackground')) || localStorage.getItem('desktopBackground') || DEFAULT_DESKTOP_WALLPAPER;
+	const fit = (window.SettingsApp && window.SettingsApp.get('wallpaperFit')) || localStorage.getItem('wallpaperFit') || 'cover';
+
 	const desktop = document.getElementById('desktop');
 	if (!desktop) return;
 
-	desktop.style.backgroundImage = `url('${current}')`;
-	if (!preloadedWallpapers.has(current)) {
-		const img = new Image();
-		img.src = current;
-		img.onload = () => preloadedWallpapers.set(current, img);
-		if (img.complete) preloadedWallpapers.set(current, img);
+	desktop.style.backgroundColor = bgColor;
+	if (mode === 'color') {
+		desktop.style.backgroundImage = 'none';
+	} else {
+		desktop.style.backgroundImage = `url('${current}')`;
+		if (!preloadedWallpapers.has(current)) {
+			const img = new Image();
+			img.src = current;
+			img.onload = () => preloadedWallpapers.set(current, img);
+			if (img.complete) preloadedWallpapers.set(current, img);
+		}
 	}
+
+	document.body.classList.remove('wallpaper-fit-cover', 'wallpaper-fit-stretch', 'wallpaper-fit-center', 'wallpaper-fit-tile', 'wallpaper-fit-fit');
+	document.body.classList.add(`wallpaper-fit-${fit}`);
+
+	if (fit === 'stretch') {
+		desktop.style.backgroundSize = '100% 100%';
+		desktop.style.backgroundRepeat = 'no-repeat';
+		desktop.style.backgroundPosition = '0 0';
+	} else if (fit === 'fit') {
+		desktop.style.backgroundSize = 'contain';
+		desktop.style.backgroundRepeat = 'no-repeat';
+		desktop.style.backgroundPosition = 'center center';
+	} else if (fit === 'center') {
+		desktop.style.backgroundSize = 'auto';
+		desktop.style.backgroundRepeat = 'no-repeat';
+		desktop.style.backgroundPosition = 'center center';
+	} else if (fit === 'tile') {
+		desktop.style.backgroundSize = 'auto';
+		desktop.style.backgroundRepeat = 'repeat';
+		desktop.style.backgroundPosition = 'top left';
+	} else {
+		desktop.style.backgroundSize = 'cover';
+		desktop.style.backgroundRepeat = 'no-repeat';
+		desktop.style.backgroundPosition = 'center center';
+	}
+
+	updateWallpaperSlideshow();
 }
 
 async function fetchWallpaperRegistry() {
-	if (desktopWallpapersRegistry) return desktopWallpapersRegistry;
+	if (wallpaperMetadataMap.size === 0) {
+		try {
+			const response = await fetch('../data/desk-wallpaper.json');
+			if (response.ok) {
+				const items = await response.json();
+				items.forEach(item => {
+					if (item.filename) wallpaperMetadataMap.set(item.filename.toLowerCase(), item.name);
+					if (item.path) {
+						const fname = item.path.split('/').pop().toLowerCase();
+						wallpaperMetadataMap.set(fname, item.name);
+						wallpaperMetadataMap.set(item.path, item.name);
+					}
+				});
+			}
+		} catch (e) {}
+	}
+
+	if (fs) {
+		let wpFolder = fs.findByPath('/WINDOWS/Web/Wallpaper');
+		if (!wpFolder) wpFolder = fs.findByPath('/Wallpaper');
+		if (wpFolder instanceof Folder) {
+			const files = wpFolder.listContent().filter(el => el instanceof File && /\.(webp|png|jpe?g|bmp|gif)$/i.test(el.name));
+			return files.map((f, index) => {
+				const lookupKey = f.name.toLowerCase();
+				const displayName = wallpaperMetadataMap.get(lookupKey) || wallpaperMetadataMap.get(f.remoteUrl || '') || f.name.replace(/\.[^/.]+$/, '');
+				return {
+					id: `wp-${index}-${f.name.replace(/[^\w-]/g, '_')}`,
+					name: displayName,
+					filename: f.name,
+					path: f.remoteUrl || f.content || f.getFullPath()
+				};
+			});
+		}
+	}
 	try {
 		const response = await fetch('../data/desk-wallpaper.json');
 		if (!response.ok) throw new Error(`HTTP error ${response.status}`);
 		desktopWallpapersRegistry = await response.json();
 		return desktopWallpapersRegistry;
 	} catch (error) {
-		console.error('Failed to load wallpaper registry:', error);
-		return [];
+		return [{ id: 'wallpaper-default', name: 'Windows XP Bliss', filename: 'wallpaper-default.webp', path: DEFAULT_DESKTOP_WALLPAPER }];
 	}
 }
 
-async function openDisplaySettings() {
-	const id = 'window-wallpaper-manager';
+async function openDisplaySettings(initialTab = 'desktop') {
+	const id = 'window-display-properties';
 	const existingWindow = document.getElementById(id);
 	if (existingWindow) {
 		bringWindowToFront(existingWindow);
+		const tabBtn = existingWindow.querySelector(`.xp-tab-btn[data-tab="${initialTab}"]`);
+		if (tabBtn) tabBtn.click();
 		return;
 	}
 
-	const wallpapers = await fetchWallpaperRegistry();
-	if (!wallpapers || wallpapers.length === 0) {
-		showXPDialog('Error', 'Unable to load wallpaper collection.', 'error');
-		return;
-	}
+	let currentBg = (window.SettingsApp && window.SettingsApp.get('desktopBackground')) || localStorage.getItem('desktopBackground') || DEFAULT_DESKTOP_WALLPAPER;
+	let currentFit = (window.SettingsApp && window.SettingsApp.get('wallpaperFit')) || localStorage.getItem('wallpaperFit') || 'cover';
+	let currentMode = (window.SettingsApp && window.SettingsApp.get('wallpaperMode')) || localStorage.getItem('wallpaperMode') || 'picture';
+	let currentBgColor = (window.SettingsApp && window.SettingsApp.get('desktopBackgroundColor')) || localStorage.getItem('desktopBackgroundColor') || '#004e98';
+	let currentInterval = (window.SettingsApp && window.SettingsApp.get('wallpaperSlideshowInterval')) || localStorage.getItem('wallpaperSlideshowInterval') || '30';
+	let currentRandom = (window.SettingsApp && window.SettingsApp.get('wallpaperSlideshowRandom')) || localStorage.getItem('wallpaperSlideshowRandom') === 'true';
 
-	let currentActiveWallpaper = localStorage.getItem('desktopBackground') || DEFAULT_DESKTOP_WALLPAPER;
-	let selectedWallpaperItem = wallpapers.find(item => item.path === currentActiveWallpaper) || wallpapers[0];
+	let selectedWallpaperPath = currentBg;
+	let selectedFit = currentFit;
+	let selectedMode = currentMode;
+	let selectedBgColor = currentBgColor;
+	let selectedInterval = currentInterval;
+	let selectedRandom = currentRandom;
+
+	const ssSettings = window.ScreenSaverManager ? window.ScreenSaverManager.settings : { activeSaver: 'xp-flying-logo', timeoutMinutes: 5, enabled: true };
+	let currentSSEnabled = ssSettings.enabled !== false;
+	let currentSS = currentSSEnabled ? (ssSettings.activeSaver || 'xp-flying-logo') : 'none';
+	let currentSSTimeout = ssSettings.timeoutMinutes !== undefined ? ssSettings.timeoutMinutes : 5;
 
 	const contentHTML = `
-		<div class="folder-window-layout">
-			<div class="folder-menu-bar">
-				<ul>
-					<li><u>F</u>ile</li>
-					<li><u>E</u>dit</li>
-					<li><u>V</u>iew</li>
-					<li><u>F</u>avorites</li>
-					<li><u>T</u>ools</li>
-					<li><u>H</u>elp</li>
-				</ul>
+		<div class="xp-tabs-container">
+			<div class="xp-tabs-bar">
+				<button type="button" class="xp-tab-btn active" data-tab="desktop">Desktop</button>
+				<button type="button" class="xp-tab-btn" data-tab="screensaver">Screen Saver</button>
 			</div>
-			<div class="folder-toolbar">
-				<div class="folder-nav-buttons">
-					<button class="folder-nav-btn" disabled><img src="data:image/svg+xml;charset=UTF-8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%232c63c3'><path d='M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z'/></svg>" alt="Back"></button>
-					<button class="folder-nav-btn" disabled><img src="data:image/svg+xml;charset=UTF-8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%232c63c3'><path d='M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z'/></svg>" alt="Forward"></button>
-					<button class="folder-nav-btn" disabled><img src="data:image/svg+xml;charset=UTF-8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%232c63c3'><path d='M4 12l1.41 1.41L11 7.83V20h2V7.83l5.58 5.59L20 12l-8-8-8 8z'/></svg>" alt="Up"></button>
-				</div>
-				<div class="folder-toolbar-separator"></div>
-				<div class="folder-address-bar-container">
-					<span>Address</span>
-					<input type="text" class="folder-address-bar" value="C:\\WINDOWS\\Web\\Wallpaper" readonly>
-				</div>
-			</div>
-			<div class="folder-main-layout">
-				<div class="folder-sidebar">
-					<div class="sidebar-section">
-						<h3>Monitor Preview</h3>
-						<div class="wallpaper-monitor-container">
-							<div class="wallpaper-monitor-bezel">
-								<div class="wallpaper-monitor-screen" id="wallpaper-live-monitor" style="background-image: url('${selectedWallpaperItem.path}');"></div>
+
+			<div class="xp-tab-page-wrapper">
+				<div class="xp-tab-page active" data-page="desktop">
+					<div class="wallpaper-monitor-container" style="margin-bottom: 6px;">
+						<div class="wallpaper-monitor-bezel">
+							<div class="wallpaper-monitor-screen" id="disp-monitor-preview" style="background-image: ${selectedMode === 'color' ? 'none' : `url('${selectedWallpaperPath}')`}; background-color: ${selectedBgColor};"></div>
+						</div>
+						<div class="wallpaper-monitor-stand"></div>
+						<div class="wallpaper-monitor-base"></div>
+					</div>
+
+					<fieldset class="xp-groupbox">
+						<legend>Background Selection</legend>
+						<div class="xp-form-row" style="margin-bottom: 6px;">
+							<label for="disp-wallpaper-mode" style="width: 80px;">Mode:</label>
+							<select id="disp-wallpaper-mode" class="xp-select" style="flex: 1;">
+								<option value="picture" ${selectedMode === 'picture' ? 'selected' : ''}>Single Picture</option>
+								<option value="slideshow" ${selectedMode === 'slideshow' ? 'selected' : ''}>Wallpaper Slideshow</option>
+								<option value="color" ${selectedMode === 'color' ? 'selected' : ''}>Solid Background Color</option>
+							</select>
+						</div>
+						<div style="display: flex; gap: 8px; align-items: flex-start;">
+							<div class="xp-listbox-frame" id="disp-wp-listbox" style="height: 110px;"></div>
+							<div style="display: flex; flex-direction: column; gap: 6px; width: 145px;">
+								<button type="button" class="xp-button-small" id="disp-btn-browse-folder">Open Wallpaper Folder</button>
+								<button type="button" class="xp-button-small" id="disp-btn-restore-bliss">Default Bliss</button>
+								<div class="xp-form-row" style="flex-direction: column; align-items: flex-start; margin-top: 2px;">
+									<label for="disp-select-fit" style="font-size: 10px;">Position:</label>
+									<select id="disp-select-fit" class="xp-select" style="width: 100%;">
+										<option value="cover" ${selectedFit === 'cover' ? 'selected' : ''}>Fill Screen (Cover)</option>
+										<option value="fit" ${selectedFit === 'fit' ? 'selected' : ''}>Fit (Keep Aspect)</option>
+										<option value="stretch" ${selectedFit === 'stretch' ? 'selected' : ''}>Stretch to Screen</option>
+										<option value="center" ${selectedFit === 'center' ? 'selected' : ''}>Center</option>
+										<option value="tile" ${selectedFit === 'tile' ? 'selected' : ''}>Tile</option>
+									</select>
+								</div>
+								<div class="xp-form-row" style="align-items: center; margin-top: 2px;">
+									<label for="disp-color-picker" style="font-size: 10px; width: 55px;">Color:</label>
+									<input type="color" id="disp-color-picker" value="${selectedBgColor}" style="width: 60px; height: 20px; cursor: pointer;">
+								</div>
 							</div>
-							<div class="wallpaper-monitor-stand"></div>
-							<div class="wallpaper-monitor-base"></div>
 						</div>
-					</div>
-					<div class="sidebar-section">
-						<h3>Wallpaper Tasks</h3>
-						<ul>
-							<li><a href="#" id="wallpaper-task-set"><img src="https://api.iconify.design/mdi/monitor-screenshot.svg" style="width:16px;height:16px;"><span>Set as Desktop Background</span></a></li>
-							<li><a href="#" id="wallpaper-task-reset"><img src="https://api.iconify.design/mdi/backup-restore.svg" style="width:16px;height:16px;"><span>Restore Default Bliss</span></a></li>
-						</ul>
-					</div>
-					<div class="sidebar-section">
-						<h3>Details</h3>
-						<div class="details-content" id="wallpaper-sidebar-details">
-							<b>${selectedWallpaperItem.name}</b>
-							${selectedWallpaperItem.filename}<br>
-							Type: WEBP Image
+						<div id="disp-slideshow-panel" style="margin-top: 8px; display: ${selectedMode === 'slideshow' ? 'flex' : 'none'}; flex-direction: column; gap: 4px; border-top: 1px dashed #aca899; padding-top: 6px;">
+							<div class="xp-form-row">
+								<label for="disp-slideshow-interval" style="width: 120px;">Change picture every:</label>
+								<select id="disp-slideshow-interval" class="xp-select" style="flex: 1;">
+									<option value="10" ${String(selectedInterval) === '10' ? 'selected' : ''}>10 seconds</option>
+									<option value="30" ${String(selectedInterval) === '30' ? 'selected' : ''}>30 seconds</option>
+									<option value="60" ${String(selectedInterval) === '60' ? 'selected' : ''}>1 minute</option>
+									<option value="300" ${String(selectedInterval) === '300' ? 'selected' : ''}>5 minutes</option>
+									<option value="900" ${String(selectedInterval) === '900' ? 'selected' : ''}>15 minutes</option>
+									<option value="1800" ${String(selectedInterval) === '1800' ? 'selected' : ''}>30 minutes</option>
+									<option value="3600" ${String(selectedInterval) === '3600' ? 'selected' : ''}>1 hour</option>
+								</select>
+							</div>
+							<div class="xp-checkbox-row">
+								<input type="checkbox" id="disp-slideshow-random" ${selectedRandom ? 'checked' : ''}>
+								<label for="disp-slideshow-random">Shuffle pictures randomly</label>
+							</div>
 						</div>
-					</div>
+					</fieldset>
 				</div>
-				<div class="folder-main-content">
-					<div class="folder-content-wrapper">
-						<div class="wallpaper-grid-view" id="wallpaper-grid-container"></div>
+
+				<div class="xp-tab-page" data-page="screensaver">
+					<div class="wallpaper-monitor-container" style="margin-bottom: 6px;">
+						<div class="wallpaper-monitor-bezel">
+							<canvas id="disp-ss-monitor-canvas" class="wallpaper-monitor-screen" width="126" height="91" style="width:100%;height:100%;display:block;background:#000000;"></canvas>
+						</div>
+						<div class="wallpaper-monitor-stand"></div>
+						<div class="wallpaper-monitor-base"></div>
 					</div>
-					<div class="folder-status-bar">
-						<div class="status-bar-left" id="wallpaper-status-count">${wallpapers.length} wallpaper(s)</div>
-						<div class="status-bar-right">Local Intranet</div>
-					</div>
+
+					<fieldset class="xp-groupbox">
+						<legend>Screen Saver</legend>
+						<div style="display: flex; gap: 8px; align-items: center; margin-bottom: 8px;">
+							<select id="disp-ss-select" class="xp-select" style="flex: 1;">
+								<option value="xp-flying-logo" ${currentSS === 'xp-flying-logo' ? 'selected' : ''}>3D Flying Windows XP Logo</option>
+								<option value="bubbles" ${currentSS === 'bubbles' ? 'selected' : ''}>Bubbles (Bulles Physiques 3D)</option>
+								<option value="starfield" ${currentSS === 'starfield' ? 'selected' : ''}>Starfield Simulation</option>
+								<option value="pipes" ${currentSS === 'pipes' ? 'selected' : ''}>3D Pipes (Tubes 3D)</option>
+								<option value="mystify" ${currentSS === 'mystify' ? 'selected' : ''}>Mystify (Polygones)</option>
+								<option value="bezier" ${currentSS === 'bezier' ? 'selected' : ''}>Bouncing Curves (Bézier)</option>
+								<option value="blank" ${currentSS === 'blank' ? 'selected' : ''}>Blank Screen</option>
+								<option value="random" ${currentSS === 'random' ? 'selected' : ''}>Random (Au hasard)</option>
+								<option value="none" ${currentSS === 'none' ? 'selected' : ''}>(None)</option>
+							</select>
+							<button type="button" class="xp-button-small" id="disp-ss-btn-preview" ${currentSS === 'none' ? 'disabled' : ''}>Preview</button>
+						</div>
+						<div class="xp-form-row">
+							<label for="disp-ss-wait-input" style="width: 50px;">Wait:</label>
+							<input type="number" id="disp-ss-wait-input" min="0.1" max="120" step="0.5" value="${currentSSTimeout}" class="xp-input" style="width: 60px;">
+							<span>minutes</span>
+						</div>
+						<div id="disp-ss-custom-settings-panel" class="ss-dynamic-config-panel"></div>
+					</fieldset>
 				</div>
 			</div>
-			<div class="wallpaper-action-footer">
-				<button class="xp-button" id="wallpaper-btn-ok">OK</button>
-				<button class="xp-button" id="wallpaper-btn-cancel">Cancel</button>
-				<button class="xp-button" id="wallpaper-btn-apply">Apply</button>
+
+			<div class="xp-dialog-action-footer">
+				<button type="button" class="xp-button" id="disp-btn-ok">OK</button>
+				<button type="button" class="xp-button" id="disp-btn-cancel">Cancel</button>
+				<button type="button" class="xp-button" id="disp-btn-apply" disabled>Apply</button>
 			</div>
 		</div>
 	`;
 
-	const win = createXPWindow(id, 'Wallpaper', contentHTML, 760, 540, {
-		iconSrc: '../assets/images/desk/icons/Display.webp'
+	const win = createXPWindow(id, 'Display Properties', contentHTML, 470, 520, {
+		iconSrc: '../assets/images/desk/icons/Display.webp',
+		resizable: false
 	});
 	win.querySelector('.xp-window-content').style.padding = '0';
-	win.classList.add('project-window');
+	win.querySelector('.xp-window-content').style.overflowX = 'hidden';
 
-	const gridContainer = win.querySelector('#wallpaper-grid-container');
-	const monitorPreview = win.querySelector('#wallpaper-live-monitor');
-	const detailsContainer = win.querySelector('#wallpaper-sidebar-details');
-	const applyBtn = win.querySelector('#wallpaper-btn-apply');
-	const okBtn = win.querySelector('#wallpaper-btn-ok');
-	const cancelBtn = win.querySelector('#wallpaper-btn-cancel');
-	const setTaskLink = win.querySelector('#wallpaper-task-set');
-	const resetTaskLink = win.querySelector('#wallpaper-task-reset');
+	const tabBtns = win.querySelectorAll('.xp-tab-btn');
+	const tabPages = win.querySelectorAll('.xp-tab-page');
+	const applyBtn = win.querySelector('#disp-btn-apply');
+	const okBtn = win.querySelector('#disp-btn-ok');
+	const cancelBtn = win.querySelector('#disp-btn-cancel');
+	const wpListbox = win.querySelector('#disp-wp-listbox');
+	const monitorPreview = win.querySelector('#disp-monitor-preview');
+	const selectFit = win.querySelector('#disp-select-fit');
+	const modeSelect = win.querySelector('#disp-wallpaper-mode');
+	const colorPicker = win.querySelector('#disp-color-picker');
+	const slideshowPanel = win.querySelector('#disp-slideshow-panel');
+	const slideshowInterval = win.querySelector('#disp-slideshow-interval');
+	const slideshowRandom = win.querySelector('#disp-slideshow-random');
 
-	function updateWallpaperSelection(item) {
-		selectedWallpaperItem = item;
-		monitorPreview.style.backgroundImage = `url('${item.path}')`;
-		try {
-			const viewed = JSON.parse(localStorage.getItem('xp_previewed_wallpapers') || '[]');
-			if (!viewed.includes(item.id)) {
-				viewed.push(item.id);
-				localStorage.setItem('xp_previewed_wallpapers', JSON.stringify(viewed));
+	const ssSelect = win.querySelector('#disp-ss-select');
+	const ssCanvas = win.querySelector('#disp-ss-monitor-canvas');
+	const ssPreviewBtn = win.querySelector('#disp-ss-btn-preview');
+	const ssWaitInput = win.querySelector('#disp-ss-wait-input');
+	const ssCustomPanel = win.querySelector('#disp-ss-custom-settings-panel');
+
+	const markDirty = () => {
+		if (applyBtn) applyBtn.disabled = false;
+	};
+
+	const renderEmbeddedScreensaverSettings = () => {
+		if (!ssCustomPanel) return;
+		ssCustomPanel.innerHTML = '';
+		if (currentSS === 'none' || !window.ScreenSaverManager) return;
+		const targetSaver = currentSS === 'random' ? 'xp-flying-logo' : currentSS;
+		window.ScreenSaverManager.renderConfigUI(ssCustomPanel, targetSaver, (updatedCfg) => {
+			markDirty();
+			if (ssCanvas && currentSS !== 'none') {
+				window.ScreenSaverManager.updateActivePreviewConfig(ssCanvas, updatedCfg);
 			}
-			if (window.AchievementsManager) {
-				window.AchievementsManager.setProgress('wallpaper_collector', viewed.length);
-			}
-		} catch (e) {}
-		detailsContainer.innerHTML = `
-			<b>${item.name}</b>
-			${item.filename}<br>
-			Type: WEBP Image
-		`;
-		gridContainer.querySelectorAll('.wallpaper-card').forEach(card => {
-			card.classList.toggle('selected', card.dataset.id === item.id);
 		});
-	}
+	};
 
-	function applyWallpaperToDesktop(item) {
-		const desktop = document.getElementById('desktop');
-		if (desktop) {
-			desktop.style.backgroundImage = `url('${item.path}')`;
+	renderEmbeddedScreensaverSettings();
+
+	const refreshWallpaperList = async () => {
+		const wallpapers = await fetchWallpaperRegistry();
+		wpListbox.innerHTML = '';
+		wallpapers.forEach(item => {
+			const row = document.createElement('div');
+			row.className = 'xp-listbox-item';
+			if (item.path === selectedWallpaperPath) row.classList.add('active');
+			row.textContent = item.name;
+			row.addEventListener('click', () => {
+				wpListbox.querySelectorAll('.xp-listbox-item').forEach(r => r.classList.remove('active'));
+				row.classList.add('active');
+				selectedWallpaperPath = item.path;
+				if (selectedMode !== 'color') {
+					monitorPreview.style.backgroundImage = `url('${item.path}')`;
+				}
+				markDirty();
+			});
+			wpListbox.appendChild(row);
+		});
+	};
+
+	refreshWallpaperList();
+
+	const updateMonitorScreen = () => {
+		monitorPreview.style.backgroundColor = selectedBgColor;
+		if (selectedMode === 'color') {
+			monitorPreview.style.backgroundImage = 'none';
+		} else {
+			monitorPreview.style.backgroundImage = `url('${selectedWallpaperPath}')`;
 		}
-		localStorage.setItem('desktopBackground', item.path);
-		currentActiveWallpaper = item.path;
-	}
+	};
 
-	wallpapers.forEach(item => {
-		const card = document.createElement('div');
-		card.className = 'wallpaper-card';
-		card.dataset.id = item.id;
-		if (item.id === selectedWallpaperItem.id) card.classList.add('selected');
-
-		const frame = document.createElement('div');
-		frame.className = 'wallpaper-card-thumb-frame';
-
-		const img = document.createElement('img');
-		img.src = item.path;
-		img.alt = item.name;
-		img.loading = 'lazy';
-		frame.appendChild(img);
-
-		const title = document.createElement('div');
-		title.className = 'wallpaper-card-title';
-		title.textContent = item.name;
-
-		card.appendChild(frame);
-		card.appendChild(title);
-
-		card.addEventListener('click', () => {
-			updateWallpaperSelection(item);
-		});
-
-		card.addEventListener('dblclick', () => {
-			updateWallpaperSelection(item);
-			applyWallpaperToDesktop(item);
-		});
-
-		card.addEventListener('contextmenu', (e) => {
-			e.preventDefault();
-			e.stopPropagation();
-			updateWallpaperSelection(item);
-			if (window.ContextMenu) {
-				const items = window.ContextMenu.getWallpaperCardItems(item);
-				window.ContextMenu.show(items, e.clientX, e.clientY);
+	tabBtns.forEach(btn => {
+		btn.addEventListener('click', () => {
+			tabBtns.forEach(b => b.classList.toggle('active', b === btn));
+			tabPages.forEach(p => p.classList.toggle('active', p.dataset.page === btn.dataset.tab));
+			if (btn.dataset.tab === 'screensaver' && window.ScreenSaverManager && ssCanvas) {
+				if (currentSS !== 'none') {
+					window.ScreenSaverManager.startPreview(ssCanvas, currentSS);
+				} else {
+					window.ScreenSaverManager.stopPreview(ssCanvas, true);
+				}
+			} else if (window.ScreenSaverManager && ssCanvas) {
+				window.ScreenSaverManager.stopPreview(ssCanvas, true);
 			}
 		});
-
-		gridContainer.appendChild(card);
 	});
 
-	applyBtn.addEventListener('click', () => {
-		applyWallpaperToDesktop(selectedWallpaperItem);
+	if (initialTab && initialTab !== 'desktop') {
+		const targetTab = win.querySelector(`.xp-tab-btn[data-tab="${initialTab}"]`);
+		if (targetTab) targetTab.click();
+	}
+
+	modeSelect.addEventListener('change', () => {
+		selectedMode = modeSelect.value;
+		slideshowPanel.style.display = selectedMode === 'slideshow' ? 'flex' : 'none';
+		updateMonitorScreen();
+		markDirty();
 	});
 
+	colorPicker.addEventListener('input', () => {
+		selectedBgColor = colorPicker.value;
+		updateMonitorScreen();
+		markDirty();
+	});
+
+	selectFit.addEventListener('change', () => {
+		selectedFit = selectFit.value;
+		markDirty();
+	});
+
+	slideshowInterval.addEventListener('change', () => {
+		selectedInterval = slideshowInterval.value;
+		markDirty();
+	});
+
+	slideshowRandom.addEventListener('change', () => {
+		selectedRandom = slideshowRandom.checked;
+		markDirty();
+	});
+
+	win.querySelector('#disp-btn-browse-folder').addEventListener('click', () => {
+		if (fs) {
+			let wpFolder = fs.findByPath('/WINDOWS/Web/Wallpaper');
+			if (!wpFolder) wpFolder = fs.root;
+			if (window.FileExplorer) window.FileExplorer.open(wpFolder);
+		}
+	});
+
+	win.querySelector('#disp-btn-restore-bliss').addEventListener('click', () => {
+		selectedWallpaperPath = DEFAULT_DESKTOP_WALLPAPER;
+		selectedMode = 'picture';
+		modeSelect.value = 'picture';
+		slideshowPanel.style.display = 'none';
+		updateMonitorScreen();
+		wpListbox.querySelectorAll('.xp-listbox-item').forEach(r => {
+			r.classList.toggle('active', r.textContent === 'Windows XP Bliss' || r.textContent === 'Bliss');
+		});
+		markDirty();
+	});
+
+	ssSelect.addEventListener('change', () => {
+		currentSS = ssSelect.value;
+		if (ssPreviewBtn) ssPreviewBtn.disabled = currentSS === 'none';
+		renderEmbeddedScreensaverSettings();
+		markDirty();
+		if (window.ScreenSaverManager && ssCanvas) {
+			if (currentSS !== 'none') {
+				window.ScreenSaverManager.startPreview(ssCanvas, currentSS);
+			} else {
+				window.ScreenSaverManager.stopPreview(ssCanvas, true);
+			}
+		}
+	});
+
+	if (ssPreviewBtn) {
+		ssPreviewBtn.addEventListener('click', () => {
+			if (currentSS !== 'none' && window.ScreenSaverManager) {
+				window.ScreenSaverManager.settings.activeSaver = currentSS;
+				window.ScreenSaverManager.start(true);
+			}
+		});
+	}
+
+	ssWaitInput.addEventListener('input', () => {
+		const val = parseFloat(ssWaitInput.value);
+		currentSSTimeout = (!isNaN(val) && val > 0) ? val : 1;
+		markDirty();
+	});
+
+	const saveChanges = () => {
+		if (window.SettingsApp) {
+			window.SettingsApp.set('wallpaperMode', selectedMode);
+			window.SettingsApp.set('desktopBackgroundColor', selectedBgColor);
+			window.SettingsApp.set('wallpaperSlideshowInterval', selectedInterval);
+			window.SettingsApp.set('wallpaperSlideshowRandom', selectedRandom);
+			window.SettingsApp.set('desktopBackground', selectedWallpaperPath);
+			window.SettingsApp.set('wallpaperFit', selectedFit);
+		} else {
+			localStorage.setItem('wallpaperMode', selectedMode);
+			localStorage.setItem('desktopBackgroundColor', selectedBgColor);
+			localStorage.setItem('wallpaperSlideshowInterval', String(selectedInterval));
+			localStorage.setItem('wallpaperSlideshowRandom', String(selectedRandom));
+			localStorage.setItem('desktopBackground', selectedWallpaperPath);
+			localStorage.setItem('wallpaperFit', selectedFit);
+		}
+
+		applyInitialDesktopBackground();
+
+		if (window.ScreenSaverManager) {
+			window.ScreenSaverManager.settings.activeSaver = currentSS;
+			window.ScreenSaverManager.settings.enabled = (currentSS !== 'none');
+			window.ScreenSaverManager.settings.timeoutMinutes = currentSSTimeout;
+			window.ScreenSaverManager.saveSettings();
+			window.ScreenSaverManager.resetIdleTimer();
+		}
+		if (applyBtn) applyBtn.disabled = true;
+	};
+
+	applyBtn.addEventListener('click', saveChanges);
 	okBtn.addEventListener('click', () => {
-		applyWallpaperToDesktop(selectedWallpaperItem);
+		saveChanges();
+		if (window.ScreenSaverManager && ssCanvas) {
+			window.ScreenSaverManager.stopPreview(ssCanvas);
+		}
 		closeWindow(win, id);
 	});
-
 	cancelBtn.addEventListener('click', () => {
+		if (window.ScreenSaverManager && ssCanvas) {
+			window.ScreenSaverManager.stopPreview(ssCanvas);
+		}
 		closeWindow(win, id);
 	});
 
-	setTaskLink.addEventListener('click', (e) => {
-		e.preventDefault();
-		applyWallpaperToDesktop(selectedWallpaperItem);
-	});
-
-	resetTaskLink.addEventListener('click', (e) => {
-		e.preventDefault();
-		const defaultItem = wallpapers.find(w => w.path === DEFAULT_DESKTOP_WALLPAPER) || wallpapers[0];
-		updateWallpaperSelection(defaultItem);
-		applyWallpaperToDesktop(defaultItem);
-	});
+	if (window.DeskEventBus) {
+		const unsub = window.DeskEventBus.on('fs:changed', () => refreshWallpaperList());
+		win.beforeClose = (force) => {
+			unsub();
+			if (window.ScreenSaverManager && ssCanvas) {
+				window.ScreenSaverManager.stopPreview(ssCanvas);
+			}
+			force();
+		};
+	}
 }
 
 function openRecycleBinWindow() {

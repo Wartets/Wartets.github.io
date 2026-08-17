@@ -576,6 +576,10 @@ body.theme-high-contrast .xp-start-right-column .xp-start-title {
 	color: var(--xp-font-color);
 }
 
+#xp-screensaver-fullscreen {
+	border-radius: inherit;
+}
+
 #taskbar {
 	background: var(--xp-taskbar-bg);
 	border-top: 1px solid var(--xp-taskbar-border);
@@ -841,6 +845,7 @@ body.wallpaper-fit-cover #desktop {
 body.wallpaper-fit-stretch #desktop {
 	background-size: 100% 100% !important;
 	background-repeat: no-repeat !important;
+	background-position: 0 0 !important;
 }
 body.wallpaper-fit-center #desktop {
 	background-size: auto !important;
@@ -851,6 +856,11 @@ body.wallpaper-fit-tile #desktop {
 	background-size: auto !important;
 	background-repeat: repeat !important;
 	background-position: top left !important;
+}
+body.wallpaper-fit-fit #desktop {
+	background-size: contain !important;
+	background-repeat: no-repeat !important;
+	background-position: center center !important;
 }
 
 .crt-preview-box {

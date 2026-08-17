@@ -1441,7 +1441,14 @@
 				row.dataset.recycleUid = el.uid;
 				row.title = `${el.name}\nOriginal location: ${el.originalPath}`;
 
-				const sizeStr = el.size !== undefined && el.type !== 'File Folder' ? `${Math.ceil(el.size / 1024)} KB` : '';
+				const formatBytesVal = (bytes) => {
+					if (!bytes || bytes <= 0) return '0 KB';
+					if (bytes < 1024) return `${bytes} B`;
+					const kb = bytes / 1024;
+					if (kb < 1024) return `${Math.ceil(kb)} KB`;
+					return `${(kb / 1024).toFixed(1)} MB`;
+				};
+				const sizeStr = el.size !== undefined && el.type !== 'File Folder' ? formatBytesVal(el.size) : '';
 				const delStr = el.deletedAt ? el.deletedAt.toLocaleString() : '';
 
 				row.innerHTML = `
@@ -1623,7 +1630,14 @@
 				else if (/\.(mp4|avi|wmv|mkv|webm)$/i.test(el.name)) typeStr = 'Video Clip';
 				else if (/\.(png|jpe?g|bmp|webp|gif)$/i.test(el.name)) typeStr = 'Image File';
 
-				const sizeStr = el.size !== undefined && !(el instanceof Folder) ? `${Math.ceil(el.size / 1024)} KB` : '';
+				const formatBytesVal = (bytes) => {
+					if (!bytes || bytes <= 0) return '0 KB';
+					if (bytes < 1024) return `${bytes} B`;
+					const kb = bytes / 1024;
+					if (kb < 1024) return `${Math.ceil(kb)} KB`;
+					return `${(kb / 1024).toFixed(1)} MB`;
+				};
+				const sizeStr = el.size !== undefined && !(el instanceof Folder) ? formatBytesVal(el.size) : '';
 				const modStr = el.modifiedAt ? el.modifiedAt.toLocaleString() : '';
 
 				row.innerHTML = `

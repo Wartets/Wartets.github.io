@@ -126,6 +126,7 @@ body.wallpaper-fit-cover #desktop {
 body.wallpaper-fit-stretch #desktop {
 	background-size: 100% 100% !important;
 	background-repeat: no-repeat !important;
+	background-position: 0 0 !important;
 }
 
 body.wallpaper-fit-center #desktop {
@@ -138,6 +139,12 @@ body.wallpaper-fit-tile #desktop {
 	background-size: auto !important;
 	background-repeat: repeat !important;
 	background-position: top left !important;
+}
+
+body.wallpaper-fit-fit #desktop {
+	background-size: contain !important;
+	background-repeat: no-repeat !important;
+	background-position: center center !important;
 }
 
 body.anim-fast .xp-window.opening,
@@ -9378,17 +9385,20 @@ body.theme-zune .xp-start-all-programs-arrow {
 }
 
 .info-window-body {
-	padding: 15px;
-	font-family: 'Roboto Mono', monospace;
-	font-size: 12px;
+	padding: 12px 14px;
+	font-family: 'Tahoma', 'Segoe UI', Arial, sans-serif;
+	font-size: 11px;
+	box-sizing: border-box;
+	overflow-x: hidden;
+	width: 100%;
 }
 
 .info-header {
 	display: flex;
 	align-items: center;
 	gap: 10px;
-	margin-bottom: 12px;
-	padding-bottom: 10px;
+	margin-bottom: 10px;
+	padding-bottom: 8px;
 	border-bottom: 1px solid var(--xp-border-light);
 }
 
@@ -9396,12 +9406,29 @@ body.theme-zune .xp-start-all-programs-arrow {
 	width: 32px;
 	height: 32px;
 	object-fit: contain;
+	flex-shrink: 0;
 }
 
 .info-title {
-	font-size: 14px;
+	font-size: 12px;
 	font-weight: bold;
 	word-break: break-word;
+	flex: 1;
+}
+
+.ss-dynamic-config-panel {
+	margin-top: 8px;
+	border-top: 1px dashed #aca899;
+	padding-top: 8px;
+	display: flex;
+	flex-direction: column;
+	gap: 6px;
+}
+
+.ss-opt-section {
+	display: flex;
+	flex-direction: column;
+	gap: 5px;
 }
 
 .info-thumbnail {
@@ -9426,25 +9453,29 @@ body.theme-zune .xp-start-all-programs-arrow {
 .info-rows {
 	display: flex;
 	flex-direction: column;
-	gap: 6px;
+	gap: 4px;
+	width: 100%;
+	box-sizing: border-box;
 }
 
 .info-row {
-	display: flex;
-	justify-content: space-between;
-	gap: 10px;
+	display: grid;
+	grid-template-columns: 115px 1fr;
+	gap: 8px;
 	border-bottom: 1px dotted rgba(0, 0, 0, 0.12);
-	padding-bottom: 4px;
+	padding-bottom: 3px;
+	align-items: baseline;
 }
 
 .info-label {
-	color: var(--xp-grey-dark);
-	flex-shrink: 0;
+	color: #555555;
+	font-weight: normal;
 }
 
 .info-value {
-	text-align: right;
+	text-align: left;
 	word-break: break-word;
+	color: #000000;
 }
 
 .info-value a {

@@ -351,8 +351,32 @@
 				desktop.style.backgroundColor = currentSettings.desktopBackgroundColor;
 			}
 		}
-		document.body.classList.remove('wallpaper-fit-cover', 'wallpaper-fit-stretch', 'wallpaper-fit-center', 'wallpaper-fit-tile');
-		document.body.classList.add(`wallpaper-fit-${currentSettings.wallpaperFit || 'cover'}`);
+		const fitMode = currentSettings.wallpaperFit || 'cover';
+		document.body.classList.remove('wallpaper-fit-cover', 'wallpaper-fit-stretch', 'wallpaper-fit-center', 'wallpaper-fit-tile', 'wallpaper-fit-fit');
+		document.body.classList.add(`wallpaper-fit-${fitMode}`);
+		if (desktop) {
+			if (fitMode === 'stretch') {
+				desktop.style.backgroundSize = '100% 100%';
+				desktop.style.backgroundRepeat = 'no-repeat';
+				desktop.style.backgroundPosition = '0 0';
+			} else if (fitMode === 'fit') {
+				desktop.style.backgroundSize = 'contain';
+				desktop.style.backgroundRepeat = 'no-repeat';
+				desktop.style.backgroundPosition = 'center center';
+			} else if (fitMode === 'center') {
+				desktop.style.backgroundSize = 'auto';
+				desktop.style.backgroundRepeat = 'no-repeat';
+				desktop.style.backgroundPosition = 'center center';
+			} else if (fitMode === 'tile') {
+				desktop.style.backgroundSize = 'auto';
+				desktop.style.backgroundRepeat = 'repeat';
+				desktop.style.backgroundPosition = 'top left';
+			} else {
+				desktop.style.backgroundSize = 'cover';
+				desktop.style.backgroundRepeat = 'no-repeat';
+				desktop.style.backgroundPosition = 'center center';
+			}
+		}
 
 		document.body.classList.remove('icon-size-mini', 'icon-size-small', 'icon-size-normal', 'icon-size-large', 'icon-size-xlarge');
 		document.body.classList.add(`icon-size-${currentSettings.iconSize || 'normal'}`);
@@ -535,6 +559,7 @@
 				<div class="xp-tabs-bar">
 					<button type="button" class="xp-tab-btn" data-tab="system">General</button>
 					<button type="button" class="xp-tab-btn" data-tab="desktop">Desktop & Icons</button>
+					<button type="button" class="xp-tab-btn" data-tab="screensaver">Screen Saver</button>
 					<button type="button" class="xp-tab-btn" data-tab="appearance">Colors & Style</button>
 					<button type="button" class="xp-tab-btn" data-tab="typography">Typography</button>
 					<button type="button" class="xp-tab-btn" data-tab="effects">CRT & Shaders</button>
@@ -615,19 +640,28 @@
 					<div class="xp-tab-page" data-page="desktop">
 						<div class="wallpaper-monitor-container" style="margin-bottom: 8px;">
 							<div class="wallpaper-monitor-bezel">
-								<div class="wallpaper-monitor-screen" id="settings-monitor-screen" style="background-image: url('${pendingSettings.desktopBackground}');"></div>
+								<div class="wallpaper-monitor-screen" id="settings-monitor-screen" style="background-image: ${pendingSettings.wallpaperMode === 'color' ? 'none' : `url('${pendingSettings.desktopBackground}')`}; background-color: ${pendingSettings.desktopBackgroundColor || '#004e98'};"></div>
 							</div>
 							<div class="wallpaper-monitor-stand"></div>
 							<div class="wallpaper-monitor-base"></div>
 						</div>
 						<fieldset class="xp-groupbox">
 							<legend>Background Picture & Color</legend>
+							<div class="xp-form-row" style="margin-bottom: 6px;">
+								<label for="settings-wallpaper-mode-select" style="width: 110px;">Display Mode:</label>
+								<select id="settings-wallpaper-mode-select" class="xp-select" style="flex: 1;">
+									<option value="picture" ${(pendingSettings.wallpaperMode || 'picture') === 'picture' ? 'selected' : ''}>Single Picture</option>
+									<option value="slideshow" ${pendingSettings.wallpaperMode === 'slideshow' ? 'selected' : ''}>Wallpaper Slideshow</option>
+									<option value="color" ${pendingSettings.wallpaperMode === 'color' ? 'selected' : ''}>Solid Background Color</option>
+								</select>
+							</div>
 							<div style="display: flex; gap: 8px; align-items: flex-start;">
 								<div class="xp-listbox-frame" id="settings-wallpaper-listbox">
 									<div class="xp-listbox-loading">Loading wallpaper catalog...</div>
 								</div>
-								<div style="display: flex; flex-direction: column; gap: 6px; width: 130px;">
+								<div style="display: flex; flex-direction: column; gap: 6px; width: 140px;">
 									<button type="button" class="xp-button-small" id="settings-btn-restore-bliss">Default Bliss</button>
+									<button type="button" class="xp-button-small" id="settings-btn-open-wp-folder">Open Wallpaper Folder</button>
 									<label class="xp-button-small" style="cursor: pointer; text-align: center;">
 										Upload Image
 										<input type="file" id="settings-wallpaper-upload" accept="image/*" style="display: none;">
@@ -635,10 +669,11 @@
 									<div class="xp-form-row" style="flex-direction: column; align-items: flex-start; margin-top: 4px;">
 										<label for="settings-wallpaper-fit" style="font-size: 10px;">Position:</label>
 										<select id="settings-wallpaper-fit" class="xp-select" style="width: 100%;">
-											<option value="cover">Stretch / Cover</option>
-											<option value="stretch">Fit to Window</option>
-											<option value="center">Center</option>
-											<option value="tile">Tile</option>
+											<option value="cover" ${(pendingSettings.wallpaperFit || 'cover') === 'cover' ? 'selected' : ''}>Fill Screen (Cover)</option>
+											<option value="fit" ${pendingSettings.wallpaperFit === 'fit' ? 'selected' : ''}>Fit to Screen (Keep Aspect)</option>
+											<option value="stretch" ${pendingSettings.wallpaperFit === 'stretch' ? 'selected' : ''}>Stretch to Window</option>
+											<option value="center" ${pendingSettings.wallpaperFit === 'center' ? 'selected' : ''}>Center</option>
+											<option value="tile" ${pendingSettings.wallpaperFit === 'tile' ? 'selected' : ''}>Tile</option>
 										</select>
 									</div>
 									<div class="xp-form-row" style="flex-direction: column; align-items: flex-start;">
@@ -647,10 +682,23 @@
 									</div>
 								</div>
 							</div>
-							<div class="xp-form-row" style="margin-top: 6px;">
-								<label for="settings-wallpaper-url-input" style="font-size: 11px;">Custom URL:</label>
-								<input type="text" id="settings-wallpaper-url-input" class="xp-input" placeholder="https://example.com/image.jpg" style="flex: 1;">
-								<button type="button" class="xp-button-small" id="settings-wallpaper-url-btn">Set</button>
+							<div id="settings-slideshow-panel" style="margin-top: 8px; display: ${pendingSettings.wallpaperMode === 'slideshow' ? 'flex' : 'none'}; flex-direction: column; gap: 4px; border-top: 1px dashed #aca899; padding-top: 6px;">
+								<div class="xp-form-row">
+									<label for="settings-slideshow-interval" style="width: 130px;">Change picture every:</label>
+									<select id="settings-slideshow-interval" class="xp-select" style="flex: 1;">
+										<option value="10" ${String(pendingSettings.wallpaperSlideshowInterval || '30') === '10' ? 'selected' : ''}>10 seconds</option>
+										<option value="30" ${String(pendingSettings.wallpaperSlideshowInterval || '30') === '30' ? 'selected' : ''}>30 seconds</option>
+										<option value="60" ${String(pendingSettings.wallpaperSlideshowInterval || '30') === '60' ? 'selected' : ''}>1 minute</option>
+										<option value="300" ${String(pendingSettings.wallpaperSlideshowInterval || '30') === '300' ? 'selected' : ''}>5 minutes</option>
+										<option value="900" ${String(pendingSettings.wallpaperSlideshowInterval || '30') === '900' ? 'selected' : ''}>15 minutes</option>
+										<option value="1800" ${String(pendingSettings.wallpaperSlideshowInterval || '30') === '1800' ? 'selected' : ''}>30 minutes</option>
+										<option value="3600" ${String(pendingSettings.wallpaperSlideshowInterval || '30') === '3600' ? 'selected' : ''}>1 hour</option>
+									</select>
+								</div>
+								<div class="xp-checkbox-row">
+									<input type="checkbox" id="settings-slideshow-random" ${pendingSettings.wallpaperSlideshowRandom ? 'checked' : ''}>
+									<label for="settings-slideshow-random">Shuffle pictures randomly</label>
+								</div>
 							</div>
 						</fieldset>
 
@@ -709,6 +757,40 @@
 								<label for="settings-selbox-opacity" style="margin-left: 12px; font-size: 11px;">Opacity:</label>
 								<input type="range" id="settings-selbox-opacity" min="0.1" max="0.8" step="0.05" value="${pendingSettings.selectionBoxOpacity || 0.3}" class="xp-slider" style="flex: 1;">
 							</div>
+						</fieldset>
+					</div>
+
+					<div class="xp-tab-page" data-page="screensaver">
+						<div class="wallpaper-monitor-container" style="margin-bottom: 6px;">
+							<div class="wallpaper-monitor-bezel">
+								<canvas id="settings-ss-monitor-canvas" class="wallpaper-monitor-screen" width="126" height="91" style="width:100%;height:100%;display:block;background:#000000;"></canvas>
+							</div>
+							<div class="wallpaper-monitor-stand"></div>
+							<div class="wallpaper-monitor-base"></div>
+						</div>
+
+						<fieldset class="xp-groupbox">
+							<legend>Screen Saver</legend>
+							<div style="display: flex; gap: 8px; align-items: center; margin-bottom: 8px;">
+								<select id="settings-ss-select" class="xp-select" style="flex: 1;">
+									<option value="xp-flying-logo" ${(pendingSettings.screensaverActive || 'xp-flying-logo') === 'xp-flying-logo' ? 'selected' : ''}>3D Flying Windows XP Logo</option>
+									<option value="bubbles" ${pendingSettings.screensaverActive === 'bubbles' ? 'selected' : ''}>Bubbles (Bulles Physiques 3D)</option>
+									<option value="starfield" ${pendingSettings.screensaverActive === 'starfield' ? 'selected' : ''}>Starfield Simulation</option>
+									<option value="pipes" ${pendingSettings.screensaverActive === 'pipes' ? 'selected' : ''}>3D Pipes (Tubes 3D)</option>
+									<option value="mystify" ${pendingSettings.screensaverActive === 'mystify' ? 'selected' : ''}>Mystify (Polygones)</option>
+									<option value="bezier" ${pendingSettings.screensaverActive === 'bezier' ? 'selected' : ''}>Bouncing Curves (Bézier)</option>
+									<option value="blank" ${pendingSettings.screensaverActive === 'blank' ? 'selected' : ''}>Blank Screen</option>
+									<option value="random" ${pendingSettings.screensaverActive === 'random' ? 'selected' : ''}>Random (Au hasard)</option>
+									<option value="none" ${pendingSettings.screensaverActive === 'none' ? 'selected' : ''}>(None)</option>
+								</select>
+								<button type="button" class="xp-button-small" id="settings-ss-btn-preview" ${pendingSettings.screensaverActive === 'none' ? 'disabled' : ''}>Preview</button>
+							</div>
+							<div class="xp-form-row">
+								<label for="settings-ss-wait-input" style="width: 50px;">Wait:</label>
+								<input type="number" id="settings-ss-wait-input" min="0.1" max="120" step="0.5" value="${pendingSettings.screensaverTimeoutMinutes !== undefined ? pendingSettings.screensaverTimeoutMinutes : 5}" class="xp-input" style="width: 60px;">
+								<span>minutes</span>
+							</div>
+							<div id="settings-ss-custom-panel" class="ss-dynamic-config-panel"></div>
 						</fieldset>
 					</div>
 
@@ -1547,10 +1629,42 @@
 	function bindSettingsDialogEvents(win, windowId, initialTab) {
 		switchTab(win, initialTab);
 
+		const ssCanvas = win.querySelector('#settings-ss-monitor-canvas');
+		const ssSelect = win.querySelector('#settings-ss-select');
+		const ssPreviewBtn = win.querySelector('#settings-ss-btn-preview');
+		const ssWaitInput = win.querySelector('#settings-ss-wait-input');
+		const ssCustomPanel = win.querySelector('#settings-ss-custom-panel');
+
+		const renderEmbeddedSettings = () => {
+			if (!ssCustomPanel) return;
+			ssCustomPanel.innerHTML = '';
+			const saver = ssSelect ? ssSelect.value : (pendingSettings.screensaverActive || 'xp-flying-logo');
+			if (saver === 'none' || !window.ScreenSaverManager) return;
+			const targetSaver = saver === 'random' ? 'xp-flying-logo' : saver;
+			window.ScreenSaverManager.renderConfigUI(ssCustomPanel, targetSaver, (updatedCfg) => {
+				markDirty(win);
+				if (ssCanvas && saver !== 'none') {
+					window.ScreenSaverManager.updateActivePreviewConfig(ssCanvas, updatedCfg);
+				}
+			});
+		};
+
+		renderEmbeddedSettings();
+
 		win.querySelectorAll('.xp-tab-btn').forEach(btn => {
 			btn.addEventListener('click', () => {
 				switchTab(win, btn.dataset.tab);
 				SoundEngine.play('click');
+				if (btn.dataset.tab === 'screensaver' && window.ScreenSaverManager && ssCanvas) {
+					const activeSaver = ssSelect ? ssSelect.value : (pendingSettings.screensaverActive || 'xp-flying-logo');
+					if (activeSaver !== 'none') {
+						window.ScreenSaverManager.startPreview(ssCanvas, activeSaver);
+					} else {
+						window.ScreenSaverManager.stopPreview(ssCanvas, true);
+					}
+				} else if (window.ScreenSaverManager && ssCanvas) {
+					window.ScreenSaverManager.stopPreview(ssCanvas, true);
+				}
 			});
 		});
 
@@ -1558,6 +1672,73 @@
 		populateAvatarGrid(win);
 		populateTrayConfigGrid(win);
 		updateThemePreviewBox(win);
+
+		if (ssSelect) {
+			ssSelect.addEventListener('change', () => {
+				pendingSettings.screensaverActive = ssSelect.value;
+				pendingSettings.screensaverEnabled = ssSelect.value !== 'none';
+				if (ssPreviewBtn) ssPreviewBtn.disabled = ssSelect.value === 'none';
+				renderEmbeddedSettings();
+				markDirty(win);
+				if (window.ScreenSaverManager && ssCanvas) {
+					if (ssSelect.value !== 'none') {
+						window.ScreenSaverManager.startPreview(ssCanvas, ssSelect.value);
+					} else {
+						window.ScreenSaverManager.stopPreview(ssCanvas, true);
+					}
+				}
+			});
+		}
+
+		if (ssPreviewBtn) {
+			ssPreviewBtn.addEventListener('click', () => {
+				const saver = ssSelect ? ssSelect.value : pendingSettings.screensaverActive;
+				if (saver && saver !== 'none' && window.ScreenSaverManager) {
+					window.ScreenSaverManager.settings.activeSaver = saver;
+					window.ScreenSaverManager.start(true);
+				}
+			});
+		}
+
+		if (ssWaitInput) {
+			ssWaitInput.addEventListener('input', () => {
+				const val = parseFloat(ssWaitInput.value);
+				pendingSettings.screensaverTimeoutMinutes = (!isNaN(val) && val > 0) ? val : 1;
+				markDirty(win);
+			});
+		}
+
+		const wpModeSelect = win.querySelector('#settings-wallpaper-mode-select');
+		const slideshowPanel = win.querySelector('#settings-slideshow-panel');
+		const slideshowIntervalSelect = win.querySelector('#settings-slideshow-interval');
+		const slideshowRandomCheck = win.querySelector('#settings-slideshow-random');
+
+		if (wpModeSelect) {
+			wpModeSelect.addEventListener('change', () => {
+				pendingSettings.wallpaperMode = wpModeSelect.value;
+				if (slideshowPanel) slideshowPanel.style.display = pendingSettings.wallpaperMode === 'slideshow' ? 'flex' : 'none';
+				const monitor = win.querySelector('#settings-monitor-screen');
+				if (monitor) {
+					monitor.style.backgroundColor = pendingSettings.desktopBackgroundColor || '#004e98';
+					monitor.style.backgroundImage = pendingSettings.wallpaperMode === 'color' ? 'none' : `url('${pendingSettings.desktopBackground}')`;
+				}
+				markDirty(win);
+			});
+		}
+
+		if (slideshowIntervalSelect) {
+			slideshowIntervalSelect.addEventListener('change', () => {
+				pendingSettings.wallpaperSlideshowInterval = slideshowIntervalSelect.value;
+				markDirty(win);
+			});
+		}
+
+		if (slideshowRandomCheck) {
+			slideshowRandomCheck.addEventListener('change', () => {
+				pendingSettings.wallpaperSlideshowRandom = slideshowRandomCheck.checked;
+				markDirty(win);
+			});
+		}
 
 		const avatarShapeSelect = win.querySelector('#settings-avatar-shape');
 		if (avatarShapeSelect) {
@@ -1936,6 +2117,17 @@
 				}
 				markDirty(win);
 				SoundEngine.play('click');
+			});
+		}
+
+		const openWpFolderBtn = win.querySelector('#settings-btn-open-wp-folder');
+		if (openWpFolderBtn) {
+			openWpFolderBtn.addEventListener('click', () => {
+				if (typeof fs !== 'undefined' && fs) {
+					let wpFolder = fs.findByPath('/WINDOWS/Web/Wallpaper');
+					if (!wpFolder) wpFolder = fs.root;
+					if (window.FileExplorer) window.FileExplorer.open(wpFolder);
+				}
 			});
 		}
 
@@ -2563,6 +2755,13 @@
 			currentSettings = { ...pendingSettings };
 			saveCurrentSettings();
 			applyAllSettings();
+			if (window.ScreenSaverManager) {
+				window.ScreenSaverManager.settings.activeSaver = currentSettings.screensaverActive || 'xp-flying-logo';
+				window.ScreenSaverManager.settings.enabled = (currentSettings.screensaverActive !== 'none');
+				window.ScreenSaverManager.settings.timeoutMinutes = currentSettings.screensaverTimeoutMinutes !== undefined ? currentSettings.screensaverTimeoutMinutes : 5;
+				window.ScreenSaverManager.saveSettings();
+				window.ScreenSaverManager.resetIdleTimer();
+			}
 			if (window.DeskEventBus) {
 				window.DeskEventBus.emit('settings:changed', { settings: currentSettings });
 			}
@@ -2575,6 +2774,9 @@
 		if (okBtn) {
 			okBtn.addEventListener('click', () => {
 				commitChanges();
+				if (window.ScreenSaverManager && ssCanvas) {
+					window.ScreenSaverManager.stopPreview(ssCanvas, true);
+				}
 				if (typeof closeWindow === 'function') closeWindow(win, windowId);
 			});
 		}
@@ -2582,9 +2784,19 @@
 		if (cancelBtn) {
 			cancelBtn.addEventListener('click', () => {
 				pendingSettings = { ...currentSettings };
+				if (window.ScreenSaverManager && ssCanvas) {
+					window.ScreenSaverManager.stopPreview(ssCanvas, true);
+				}
 				if (typeof closeWindow === 'function') closeWindow(win, windowId);
 			});
 		}
+
+		win.beforeClose = (force) => {
+			if (window.ScreenSaverManager && ssCanvas) {
+				window.ScreenSaverManager.stopPreview(ssCanvas, true);
+			}
+			force();
+		};
 	}
 
 	loadSavedSettings();

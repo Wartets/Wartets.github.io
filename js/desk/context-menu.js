@@ -376,6 +376,7 @@
 				{ separator: true },
 				{
 					label: 'Next Desktop Background',
+					disabled: ((window.SettingsApp && window.SettingsApp.get('wallpaperMode')) || localStorage.getItem('wallpaperMode') || 'picture') !== 'slideshow',
 					action: async () => {
 						if (typeof fetchWallpaperRegistry === 'function') {
 							const list = await fetchWallpaperRegistry();
@@ -904,13 +905,19 @@
 					icon: '../assets/images/desk/icons/Display.webp',
 					submenu: [
 						{
-							label: 'Stretch / Cover',
+							label: 'Fill Screen (Cover)',
 							action: () => {
 								if (typeof setImageAsWallpaper === 'function') setImageAsWallpaper(element.content || element.remoteUrl, 'cover');
 							}
 						},
 						{
-							label: 'Fit to Screen',
+							label: 'Fit (Keep Aspect)',
+							action: () => {
+								if (typeof setImageAsWallpaper === 'function') setImageAsWallpaper(element.content || element.remoteUrl, 'fit');
+							}
+						},
+						{
+							label: 'Stretch to Screen',
 							action: () => {
 								if (typeof setImageAsWallpaper === 'function') setImageAsWallpaper(element.content || element.remoteUrl, 'stretch');
 							}
@@ -2463,7 +2470,7 @@
 					icon: '../assets/images/desk/icons/Display.webp',
 					submenu: [
 						{
-							label: 'Stretch / Cover',
+							label: 'Fill Screen (Cover)',
 							action: () => {
 								if (typeof window.setImageAsWallpaper === 'function') window.setImageAsWallpaper(currentImage.src, 'cover');
 								else if (window.SettingsApp) window.SettingsApp.set('desktopBackground', currentImage.src);
@@ -2471,7 +2478,15 @@
 							}
 						},
 						{
-							label: 'Fit to Screen',
+							label: 'Fit (Keep Aspect)',
+							action: () => {
+								if (typeof window.setImageAsWallpaper === 'function') window.setImageAsWallpaper(currentImage.src, 'fit');
+								else if (window.SettingsApp) window.SettingsApp.set('desktopBackground', currentImage.src);
+								if (typeof showXPDialog === 'function') showXPDialog('Desktop Background', `"${currentImage.name}" is now set as desktop wallpaper.`, 'info');
+							}
+						},
+						{
+							label: 'Stretch to Screen',
 							action: () => {
 								if (typeof window.setImageAsWallpaper === 'function') window.setImageAsWallpaper(currentImage.src, 'stretch');
 								else if (window.SettingsApp) window.SettingsApp.set('desktopBackground', currentImage.src);

@@ -31,6 +31,68 @@
 	"desktopBackground": "../assets/images/desk/wallpapers/wallpaper-default.webp",
 	"desktopBackgroundColor": "#004e98",
 	"wallpaperFit": "cover",
+	"wallpaperMode": "picture",
+	"wallpaperSlideshowInterval": "30",
+	"wallpaperSlideshowRandom": false,
+	"screensaverActive": "xp-flying-logo",
+	"screensaverEnabled": true,
+	"screensaverTimeoutMinutes": 5,
+	"screensaverSavers": {
+		"xp-flying-logo": {
+			"speed": 4,
+			"logoScale": 0.5,
+			"rotationSpeed": 1.5,
+			"waveIntensity": 2.5,
+			"extrusionDepth": 12,
+			"trailEffect": true,
+			"trailDensity": 40,
+			"starfieldBackground": true,
+			"starCount": 200
+		},
+		"starfield": {
+			"speed": 6,
+			"starCount": 500,
+			"streakLength": 6,
+			"colorMode": "white",
+			"centerGlow": true
+		},
+		"pipes": {
+			"pipeSpeed": 3,
+			"maxPipes": 5,
+			"pipeRadius": 10,
+			"jointType": "mixed",
+			"shading": "shiny",
+			"colorScheme": "classic"
+		},
+		"mystify": {
+			"speed": 4,
+			"linesCount": 12,
+			"polygonCount": 2,
+			"vertexCount": 4,
+			"lineWidth": 1.5,
+			"colorScheme": "rainbow",
+			"colorCycleSpeed": 3
+		},
+		"bezier": {
+			"speed": 4,
+			"curveCount": 3,
+			"segments": 25,
+			"lineWidth": 1.5,
+			"colorScheme": "vibrant"
+		},
+		"bubbles": {
+			"bubbleCount": 80,
+			"baseRadius": 22,
+			"radiusVariation": 0.6,
+			"speed": 3.5,
+			"massExponent": 2,
+			"restitution": 1.0,
+			"gravityY": 0.0,
+			"colorScheme": "soap",
+			"specularHighlights": true
+		},
+		"blank": {}
+	},
 	"iconSize": "normal",
 	"iconLabelColor": "#ffffff",
 	"iconLabelBgColor": "transparent",
