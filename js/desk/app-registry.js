@@ -390,6 +390,27 @@
 					if (typeof openAnecdoteWindow === 'function') openAnecdoteWindow(new Date());
 				}
 			});
+
+			this.register({
+				id: 'markdownpreview',
+				name: 'Markdown Live Preview',
+				subtitle: 'Document & Formula Typesetter',
+				icon: '../assets/images/desk/icons/List File.webp',
+				category: 'Accessories',
+				aliases: ['markdown', 'preview', 'katex', 'math-preview'],
+				handler: (args) => {
+					if (window.MarkdownPreviewApp) {
+						if (args && args.textarea) {
+							window.MarkdownPreviewApp.open(args);
+						} else if (window.NotepadApp) {
+							const npWin = window.NotepadApp.open(null, { title: 'Notes.md', initialContent: '# Welcome to Markdown\n\nWrite notes, formulas like $$E = mc^2$$ and tables.' });
+							if (npWin && npWin.notepadSession) {
+								window.MarkdownPreviewApp.open(npWin.notepadSession);
+							}
+						}
+					}
+				}
+			});
 		}
 	}
 

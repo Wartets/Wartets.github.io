@@ -66,7 +66,7 @@
 			`;
 
 			const win = createXPWindow(id, 'Calculator', contentHTML, 260, 245, {
-				iconSrc: 'https://api.iconify.design/mdi/calculator.svg?color=%231b4b9b',
+				iconSrc: '../assets/images/desk/icons/Calculator.webp',
 				resizable: false
 			});
 

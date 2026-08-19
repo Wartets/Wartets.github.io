@@ -47,6 +47,7 @@
 					<li data-action="menu-edit"><u>E</u>dit</li>
 					<li data-action="menu-format">F<u>o</u>rmat</li>
 					<li data-action="menu-view"><u>V</u>iew</li>
+					<li data-action="menu-markdown"><u>M</u>arkdown</li>
 					<li data-action="menu-run"><u>R</u>un</li>
 					<li data-action="menu-help"><u>H</u>elp</li>
 				</ul>
@@ -118,6 +119,13 @@
 					this.updateTitle();
 				}
 				this.updateStatusBar();
+				if (window.DeskEventBus) {
+					window.DeskEventBus.emit('notepad:content-changed', {
+						session: this,
+						content: this.textarea.value,
+						title: this.file ? this.file.name : (this.options.title || 'Untitled.md')
+					});
+				}
 			});
 
 			const updateCursorPos = () => this.updateStatusBar();
@@ -157,6 +165,9 @@
 				} else if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'r') {
 					e.preventDefault();
 					this.runInCommandPrompt();
+				} else if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'm') {
+					e.preventDefault();
+					this.openMarkdownPreview();
 				}
 			});
 
@@ -602,10 +613,82 @@
 			}
 		}
 
+		openMarkdownPreview() {
+			if (window.MarkdownPreviewApp) {
+				window.MarkdownPreviewApp.open(this);
+			}
+		}
+
 		openMenuDropdown(menuType, x, y) {
 			let items = [];
 
-			if (menuType === 'menu-file') {
+			if (menuType === 'menu-markdown') {
+				items = [
+					{
+						label: 'Open Markdown Live Preview',
+						shortcut: 'Ctrl+M',
+						bold: true,
+						icon: '../assets/images/desk/icons/List File.webp',
+						action: () => this.openMarkdownPreview()
+					},
+					{ separator: true },
+					{
+						label: 'Export Document to PDF...',
+						icon: '../assets/images/desk/icons/List File.webp',
+						action: () => {
+							if (window.MarkdownPreviewApp) {
+								window.MarkdownPreviewApp.exportDirectPDF(this);
+							} else {
+								this.openMarkdownPreview();
+							}
+						}
+					},
+					{
+						label: 'Export Rendered Image (PNG)...',
+						icon: '../assets/images/desk/icons/Picture.webp',
+						action: () => {
+							if (window.MarkdownPreviewApp) {
+								window.MarkdownPreviewApp.exportDirectImage(this);
+							} else {
+								this.openMarkdownPreview();
+							}
+						}
+					},
+					{
+						label: 'Export Standalone HTML...',
+						icon: '../assets/images/desk/icons/Internet Explorer.webp',
+						action: () => {
+							if (window.MarkdownPreviewApp) {
+								window.MarkdownPreviewApp.exportDirectHTML(this);
+							}
+						}
+					},
+					{ separator: true },
+					{
+						label: 'Insert Math Formula ($$...$$)',
+						action: () => {
+							const start = this.textarea.selectionStart;
+							const end = this.textarea.selectionEnd;
+							const sel = this.textarea.value.substring(start, end) || 'E = mc^2';
+							const snippet = `\n$$\n${sel}\n$$\n`;
+							this.textarea.value = this.textarea.value.substring(0, start) + snippet + this.textarea.value.substring(end);
+							this.textarea.selectionStart = this.textarea.selectionEnd = start + snippet.length;
+							this.textarea.dispatchEvent(new Event('input'));
+						}
+					},
+					{
+						label: 'Insert Table Template',
+						action: () => {
+							const start = this.textarea.selectionStart;
+							const end = this.textarea.selectionEnd;
+							const snippet = `\n| Column 1 | Column 2 | Column 3 |\n| :--- | :---: | ---: |\n| Data A | Data B | Data C |\n| Value 1 | Value 2 | Value 3 |\n`;
+							this.textarea.value = this.textarea.value.substring(0, start) + snippet + this.textarea.value.substring(end);
+							this.textarea.selectionStart = this.textarea.selectionEnd = start + snippet.length;
+							this.textarea.dispatchEvent(new Event('input'));
+						}
+					}
+				];
+			} else if (menuType === 'menu-file') {
 				items = [
 					{
 						label: 'New',

@@ -1,20 +1,53 @@
 (function () {
 	const SETTINGS_STORAGE_KEY = 'xp_system_settings';
 
-	const AVATAR_PRESETS = [
-		{ id: 'user-1', name: 'User 1', url: '../assets/images/desk/icons/User 1.webp' },
-		{ id: 'user-2', name: 'User 2', url: '../assets/images/desk/icons/User 2.webp' },
-		{ id: 'earth', name: 'Earth', url: '../assets/images/desk/icons/Earth (fixed).webp' },
-		{ id: 'camera', name: 'Camera', url: '../assets/images/desk/icons/Camera.webp' },
-		{ id: 'laptop', name: 'Laptop', url: '../assets/images/desk/icons/Laptop.webp' },
-		{ id: 'phone', name: 'Phone', url: '../assets/images/desk/icons/Phone.webp' },
-		{ id: 'display', name: 'Display', url: '../assets/images/desk/icons/Display.webp' },
-		{ id: 'monitor', name: 'Monitor', url: '../assets/images/desk/icons/Monitor.webp' },
-		{ id: 'trophy', name: 'Trophy', url: '../assets/images/desk/icons/Trophy.webp' },
-		{ id: 'game', name: 'Game Pad', url: '../assets/images/desk/icons/Game Controller.webp' },
-		{ id: 'music', name: 'Music Note', url: '../assets/images/desk/icons/Music File.webp' },
-		{ id: 'picture', name: 'Picture', url: '../assets/images/desk/icons/Picture.webp' }
+	const KNOWN_ICON_FILENAMES = [
+		'User 1.webp', 'User 2.webp', 'User Accounts.webp', 'User Personalization.webp', 'User Support.webp', "User's Computer.webp",
+		'My Profile Folder.webp', 'My Computer.webp', 'My Network Places.webp', 'Display.webp', 'Monitor.webp', 'Laptop.webp',
+		'Camera.webp', 'Picture.webp', 'Phone.webp', 'Earth (fixed).webp', 'Network Computers.webp', 'Trophy.webp',
+		'Game Controller.webp', 'Hearts.webp', 'Minesweeper.webp', 'Winamp.webp', 'Music File.webp', 'Video File.webp',
+		'Paint.webp', 'Notepad.webp', 'File.webp', 'List File.webp', 'Disk Image File.webp', 'Floppy Drive.webp',
+		'Folder Closed.webp', 'Folder Closed (Alt).webp', 'Folder Open.webp', 'Folder Search.webp', 'Trash.webp',
+		'Calculator.webp', 'Calendar.webp', 'Fax.webp', 'Printer.webp', 'Search.webp', 'System Properties.webp',
+		'Sounds, Speech, and Audio Devices.webp', 'Internet Explorer.webp', 'Internet Properties.webp', 'Mail.webp',
+		'Activate Windows.webp', 'Command Prompt.webp'
 	];
+
+	function buildDynamicAvatarPresets() {
+		const list = [];
+		const iconMap = new Map();
+
+		KNOWN_ICON_FILENAMES.forEach(filename => {
+			const rawName = filename.replace(/\.[^/.]+$/, '');
+			const id = rawName.toLowerCase().replace(/[^\w-]/g, '-');
+			const url = `../assets/images/desk/icons/${filename}`;
+			iconMap.set(url, { id, name: rawName, url });
+		});
+
+		if (typeof fs !== 'undefined' && fs && fs.root) {
+			const checkElement = (el) => {
+				if (el.icon && typeof el.icon === 'string' && el.icon.includes('/icons/') && !iconMap.has(el.icon)) {
+					const filename = el.icon.split('/').pop();
+					const rawName = decodeURIComponent(filename).replace(/\.[^/.]+$/, '');
+					iconMap.set(el.icon, {
+						id: rawName.toLowerCase().replace(/[^\w-]/g, '-'),
+						name: rawName,
+						url: el.icon
+					});
+				}
+				if (el.children && typeof el.children.values === 'function') {
+					for (const child of el.children.values()) {
+						checkElement(child);
+					}
+				}
+			};
+			checkElement(fs.root);
+		}
+
+		return Array.from(iconMap.values());
+	}
+
+	const AVATAR_PRESETS = buildDynamicAvatarPresets();
 
 	let DEFAULT_SETTINGS = {}; // never to modifiy, use data/desk-default-settings.json to change default settings
 
@@ -1583,7 +1616,9 @@
 		if (!grid) return;
 		grid.innerHTML = '';
 
-		AVATAR_PRESETS.forEach(avatar => {
+		const dynamicPresets = buildDynamicAvatarPresets();
+
+		dynamicPresets.forEach(avatar => {
 			const item = document.createElement('div');
 			item.className = 'xp-avatar-item';
 			if (pendingSettings.userAvatar === avatar.url) {
@@ -1594,6 +1629,7 @@
 			const img = document.createElement('img');
 			img.src = avatar.url;
 			img.alt = avatar.name;
+			img.loading = 'lazy';
 			item.appendChild(img);
 
 			item.addEventListener('click', () => {

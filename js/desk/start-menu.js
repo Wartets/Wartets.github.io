@@ -539,8 +539,8 @@
 							categoryProjects.forEach(p => {
 								const pTitle = this.resolveProjectTitle(p.title);
 								prjHtml += `
-									<div class="xp-start-flyout-item" data-project-id="${pTitle}">
-										<img src="${p.icon || '../assets/images/desk/icons/File.webp'}" class="xp-start-item-icon" alt="">
+									<div class="xp-start-flyout-item xp-start-project-item" data-type="project" data-project-id="${pTitle}">
+										<img src="${p.icon || '../assets/images/desk/icons/File.webp'}" class="xp-start-item-icon xp-start-project-icon" alt="">
 										<span class="xp-start-title">${pTitle}</span>
 									</div>
 								`;

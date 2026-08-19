@@ -84,7 +84,7 @@
 		"title": "Pen Pal",
 		"description": "Compose and dispatch an e-mail message using Outlook Express.",
 		"category": "communication",
-		"icon": "../assets/images/desk/OE2001.webp",
+		"icon": "../assets/images/desk/icons/Mail.webp",
 		"hideIconWhenLocked": false,
 		"maxProgress": 1,
 		"points": 20
@@ -374,7 +374,7 @@
 		"title": "Portfolio Inception",
 		"description": "Navigate to wartets.github.io inside Internet Explorer.",
 		"category": "internet",
-		"icon": "../assets/images/desk/internet-explorer.png",
+		"icon": "../assets/images/desk/icons/Internet Explorer.webp",
 		"hideIconWhenLocked": false,
 		"maxProgress": 1,
 		"points": 15

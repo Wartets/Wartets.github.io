@@ -289,7 +289,7 @@
 			`;
 
 			const win = createXPWindow(id, 'Character Map', contentHTML, 500, 440, {
-				iconSrc: 'https://api.iconify.design/mdi/format-font.svg?color=%231b4b9b',
+				iconSrc: '../assets/images/desk/icons/List File.webp',
 				resizable: false
 			});
 

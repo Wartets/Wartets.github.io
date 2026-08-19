@@ -8,7 +8,58 @@
 		},
 
 		registerDefaults() {
-			this.register(['.txt', '.text', '.log', '.ini', '.cfg', '.md', '.js', '.css', '.xml', '.csv', '.ts', '.py', '.c', '.cpp', '.h', '.sql'], {
+			this.register(['.md', '.markdown'], {
+				typeLabel: 'Markdown Document',
+				defaultIcon: '../assets/images/desk/icons/List File.webp',
+				defaultApp: 'notepad',
+				openHandler: (file) => {
+					if (window.NotepadApp) {
+						const npWin = window.NotepadApp.open(file);
+						if (npWin && npWin.notepadSession && window.MarkdownPreviewApp) {
+							window.MarkdownPreviewApp.open(npWin.notepadSession);
+						}
+					}
+				},
+				openWith: [
+					{
+						id: 'notepad',
+						name: 'Notepad (Source Editor)',
+						icon: '../assets/images/desk/icons/Notepad.webp',
+						action: (file) => {
+							if (window.NotepadApp) window.NotepadApp.open(file);
+						}
+					},
+					{
+						id: 'markdown-preview',
+						name: 'Markdown Live Preview & Math Typesetter',
+						icon: '../assets/images/desk/icons/List File.webp',
+						action: (file) => {
+							if (window.NotepadApp) {
+								const npWin = window.NotepadApp.open(file);
+								if (npWin && npWin.notepadSession && window.MarkdownPreviewApp) {
+									window.MarkdownPreviewApp.open(npWin.notepadSession);
+								}
+							}
+						}
+					},
+					{
+						id: 'ie',
+						name: 'Internet Explorer',
+						icon: '../assets/images/desk/icons/Internet Explorer.webp',
+						action: (file) => {
+							if (window.InternetExplorerApp) window.InternetExplorerApp.open(`file://${file.getFullPath()}`);
+						}
+					}
+				],
+				newTemplate: {
+					extension: '.md',
+					defaultName: 'New Markdown Document.md',
+					content: '# Document Title\n\n## Section 1\nType your notes here.\n\n### Mathematical Formulation\n$$\n\\int_{-\\infty}^{+\\infty} e^{-x^2} dx = \\sqrt{\\pi}\n$$\n',
+					label: 'Markdown Document'
+				}
+			});
+
+			this.register(['.txt', '.text', '.log', '.ini', '.cfg', '.js', '.css', '.xml', '.csv', '.ts', '.py', '.c', '.cpp', '.h', '.sql'], {
 				typeLabel: 'Text Document',
 				defaultIcon: '../assets/images/desk/icons/File.webp',
 				defaultApp: 'notepad',
@@ -120,7 +171,7 @@
 					{
 						id: 'ie',
 						name: 'Internet Explorer',
-						icon: '../assets/images/desk/internet-explorer.png',
+						icon: '../assets/images/desk/icons/Internet Explorer.webp',
 						action: (file) => {
 							if (window.InternetExplorerApp) window.InternetExplorerApp.open(file.remoteUrl || file.content || `file://${file.getFullPath()}`);
 						}
@@ -178,7 +229,7 @@
 					{
 						id: 'ie',
 						name: 'Internet Explorer',
-						icon: '../assets/images/desk/internet-explorer.png',
+						icon: '../assets/images/desk/icons/Internet Explorer.webp',
 						action: (file) => {
 							if (window.InternetExplorerApp) window.InternetExplorerApp.open(file.remoteUrl || file.content);
 						}
@@ -257,7 +308,7 @@
 					{
 						id: 'ie',
 						name: 'Internet Explorer',
-						icon: '../assets/images/desk/internet-explorer.png',
+						icon: '../assets/images/desk/icons/Internet Explorer.webp',
 						action: (file) => {
 							if (window.InternetExplorerApp) window.InternetExplorerApp.open(file.content || file.remoteUrl || `file://${file.getFullPath()}`);
 						}
@@ -284,7 +335,7 @@
 					{
 						id: 'ie',
 						name: 'Internet Explorer',
-						icon: '../assets/images/desk/internet-explorer.png',
+						icon: '../assets/images/desk/icons/Internet Explorer.webp',
 						action: (file) => {
 							if (window.InternetExplorerApp) window.InternetExplorerApp.open(file.content || file.remoteUrl);
 						}
@@ -487,7 +538,7 @@
 				{
 					id: 'ie',
 					name: 'Internet Explorer',
-					icon: '../assets/images/desk/internet-explorer.png',
+					icon: '../assets/images/desk/icons/Internet Explorer.webp',
 					action: () => {
 						if (window.InternetExplorerApp) window.InternetExplorerApp.open(`file://${element.getFullPath()}`);
 					}

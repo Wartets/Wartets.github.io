@@ -38,6 +38,15 @@
 	let draggedQlId = null;
 	let calendarCurrentDate = new Date();
 
+	let batteryState = {
+		supported: false,
+		charging: true,
+		level: 1.0,
+		chargingTime: 0,
+		dischargingTime: Infinity,
+		alertTriggered: false
+	};
+
 	const Taskbar = {
 		init() {
 			taskbarEl = document.getElementById('taskbar');
@@ -50,6 +59,7 @@
 
 			this.loadQuickLaunchItems();
 			this.createDomElements();
+			this.initBatteryMonitoring();
 			this.renderQuickLaunch();
 			this.renderSystemTray();
 			this.bindEvents();
@@ -117,9 +127,10 @@
 				{
 					id: 'power',
 					name: 'Power Meter',
-					icon: 'https://api.iconify.design/mdi/battery-charging.svg?color=%23ffffff',
-					title: 'On AC Power - Battery remaining: 98% (Fully Charged)',
-					hidden: true,
+					icon: this.getBatteryIconUrl(),
+					title: this.getBatteryStatusText(),
+					isBatteryWidget: true,
+					hidden: false,
 					onClick: (e) => this.showPowerMeterPopup(e),
 					onContextMenu: (e) => {
 						if (window.ContextMenu) {
@@ -229,6 +240,100 @@
 			];
 		},
 
+		async initBatteryMonitoring() {
+			if (typeof navigator !== 'undefined' && typeof navigator.getBattery === 'function') {
+				try {
+					const battery = await navigator.getBattery();
+					batteryState.supported = true;
+					const syncState = () => {
+						const oldLevel = batteryState.level;
+						const oldCharging = batteryState.charging;
+						batteryState.charging = battery.charging;
+						batteryState.level = battery.level;
+						batteryState.chargingTime = battery.chargingTime;
+						batteryState.dischargingTime = battery.dischargingTime;
+
+						if (!battery.charging && battery.level <= 0.15 && !batteryState.alertTriggered) {
+							batteryState.alertTriggered = true;
+							this.showBalloon(
+								'Low Battery Warning',
+								`Battery power is low (${Math.round(battery.level * 100)}% remaining). Connect your computer to AC power now to prevent data loss.`,
+								'https://api.iconify.design/mdi/battery-alert.svg?color=%23cc2222',
+								10000
+							);
+							if (window.SettingsApp && window.SettingsApp.playSound) {
+								window.SettingsApp.playSound('exclamation');
+							}
+						} else if (battery.charging || battery.level > 0.15) {
+							batteryState.alertTriggered = false;
+						}
+
+						this.updateBatteryTrayUI();
+					};
+
+					syncState();
+					battery.addEventListener('chargingchange', syncState);
+					battery.addEventListener('levelchange', syncState);
+					battery.addEventListener('chargingtimechange', syncState);
+					battery.addEventListener('dischargingtimechange', syncState);
+				} catch (e) {
+					batteryState.supported = false;
+				}
+			}
+		},
+
+		getBatteryIconUrl() {
+			const pct = Math.round(batteryState.level * 100);
+			if (batteryState.charging) {
+				return 'https://api.iconify.design/mdi/battery-charging.svg?color=%23ffffff';
+			}
+			if (pct <= 15) {
+				return 'https://api.iconify.design/mdi/battery-alert.svg?color=%23ff4444';
+			}
+			if (pct <= 30) {
+				return 'https://api.iconify.design/mdi/battery-30.svg?color=%23ffffff';
+			}
+			if (pct <= 60) {
+				return 'https://api.iconify.design/mdi/battery-60.svg?color=%23ffffff';
+			}
+			if (pct <= 90) {
+				return 'https://api.iconify.design/mdi/battery-90.svg?color=%23ffffff';
+			}
+			return 'https://api.iconify.design/mdi/battery.svg?color=%23ffffff';
+		},
+
+		getBatteryStatusText() {
+			const pct = Math.round(batteryState.level * 100);
+			if (!batteryState.supported) {
+				return 'On AC Power (Online)';
+			}
+			if (batteryState.charging) {
+				return `On AC Power - ${pct}% (Charging)`;
+			}
+			if (pct <= 15) {
+				return `CRITICAL LOW BATTERY: ${pct}% remaining!`;
+			}
+			return `Battery power remaining: ${pct}%`;
+		},
+
+		updateBatteryTrayUI() {
+			const trayPowerBtn = document.getElementById('tray-power-btn');
+			if (!trayPowerBtn) return;
+			trayPowerBtn.title = this.getBatteryStatusText();
+			const img = trayPowerBtn.querySelector('img');
+			if (img) img.src = this.getBatteryIconUrl();
+
+			let pctBadge = trayPowerBtn.querySelector('.tray-battery-percentage');
+			if (!pctBadge && batteryState.supported) {
+				pctBadge = document.createElement('span');
+				pctBadge.className = 'tray-battery-percentage';
+				trayPowerBtn.appendChild(pctBadge);
+			}
+			if (pctBadge) {
+				pctBadge.textContent = `${Math.round(batteryState.level * 100)}%`;
+			}
+		},
+
 		renderSystemTray() {
 			if (!systemTrayEl) return;
 			systemTrayEl.innerHTML = '';
@@ -283,6 +388,11 @@
 					countBadge.className = 'tray-icon-badge hidden';
 					countBadge.id = 'tray-mail-count-badge';
 					itemEl.appendChild(countBadge);
+				} else if (srv.isBatteryWidget && batteryState.supported) {
+					const pctBadge = document.createElement('span');
+					pctBadge.className = 'tray-battery-percentage';
+					pctBadge.textContent = `${Math.round(batteryState.level * 100)}%`;
+					itemEl.appendChild(pctBadge);
 				}
 
 				if (srv.onClick) {
@@ -436,11 +546,101 @@
 
 		showWindowsUpdateDialog(e) {
 			if (window.AchievementsManager) window.AchievementsManager.progress('update_checker', 1);
-			showXPDialog('Automatic Updates', 'Windows is up to date.\nLast checked: Today at 03:00 AM.\nNo new security updates are required.', 'info');
+			const now = new Date();
+			const timeString = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+			const dateString = now.toLocaleDateString();
+			const fileCount = (typeof fs !== 'undefined' && fs && fs.root) ? fs.root.getAllDescendants().length : 42;
+
+			showXPDialog(
+				'Automatic Updates',
+				`Windows is up to date.\n\n` +
+				`Last checked: ${dateString} at ${timeString}.\n` +
+				`Integrity status: ${fileCount} system objects verified.\n` +
+				`Operating System: Windows XP Professional (SP3 Build 2600).\n` +
+				`Security Definition Database: Version ${now.getFullYear()}.${now.getMonth() + 1}.${now.getDate()}.\n\n` +
+				`No new critical security updates or hotfixes are required.`,
+				'info'
+			);
 		},
 
 		showPowerMeterPopup(e) {
-			showXPDialog('Power Meter', 'Power status: AC Power Online\nBattery capacity: 98% (Fully Charged)\nPower scheme: Home/Office Desk', 'info');
+			const id = 'window-power-meter';
+			if (document.getElementById(id)) {
+				if (typeof bringWindowToFront === 'function') bringWindowToFront(document.getElementById(id));
+				return;
+			}
+
+			const pct = Math.round(batteryState.level * 100);
+			const isCharging = batteryState.charging;
+			const isSupported = batteryState.supported;
+			let timeText = 'Unknown';
+
+			if (isCharging && batteryState.chargingTime && isFinite(batteryState.chargingTime)) {
+				const mins = Math.round(batteryState.chargingTime / 60);
+				timeText = `${Math.floor(mins / 60)}h ${mins % 60}m until fully charged`;
+			} else if (!isCharging && batteryState.dischargingTime && isFinite(batteryState.dischargingTime)) {
+				const mins = Math.round(batteryState.dischargingTime / 60);
+				timeText = `${Math.floor(mins / 60)}h ${mins % 60}m remaining`;
+			} else {
+				timeText = isCharging ? 'Fully Charged / AC Line Connected' : 'Running on primary battery';
+			}
+
+			const contentHTML = `
+				<div class="xp-tabs-container">
+					<div class="xp-tabs-bar">
+						<button type="button" class="xp-tab-btn active">Power Meter</button>
+					</div>
+					<div class="xp-tab-page-wrapper" style="padding: 10px;">
+						<div class="xp-tab-page active">
+							<fieldset class="xp-groupbox">
+								<legend>Power Status</legend>
+								<div style="display: flex; gap: 14px; align-items: center; margin-bottom: 10px;">
+									<div class="xp-battery-gauge-frame">
+										<div class="xp-battery-gauge-fill" style="width: ${pct}%; background-color: ${pct <= 15 ? '#cc2222' : (pct <= 30 ? '#ff9900' : '#2e8b2e')};"></div>
+									</div>
+									<div style="font-size: 13px; font-weight: bold; color: #000080;">${pct}% Remaining</div>
+								</div>
+								<div class="xp-info-grid" style="grid-template-columns: 130px 1fr; gap: 4px;">
+									<div>Current power source:</div>
+									<div><strong>${isCharging ? 'AC Power (Plugged in)' : 'Battery'}</strong></div>
+									<div>Total battery power:</div>
+									<div><strong>${pct}%</strong></div>
+									<div>Estimated remaining time:</div>
+									<div><strong>${timeText}</strong></div>
+									<div>Hardware sensor:</div>
+									<div>${isSupported ? 'Native Web Battery API' : 'Direct AC Power Controller'}</div>
+								</div>
+							</fieldset>
+
+							<fieldset class="xp-groupbox" style="margin-top: 8px;">
+								<legend>Active Power Scheme</legend>
+								<div class="xp-form-row">
+									<label style="width: 100px;">Power scheme:</label>
+									<select class="xp-select" id="power-meter-scheme-select" style="flex: 1;">
+										<option value="desktop" selected>Home / Office Desk</option>
+										<option value="portable">Portable / Laptop</option>
+										<option value="presentation">Presentation</option>
+										<option value="max-battery">Max Battery Life</option>
+									</select>
+								</div>
+							</fieldset>
+
+							<div class="xp-dialog-action-footer" style="margin-top: 10px;">
+								<button type="button" class="xp-button" id="power-meter-ok-btn">OK</button>
+							</div>
+						</div>
+					</div>
+				</div>
+			`;
+
+			const win = createXPWindow(id, 'Power Meter', contentHTML, 420, 310, {
+				iconSrc: this.getBatteryIconUrl(),
+				resizable: false
+			});
+			win.querySelector('.xp-window-content').style.padding = '0';
+			win.querySelector('#power-meter-ok-btn').addEventListener('click', () => {
+				if (typeof closeWindow === 'function') closeWindow(win, id);
+			});
 		},
 
 		showNetworkStatusDialog(e) {
@@ -450,23 +650,44 @@
 				return;
 			}
 
+			const isOnline = typeof navigator !== 'undefined' ? navigator.onLine : true;
+			const conn = (typeof navigator !== 'undefined' && (navigator.connection || navigator.mozConnection || navigator.webkitConnection)) || null;
+
+			let speedText = '100.0 Mbps';
+			if (conn && conn.downlink) {
+				speedText = `${conn.downlink >= 10 ? Math.round(conn.downlink) : conn.downlink.toFixed(1)} Mbps (${conn.effectiveType ? conn.effectiveType.toUpperCase() : 'Broadband'})`;
+			}
+
+			const perfEntries = (typeof performance !== 'undefined' && typeof performance.getEntriesByType === 'function') 
+				? performance.getEntriesByType('resource') 
+				: [];
+
+			let totalTransferred = 0;
+			perfEntries.forEach(entry => {
+				totalTransferred += (entry.transferSize || entry.decodedBodySize || 1024);
+			});
+
+			const packetsSent = Math.max(124, Math.round(perfEntries.length * 12 + 48));
+			const packetsRecv = Math.max(482, Math.round(totalTransferred / 420 + perfEntries.length * 36));
+
 			const contentHTML = `
 				<div style="padding: 12px; font-family: 'Tahoma', sans-serif; font-size: 11px; display: flex; flex-direction: column; gap: 8px;">
 					<div style="display: flex; align-items: center; gap: 8px;">
 						<img src="https://api.iconify.design/mdi/lan-connect.svg?color=%231b4b9b" style="width: 32px; height: 32px;" alt="">
 						<div>
 							<strong>Local Area Connection Status</strong><br>
-							<span>Realtek RTL8139 Family Fast Ethernet NIC</span>
+							<span>Realtek RTL8139 / Virtual Packet Adapter</span>
 						</div>
 					</div>
 					<div class="xp-netstatus-grid">
-						<div>Status:</div><div><strong>Connected</strong></div>
-						<div>Duration:</div><div>14:32:05</div>
-						<div>Speed:</div><div>100.0 Mbps</div>
-						<div>IP Address:</div><div>192.168.1.42</div>
-						<div>Subnet Mask:</div><div>255.255.255.0</div>
-						<div>Packets Sent:</div><div id="net-pk-sent">28,419</div>
-						<div>Packets Recv:</div><div id="net-pk-recv">94,182</div>
+						<div>Status:</div><div><strong style="color: ${isOnline ? '#2e7d32' : '#cc2222'};">${isOnline ? 'Connected' : 'Disconnected'}</strong></div>
+						<div>Network Media:</div><div>${conn && conn.type ? conn.type.toUpperCase() : 'Ethernet / Wi-Fi Adapter'}</div>
+						<div>Link Speed:</div><div><strong>${speedText}</strong></div>
+						<div>Latency (RTT):</div><div>${conn && conn.rtt ? `${conn.rtt} ms` : '1 ms (Localhost)'}</div>
+						<div>IP Configuration:</div><div>DHCP Assigned (IPv4 / IPv6 Active)</div>
+						<div>Packets Sent:</div><div id="net-pk-sent">${packetsSent.toLocaleString()}</div>
+						<div>Packets Received:</div><div id="net-pk-recv">${packetsRecv.toLocaleString()}</div>
+						<div>Data Volume:</div><div>${(totalTransferred / (1024 * 1024)).toFixed(2)} MB Transferred</div>
 					</div>
 					<div style="display: flex; justify-content: flex-end; gap: 6px;">
 						<button class="xp-button" id="net-repair-btn">Repair</button>
