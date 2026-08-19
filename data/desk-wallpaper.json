@@ -1,145 +1,265 @@
 [
 	{
 		"id": "wallpaper-default",
-		"name": "Windows XP Bliss",
+		"name": "Bliss",
 		"filename": "wallpaper-default.webp",
 		"path": "../assets/images/desk/wallpapers/wallpaper-default.webp"
 	},
 	{
+		"id": "wallpaper-ascent",
+		"name": "Ascent",
+		"filename": "Ascent.webp",
+		"path": "../assets/images/desk/wallpapers/Ascent.webp"
+	},
+	{
+		"id": "wallpaper-autumn",
+		"name": "Autumn",
+		"filename": "Autumn.webp",
+		"path": "../assets/images/desk/wallpapers/Autumn.webp"
+	},
+	{
+		"id": "wallpaper-azul",
+		"name": "Azul",
+		"filename": "Azul.webp",
+		"path": "../assets/images/desk/wallpapers/Azul.webp"
+	},
+	{
+		"id": "wallpaper-crystal",
+		"name": "Crystal",
+		"filename": "Crystal.webp",
+		"path": "../assets/images/desk/wallpapers/Crystal.webp"
+	},
+	{
+		"id": "wallpaper-follow",
+		"name": "Follow",
+		"filename": "Follow.webp",
+		"path": "../assets/images/desk/wallpapers/Follow.webp"
+	},
+	{
+		"id": "wallpaper-friend",
+		"name": "Friend",
+		"filename": "Friend.webp",
+		"path": "../assets/images/desk/wallpapers/Friend.webp"
+	},
+	{
+		"id": "wallpaper-home",
+		"name": "Home",
+		"filename": "Home.webp",
+		"path": "../assets/images/desk/wallpapers/Home.webp"
+	},
+	{
+		"id": "wallpaper-moon-flower",
+		"name": "Moon Flower",
+		"filename": "Moon_flower.webp",
+		"path": "../assets/images/desk/wallpapers/Moon_flower.webp"
+	},
+	{
+		"id": "wallpaper-peace",
+		"name": "Peace",
+		"filename": "Peace.webp",
+		"path": "../assets/images/desk/wallpapers/Peace.webp"
+	},
+	{
+		"id": "wallpaper-power",
+		"name": "Power",
+		"filename": "Power.webp",
+		"path": "../assets/images/desk/wallpapers/Power.webp"
+	},
+	{
+		"id": "wallpaper-purple-flower",
+		"name": "Purple Flower",
+		"filename": "Purple_flower.webp",
+		"path": "../assets/images/desk/wallpapers/Purple_flower.webp"
+	},
+	{
+		"id": "wallpaper-radiance",
+		"name": "Radiance",
+		"filename": "Radiance.webp",
+		"path": "../assets/images/desk/wallpapers/Radiance.webp"
+	},
+	{
+		"id": "wallpaper-red-moon-desert",
+		"name": "Red Moon Desert",
+		"filename": "Red_moon_desert.webp",
+		"path": "../assets/images/desk/wallpapers/Red_moon_desert.webp"
+	},
+	{
+		"id": "wallpaper-ripple",
+		"name": "Ripple",
+		"filename": "Ripple.webp",
+		"path": "../assets/images/desk/wallpapers/Ripple.webp"
+	},
+	{
+		"id": "wallpaper-stonehenge",
+		"name": "Stonehenge",
+		"filename": "Stonehenge.webp",
+		"path": "../assets/images/desk/wallpapers/Stonehenge.webp"
+	},
+	{
+		"id": "wallpaper-tulips",
+		"name": "Tulips",
+		"filename": "Tulips.webp",
+		"path": "../assets/images/desk/wallpapers/Tulips.webp"
+	},
+	{
+		"id": "wallpaper-vortec-space",
+		"name": "Vortec Space",
+		"filename": "Vortec_space.webp",
+		"path": "../assets/images/desk/wallpapers/Vortec_space.webp"
+	},
+	{
+		"id": "wallpaper-wind",
+		"name": "Wind",
+		"filename": "Wind.webp",
+		"path": "../assets/images/desk/wallpapers/Wind.webp"
+	},
+	{
+		"id": "wallpaper-xp-home",
+		"name": "Windows XP Home Edition",
+		"filename": "Windows_XP_Home_Edition.webp",
+		"path": "../assets/images/desk/wallpapers/Windows_XP_Home_Edition.webp"
+	},
+	{
+		"id": "wallpaper-xp-pro",
+		"name": "Windows XP Professional",
+		"filename": "Windows_XP_Professional.webp",
+		"path": "../assets/images/desk/wallpapers/Windows_XP_Professional.webp"
+	},
+	{
 		"id": "wallpaper-default-antonov",
-		"name": "Antonov An-225 Mriya",
+		"name": "Bliss Antonov An-225 Mriya",
 		"filename": "wallpaper-default-antonov.webp",
 		"path": "../assets/images/desk/wallpapers/wallpaper-default-antonov.webp"
 	},
 	{
 		"id": "wallpaper-default-bomb",
-		"name": "Bomb",
+		"name": "Bliss Bomb",
 		"filename": "wallpaper-default-bomb.webp",
 		"path": "../assets/images/desk/wallpapers/wallpaper-default-bomb.webp"
 	},
 	{
 		"id": "wallpaper-default-breakout",
-		"name": "Breakout",
+		"name": "Bliss Breakout",
 		"filename": "wallpaper-default-breakout.webp",
 		"path": "../assets/images/desk/wallpapers/wallpaper-default-breakout.webp"
 	},
 	{
 		"id": "wallpaper-default-digital-drawing",
-		"name": "Digital Drawing",
+		"name": "Bliss Digital Drawing",
 		"filename": "wallpaper-default-digital-drawing.webp",
 		"path": "../assets/images/desk/wallpapers/wallpaper-default-digital-drawing.webp"
 	},
 	{
 		"id": "wallpaper-default-doom",
-		"name": "DOOM",
+		"name": "Bliss DOOM",
 		"filename": "wallpaper-default-doom.webp",
 		"path": "../assets/images/desk/wallpapers/wallpaper-default-doom.webp"
 	},
 	{
 		"id": "wallpaper-default-duck",
-		"name": "Duck",
+		"name": "Bliss Duck",
 		"filename": "wallpaper-default-duck.webp",
 		"path": "../assets/images/desk/wallpapers/wallpaper-default-duck.webp"
 	},
 	{
 		"id": "wallpaper-default-glitch",
-		"name": "Glitch",
+		"name": "Bliss Glitch",
 		"filename": "wallpaper-default-glitch.webp",
 		"path": "../assets/images/desk/wallpapers/wallpaper-default-glitch.webp"
 	},
 	{
 		"id": "wallpaper-default-goku",
-		"name": "Son Goku",
+		"name": "Bliss Son Goku",
 		"filename": "wallpaper-default-goku.webp",
 		"path": "../assets/images/desk/wallpapers/wallpaper-default-goku.webp"
 	},
 	{
 		"id": "wallpaper-default-jojos",
-		"name": "JoJo's Bizarre Adventure",
+		"name": "Bliss JoJo's Bizarre Adventure",
 		"filename": "wallpaper-default-jojos.webp",
 		"path": "../assets/images/desk/wallpapers/wallpaper-default-jojos.webp"
 	},
 	{
 		"id": "wallpaper-default-kermit",
-		"name": "Kermit the Frog",
+		"name": "Bliss Kermit the Frog",
 		"filename": "wallpaper-default-kermit.webp",
 		"path": "../assets/images/desk/wallpapers/wallpaper-default-kermit.webp"
 	},
 	{
 		"id": "wallpaper-default-laputa",
-		"name": "Castle in the Sky",
+		"name": "Bliss Castle in the Sky",
 		"filename": "wallpaper-default-laputa.webp",
 		"path": "../assets/images/desk/wallpapers/wallpaper-default-laputa.webp"
 	},
 	{
 		"id": "wallpaper-default-lego",
-		"name": "LEGO Bricks",
+		"name": "Bliss LEGO Bricks",
 		"filename": "wallpaper-default-lego.webp",
 		"path": "../assets/images/desk/wallpapers/wallpaper-default-lego.webp"
 	},
 	{
 		"id": "wallpaper-default-linux",
-		"name": "Linux",
+		"name": "Bliss Linux",
 		"filename": "wallpaper-default-linux.webp",
 		"path": "../assets/images/desk/wallpapers/wallpaper-default-linux.webp"
 	},
 	{
 		"id": "wallpaper-default-logo",
-		"name": "Landscape with Logo",
+		"name": "Bliss Landscape with Logo",
 		"filename": "wallpaper-default-logo.webp",
 		"path": "../assets/images/desk/wallpapers/wallpaper-default-logo.webp"
 	},
 	{
 		"id": "wallpaper-default-pixel",
-		"name": "Pixel Art",
+		"name": "Bliss Pixel Art",
 		"filename": "wallpaper-default-pixel.webp",
 		"path": "../assets/images/desk/wallpapers/wallpaper-default-pixel.webp"
 	},
 	{
 		"id": "wallpaper-default-pokemon",
-		"name": "Pokemon",
+		"name": "Bliss Pokemon",
 		"filename": "wallpaper-default-pokemon.webp",
 		"path": "../assets/images/desk/wallpapers/wallpaper-default-pokemon.webp"
 	},
 	{
-		"id": "wallpaper-default-sahdow-of-the-colossus",
-		"name": "Shadow of the Colossus",
-		"filename": "wallpaper-default-sahdow-of-the-colossus.webp",
-		"path": "../assets/images/desk/wallpapers/wallpaper-default-sahdow-of-the-colossus.webp"
+		"id": "wallpaper-default-shadow-of-the-colossus",
+		"name": "Bliss Shadow of the Colossus",
+		"filename": "wallpaper-default-shadow-of-the-colossus.webp",
+		"path": "../assets/images/desk/wallpapers/wallpaper-default-shadow-of-the-colossus.webp"
 	},
 	{
 		"id": "wallpaper-default-starwars",
-		"name": "Star Wars",
+		"name": "Bliss Star Wars",
 		"filename": "wallpaper-default-starwars.webp",
 		"path": "../assets/images/desk/wallpapers/wallpaper-default-starwars.webp"
 	},
 	{
 		"id": "wallpaper-default-subaru",
-		"name": "Subaru",
+		"name": "Bliss Subaru",
 		"filename": "wallpaper-default-subaru.webp",
 		"path": "../assets/images/desk/wallpapers/wallpaper-default-subaru.webp"
 	},
 	{
 		"id": "wallpaper-default-submarine",
-		"name": "Submarine",
+		"name": "Bliss Submarine",
 		"filename": "wallpaper-default-submarine.webp",
 		"path": "../assets/images/desk/wallpapers/wallpaper-default-submarine.webp"
 	},
 	{
 		"id": "wallpaper-default-tardis",
-		"name": "Doctor Who",
+		"name": "Bliss Doctor Who",
 		"filename": "wallpaper-default-tardis.webp",
 		"path": "../assets/images/desk/wallpapers/wallpaper-default-tardis.webp"
 	},
 	{
 		"id": "wallpaper-default-teletubbies",
-		"name": "Teletubbies",
+		"name": "Bliss Teletubbies",
 		"filename": "wallpaper-default-teletubbies.webp",
 		"path": "../assets/images/desk/wallpapers/wallpaper-default-teletubbies.webp"
 	},
 	{
 		"id": "wallpaper-default-zelda",
-		"name": "The Legend of Zelda",
+		"name": "Bliss The Legend of Zelda",
 		"filename": "wallpaper-default-zelda.webp",
 		"path": "../assets/images/desk/wallpapers/wallpaper-default-zelda.webp"
 	}

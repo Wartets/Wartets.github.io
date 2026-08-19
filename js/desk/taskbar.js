@@ -5,14 +5,14 @@
 		{ id: 'ql-show-desktop', name: 'Show Desktop', icon: '../assets/images/desk/XPIcon.png', action: 'show-desktop', system: true },
 		{ id: 'ql-achievements', name: 'Milestones & Achievements', icon: '../assets/images/desk/icons/Trophy.webp', action: 'open-achievements' },
 		{ id: 'ql-settings', name: 'Control Panel & Settings', icon: '../assets/images/desk/icons/System Properties.webp', action: 'open-settings' },
-		{ id: 'ql-ie', name: 'Internet Explorer', icon: '../assets/images/desk/internet-explorer.png', action: 'open-ie' },
-		{ id: 'ql-oe', name: 'Outlook Express', icon: '../assets/images/desk/OE2001.webp', action: 'open-oe', hasBadge: true },
+		{ id: 'ql-ie', name: 'Internet Explorer', icon: '../assets/images/desk/icons/Internet Explorer.webp', action: 'open-ie' },
+		{ id: 'ql-oe', name: 'Outlook Express', icon: '../assets/images/desk/icons/Mail.webp', action: 'open-oe', hasBadge: true },
 		{ id: 'ql-cmd', name: 'Command Prompt', icon: '../assets/images/desk/icons/Command Prompt.webp', action: 'open-cmd' },
 		{ id: 'ql-notepad', name: 'Notepad', icon: '../assets/images/desk/icons/Notepad.webp', action: 'open-notepad' },
 		{ id: 'ql-calc', name: 'Calculator', icon: '../assets/images/desk/icons/Calculator.webp', action: 'open-calc' },
 		{ id: 'ql-paint', name: 'Paint', icon: '../assets/images/desk/icons/Paint.webp', action: 'open-paint' },
 		{ id: 'ql-wmp', name: 'Windows Media Player', icon: '../assets/images/desk/icons/Video File.webp', action: 'open-media-player' },
-		{ id: 'ql-winamp', name: 'Winamp Media Player', icon: 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/0d/Winamp-logo.svg/960px-Winamp-logo.svg.png', action: 'open-winamp' },
+		{ id: 'ql-winamp', name: 'Winamp Media Player', icon: '../assets/images/desk/icons/Winamp.webp', action: 'open-winamp' },
 		{ id: 'ql-mine', name: 'Minesweeper', icon: '../assets/images/desk/icons/Minesweeper.webp', action: 'open-mine' },
 	];
 
@@ -213,7 +213,7 @@
 					id: 'clippy',
 					name: 'Clippy Assistant',
 					icon: '../assets/images/desk/clippy/idle.png',
-					title: 'Mircosoft Clippy Assistant',
+					title: 'Microsoft Clippy Assistant',
 					hidden: false,
 					onClick: () => {
 						if (window.ClippyAgent && typeof window.ClippyAgent.toggle === 'function') {
@@ -359,7 +359,7 @@
 						<img src="https://api.iconify.design/mdi/virus-outline.svg?color=%232e7d32" alt="">
 						<div>
 							<strong>Virus Protection</strong><br>
-							<span>Mircosoft Antivirus definition set 2002.3.1 active.</span>
+							<span>Microsoft Antivirus definition set 2002.3.1 active.</span>
 						</div>
 					</div>
 					<div style="display: flex; justify-content: flex-end;">

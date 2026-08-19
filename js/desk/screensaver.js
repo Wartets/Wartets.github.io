@@ -64,6 +64,18 @@
 
 	const V_WIDTH = 800;
 
+	function isAudioPlayingGlobally() {
+		if (window.MediaPlayerApp && typeof window.MediaPlayerApp.isPlaying === 'boolean' && window.MediaPlayerApp.isPlaying) return true;
+		if (typeof webampInstance !== 'undefined' && webampInstance && typeof webampInstance.getMediaStatus === 'function') {
+			if (webampInstance.getMediaStatus() === 'PLAYING') return true;
+		}
+		const mediaElements = document.querySelectorAll('audio, video');
+		for (const el of mediaElements) {
+			if (!el.paused && !el.ended && el.currentTime > 0) return true;
+		}
+		return false;
+	}
+
 	class ScreenSaverManager {
 		constructor() {
 			this.settings = this.loadSettings();
@@ -145,6 +157,10 @@
 
 		start(isTest = false) {
 			if (this.isRunning) return;
+			if (!isTest && isAudioPlayingGlobally()) {
+				this.resetIdleTimer();
+				return;
+			}
 			this.pauseAllPreviews();
 			this.isRunning = true;
 			this.startTime = Date.now();
@@ -293,44 +309,60 @@
 			}
 		}
 
+		ensureCleanCanvas(canvasEl) {
+			if (!canvasEl) return canvasEl;
+			const target = (canvasEl.id ? document.getElementById(canvasEl.id) : null) || canvasEl;
+			if (!target || !target.parentNode) return target;
+			const cleanCanvas = document.createElement('canvas');
+			cleanCanvas.id = target.id;
+			cleanCanvas.className = target.className;
+			cleanCanvas.style.cssText = target.style.cssText;
+			const w = target.clientWidth || parseInt(target.getAttribute('width'), 10) || 126;
+			const h = target.clientHeight || parseInt(target.getAttribute('height'), 10) || 91;
+			cleanCanvas.width = w;
+			cleanCanvas.height = h;
+			cleanCanvas.style.width = '100%';
+			cleanCanvas.style.height = '100%';
+			cleanCanvas.style.display = 'block';
+			target.parentNode.replaceChild(cleanCanvas, target);
+			return cleanCanvas;
+		}
+
 		startPreview(canvasEl, saverId, customConfig = null) {
-			if (!canvasEl) return;
-			if (this.activePreviewLoops.has(canvasEl)) {
-				const oldLoop = this.activePreviewLoops.get(canvasEl);
-				if (oldLoop && typeof oldLoop.stop === 'function') {
-					oldLoop.stop();
+			if (!canvasEl) return null;
+			const targetCanvas = (canvasEl.id ? document.getElementById(canvasEl.id) : null) || canvasEl;
+			for (const [c, loopData] of this.activePreviewLoops.entries()) {
+				if (c === targetCanvas || (c.id && targetCanvas.id && c.id === targetCanvas.id)) {
+					if (loopData && typeof loopData.stop === 'function') loopData.stop();
+					this.activePreviewLoops.delete(c);
 				}
-				this.activePreviewLoops.delete(canvasEl);
 			}
 
-			this.previewRegistry.set(canvasEl, { saverId, customConfig });
-			if (this.isRunning) return;
+			const freshCanvas = this.ensureCleanCanvas(targetCanvas);
+			this.previewRegistry.set(freshCanvas, { saverId, customConfig });
 
-			const effectiveSaver = (saverId === 'random' || !saverId || saverId === 'none') ? 'xp-flying-logo' : saverId;
-			if (saverId === 'none') {
-				this.clearCanvas(canvasEl);
-				return;
+			if (this.isRunning || saverId === 'none') {
+				this.clearCanvas(freshCanvas);
+				return freshCanvas;
 			}
 
-			const w = canvasEl.clientWidth || canvasEl.width || 126;
-			const h = canvasEl.clientHeight || canvasEl.height || 91;
-			canvasEl.width = w;
-			canvasEl.height = h;
-
+			const effectiveSaver = (saverId === 'random' || !saverId) ? 'xp-flying-logo' : saverId;
+			const w = freshCanvas.width || 126;
+			const h = freshCanvas.height || 91;
 			const config = customConfig || this.getSaverConfig(effectiveSaver);
 			const runnerFactory = this.getSaverRunner(effectiveSaver);
-
 			const vWidth = V_WIDTH;
 			const vHeight = Math.max(300, Math.round((h / (w || 1)) * vWidth));
 			const scale = w / vWidth;
 
-			const instance = runnerFactory.createInstance(canvasEl, config, vWidth, vHeight);
+			const instance = runnerFactory.createInstance(freshCanvas, config, vWidth, vHeight);
 
 			let isPreviewActive = true;
 			let currentConfig = config;
 			let reqId = null;
 
 			const loopRecord = {
+				canvas: freshCanvas,
 				stop: () => {
 					isPreviewActive = false;
 					if (reqId !== null) {
@@ -349,19 +381,19 @@
 				}
 			};
 
-			this.activePreviewLoops.set(canvasEl, loopRecord);
+			this.activePreviewLoops.set(freshCanvas, loopRecord);
 
 			const loop = () => {
 				if (!isPreviewActive) return;
 				if (instance.stepAndRender) {
-					instance.stepAndRender(canvasEl, currentConfig, vWidth, vHeight, scale);
+					instance.stepAndRender(freshCanvas, currentConfig, vWidth, vHeight, scale);
 				} else {
-					const ctx = canvasEl.getContext('2d');
+					const ctx = freshCanvas.getContext('2d');
 					if (ctx) {
-						instance.update(canvasEl, ctx, currentConfig, vWidth, vHeight);
+						instance.update(freshCanvas, ctx, currentConfig, vWidth, vHeight);
 						ctx.save();
 						ctx.setTransform(scale, 0, 0, scale, 0, 0);
-						instance.render(canvasEl, ctx, currentConfig, vWidth, vHeight);
+						instance.render(freshCanvas, ctx, currentConfig, vWidth, vHeight);
 						ctx.restore();
 					}
 				}
@@ -370,6 +402,7 @@
 				}
 			};
 			reqId = requestAnimationFrame(loop);
+			return freshCanvas;
 		}
 
 		pauseAllPreviews() {
@@ -395,21 +428,35 @@
 
 		stopPreview(canvasEl, clearToBlack = true) {
 			if (!canvasEl) return;
-			if (this.activePreviewLoops.has(canvasEl)) {
-				const loopData = this.activePreviewLoops.get(canvasEl);
-				if (loopData && typeof loopData.stop === 'function') {
-					loopData.stop();
+			let target = canvasEl;
+			for (const [c, loopData] of this.activePreviewLoops.entries()) {
+				if (c === canvasEl || c.id === canvasEl.id) {
+					if (loopData && typeof loopData.stop === 'function') loopData.stop();
+					this.activePreviewLoops.delete(c);
+					target = c;
 				}
-				this.activePreviewLoops.delete(canvasEl);
 			}
-			this.previewRegistry.delete(canvasEl);
+			for (const c of this.previewRegistry.keys()) {
+				if (c === canvasEl || c.id === canvasEl.id) {
+					this.previewRegistry.delete(c);
+				}
+			}
 			if (clearToBlack) {
-				this.clearCanvas(canvasEl);
+				this.clearCanvas(target);
 			}
 		}
 
 		updateActivePreviewConfig(canvasEl, newConfig) {
-			const entry = this.activePreviewLoops.get(canvasEl);
+			if (!canvasEl) return;
+			let entry = this.activePreviewLoops.get(canvasEl);
+			if (!entry) {
+				for (const [c, loopData] of this.activePreviewLoops.entries()) {
+					if (c.id === canvasEl.id) {
+						entry = loopData;
+						break;
+					}
+				}
+			}
 			if (entry && entry.updateConfig) {
 				entry.updateConfig(newConfig);
 			}
@@ -1667,11 +1714,11 @@
 
 			const quadVerts = new Float32Array([
 				-1.0, -1.0,
-				 1.0, -1.0,
+				1.0, -1.0,
 				-1.0,  1.0,
 				-1.0,  1.0,
-				 1.0, -1.0,
-				 1.0,  1.0
+				1.0, -1.0,
+				1.0,  1.0
 			]);
 
 			const quadBuffer = gl.createBuffer();
@@ -1704,6 +1751,9 @@
 			this.vWidth = vWidth;
 			this.vHeight = vHeight;
 			const targetCount = Math.min(2500, Math.max(1, parseInt(config.bubbleCount || 80, 10)));
+			if (targetCount >= 1500 && window.AchievementsManager) {
+				window.AchievementsManager.progress('bubbles_max_perf', 1);
+			}
 			const baseR = Math.max(2, parseFloat(config.baseRadius || 22));
 			const variation = Math.max(0, Math.min(1, parseFloat(config.radiusVariation !== undefined ? config.radiusVariation : 0.6)));
 			const speedBase = Math.max(0.5, parseFloat(config.speed || 3.5));

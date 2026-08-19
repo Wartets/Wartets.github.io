@@ -162,6 +162,8 @@
 				resizable: false
 			});
 			win.querySelector('.xp-window-content').style.padding = '0';
+			win.dataset.appId = 'soundrecorder';
+			win.dataset.appArgs = file ? JSON.stringify({ path: file.getFullPath() }) : '';
 
 			this.initInstance(win, file);
 			return win;
@@ -801,7 +803,7 @@
 				} else if (action === 'audio-properties') {
 					if (window.SettingsApp) window.SettingsApp.open('audio');
 				} else if (action === 'about') {
-					showXPDialog('About Sound Recorder', 'Mircosoft Sound Recorder\nVersion 5.1 (Build 2600.xpsp_sp3_gdr)\nAudio Recording and Waveform Editor Utility', 'info');
+					showXPDialog('About Sound Recorder', 'Microsoft Sound Recorder\nVersion 5.1 (Build 2600.xpsp_sp3_gdr)\nAudio Recording and Waveform Editor Utility', 'info');
 				}
 			};
 

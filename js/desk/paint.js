@@ -15,7 +15,23 @@
 
 	const PaintApp = {
 		open(initialFile = null) {
-			const id = initialFile ? `window-paint-${initialFile.getFullPath().replace(/[^\w-]/g, '_')}` : 'window-paint';
+			let fileIdentifier = 'untitled';
+			let displayTitle = 'untitled';
+
+			if (initialFile) {
+				if (typeof initialFile === 'object' && typeof initialFile.getFullPath === 'function') {
+					fileIdentifier = initialFile.getFullPath();
+					displayTitle = initialFile.name || 'untitled';
+				} else if (typeof initialFile === 'object' && initialFile.name) {
+					fileIdentifier = initialFile.name;
+					displayTitle = initialFile.name;
+				} else if (typeof initialFile === 'string') {
+					fileIdentifier = initialFile;
+					displayTitle = initialFile.split('/').pop() || 'untitled';
+				}
+			}
+
+			const id = initialFile ? `window-paint-${fileIdentifier.replace(/[^\w-]/g, '_')}` : 'window-paint';
 			const existing = document.getElementById(id);
 			if (existing) {
 				if (typeof bringWindowToFront === 'function') bringWindowToFront(existing);
@@ -25,7 +41,7 @@
 				return existing;
 			}
 
-			const title = initialFile ? `${initialFile.name} - Paint` : 'untitled - Paint';
+			const title = `${displayTitle} - Paint`;
 			const contentHTML = `
 				<div class="paint-layout">
 					<div class="paint-menubar">
@@ -100,12 +116,13 @@
 
 			win.querySelector('.xp-window-content').style.padding = '0';
 			win.classList.add('paint-window');
+			win.dataset.appId = 'paint';
 
-			this.initPaintEngine(win, initialFile);
+			this.initPaintEngine(win, initialFile, options);
 			return win;
 		},
 
-		initPaintEngine(win, activeFile) {
+		initPaintEngine(win, activeFile, options = {}) {
 			const mainCanvas = win.querySelector('#paint-main-canvas');
 			const overlayCanvas = win.querySelector('#paint-overlay-canvas');
 			const gridCanvas = win.querySelector('#paint-grid-canvas');
@@ -130,7 +147,8 @@
 			const sbHint = win.querySelector('#paint-sb-hint');
 			const titleSpan = win.querySelector('.xp-window-header .title');
 
-			let currentFile = activeFile;
+			let currentFile = (typeof activeFile === 'object' && activeFile && typeof activeFile.write === 'function') ? activeFile : null;
+			let initialImageSource = (typeof activeFile === 'string') ? activeFile : (activeFile ? (activeFile.content || activeFile.remoteUrl || null) : null);
 			let isDirty = false;
 
 			let primaryColor = '#000000';
@@ -201,6 +219,49 @@
 			};
 
 			undoStack.push(ctx.getImageData(0, 0, mainCanvas.width, mainCanvas.height));
+
+			win.getWindowState = () => ({
+				appId: 'paint',
+				filePath: currentFile ? currentFile.getFullPath() : null,
+				title: currentFile ? currentFile.name : 'untitled',
+				width: mainCanvas.width,
+				height: mainCanvas.height,
+				primaryColor,
+				secondaryColor,
+				activeTool,
+				lineWidth,
+				shapeFillMode,
+				brushType,
+				brushSize,
+				eraserSize,
+				zoomLevel,
+				isTransparentSelection,
+				showGrid,
+				dataUrl: mainCanvas.toDataURL('image/png')
+			});
+
+			if (options && options.restoreState) {
+				const st = options.restoreState;
+				if (st.primaryColor) primaryColor = st.primaryColor;
+				if (st.secondaryColor) secondaryColor = st.secondaryColor;
+				if (st.activeTool) activeTool = st.activeTool;
+				if (st.lineWidth) lineWidth = st.lineWidth;
+				if (st.shapeFillMode) shapeFillMode = st.shapeFillMode;
+				if (st.brushType) brushType = st.brushType;
+				if (st.brushSize) brushSize = st.brushSize;
+				if (st.eraserSize) eraserSize = st.eraserSize;
+				if (st.zoomLevel) setZoom(st.zoomLevel);
+				if (st.isTransparentSelection !== undefined) isTransparentSelection = st.isTransparentSelection;
+				if (st.showGrid !== undefined) {
+					showGrid = st.showGrid;
+					renderGrid();
+				}
+				if (st.dataUrl) {
+					loadImageDataUrl(st.dataUrl);
+				}
+				updateColorBoxes();
+				renderToolOptions();
+			}
 
 			win.beforeClose = (forceClose) => {
 				commitSelection();
@@ -1305,8 +1366,8 @@
 				img.src = dataUrl;
 			}
 
-			if (currentFile && currentFile.content) {
-				loadImageDataUrl(currentFile.content);
+			if (initialImageSource) {
+				loadImageDataUrl(initialImageSource);
 			}
 
 			function saveDocument(cb = null) {
@@ -2238,7 +2299,7 @@
 								label: 'About Paint',
 								bold: true,
 								action: () => {
-									showXPDialog('About Paint', 'Mircosoft Windows XP Paint\nVersion 5.1 (Build 2600.xpsp_sp3_gdr)\nBitmap Graphics Editor Engine', 'info');
+									showXPDialog('About Paint', 'Microsoft Windows XP Paint\nVersion 5.1 (Build 2600.xpsp_sp3_gdr)\nBitmap Graphics Editor Engine', 'info');
 								}
 							}
 						];

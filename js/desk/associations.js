@@ -27,7 +27,7 @@
 					{
 						id: 'ie',
 						name: 'Internet Explorer',
-						icon: '../assets/images/desk/internet-explorer.png',
+						icon: '../assets/images/desk/icons/Internet Explorer.webp',
 						action: (file) => {
 							if (window.InternetExplorerApp) window.InternetExplorerApp.open(`file://${file.getFullPath()}`);
 						}
@@ -162,7 +162,7 @@
 					{
 						id: 'winamp',
 						name: 'Winamp Media Player',
-						icon: 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/0d/Winamp-logo.svg/960px-Winamp-logo.svg.png',
+						icon: '../assets/images/desk/icons/Winamp.webp',
 						action: (file) => {
 							if (typeof openWinamp === 'function') openWinamp(file);
 						}
@@ -218,7 +218,7 @@
 					{
 						id: 'winamp',
 						name: 'Winamp Media Player',
-						icon: 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/0d/Winamp-logo.svg/960px-Winamp-logo.svg.png',
+						icon: '../assets/images/desk/icons/Winamp.webp',
 						action: (file) => {
 							if (typeof openWinamp === 'function') openWinamp(file);
 						}
@@ -294,7 +294,7 @@
 
 			this.register(['.html', '.htm'], {
 				typeLabel: 'HTML Document',
-				defaultIcon: '../assets/images/desk/internet-explorer.png',
+				defaultIcon: '../assets/images/desk/icons/Internet Explorer.webp',
 				defaultApp: 'ie',
 				openHandler: (file) => {
 					if (window.InternetExplorerApp) window.InternetExplorerApp.open(`file://${file.getFullPath()}`);
@@ -303,7 +303,7 @@
 					{
 						id: 'ie',
 						name: 'Internet Explorer',
-						icon: '../assets/images/desk/internet-explorer.png',
+						icon: '../assets/images/desk/icons/Internet Explorer.webp',
 						action: (file) => {
 							if (window.InternetExplorerApp) window.InternetExplorerApp.open(`file://${file.getFullPath()}`);
 						}

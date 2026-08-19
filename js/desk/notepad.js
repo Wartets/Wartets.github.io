@@ -794,7 +794,7 @@
 						label: 'About Notepad',
 						bold: true,
 						action: () => {
-							showXPDialog('About Notepad', 'Mircosoft Windows XP Notepad\nVersion 5.1 (Build 2600.xpsp_sp3_gdr)\nCopyright (C) 1985-2001 Mircosoft Corporation.', 'info');
+							showXPDialog('About Notepad', 'Microsoft Windows XP Notepad\nVersion 5.1 (Build 2600.xpsp_sp3_gdr)\nCopyright (C) 1985-2001 Microsoft Corporation.', 'info');
 						}
 					}
 				];
@@ -827,8 +827,43 @@
 			});
 
 			win.classList.add('notepad-window');
+			win.dataset.appId = 'notepad';
+			if (file) {
+				win.dataset.appArgs = JSON.stringify({ path: file.getFullPath() });
+			}
 			const session = new NotepadSession(win, file, options);
 			win.notepadSession = session;
+
+			win.getWindowState = () => ({
+				appId: 'notepad',
+				filePath: file ? file.getFullPath() : null,
+				title: file ? file.name : (options.title || 'Untitled.txt'),
+				content: session.textarea ? session.textarea.value : '',
+				isDirty: session.isDirty,
+				isWordWrap: session.isWordWrap,
+				showStatusBar: session.showStatusBar,
+				selectionStart: session.textarea ? session.textarea.selectionStart : 0,
+				selectionEnd: session.textarea ? session.textarea.selectionEnd : 0
+			});
+
+			if (options.restoreState) {
+				const st = options.restoreState;
+				if (st.content !== undefined && session.textarea) session.textarea.value = st.content;
+				if (st.isDirty !== undefined) session.isDirty = st.isDirty;
+				if (st.isWordWrap !== undefined && session.isWordWrap !== st.isWordWrap) {
+					session.isWordWrap = st.isWordWrap;
+					session.textarea.classList.toggle('wrap-enabled', session.isWordWrap);
+				}
+				if (st.showStatusBar !== undefined) {
+					session.showStatusBar = st.showStatusBar;
+					session.statusBarEl.style.display = session.showStatusBar ? 'flex' : 'none';
+				}
+				if (session.textarea && st.selectionStart !== undefined) {
+					session.textarea.setSelectionRange(st.selectionStart, st.selectionEnd || st.selectionStart);
+				}
+				session.updateTitle();
+				session.updateStatusBar();
+			}
 
 			if (file && window.DeskAPI) {
 				window.DeskAPI.addToRecentDocs({

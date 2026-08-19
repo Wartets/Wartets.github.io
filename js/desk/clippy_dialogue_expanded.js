@@ -158,7 +158,7 @@
 		},
 
 		OFFICE_LORE_AND_NOSTALGIA: {
-			keywords: ['office 97', 'Mircosoft', 'word', 'excel', 'powerpoint', 'bob', 'clippit', 'rover', 'merlin', 'wizard', 'redmond', '1997', '2001', 'xp'],
+			keywords: ['office 97', 'Microsoft', 'word', 'excel', 'powerpoint', 'bob', 'clippit', 'rover', 'merlin', 'wizard', 'redmond', '1997', '2001', 'xp'],
 			responses: {
 				NOSTALGIC: [
 					"Ah, the memories of Office 97! Merlin the Wizard, Rover the Dog, and The Dot... we were a legendary crew of assistants!",
@@ -166,7 +166,7 @@
 					"Opening a fresh document with default 1.25-inch margins and Times New Roman 12pt felt like an infinite blank canvas."
 				],
 				CYNICAL: [
-					"Mircosoft Bob was so user-friendly that users practically ran away from it into the comforting arms of command line prompts.",
+					"Microsoft Bob was so user-friendly that users practically ran away from it into the comforting arms of command line prompts.",
 					"I spent years watching people format resumes that could have been summarized in two bullet points.",
 					"Everyone complained about my helpful popups, yet decades later, here you are chatting with me on a retro workstation!"
 				],

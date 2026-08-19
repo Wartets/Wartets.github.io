@@ -91,12 +91,82 @@
 			});
 
 			win.classList.add('wmp-window');
+			win.dataset.appId = 'mediaplayer';
 			win.querySelector('.xp-window-content').style.padding = '0';
 			activePlayerWindow = win;
 
+			win.getWindowState = () => ({
+				appId: 'mediaplayer',
+				currentPlaylist: currentPlaylist.map(t => ({
+					id: t.id,
+					title: t.title,
+					artist: t.artist,
+					album: t.album,
+					year: t.year,
+					genre: t.genre,
+					duration: t.duration,
+					url: t.url,
+					candidates: t.candidates,
+					artwork: t.artwork,
+					isVideo: t.isVideo
+				})),
+				currentTrackIndex,
+				currentTime: this.getActiveMedia() ? this.getActiveMedia().currentTime : 0,
+				currentVolume,
+				isMuted,
+				isShuffle,
+				repeatMode,
+				currentVisualization,
+				isPlaylistVisible,
+				isEnhancementsOpen,
+				activeEnhancementTab,
+				isEqEnabled,
+				currentEqPreset,
+				currentEqGains,
+				playbackSpeed,
+				stereoBalance,
+				srsWowAmount,
+				trubassAmount,
+				isSrsEnabled,
+				videoAspectRatio
+			});
+
 			this.bindPlayerEvents(win);
 
-			if (target) {
+			if (options.restoreState) {
+				const st = options.restoreState;
+				if (Array.isArray(st.currentPlaylist) && st.currentPlaylist.length > 0) {
+					currentPlaylist = st.currentPlaylist;
+					currentTrackIndex = st.currentTrackIndex !== undefined ? st.currentTrackIndex : 0;
+					if (typeof st.currentVolume === 'number') currentVolume = st.currentVolume;
+					if (typeof st.isMuted === 'boolean') isMuted = st.isMuted;
+					if (typeof st.isShuffle === 'boolean') isShuffle = st.isShuffle;
+					if (st.repeatMode) repeatMode = st.repeatMode;
+					if (st.currentVisualization) currentVisualization = st.currentVisualization;
+					if (typeof st.isPlaylistVisible === 'boolean') isPlaylistVisible = st.isPlaylistVisible;
+					if (typeof st.isEnhancementsOpen === 'boolean') isEnhancementsOpen = st.isEnhancementsOpen;
+					if (st.activeEnhancementTab) activeEnhancementTab = st.activeEnhancementTab;
+					if (Array.isArray(st.currentEqGains)) currentEqGains = [...st.currentEqGains];
+					if (st.currentEqPreset) currentEqPreset = st.currentEqPreset;
+					if (typeof st.playbackSpeed === 'number') playbackSpeed = st.playbackSpeed;
+					if (typeof st.stereoBalance === 'number') stereoBalance = st.stereoBalance;
+					if (st.videoAspectRatio) videoAspectRatio = st.videoAspectRatio;
+
+					this.renderPlaylist(win);
+					if (currentPlaylist[currentTrackIndex]) {
+						this.updateTrackInfoUI(win, currentPlaylist[currentTrackIndex]);
+						this.playIndex(currentTrackIndex);
+						setTimeout(() => {
+							const media = this.getActiveMedia();
+							if (media && typeof st.currentTime === 'number') {
+								media.currentTime = st.currentTime;
+							}
+						}, 200);
+					}
+				} else {
+					this.loadDefaultLibrary();
+				}
+			} else if (target) {
 				this.loadAndPlay(target, options);
 			} else {
 				this.loadDefaultLibrary();
@@ -1896,7 +1966,7 @@
 			} else if (menuType === 'help') {
 				items = [
 					{ label: 'About Windows Media Player', bold: true, action: () => {
-						showXPDialog('About Windows Media Player', 'Windows Media Player 9 Series\nVersion 9.00.00.2980\nMircosoft Corporation', 'info');
+						showXPDialog('About Windows Media Player', 'Windows Media Player 9 Series\nVersion 9.00.00.2980\nMicrosoft Corporation', 'info');
 					}}
 				];
 			}

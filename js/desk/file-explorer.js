@@ -50,6 +50,21 @@
 				selectedItems: new Set()
 			};
 
+			win.dataset.appId = 'explorer';
+			win.dataset.appArgs = JSON.stringify({
+				path: targetFolder.getFullPath(),
+				viewMode: win.explorerState.viewMode
+			});
+
+			win.getWindowState = () => ({
+				appId: 'explorer',
+				path: win.explorerState.currentFolder ? win.explorerState.currentFolder.getFullPath() : '/',
+				viewMode: win.explorerState.viewMode,
+				sortBy: win.explorerState.sortBy,
+				sortAsc: win.explorerState.sortAsc,
+				sidebarMode: win.explorerState.sidebarMode
+			});
+
 			this.bindWindowEvents(win);
 			this.updateView(win, false);
 			return win;
@@ -69,7 +84,7 @@
 
 			const contentHTML = this.buildRecycleBinWindowTemplate();
 			const win = createXPWindow(windowId, 'Recycle Bin', contentHTML, 780, 520, {
-				iconSrc: '../assets/images/desk/trash.png'
+				iconSrc: '../assets/images/desk/icons/Trash.webp'
 			});
 
 			win.classList.add('project-window');
@@ -82,7 +97,7 @@
 				currentFolder: {
 					name: 'Recycle Bin',
 					getFullPath: () => 'Recycle Bin',
-					icon: '../assets/images/desk/trash.png',
+					icon: '../assets/images/desk/icons/Trash.webp',
 					listContent: () => (typeof fs !== 'undefined' && fs) ? fs.loadRecycleBinItems() : []
 				},
 				history: ['Recycle Bin'],
@@ -93,6 +108,19 @@
 				sortAsc: false,
 				selectedItems: new Set()
 			};
+
+			win.dataset.appId = 'recyclebin';
+			win.dataset.appArgs = JSON.stringify({
+				viewMode: win.explorerState.viewMode
+			});
+
+			win.getWindowState = () => ({
+				appId: 'recyclebin',
+				viewMode: win.explorerState.viewMode,
+				sortBy: win.explorerState.sortBy,
+				sortAsc: win.explorerState.sortAsc,
+				sidebarMode: win.explorerState.sidebarMode
+			});
 
 			this.bindWindowEvents(win);
 			this.updateView(win, false);
@@ -175,7 +203,7 @@
 					<div class="xp-explorer-addressbar-row">
 						<span class="xp-address-label">Address</span>
 						<div class="xp-address-combo">
-							<img src="../assets/images/desk/trash.png" class="xp-address-icon" alt="">
+							<img src="../assets/images/desk/icons/Trash.webp" class="xp-address-icon" alt="">
 							<input type="text" class="xp-address-input" value="Recycle Bin" readonly>
 							<div class="xp-address-dropdown-arrow" title="Address Bar Locations">▼</div>
 						</div>
@@ -240,7 +268,7 @@
 						<div class="xp-sb-pane xp-sb-count">0 objects</div>
 						<div class="xp-sb-pane xp-sb-size">0 KB</div>
 						<div class="xp-sb-pane xp-sb-zone">
-							<img src="../assets/images/desk/trash.png" alt="">
+							<img src="../assets/images/desk/icons/Trash.webp" alt="">
 							<span>Recycle Bin</span>
 						</div>
 					</div>
@@ -355,7 +383,7 @@
 										<a href="#" class="xp-task-link" data-place="my-documents"><img src="../assets/images/desk/icons/My Profile Folder.webp" alt=""><span>My Documents</span></a>
 										<a href="#" class="xp-task-link" data-place="my-computer"><img src="../assets/images/desk/icons/My Computer.webp" alt=""><span>My Computer</span></a>
 										<a href="#" class="xp-task-link" data-place="my-network"><img src="../assets/images/desk/icons/My Network Places.webp" alt=""><span>My Network Places</span></a>
-										<a href="#" class="xp-task-link" data-place="recycle-bin"><img src="../assets/images/desk/trash.png" alt=""><span>Recycle Bin</span></a>
+										<a href="#" class="xp-task-link" data-place="recycle-bin"><img src="../assets/images/desk/icons/Trash.webp" alt=""><span>Recycle Bin</span></a>
 									</div>
 								</div>
 
@@ -542,7 +570,7 @@
 						},
 						{
 							label: 'Recycle Bin',
-							icon: '../assets/images/desk/trash.png',
+							icon: '../assets/images/desk/icons/Trash.webp',
 							action: () => {
 								if (typeof openRecycleBinWindow === 'function') openRecycleBinWindow();
 							}
@@ -1397,6 +1425,13 @@
 				});
 			}
 
+			if (fs && fs.clipboard && fs.clipboard.mode === 'cut' && Array.isArray(fs.clipboard.paths)) {
+				fs.clipboard.paths.forEach(p => {
+					const match = contentContainer.querySelector(`[data-path="${p.replace(/"/g, '\\"')}"]`);
+					if (match) match.classList.add('cut-item');
+				});
+			}
+
 			this.updateSelectionDetails(win);
 		},
 
@@ -1836,7 +1871,7 @@
 					if (sbSize) sbSize.textContent = `${Math.ceil(totalBytes / 1024)} KB`;
 					if (detailsBody) {
 						detailsBody.innerHTML = `
-							<div class="xp-details-preview-frame"><img src="../assets/images/desk/trash.png" alt=""></div>
+							<div class="xp-details-preview-frame"><img src="../assets/images/desk/icons/Trash.webp" alt=""></div>
 							<div class="xp-details-name"><b>Recycle Bin</b></div>
 							<div class="xp-details-type">System Folder</div>
 							<div>Contains ${totalCount} deleted item(s)</div>

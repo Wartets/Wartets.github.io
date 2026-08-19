@@ -73,6 +73,7 @@
 			win.querySelector('.xp-window-content').style.padding = '0';
 			win.classList.add('calc-window');
 
+			win.dataset.appId = 'calculator';
 			this.initCalculatorEngine(win);
 			return win;
 		},
@@ -280,6 +281,14 @@
 				updateDisplay();
 			};
 
+			win.getWindowState = () => ({
+				currentVal,
+				storedVal,
+				pendingOp,
+				memoryVal,
+				hasMemory
+			});
+
 			win.querySelectorAll('.calc-btn[data-num]').forEach(btn => {
 				btn.addEventListener('click', () => inputDigit(btn.dataset.num));
 			});
@@ -415,7 +424,7 @@
 								label: 'About Calculator',
 								bold: true,
 								action: () => {
-									showXPDialog('About Calculator', 'Mircosoft Windows XP Calculator\nVersion 5.1 (Build 2600.xpsp_sp3_gdr)\nStandard Numeric Engine', 'info');
+									showXPDialog('About Calculator', 'Microsoft Windows XP Calculator\nVersion 5.1 (Build 2600.xpsp_sp3_gdr)\nStandard Numeric Engine', 'info');
 								}
 							}
 						];

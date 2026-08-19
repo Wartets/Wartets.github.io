@@ -312,17 +312,26 @@
 		},
 
 		showNotificationToast(achievement) {
+			const enabled = (window.SettingsApp && typeof window.SettingsApp.get === 'function')
+				? (window.SettingsApp.get('achievementNotificationsEnabled') !== false)
+				: true;
+			if (!enabled) return;
+
+			const position = (window.SettingsApp && typeof window.SettingsApp.get === 'function')
+				? (window.SettingsApp.get('achievementNotificationPosition') || 'top-left')
+				: 'top-left';
+
 			let container = document.getElementById('achievement-toast-container');
 			if (!container) {
 				container = document.createElement('div');
 				container.id = 'achievement-toast-container';
-				container.className = 'xp-achievement-toast-container';
 				const screenFrame = document.getElementById('screen-frame') || document.body;
 				screenFrame.appendChild(container);
 			}
+			container.className = `xp-achievement-toast-container xp-toast-pos-${position}`;
 
 			const toast = document.createElement('div');
-			toast.className = 'xp-achievement-toast';
+			toast.className = `xp-achievement-toast xp-toast-${position}`;
 			toast.dataset.achId = achievement.id;
 
 			const iconSrc = achievement.icon || 'https://api.iconify.design/mdi/trophy-award.svg?color=%23e68a00';
@@ -381,7 +390,11 @@
 		},
 
 		onUnlock(achievement) {
-			if (window.SettingsApp && window.SettingsApp.playSound) {
+			const enabled = (window.SettingsApp && typeof window.SettingsApp.get === 'function')
+				? (window.SettingsApp.get('achievementNotificationsEnabled') !== false)
+				: true;
+
+			if (enabled && window.SettingsApp && window.SettingsApp.playSound) {
 				window.SettingsApp.playSound('asterisk');
 			}
 
@@ -389,7 +402,9 @@
 				window.DeskEventBus.emit('achievement:unlocked', achievement);
 			}
 
-			this.showNotificationToast(achievement);
+			if (enabled) {
+				this.showNotificationToast(achievement);
+			}
 
 			const win = document.getElementById('window-achievements-vault');
 			if (win) {

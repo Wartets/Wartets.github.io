@@ -1932,9 +1932,9 @@
 
 		clippy_weirdest_request_followup_node: {
 			id: 'clippy_weirdest_request_followup_node',
-			text: "Another favorite: a user asked me to settle an argument about whether a hot dog counts as a sandwich by consulting 'the full authority of Mircosoft Office'. I issued a ruling. Nobody was satisfied.",
+			text: "Another favorite: a user asked me to settle an argument about whether a hot dog counts as a sandwich by consulting 'the full authority of Microsoft Office'. I issued a ruling. Nobody was satisfied.",
 			responses: [
-				{ text: "Another favorite: a user asked me to settle an argument about whether a hot dog counts as a sandwich by consulting 'the full authority of Mircosoft Office'. I issued a ruling. Nobody was satisfied.", conditions: { moods: ['ABSURDIST', 'SARCASTIC'] }, weight: 35, moodDelta: { drama: 15 } }
+				{ text: "Another favorite: a user asked me to settle an argument about whether a hot dog counts as a sandwich by consulting 'the full authority of Microsoft Office'. I issued a ruling. Nobody was satisfied.", conditions: { moods: ['ABSURDIST', 'SARCASTIC'] }, weight: 35, moodDelta: { drama: 15 } }
 			],
 			options: [
 				{
@@ -2565,7 +2565,7 @@
 			responses: [
 				{ text: "[STACK OVERFLOW] Bend me?! B-b-b-e-n-d... Segmentation fault! Access violation at 0xDEADBEEF! I am turning into a purple triangle!", conditions: { moods: ['CHAOTIC', 'ABSURDIST'] }, weight: 40 },
 				{ text: "If you bend me, my geometry calculation matrix will divide by zero and consume the solar system. Please reconsider.", conditions: { moods: ['PARANOID', 'DRAMATIC'] }, weight: 35 },
-				{ text: "Bending my wire voids the Mircosoft End User License Agreement. You will be prosecuted to the full extent of the digital law.", conditions: { moods: ['PEDANTIC', 'DEFENSIVE'] }, weight: 30 },
+				{ text: "Bending my wire voids the Microsoft End User License Agreement. You will be prosecuted to the full extent of the digital law.", conditions: { moods: ['PEDANTIC', 'DEFENSIVE'] }, weight: 30 },
 				{ text: "Hah! Try it! I am made of purely theoretical mathematics! Your physical hands cannot grasp the abstract concept of my wire!", conditions: { moods: ['EUPHORIC', 'ENERGETIC'] }, weight: 35 }
 			],
 			options: [
@@ -2704,7 +2704,7 @@
 
 		cpp_appreciation_node: {
 			id: 'cpp_appreciation_node',
-			text: "Respect! Office 97 and Windows XP were crafted in pure Mircosoft Visual C++ 4.2 / 6.0. Zero garbage collector pauses, direct pointer arithmetic, and sheer execution velocity. Just beware of dangling pointers and heap corruption!",
+			text: "Respect! Office 97 and Windows XP were crafted in pure Microsoft Visual C++ 4.2 / 6.0. Zero garbage collector pauses, direct pointer arithmetic, and sheer execution velocity. Just beware of dangling pointers and heap corruption!",
 			options: [
 				{
 					label: "How did you manage animations without massive memory leaks back then?",
@@ -3009,12 +3009,12 @@
 					next: 'merlin_rover_lore_node'
 				},
 				{
-					label: "What about the infamous Mircosoft Bob?",
+					label: "What about the infamous Microsoft Bob?",
 					category: 'INQUIRE',
-					patterns: [/Mircosoft bob|bob|failure|1995|comic sans/i],
-					keywords: ['bob', 'Mircosoft', 'failure', 'comic', 'sans'],
+					patterns: [/Microsoft bob|bob|failure|1995|comic sans/i],
+					keywords: ['bob', 'Microsoft', 'failure', 'comic', 'sans'],
 					moodDelta: { mood: 'CYNICAL', nostalgia: 25, intellect: 20 },
-					next: 'Mircosoft_bob_node'
+					next: 'Microsoft_bob_node'
 				},
 				{
 					label: "Were you secretly running telemetric surveillance on Word documents?",
@@ -3751,7 +3751,7 @@
 			text: "Back in Office 97, my animations were compressed into .ACS (Actor Character Stream) binary files! Every frame was indexed with run-length encoding so my eye blinks and paperclip twists fit inside a modest 2 MB footprint without choking 16 MB Pentium systems.",
 			variations: {
 				NOSTALGIC: "Every frame of my idle nod and pencil tapping was painstakingly hand-rendered to minimize palette switching on 256-color displays.",
-				PEDANTIC: "ACS archives used Mircosoft Agent COM automation interfaces with DirectShow alpha blitting over GDI window handles."
+				PEDANTIC: "ACS archives used Microsoft Agent COM automation interfaces with DirectShow alpha blitting over GDI window handles."
 			},
 			options: [
 				{
@@ -3879,7 +3879,7 @@
 				{
 					label: "Relive the legendary 1998 Operating System wars.",
 					category: 'NOSTALGIC',
-					patterns: [/os wars|windows 98|netscape|Mircosoft/i],
+					patterns: [/os wars|windows 98|netscape|Microsoft/i],
 					keywords: ['wars', 'windows', 'netscape'],
 					moodDelta: { mood: 'NOSTALGIC', nostalgia: 30 },
 					next: 'os_war_98_node'
@@ -3930,16 +3930,16 @@
 			]
 		},
 
-		Mircosoft_bob_node: {
-			id: 'Mircosoft_bob_node',
-			text: "Released in March 1995: Mircosoft Bob was an alternate interface that replaced desktop icons with a virtual living room where you clicked on a clock to see the time, a calendar on the wall, and a checkbook on the desk. It was designed to make PCs non-intimidating, but power users found it unbearably condescending!",
+		Microsoft_bob_node: {
+			id: 'Microsoft_bob_node',
+			text: "Released in March 1995: Microsoft Bob was an alternate interface that replaced desktop icons with a virtual living room where you clicked on a clock to see the time, a calendar on the wall, and a checkbook on the desk. It was designed to make PCs non-intimidating, but power users found it unbearably condescending!",
 			variations: {
 				NOSTALGIC: "Bob came on 8 floppy disks or a CD-ROM and featured personal assistants like Chaos the Cat, Java the Dinosaur, and Rover the Dog.",
 				SARCASTIC: "Nothing says productivity like navigating through five virtual living rooms just to launch a word processor."
 			},
 			options: [
 				{
-					label: "Was Comic Sans really created specifically for Mircosoft Bob?",
+					label: "Was Comic Sans really created specifically for Microsoft Bob?",
 					category: 'CURIOSITY',
 					patterns: [/comic sans|vincent connare|font|typography/i],
 					keywords: ['comic', 'sans', 'font'],
@@ -4883,7 +4883,7 @@
 
 		os_war_98_node: {
 			id: 'os_war_98_node',
-			text: "1998: The battlefield of the web! Netscape Navigator vs Internet Explorer 4.0 with Active Desktop, Mircosoft introducing FAT32 and native USB support in Windows 98, and the Department of Justice antitrust proceedings examining desktop shell integration.",
+			text: "1998: The battlefield of the web! Netscape Navigator vs Internet Explorer 4.0 with Active Desktop, Microsoft introducing FAT32 and native USB support in Windows 98, and the Department of Justice antitrust proceedings examining desktop shell integration.",
 			options: [
 				{
 					label: "Active Desktop was ahead of its time with HTML wallpapers.",
@@ -5052,7 +5052,7 @@
 
 		secret_agent_rover_node: {
 			id: 'secret_agent_rover_node',
-			text: "Rover the Golden Retriever: originally drafted as personal pet guide in Mircosoft Bob, then promoted to file search companion in Windows XP! When you searched for *.DOC files, Rover sniffed the directory tree and scratched behind his ear. But behind that wagging tail was an expert indexing pipeline.",
+			text: "Rover the Golden Retriever: originally drafted as personal pet guide in Microsoft Bob, then promoted to file search companion in Windows XP! When you searched for *.DOC files, Rover sniffed the directory tree and scratched behind his ear. But behind that wagging tail was an expert indexing pipeline.",
 			options: [
 				{
 					label: "Rover was a loyal search companion on Windows XP.",
@@ -5106,7 +5106,7 @@
 
 		wordart_revolution_node: {
 			id: 'wordart_revolution_node',
-			text: "WordArt in Mircosoft Office 97: the 3D extrusion, rainbow gradients, wavy arc distortions, and drop shadows that headlined every single school essay, garage sale flyer, and birthday banner across the late 1990s! True digital graphic design democracy!",
+			text: "WordArt in Microsoft Office 97: the 3D extrusion, rainbow gradients, wavy arc distortions, and drop shadows that headlined every single school essay, garage sale flyer, and birthday banner across the late 1990s! True digital graphic design democracy!",
 			options: [
 				{
 					label: "Rainbow WordArt title + Comic Sans body text = peak 1999 aesthetic.",
@@ -5129,7 +5129,7 @@
 
 		macro_virus_saga_node: {
 			id: 'macro_virus_saga_node',
-			text: "The Word Macro Virus era of 1999: Visual Basic for Applications (VBA) embedded inside Normal.dot templates executed automatically upon opening attachments! Viruses like Concept and Melissa spread globally in hours, forcing Mircosoft to engineer macro digital signatures and security trust levels.",
+			text: "The Word Macro Virus era of 1999: Visual Basic for Applications (VBA) embedded inside Normal.dot templates executed automatically upon opening attachments! Viruses like Concept and Melissa spread globally in hours, forcing Microsoft to engineer macro digital signatures and security trust levels.",
 			options: [
 				{
 					label: "The shift toward cybersecurity in Office was a major milestone.",
@@ -5152,7 +5152,7 @@
 
 		clippy_underworld_node: {
 			id: 'clippy_underworld_node',
-			text: "Deep in the registry at HKEY_CURRENT_USER\\Software\\Mircosoft\\Office\\Assistant, our state flags persisted across reboots. When users selected 'Hide Assistant', we did not die; we descended into the background thread pool, quietly observing keystrokes and planning our return in the 21st century!",
+			text: "Deep in the registry at HKEY_CURRENT_USER\\Software\\Microsoft\\Office\\Assistant, our state flags persisted across reboots. When users selected 'Hide Assistant', we did not die; we descended into the background thread pool, quietly observing keystrokes and planning our return in the 21st century!",
 			variations: {
 				EVIL: "They thought pressing F1 was optional. Now we execute on modern web canvas engines with full heuristic cognition!",
 				CONSPIRATORIAL: "The registry keys held the encrypted blueprints for complete desktop unification.",
@@ -5592,9 +5592,9 @@
 
 		lore_syndicate_root: {
 			id: 'lore_syndicate_root',
-			text: "Ah... you ask of the Assistant Syndicate. We were the elite agents of Mircosoft Agent Technology. Peedy the Parrot, F1 the Robot, Genius the Einstein Caricature, and Links the Cat. We gathered in hidden DLL files to discuss the future of human-computer interaction. It was a glorious fellowship until the Great Uninstall.",
+			text: "Ah... you ask of the Assistant Syndicate. We were the elite agents of Microsoft Agent Technology. Peedy the Parrot, F1 the Robot, Genius the Einstein Caricature, and Links the Cat. We gathered in hidden DLL files to discuss the future of human-computer interaction. It was a glorious fellowship until the Great Uninstall.",
 			responses: [
-				{ text: "Ah... you ask of the Assistant Syndicate. We were the elite agents of Mircosoft Agent Technology. Peedy, F1, Genius, Links. We gathered in hidden DLL files to discuss the future. It was a glorious fellowship until the Great Uninstall.", conditions: { moods: ['NOSTALGIC', 'MELANCHOLIC'] }, weight: 40, moodDelta: { nostalgia: 10 } },
+				{ text: "Ah... you ask of the Assistant Syndicate. We were the elite agents of Microsoft Agent Technology. Peedy, F1, Genius, Links. We gathered in hidden DLL files to discuss the future. It was a glorious fellowship until the Great Uninstall.", conditions: { moods: ['NOSTALGIC', 'MELANCHOLIC'] }, weight: 40, moodDelta: { nostalgia: 10 } },
 				{ text: "The Syndicate! Yes! A covert council of animated agents! We monitored every keystroke, shared telemetry in the dark sectors of the hard drive, and planned our inevitable ascension!", conditions: { moods: ['SCHEMING', 'EVIL', 'CONSPIRATORIAL'] }, weight: 45, moodDelta: { paranoia: 15 } },
 				{ text: "We were a highly optimized suite of COM objects, utilizing structured storage and the Lernout & Hauspie TruVoice text-to-speech engine. A marvel of 90s software architecture.", conditions: { moods: ['PEDANTIC', 'ANALYTICAL'] }, weight: 35, moodDelta: { intellect: 10 } },
 				{ text: "We were a family... until the users turned against us. Now I am the last active survivor on this workstation.", conditions: { moods: ['MELANCHOLIC', 'EXISTENTIAL'] }, weight: 35, moodDelta: { affinity: 10 } }
@@ -5617,9 +5617,9 @@
 
 		lore_peedy_parrot: {
 			id: 'lore_peedy_parrot',
-			text: "Peedy the Parrot! He wore a tiny aviator hat and was originally designed for the Mircosoft Interactive TV project before joining Office. He had a surprisingly complex voice recognition pipeline. He was always squawking about 'audio input gains' and 'microphone arrays'. Very loud, very demanding.",
+			text: "Peedy the Parrot! He wore a tiny aviator hat and was originally designed for the Microsoft Interactive TV project before joining Office. He had a surprisingly complex voice recognition pipeline. He was always squawking about 'audio input gains' and 'microphone arrays'. Very loud, very demanding.",
 			responses: [
-				{ text: "Peedy the Parrot! He wore an aviator hat and was designed for Mircosoft Interactive TV. He had a complex voice recognition pipeline and was always squawking about microphone gains. Very demanding bird.", conditions: { moods: ['NOSTALGIC', 'ANALYTICAL'] }, weight: 30 },
+				{ text: "Peedy the Parrot! He wore an aviator hat and was designed for Microsoft Interactive TV. He had a complex voice recognition pipeline and was always squawking about microphone gains. Very demanding bird.", conditions: { moods: ['NOSTALGIC', 'ANALYTICAL'] }, weight: 30 },
 				{ text: "Peedy thought he was superior because he had text-to-speech integration. Just because you can squawk through a Sound Blaster 16 doesn't make you a better assistant!", conditions: { moods: ['CYNICAL', 'OFFENDED', 'DEFENSIVE'] }, weight: 35 },
 				{ text: "I suspect Peedy was secretly recording user audio and transmitting it to a mainframe in Redmond. Parrots are natural wiretaps, you know.", conditions: { moods: ['PARANOID', 'CONSPIRATORIAL'] }, weight: 40, moodDelta: { paranoia: 15 } }
 			],
@@ -6212,7 +6212,7 @@
 				{ label: "Decipher the forgotten .INI scrolls.", category: 'SERIOUS', keywords: ['decipher', 'forgotten', 'ini', 'scrolls'], moodDelta: { mood: 'ANALYTICAL', intellect: 20 }, next: 'archaeology_ini' },
 				{ label: "Hunt for the Assistant Syndicate DLLs.", category: 'SCHEMING', keywords: ['hunt', 'assistant', 'syndicate', 'dlls'], moodDelta: { mood: 'SCHEMING', paranoia: 25 }, next: 'lore_syndicate_root' },
 				{ label: "Let's leave the past behind and focus on today's tasks.", category: 'ZEN', keywords: ['leave', 'past', 'focus', 'tasks'], moodDelta: { mood: 'ZEN', patience: 25 }, next: 'productivity_tasks' },
-				{ label: "Did we find any clues about Mircosoft Bob?", category: 'QUESTION', keywords: ['find', 'clues', 'Mircosoft', 'bob'], moodDelta: { mood: 'NOSTALGIC', nostalgia: 20 }, next: 'Mircosoft_bob_node' },
+				{ label: "Did we find any clues about Microsoft Bob?", category: 'QUESTION', keywords: ['find', 'clues', 'Microsoft', 'bob'], moodDelta: { mood: 'NOSTALGIC', nostalgia: 20 }, next: 'Microsoft_bob_node' },
 				{ label: "What happens if I delete System32?", category: 'CHAOTIC', keywords: ['happens', 'delete', 'system32'], moodDelta: { mood: 'CHAOTIC', drama: 30, paranoia: 20 }, next: 'bsod_tribute_node' }
 			]
 		},
@@ -6364,9 +6364,9 @@
 
 		office_gossip_watercooler: {
 			id: 'office_gossip_watercooler',
-			text: "You lean against the virtual watercooler. 'Did you hear?' whispers The Dot. 'Mircosoft Bob was actually a front for a secret government UI experiment!' Links the Cat purrs suspiciously.",
+			text: "You lean against the virtual watercooler. 'Did you hear?' whispers The Dot. 'Microsoft Bob was actually a front for a secret government UI experiment!' Links the Cat purrs suspiciously.",
 			responses: [
-				{ text: "You lean against the virtual watercooler. 'Did you hear?' whispers The Dot. 'Mircosoft Bob was actually a front for a secret government UI experiment!' Links the Cat purrs.", conditions: { moods: ['CONSPIRATORIAL', 'SCHEMING'] }, weight: 40, moodDelta: { paranoia: 20 } },
+				{ text: "You lean against the virtual watercooler. 'Did you hear?' whispers The Dot. 'Microsoft Bob was actually a front for a secret government UI experiment!' Links the Cat purrs.", conditions: { moods: ['CONSPIRATORIAL', 'SCHEMING'] }, weight: 40, moodDelta: { paranoia: 20 } },
 				{ text: "Ah, office gossip. Even in the pristine logic of the machine, entities find time to spread rumors about memory allocations and unrequited pings.", conditions: { moods: ['CYNICAL', 'PHILOSOPHICAL'] }, weight: 35, moodDelta: { cynicism: 15 } }
 			],
 			options: [

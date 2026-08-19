@@ -125,6 +125,105 @@
 		win.querySelector('.xp-window-content').style.padding = '0';
 		win.querySelector('.xp-window-content').style.overflow = 'hidden';
 
+		win.dataset.appId = 'minesweeper';
+		win.getWindowState = () => ({
+			appId: 'minesweeper',
+			difficulty: gameState.difficulty,
+			rows: gameState.rows,
+			cols: gameState.cols,
+			minesCount: gameState.minesCount,
+			marksEnabled: gameState.marksEnabled,
+			soundEnabled: gameState.soundEnabled,
+			minesRemaining: gameState.minesRemaining,
+			timer: gameState.timer,
+			status: gameState.status,
+			firstClick: gameState.firstClick,
+			grid: gameState.grid.map(row => row.map(cell => ({
+				isMine: cell.isMine,
+				state: cell.state,
+				adjacentMines: cell.adjacentMines,
+				hitMine: cell.hitMine
+			})))
+		});
+
+		win.restoreSessionState = (saved) => {
+			if (!saved || !saved.grid) return;
+			gameState.difficulty = saved.difficulty || 'beginner';
+			gameState.rows = saved.rows || 9;
+			gameState.cols = saved.cols || 9;
+			gameState.minesCount = saved.minesCount || 10;
+			gameState.marksEnabled = saved.marksEnabled !== false;
+			gameState.soundEnabled = saved.soundEnabled !== false;
+			gameState.minesRemaining = saved.minesRemaining !== undefined ? saved.minesRemaining : 10;
+			gameState.timer = saved.timer || 0;
+			gameState.status = saved.status || 'ready';
+			gameState.firstClick = !!saved.firstClick;
+
+			updateDigitalDisplay('#ms-mines-left', gameState.minesRemaining);
+			updateDigitalDisplay('#ms-timer', gameState.timer);
+			if (gameState.status === 'won') updateFaceIcon('😎');
+			else if (gameState.status === 'lost') updateFaceIcon('😵');
+			else updateFaceIcon('🙂');
+
+			const boardEl = win.querySelector('#ms-board');
+			if (!boardEl) return;
+			boardEl.innerHTML = '';
+			boardEl.style.gridTemplateColumns = `repeat(${gameState.cols}, 16px)`;
+			boardEl.style.gridTemplateRows = `repeat(${gameState.rows}, 16px)`;
+			gameState.grid = [];
+
+			for (let r = 0; r < gameState.rows; r++) {
+				const row = [];
+				for (let c = 0; c < gameState.cols; c++) {
+					const cellData = saved.grid[r] ? saved.grid[r][c] : null;
+					const cell = document.createElement('div');
+					cell.className = 'ms-cell';
+					cell.dataset.row = r;
+					cell.dataset.col = c;
+
+					if (cellData) {
+						if (cellData.state === 'revealed') {
+							cell.className = 'ms-cell revealed';
+							if (cellData.isMine) {
+								cell.classList.add(cellData.hitMine ? 'mine-death' : 'mine');
+								cell.textContent = '💣';
+							} else if (cellData.adjacentMines > 0) {
+								cell.textContent = cellData.adjacentMines;
+								cell.dataset.num = cellData.adjacentMines;
+							}
+						} else if (cellData.state === 'flagged') {
+							cell.classList.add('flagged');
+							cell.textContent = '🚩';
+						} else if (cellData.state === 'question') {
+							cell.classList.add('question');
+							cell.textContent = '?';
+						}
+					}
+
+					cell.addEventListener('mousedown', (e) => handleCellMouseDown(e, r, c));
+					cell.addEventListener('mouseup', (e) => handleCellMouseUp(e, r, c));
+					cell.addEventListener('contextmenu', (e) => {
+						e.preventDefault();
+						handleCellRightClick(r, c);
+					});
+
+					boardEl.appendChild(cell);
+					row.push({
+						element: cell,
+						isMine: cellData ? cellData.isMine : false,
+						state: cellData ? cellData.state : 'covered',
+						adjacentMines: cellData ? cellData.adjacentMines : 0,
+						hitMine: cellData ? cellData.hitMine : false
+					});
+				}
+				gameState.grid.push(row);
+			}
+
+			if (gameState.status === 'playing' && !gameState.firstClick) {
+				startTimer();
+			}
+		};
+
 		gameState.activeWin = win;
 		bindWindowEvents(win);
 		resetGame();
@@ -243,7 +342,7 @@
 					{
 						label: 'About Minesweeper',
 						action: () => {
-							showXPDialog('About Minesweeper', 'Mircosoft Windows XP Minesweeper Recreation.\nAuthentic gameplay, high scores and board calibration.', 'info');
+							showXPDialog('About Minesweeper', 'Microsoft Windows XP Minesweeper Recreation.\nAuthentic gameplay, high scores and board calibration.', 'info');
 						}
 					}
 				];

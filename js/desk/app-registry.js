@@ -144,7 +144,7 @@
 				id: 'outlook',
 				name: 'Outlook Express',
 				subtitle: 'E-mail Client',
-				icon: '../assets/images/desk/OE2001.webp',
+				icon: '../assets/images/desk/icons/Mail.webp',
 				category: 'Internet',
 				aliases: ['mail', 'oe', 'email', 'inbox', 'msimn', 'msimn.exe'],
 				handler: () => {
@@ -156,7 +156,7 @@
 				id: 'ie',
 				name: 'Internet Explorer',
 				subtitle: 'Web Browser',
-				icon: '../assets/images/desk/internet-explorer.png',
+				icon: '../assets/images/desk/icons/Internet Explorer.webp',
 				category: 'Internet',
 				aliases: ['internet', 'browser', 'web', 'explore', 'iexplore', 'iexplore.exe'],
 				handler: (args) => {
@@ -232,7 +232,7 @@
 			this.register({
 				id: 'charmap',
 				name: 'Character Map',
-				icon: 'https://api.iconify.design/mdi/format-font.svg?color=%231b4b9b',
+				icon: '../assets/images/desk/icons/List File.webp',
 				category: 'System Tools',
 				aliases: ['character-map', 'charactermap', 'symbols', 'characters', 'charmap.exe'],
 				handler: () => {
@@ -243,7 +243,7 @@
 			this.register({
 				id: 'winamp',
 				name: 'Winamp Media Player',
-				icon: 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/0d/Winamp-logo.svg/960px-Winamp-logo.svg.png',
+				icon: '../assets/images/desk/icons/Winamp.webp',
 				category: 'Entertainment',
 				aliases: ['music', 'mp3', 'player', 'audio-player', 'winamp.exe'],
 				handler: () => {
@@ -335,7 +335,7 @@
 			this.register({
 				id: 'search',
 				name: 'Search Companion',
-				icon: 'https://api.iconify.design/mdi/magnify.svg?color=%231b4b9b',
+				icon: '../assets/images/desk/icons/Search.webp',
 				category: 'System Tools',
 				aliases: ['find', 'locate'],
 				handler: (args) => {
@@ -347,7 +347,7 @@
 			this.register({
 				id: 'recyclebin',
 				name: 'Recycle Bin',
-				icon: '../assets/images/desk/trash.png',
+				icon: '../assets/images/desk/icons/Trash.webp',
 				category: 'System Tools',
 				aliases: ['trash', 'garbage', 'bin'],
 				handler: () => {
@@ -383,7 +383,7 @@
 			this.register({
 				id: 'todayanecdote',
 				name: "Today's Anecdote",
-				icon: 'https://api.iconify.design/mdi/calendar-star.svg',
+				icon: '../assets/images/desk/icons/Calendar.webp',
 				category: 'Accessories',
 				aliases: ['today-anecdote', 'anecdote', 'anecdotes', 'daily'],
 				handler: () => {

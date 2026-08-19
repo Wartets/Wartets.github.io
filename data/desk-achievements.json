@@ -224,7 +224,7 @@
 		"title": "Boss Key",
 		"description": "Use the Show Desktop action while having 10 or more active windows open.",
 		"category": "productivity",
-		"icon": "../assets/images/desk/XPIcon.png",
+		"icon": "../assets/images/desk/icons/My Computer.webp",
 		"hideIconWhenLocked": false,
 		"maxProgress": 1,
 		"points": 30
@@ -508,6 +508,26 @@
 		"hideIconWhenLocked": true,
 		"maxProgress": 1,
 		"points": 25
+	},
+	{
+		"id": "bubbles_max_perf",
+		"title": "Full Perf",
+		"description": "Configure the Bubbles screen saver to 1500 bubbles.",
+		"category": "visuals",
+		"icon": "../assets/images/desk/icons/Display.webp",
+		"hideIconWhenLocked": false,
+		"maxProgress": 1,
+		"points": 25
+	},
+	{
+		"id": "mute_achievements",
+		"title": "Silent Treatment",
+		"description": "Disable achievement notifications in System settings.",
+		"category": "system",
+		"icon": "https://api.iconify.design/mdi/bell-off-outline.svg?color=%23cc3333",
+		"hideIconWhenLocked": true,
+		"maxProgress": 1,
+		"points": 15
 	},
 	{
 		"id": "grand_explorer",

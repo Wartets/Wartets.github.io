@@ -64,14 +64,14 @@
 								</div>
 							</div>
 							<div class="xp-start-item xp-start-pinned" data-action="open-ie">
-								<img src="../assets/images/desk/internet-explorer.png" class="xp-start-item-icon" alt="Internet">
+								<img src="../assets/images/desk/icons/Internet Explorer.webp" class="xp-start-item-icon" alt="Internet">
 								<div class="xp-start-item-texts">
 									<strong class="xp-start-title">Internet</strong>
 									<span class="xp-start-subtitle">Internet Explorer</span>
 								</div>
 							</div>
 							<div class="xp-start-item xp-start-pinned" data-action="open-outlook">
-								<img src="../assets/images/desk/OE2001.webp" class="xp-start-item-icon" alt="E-mail">
+								<img src="../assets/images/desk/icons/Mail.webp" class="xp-start-item-icon" alt="E-mail">
 								<div class="xp-start-item-texts">
 									<strong class="xp-start-title">E-mail</strong>
 									<span class="xp-start-subtitle">Outlook Express</span>
@@ -90,7 +90,7 @@
 								</div>
 							</div>
 							<div class="xp-start-item" data-action="open-winamp">
-								<img src="https://upload.wikimedia.org/wikipedia/commons/thumb/0/0d/Winamp-logo.svg/960px-Winamp-logo.svg.png" class="xp-start-item-icon" alt="Winamp">
+								<img src="../assets/images/desk/icons/Winamp.webp" class="xp-start-item-icon" alt="Winamp">
 								<div class="xp-start-item-texts">
 									<span class="xp-start-title">Winamp Media Player</span>
 								</div>
@@ -126,7 +126,7 @@
 								</div>
 							</div>
 							<div class="xp-start-item" data-action="open-today-anecdote">
-								<img src="https://api.iconify.design/mdi/calendar-star.svg" class="xp-start-item-icon" alt="Daily Anecdote">
+								<img src="../assets/images/desk/icons/Calendar.webp" class="xp-start-item-icon" alt="Daily Anecdote">
 								<div class="xp-start-item-texts">
 									<span class="xp-start-title">Today's Anecdote</span>
 								</div>
@@ -171,7 +171,7 @@
 							<span class="xp-start-flyout-arrow">►</span>
 						</div>
 						<div class="xp-start-item xp-start-right-item" data-action="printers-faxes">
-							<img src="../assets/images/desk/icons/Fax.webp" class="xp-start-item-icon" alt="Printers">
+							<img src="../assets/images/desk/icons/Printer.webp" class="xp-start-item-icon" alt="Printers">
 							<span class="xp-start-title">Printers and Faxes</span>
 						</div>
 						<div class="xp-start-item xp-start-right-item has-flyout" id="start-recent-docs-trigger">
@@ -187,12 +187,12 @@
 							<span class="xp-start-title">Help and Support</span>
 						</div>
 						<div class="xp-start-item xp-start-right-item has-flyout" id="start-search-trigger" data-action="search">
-							<img src="https://api.iconify.design/mdi/magnify.svg" class="xp-start-item-icon" alt="Search">
+							<img src="../assets/images/desk/icons/Search.webp" class="xp-start-item-icon" alt="Search">
 							<span class="xp-start-title">Search</span>
 							<span class="xp-start-flyout-arrow">►</span>
 						</div>
 						<div class="xp-start-item xp-start-right-item" data-action="run">
-							<img src="https://api.iconify.design/mdi/console-line.svg" class="xp-start-item-icon" alt="Run">
+							<img src="../assets/images/desk/icons/Command Prompt.webp" class="xp-start-item-icon" alt="Run">
 							<span class="xp-start-title">Run...</span>
 						</div>
 					</div>
@@ -384,15 +384,15 @@
 						${categoriesHtml}
 						<div class="xp-start-divider"></div>
 						<div class="xp-start-flyout-item" data-action="open-ie">
-							<img src="../assets/images/desk/internet-explorer.png" class="xp-start-item-icon" alt="">
+							<img src="../assets/images/desk/icons/Internet Explorer.webp" class="xp-start-item-icon" alt="">
 							<span class="xp-start-title">Internet Explorer</span>
 						</div>
 						<div class="xp-start-flyout-item" data-action="open-outlook">
-							<img src="../assets/images/desk/OE2001.webp" class="xp-start-item-icon" alt="">
+							<img src="../assets/images/desk/icons/Mail.webp" class="xp-start-item-icon" alt="">
 							<span class="xp-start-title">Outlook Express</span>
 						</div>
 						<div class="xp-start-flyout-item" data-action="open-winamp">
-							<img src="https://upload.wikimedia.org/wikipedia/commons/thumb/0/0d/Winamp-logo.svg/960px-Winamp-logo.svg.png" class="xp-start-item-icon" alt="">
+							<img src="../assets/images/desk/icons/Winamp.webp" class="xp-start-item-icon" alt="">
 							<span class="xp-start-title">Winamp</span>
 						</div>
 					</div>
@@ -458,7 +458,7 @@
 									<span class="xp-start-title">Sound Recorder</span>
 								</div>
 								<div class="xp-start-flyout-item" data-action="open-charmap">
-									<img src="https://api.iconify.design/mdi/format-font.svg?color=%231b4b9b" class="xp-start-item-icon" alt="">
+									<img src="../assets/images/desk/icons/List File.webp" class="xp-start-item-icon" alt="">
 									<span class="xp-start-title">Character Map</span>
 								</div>
 								<div class="xp-start-flyout-item" data-action="new-text-document">
@@ -470,7 +470,7 @@
 									<span class="xp-start-title">Command Prompt</span>
 								</div>
 								<div class="xp-start-flyout-item" data-action="open-today-anecdote">
-									<img src="https://api.iconify.design/mdi/calendar-star.svg" class="xp-start-item-icon" alt="">
+									<img src="../assets/images/desk/icons/Calendar.webp" class="xp-start-item-icon" alt="">
 									<span class="xp-start-title">Daily Anecdotes</span>
 								</div>
 								<div class="xp-start-flyout-item" data-action="my-documents">
@@ -496,7 +496,7 @@
 									<span class="xp-start-title">Windows Media Player</span>
 								</div>
 								<div class="xp-start-flyout-item" data-action="open-winamp">
-									<img src="https://upload.wikimedia.org/wikipedia/commons/thumb/0/0d/Winamp-logo.svg/960px-Winamp-logo.svg.png" class="xp-start-item-icon" alt="">
+									<img src="../assets/images/desk/icons/Winamp.webp" class="xp-start-item-icon" alt="">
 									<span class="xp-start-title">Winamp Media Player</span>
 								</div>
 								<div class="xp-start-flyout-item" data-action="open-sound-recorder">
@@ -519,7 +519,7 @@
 									<span class="xp-start-title">Control Panel</span>
 								</div>
 								<div class="xp-start-flyout-item" data-action="recycle-bin">
-									<img src="../assets/images/desk/trash.png" class="xp-start-item-icon" alt="">
+									<img src="../assets/images/desk/icons/Trash.webp" class="xp-start-item-icon" alt="">
 									<span class="xp-start-title">Recycle Bin</span>
 								</div>
 								<div class="xp-start-flyout-item" data-action="my-computer">
@@ -738,15 +738,15 @@
 
 				flyout.innerHTML = `
 					<div class="xp-start-flyout-item" data-search-target="files">
-						<img src="https://api.iconify.design/mdi/folder-search-outline.svg" class="xp-start-item-icon" alt="">
+						<img src="../assets/images/desk/icons/Folder Search.webp" class="xp-start-item-icon" alt="">
 						<span class="xp-start-title">For Files or Folders...</span>
 					</div>
 					<div class="xp-start-flyout-item" data-search-target="projects">
-						<img src="https://api.iconify.design/mdi/magnify.svg" class="xp-start-item-icon" alt="">
+						<img src="../assets/images/desk/icons/Search.webp" class="xp-start-item-icon" alt="">
 						<span class="xp-start-title">For Portfolio Projects...</span>
 					</div>
 					<div class="xp-start-flyout-item" data-search-target="web">
-						<img src="../assets/images/desk/internet-explorer.png" class="xp-start-item-icon" alt="">
+						<img src="../assets/images/desk/icons/Internet Explorer.webp" class="xp-start-item-icon" alt="">
 						<span class="xp-start-title">On the Internet (Web Search)...</span>
 					</div>
 				`;

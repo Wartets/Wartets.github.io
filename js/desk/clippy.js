@@ -733,14 +733,14 @@
 		"The Apollo 11 Guidance Computer (AGC) operated with exactly 2,048 words (approximately 4 KB) of RAM and 36,864 words (approximately 72 KB) of core rope ROM.",
 		"The iconic Windows XP default wallpaper 'Bliss' is an unedited photograph captured in Sonoma County, California in January 1996 by photographer Charles O'Rear using a Mamiya RZ67 camera.",
 		"The computer term 'debugging' was popularized after Grace Hopper and her team found a physical moth short-circuiting Relay 70 in Panel F of the Harvard Mark II computer on September 9, 1947.",
-		"Windows XP was released to manufacturing (RTM) on August 24, 2001, developed under the internal Mircosoft codename 'Whistler'.",
+		"Windows XP was released to manufacturing (RTM) on August 24, 2001, developed under the internal Microsoft codename 'Whistler'.",
 		"3D Pinball for Windows: Space Cadet was originally developed by Cinematronics and published by Maxis in 1995 as part of the 'Full Tilt! Pinball' suite before being integrated into Windows NT and XP.",
-		"The text displayed on the original Blue Screen of Death (BSOD) in Windows 3.1 was authored directly by Steve Ballmer while heading the Systems Division at Mircosoft.",
+		"The text displayed on the original Blue Screen of Death (BSOD) in Windows 3.1 was authored directly by Steve Ballmer while heading the Systems Division at Microsoft.",
 		"The initial floppy disk format introduced commercially by IBM in 1971 measured 8 inches (200 mm) in diameter and offered an unformatted capacity of 80 Kilobytes.",
 		"The world's first networked webcam was created in 1991 at the University of Cambridge computer laboratory to monitor the physical level of the Trojan Room coffee pot.",
 		"The very first commercial Internet domain name ever registered under the .com top-level domain was 'symbolics.com' on March 15, 1985.",
 		"The QWERTY mechanical layout was patented in 1878 by Christopher Latham Sholes to physically separate commonly sequential letter pairs and reduce mechanical typewriter jams.",
-		"The typeface Comic Sans was created in 1994 by Vincent Connare at Mircosoft, inspired by comic book lettering and intended for Mircosoft Bob.",
+		"The typeface Comic Sans was created in 1994 by Vincent Connare at Microsoft, inspired by comic book lettering and intended for Microsoft Bob.",
 		"The classic Windows XP Luna visual style blue hue is officially specified in hex code as #0055EA with highlight borders at #316AC5.",
 		"The FAT32 file system was first introduced to consumer PCs with Windows 95 OSR2 in August 1996, extending partition limits beyond the 2 GB constraint of FAT16.",
 		"The maximum addressable physical memory for 32-bit x86 architectures without Physical Address Extension (PAE) enabled is exactly 4,294,967,296 bytes (4 Gigabytes).",
@@ -755,7 +755,7 @@
 		"The standard CD-ROM format (Compact Disc Read-Only Memory) established in the 1985 Yellow Book standard holds up to 650 to 700 MB of data, roughly equivalent to 450 floppy disks.",
 		"The first hard disk drive, the IBM 350 Disk Storage Unit shipped in 1956, weighed over one ton and stored approximately 3.75 Megabytes of data across 50 magnetic platters.",
 		"The BIOS (Basic Input/Output System) acronym was first coined by Gary Kildall in 1975 for the CP/M operating system boot sequence.",
-		"Mircosoft Solitaire was originally written in 1989 by Mircosoft intern Wes Cherry to help novice users practice fluent mouse drag-and-drop actions in Windows 3.0.",
+		"Microsoft Solitaire was originally written in 1989 by Microsoft intern Wes Cherry to help novice users practice fluent mouse drag-and-drop actions in Windows 3.0.",
 		"Minesweeper was originally created by Robert Donner and Curt Johnson for the Windows Entertainment Pack in 1990 to train users on precision left and right mouse clicks.",
 		"In 1900, Max Planck resolved the ultraviolet catastrophe of blackbody radiation by hypothesizing that electromagnetic energy is quantized in discrete packets: E = h * nu.",
 		"In 1905, Albert Einstein published four Annus Mirabilis papers establishing the photoelectric effect (for which he received the Nobel Prize), Brownian motion, Special Relativity, and mass-energy equivalence E = m*c^2.",
@@ -804,7 +804,7 @@
 			q: "What was the official internal development codename for Windows XP?",
 			options: ["Whistler", "Memphis", "Chicago", "Longhorn"],
 			answer: 0,
-			fact: "Whistler was named after Whistler, British Columbia, where Mircosoft development teams frequently skied."
+			fact: "Whistler was named after Whistler, British Columbia, where Microsoft development teams frequently skied."
 		},
 		{
 			q: "Which ambient music pioneer composed the iconic Windows 95 startup sound?",
@@ -822,13 +822,13 @@
 			q: "What does the 'XP' suffix officially signify in the Windows XP brand name?",
 			options: ["eXtra Performance", "eXPerience", "eXtreme Protocol", "eXtra Power"],
 			answer: 1,
-			fact: "Mircosoft introduced the 'XP' designation to highlight the enhanced multimedia user experience."
+			fact: "Microsoft introduced the 'XP' designation to highlight the enhanced multimedia user experience."
 		},
 		{
 			q: "In what year did the Clippy office assistant make its official commercial debut?",
 			options: ["1995", "1997", "1999", "2001"],
 			answer: 1,
-			fact: "Clippy was introduced in Mircosoft Office 97 to assist users with letter drafting and automated formatting."
+			fact: "Clippy was introduced in Microsoft Office 97 to assist users with letter drafting and automated formatting."
 		},
 		{
 			q: "What is the theoretical maximum single file size allowable on a FAT32 file system?",

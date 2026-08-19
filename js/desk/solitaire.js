@@ -200,7 +200,51 @@
 			this.bindMenuCommands(win);
 			this.bindGlobalKeyboard(win);
 			this.bindBoardInteractions(win);
-			this.startNewDeal();
+
+			win.getWindowState = () => this.getSessionState();
+
+			if (options.restoreState) {
+				this.restoreSessionState(options.restoreState);
+			} else {
+				this.startNewDeal();
+			}
+		},
+
+		getSessionState() {
+			if (!activeSession) return null;
+			return {
+				appId: 'solitaire',
+				deck: activeSession.deck,
+				stock: activeSession.stock,
+				waste: activeSession.waste,
+				foundations: activeSession.foundations,
+				tableau: activeSession.tableau,
+				score: activeSession.score,
+				timeElapsed: activeSession.timeElapsed,
+				passesCount: activeSession.passesCount,
+				gameStarted: activeSession.gameStarted,
+				isWon: activeSession.isWon,
+				options: activeSession.options
+			};
+		},
+
+		restoreSessionState(state) {
+			if (!state || !activeSession) return;
+			activeSession.deck = state.deck || [];
+			activeSession.stock = state.stock || [];
+			activeSession.waste = state.waste || [];
+			activeSession.foundations = state.foundations || [[], [], [], []];
+			activeSession.tableau = state.tableau || [[], [], [], [], [], [], []];
+			activeSession.score = state.score || 0;
+			activeSession.timeElapsed = state.timeElapsed || 0;
+			activeSession.passesCount = state.passesCount || 0;
+			activeSession.gameStarted = !!state.gameStarted;
+			activeSession.isWon = !!state.isWon;
+			this.renderFullBoard();
+			this.updateStatusBar();
+			if (activeSession.gameStarted && !activeSession.isWon) {
+				this.startClock();
+			}
 		},
 
 		stopVictoryAnimation() {
@@ -1546,7 +1590,7 @@
 					label: 'About Solitaire',
 					bold: true,
 					action: () => {
-						showXPDialog('About Solitaire', 'Mircosoft Windows XP Solitaire\nKlondike Edition 5.1\nAuthentic Desktop Card Simulator Engine', 'info');
+						showXPDialog('About Solitaire', 'Microsoft Windows XP Solitaire\nKlondike Edition 5.1\nAuthentic Desktop Card Simulator Engine', 'info');
 					}
 				}
 			];

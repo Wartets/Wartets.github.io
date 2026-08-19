@@ -6,29 +6,38 @@
 		{ id: 'user-2', name: 'User 2', url: '../assets/images/desk/icons/User 2.webp' },
 		{ id: 'earth', name: 'Earth', url: '../assets/images/desk/icons/Earth (fixed).webp' },
 		{ id: 'camera', name: 'Camera', url: '../assets/images/desk/icons/Camera.webp' },
-		{ id: 'chess', name: 'Chess', url: 'https://api.iconify.design/mdi/chess-knight.svg?color=%231b4b9b' },
-		{ id: 'duck', name: 'Rubber Duck', url: 'https://api.iconify.design/mdi/duck.svg?color=%23e68a00' },
-		{ id: 'cat', name: 'Cat', url: 'https://api.iconify.design/mdi/cat.svg?color=%232d74da' },
-		{ id: 'dog', name: 'Dog', url: 'https://api.iconify.design/mdi/dog.svg?color=%238a5a36' },
-		{ id: 'frog', name: 'Frog', url: 'https://api.iconify.design/mdi/emoticon-happy-outline.svg?color=%232e7d32' },
-		{ id: 'butterfly', name: 'Butterfly', url: 'https://api.iconify.design/mdi/butterfly.svg?color=%239c27b0' },
-		{ id: 'ball', name: 'Soccer', url: 'https://api.iconify.design/mdi/soccer.svg?color=%23333333' },
-		{ id: 'guitar', name: 'Guitar', url: 'https://api.iconify.design/mdi/guitar-acoustic.svg?color=%23d84315' }
+		{ id: 'laptop', name: 'Laptop', url: '../assets/images/desk/icons/Laptop.webp' },
+		{ id: 'phone', name: 'Phone', url: '../assets/images/desk/icons/Phone.webp' },
+		{ id: 'display', name: 'Display', url: '../assets/images/desk/icons/Display.webp' },
+		{ id: 'monitor', name: 'Monitor', url: '../assets/images/desk/icons/Monitor.webp' },
+		{ id: 'trophy', name: 'Trophy', url: '../assets/images/desk/icons/Trophy.webp' },
+		{ id: 'game', name: 'Game Pad', url: '../assets/images/desk/icons/Game Controller.webp' },
+		{ id: 'music', name: 'Music Note', url: '../assets/images/desk/icons/Music File.webp' },
+		{ id: 'picture', name: 'Picture', url: '../assets/images/desk/icons/Picture.webp' }
 	];
 
-	let DEFAULT_SETTINGS = {}; // never modifiy this directly, use data/desk-default-settings.json to change default settings
+	let DEFAULT_SETTINGS = {}; // never to modifiy, use data/desk-default-settings.json to change default settings
 
 	function loadDefaultSettingsAsync() {
 		fetch('../data/desk-default-settings.json')
-			.then(r => r.json())
+			.then(r => r.ok ? r.json() : Promise.reject())
 			.then(data => {
 				DEFAULT_SETTINGS = data;
 				loadSavedSettings();
 				applyAllSettings();
 			})
 			.catch(() => {
-				loadSavedSettings();
-				applyAllSettings();
+				fetch('data/desk-default-settings.json')
+					.then(r => r.ok ? r.json() : {})
+					.then(data => {
+						DEFAULT_SETTINGS = data;
+						loadSavedSettings();
+						applyAllSettings();
+					})
+					.catch(() => {
+						loadSavedSettings();
+						applyAllSettings();
+					});
 			});
 	}
 
@@ -202,7 +211,14 @@
 		try {
 			const saved = localStorage.getItem(SETTINGS_STORAGE_KEY);
 			if (saved) {
-				currentSettings = Object.assign({}, DEFAULT_SETTINGS, JSON.parse(saved));
+				const parsed = JSON.parse(saved);
+				currentSettings = Object.assign({}, DEFAULT_SETTINGS, parsed);
+				if (DEFAULT_SETTINGS.screensaverSavers) {
+					currentSettings.screensaverSavers = Object.assign({}, DEFAULT_SETTINGS.screensaverSavers, parsed.screensaverSavers || {});
+				}
+				if (DEFAULT_SETTINGS.trayConfig) {
+					currentSettings.trayConfig = Object.assign({}, DEFAULT_SETTINGS.trayConfig, parsed.trayConfig || {});
+				}
 			} else {
 				currentSettings = Object.assign({}, DEFAULT_SETTINGS);
 			}
@@ -523,6 +539,12 @@
 		if (window.Taskbar && typeof window.Taskbar.updateDensity === 'function') {
 			window.Taskbar.updateDensity();
 		}
+		if (window.WindowManager && typeof window.WindowManager.clampAllWindowsToWorkspace === 'function') {
+			window.WindowManager.clampAllWindowsToWorkspace();
+		}
+		if (typeof arrangeIcons === 'function') {
+			arrangeIcons('none');
+		}
 	}
 
 	function calculateStorageUsage() {
@@ -574,7 +596,7 @@
 						<div style="display: flex; gap: 14px; margin-bottom: 10px; align-items: center;">
 							<img src="../assets/images/desk/icons/System Properties.webp" alt="Windows XP" style="width: 48px; height: 48px; flex-shrink: 0;">
 							<div style="font-size: 11px; line-height: 1.45;">
-								<strong>Mircosoft Windows XP</strong><br>
+								<strong>Microsoft Windows XP</strong><br>
 								Professional Version 2002 Service Pack 3<br>
 								Wartets Interactive Experience & Portfolio Engine
 							</div>
@@ -603,14 +625,39 @@
 						</fieldset>
 
 						<fieldset class="xp-groupbox" style="margin-top: 8px;">
-							<legend>Start Button & Shell Identity</legend>
+							<legend>Start Button & Boot Logo Selection</legend>
 							<div class="xp-form-row">
 								<label for="settings-startbtn-caption" style="width: 130px;">Start Button Text:</label>
 								<input type="text" id="settings-startbtn-caption" class="xp-input" value="${pendingSettings.startButtonText || 'start'}" style="flex: 1;">
 							</div>
-							<div class="xp-checkbox-row" style="margin-top: 4px;">
+							<div class="xp-form-row" style="margin-top: 6px;">
+								<label for="settings-boot-logo-select" style="width: 130px;">Boot Screen Logo:</label>
+								<select id="settings-boot-logo-select" class="xp-select" style="flex: 1;">
+									<option value="default" ${(pendingSettings.bootLogoPreset || 'default') === 'default' ? 'selected' : ''}>Windows XP Standard Edition</option>
+									<option value="pro" ${pendingSettings.bootLogoPreset === 'pro' ? 'selected' : ''}>Windows XP Professional Edition</option>
+									<option value="win2000" ${pendingSettings.bootLogoPreset === 'win2000' ? 'selected' : ''}>Windows 2000 Professional</option>
+								</select>
+							</div>
+							<div class="xp-checkbox-row" style="margin-top: 6px;">
 								<input type="checkbox" id="settings-skip-boot" ${pendingSettings.skipBootScreen ? 'checked' : ''}>
 								<label for="settings-skip-boot">Fast boot (skip startup boot logo screen)</label>
+							</div>
+						</fieldset>
+
+						<fieldset class="xp-groupbox" style="margin-top: 8px;">
+							<legend>Milestones & Quest Notifications</legend>
+							<div class="xp-checkbox-row">
+								<input type="checkbox" id="settings-ach-notifications-toggle" ${pendingSettings.achievementNotificationsEnabled !== false ? 'checked' : ''}>
+								<label for="settings-ach-notifications-toggle">Display achievement unlock notification banners</label>
+							</div>
+							<div class="xp-form-row" style="margin-top: 6px;">
+								<label for="settings-ach-position-select" style="width: 140px;">Banner Placement:</label>
+								<select id="settings-ach-position-select" class="xp-select" style="flex: 1;">
+									<option value="top-left" ${(pendingSettings.achievementNotificationPosition || 'top-left') === 'top-left' ? 'selected' : ''}>Top Left Corner</option>
+									<option value="top-right" ${pendingSettings.achievementNotificationPosition === 'top-right' ? 'selected' : ''}>Top Right Corner</option>
+									<option value="bottom-left" ${pendingSettings.achievementNotificationPosition === 'bottom-left' ? 'selected' : ''}>Bottom Left Corner</option>
+									<option value="bottom-right" ${pendingSettings.achievementNotificationPosition === 'bottom-right' ? 'selected' : ''}>Bottom Right Corner</option>
+								</select>
 							</div>
 						</fieldset>
 
@@ -1285,7 +1332,7 @@
 							</div>
 							<div class="xp-checkbox-row" style="margin-top: 6px;">
 								<input type="checkbox" id="settings-clippy-toggle" ${pendingSettings.clippyEnabled ? 'checked' : ''}>
-								<label for="settings-clippy-toggle">Enable Mircosoft Clippy assistant in taskbar</label>
+								<label for="settings-clippy-toggle">Enable Microsoft Clippy assistant in taskbar</label>
 							</div>
 						</fieldset>
 
@@ -1442,6 +1489,14 @@
 		});
 		win.querySelector('.xp-window-content').style.padding = '0';
 
+		win.getWindowState = () => {
+			const activeBtn = win.querySelector('.xp-tab-btn.active');
+			return {
+				appId: 'settings',
+				activeTab: activeBtn ? activeBtn.dataset.tab : 'system'
+			};
+		};
+
 		bindSettingsDialogEvents(win, id, defaultTab);
 	}
 
@@ -1573,14 +1628,14 @@
 		grid.innerHTML = '';
 
 		const trayServices = [
-			{ id: 'security', name: 'Security Center', icon: 'https://api.iconify.design/mdi/shield-check.svg?color=%2355aa55', defaultHidden: true },
-			{ id: 'hardware', name: 'Safely Remove Hardware', icon: 'https://api.iconify.design/mdi/usb.svg?color=%231b4b9b', defaultHidden: true },
-			{ id: 'update', name: 'Automatic Updates', icon: 'https://api.iconify.design/mdi/shield-sync-outline.svg?color=%23ffcc00', defaultHidden: true },
-			{ id: 'power', name: 'Power Meter', icon: 'https://api.iconify.design/mdi/battery-charging.svg?color=%232e7d32', defaultHidden: true },
-			{ id: 'network', name: 'Network Connection', icon: 'https://api.iconify.design/mdi/lan-connect.svg?color=%231b4b9b', defaultHidden: false },
-			{ id: 'mail', name: 'Outlook Express Mail', icon: 'https://api.iconify.design/mdi/email-outline.svg?color=%231b4b9b', defaultHidden: false },
-			{ id: 'volume', name: 'Volume Control', icon: 'https://api.iconify.design/mdi/volume-high.svg?color=%231b4b9b', defaultHidden: false },
-			{ id: 'lang', name: 'Language Indicator', icon: 'https://api.iconify.design/mdi/keyboard.svg?color=%231b4b9b', defaultHidden: false },
+			{ id: 'security', name: 'Security Center', icon: '../assets/images/desk/icons/User Support.webp', defaultHidden: true },
+			{ id: 'hardware', name: 'Safely Remove Hardware', icon: '../assets/images/desk/icons/Laptop.webp', defaultHidden: true },
+			{ id: 'update', name: 'Automatic Updates', icon: '../assets/images/desk/icons/Activate Windows.webp', defaultHidden: true },
+			{ id: 'power', name: 'Power Meter', icon: '../assets/images/desk/icons/Laptop.webp', defaultHidden: true },
+			{ id: 'network', name: 'Network Connection', icon: '../assets/images/desk/icons/Network Computers.webp', defaultHidden: false },
+			{ id: 'mail', name: 'Outlook Express Mail', icon: '../assets/images/desk/icons/Mail.webp', defaultHidden: false },
+			{ id: 'volume', name: 'Volume Control', icon: '../assets/images/desk/icons/Sounds, Speech, and Audio Devices.webp', defaultHidden: false },
+			{ id: 'lang', name: 'Language Indicator', icon: '../assets/images/desk/icons/Internet Properties.webp', defaultHidden: false },
 			{ id: 'clippy', name: 'Clippy Assistant', icon: '../assets/images/desk/clippy/idle.png', defaultHidden: false },
 			{ id: 'clock', name: 'Taskbar Clock', icon: '../assets/images/desk/icons/Calendar.webp', defaultHidden: false }
 		];
@@ -1655,15 +1710,16 @@
 			btn.addEventListener('click', () => {
 				switchTab(win, btn.dataset.tab);
 				SoundEngine.play('click');
-				if (btn.dataset.tab === 'screensaver' && window.ScreenSaverManager && ssCanvas) {
+				const curCanvas = win.querySelector('#settings-ss-monitor-canvas') || ssCanvas;
+				if (btn.dataset.tab === 'screensaver' && window.ScreenSaverManager && curCanvas) {
 					const activeSaver = ssSelect ? ssSelect.value : (pendingSettings.screensaverActive || 'xp-flying-logo');
 					if (activeSaver !== 'none') {
-						window.ScreenSaverManager.startPreview(ssCanvas, activeSaver);
+						window.ScreenSaverManager.startPreview(curCanvas, activeSaver);
 					} else {
-						window.ScreenSaverManager.stopPreview(ssCanvas, true);
+						window.ScreenSaverManager.stopPreview(curCanvas, true);
 					}
-				} else if (window.ScreenSaverManager && ssCanvas) {
-					window.ScreenSaverManager.stopPreview(ssCanvas, true);
+				} else if (window.ScreenSaverManager && curCanvas) {
+					window.ScreenSaverManager.stopPreview(curCanvas, true);
 				}
 			});
 		});
@@ -1680,11 +1736,12 @@
 				if (ssPreviewBtn) ssPreviewBtn.disabled = ssSelect.value === 'none';
 				renderEmbeddedSettings();
 				markDirty(win);
-				if (window.ScreenSaverManager && ssCanvas) {
+				const activeCanvas = win.querySelector('#settings-ss-monitor-canvas') || ssCanvas;
+				if (window.ScreenSaverManager && activeCanvas) {
 					if (ssSelect.value !== 'none') {
-						window.ScreenSaverManager.startPreview(ssCanvas, ssSelect.value);
+						window.ScreenSaverManager.startPreview(activeCanvas, ssSelect.value);
 					} else {
-						window.ScreenSaverManager.stopPreview(ssCanvas, true);
+						window.ScreenSaverManager.stopPreview(activeCanvas, true);
 					}
 				}
 			});
@@ -2139,10 +2196,34 @@
 			});
 		}
 
+		const bootLogoSelect = win.querySelector('#settings-boot-logo-select');
+		if (bootLogoSelect) {
+			bootLogoSelect.addEventListener('change', () => {
+				pendingSettings.bootLogoPreset = bootLogoSelect.value;
+				markDirty(win);
+			});
+		}
+
 		const skipBootToggle = win.querySelector('#settings-skip-boot');
 		if (skipBootToggle) {
 			skipBootToggle.addEventListener('change', () => {
 				pendingSettings.skipBootScreen = skipBootToggle.checked;
+				markDirty(win);
+			});
+		}
+
+		const achNotifToggle = win.querySelector('#settings-ach-notifications-toggle');
+		if (achNotifToggle) {
+			achNotifToggle.addEventListener('change', () => {
+				pendingSettings.achievementNotificationsEnabled = achNotifToggle.checked;
+				markDirty(win);
+			});
+		}
+
+		const achPosSelect = win.querySelector('#settings-ach-position-select');
+		if (achPosSelect) {
+			achPosSelect.addEventListener('change', () => {
+				pendingSettings.achievementNotificationPosition = achPosSelect.value;
 				markDirty(win);
 			});
 		}
@@ -2722,8 +2803,10 @@
 							if (res === 'Yes') {
 								if (window.AchievementsManager) window.AchievementsManager.progress('factory_reset', 1);
 								const achState = localStorage.getItem('xp_achievements_state');
+								const bibCache = localStorage.getItem('xp_music_bib_isolated_cache');
 								localStorage.clear();
 								if (achState) localStorage.setItem('xp_achievements_state', achState);
+								if (bibCache) localStorage.setItem('xp_music_bib_isolated_cache', bibCache);
 								SoundEngine.play('startup');
 								location.reload();
 							}
@@ -2750,6 +2833,9 @@
 				}
 				if (pendingSettings.crtAspectRatio && pendingSettings.crtAspectRatio !== 'fullscreen') {
 					window.AchievementsManager.progress('crt_aspect_changer', 1);
+				}
+				if (pendingSettings.achievementNotificationsEnabled === false && currentSettings.achievementNotificationsEnabled !== false) {
+					window.AchievementsManager.progress('mute_achievements', 1);
 				}
 			}
 			currentSettings = { ...pendingSettings };

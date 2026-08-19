@@ -1,5 +1,6 @@
 (function () {
 	const STORAGE_KEY_GEOMETRIES = 'xp_window_geometries';
+	const STORAGE_KEY_SESSION_WINDOWS = 'xp_open_windows_session_state';
 
 	class WindowManager {
 		constructor() {
@@ -12,6 +13,8 @@
 			this.snapGuideHEl = null;
 			this.snapGuideVEl = null;
 			this.activeSnapTarget = null;
+			this.saveSessionDebounceTimer = null;
+			this.isRestoringSession = false;
 			this.savedGeometries = this.loadSavedGeometries();
 			this.initGlobalShortcuts();
 			this.initSnapPreviewElement();
@@ -31,6 +34,241 @@
 			try {
 				localStorage.setItem(STORAGE_KEY_GEOMETRIES, JSON.stringify(this.savedGeometries));
 			} catch (e) {}
+		}
+
+		queueSaveOpenWindowsState() {
+			if (this.isRestoringSession) return;
+			if (this.saveSessionDebounceTimer) clearTimeout(this.saveSessionDebounceTimer);
+			this.saveSessionDebounceTimer = setTimeout(() => {
+				this.saveOpenWindowsState();
+			}, 300);
+		}
+
+		saveOpenWindowsState() {
+			if (this.isRestoringSession) return;
+			try {
+				const windowStates = [];
+				Object.keys(this.windows).forEach(id => {
+					const win = this.windows[id];
+					if (!win || win.classList.contains('xp-modal-overlay') || id.startsWith('dialog-') || id.startsWith('overlay-')) return;
+					const title = win.querySelector('.xp-window-header .title')?.textContent || '';
+					const iconSrc = win.querySelector('.xp-window-header img')?.src || '';
+
+					let appId = win.dataset.appId || null;
+					let appArgs = null;
+
+					try {
+						if (win.dataset.appArgs) appArgs = JSON.parse(win.dataset.appArgs);
+					} catch (e) {
+						appArgs = win.dataset.appArgs || null;
+					}
+
+					if (!appId) {
+						if (id.startsWith('window-folder-') || win.classList.contains('xp-explorer-window')) {
+							appId = win.explorerState?.isRecycleBin ? 'recyclebin' : 'explorer';
+							appArgs = {
+								path: win.explorerState?.currentFolder?.getFullPath ? win.explorerState.currentFolder.getFullPath() : '/',
+								viewMode: win.explorerState?.viewMode || 'icons'
+							};
+						} else if (id === 'window-paint' || id.startsWith('window-paint-')) {
+							appId = 'paint';
+						} else if (id === 'window-notepad' || id.startsWith('window-notepad-')) {
+							appId = 'notepad';
+						} else if (id === 'window-calculator') {
+							appId = 'calculator';
+						} else if (id === 'window-minesweeper') {
+							appId = 'minesweeper';
+						} else if (id === 'window-solitaire') {
+							appId = 'solitaire';
+						} else if (id === 'window-sound-recorder') {
+							appId = 'soundrecorder';
+						} else if (id === 'window-charmap') {
+							appId = 'charmap';
+						} else if (id === 'window-cmd' || id.startsWith('window-cmd-')) {
+							appId = 'cmd';
+						} else if (id === 'window-media-player') {
+							appId = 'mediaplayer';
+						} else if (id === 'window-internet-explorer') {
+							appId = 'ie';
+						} else if (id === 'window-outlook-express') {
+							appId = 'outlook';
+						} else if (id === 'window-achievements-vault') {
+							appId = 'achievements';
+						} else if (id === 'window-control-panel-properties') {
+							appId = 'settings';
+						} else if (id === 'window-display-properties') {
+							appId = 'display';
+						} else if (id === 'window-my-computer') {
+							appId = 'mycomputer';
+						} else if (id === 'window-network-places') {
+							appId = 'network';
+						} else if (id === 'window-printers-faxes') {
+							appId = 'printers';
+						} else if (id === 'window-search-companion') {
+							appId = 'search';
+						} else if (id.startsWith('window-project-') || id.startsWith('window-')) {
+							appId = 'project';
+							appArgs = { title };
+						}
+					}
+
+					const appState = typeof win.getWindowState === 'function' ? win.getWindowState() : null;
+					windowStates.push({
+						id,
+						appId,
+						appArgs,
+						appState,
+						title,
+						iconSrc,
+						left: win.style.left,
+						top: win.style.top,
+						width: win.style.width,
+						height: win.style.height,
+						zIndex: parseInt(win.style.zIndex || '100', 10),
+						opacity: win.dataset.customOpacity || win.style.opacity || '1',
+						minimized: win.classList.contains('minimized'),
+						maximized: win.classList.contains('maximized'),
+						snapped: win.dataset.snapped || null,
+						rolledUp: win.classList.contains('window-rolled-up'),
+						pinned: win.classList.contains('window-always-on-top'),
+						resizable: win.dataset.resizable !== 'false',
+						originalLeft: win.dataset.originalLeft || null,
+						originalTop: win.dataset.originalTop || null,
+						originalWidth: win.dataset.originalWidth || null,
+						originalHeight: win.dataset.originalHeight || null,
+						restoreLeft: win.dataset.restoreLeft || null,
+						restoreTop: win.dataset.restoreTop || null,
+						restoreWidth: win.dataset.restoreWidth || null,
+						restoreHeight: win.dataset.restoreHeight || null
+					});
+				});
+
+				localStorage.setItem(STORAGE_KEY_SESSION_WINDOWS, JSON.stringify(windowStates));
+			} catch (e) {}
+		}
+
+		restoreOpenWindowsState() {
+			try {
+				const raw = localStorage.getItem(STORAGE_KEY_SESSION_WINDOWS);
+				if (!raw) return;
+				const windowStates = JSON.parse(raw);
+				if (!Array.isArray(windowStates) || windowStates.length === 0) return;
+
+				this.isRestoringSession = true;
+				windowStates.sort((a, b) => (a.zIndex || 100) - (b.zIndex || 100));
+
+				windowStates.forEach(state => {
+					let win = null;
+					if (state.appId === 'explorer' && window.FileExplorer && typeof fs !== 'undefined' && fs) {
+						const folder = state.appArgs?.path ? fs.findByPath(state.appArgs.path) : fs.root;
+						win = window.FileExplorer.open(folder || fs.root, {
+							viewMode: state.viewMode || state.appArgs?.viewMode || 'icons',
+							restoreState: state.appState
+						});
+					} else if (state.appId === 'recyclebin' && window.FileExplorer) {
+						win = window.FileExplorer.openRecycleBin({
+							viewMode: state.viewMode || state.appArgs?.viewMode || 'details',
+							restoreState: state.appState
+						});
+					} else if (state.appId === 'paint' && window.PaintApp) {
+						win = window.PaintApp.open(state.appArgs?.path || null, { restoreState: state.appState });
+					} else if (state.appId === 'notepad' && window.NotepadApp) {
+						const targetFile = state.appArgs?.path && typeof fs !== 'undefined' ? fs.findByPath(state.appArgs.path) : null;
+						win = window.NotepadApp.open(targetFile, { restoreState: state.appState, title: state.title });
+					} else if (state.appId === 'calculator' && window.CalculatorApp) {
+						win = window.CalculatorApp.open();
+					} else if (state.appId === 'charmap' && window.CharacterMapApp) {
+						win = window.CharacterMapApp.open();
+					} else if (state.appId === 'soundrecorder' && window.SoundRecorderApp) {
+						win = window.SoundRecorderApp.open(state.appArgs?.path && typeof fs !== 'undefined' ? fs.findByPath(state.appArgs.path) : null);
+					} else if (state.appId === 'mediaplayer' && window.MediaPlayerApp) {
+						win = window.MediaPlayerApp.open(null, { restoreState: state.appState });
+					} else if (state.appId === 'pictureviewer' && window.PictureViewerApp) {
+						const targetFile = state.appArgs?.path && typeof fs !== 'undefined' ? fs.findByPath(state.appArgs.path) : (state.appArgs?.path || null);
+						win = window.PictureViewerApp.open(targetFile, { restoreState: state.appState });
+					} else if (state.appId === 'minesweeper' && window.MinesweeperApp) {
+						win = window.MinesweeperApp.open();
+						if (win && typeof win.restoreSessionState === 'function' && state.appState) {
+							win.restoreSessionState(state.appState);
+						}
+					} else if (state.appId === 'solitaire' && window.SolitaireApp) {
+						win = window.SolitaireApp.open();
+						if (win && window.SolitaireApp.restoreSessionState && state.appState) {
+							window.SolitaireApp.restoreSessionState(state.appState);
+						}
+					} else if (state.appId === 'ie' && window.InternetExplorerApp) {
+						win = window.InternetExplorerApp.open(state.appState?.tabs?.[0]?.currentUrl || 'about:home');
+					} else if (state.appId === 'outlook' && typeof openOutlookExpress === 'function') {
+						openOutlookExpress();
+						win = document.getElementById('window-outlook-express');
+					} else if (state.appId === 'settings' && window.SettingsApp) {
+						window.SettingsApp.open(state.appState?.activeTab || 'system');
+						win = document.getElementById('window-control-panel-properties');
+					} else if (state.appId === 'display' && typeof openDisplaySettings === 'function') {
+						openDisplaySettings(state.appState?.activeTab || 'desktop');
+						win = document.getElementById('window-display-properties');
+					} else if (state.appId === 'project' && typeof projects !== 'undefined') {
+						const p = projects.flat().find(pr => pr && typeof pr === 'object' && ((pr.title && (pr.title.en === state.title || pr.title === state.title)) || state.title.includes(String(pr.title))));
+						if (p && typeof openProjectWindow === 'function') openProjectWindow(p);
+						win = document.getElementById(state.id);
+					} else if (state.appId && window.DeskAppRegistry && window.DeskAppRegistry.get(state.appId)) {
+						win = window.DeskAppRegistry.launch(state.appId, state.appArgs || state.appState);
+					}
+
+					if (!win && state.id) {
+						win = document.getElementById(state.id);
+					}
+
+					if (win) {
+						win.dataset.appId = state.appId || '';
+						if (state.appArgs) win.dataset.appArgs = typeof state.appArgs === 'string' ? state.appArgs : JSON.stringify(state.appArgs);
+
+						if (state.left) win.style.left = state.left;
+						if (state.top) win.style.top = state.top;
+						if (state.width) win.style.width = state.width;
+						if (state.height) win.style.height = state.height;
+						if (state.zIndex) {
+							win.style.zIndex = String(state.zIndex);
+							this.zIndexCounter = Math.max(this.zIndexCounter, state.zIndex);
+						}
+
+						if (state.opacity && state.opacity !== '1') {
+							this.setOpacity(win, state.opacity);
+						}
+
+						if (state.originalLeft) win.dataset.originalLeft = state.originalLeft;
+						if (state.originalTop) win.dataset.originalTop = state.originalTop;
+						if (state.originalWidth) win.dataset.originalWidth = state.originalWidth;
+						if (state.originalHeight) win.dataset.originalHeight = state.originalHeight;
+						if (state.restoreLeft) win.dataset.restoreLeft = state.restoreLeft;
+						if (state.restoreTop) win.dataset.restoreTop = state.restoreTop;
+						if (state.restoreWidth) win.dataset.restoreWidth = state.restoreWidth;
+						if (state.restoreHeight) win.dataset.restoreHeight = state.restoreHeight;
+
+						if (state.pinned) {
+							this.toggleAlwaysOnTop(win);
+						}
+						if (state.rolledUp) {
+							this.toggleRollup(win);
+						}
+						if (state.snapped) {
+							this.snap(win, state.snapped);
+						} else if (state.maximized) {
+							this.maximize(win);
+						}
+						if (state.minimized) {
+							this.minimize(win, state.id);
+						} else {
+							this.setActive(win);
+						}
+					}
+				});
+
+				this.isRestoringSession = false;
+				this.clampAllWindowsToWorkspace();
+			} catch (e) {
+				this.isRestoringSession = false;
+			}
 		}
 
 		getSetting(key, fallback) {
@@ -117,6 +355,18 @@
 		}
 
 		getWorkspaceBounds() {
+			const desktopEl = document.getElementById('desktop');
+			if (desktopEl) {
+				const rect = desktopEl.getBoundingClientRect();
+				return {
+					left: Math.round(rect.left),
+					top: Math.round(rect.top),
+					width: Math.round(rect.width),
+					height: Math.round(rect.height),
+					right: Math.round(rect.right),
+					bottom: Math.round(rect.bottom)
+				};
+			}
 			const isTopTaskbar = document.body.classList.contains('taskbar-position-top');
 			const taskbarHeight = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--xp-taskbar-height') || '36', 10);
 			const top = isTopTaskbar ? taskbarHeight : 0;
@@ -124,6 +374,45 @@
 			const width = window.innerWidth;
 			const height = window.innerHeight - taskbarHeight;
 			return { left, top, width, height, right: left + width, bottom: top + height };
+		}
+
+		clampAllWindowsToWorkspace() {
+			const bounds = this.getWorkspaceBounds();
+			Object.values(this.windows).forEach(win => {
+				if (!win || win.classList.contains('minimized') || win.classList.contains('xp-modal-overlay') || win.classList.contains('window-detached') || win.style.display === 'none') return;
+				if (win.classList.contains('maximized')) {
+					win.style.left = `${bounds.left}px`;
+					win.style.top = `${bounds.top}px`;
+					win.style.width = `${bounds.width}px`;
+					win.style.height = `${bounds.height}px`;
+					return;
+				}
+				if (win.dataset.snapped) {
+					this.snap(win, win.dataset.snapped);
+					return;
+				}
+				const rect = win.getBoundingClientRect();
+				let currentLeft = parseInt(win.style.left, 10);
+				let currentTop = parseInt(win.style.top, 10);
+				let currentWidth = parseInt(win.style.width, 10) || rect.width;
+				let currentHeight = parseInt(win.style.height, 10) || rect.height;
+
+				currentWidth = Math.max(160, Math.min(currentWidth, bounds.width));
+				currentHeight = Math.max(80, Math.min(currentHeight, bounds.height));
+				win.style.width = `${currentWidth}px`;
+				win.style.height = `${currentHeight}px`;
+
+				if (isNaN(currentLeft)) currentLeft = rect.left;
+				if (isNaN(currentTop)) currentTop = rect.top;
+
+				const maxLeft = bounds.right - 80;
+				const maxTop = bounds.bottom - 40;
+				const clampedLeft = Math.max(bounds.left, Math.min(currentLeft, maxLeft));
+				const clampedTop = Math.max(bounds.top, Math.min(currentTop, maxTop));
+
+				win.style.left = `${clampedLeft}px`;
+				win.style.top = `${clampedTop}px`;
+			});
 		}
 
 		getNextPosition(width, height, windowId = '') {
@@ -241,6 +530,7 @@
 			const win = document.createElement('div');
 			win.id = id;
 			win.className = 'xp-window opening';
+			win.dataset.resizable = options.resizable === false ? 'false' : 'true';
 
 			if (options.isModal) {
 				win.style.width = `${initialWidth}px`;
@@ -250,11 +540,20 @@
 			} else if (!options.isMenu) {
 				const isCompact = options.resizable === false;
 				const { width, height } = this.computeDimensions(initialWidth, initialHeight, isCompact, id);
-				const pos = this.getNextPosition(width, height, id);
+				let posX, posY;
+				const bounds = this.getWorkspaceBounds();
+				if (typeof options.x === 'number' && typeof options.y === 'number') {
+					posX = Math.max(bounds.left + 5, Math.min(options.x, bounds.right - width - 5));
+					posY = Math.max(bounds.top + 5, Math.min(options.y, bounds.bottom - height - 5));
+				} else {
+					const pos = this.getNextPosition(width, height, id);
+					posX = pos.x;
+					posY = pos.y;
+				}
 				win.style.width = `${width}px`;
 				win.style.height = `${height}px`;
-				win.style.left = `${pos.x}px`;
-				win.style.top = `${pos.y}px`;
+				win.style.left = `${posX}px`;
+				win.style.top = `${posY}px`;
 			}
 
 			win.style.opacity = '0';
@@ -321,6 +620,7 @@
 				window.DeskEventBus.emit('window:created', { id, title, win, options });
 			}
 
+			this.queueSaveOpenWindowsState();
 			return win;
 		}
 
@@ -460,7 +760,7 @@
 		}
 
 		snap(win, type) {
-			if (!win || win.classList.contains('xp-modal-overlay')) return;
+			if (!win || win.classList.contains('xp-modal-overlay') || win.dataset.resizable === 'false') return;
 			const bounds = this.getWorkspaceBounds();
 			const halfW = Math.round(bounds.width / 2);
 			const halfH = Math.round(bounds.height / 2);
@@ -859,6 +1159,7 @@
 						};
 						this.saveGeometries();
 					}
+					this.queueSaveOpenWindowsState();
 				}
 			};
 
@@ -975,6 +1276,7 @@
 					};
 					this.saveGeometries();
 				}
+				this.queueSaveOpenWindowsState();
 			};
 
 			document.addEventListener('mousemove', handleResize);
@@ -1065,6 +1367,7 @@
 				if (window.DeskEventBus) {
 					window.DeskEventBus.emit('window:minimized', { id, win });
 				}
+				this.queueSaveOpenWindowsState();
 			};
 
 			const hasAnim = !document.body.classList.contains('no-window-animations') && !document.body.classList.contains('anim-instant');
@@ -1122,6 +1425,7 @@
 			if (window.DeskEventBus) {
 				window.DeskEventBus.emit('window:restored', { id: win.id, win });
 			}
+			this.queueSaveOpenWindowsState();
 		}
 
 		maximize(win) {
@@ -1173,6 +1477,7 @@
 					window.DeskEventBus.emit('window:maximized', { id: win.id, win });
 				}
 			}
+			this.queueSaveOpenWindowsState();
 		}
 
 		close(win, id) {
@@ -1215,6 +1520,7 @@
 				if (window.DeskEventBus) {
 					window.DeskEventBus.emit('window:closed', { id });
 				}
+				this.queueSaveOpenWindowsState();
 			};
 
 			const hasAnim = !document.body.classList.contains('no-window-animations') && !document.body.classList.contains('anim-instant');

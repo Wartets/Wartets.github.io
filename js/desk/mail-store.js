@@ -6,7 +6,7 @@
 		{ id: "outbox", name: "Outbox", icon: "../assets/images/desk/icons/Folder Closed.webp", deletable: false },
 		{ id: "sent", name: "Sent Items", icon: "../assets/images/desk/icons/Folder Closed.webp", deletable: false },
 		{ id: "drafts", name: "Drafts", icon: "../assets/images/desk/icons/Folder Closed.webp", deletable: false },
-		{ id: "deleted", name: "Deleted Items", icon: "../assets/images/desk/trash.png", deletable: false },
+		{ id: "deleted", name: "Deleted Items", icon: "../assets/images/desk/icons/Trash.webp", deletable: false },
 		{ id: "spam", name: "Spam", icon: "../assets/images/desk/icons/Folder Closed.webp", deletable: false }
 	];
 

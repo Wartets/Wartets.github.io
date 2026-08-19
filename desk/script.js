@@ -346,9 +346,12 @@ class FileSystemManager {
 		this.root = new Folder('Desktop');
 		this.clipboard = {
 			mode: null,
-			element: null
+			elements: [],
+			paths: [],
+			sources: []
 		};
 		this.undoStack = [];
+		this.redoStack = [];
 		this.initTypeRegistry();
 	}
 
@@ -415,6 +418,12 @@ class FileSystemManager {
 		}
 
 		parentFolder.add(newElement);
+		this.undoStack.push({
+			type: 'create',
+			path: newElement.getFullPath(),
+			elementData: newElement.toJSON()
+		});
+		this.redoStack = [];
 		this.save();
 		this.emitEvent('fs:created', { element: newElement, path: newElement.getFullPath() });
 
@@ -503,10 +512,13 @@ class FileSystemManager {
 
 		this.undoStack.push({
 			type: 'move',
-			sourcePath: `${destFolder.getFullPath() === '/' ? '' : destFolder.getFullPath()}/${finalName}`,
-			destPath: originalParent.getFullPath(),
-			originalName
+			fromParentPath: originalParent.getFullPath(),
+			fromPath: sourcePath,
+			toPath: element.getFullPath(),
+			originalName,
+			destName: finalName
 		});
+		this.redoStack = [];
 
 		this.save();
 		this.emitEvent('fs:moved', { element, sourcePath, destPath: element.getFullPath() });
@@ -536,6 +548,12 @@ class FileSystemManager {
 		const newElement = elementToCopy.copy();
 		newElement.name = finalName;
 		destFolder.add(newElement);
+		this.undoStack.push({
+			type: 'copy',
+			path: newElement.getFullPath(),
+			elementData: newElement.toJSON()
+		});
+		this.redoStack = [];
 		this.save();
 		this.emitEvent('fs:created', { element: newElement, path: newElement.getFullPath() });
 		return newElement;
@@ -602,14 +620,22 @@ class FileSystemManager {
 		const serialized = element.toJSON();
 		element.parent.remove(element.name);
 
+		const uid = `rb-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
 		const recycleItems = this.loadRecycleBinItems();
 		recycleItems.push({
-			uid: `rb-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+			uid,
 			originalPath,
 			deletedAt: new Date().toISOString(),
 			data: serialized
 		});
 		this.saveRecycleBinItems(recycleItems);
+		this.undoStack.push({
+			type: 'recycle',
+			uid,
+			originalPath,
+			data: serialized
+		});
+		this.redoStack = [];
 		this.save();
 		if (window.SettingsApp && typeof window.SettingsApp.playSound === 'function') {
 			window.SettingsApp.playSound('recycle');
@@ -648,6 +674,13 @@ class FileSystemManager {
 		destFolder.add(restored);
 		items.splice(index, 1);
 		this.saveRecycleBinItems(items);
+		this.undoStack.push({
+			type: 'restore',
+			path: restored.getFullPath(),
+			originalPath: item.originalPath,
+			data: item.data
+		});
+		this.redoStack = [];
 		this.save();
 		if (window.SettingsApp && typeof window.SettingsApp.playSound === 'function') {
 			window.SettingsApp.playSound('window');
@@ -681,16 +714,174 @@ class FileSystemManager {
 	undo() {
 		if (this.undoStack.length === 0) return false;
 		const op = this.undoStack.pop();
+		if (op.type === 'batch') {
+			for (let i = op.operations.length - 1; i >= 0; i--) {
+				this.undoStack.push(op.operations[i]);
+				this.undo();
+			}
+			return true;
+		}
+		if (op.type === 'desktop-layout') {
+			const currentPos = loadDesktopIconPositions();
+			this.redoStack.push({
+				type: 'desktop-layout',
+				positions: currentPos
+			});
+			saveDesktopIconPositions(op.positions);
+			arrangeIcons('none');
+			return true;
+		}
 		if (op.type === 'move') {
-			const el = this.findByPath(op.sourcePath);
-			const dest = this.findByPath(op.destPath);
+			const el = this.findByPath(op.toPath);
+			const dest = this.findByPath(op.fromParentPath);
 			if (el && dest instanceof Folder) {
 				el.parent.remove(el.name);
 				el.name = op.originalName;
 				dest.add(el);
+				this.redoStack.push({
+					type: 'move',
+					fromParentPath: op.toPath.substring(0, op.toPath.lastIndexOf('/')) || '/',
+					fromPath: el.getFullPath(),
+					toPath: op.toPath,
+					originalName: op.originalName,
+					destName: op.destName
+				});
 				this.save();
-				this.emitEvent('fs:moved', { element: el, sourcePath: op.sourcePath, destPath: el.getFullPath() });
-				this.emitEvent('fs:changed', {});
+				this.emitEvent('fs:moved', { element: el, sourcePath: op.toPath, destPath: el.getFullPath() });
+				return true;
+			}
+		} else if (op.type === 'create' || op.type === 'copy') {
+			const el = this.findByPath(op.path);
+			if (el && el.parent) {
+				const parent = el.parent;
+				const name = el.name;
+				parent.remove(name);
+				this.redoStack.push(op);
+				this.save();
+				this.emitEvent('fs:deleted', { path: op.path, name });
+				return true;
+			}
+		} else if (op.type === 'recycle') {
+			const items = this.loadRecycleBinItems();
+			const idx = items.findIndex(i => i.uid === op.uid);
+			if (idx !== -1) {
+				const item = items[idx];
+				let destFolder = this.findByPath(item.originalPath);
+				if (!(destFolder instanceof Folder)) destFolder = this.root;
+				const restored = this.rehydrate(item.data, null);
+				destFolder.add(restored);
+				items.splice(idx, 1);
+				this.saveRecycleBinItems(items);
+				this.redoStack.push({
+					type: 'restore',
+					path: restored.getFullPath(),
+					originalPath: item.originalPath,
+					data: item.data
+				});
+				this.save();
+				this.emitEvent('fs:restored', { element: restored, path: restored.getFullPath() });
+				return true;
+			}
+		} else if (op.type === 'restore') {
+			const el = this.findByPath(op.path);
+			if (el && el.parent) {
+				const originalPath = el.parent.getFullPath();
+				const serialized = el.toJSON();
+				el.parent.remove(el.name);
+				const uid = `rb-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+				const recycleItems = this.loadRecycleBinItems();
+				recycleItems.push({
+					uid,
+					originalPath,
+					deletedAt: new Date().toISOString(),
+					data: serialized
+				});
+				this.saveRecycleBinItems(recycleItems);
+				this.redoStack.push({
+					type: 'recycle',
+					uid,
+					originalPath,
+					data: serialized
+				});
+				this.save();
+				this.emitEvent('fs:recycled', { path: op.path, originalPath });
+				return true;
+			}
+		} else if (op.type === 'rename') {
+			const el = this.findByPath(op.newPath);
+			if (el) {
+				el.rename(op.oldName);
+				this.redoStack.push({
+					type: 'rename',
+					oldPath: op.oldPath,
+					newPath: el.getFullPath(),
+					oldName: op.oldName,
+					newName: op.newName
+				});
+				this.save();
+				return true;
+			}
+		}
+		return false;
+	}
+
+	redo() {
+		if (this.redoStack.length === 0) return false;
+		const op = this.redoStack.pop();
+		if (op.type === 'batch') {
+			for (let i = 0; i < op.operations.length; i++) {
+				this.redoStack.push(op.operations[i]);
+				this.redo();
+			}
+			return true;
+		}
+		if (op.type === 'desktop-layout') {
+			const currentPos = loadDesktopIconPositions();
+			this.undoStack.push({
+				type: 'desktop-layout',
+				positions: currentPos
+			});
+			saveDesktopIconPositions(op.positions);
+			arrangeIcons('none');
+			return true;
+		}
+		if (op.type === 'move') {
+			const el = this.findByPath(op.fromPath);
+			const destFolder = this.findByPath(op.fromParentPath);
+			if (el && destFolder instanceof Folder) {
+				this.move(el.getFullPath(), destFolder.getFullPath());
+				return true;
+			}
+		} else if (op.type === 'create' || op.type === 'copy') {
+			const parentPath = op.path.substring(0, op.path.lastIndexOf('/')) || '/';
+			const parent = this.findByPath(parentPath);
+			if (parent instanceof Folder) {
+				const recreated = this.rehydrate(op.elementData, parent);
+				parent.add(recreated);
+				this.undoStack.push(op);
+				this.save();
+				this.emitEvent('fs:created', { element: recreated, path: recreated.getFullPath() });
+				return true;
+			}
+		} else if (op.type === 'recycle') {
+			if (op.path) {
+				const el = this.findByPath(op.path);
+				if (el) {
+					this.moveToRecycleBin(op.path);
+					return true;
+				}
+			}
+		} else if (op.type === 'restore') {
+			if (op.uid) {
+				this.restoreFromRecycleBin(op.uid);
+				return true;
+			}
+		} else if (op.type === 'rename') {
+			const el = this.findByPath(op.oldPath);
+			if (el) {
+				el.rename(op.newName);
+				this.undoStack.push(op);
+				this.save();
 				return true;
 			}
 		}
@@ -777,6 +968,55 @@ let customIcons = JSON.parse(localStorage.getItem('customIcons')) || [];
 let webampInstance = null;
 let lastClickedIconForRange = null;
 let desktopDragOffset = { x: 0, y: 0 };
+
+function setCutVisuals(paths) {
+	clearCutVisuals();
+	if (!Array.isArray(paths)) return;
+	const selectors = paths.map(p => `[data-path="${p.replace(/"/g, '\\"')}"]`).join(', ');
+	if (!selectors) return;
+	document.querySelectorAll(selectors).forEach(el => {
+		el.classList.add('cut-item');
+	});
+}
+
+function clearCutVisuals() {
+	document.querySelectorAll('.cut-item').forEach(el => {
+		el.classList.remove('cut-item');
+	});
+}
+
+function getActiveSelectedElements() {
+	const elements = [];
+	const paths = [];
+	let activeContainer = null;
+	if (activeWindow && activeWindow.classList.contains('xp-explorer-window')) {
+		const state = activeWindow.explorerState;
+		if (state && state.selectedItems && state.selectedItems.size > 0) {
+			state.selectedItems.forEach(item => {
+				const p = item.dataset.path;
+				if (p && !p.startsWith('app://')) {
+					const el = fs ? fs.findByPath(p) : null;
+					if (el) {
+						elements.push(el);
+						paths.push(p);
+					}
+				}
+			});
+			return { elements, paths };
+		}
+	}
+	selectedIcons.forEach(item => {
+		const p = item.dataset.path;
+		if (p && !p.startsWith('app://')) {
+			const el = fs ? fs.findByPath(p) : null;
+			if (el && !paths.includes(p)) {
+				elements.push(el);
+				paths.push(p);
+			}
+		}
+	});
+	return { elements, paths };
+}
 
 function loadDesktopIconPositions() {
 	try {
@@ -1029,6 +1269,25 @@ document.addEventListener('DOMContentLoaded', () => {
 	setInterval(updateOutlookUnreadBadge, 60000);
 	if (window.ClippyAgent) window.ClippyAgent.init();
 
+	if (window.WindowManager && typeof window.WindowManager.restoreOpenWindowsState === 'function') {
+		setTimeout(() => {
+			window.WindowManager.restoreOpenWindowsState();
+		}, 150);
+	}
+
+	window.addEventListener('resize', () => {
+		if (window.WindowManager && typeof window.WindowManager.clampAllWindowsToWorkspace === 'function') {
+			window.WindowManager.clampAllWindowsToWorkspace();
+		}
+		arrangeIcons('none');
+	});
+
+	window.addEventListener('beforeunload', () => {
+		if (window.WindowManager && typeof window.WindowManager.saveOpenWindowsState === 'function') {
+			window.WindowManager.saveOpenWindowsState();
+		}
+	});
+
 	if (window.DeskEventBus) {
 		window.DeskEventBus.on('fs:changed', () => refreshUI());
 		window.DeskEventBus.on('settings:changed', () => arrangeIcons('none'));
@@ -1047,6 +1306,21 @@ document.addEventListener('DOMContentLoaded', () => {
 	const welcomeScreen = document.getElementById('welcome-screen');
 	const loginUser = document.getElementById('login-user');
 	const bootLogo = document.querySelector('.boot-logo');
+
+	const bootLogoImage = document.getElementById('boot-logo-image');
+	if (bootLogoImage && window.SettingsApp) {
+		const preset = window.SettingsApp.get('bootLogoPreset') || 'default';
+		if (preset === 'pro') {
+			bootLogoImage.src = '../assets/images/desk/logos/WindowsProLogoText-Big.webp';
+			bootLogoImage.className = 'boot-logo preset-pro';
+		} else if (preset === 'win2000') {
+			bootLogoImage.src = '../assets/images/desk/logos/Windows2000LogoText-Big.webp';
+			bootLogoImage.className = 'boot-logo preset-win2000';
+		} else {
+			bootLogoImage.src = '../assets/images/desk/logos/WindowsLogoText-Big.webp';
+			bootLogoImage.className = 'boot-logo preset-default';
+		}
+	}
 
 	let bootTimeout;
 	let loginTimeout;
@@ -1277,6 +1551,14 @@ function openPDFWindow(file) {
 	addToRecentDocs({ name: file.name, icon: file.icon, type: 'pdf', path: file.getFullPath() });
 	const win = createXPWindow(id, file.name, contentHTML, 800, 600, {
 		iconSrc: file.icon
+	});
+
+	win.dataset.appId = 'pdf';
+	win.dataset.appArgs = JSON.stringify({ path: file.getFullPath() });
+	win.getWindowState = () => ({
+		appId: 'pdf',
+		path: file.getFullPath(),
+		fileName: file.name
 	});
 
 	const content = win.querySelector('.xp-window-content');
@@ -1559,7 +1841,7 @@ function renderDesktopIcons() {
 		systemType: "my-computer"
 	}, {
 		name: "Recycle Bin",
-		icon: "../assets/images/desk/trash.png",
+		icon: "../assets/images/desk/icons/Trash.webp",
 		action: openRecycleBinWindow,
 		type: "system",
 		systemType: "recycle-bin"
@@ -2121,6 +2403,18 @@ function setupGlobalKeyboardShortcuts() {
 			return;
 		}
 
+		if (key === 'z' && !isEditable) {
+			e.preventDefault();
+			if (fs && fs.undo()) refreshUI();
+			return;
+		}
+
+		if (key === 'y' && !isEditable) {
+			e.preventDefault();
+			if (fs && fs.redo()) refreshUI();
+			return;
+		}
+
 		if (key === 'a' && !isEditable) {
 			const container = getActiveIconContainer();
 			if (container) {
@@ -2135,35 +2429,77 @@ function setupGlobalKeyboardShortcuts() {
 			return;
 		}
 
+		if (e.key === 'Escape' && !isEditable) {
+			clearCutVisuals();
+			if (fs && fs.clipboard) {
+				fs.clipboard.mode = null;
+			}
+			return;
+		}
+
 		if ((key === 'c' || key === 'x') && !isEditable) {
-			if (selectedIcons.size === 0) return;
-			const icon = selectedIcons.values().next().value;
-			const path = icon.dataset.path;
-			if (!path || path.startsWith('app://')) return;
+			const sel = getActiveSelectedElements();
+			if (sel.elements.length === 0) return;
 			e.preventDefault();
 			fs.clipboard.mode = key === 'x' ? 'cut' : 'copy';
-			fs.clipboard.element = fs.findByPath(path);
+			fs.clipboard.elements = sel.elements;
+			fs.clipboard.paths = sel.paths;
+			fs.clipboard.element = sel.elements[0];
+			if (key === 'x') {
+				setCutVisuals(sel.paths);
+			} else {
+				clearCutVisuals();
+			}
 			return;
 		}
 
 		if (key === 'v' && !isEditable) {
-			if (!fs.clipboard.element) return;
-			const container = getActiveIconContainer();
-			if (!container) return;
+			if (!fs || !fs.clipboard || !fs.clipboard.elements || fs.clipboard.elements.length === 0) return;
 			e.preventDefault();
 			const destPath = getActiveContainerDestPath();
+			const mode = fs.clipboard.mode || 'copy';
+			const ops = [];
 			try {
-				const sourcePath = fs.clipboard.element.getFullPath();
-				if (fs.clipboard.mode === 'cut') {
-					fs.move(sourcePath, destPath);
+				fs.clipboard.elements.forEach(el => {
+					const srcPath = el.getFullPath();
+					if (mode === 'cut') {
+						const originalParent = el.parent ? el.parent.getFullPath() : '/';
+						const originalName = el.name;
+						const moved = fs.move(srcPath, destPath);
+						if (moved) {
+							ops.push({
+								type: 'move',
+								fromParentPath: originalParent,
+								fromPath: srcPath,
+								toPath: moved.getFullPath(),
+								originalName,
+								destName: moved.name
+							});
+						}
+					} else {
+						const copied = fs.copy(srcPath, destPath);
+						if (copied) {
+							ops.push({
+								type: 'copy',
+								path: copied.getFullPath(),
+								elementData: copied.toJSON()
+							});
+						}
+					}
+				});
+				if (mode === 'cut') {
 					fs.clipboard.mode = null;
-					fs.clipboard.element = null;
-				} else if (fs.clipboard.mode === 'copy') {
-					fs.copy(sourcePath, destPath);
+					clearCutVisuals();
+				}
+				if (ops.length > 1) {
+					fs.undoStack.push({
+						type: 'batch',
+						operations: ops
+					});
 				}
 				refreshUI();
 			} catch (error) {
-				showXPDialog('Error', error.message, 'error');
+				showXPDialog('Clipboard Error', error.message, 'error');
 			}
 			return;
 		}
@@ -2226,7 +2562,7 @@ function buildInfoRow(label, value) {
 	return `<div class="info-row"><span class="info-label">${label}</span><span class="info-value">${value}</span></div>`;
 }
 
-async function openElementInfoWindow(element) {
+async function openElementInfoWindow(element, options = {}) {
 	if (!element) return;
 
 	let typeLabel = window.ShellAssociations ? window.ShellAssociations.getTypeLabel(element) : 'File';
@@ -2344,9 +2680,22 @@ async function openElementInfoWindow(element) {
 		</div>
 	`;
 
+	const bounds = (window.WindowManager && typeof window.WindowManager.getWorkspaceBounds === 'function') 
+		? window.WindowManager.getWorkspaceBounds() 
+		: { left: 0, top: 0, width: window.innerWidth, height: window.innerHeight - 36, right: window.innerWidth, bottom: window.innerHeight - 36 };
+
+	let targetX = options.x;
+	let targetY = options.y;
+	if (typeof targetX === 'number' && typeof targetY === 'number') {
+		targetX = Math.max(bounds.left + 8, Math.min(targetX, bounds.right - 450 - 8));
+		targetY = Math.max(bounds.top + 8, Math.min(targetY, bounds.bottom - 520 - 8));
+	}
+
 	const win = createXPWindow(id, `${element.name} Properties`, contentHTML, 450, 520, {
 		iconSrc: element.icon,
-		resizable: false
+		resizable: false,
+		x: targetX,
+		y: targetY
 	});
 	win.querySelector('.xp-window-content').style.padding = '0';
 	win.querySelector('.xp-window-content').style.overflowX = 'hidden';
@@ -2728,7 +3077,7 @@ async function openWinamp(targetTrack = null) {
 		});
 
 		if (window.Taskbar) {
-			const btn = window.Taskbar.addWindowButton('window-winamp', 'Winamp', 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/0d/Winamp-logo.svg/960px-Winamp-logo.svg.png');
+			const btn = window.Taskbar.addWindowButton('window-winamp', 'Winamp', '../assets/images/desk/icons/Winamp.webp');
 			if (btn) {
 				btn.addEventListener('click', () => {
 					if (webampInstance) {
@@ -2758,7 +3107,7 @@ async function openWinamp(targetTrack = null) {
 
 		webampInstance.onTrackDidChange((track) => {
 			if (track && track.title && window.Taskbar) {
-				window.Taskbar.updateWindowButton('window-winamp', `${track.title} - Winamp`, 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/0d/Winamp-logo.svg/960px-Winamp-logo.svg.png');
+				window.Taskbar.updateWindowButton('window-winamp', `${track.title} - Winamp`, '../assets/images/desk/icons/Winamp.webp');
 			}
 			if (window.AchievementsManager) {
 				window.AchievementsManager.progress('winamp_master', 1);
@@ -3449,6 +3798,8 @@ function handleDrop(e) {
 
 	const alignGrid = isAlignToGridEnabled();
 
+	const previousLayoutSnapshot = JSON.parse(JSON.stringify(positions));
+
 	sourcePaths.forEach((src) => {
 		const isAppIcon = src.startsWith('app://');
 		let element = null;
@@ -3511,6 +3862,11 @@ function handleDrop(e) {
 
 	if (isDesktopDrop && destFullPath === '/') {
 		saveDesktopIconPositions(positions);
+		fs.undoStack.push({
+			type: 'desktop-layout',
+			positions: previousLayoutSnapshot
+		});
+		fs.redoStack = [];
 	}
 
 	if (window.SettingsApp && window.SettingsApp.playSound) {
@@ -3766,7 +4122,7 @@ async function fetchWallpaperRegistry() {
 	}
 }
 
-async function openDisplaySettings(initialTab = 'desktop') {
+async function openDisplaySettings(initialTab = 'desktop', options = {}) {
 	const id = 'window-display-properties';
 	const existingWindow = document.getElementById(id);
 	if (existingWindow) {
@@ -3774,6 +4130,17 @@ async function openDisplaySettings(initialTab = 'desktop') {
 		const tabBtn = existingWindow.querySelector(`.xp-tab-btn[data-tab="${initialTab}"]`);
 		if (tabBtn) tabBtn.click();
 		return;
+	}
+
+	const bounds = (window.WindowManager && typeof window.WindowManager.getWorkspaceBounds === 'function') 
+		? window.WindowManager.getWorkspaceBounds() 
+		: { left: 0, top: 0, width: window.innerWidth, height: window.innerHeight - 36, right: window.innerWidth, bottom: window.innerHeight - 36 };
+
+	let targetX = options.x;
+	let targetY = options.y;
+	if (typeof targetX === 'number' && typeof targetY === 'number') {
+		targetX = Math.max(bounds.left + 8, Math.min(targetX, bounds.right - 470 - 8));
+		targetY = Math.max(bounds.top + 8, Math.min(targetY, bounds.bottom - 520 - 8));
 	}
 
 	let currentBg = (window.SettingsApp && window.SettingsApp.get('desktopBackground')) || localStorage.getItem('desktopBackground') || DEFAULT_DESKTOP_WALLPAPER;
@@ -3909,10 +4276,20 @@ async function openDisplaySettings(initialTab = 'desktop') {
 
 	const win = createXPWindow(id, 'Display Properties', contentHTML, 470, 520, {
 		iconSrc: '../assets/images/desk/icons/Display.webp',
-		resizable: false
+		resizable: false,
+		x: targetX,
+		y: targetY
 	});
 	win.querySelector('.xp-window-content').style.padding = '0';
 	win.querySelector('.xp-window-content').style.overflowX = 'hidden';
+
+	win.getWindowState = () => {
+		const activeBtn = win.querySelector('.xp-tab-btn.active');
+		return {
+			appId: 'display',
+			activeTab: activeBtn ? activeBtn.dataset.tab : 'desktop'
+		};
+	};
 
 	const tabBtns = win.querySelectorAll('.xp-tab-btn');
 	const tabPages = win.querySelectorAll('.xp-tab-page');
@@ -4059,11 +4436,12 @@ async function openDisplaySettings(initialTab = 'desktop') {
 		if (ssPreviewBtn) ssPreviewBtn.disabled = currentSS === 'none';
 		renderEmbeddedScreensaverSettings();
 		markDirty();
-		if (window.ScreenSaverManager && ssCanvas) {
+		const currentCanvas = win.querySelector('#disp-ss-monitor-canvas') || ssCanvas;
+		if (window.ScreenSaverManager && currentCanvas) {
 			if (currentSS !== 'none') {
-				window.ScreenSaverManager.startPreview(ssCanvas, currentSS);
+				window.ScreenSaverManager.startPreview(currentCanvas, currentSS);
 			} else {
-				window.ScreenSaverManager.stopPreview(ssCanvas, true);
+				window.ScreenSaverManager.stopPreview(currentCanvas, true);
 			}
 		}
 	});
@@ -4168,7 +4546,7 @@ function openRunDialog() {
 	const contentHTML = `
 		<div style="display: flex; flex-direction: column; padding: 15px; gap: 15px;">
 			<div style="display: flex; gap: 15px; align-items: flex-start;">
-				<img src="https://api.iconify.design/mdi/console-line.svg" style="width: 32px; height: 32px;" alt="Run">
+				<img src="../assets/images/desk/icons/Command Prompt.webp" style="width: 32px; height: 32px;" alt="Run">
 				<div>
 					<p style="margin: 0 0 10px 0;">Type the name of a program, folder, document, or Internet resource, and Windows will open it for you.</p>
 					<div style="display: flex; align-items: center; gap: 10px;">
@@ -4191,7 +4569,7 @@ function openRunDialog() {
 		</div>
 	`;
 
-	const runWindow = createXPWindow(id, title, contentHTML, 400, 180, { resizable: false, iconSrc: 'https://api.iconify.design/mdi/console-line.svg' });
+	const runWindow = createXPWindow(id, title, contentHTML, 400, 180, { resizable: false, iconSrc: '../assets/images/desk/icons/Command Prompt.webp' });
 	
 	const input = runWindow.querySelector('#run-input');
 	const okBtn = runWindow.querySelector('#run-ok');
@@ -4269,8 +4647,59 @@ function processRunCommand(command) {
 		return;
 	}
 
-	if (window.DeskAppRegistry && window.DeskAppRegistry.get(lowerCmd)) {
-		window.DeskAppRegistry.launch(lowerCmd, args || undefined);
+	const aliases = {
+		'mspaint': 'paint',
+		'pbrush': 'paint',
+		'paint': 'paint',
+		'calc': 'calculator',
+		'calculator': 'calculator',
+		'winmine': 'minesweeper',
+		'minesweeper': 'minesweeper',
+		'sol': 'solitaire',
+		'solitaire': 'solitaire',
+		'sndrec32': 'soundrecorder',
+		'soundrecorder': 'soundrecorder',
+		'charmap': 'charmap',
+		'wmplayer': 'mediaplayer',
+		'wmp': 'mediaplayer',
+		'mediaplayer': 'mediaplayer',
+		'winamp': 'winamp',
+		'iexplore': 'ie',
+		'ie': 'ie',
+		'msimn': 'outlook',
+		'outlook': 'outlook',
+		'mail': 'outlook',
+		'cmd': 'cmd',
+		'command': 'cmd',
+		'notepad': 'notepad',
+		'write': 'notepad',
+		'wordpad': 'notepad',
+		'photoviewer': 'pictureviewer',
+		'shimgvw': 'pictureviewer',
+		'explorer': 'explorer',
+		'control': 'settings',
+		'cleanmgr': 'recyclebin',
+		'recyclebin': 'recyclebin',
+		'clippy': 'clippy'
+	};
+	const resolvedApp = aliases[lowerCmd] || lowerCmd;
+
+	if (resolvedApp === 'clippy') {
+		if (window.ClippyAgent && typeof window.ClippyAgent.open === 'function') {
+			window.ClippyAgent.open();
+			if (args) window.ClippyAgent.prompt(args);
+			return;
+		}
+	}
+
+	if (window.DeskAppRegistry && window.DeskAppRegistry.get(resolvedApp)) {
+		let launchArgs = args || undefined;
+		if (args && (resolvedApp === 'notepad' || resolvedApp === 'paint' || resolvedApp === 'pictureviewer' || resolvedApp === 'soundrecorder')) {
+			let filePath = args.replace(/\\/g, '/');
+			if (filePath.startsWith('C:/') || filePath.startsWith('c:/')) filePath = filePath.substring(2);
+			if (fs && fs.exists(filePath)) launchArgs = fs.findByPath(filePath);
+		}
+		window.DeskAppRegistry.launch(resolvedApp, launchArgs);
 		return;
 	}
 
@@ -4320,7 +4749,7 @@ function openMyComputerWindow() {
 				</div>
 				<div class="xp-tb-sep"></div>
 				<div class="xp-tb-group">
-					<button type="button" class="xp-tb-btn tb-search" id="mycomp-tb-search"><img src="https://api.iconify.design/mdi/magnify.svg?color=%231b4b9b" alt=""><span>Search</span></button>
+					<button type="button" class="xp-tb-btn tb-search" id="mycomp-tb-search"><img src="../assets/images/desk/icons/Search.webp" alt=""><span>Search</span></button>
 					<button type="button" class="xp-tb-btn" id="mycomp-tb-folders"><img src="../assets/images/desk/icons/Folder Closed.webp" alt=""><span>Folders</span></button>
 				</div>
 			</div>
@@ -4386,7 +4815,7 @@ function openMyComputerWindow() {
 							<div class="my-comp-group-title">Hard Disk Drives</div>
 							<div class="my-comp-grid">
 								<div class="my-comp-item" id="mycomp-item-drive-c">
-									<img src="https://api.iconify.design/mdi/harddisk.svg?color=%231b4b9b" alt="Drive C">
+									<img src="../assets/images/desk/icons/User's Computer.webp" alt="Drive C">
 									<div class="my-comp-texts">
 										<strong>Local Disk (C:)</strong>
 										<span>24.8 GB free of 40.0 GB</span>
@@ -4399,14 +4828,14 @@ function openMyComputerWindow() {
 							<div class="my-comp-group-title">Devices with Removable Storage</div>
 							<div class="my-comp-grid">
 								<div class="my-comp-item" id="mycomp-item-floppy">
-									<img src="https://api.iconify.design/mdi/floppy.svg?color=%23555555" alt="Floppy A">
+									<img src="../assets/images/desk/icons/Floppy Drive.webp" alt="Floppy A">
 									<div class="my-comp-texts">
 										<strong>3½ Floppy (A:)</strong>
 										<span>3½-Inch Floppy Disk</span>
 									</div>
 								</div>
 								<div class="my-comp-item" id="mycomp-item-cdrom">
-									<img src="https://api.iconify.design/mdi/disc.svg?color=%23555555" alt="CD Drive D">
+									<img src="../assets/images/desk/icons/Disk Image File.webp" alt="CD Drive D">
 									<div class="my-comp-texts">
 										<strong>CD Drive (D:) XP_SP3</strong>
 										<span>Compact Disc</span>
@@ -4463,7 +4892,7 @@ function openMyComputerWindow() {
 		showXPDialog('Drive A:', 'Please insert a disk into drive A:.', 'error');
 	});
 	win.querySelector('#mycomp-item-cdrom').addEventListener('dblclick', () => {
-		showXPDialog('CD Drive (D:)', 'Mircosoft Windows XP Professional SP3 Installation Media.', 'info');
+		showXPDialog('CD Drive (D:)', 'Microsoft Windows XP Professional SP3 Installation Media.', 'info');
 	});
 
 	win.querySelectorAll('.xp-task-header').forEach(header => {
@@ -4522,7 +4951,7 @@ function openSearchWindow(initialQuery = '') {
 	`;
 
 	const win = createXPWindow(id, 'Search Results', contentHTML, 680, 420, {
-		iconSrc: 'https://api.iconify.design/mdi/magnify.svg'
+		iconSrc: '../assets/images/desk/icons/Search.webp'
 	});
 	win.querySelector('.xp-window-content').style.padding = '0';
 
@@ -4638,7 +5067,7 @@ function openPrintersWindow() {
 				</div>
 				<div class="xp-tb-sep"></div>
 				<div class="xp-tb-group">
-					<button type="button" class="xp-tb-btn tb-search" id="printers-tb-search"><img src="https://api.iconify.design/mdi/magnify.svg?color=%231b4b9b" alt=""><span>Search</span></button>
+					<button type="button" class="xp-tb-btn tb-search" id="printers-tb-search"><img src="../assets/images/desk/icons/Search.webp" alt=""><span>Search</span></button>
 					<button type="button" class="xp-tb-btn" id="printers-tb-folders"><img src="../assets/images/desk/icons/Folder Closed.webp" alt=""><span>Folders</span></button>
 				</div>
 			</div>
@@ -4656,9 +5085,9 @@ function openPrintersWindow() {
 						<div class="xp-task-box">
 							<div class="xp-task-header"><span>Printer Tasks</span><button type="button" class="xp-task-chevron"></button></div>
 							<div class="xp-task-content">
-								<a href="#" class="xp-task-link" id="printer-task-add"><img src="https://api.iconify.design/mdi/printer-plus.svg?color=%231b4b9b" alt=""><span>Add a printer</span></a>
+								<a href="#" class="xp-task-link" id="printer-task-add"><img src="../assets/images/desk/icons/Printer.webp" alt=""><span>Add a printer</span></a>
 								<a href="#" class="xp-task-link" id="printer-task-fax"><img src="../assets/images/desk/icons/Fax.webp" alt=""><span>Set up faxing</span></a>
-								<a href="#" class="xp-task-link" id="printer-task-queue"><img src="https://api.iconify.design/mdi/printer.svg?color=%231b4b9b" alt=""><span>See what's printing</span></a>
+								<a href="#" class="xp-task-link" id="printer-task-queue"><img src="../assets/images/desk/icons/Fax.webp" alt=""><span>See what's printing</span></a>
 							</div>
 						</div>
 						<div class="xp-task-box">
@@ -4682,21 +5111,21 @@ function openPrintersWindow() {
 					<div class="xp-explorer-view-container">
 						<div class="xp-file-grid view-tiles" style="padding: 12px; gap: 10px;">
 							<div class="xp-explorer-item mode-tile printer-card-item" id="printer-item-add" style="cursor: pointer;">
-								<img src="https://api.iconify.design/mdi/printer-plus.svg?color=%231b4b9b" alt="">
+								<img src="../assets/images/desk/icons/Printer.webp" alt="">
 								<div class="xp-tile-texts">
 									<strong>Add Printer</strong>
 									<span>Printer Wizard</span>
 								</div>
 							</div>
 							<div class="xp-explorer-item mode-tile printer-card-item" id="printer-item-pdf" style="cursor: pointer;">
-								<img src="https://api.iconify.design/mdi/printer-check.svg?color=%232e7d32" alt="">
+								<img src="../assets/images/desk/icons/Printer.webp" alt="">
 								<div class="xp-tile-texts">
 									<strong>PDF Document Writer</strong>
 									<span>0 documents in queue - Ready (Default)</span>
 								</div>
 							</div>
 							<div class="xp-explorer-item mode-tile printer-card-item" id="printer-item-laser" style="cursor: pointer;">
-								<img src="https://api.iconify.design/mdi/printer.svg?color=%23555555" alt="">
+								<img src="../assets/images/desk/icons/Printer.webp" alt="">
 								<div class="xp-tile-texts">
 									<strong>HP LaserJet 4050 Series PCL</strong>
 									<span>0 documents in queue - Ready</span>
@@ -4786,7 +5215,7 @@ function openNetworkPlacesWindow() {
 				</div>
 				<div class="xp-tb-sep"></div>
 				<div class="xp-tb-group">
-					<button type="button" class="xp-tb-btn tb-search" id="net-tb-search"><img src="https://api.iconify.design/mdi/magnify.svg?color=%231b4b9b" alt=""><span>Search</span></button>
+					<button type="button" class="xp-tb-btn tb-search" id="net-tb-search"><img src="../assets/images/desk/icons/Search.webp" alt=""><span>Search</span></button>
 					<button type="button" class="xp-tb-btn" id="net-tb-folders"><img src="../assets/images/desk/icons/Folder Closed.webp" alt=""><span>Folders</span></button>
 				</div>
 			</div>
@@ -4804,7 +5233,7 @@ function openNetworkPlacesWindow() {
 						<div class="xp-task-box">
 							<div class="xp-task-header"><span>Network Tasks</span><button type="button" class="xp-task-chevron"></button></div>
 							<div class="xp-task-content">
-								<a href="#" class="xp-task-link" id="net-task-add"><img src="https://api.iconify.design/mdi/folder-network-outline.svg?color=%231b4b9b" alt=""><span>Add a network place</span></a>
+								<a href="#" class="xp-task-link" id="net-task-add"><img src="../assets/images/desk/icons/Network Computers.webp" alt=""><span>Add a network place</span></a>
 								<a href="#" class="xp-task-link" id="net-task-view"><img src="../assets/images/desk/icons/Network Computers.webp" alt=""><span>View network connections</span></a>
 								<a href="#" class="xp-task-link" id="net-task-setup"><img src="../assets/images/desk/icons/Earth (fixed).webp" alt=""><span>Set up home or office network</span></a>
 							</div>
@@ -4835,7 +5264,7 @@ function openNetworkPlacesWindow() {
 								<img src="../assets/images/desk/icons/Earth (fixed).webp" alt="">
 								<div class="xp-tile-texts">
 									<strong>Entire Network</strong>
-									<span>Mircosoft Windows Network</span>
+									<span>Microsoft Windows Network</span>
 								</div>
 							</div>
 							<div class="xp-explorer-item mode-tile net-card-item" id="net-item-workgroup" style="cursor: pointer;">
@@ -4907,7 +5336,7 @@ function openNetworkPlacesWindow() {
 		showXPDialog('Network Setup Wizard', 'Your home network is configured with IP 192.168.1.1 gateway.', 'info');
 	});
 
-	win.querySelector('#net-item-entire').addEventListener('dblclick', () => showXPDialog('Entire Network', 'Scanning Mircosoft Windows Network domains... (MSHOME)', 'info'));
+	win.querySelector('#net-item-entire').addEventListener('dblclick', () => showXPDialog('Entire Network', 'Scanning Microsoft Windows Network domains... (MSHOME)', 'info'));
 	win.querySelector('#net-item-workgroup').addEventListener('dblclick', () => showXPDialog('Workgroup (MSHOME)', 'Found hosts: Colin-Laptop, Router-Gateway.', 'info'));
 	win.querySelector('#net-item-laptop').addEventListener('dblclick', () => showXPDialog('Colin-Laptop', 'Shared resources:\n\\\\Colin-Laptop\\Public\n\\\\Colin-Laptop\\Projects', 'info'));
 
@@ -5141,7 +5570,7 @@ async function openOutlookExpress() {
 			</div>
 		</div>
 	`;
-	const outlookWindow = createXPWindow(id, 'Outlook Express', contentHTML, APP_WINDOW_BASE_SIZES.outlook.width, APP_WINDOW_BASE_SIZES.outlook.height, { iconSrc: '../assets/images/desk/OE2001.webp' });
+	const outlookWindow = createXPWindow(id, 'Outlook Express', contentHTML, APP_WINDOW_BASE_SIZES.outlook.width, APP_WINDOW_BASE_SIZES.outlook.height, { iconSrc: '../assets/images/desk/icons/Mail.webp' });
 	outlookWindow.querySelector('.xp-window-content').style.padding = '0';
 
 	const folderListEl = outlookWindow.querySelector('#oe-folder-list');
@@ -5328,10 +5757,10 @@ async function openOutlookExpress() {
 					{ label: 'Contents and Index', action: () => window.open('https://github.com/wartets/Wartets.github.io', '_blank') },
 					{ separator: true },
 					{
-						label: 'About Mircosoft Outlook Express',
+						label: 'About Microsoft Outlook Express',
 						bold: true,
 						action: () => {
-							showXPDialog('About Outlook Express', 'Mircosoft Outlook Express 6.0\nRunning on Windows XP Professional\nPortfolio Communications Client', 'info');
+							showXPDialog('About Outlook Express', 'Microsoft Outlook Express 6.0\nRunning on Windows XP Professional\nPortfolio Communications Client', 'info');
 						}
 					}
 				];
@@ -5704,7 +6133,7 @@ async function openOutlookExpress() {
 				<div style="border-top:1px solid #ddd; padding-top:10px;">${message.body}</div>
 			</div>
 		`;
-		const win = createXPWindow(mid, message.subject, html, 520, 380, { iconSrc: '../assets/images/desk/OE2001.webp' });
+		const win = createXPWindow(mid, message.subject, html, 520, 380, { iconSrc: '../assets/images/desk/icons/Mail.webp' });
 		win.querySelector('.xp-window-content').style.padding = '0';
 		win.querySelectorAll('a').forEach(link => {
 			link.addEventListener('click', () => {
@@ -5722,6 +6151,14 @@ async function openOutlookExpress() {
 		if (document.getElementById(composeId)) {
 			bringWindowToFront(document.getElementById(composeId));
 			return;
+		}
+
+		let initialX = undefined;
+		let initialY = undefined;
+		if (outlookWindow) {
+			const outlookRect = outlookWindow.getBoundingClientRect();
+			initialX = Math.round(outlookRect.left + 35);
+			initialY = Math.round(outlookRect.top + 30);
 		}
 
 		const content = `
@@ -5750,8 +6187,13 @@ async function openOutlookExpress() {
 			</div>
 		`;
 
-		const win = createXPWindow(composeId, prefill.subject ? `New Message - ${prefill.subject}` : 'New Message', content, 560, 440, { iconSrc: '../assets/images/desk/OE2001.webp' });
+		const win = createXPWindow(composeId, prefill.subject ? `New Message - ${prefill.subject}` : 'New Message', content, 560, 440, { 
+			iconSrc: '../assets/images/desk/icons/Mail.webp',
+			x: initialX,
+			y: initialY
+		});
 		win.querySelector('.xp-window-content').style.padding = '0';
+		bringWindowToFront(win);
 
 		const toInput = win.querySelector('#compose-to');
 		const subjectInput = win.querySelector('#compose-subject');

@@ -20,9 +20,9 @@
 
 	const SYSTEM_SPECS = [
 		'Host Name:                 WARTETS-XP-PC',
-		'OS Name:                   Mircosoft Windows XP Professional',
+		'OS Name:                   Microsoft Windows XP Professional',
 		'OS Version:                5.1.2600 Service Pack 3 Build 2600',
-		'OS Manufacturer:           Mircosoft Corporation',
+		'OS Manufacturer:           Microsoft Corporation',
 		'OS Configuration:          Standalone Workstation',
 		'OS Build Type:             Multiprocessor Free',
 		'Registered Owner:          Colin B.R.',
@@ -132,6 +132,11 @@
 
 			if (options.script) {
 				this.executeBatch(options.script);
+			} else if (options.outputHtml) {
+				this.outputEl.innerHTML = options.outputHtml;
+				if (options.history) this.history = options.history;
+				if (options.env) this.env = Object.assign(this.env, options.env);
+				this.showPrompt();
 			} else {
 				this.printHeader();
 				this.showPrompt();
@@ -454,8 +459,8 @@
 		}
 
 		printHeader() {
-			this.println('Mircosoft Windows XP [Version 5.1.2600]');
-			this.println('(C) Copyright 1985-2001 Mircosoft Corp.\n');
+			this.println('Microsoft Windows XP [Version 5.1.2600]');
+			this.println('(C) Copyright 1985-2001 Microsoft Corp.\n');
 		}
 
 		getPromptString() {
@@ -738,7 +743,7 @@
 					this.cmdTitle(args, line);
 					break;
 				case 'ver':
-					this.println('\nMircosoft Windows XP [Version 5.1.2600]\n');
+					this.println('\nMicrosoft Windows XP [Version 5.1.2600]\n');
 					break;
 				case 'vol':
 					this.println(' Volume in drive C has no label.');
@@ -880,12 +885,109 @@
 				case 'winamp':
 					this.cmdWinamp(args);
 					break;
-				case 'minesweeper':
-				case 'mine':
-					if (window.DeskAPI) window.DeskAPI.openMinesweeperGame();
+				case 'paint':
+				case 'mspaint':
+				case 'pbrush':
+					if (window.PaintApp) {
+						const target = args.length > 0 ? this.currentFolder.getByName(args[0].replace(/"/g, '')) : null;
+						window.PaintApp.open(target || (args[0] ? args[0].replace(/"/g, '') : null));
+						this.println('Microsoft Paint started.');
+					}
 					break;
 				case 'solitaire':
-					showXPDialog('Solitaire', 'Klondike Solitaire loading...', 'info');
+				case 'sol':
+					if (window.SolitaireApp) {
+						if (args[0] === 'win' || args[0] === 'cheat') {
+							window.SolitaireApp.cheatWin(args[1] || 'bouncing');
+							this.println('Solitaire victory sequence initiated.');
+						} else {
+							window.SolitaireApp.open();
+							this.println('Solitaire started.');
+						}
+					}
+					break;
+				case 'minesweeper':
+				case 'winmine':
+				case 'mine':
+					if (window.DeskAppRegistry) window.DeskAppRegistry.launch('minesweeper', args[0]);
+					else if (window.DeskAPI) window.DeskAPI.openMinesweeperGame();
+					this.println('Minesweeper started.');
+					break;
+				case 'calc':
+				case 'calculator':
+					if (window.DeskAppRegistry) window.DeskAppRegistry.launch('calculator');
+					else if (window.DeskAPI) window.DeskAPI.openCalculator();
+					this.println('Calculator started.');
+					break;
+				case 'charmap':
+					if (window.DeskAppRegistry) window.DeskAppRegistry.launch('charmap');
+					else if (window.CharacterMapApp) window.CharacterMapApp.open();
+					this.println('Character Map started.');
+					break;
+				case 'soundrec':
+				case 'soundrecorder':
+					if (window.DeskAppRegistry) window.DeskAppRegistry.launch('soundrecorder', args.join(' '));
+					else if (window.SoundRecorderApp) window.SoundRecorderApp.open(args.join(' '));
+					this.println('Sound Recorder started.');
+					break;
+				case 'wmp':
+				case 'wmplayer':
+				case 'mediaplayer':
+					if (window.MediaPlayerApp) {
+						window.MediaPlayerApp.open(args.length > 0 ? args.join(' ') : null);
+						this.println('Windows Media Player started.');
+					}
+					break;
+				case 'explorer':
+					if (window.FileExplorer) {
+						const targetPath = args.join(' ');
+						if (targetPath.toLowerCase().includes('recycle')) {
+							window.FileExplorer.openRecycleBin();
+						} else {
+							const f = targetPath ? resolveFsFromVirtualPath(targetPath, this.currentFolder) : this.currentFolder;
+							window.FileExplorer.open(f || fs.root);
+						}
+						this.println('Windows Explorer started.');
+					}
+					break;
+				case 'display':
+				case 'desk.cpl':
+					if (typeof openDisplaySettings === 'function') openDisplaySettings(args[0] || 'desktop');
+					this.println('Display Properties opened.');
+					break;
+				case 'screensaver':
+					if (window.ScreenSaverManager) {
+						if (args[0] === 'run' || args[0] === 'start' || args[0] === '/s') {
+							window.ScreenSaverManager.start(true);
+							this.println('Screen saver launched.');
+						} else if (args[0] === 'config' || args[0] === '/c') {
+							if (typeof openDisplaySettings === 'function') openDisplaySettings('screensaver');
+						} else {
+							this.println('Usage: screensaver [run | config]');
+						}
+					}
+					break;
+				case 'achievements':
+				case 'milestones':
+				case 'trophies':
+					if (window.DeskAPI) window.DeskAPI.openAchievements();
+					this.println('Milestones opened.');
+					break;
+				case 'mycomputer':
+					if (window.DeskAPI) window.DeskAPI.openMyComputer();
+					this.println('My Computer opened.');
+					break;
+				case 'network':
+					if (window.DeskAPI) window.DeskAPI.openNetworkPlaces();
+					this.println('My Network Places opened.');
+					break;
+				case 'printers':
+					if (window.DeskAPI) window.DeskAPI.openPrinters();
+					this.println('Printers and Faxes opened.');
+					break;
+				case 'search':
+					if (window.DeskAPI) window.DeskAPI.openSearch(args.join(' '));
+					this.println('Search Companion opened.');
 					break;
 				case 'anecdote':
 					this.cmdAnecdote(args);
@@ -918,9 +1020,6 @@
 					break;
 				case 'dxdiag':
 					showXPDialog('DirectX Diagnostic Tool', 'DirectX 9.0c installed.\nDirectDraw, Direct3D, AGP Texture Acceleration Enabled.', 'info');
-					break;
-				case 'calc':
-					showXPDialog('Calculator', 'Calculator is opening...', 'info');
 					break;
 				case 'cmd':
 					CommandPrompt.open();
@@ -1831,7 +1930,7 @@
 
 		cmdDefrag(args) {
 			this.println('\nWindows Disk Defragmenter');
-			this.println('Copyright (c) 2001 Mircosoft Corp. and Executive Software International, Inc.\n');
+			this.println('Copyright (c) 2001 Microsoft Corp. and Executive Software International, Inc.\n');
 			this.println('Analysis Report for Volume (C:):');
 			this.println('    Volume size                 = 40.0 GB');
 			this.println('    Free space                  = 24.8 GB');
@@ -1841,8 +1940,8 @@
 		}
 
 		cmdDiskpart() {
-			this.println('\nMircosoft DiskPart version 5.1.2600');
-			this.println('Copyright (C) 1999-2001 Mircosoft Corporation.\n');
+			this.println('\nMicrosoft DiskPart version 5.1.2600');
+			this.println('Copyright (C) 1999-2001 Microsoft Corporation.\n');
 			this.println('DISKPART> LIST DISK');
 			this.println('  Disk ###  Status      Size     Free     Dyn  Gpt');
 			this.println('  --------  ----------  -------  -------  ---  ---');
@@ -2198,6 +2297,17 @@
 			win.classList.add('xp-cmd-window');
 			const terminal = new TerminalInstance(win, options);
 			win.terminalInstance = terminal;
+			win.getWindowState = () => ({
+				appId: 'cmd',
+				currentPath: terminal.currentFolder ? terminal.currentFolder.getFullPath() : '/',
+				history: terminal.history,
+				env: terminal.env,
+				title: terminal.title,
+				outputHtml: terminal.outputEl.innerHTML
+			});
+			if (options.outputHtml) {
+				terminal.outputEl.innerHTML = options.outputHtml;
+			}
 			return win;
 		}
 	};

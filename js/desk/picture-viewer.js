@@ -47,8 +47,29 @@
 			win.querySelector('.xp-window-content').style.padding = '0';
 			activeViewerWindow = win;
 
+			win.dataset.appId = 'pictureviewer';
+			win.dataset.appArgs = JSON.stringify({ path: resolved.src, name: resolved.name });
+			win.getWindowState = () => ({
+				appId: 'pictureviewer',
+				currentPath: currentImageFile ? currentImageFile.src : resolved.src,
+				currentName: currentImageFile ? currentImageFile.name : resolved.name,
+				currentImageIndex,
+				currentZoom,
+				currentRotation,
+				isSlideshow
+			});
+
 			this.bindViewerEvents(win);
 			this.displayImage(win, resolved);
+
+			if (options.restoreState) {
+				if (typeof options.restoreState.currentZoom === 'number') this.setZoom(options.restoreState.currentZoom);
+				if (typeof options.restoreState.currentRotation === 'number') {
+					currentRotation = options.restoreState.currentRotation;
+					this.applyTransform();
+				}
+				if (options.restoreState.isSlideshow) this.startSlideshow(win);
+			}
 
 			win.beforeClose = () => {
 				this.stopSlideshow();

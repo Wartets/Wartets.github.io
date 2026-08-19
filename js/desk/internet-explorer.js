@@ -10,7 +10,7 @@
 		{ id: 'fav-github', title: 'GitHub - Colin B.R. (Wartets)', url: 'https://github.com/wartets', icon: 'https://img.icons8.com/fluent/24/000000/github.png' },
 		{ id: 'fav-wikipedia', title: 'Wikipedia - The Free Encyclopedia', url: 'https://en.wikipedia.org', icon: 'https://api.iconify.design/mdi/wikipedia.svg?color=%23333333' },
 		{ id: 'fav-msdn', title: 'MSDN Architecture Reference', url: 'http://msdn.microsoft.com/', icon: '../assets/images/desk/icons/List File.webp' },
-		{ id: 'fav-winupdate', title: 'Windows Update Catalog', url: 'http://windowsupdate.microsoft.com/', icon: 'https://api.iconify.design/mdi/shield-sync-outline.svg?color=%232e7d32' }
+		{ id: 'fav-winupdate', title: 'Windows Update Catalog', url: 'http://windowsupdate.microsoft.com/', icon: '../assets/images/desk/icons/Activate Windows.webp' }
 	];
 
 	let ieWindowState = null;
@@ -32,10 +32,11 @@
 
 			const contentHTML = this.buildWindowTemplate();
 			const win = createXPWindow(id, 'Internet Explorer', contentHTML, 860, 580, {
-				iconSrc: '../assets/images/desk/internet-explorer.png'
+				iconSrc: '../assets/images/desk/icons/Internet Explorer.webp'
 			});
 
 			win.classList.add('ie-browser-window');
+			win.dataset.appId = 'ie';
 			win.querySelector('.xp-window-content').style.padding = '0';
 
 			ieWindowState = {
@@ -46,6 +47,20 @@
 				favorites: this.loadFavorites(),
 				history: this.loadHistory()
 			};
+
+			win.getWindowState = () => ({
+				appId: 'ie',
+				sidebarMode: ieWindowState.sidebarMode,
+				textZoom: ieWindowState.textZoom,
+				activeTabId: ieWindowState.activeTabId,
+				tabs: ieWindowState.tabs.map(t => ({
+					id: t.id,
+					title: t.title,
+					currentUrl: t.currentUrl,
+					history: t.history,
+					historyIndex: t.historyIndex
+				}))
+			});
 
 			this.bindWindowEvents(win);
 			this.createTab(win, initialUrl, true);
@@ -119,11 +134,11 @@
 
 						<div class="ie-tb-group">
 							<button type="button" class="ie-tool-button tb-ie-mail" title="Mail (Outlook Express)">
-								<img src="../assets/images/desk/OE2001.webp" alt="">
+								<img src="../assets/images/desk/icons/Mail.webp" alt="">
 								<div class="ie-tb-arrow"></div>
 							</button>
 							<button type="button" class="ie-tool-button tb-ie-print" title="Print (Ctrl+P)">
-								<img src="https://api.iconify.design/mdi/printer.svg?color=%23555555" alt="">
+								<img src="../assets/images/desk/icons/Fax.webp" alt="">
 								<span>Print</span>
 							</button>
 							<button type="button" class="ie-tool-button tb-ie-source" title="View Source in Notepad">
@@ -287,7 +302,7 @@
 				e.stopPropagation();
 				const rect = mailBtn.getBoundingClientRect();
 				const menuItems = [
-					{ label: 'Read Mail', icon: '../assets/images/desk/OE2001.webp', action: () => { if (typeof openOutlookExpress === 'function') openOutlookExpress(); } },
+					{ label: 'Read Mail', icon: '../assets/images/desk/icons/Mail.webp', action: () => { if (typeof openOutlookExpress === 'function') openOutlookExpress(); } },
 					{ label: 'New Message...', icon: '../assets/images/desk/icons/File.webp', action: () => { if (typeof openOutlookExpress === 'function') openOutlookExpress(); } },
 					{ separator: true },
 					{ label: 'Send a Link...', action: () => { this.sendLinkByMail(); } },
@@ -512,7 +527,7 @@
 					? 'https://api.iconify.design/mdi/loading.svg?color=%231b4b9b' 
 					: (tab.currentUrl.startsWith('https://') 
 						? 'https://api.iconify.design/mdi/lock.svg?color=%232e7d32' 
-						: '../assets/images/desk/internet-explorer.png');
+						: '../assets/images/desk/icons/Internet Explorer.webp');
 				if (tab.loading) iconImg.classList.add('ie-spinning');
 				tabEl.appendChild(iconImg);
 
@@ -673,7 +688,7 @@
 			if (icon) {
 				icon.src = isLoading 
 					? 'https://api.iconify.design/mdi/loading.svg?color=%231b4b9b' 
-					: '../assets/images/desk/internet-explorer.png';
+					: '../assets/images/desk/icons/Internet Explorer.webp';
 				icon.classList.toggle('ie-spinning', isLoading);
 			}
 		},
@@ -731,7 +746,7 @@
 			if (cleanUrl === 'about:projects' || cleanUrl === 'http://portfolio/projects' || cleanUrl === 'http://portfolio.wartets/projects') {
 				return { title: 'Portfolio Project Catalog - Colin B.R.', element: this.buildPortfolioWebDirectory(tabId), zone: 'local' };
 			}
-			if (cleanUrl.startsWith('http://windowsupdate.microsoft.com') || cleanUrl.startsWith('http://windowsupdate.Mircosoft.com')) {
+			if (cleanUrl.startsWith('http://windowsupdate.microsoft.com') || cleanUrl.startsWith('http://windowsupdate.Microsoft.com')) {
 				return { title: 'Windows Update Catalog', element: this.buildWindowsUpdatePage(tabId), zone: 'trusted' };
 			}
 			if (cleanUrl.startsWith('http://msdn.microsoft.com') || cleanUrl.startsWith('http://msdn.wartets.dev')) {
@@ -1080,7 +1095,7 @@
 				<div class="ie-winupdate-header">
 					<img src="https://api.iconify.design/mdi/shield-sync-outline.svg?color=%232e7d32" style="width:40px; height:40px;">
 					<div>
-						<h2>Mircosoft Windows Update</h2>
+						<h2>Microsoft Windows Update</h2>
 						<span>Windows XP Professional Service Pack 3 Catalog</span>
 					</div>
 				</div>
@@ -1127,7 +1142,7 @@
 						<div class="ie-msdn-node">└─ Outlook MailStore Protocol</div>
 					</div>
 					<div class="ie-msdn-article">
-						<h2>Mircosoft Windows XP Web Architecture</h2>
+						<h2>Microsoft Windows XP Web Architecture</h2>
 						<p>The desktop environment simulates a complete Windows XP workstation running directly inside the browser using modern vanilla JavaScript, WebAudio API, HTML5 Canvas, and flexible CSS variable theme matrices.</p>
 						<h3>Key Design Principles</h3>
 						<ul>
@@ -1744,7 +1759,7 @@
 						]
 					},
 					{ label: 'Synchronize All...', action: () => showXPDialog('Synchronize', 'Offline web pages are synchronized.', 'info') },
-					{ label: 'Windows Update', action: () => { if (activeTab) this.navigateTab(activeTab.id, 'http://windowsupdate.Mircosoft.com/'); } },
+					{ label: 'Windows Update', action: () => { if (activeTab) this.navigateTab(activeTab.id, 'http://windowsupdate.Microsoft.com/'); } },
 					{ separator: true },
 					{ label: 'Internet Options...', bold: true, action: () => { if (window.SettingsApp) window.SettingsApp.open('system'); } }
 				];
@@ -1814,7 +1829,7 @@
 			if (typeof fs !== 'undefined' && fs.create) {
 				fs.create('Shortcut', '/', `${title} - Shortcut`, {
 					targetPath: url,
-					icon: '../assets/images/desk/internet-explorer.png'
+					icon: '../assets/images/desk/icons/Internet Explorer.webp'
 				});
 				if (typeof refreshUI === 'function') refreshUI();
 				showXPDialog('Create Shortcut', `A shortcut to '${title}' has been placed on your Desktop.`, 'info');

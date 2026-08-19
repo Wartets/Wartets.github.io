@@ -4,7 +4,7 @@
 	const MEDIA_BASE_URL = 'https://media.githubusercontent.com/media/Wartets/music/refs/heads/main/';
 	const CDN_BASE_URL = 'https://cdn.jsdelivr.net/gh/Wartets/music@main/';
 	const RAW_BASE_URL = 'https://raw.githubusercontent.com/Wartets/music/main/';
-	const STORAGE_CACHE_KEY = 'xp_music_bib_cache';
+	const STORAGE_CACHE_KEY = 'xp_music_bib_isolated_cache';
 	const SEPARATORS_RE = /\s*(?:;|\||\\\\|\/|,|\bfeat\.?\b|\bfeaturing\b|\bft\.?\b)\s*/i;
 	const EXT_QUALITY = { wav: 8, aiff: 7, aif: 7, flac: 7, alac: 6, m4a: 5, aac: 5, mp3: 4, ogg: 3, wma: 2 };
 	const UNSUPPORTED_CODEC_RE = /(alac|ape|wvpack|tta|tak)/i;
@@ -470,14 +470,16 @@
 		if (isInitialized) return Promise.resolve(libraryPrimaries);
 		if (initPromise) return initPromise;
 
-		const cachedRaw = sessionStorage.getItem(STORAGE_CACHE_KEY) || localStorage.getItem(STORAGE_CACHE_KEY);
+		const cachedRaw = localStorage.getItem(STORAGE_CACHE_KEY) || sessionStorage.getItem(STORAGE_CACHE_KEY);
 		if (cachedRaw) {
 			try {
 				rawBibData = JSON.parse(cachedRaw);
 				const cachedItems = rawBibData.items || [];
-				buildLibrary(cachedItems);
-				populateFileSystem(cachedItems);
-				isInitialized = true;
+				if (cachedItems.length > 0) {
+					buildLibrary(cachedItems);
+					populateFileSystem(cachedItems);
+					isInitialized = true;
+				}
 			} catch (e) {}
 		}
 
@@ -487,26 +489,31 @@
 				if (!res.ok) {
 					res = await fetch(FALLBACK_BIB_URL);
 				}
-				if (!res.ok) throw new Error(`HTTP ${res.status}`);
+				if (!res.ok) {
+					if (isInitialized && rawBibData && rawBibData.items) return libraryPrimaries;
+					throw new Error(`HTTP ${res.status}`);
+				}
 				const freshData = await res.json();
-				rawBibData = freshData;
-				const items = rawBibData.items || [];
-				buildLibrary(items);
-				populateFileSystem(items);
-				isInitialized = true;
+				if (freshData && Array.isArray(freshData.items) && freshData.items.length > 0) {
+					rawBibData = freshData;
+					const items = rawBibData.items || [];
+					buildLibrary(items);
+					populateFileSystem(items);
+					isInitialized = true;
 
-				try {
-					const strData = JSON.stringify(freshData);
-					sessionStorage.setItem(STORAGE_CACHE_KEY, strData);
-					localStorage.setItem(STORAGE_CACHE_KEY, strData);
-				} catch (e) {}
+					try {
+						const strData = JSON.stringify(freshData);
+						localStorage.setItem(STORAGE_CACHE_KEY, strData);
+						sessionStorage.setItem(STORAGE_CACHE_KEY, strData);
+					} catch (e) {}
+				}
 
 				if (window.DeskEventBus) {
-					window.DeskEventBus.emit('music:loaded', { items, primaries: libraryPrimaries });
+					window.DeskEventBus.emit('music:loaded', { items: rawBibData ? rawBibData.items : [], primaries: libraryPrimaries });
 				}
 				return libraryPrimaries;
 			} catch (error) {
-				if (isInitialized) return libraryPrimaries;
+				if (isInitialized && libraryPrimaries.length > 0) return libraryPrimaries;
 				return [];
 			}
 		})();

@@ -37,7 +37,7 @@
 			this.close();
 			if (!items || items.length === 0) return;
 
-			activeMenu = this.createMenuElement(items, context, 0);
+			activeMenu = this.createMenuElement(items, { ...context, x, y }, 0);
 			document.body.appendChild(activeMenu);
 			this.positionMenu(activeMenu, x, y);
 		},
@@ -328,16 +328,44 @@
 				{
 					label: 'Paste',
 					shortcut: 'Ctrl+V',
-					disabled: !hasClipboard,
+					disabled: !fs || !fs.clipboard || !fs.clipboard.elements || fs.clipboard.elements.length === 0,
 					action: () => {
-						if (!fs.clipboard.element) return;
-						const sourcePath = fs.clipboard.element.getFullPath();
-						if (fs.clipboard.mode === 'cut') {
-							fs.move(sourcePath, destPath);
+						if (!fs.clipboard.elements || fs.clipboard.elements.length === 0) return;
+						const mode = fs.clipboard.mode || 'copy';
+						const ops = [];
+						fs.clipboard.elements.forEach(el => {
+							const sourcePath = el.getFullPath();
+							if (mode === 'cut') {
+								const origParent = el.parent ? el.parent.getFullPath() : '/';
+								const origName = el.name;
+								const moved = fs.move(sourcePath, destPath);
+								if (moved) {
+									ops.push({
+										type: 'move',
+										fromParentPath: origParent,
+										fromPath: sourcePath,
+										toPath: moved.getFullPath(),
+										originalName: origName,
+										destName: moved.name
+									});
+								}
+							} else {
+								const copied = fs.copy(sourcePath, destPath);
+								if (copied) {
+									ops.push({
+										type: 'copy',
+										path: copied.getFullPath(),
+										elementData: copied.toJSON()
+									});
+								}
+							}
+						});
+						if (mode === 'cut') {
 							fs.clipboard.mode = null;
-							fs.clipboard.element = null;
-						} else {
-							fs.copy(sourcePath, destPath);
+							if (typeof clearCutVisuals === 'function') clearCutVisuals();
+						}
+						if (ops.length > 1) {
+							fs.undoStack.push({ type: 'batch', operations: ops });
 						}
 						refreshUI();
 					}
@@ -395,7 +423,9 @@
 					label: 'Properties',
 					bold: true,
 					icon: '../assets/images/desk/icons/Display.webp',
-					action: () => openDisplaySettings()
+					action: (ctx) => {
+						if (typeof openDisplaySettings === 'function') openDisplaySettings('desktop', ctx);
+					}
 				}
 			];
 		},
@@ -688,16 +718,44 @@
 				{
 					label: 'Paste',
 					shortcut: 'Ctrl+V',
-					disabled: !hasClipboard,
+					disabled: !fs || !fs.clipboard || !fs.clipboard.elements || fs.clipboard.elements.length === 0,
 					action: () => {
-						if (!fs.clipboard.element) return;
-						const sourcePath = fs.clipboard.element.getFullPath();
-						if (fs.clipboard.mode === 'cut') {
-							fs.move(sourcePath, destPath);
+						if (!fs.clipboard.elements || fs.clipboard.elements.length === 0) return;
+						const mode = fs.clipboard.mode || 'copy';
+						const ops = [];
+						fs.clipboard.elements.forEach(el => {
+							const sourcePath = el.getFullPath();
+							if (mode === 'cut') {
+								const origParent = el.parent ? el.parent.getFullPath() : '/';
+								const origName = el.name;
+								const moved = fs.move(sourcePath, destPath);
+								if (moved) {
+									ops.push({
+										type: 'move',
+										fromParentPath: origParent,
+										fromPath: sourcePath,
+										toPath: moved.getFullPath(),
+										originalName: origName,
+										destName: moved.name
+									});
+								}
+							} else {
+								const copied = fs.copy(sourcePath, destPath);
+								if (copied) {
+									ops.push({
+										type: 'copy',
+										path: copied.getFullPath(),
+										elementData: copied.toJSON()
+									});
+								}
+							}
+						});
+						if (mode === 'cut') {
 							fs.clipboard.mode = null;
-							fs.clipboard.element = null;
-						} else {
-							fs.copy(sourcePath, destPath);
+							if (typeof clearCutVisuals === 'function') clearCutVisuals();
+						}
+						if (ops.length > 1) {
+							fs.undoStack.push({ type: 'batch', operations: ops });
 						}
 						refreshUI();
 					}
@@ -769,7 +827,9 @@
 				{
 					label: 'Properties',
 					bold: true,
-					action: () => openElementInfoWindow(folder)
+					action: (ctx) => {
+						if (typeof openElementInfoWindow === 'function') openElementInfoWindow(folder, ctx);
+					}
 				}
 			];
 		},
@@ -990,7 +1050,7 @@
 					},
 					{
 						label: 'Mail Recipient',
-						icon: 'https://api.iconify.design/mdi/email-outline.svg',
+						icon: '../assets/images/desk/icons/Mail.webp',
 						action: () => {
 							if (typeof openOutlookExpress === 'function') openOutlookExpress();
 						}
@@ -1006,7 +1066,7 @@
 					},
 					{
 						label: '3½ Floppy (A:)',
-						icon: 'https://api.iconify.design/mdi/floppy.svg',
+						icon: '../assets/images/desk/icons/Floppy Drive.webp',
 						action: () => {
 							showXPDialog('Drive A:', 'Please insert a disk into drive A:.', 'error');
 						}
@@ -1027,8 +1087,12 @@
 				label: 'Cut',
 				shortcut: 'Ctrl+X',
 				action: () => {
+					const sel = typeof getActiveSelectedElements === 'function' ? getActiveSelectedElements() : { elements: [element], paths: [element.getFullPath()] };
 					fs.clipboard.mode = 'cut';
-					fs.clipboard.element = element;
+					fs.clipboard.elements = sel.elements.length > 0 ? sel.elements : [element];
+					fs.clipboard.paths = sel.paths.length > 0 ? sel.paths : [element.getFullPath()];
+					fs.clipboard.element = fs.clipboard.elements[0];
+					if (typeof setCutVisuals === 'function') setCutVisuals(fs.clipboard.paths);
 				}
 			});
 
@@ -1036,8 +1100,12 @@
 				label: 'Copy',
 				shortcut: 'Ctrl+C',
 				action: () => {
+					const sel = typeof getActiveSelectedElements === 'function' ? getActiveSelectedElements() : { elements: [element], paths: [element.getFullPath()] };
 					fs.clipboard.mode = 'copy';
-					fs.clipboard.element = element;
+					fs.clipboard.elements = sel.elements.length > 0 ? sel.elements : [element];
+					fs.clipboard.paths = sel.paths.length > 0 ? sel.paths : [element.getFullPath()];
+					fs.clipboard.element = fs.clipboard.elements[0];
+					if (typeof clearCutVisuals === 'function') clearCutVisuals();
 				}
 			});
 
@@ -1100,7 +1168,9 @@
 			items.push({
 				label: 'Properties',
 				bold: true,
-				action: () => openElementInfoWindow(element)
+				action: (ctx) => {
+					if (typeof openElementInfoWindow === 'function') openElementInfoWindow(element, ctx);
+				}
 			});
 
 			return items;
@@ -1589,15 +1659,17 @@
 			const isMax = win.classList.contains('maximized');
 			const isPinned = win.classList.contains('window-always-on-top');
 			const isRolledUp = win.classList.contains('window-rolled-up');
+			const isResizable = win.dataset.resizable !== 'false' && !win.classList.contains('xp-modal-overlay');
 
 			return [
 				{
 					label: 'Restore',
-					bold: isMin,
-					disabled: !isMin && !isMax,
+					bold: isMin || isMax || !!win.dataset.snapped,
+					disabled: !isMin && !isMax && !win.dataset.snapped,
 					action: () => {
 						if (isMin && typeof unminimizeWindow === 'function') unminimizeWindow(win);
 						else if (isMax && typeof maximizeWindow === 'function') maximizeWindow(win);
+						else if (win.dataset.snapped && window.WindowManager) window.WindowManager.restoreSnap(win);
 						if (typeof bringWindowToFront === 'function') bringWindowToFront(win);
 					}
 				},
@@ -1610,7 +1682,7 @@
 				},
 				{
 					label: 'Size',
-					disabled: isMax || isMin,
+					disabled: isMax || isMin || !isResizable,
 					action: () => {
 						if (typeof bringWindowToFront === 'function') bringWindowToFront(win);
 					}
@@ -1624,7 +1696,7 @@
 				},
 				{
 					label: 'Maximize',
-					disabled: isMax,
+					disabled: isMax || !isResizable,
 					action: () => {
 						if (!isMax && typeof maximizeWindow === 'function') maximizeWindow(win);
 						if (typeof bringWindowToFront === 'function') bringWindowToFront(win);
@@ -1657,7 +1729,7 @@
 				{ separator: true },
 				{
 					label: 'Snap & Layout',
-					disabled: isMin,
+					disabled: isMin || !isResizable,
 					submenu: [
 						{
 							label: 'Left Half (50%)',
@@ -1975,18 +2047,20 @@
 			const isMax = win.classList.contains('maximized');
 			const isPinned = win.classList.contains('window-always-on-top');
 			const isDetached = win.classList.contains('window-detached');
+			const isResizable = win.dataset.resizable !== 'false' && !win.classList.contains('xp-modal-overlay');
 
 			return [
 				{
 					label: isDetached ? 'Re-dock to Desktop' : 'Restore',
 					bold: isMin || isDetached,
-					disabled: !isMin && !isMax && !isDetached,
+					disabled: !isMin && !isMax && !isDetached && !win.dataset.snapped,
 					action: () => {
 						if (isDetached && window.WindowManager) {
 							window.WindowManager.reattachFromPopout(win, id);
 						} else {
 							if (isMin && typeof unminimizeWindow === 'function') unminimizeWindow(win);
 							else if (isMax && typeof maximizeWindow === 'function') maximizeWindow(win);
+							else if (win.dataset.snapped && window.WindowManager) window.WindowManager.restoreSnap(win);
 							if (typeof bringWindowToFront === 'function') bringWindowToFront(win);
 						}
 					}
@@ -2008,7 +2082,7 @@
 				},
 				{
 					label: 'Maximize',
-					disabled: isMax || isDetached,
+					disabled: isMax || isDetached || !isResizable,
 					action: () => {
 						if (!isMax && typeof maximizeWindow === 'function') maximizeWindow(win);
 						if (typeof bringWindowToFront === 'function') bringWindowToFront(win);
@@ -2017,7 +2091,7 @@
 				{ separator: true },
 				{
 					label: 'Snap & Layout',
-					disabled: isMin || isDetached,
+					disabled: isMin || isDetached || !isResizable,
 					submenu: [
 						{
 							label: 'Left Half',
@@ -2329,7 +2403,7 @@
 				},
 				{
 					label: 'Play in Winamp',
-					icon: 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/0d/Winamp-logo.svg/960px-Winamp-logo.svg.png',
+					icon: '../assets/images/desk/icons/Winamp.webp',
 					action: () => {
 						if (typeof openWinamp === 'function') openWinamp(track);
 					}
