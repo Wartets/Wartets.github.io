@@ -14,7 +14,7 @@
 	let paintClipboard = null;
 
 	const PaintApp = {
-		open(initialFile = null) {
+		open(initialFile = null, options = {}) {
 			let fileIdentifier = 'untitled';
 			let displayTitle = 'untitled';
 

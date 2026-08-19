@@ -546,6 +546,18 @@ body.theme-matrix .xp-start-right-column .xp-start-title {
 	color: var(--xp-font-color);
 }
 
+body.theme-matrix .xp-encarta-layout,
+body.theme-matrix .xp-encarta-sidebar-panel {
+	background-color: var(--xp-window-bg);
+	color: var(--xp-font-color);
+}
+
+body.theme-high-contrast .xp-encarta-layout,
+body.theme-high-contrast .xp-encarta-sidebar-panel {
+	background-color: var(--xp-window-bg);
+	color: var(--xp-font-color);
+}
+
 body.theme-high-contrast .xp-window,
 body.theme-high-contrast .xp-start-menu,
 body.theme-high-contrast .folder-window-layout,

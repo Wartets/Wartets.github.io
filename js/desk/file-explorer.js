@@ -1540,9 +1540,29 @@
 				icon.classList.add('mode-thumbnail');
 				const thumbFrame = document.createElement('div');
 				thumbFrame.className = 'xp-thumb-frame';
+
+				const isImage = /\.(png|jpe?g|bmp|webp|gif|svg|ico|tiff?)$/i.test(element.name);
+				let thumbSrc = element.icon || '../assets/images/desk/icons/File.webp';
+
+				if (isImage && element.data) {
+					if (element.data.remoteUrl) {
+						thumbSrc = element.data.remoteUrl;
+						thumbFrame.classList.add('xp-thumb-image-frame');
+					} else if (element.data.content && (element.data.content.startsWith('data:') || element.data.content.startsWith('http') || element.data.content.startsWith('/') || element.data.content.startsWith('../') || element.data.content.startsWith('assets/'))) {
+						thumbSrc = element.data.content;
+						thumbFrame.classList.add('xp-thumb-image-frame');
+					}
+				}
+
 				const img = document.createElement('img');
-				img.src = element.icon || '../assets/images/desk/icons/File.webp';
+				img.src = thumbSrc;
 				img.alt = element.name;
+				img.loading = 'lazy';
+				img.onerror = () => {
+					img.onerror = null;
+					img.src = element.icon || '../assets/images/desk/icons/File.webp';
+					thumbFrame.classList.remove('xp-thumb-image-frame');
+				};
 				thumbFrame.appendChild(img);
 				icon.appendChild(thumbFrame);
 
@@ -1734,9 +1754,47 @@
 				icon.classList.add('mode-thumbnail');
 				const thumbFrame = document.createElement('div');
 				thumbFrame.className = 'xp-thumb-frame';
+
+				let thumbSrc = element.icon || '../assets/images/desk/icons/File.webp';
+				let isVisualThumbnail = false;
+
+				if (element instanceof File) {
+					const isImage = /\.(png|jpe?g|bmp|webp|gif|svg|ico|tiff?)$/i.test(element.name);
+					if (isImage) {
+						if (element.remoteUrl) {
+							thumbSrc = element.remoteUrl;
+							isVisualThumbnail = true;
+						} else if (element.content && (element.content.startsWith('data:') || element.content.startsWith('http') || element.content.startsWith('/') || element.content.startsWith('../') || element.content.startsWith('assets/'))) {
+							thumbSrc = element.content;
+							isVisualThumbnail = true;
+						}
+					} else if (element.musicTrack && window.MusicStore) {
+						const art = window.MusicStore.getBestArtwork(element.musicTrack);
+						if (art) {
+							thumbSrc = window.MusicStore.toMediaUrl(art.path, 'media');
+							isVisualThumbnail = true;
+						}
+					}
+				} else if (element instanceof ProjectFile && element.projectData) {
+					if (element.projectData.image || element.projectData.icon) {
+						thumbSrc = element.projectData.image || element.projectData.icon;
+						isVisualThumbnail = true;
+					}
+				}
+
+				if (isVisualThumbnail) {
+					thumbFrame.classList.add('xp-thumb-image-frame');
+				}
+
 				const img = document.createElement('img');
-				img.src = element.icon || '../assets/images/desk/icons/File.webp';
+				img.src = thumbSrc;
 				img.alt = element.name;
+				img.loading = 'lazy';
+				img.onerror = () => {
+					img.onerror = null;
+					img.src = element.icon || '../assets/images/desk/icons/File.webp';
+					thumbFrame.classList.remove('xp-thumb-image-frame');
+				};
 				thumbFrame.appendChild(img);
 				icon.appendChild(thumbFrame);
 

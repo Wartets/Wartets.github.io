@@ -391,11 +391,6 @@
 
 		const desktop = document.getElementById('desktop');
 		if (desktop) {
-			if (currentSettings.desktopBackground) {
-				desktop.style.backgroundImage = `url('${currentSettings.desktopBackground}')`;
-			} else {
-				desktop.style.backgroundImage = 'none';
-			}
 			if (currentSettings.desktopBackgroundColor) {
 				desktop.style.backgroundColor = currentSettings.desktopBackgroundColor;
 			}
@@ -403,29 +398,6 @@
 		const fitMode = currentSettings.wallpaperFit || 'cover';
 		document.body.classList.remove('wallpaper-fit-cover', 'wallpaper-fit-stretch', 'wallpaper-fit-center', 'wallpaper-fit-tile', 'wallpaper-fit-fit');
 		document.body.classList.add(`wallpaper-fit-${fitMode}`);
-		if (desktop) {
-			if (fitMode === 'stretch') {
-				desktop.style.backgroundSize = '100% 100%';
-				desktop.style.backgroundRepeat = 'no-repeat';
-				desktop.style.backgroundPosition = '0 0';
-			} else if (fitMode === 'fit') {
-				desktop.style.backgroundSize = 'contain';
-				desktop.style.backgroundRepeat = 'no-repeat';
-				desktop.style.backgroundPosition = 'center center';
-			} else if (fitMode === 'center') {
-				desktop.style.backgroundSize = 'auto';
-				desktop.style.backgroundRepeat = 'no-repeat';
-				desktop.style.backgroundPosition = 'center center';
-			} else if (fitMode === 'tile') {
-				desktop.style.backgroundSize = 'auto';
-				desktop.style.backgroundRepeat = 'repeat';
-				desktop.style.backgroundPosition = 'top left';
-			} else {
-				desktop.style.backgroundSize = 'cover';
-				desktop.style.backgroundRepeat = 'no-repeat';
-				desktop.style.backgroundPosition = 'center center';
-			}
-		}
 
 		document.body.classList.remove('icon-size-mini', 'icon-size-small', 'icon-size-normal', 'icon-size-large', 'icon-size-xlarge');
 		document.body.classList.add(`icon-size-${currentSettings.iconSize || 'normal'}`);
@@ -775,10 +747,53 @@
 										<option value="3600" ${String(pendingSettings.wallpaperSlideshowInterval || '30') === '3600' ? 'selected' : ''}>1 hour</option>
 									</select>
 								</div>
+								<div class="xp-form-row">
+									<label for="settings-wallpaper-transition" style="width: 130px;">Transition Effect:</label>
+									<select id="settings-wallpaper-transition" class="xp-select" style="flex: 1;">
+										<option value="none" ${(pendingSettings.wallpaperTransition || 'none') === 'none' ? 'selected' : ''}>None (Instant Cut)</option>
+										<option value="fade" ${pendingSettings.wallpaperTransition === 'fade' ? 'selected' : ''}>Crossfade</option>
+										<option value="slide-left" ${pendingSettings.wallpaperTransition === 'slide-left' ? 'selected' : ''}>Slide Left</option>
+										<option value="slide-right" ${pendingSettings.wallpaperTransition === 'slide-right' ? 'selected' : ''}>Slide Right</option>
+										<option value="slide-up" ${pendingSettings.wallpaperTransition === 'slide-up' ? 'selected' : ''}>Slide Up</option>
+										<option value="slide-down" ${pendingSettings.wallpaperTransition === 'slide-down' ? 'selected' : ''}>Slide Down</option>
+										<option value="zoom-in" ${pendingSettings.wallpaperTransition === 'zoom-in' ? 'selected' : ''}>Zoom In</option>
+										<option value="zoom-out" ${pendingSettings.wallpaperTransition === 'zoom-out' ? 'selected' : ''}>Zoom Out</option>
+										<option value="rotate" ${pendingSettings.wallpaperTransition === 'rotate' ? 'selected' : ''}>Rotate & Zoom</option>
+									</select>
+								</div>
+								<div class="xp-form-row">
+									<label for="settings-wallpaper-trans-duration" style="width: 130px;">Transition Duration:</label>
+									<select id="settings-wallpaper-trans-duration" class="xp-select" style="flex: 1;">
+										<option value="0.5" ${String(pendingSettings.wallpaperTransitionDuration || '1.0') === '0.5' ? 'selected' : ''}>0.5 seconds</option>
+										<option value="1.0" ${String(pendingSettings.wallpaperTransitionDuration || '1.0') === '1.0' ? 'selected' : ''}>1.0 second (Standard)</option>
+										<option value="1.5" ${String(pendingSettings.wallpaperTransitionDuration || '1.0') === '1.5' ? 'selected' : ''}>1.5 seconds</option>
+										<option value="2.0" ${String(pendingSettings.wallpaperTransitionDuration || '1.0') === '2.0' ? 'selected' : ''}>2.0 seconds (Slow)</option>
+									</select>
+								</div>
 								<div class="xp-checkbox-row">
 									<input type="checkbox" id="settings-slideshow-random" ${pendingSettings.wallpaperSlideshowRandom ? 'checked' : ''}>
 									<label for="settings-slideshow-random">Shuffle pictures randomly</label>
 								</div>
+							</div>
+						</fieldset>
+
+						<fieldset class="xp-groupbox" style="margin-top: 8px;">
+							<legend>Desktop Grid Flow & Alignment</legend>
+							<div class="xp-form-row">
+								<label for="settings-grid-direction" style="width: 120px;">Flow Direction:</label>
+								<select id="settings-grid-direction" class="xp-select" style="flex: 1;">
+									<option value="top-to-bottom" ${(pendingSettings.desktopGridDirection || 'top-to-bottom') === 'top-to-bottom' ? 'selected' : ''}>Top to Bottom (Columns)</option>
+									<option value="left-to-right" ${pendingSettings.desktopGridDirection === 'left-to-right' ? 'selected' : ''}>Left to Right (Rows)</option>
+								</select>
+							</div>
+							<div class="xp-form-row" style="margin-top: 6px;">
+								<label for="settings-grid-origin" style="width: 120px;">Grid Corner Origin:</label>
+								<select id="settings-grid-origin" class="xp-select" style="flex: 1;">
+									<option value="top-left" ${(pendingSettings.desktopGridOrigin || 'top-left') === 'top-left' ? 'selected' : ''}>Top-Left Corner</option>
+									<option value="top-right" ${pendingSettings.desktopGridOrigin === 'top-right' ? 'selected' : ''}>Top-Right Corner</option>
+									<option value="bottom-left" ${pendingSettings.desktopGridOrigin === 'bottom-left' ? 'selected' : ''}>Bottom-Left Corner</option>
+									<option value="bottom-right" ${pendingSettings.desktopGridOrigin === 'bottom-right' ? 'selected' : ''}>Bottom-Right Corner</option>
+								</select>
 							</div>
 						</fieldset>
 
@@ -1829,6 +1844,38 @@
 		if (slideshowRandomCheck) {
 			slideshowRandomCheck.addEventListener('change', () => {
 				pendingSettings.wallpaperSlideshowRandom = slideshowRandomCheck.checked;
+				markDirty(win);
+			});
+		}
+
+		const wpTransSelect = win.querySelector('#settings-wallpaper-transition');
+		if (wpTransSelect) {
+			wpTransSelect.addEventListener('change', () => {
+				pendingSettings.wallpaperTransition = wpTransSelect.value;
+				markDirty(win);
+			});
+		}
+
+		const wpTransDurSelect = win.querySelector('#settings-wallpaper-trans-duration');
+		if (wpTransDurSelect) {
+			wpTransDurSelect.addEventListener('change', () => {
+				pendingSettings.wallpaperTransitionDuration = parseFloat(wpTransDurSelect.value);
+				markDirty(win);
+			});
+		}
+
+		const gridDirSelect = win.querySelector('#settings-grid-direction');
+		if (gridDirSelect) {
+			gridDirSelect.addEventListener('change', () => {
+				pendingSettings.desktopGridDirection = gridDirSelect.value;
+				markDirty(win);
+			});
+		}
+
+		const gridOrigSelect = win.querySelector('#settings-grid-origin');
+		if (gridOrigSelect) {
+			gridOrigSelect.addEventListener('change', () => {
+				pendingSettings.desktopGridOrigin = gridOrigSelect.value;
 				markDirty(win);
 			});
 		}

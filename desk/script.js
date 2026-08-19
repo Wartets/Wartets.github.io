@@ -1205,6 +1205,12 @@ window.DeskAPI = {
 		if (window.DeskAppRegistry) return window.DeskAppRegistry.launch('achievements', { targetId });
 		if (window.AchievementsManager) return window.AchievementsManager.open(targetId);
 	},
+	openTaskManager: (tab = 'applications') => {
+		if (window.TaskManagerApp) return window.TaskManagerApp.open(tab);
+	},
+	openEncartaGlobe: () => {
+		if (window.EncartaGlobeApp) return window.EncartaGlobeApp.open();
+	},
 	getNowPlaying: () => {
 		if (window.MediaPlayerApp && typeof window.MediaPlayerApp.getNowPlaying === 'function') {
 			const current = window.MediaPlayerApp.getNowPlaying();
@@ -1268,6 +1274,7 @@ document.addEventListener('DOMContentLoaded', () => {
 	updateOutlookUnreadBadge();
 	setInterval(updateOutlookUnreadBadge, 60000);
 	if (window.ClippyAgent) window.ClippyAgent.init();
+	checkAndDisplayMobileWarning();
 
 	if (window.WindowManager && typeof window.WindowManager.restoreOpenWindowsState === 'function') {
 		setTimeout(() => {
@@ -2329,6 +2336,12 @@ function setupGlobalKeyboardShortcuts() {
 			return;
 		}
 
+		if (e.ctrlKey && e.shiftKey && e.key === 'Escape') {
+			e.preventDefault();
+			if (window.TaskManagerApp) window.TaskManagerApp.open();
+			return;
+		}
+
 		if (e.key === 'F5' && !isEditable) {
 			e.preventDefault();
 			refreshUI();
@@ -3372,12 +3385,38 @@ function arrangeIcons(sortBy = 'none') {
 	const iconHeight = customGapY;
 	const startX = 10;
 	const startY = 10;
+	const desktopWidth = window.innerWidth;
 	const desktopHeight = window.innerHeight - 40;
+
+	const gridDirection = (window.SettingsApp && window.SettingsApp.get('desktopGridDirection')) || localStorage.getItem('desktopGridDirection') || 'top-to-bottom';
+	const gridOrigin = (window.SettingsApp && window.SettingsApp.get('desktopGridOrigin')) || localStorage.getItem('desktopGridOrigin') || 'top-left';
+
 	const iconsPerColumn = Math.max(1, Math.floor((desktopHeight - startY) / iconHeight));
+	const iconsPerRow = Math.max(1, Math.floor((desktopWidth - startX) / (iconWidth + 10)));
 
 	const autoArrange = isAutoArrangeEnabled();
 	const alignGrid = isAlignToGridEnabled();
 	const positions = loadDesktopIconPositions();
+
+	const computeSlotCoords = (col, row) => {
+		let posX = startX + col * (iconWidth + 10);
+		let posY = startY + row * iconHeight;
+
+		if (gridOrigin === 'top-right') {
+			posX = (desktopWidth - startX - iconWidth) - col * (iconWidth + 10);
+			posY = startY + row * iconHeight;
+		} else if (gridOrigin === 'bottom-left') {
+			posX = startX + col * (iconWidth + 10);
+			posY = (desktopHeight - startY - iconHeight) - row * iconHeight;
+		} else if (gridOrigin === 'bottom-right') {
+			posX = (desktopWidth - startX - iconWidth) - col * (iconWidth + 10);
+			posY = (desktopHeight - startY - iconHeight) - row * iconHeight;
+		}
+
+		posX = Math.max(10, Math.min(posX, desktopWidth - iconWidth - 10));
+		posY = Math.max(10, Math.min(posY, desktopHeight - iconHeight - 10));
+		return { x: posX, y: posY };
+	};
 
 	if (sortBy !== 'none' || autoArrange) {
 		const getElement = (icon) => {
@@ -3414,17 +3453,24 @@ function arrangeIcons(sortBy = 'none') {
 
 		const newPositions = {};
 		icons.forEach((icon, index) => {
-			const col = Math.floor(index / iconsPerColumn);
-			const row = index % iconsPerColumn;
-			const posX = startX + col * (iconWidth + 10);
-			const posY = startY + row * iconHeight;
+			let col = 0;
+			let row = 0;
+			if (gridDirection === 'left-to-right') {
+				row = Math.floor(index / iconsPerRow);
+				col = index % iconsPerRow;
+			} else {
+				col = Math.floor(index / iconsPerColumn);
+				row = index % iconsPerColumn;
+			}
+
+			const coords = computeSlotCoords(col, row);
 
 			icon.style.position = 'absolute';
-			icon.style.left = `${posX}px`;
-			icon.style.top = `${posY}px`;
+			icon.style.left = `${coords.x}px`;
+			icon.style.top = `${coords.y}px`;
 
 			if (icon.dataset.path) {
-				newPositions[icon.dataset.path] = { x: posX, y: posY };
+				newPositions[icon.dataset.path] = { x: coords.x, y: coords.y };
 			}
 		});
 		saveDesktopIconPositions(newPositions);
@@ -3443,7 +3489,7 @@ function arrangeIcons(sortBy = 'none') {
 					posX = startX + Math.round((posX - startX) / (iconWidth + 10)) * (iconWidth + 10);
 					posY = startY + Math.round((posY - startY) / iconHeight) * iconHeight;
 				}
-				posX = Math.max(10, Math.min(posX, window.innerWidth - iconWidth - 10));
+				posX = Math.max(10, Math.min(posX, desktopWidth - iconWidth - 10));
 				posY = Math.max(10, Math.min(posY, desktopHeight - iconHeight - 10));
 
 				icon.style.position = 'absolute';
@@ -3454,27 +3500,82 @@ function arrangeIcons(sortBy = 'none') {
 				const rowSlot = Math.round((posY - startY) / iconHeight);
 				occupiedGridSlots.add(`${colSlot},${rowSlot}`);
 			} else {
-				while (occupiedGridSlots.has(`${Math.floor(unpositionedIndex / iconsPerColumn)},${unpositionedIndex % iconsPerColumn}`)) {
-					unpositionedIndex++;
+				let col = 0;
+				let row = 0;
+				if (gridDirection === 'left-to-right') {
+					while (occupiedGridSlots.has(`${unpositionedIndex % iconsPerRow},${Math.floor(unpositionedIndex / iconsPerRow)}`)) {
+						unpositionedIndex++;
+					}
+					row = Math.floor(unpositionedIndex / iconsPerRow);
+					col = unpositionedIndex % iconsPerRow;
+				} else {
+					while (occupiedGridSlots.has(`${Math.floor(unpositionedIndex / iconsPerColumn)},${unpositionedIndex % iconsPerColumn}`)) {
+						unpositionedIndex++;
+					}
+					col = Math.floor(unpositionedIndex / iconsPerColumn);
+					row = unpositionedIndex % iconsPerColumn;
 				}
-				const col = Math.floor(unpositionedIndex / iconsPerColumn);
-				const row = unpositionedIndex % iconsPerColumn;
-				const posX = startX + col * (iconWidth + 10);
-				const posY = startY + row * iconHeight;
+
+				const coords = computeSlotCoords(col, row);
 
 				icon.style.position = 'absolute';
-				icon.style.left = `${posX}px`;
-				icon.style.top = `${posY}px`;
+				icon.style.left = `${coords.x}px`;
+				icon.style.top = `${coords.y}px`;
 
 				occupiedGridSlots.add(`${col},${row}`);
 				if (path) {
-					positions[path] = { x: posX, y: posY };
+					positions[path] = { x: coords.x, y: coords.y };
 				}
 				unpositionedIndex++;
 			}
 		});
 		saveDesktopIconPositions(positions);
 	}
+}
+
+function checkAndDisplayMobileWarning() {
+	const isTouch = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
+	const isSmallViewport = window.innerWidth < 768 || window.innerHeight < 520;
+	if (!isTouch && !isSmallViewport) return;
+
+	if (sessionStorage.getItem('xp_mobile_warned') === 'true') return;
+
+	const overlay = document.createElement('div');
+	overlay.className = 'xp-mobile-dialog-overlay';
+
+	overlay.innerHTML = `
+		<div class="xp-mobile-dialog-window">
+			<div class="xp-mobile-dialog-header">
+				<span>Windows XP Compatibility Warning</span>
+			</div>
+			<div class="xp-mobile-dialog-body">
+				<img src="https://api.iconify.design/mdi/alert.svg?color=%23e68a00" class="xp-mobile-dialog-icon" alt="">
+				<div>
+					<strong>Mobile / Touchscreen Device Detected</strong><br><br>
+					This interactive portfolio is structured as a full desktop workstation simulation optimized for computers with physical keyboard, mouse controls, and high-resolution displays.<br><br>
+					Touch screen controls, small displays, or mobile browsers may encounter layout restrictions or navigation difficulties.
+				</div>
+			</div>
+			<div class="xp-mobile-dialog-footer">
+				<button type="button" class="xp-button" id="mobile-warn-continue-btn">Continue to Desktop</button>
+				<button type="button" class="xp-button" id="mobile-warn-portfolio-btn">Standard Web Version</button>
+			</div>
+		</div>
+	`;
+
+	document.body.appendChild(overlay);
+
+	overlay.querySelector('#mobile-warn-continue-btn').addEventListener('click', () => {
+		sessionStorage.setItem('xp_mobile_warned', 'true');
+		overlay.remove();
+		if (window.SettingsApp && window.SettingsApp.playSound) {
+			window.SettingsApp.playSound('click');
+		}
+	});
+
+	overlay.querySelector('#mobile-warn-portfolio-btn').addEventListener('click', () => {
+		window.location.href = 'https://wartets.github.io/';
+	});
 }
 
 let currentDragTargetElement = null;
@@ -3971,16 +4072,92 @@ function downloadFileSystemElement(element) {
 	}
 }
 
-function setImageAsWallpaper(source, fitMode = 'cover') {
+function trackWallpaperViewed(source) {
+	if (!source || typeof source !== 'string') return;
+	try {
+		let viewed = JSON.parse(localStorage.getItem('xp_viewed_wallpapers') || '[]');
+		const key = source.toLowerCase();
+		if (!viewed.includes(key)) {
+			viewed.push(key);
+			localStorage.setItem('xp_viewed_wallpapers', JSON.stringify(viewed));
+		}
+		if (window.AchievementsManager) {
+			window.AchievementsManager.setProgress('wallpaper_collector', viewed.length);
+		}
+	} catch (e) {}
+}
+
+let currentWallpaperLayer = 'a';
+let activeWallpaperTransitionTimer = null;
+
+function setImageAsWallpaper(source, fitMode = 'cover', transitionType = null) {
 	const desktop = document.getElementById('desktop');
-	if (desktop) {
+	const layerA = document.getElementById('desktop-wallpaper-layer-a');
+	const layerB = document.getElementById('desktop-wallpaper-layer-b');
+	const transMode = transitionType || (window.SettingsApp && window.SettingsApp.get('wallpaperTransition')) || localStorage.getItem('wallpaperTransition') || 'none';
+	const transDuration = parseFloat((window.SettingsApp && window.SettingsApp.get('wallpaperTransitionDuration')) || localStorage.getItem('wallpaperTransitionDuration') || '1.0');
+
+	document.documentElement.style.setProperty('--wp-trans-duration', `${transDuration}s`);
+
+	if (layerA && layerB) {
+		const targetLayer = currentWallpaperLayer === 'a' ? layerB : layerA;
+		const activeLayer = currentWallpaperLayer === 'a' ? layerA : layerB;
+
+		if (activeWallpaperTransitionTimer) {
+			clearTimeout(activeWallpaperTransitionTimer);
+			activeWallpaperTransitionTimer = null;
+		}
+
+		targetLayer.className = 'desktop-wallpaper-layer';
+		targetLayer.style.backgroundImage = `url('${source}')`;
+		targetLayer.style.backgroundSize = fitMode === 'fit' ? 'contain' : (fitMode === 'stretch' ? '100% 100%' : (fitMode === 'tile' || fitMode === 'center' ? 'auto' : 'cover'));
+		targetLayer.style.backgroundRepeat = fitMode === 'tile' ? 'repeat' : 'no-repeat';
+		targetLayer.style.backgroundPosition = fitMode === 'tile' ? 'top left' : 'center center';
+		targetLayer.style.zIndex = '2';
+		activeLayer.style.zIndex = '1';
+
+		if (transMode !== 'none') {
+			targetLayer.classList.add(`trans-${transMode}-in`);
+
+			const finalizeTransition = () => {
+				if (activeWallpaperTransitionTimer) {
+					clearTimeout(activeWallpaperTransitionTimer);
+					activeWallpaperTransitionTimer = null;
+				}
+				activeLayer.className = 'desktop-wallpaper-layer';
+				activeLayer.style.zIndex = '0';
+				activeLayer.style.opacity = '0';
+				activeLayer.style.backgroundImage = 'none';
+
+				targetLayer.className = 'desktop-wallpaper-layer active';
+				targetLayer.style.zIndex = '1';
+				targetLayer.style.opacity = '1';
+				currentWallpaperLayer = currentWallpaperLayer === 'a' ? 'b' : 'a';
+			};
+
+			activeWallpaperTransitionTimer = setTimeout(finalizeTransition, Math.max(120, Math.round(transDuration * 1000)));
+		} else {
+			targetLayer.className = 'desktop-wallpaper-layer active';
+			targetLayer.style.zIndex = '1';
+			targetLayer.style.opacity = '1';
+
+			activeLayer.className = 'desktop-wallpaper-layer';
+			activeLayer.style.zIndex = '0';
+			activeLayer.style.opacity = '0';
+			activeLayer.style.backgroundImage = 'none';
+			currentWallpaperLayer = currentWallpaperLayer === 'a' ? 'b' : 'a';
+		}
+	} else if (desktop) {
 		desktop.style.backgroundImage = `url('${source}')`;
 	}
+
 	localStorage.setItem('desktopBackground', source);
 	if (window.SettingsApp) {
 		window.SettingsApp.set('desktopBackground', source);
 		window.SettingsApp.set('wallpaperFit', fitMode);
 	}
+	trackWallpaperViewed(source);
+
 	if (window.AchievementsManager && (source.includes('artwork') || source.includes('/music/') || source.includes('track_artwork') || source.includes('album_artwork'))) {
 		window.AchievementsManager.progress('artwork_wallpaper', 1);
 	}
@@ -3993,6 +4170,14 @@ const DEFAULT_DESKTOP_WALLPAPER = '../assets/images/desk/wallpapers/wallpaper-de
 let desktopWallpapersRegistry = null;
 
 const preloadedWallpapers = new Map();
+
+function preloadWallpaperImage(url) {
+	if (!url || preloadedWallpapers.has(url)) return;
+	const img = new Image();
+	img.src = url;
+	img.onload = () => preloadedWallpapers.set(url, img);
+	if (img.complete) preloadedWallpapers.set(url, img);
+}
 
 let wallpaperSlideshowTimer = null;
 
@@ -4008,24 +4193,102 @@ function updateWallpaperSlideshow() {
 	let intervalSec = parseFloat((window.SettingsApp && window.SettingsApp.get('wallpaperSlideshowInterval')) || localStorage.getItem('wallpaperSlideshowInterval') || '30');
 	if (isNaN(intervalSec) || intervalSec < 3) intervalSec = 30;
 
+	const prepareNextPreload = async () => {
+		const list = await fetchWallpaperRegistry();
+		if (!list || list.length === 0) return;
+		const isRandom = (window.SettingsApp && window.SettingsApp.get('wallpaperSlideshowRandom')) || localStorage.getItem('wallpaperSlideshowRandom') === 'true';
+		const curr = (window.SettingsApp && window.SettingsApp.get('desktopBackground')) || localStorage.getItem('desktopBackground');
+		const idx = list.findIndex(w => w.path === curr);
+		const nextCandidate = isRandom ? list[Math.floor(Math.random() * list.length)] : list[(idx + 1) % list.length];
+		if (nextCandidate && nextCandidate.path) {
+			preloadWallpaperImage(nextCandidate.path);
+		}
+	};
+
+	prepareNextPreload();
+
 	wallpaperSlideshowTimer = setInterval(async () => {
 		const list = await fetchWallpaperRegistry();
 		if (!list || list.length === 0) return;
 		const isRandom = (window.SettingsApp && window.SettingsApp.get('wallpaperSlideshowRandom')) || localStorage.getItem('wallpaperSlideshowRandom') === 'true';
 		let nextWp;
+		const curr = (window.SettingsApp && window.SettingsApp.get('desktopBackground')) || localStorage.getItem('desktopBackground');
+		const idx = list.findIndex(w => w.path === curr);
+
 		if (isRandom) {
 			nextWp = list[Math.floor(Math.random() * list.length)];
 		} else {
-			const curr = (window.SettingsApp && window.SettingsApp.get('desktopBackground')) || localStorage.getItem('desktopBackground');
-			const idx = list.findIndex(w => w.path === curr);
 			nextWp = list[(idx + 1) % list.length];
 		}
+
 		if (nextWp) {
 			const fit = (window.SettingsApp && window.SettingsApp.get('wallpaperFit')) || localStorage.getItem('wallpaperFit') || 'cover';
-			setImageAsWallpaper(nextWp.path, fit);
+			const transition = (window.SettingsApp && window.SettingsApp.get('wallpaperTransition')) || localStorage.getItem('wallpaperTransition') || 'none';
+			setImageAsWallpaper(nextWp.path, fit, transition);
 		}
+
+		prepareNextPreload();
 	}, intervalSec * 1000);
 }
+
+async function purgeAllClientData() {
+	try {
+		localStorage.clear();
+	} catch (e) {}
+
+	try {
+		sessionStorage.clear();
+	} catch (e) {}
+
+	try {
+		document.cookie.split(';').forEach(cookie => {
+			const eqPos = cookie.indexOf('=');
+			const name = eqPos > -1 ? cookie.substring(0, eqPos).trim() : cookie.trim();
+			if (name) {
+				document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/;`;
+				document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/;domain=${window.location.hostname};`;
+			}
+		});
+	} catch (e) {}
+
+	try {
+		if (window.indexedDB && typeof indexedDB.databases === 'function') {
+			const databases = await indexedDB.databases();
+			await Promise.all((databases || []).map(db => {
+				if (db && db.name) {
+					return new Promise(resolve => {
+						const req = indexedDB.deleteDatabase(db.name);
+						req.onsuccess = () => resolve();
+						req.onerror = () => resolve();
+						req.onblocked = () => resolve();
+					});
+				}
+				return Promise.resolve();
+			}));
+		}
+	} catch (e) {}
+
+	try {
+		if (window.caches) {
+			const cacheKeys = await caches.keys();
+			await Promise.all(cacheKeys.map(key => caches.delete(key)));
+		}
+	} catch (e) {}
+
+	try {
+		if (navigator.serviceWorker) {
+			const registrations = await navigator.serviceWorker.getRegistrations();
+			await Promise.all(registrations.map(reg => reg.unregister()));
+		}
+	} catch (e) {}
+
+	window.location.reload();
+}
+
+window.purgeAllData = purgeAllClientData;
+window.clearAllData = purgeAllClientData;
+window.purgeAll = purgeAllClientData;
+window.wipeAllData = purgeAllClientData;
 
 function applyInitialDesktopBackground() {
 	const mode = (window.SettingsApp && window.SettingsApp.get('wallpaperMode')) || localStorage.getItem('wallpaperMode') || 'picture';
@@ -4034,45 +4297,34 @@ function applyInitialDesktopBackground() {
 	const fit = (window.SettingsApp && window.SettingsApp.get('wallpaperFit')) || localStorage.getItem('wallpaperFit') || 'cover';
 
 	const desktop = document.getElementById('desktop');
+	const layerA = document.getElementById('desktop-wallpaper-layer-a');
+	const layerB = document.getElementById('desktop-wallpaper-layer-b');
 	if (!desktop) return;
 
 	desktop.style.backgroundColor = bgColor;
-	if (mode === 'color') {
-		desktop.style.backgroundImage = 'none';
-	} else {
-		desktop.style.backgroundImage = `url('${current}')`;
-		if (!preloadedWallpapers.has(current)) {
-			const img = new Image();
-			img.src = current;
-			img.onload = () => preloadedWallpapers.set(current, img);
-			if (img.complete) preloadedWallpapers.set(current, img);
+
+	if (layerA) {
+		layerA.style.backgroundColor = bgColor;
+		if (mode === 'color') {
+			layerA.style.backgroundImage = 'none';
+		} else {
+			layerA.style.backgroundImage = `url('${current}')`;
+			layerA.style.backgroundSize = fit === 'fit' ? 'contain' : (fit === 'stretch' ? '100% 100%' : (fit === 'tile' || fit === 'center' ? 'auto' : 'cover'));
+			layerA.style.backgroundRepeat = fit === 'tile' ? 'repeat' : 'no-repeat';
+			layerA.style.backgroundPosition = fit === 'tile' ? 'top left' : 'center center';
+			layerA.className = 'desktop-wallpaper-layer active';
+			preloadWallpaperImage(current);
+			trackWallpaperViewed(current);
 		}
+	}
+
+	if (layerB) {
+		layerB.className = 'desktop-wallpaper-layer';
+		layerB.style.backgroundImage = 'none';
 	}
 
 	document.body.classList.remove('wallpaper-fit-cover', 'wallpaper-fit-stretch', 'wallpaper-fit-center', 'wallpaper-fit-tile', 'wallpaper-fit-fit');
 	document.body.classList.add(`wallpaper-fit-${fit}`);
-
-	if (fit === 'stretch') {
-		desktop.style.backgroundSize = '100% 100%';
-		desktop.style.backgroundRepeat = 'no-repeat';
-		desktop.style.backgroundPosition = '0 0';
-	} else if (fit === 'fit') {
-		desktop.style.backgroundSize = 'contain';
-		desktop.style.backgroundRepeat = 'no-repeat';
-		desktop.style.backgroundPosition = 'center center';
-	} else if (fit === 'center') {
-		desktop.style.backgroundSize = 'auto';
-		desktop.style.backgroundRepeat = 'no-repeat';
-		desktop.style.backgroundPosition = 'center center';
-	} else if (fit === 'tile') {
-		desktop.style.backgroundSize = 'auto';
-		desktop.style.backgroundRepeat = 'repeat';
-		desktop.style.backgroundPosition = 'top left';
-	} else {
-		desktop.style.backgroundSize = 'cover';
-		desktop.style.backgroundRepeat = 'no-repeat';
-		desktop.style.backgroundPosition = 'center center';
-	}
 
 	updateWallpaperSlideshow();
 }
@@ -4149,6 +4401,8 @@ async function openDisplaySettings(initialTab = 'desktop', options = {}) {
 	let currentBgColor = (window.SettingsApp && window.SettingsApp.get('desktopBackgroundColor')) || localStorage.getItem('desktopBackgroundColor') || '#004e98';
 	let currentInterval = (window.SettingsApp && window.SettingsApp.get('wallpaperSlideshowInterval')) || localStorage.getItem('wallpaperSlideshowInterval') || '30';
 	let currentRandom = (window.SettingsApp && window.SettingsApp.get('wallpaperSlideshowRandom')) || localStorage.getItem('wallpaperSlideshowRandom') === 'true';
+	let currentTransition = (window.SettingsApp && window.SettingsApp.get('wallpaperTransition')) || localStorage.getItem('wallpaperTransition') || 'none';
+	let currentTransDuration = (window.SettingsApp && window.SettingsApp.get('wallpaperTransitionDuration')) || localStorage.getItem('wallpaperTransitionDuration') || '1.0';
 
 	let selectedWallpaperPath = currentBg;
 	let selectedFit = currentFit;
@@ -4156,6 +4410,8 @@ async function openDisplaySettings(initialTab = 'desktop', options = {}) {
 	let selectedBgColor = currentBgColor;
 	let selectedInterval = currentInterval;
 	let selectedRandom = currentRandom;
+	let selectedTransition = currentTransition;
+	let selectedTransDuration = currentTransDuration;
 
 	const ssSettings = window.ScreenSaverManager ? window.ScreenSaverManager.settings : { activeSaver: 'xp-flying-logo', timeoutMinutes: 5, enabled: true };
 	let currentSSEnabled = ssSettings.enabled !== false;
@@ -4221,6 +4477,29 @@ async function openDisplaySettings(initialTab = 'desktop', options = {}) {
 									<option value="900" ${String(selectedInterval) === '900' ? 'selected' : ''}>15 minutes</option>
 									<option value="1800" ${String(selectedInterval) === '1800' ? 'selected' : ''}>30 minutes</option>
 									<option value="3600" ${String(selectedInterval) === '3600' ? 'selected' : ''}>1 hour</option>
+								</select>
+							</div>
+							<div class="xp-form-row">
+								<label for="disp-slideshow-transition" style="width: 120px;">Transition Effect:</label>
+								<select id="disp-slideshow-transition" class="xp-select" style="flex: 1;">
+									<option value="none" ${selectedTransition === 'none' ? 'selected' : ''}>None (Instant Cut)</option>
+									<option value="fade" ${selectedTransition === 'fade' ? 'selected' : ''}>Crossfade</option>
+									<option value="slide-left" ${selectedTransition === 'slide-left' ? 'selected' : ''}>Slide Left</option>
+									<option value="slide-right" ${selectedTransition === 'slide-right' ? 'selected' : ''}>Slide Right</option>
+									<option value="slide-up" ${selectedTransition === 'slide-up' ? 'selected' : ''}>Slide Up</option>
+									<option value="slide-down" ${selectedTransition === 'slide-down' ? 'selected' : ''}>Slide Down</option>
+									<option value="zoom-in" ${selectedTransition === 'zoom-in' ? 'selected' : ''}>Zoom In</option>
+									<option value="zoom-out" ${selectedTransition === 'zoom-out' ? 'selected' : ''}>Zoom Out</option>
+									<option value="rotate" ${selectedTransition === 'rotate' ? 'selected' : ''}>Rotate & Zoom</option>
+								</select>
+							</div>
+							<div class="xp-form-row">
+								<label for="disp-slideshow-trans-dur" style="width: 120px;">Transition Duration:</label>
+								<select id="disp-slideshow-trans-dur" class="xp-select" style="flex: 1;">
+									<option value="0.5" ${String(selectedTransDuration) === '0.5' ? 'selected' : ''}>0.5 seconds</option>
+									<option value="1.0" ${String(selectedTransDuration) === '1.0' ? 'selected' : ''}>1.0 second</option>
+									<option value="1.5" ${String(selectedTransDuration) === '1.5' ? 'selected' : ''}>1.5 seconds</option>
+									<option value="2.0" ${String(selectedTransDuration) === '2.0' ? 'selected' : ''}>2.0 seconds</option>
 								</select>
 							</div>
 							<div class="xp-checkbox-row">
@@ -4304,6 +4583,22 @@ async function openDisplaySettings(initialTab = 'desktop', options = {}) {
 	const slideshowPanel = win.querySelector('#disp-slideshow-panel');
 	const slideshowInterval = win.querySelector('#disp-slideshow-interval');
 	const slideshowRandom = win.querySelector('#disp-slideshow-random');
+	const slideshowTransition = win.querySelector('#disp-slideshow-transition');
+	const slideshowTransDur = win.querySelector('#disp-slideshow-trans-dur');
+
+	if (slideshowTransition) {
+		slideshowTransition.addEventListener('change', () => {
+			selectedTransition = slideshowTransition.value;
+			markDirty();
+		});
+	}
+
+	if (slideshowTransDur) {
+		slideshowTransDur.addEventListener('change', () => {
+			selectedTransDuration = slideshowTransDur.value;
+			markDirty();
+		});
+	}
 
 	const ssSelect = win.querySelector('#disp-ss-select');
 	const ssCanvas = win.querySelector('#disp-ss-monitor-canvas');
@@ -4467,6 +4762,8 @@ async function openDisplaySettings(initialTab = 'desktop', options = {}) {
 			window.SettingsApp.set('desktopBackgroundColor', selectedBgColor);
 			window.SettingsApp.set('wallpaperSlideshowInterval', selectedInterval);
 			window.SettingsApp.set('wallpaperSlideshowRandom', selectedRandom);
+			window.SettingsApp.set('wallpaperTransition', selectedTransition);
+			window.SettingsApp.set('wallpaperTransitionDuration', parseFloat(selectedTransDuration));
 			window.SettingsApp.set('desktopBackground', selectedWallpaperPath);
 			window.SettingsApp.set('wallpaperFit', selectedFit);
 		} else {
@@ -4474,6 +4771,8 @@ async function openDisplaySettings(initialTab = 'desktop', options = {}) {
 			localStorage.setItem('desktopBackgroundColor', selectedBgColor);
 			localStorage.setItem('wallpaperSlideshowInterval', String(selectedInterval));
 			localStorage.setItem('wallpaperSlideshowRandom', String(selectedRandom));
+			localStorage.setItem('wallpaperTransition', selectedTransition);
+			localStorage.setItem('wallpaperTransitionDuration', String(selectedTransDuration));
 			localStorage.setItem('desktopBackground', selectedWallpaperPath);
 			localStorage.setItem('wallpaperFit', selectedFit);
 		}
@@ -4680,7 +4979,13 @@ function processRunCommand(command) {
 		'control': 'settings',
 		'cleanmgr': 'recyclebin',
 		'recyclebin': 'recyclebin',
-		'clippy': 'clippy'
+		'clippy': 'clippy',
+		'taskmgr': 'taskmgr',
+		'taskmanager': 'taskmgr',
+		'encarta': 'encarta',
+		'globe': 'encarta',
+		'map': 'encarta',
+		'atlas': 'encarta'
 	};
 	const resolvedApp = aliases[lowerCmd] || lowerCmd;
 

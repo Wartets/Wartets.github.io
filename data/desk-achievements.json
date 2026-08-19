@@ -538,5 +538,15 @@
 		"hideIconWhenLocked": false,
 		"maxProgress": 20,
 		"points": 100
+	},
+	{
+		"id": "taskmgr_process_terminator",
+		"title": "Process Assassin",
+		"description": "Terminate a running process through Windows Task Manager.",
+		"category": "system",
+		"icon": "../assets/images/desk/icons/System Properties.webp",
+		"hideIconWhenLocked": false,
+		"maxProgress": 1,
+		"points": 20
 	}
 ]

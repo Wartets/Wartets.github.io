@@ -514,6 +514,10 @@
 							`;
 						} else if (subKey === 'system-tools') {
 							nestedFlyout.innerHTML = `
+								<div class="xp-start-flyout-item" data-action="open-taskmgr">
+									<img src="../assets/images/desk/icons/System Properties.webp" class="xp-start-item-icon" alt="">
+									<span class="xp-start-title"><strong>Task Manager</strong></span>
+								</div>
 								<div class="xp-start-flyout-item" data-action="control-panel">
 									<img src="../assets/images/desk/icons/System Properties.webp" class="xp-start-item-icon" alt="">
 									<span class="xp-start-title">Control Panel</span>

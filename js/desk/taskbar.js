@@ -1148,6 +1148,15 @@
 				});
 			}
 
+			if (windowsContainerEl) {
+				windowsContainerEl.addEventListener('wheel', (e) => {
+					if (e.deltaY !== 0) {
+						e.preventDefault();
+						windowsContainerEl.scrollLeft += e.deltaY;
+					}
+				}, { passive: false });
+			}
+
 			if (quickLaunchEl) {
 				quickLaunchEl.addEventListener('contextmenu', (e) => {
 					if (e.target.closest('.quick-launch-icon-wrapper')) return;

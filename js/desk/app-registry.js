@@ -392,6 +392,30 @@
 			});
 
 			this.register({
+				id: 'taskmgr',
+				name: 'Windows Task Manager',
+				icon: '../assets/images/desk/icons/System Properties.webp',
+				category: 'System Tools',
+				aliases: ['taskmgr.exe', 'taskmanager', 'task-manager', 'tasks', 'kill'],
+				handler: (args) => {
+					const tab = typeof args === 'string' ? args : (args && args.tab ? args.tab : 'applications');
+					if (window.TaskManagerApp) window.TaskManagerApp.open(tab);
+				}
+			});
+
+			this.register({
+				id: 'encarta',
+				name: 'Microsoft Encarta Virtual Globe',
+				subtitle: 'World Interactive Atlas',
+				icon: '../assets/images/desk/icons/Earth (fixed).webp',
+				category: 'Entertainment',
+				aliases: ['globe', 'map', 'worldmap', 'atlas', 'encarta.exe'],
+				handler: () => {
+					if (window.EncartaGlobeApp) window.EncartaGlobeApp.open();
+				}
+			});
+
+			this.register({
 				id: 'markdownpreview',
 				name: 'Markdown Live Preview',
 				subtitle: 'Document & Formula Typesetter',

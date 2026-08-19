@@ -303,6 +303,65 @@
 						},
 						{ separator: true },
 						{
+							label: 'Grid Direction',
+							submenu: [
+								{
+									label: 'Top to Bottom (Columns)',
+									radio: (window.SettingsApp && window.SettingsApp.get('desktopGridDirection')) !== 'left-to-right',
+									action: () => {
+										if (window.SettingsApp) window.SettingsApp.set('desktopGridDirection', 'top-to-bottom');
+										arrangeIcons('none');
+									}
+								},
+								{
+									label: 'Left to Right (Rows)',
+									radio: (window.SettingsApp && window.SettingsApp.get('desktopGridDirection')) === 'left-to-right',
+									action: () => {
+										if (window.SettingsApp) window.SettingsApp.set('desktopGridDirection', 'left-to-right');
+										arrangeIcons('none');
+									}
+								}
+							]
+						},
+						{
+							label: 'Grid Origin Corner',
+							submenu: [
+								{
+									label: 'Top-Left',
+									radio: ((window.SettingsApp && window.SettingsApp.get('desktopGridOrigin')) || 'top-left') === 'top-left',
+									action: () => {
+										if (window.SettingsApp) window.SettingsApp.set('desktopGridOrigin', 'top-left');
+										arrangeIcons('none');
+									}
+								},
+								{
+									label: 'Top-Right',
+									radio: (window.SettingsApp && window.SettingsApp.get('desktopGridOrigin')) === 'top-right',
+									action: () => {
+										if (window.SettingsApp) window.SettingsApp.set('desktopGridOrigin', 'top-right');
+										arrangeIcons('none');
+									}
+								},
+								{
+									label: 'Bottom-Left',
+									radio: (window.SettingsApp && window.SettingsApp.get('desktopGridOrigin')) === 'bottom-left',
+									action: () => {
+										if (window.SettingsApp) window.SettingsApp.set('desktopGridOrigin', 'bottom-left');
+										arrangeIcons('none');
+									}
+								},
+								{
+									label: 'Bottom-Right',
+									radio: (window.SettingsApp && window.SettingsApp.get('desktopGridOrigin')) === 'bottom-right',
+									action: () => {
+										if (window.SettingsApp) window.SettingsApp.set('desktopGridOrigin', 'bottom-right');
+										arrangeIcons('none');
+									}
+								}
+							]
+						},
+						{ separator: true },
+						{
 							label: 'Auto Arrange',
 							checked: typeof isAutoArrangeEnabled === 'function' ? isAutoArrangeEnabled() : false,
 							action: () => {
@@ -2018,8 +2077,9 @@
 				{ separator: true },
 				{
 					label: 'Task Manager',
+					shortcut: 'Ctrl+Shift+Esc',
 					action: () => {
-						if (window.SettingsApp) window.SettingsApp.open('system');
+						if (window.TaskManagerApp) window.TaskManagerApp.open('applications');
 					}
 				},
 				{ separator: true },
@@ -2062,6 +2122,18 @@
 							else if (isMax && typeof maximizeWindow === 'function') maximizeWindow(win);
 							else if (win.dataset.snapped && window.WindowManager) window.WindowManager.restoreSnap(win);
 							if (typeof bringWindowToFront === 'function') bringWindowToFront(win);
+						}
+					}
+				},
+				{
+					label: 'Center and Focus Window',
+					action: () => {
+						if (win.classList.contains('minimized') && typeof unminimizeWindow === 'function') {
+							unminimizeWindow(win);
+						}
+						if (window.WindowManager) {
+							window.WindowManager.snap(win, 'center');
+							window.WindowManager.bringToFront(win);
 						}
 					}
 				},
