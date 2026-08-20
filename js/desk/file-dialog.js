@@ -118,8 +118,11 @@
 			function buildFolderDropdown() {
 				folderSelectEl.innerHTML = '';
 				const foldersList = [];
+				const visitedFolders = new Set();
 
 				function traverse(f, depth = 0) {
+					if (!f || visitedFolders.has(f)) return;
+					visitedFolders.add(f);
 					foldersList.push({ folder: f, depth });
 					f.listContent().forEach(child => {
 						if (child instanceof Folder) {
@@ -132,10 +135,22 @@
 					traverse(fs.root, 0);
 				}
 
+				if (fs && fs.getDrives) {
+					fs.getDrives().forEach(d => {
+						if (d.mountPath !== '/') {
+							const driveFolder = fs.findByPath(d.mountPath);
+							if (driveFolder && !visitedFolders.has(driveFolder)) {
+								traverse(driveFolder, 1);
+							}
+						}
+					});
+				}
+
 				foldersList.forEach(item => {
 					const opt = document.createElement('option');
 					opt.value = item.folder.getFullPath();
-					opt.textContent = `${'\u00A0\u00A0'.repeat(item.depth)}${item.folder.name}`;
+					const displayLabel = item.folder.getFullPath() === '/' ? 'Desktop' : (VFSPath.toWindowsPath ? VFSPath.toWindowsPath(item.folder.getFullPath()) : item.folder.name);
+					opt.textContent = `${'\u00A0\u00A0'.repeat(item.depth)}${displayLabel}`;
 					if (item.folder === currentFolder) opt.selected = true;
 					folderSelectEl.appendChild(opt);
 				});
@@ -297,16 +312,17 @@
 					placeBtn.classList.add('active');
 					const place = placeBtn.dataset.place;
 					if (place === 'desktop') {
-						currentFolder = fs.root;
+						currentFolder = fs ? fs.root : null;
 					} else if (place === 'documents') {
-						currentFolder = (fs && fs.root) ? (fs.root.getByName('PDFs') || fs.root) : fs.root;
+						currentFolder = fs ? (fs.findByPath('/PDFs') || fs.root) : null;
 					} else if (place === 'recent') {
-						currentFolder = fs.root;
+						currentFolder = fs ? (fs.findByPath('/UserData') || fs.root) : null;
 					} else if (place === 'computer') {
-						currentFolder = fs.root;
+						currentFolder = fs ? fs.root : null;
 					} else if (place === 'network') {
-						currentFolder = (fs && fs.root) ? (fs.root.getByName('Others') || fs.root) : fs.root;
+						currentFolder = fs ? (fs.findByPath('/Others') || fs.root) : null;
 					}
+					if (!currentFolder && fs) currentFolder = fs.root;
 					buildFolderDropdown();
 					renderFileList();
 				});

@@ -493,8 +493,8 @@
 				category: 'Accessories',
 				aliases: ['mydocuments', 'my-documents', 'docs', 'pdf', 'pdfs'],
 				handler: () => {
-					if (typeof fs !== 'undefined' && fs && fs.root) {
-						const pdfs = fs.root.getByName('PDFs') || fs.root;
+					if (typeof fs !== 'undefined' && fs) {
+						const pdfs = fs.findByPath('/PDFs') || fs.root;
 						if (window.FileExplorer) return window.FileExplorer.open(pdfs);
 					}
 					return null;
@@ -525,13 +525,8 @@
 				aliases: ['mymusic', 'my-music', 'audio-library'],
 				handler: () => {
 					if (typeof fs !== 'undefined' && fs) {
-						let musicFolder = fs.root.getByName('Music');
-						if (!musicFolder) {
-							musicFolder = new Folder('Music');
-							musicFolder.icon = '../assets/images/desk/icons/Folder Closed.webp';
-							fs.root.add(musicFolder);
-						}
-						if (window.FileExplorer) return window.FileExplorer.open(musicFolder);
+						let musicFolder = fs.findByPath('/Music') || fs.root.getByName('Music');
+						if (musicFolder && window.FileExplorer) return window.FileExplorer.open(musicFolder);
 					}
 					if (window.DeskAppRegistry) return window.DeskAppRegistry.launch('mediaplayer');
 					return null;

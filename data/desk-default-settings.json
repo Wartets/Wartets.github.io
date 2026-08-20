@@ -395,6 +395,21 @@
 		"../assets/images/desk/icons/Activate Windows.webp",
 		"../assets/images/desk/icons/Command Prompt.webp"
 	],
+	"vfsDrives": [
+		{ "letter": "C", "label": "Local Disk (C:)", "type": "fixed", "totalBytes": 42949672960, "freeBytes": 26628797235, "icon": "../assets/images/desk/icons/User's Computer.webp" },
+		{ "letter": "D", "label": "CD Drive (D:) XP_SP3", "type": "cdrom", "totalBytes": 734003200, "freeBytes": 0, "icon": "../assets/images/desk/icons/Disk Image File.webp" },
+		{ "letter": "A", "label": "3½ Floppy (A:)", "type": "removable", "totalBytes": 1474560, "freeBytes": 1474560, "icon": "../assets/images/desk/icons/Floppy Drive.webp" }
+	],
+	"vfsMounts": [
+		{ "path": "/", "provider": "local", "options": { "storageKey": "fileSystem", "rootName": "Desktop" } },
+		{ "path": "/PDFs", "provider": "dynamic", "options": { "rootName": "PDFs" } },
+		{ "path": "/Music", "provider": "dynamic", "options": { "rootName": "Music" } },
+		{ "path": "/WINDOWS/Web/Wallpaper", "provider": "static-json", "options": { "endpoint": "../data/desk-wallpaper.json", "rootName": "Wallpaper" } },
+		{ "path": "/Others/Poems", "provider": "dynamic", "options": { "rootName": "Poems" } },
+		{ "path": "/Others/Projects", "provider": "dynamic", "options": { "rootName": "Projects" } },
+		{ "path": "/UserData", "provider": "indexeddb", "options": { "rootName": "UserData", "dbName": "Wartets_XP_UserData_DB", "storeName": "files" } },
+		{ "path": "/Temp", "provider": "memory", "options": { "rootName": "Temp" } }
+	],
 	"systemProcessesList": [
 		{ "name": "System", "pid": 4, "user": "SYSTEM", "cpu": 0.8, "mem": 240, "desc": "NT Kernel & System", "critical": true, "icon": "../assets/images/desk/icons/System Properties.webp" },
 		{ "name": "smss.exe", "pid": 440, "user": "SYSTEM", "cpu": 0.0, "mem": 480, "desc": "Session Manager Subsystem", "critical": true, "icon": "../assets/images/desk/icons/System Properties.webp" },

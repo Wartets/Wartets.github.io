@@ -739,6 +739,36 @@
 				if (window.DeskAppRegistry) window.DeskAppRegistry.launch('settings', 'system');
 				return;
 			}
+
+			if (action === 'my-documents') {
+				if (window.DeskAppRegistry) window.DeskAppRegistry.launch('documents');
+				return;
+			}
+
+			if (action === 'my-pictures') {
+				if (window.DeskAppRegistry) window.DeskAppRegistry.launch('pictures');
+				return;
+			}
+
+			if (action === 'my-music') {
+				if (window.DeskAppRegistry) window.DeskAppRegistry.launch('music');
+				return;
+			}
+
+			if (action === 'my-computer') {
+				if (window.DeskAppRegistry) window.DeskAppRegistry.launch('mycomputer');
+				return;
+			}
+
+			if (action === 'my-network-places') {
+				if (window.DeskAppRegistry) window.DeskAppRegistry.launch('network');
+				return;
+			}
+
+			if (action === 'printers-faxes') {
+				if (window.DeskAppRegistry) window.DeskAppRegistry.launch('printers');
+				return;
+			}
 		},
 
 		updateProfile() {

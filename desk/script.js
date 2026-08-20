@@ -1,961 +1,3 @@
-class Element {
-	constructor(name, parent = null) {
-		if (typeof name !== 'string' || name.trim() === '') {
-			throw new Error('Element name must be a non-empty string.');
-		}
-		this.name = name.trim();
-		this.parent = parent;
-		this.createdAt = new Date();
-		this.modifiedAt = new Date();
-		this.hidden = false;
-		this.attributes = {
-			archive: true,
-			system: false
-		};
-	}
-
-	rename(newName) {
-		if (typeof newName !== 'string' || newName.trim() === '') {
-			throw new Error('New name must be a non-empty string.');
-		}
-		const sanitized = newName.trim();
-		const parent = this.parent;
-		if (parent) {
-			if (parent.children.has(sanitized) && sanitized.toLowerCase() !== this.name.toLowerCase()) {
-				throw new Error(`An element named "${sanitized}" already exists in this folder.`);
-			}
-			const oldPath = this.getFullPath();
-			const oldName = this.name;
-			parent.children.delete(oldName);
-			this.name = sanitized;
-			parent.children.set(this.name, this);
-			parent.modifiedAt = new Date();
-			const newPath = this.getFullPath();
-			const posMap = loadDesktopIconPositions();
-			if (posMap[oldPath]) {
-				posMap[newPath] = posMap[oldPath];
-				delete posMap[oldPath];
-				saveDesktopIconPositions(posMap);
-			}
-		} else {
-			this.name = sanitized;
-		}
-		this.modifiedAt = new Date();
-	}
-
-	getFullPath() {
-		if (!this.parent) {
-			return '/';
-		}
-		let path = '';
-		let current = this;
-		while (current && current.parent) {
-			path = `/${current.name}${path}`;
-			current = current.parent;
-		}
-		return path || '/';
-	}
-
-	getDepth() {
-		let depth = 0;
-		let current = this;
-		while (current && current.parent) {
-			depth++;
-			current = current.parent;
-		}
-		return depth;
-	}
-
-	toJSON() {
-		return {
-			name: this.name,
-			createdAt: this.createdAt.toISOString ? this.createdAt.toISOString() : this.createdAt,
-			modifiedAt: this.modifiedAt.toISOString ? this.modifiedAt.toISOString() : this.modifiedAt,
-			type: this.constructor.name,
-			hidden: this.hidden,
-			attributes: this.attributes
-		};
-	}
-}
-
-class File extends Element {
-	constructor(name, parent = null, content = '') {
-		super(name, parent);
-		this.content = content;
-		this.size = new TextEncoder().encode(content).length;
-		this.icon = window.ShellAssociations ? window.ShellAssociations.getIcon(this) : '../assets/images/desk/icons/File.webp';
-		this.readOnly = false;
-		this.remoteUrl = null;
-		this.savedFromNotepad = false;
-	}
-
-	read() {
-		return this.content;
-	}
-
-	write(newContent) {
-		if (this.readOnly) {
-			throw new Error('This file is read-only.');
-		}
-		this.content = newContent;
-		this.size = new TextEncoder().encode(this.content).length;
-		this.modifiedAt = new Date();
-		if (this.parent) {
-			this.parent.modifiedAt = new Date();
-		}
-	}
-
-	async calculateChecksum() {
-		try {
-			if (!window.crypto || !window.crypto.subtle) return 'N/A';
-			const msgUint8 = new TextEncoder().encode(this.content || '');
-			const hashBuffer = await window.crypto.subtle.digest('SHA-256', msgUint8);
-			const hashArray = Array.from(new Uint8Array(hashBuffer));
-			return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-		} catch (e) {
-			return 'N/A';
-		}
-	}
-
-	rename(newName) {
-		super.rename(newName);
-		if (window.ShellAssociations) {
-			this.icon = window.ShellAssociations.getIcon(this);
-		}
-	}
-
-	copy() {
-		const newFile = new File(this.name, null, this.content);
-		newFile.createdAt = new Date(this.createdAt);
-		newFile.modifiedAt = new Date(this.modifiedAt);
-		newFile.readOnly = this.readOnly;
-		newFile.hidden = this.hidden;
-		newFile.remoteUrl = this.remoteUrl;
-		newFile.savedFromNotepad = this.savedFromNotepad;
-		newFile.icon = this.icon;
-		newFile.attributes = Object.assign({}, this.attributes);
-		return newFile;
-	}
-
-	toJSON() {
-		return {
-			...super.toJSON(),
-			content: this.content,
-			size: this.size,
-			icon: this.icon,
-			readOnly: this.readOnly,
-			remoteUrl: this.remoteUrl,
-			savedFromNotepad: this.savedFromNotepad,
-		};
-	}
-}
-
-class Folder extends Element {
-	constructor(name, parent = null) {
-		super(name, parent);
-		this.children = new Map();
-		this.icon = '../assets/images/desk/icons/Folder Closed.webp';
-	}
-
-	add(element) {
-		if (this.children.has(element.name)) {
-			throw new Error(`An element named "${element.name}" already exists.`);
-		}
-		element.parent = this;
-		this.children.set(element.name, element);
-		this.modifiedAt = new Date();
-	}
-
-	remove(elementName) {
-		if (!this.children.has(elementName)) {
-			throw new Error(`Element "${elementName}" not found.`);
-		}
-		const element = this.children.get(elementName);
-		element.parent = null;
-		this.children.delete(elementName);
-		this.modifiedAt = new Date();
-		return true;
-	}
-
-	getByName(name) {
-		return this.children.get(name);
-	}
-
-	listContent() {
-		return Array.from(this.children.values());
-	}
-
-	calculateSize() {
-		let total = 0;
-		for (const child of this.children.values()) {
-			if (child instanceof Folder) {
-				total += child.calculateSize();
-			} else if (child instanceof File) {
-				total += (child.size || 0);
-			}
-		}
-		return total;
-	}
-
-	countItems(recursive = false) {
-		if (!recursive) {
-			return { files: this.listContent().filter(c => !(c instanceof Folder)).length, folders: this.listContent().filter(c => c instanceof Folder).length };
-		}
-		let files = 0;
-		let folders = 0;
-		for (const child of this.children.values()) {
-			if (child instanceof Folder) {
-				folders++;
-				const sub = child.countItems(true);
-				files += sub.files;
-				folders += sub.folders;
-			} else {
-				files++;
-			}
-		}
-		return { files, folders };
-	}
-
-	getAllDescendants() {
-		const result = [];
-		for (const child of this.children.values()) {
-			result.push(child);
-			if (child instanceof Folder) {
-				result.push(...child.getAllDescendants());
-			}
-		}
-		return result;
-	}
-
-	getUniqueName(baseName, extension = '') {
-		let finalName = `${baseName}${extension}`;
-		let counter = 1;
-		while (this.children.has(finalName)) {
-			finalName = `${baseName} (${counter})${extension}`;
-			counter++;
-		}
-		return finalName;
-	}
-
-	copy() {
-		const newFolder = new Folder(this.name, null);
-		newFolder.createdAt = new Date(this.createdAt);
-		newFolder.modifiedAt = new Date(this.modifiedAt);
-		newFolder.hidden = this.hidden;
-		newFolder.icon = this.icon;
-		newFolder.attributes = Object.assign({}, this.attributes);
-		for (const child of this.children.values()) {
-			const childCopy = child.copy();
-			newFolder.add(childCopy);
-		}
-		return newFolder;
-	}
-
-	toJSON() {
-		let isInsideDynamic = false;
-		let curr = this;
-		while (curr) {
-			if (curr.name === 'Music' || curr.name === 'PDFs') {
-				isInsideDynamic = true;
-				break;
-			}
-			curr = curr.parent;
-		}
-		if (isInsideDynamic && this.name !== 'Music' && this.name !== 'PDFs') {
-			return {
-				...super.toJSON(),
-				icon: this.icon,
-				isDynamicLibrary: true,
-				children: []
-			};
-		}
-		return {
-			...super.toJSON(),
-			icon: this.icon,
-			children: Array.from(this.children.values()).filter(c => c.name !== 'Music' && c.name !== 'PDFs').map(child => child.toJSON()),
-		};
-	}
-}
-
-class Shortcut extends Element {
-	constructor(name, parent = null, targetPath, icon) {
-		super(name, parent);
-		this.targetPath = targetPath;
-		this.icon = icon || '../assets/images/desk/icons/Folder Closed.webp';
-	}
-
-	resolve() {
-		const fsInstance = (typeof fs !== 'undefined' && fs) ? fs : window.fs;
-		if (fsInstance) {
-			return fsInstance.findByPath(this.targetPath);
-		}
-		return null;
-	}
-
-	copy() {
-		const newShortcut = new Shortcut(this.name, null, this.targetPath, this.icon);
-		newShortcut.createdAt = new Date(this.createdAt);
-		newShortcut.modifiedAt = new Date(this.modifiedAt);
-		newShortcut.hidden = this.hidden;
-		newShortcut.attributes = Object.assign({}, this.attributes);
-		return newShortcut;
-	}
-
-	toJSON() {
-		return {
-			...super.toJSON(),
-			targetPath: this.targetPath,
-			icon: this.icon,
-		};
-	}
-}
-
-class ProjectFile extends Element {
-	constructor(name, parent = null, projectData = {}) {
-		super(name, parent);
-		this.projectData = projectData;
-		this.icon = projectData.icon || '../assets/images/desk/icons/File.webp';
-	}
-
-	copy() {
-		const newProject = new ProjectFile(this.name, null, this.projectData);
-		newProject.createdAt = new Date(this.createdAt);
-		newProject.modifiedAt = new Date(this.modifiedAt);
-		newProject.hidden = this.hidden;
-		newProject.attributes = Object.assign({}, this.attributes);
-		return newProject;
-	}
-
-	toJSON() {
-		return {
-			...super.toJSON(),
-			projectData: this.projectData,
-			icon: this.icon,
-		};
-	}
-}
-
-class FileSystemManager {
-	static typeRegistry = new Map();
-
-	static registerType(type, constructorRef) {
-		FileSystemManager.typeRegistry.set(type, constructorRef);
-	}
-
-	constructor() {
-		this.root = new Folder('Desktop');
-		this.clipboard = {
-			mode: null,
-			elements: [],
-			paths: [],
-			sources: []
-		};
-		this.undoStack = [];
-		this.redoStack = [];
-		this.initTypeRegistry();
-	}
-
-	initTypeRegistry() {
-		FileSystemManager.registerType('Folder', Folder);
-		FileSystemManager.registerType('File', File);
-		FileSystemManager.registerType('Shortcut', Shortcut);
-		FileSystemManager.registerType('ProjectFile', ProjectFile);
-	}
-
-	emitEvent(eventName, payload) {
-		if (window.DeskEventBus) {
-			window.DeskEventBus.emit(eventName, payload);
-			window.DeskEventBus.emit('fs:changed', payload);
-		}
-	}
-
-	exists(path) {
-		return this.findByPath(path) !== null;
-	}
-
-	findByPath(path) {
-		if (!path || path === '/' || path === '') {
-			return this.root;
-		}
-		const parts = path.split('/').filter(p => p);
-		let current = this.root;
-		for (const part of parts) {
-			if (!(current instanceof Folder) || !current.children.has(part)) {
-				return null;
-			}
-			current = current.getByName(part);
-		}
-		return current;
-	}
-
-	create(type, path, name, options = {}) {
-		const parentFolder = this.findByPath(path);
-		if (!(parentFolder instanceof Folder)) {
-			throw new Error(`Invalid path: ${path}`);
-		}
-
-		const getBaseNameAndExtension = (filename) => {
-			const lastDot = filename.lastIndexOf('.');
-			if (lastDot === -1 || lastDot === 0) return [filename, ''];
-			return [filename.substring(0, lastDot), filename.substring(lastDot)];
-		};
-
-		let [baseName, ext] = getBaseNameAndExtension(name);
-		let finalName = parentFolder.getUniqueName(baseName, ext);
-
-		let newElement;
-		if (type === 'Folder') {
-			newElement = new Folder(finalName);
-			if (options.icon) newElement.icon = options.icon;
-		} else if (type === 'Shortcut') {
-			newElement = new Shortcut(finalName, null, options.targetPath || '/', options.icon || '../assets/images/desk/icons/Folder Closed.webp');
-		} else if (type === 'ProjectFile') {
-			newElement = new ProjectFile(finalName, null, options.projectData || {});
-		} else {
-			newElement = new File(finalName, null, options.content || '');
-			if (options.icon) newElement.icon = options.icon;
-			else if (window.ShellAssociations) newElement.icon = window.ShellAssociations.getIcon(newElement);
-		}
-
-		parentFolder.add(newElement);
-		this.undoStack.push({
-			type: 'create',
-			path: newElement.getFullPath(),
-			elementData: newElement.toJSON()
-		});
-		this.redoStack = [];
-		this.save();
-		this.emitEvent('fs:created', { element: newElement, path: newElement.getFullPath() });
-
-		if (type === 'Folder' && window.AchievementsManager) {
-			let depth = 0;
-			let curr = newElement;
-			const names = new Set();
-			let hasDefault = false;
-			while (curr && curr.parent) {
-				depth++;
-				if (curr.name.toLowerCase().startsWith('new folder')) hasDefault = true;
-				names.add(curr.name.toLowerCase());
-				curr = curr.parent;
-			}
-			if (depth >= 4 && !hasDefault && names.size >= 4) {
-				window.AchievementsManager.progress('deep_folders', 1);
-			}
-		}
-
-		return newElement;
-	}
-
-	delete(path) {
-		const element = this.findByPath(path);
-		if (!element || !element.parent) {
-			throw new Error('Cannot delete root or non-existent element.');
-		}
-		if (element instanceof File && element.savedFromNotepad && window.AchievementsManager) {
-			window.AchievementsManager.progress('notepad_save_delete', 1);
-		}
-		if (element instanceof Folder && (element.name.toLowerCase() === 'music' || element.getFullPath() === '/Music') && window.AchievementsManager) {
-			window.AchievementsManager.progress('delete_music_library', 1);
-		}
-		const fullPath = element.getFullPath();
-		const posMap = loadDesktopIconPositions();
-		if (posMap[fullPath]) {
-			delete posMap[fullPath];
-			saveDesktopIconPositions(posMap);
-		}
-		const parent = element.parent;
-		const name = element.name;
-		parent.remove(name);
-		this.save();
-		this.emitEvent('fs:deleted', { path, name });
-	}
-
-	duplicate(path) {
-		const element = this.findByPath(path);
-		if (!element || !element.parent) throw new Error('Cannot duplicate non-existent or root element.');
-		const parent = element.parent;
-		return this.copy(element.getFullPath(), parent.getFullPath());
-	}
-
-	move(sourcePath, destPath) {
-		const element = this.findByPath(sourcePath);
-		const destFolder = this.findByPath(destPath);
-
-		if (!element || !element.parent) throw new Error('Source not found or is root.');
-		if (!(destFolder instanceof Folder)) throw new Error('Destination is not a folder.');
-
-		let checkParent = destFolder;
-		while (checkParent) {
-			if (checkParent === element) {
-				throw new Error('Cannot move a folder into itself or one of its children.');
-			}
-			checkParent = checkParent.parent;
-		}
-
-		if (element.parent === destFolder) return;
-
-		const getBaseNameAndExtension = (filename) => {
-			const lastDot = filename.lastIndexOf('.');
-			if (lastDot === -1 || lastDot === 0) return [filename, ''];
-			return [filename.substring(0, lastDot), filename.substring(lastDot)];
-		};
-
-		const [baseName, ext] = getBaseNameAndExtension(element.name);
-		const finalName = destFolder.getUniqueName(baseName, ext);
-
-		const originalParent = element.parent;
-		const originalName = element.name;
-		originalParent.remove(originalName);
-
-		element.name = finalName;
-		destFolder.add(element);
-
-		this.undoStack.push({
-			type: 'move',
-			fromParentPath: originalParent.getFullPath(),
-			fromPath: sourcePath,
-			toPath: element.getFullPath(),
-			originalName,
-			destName: finalName
-		});
-		this.redoStack = [];
-
-		this.save();
-		this.emitEvent('fs:moved', { element, sourcePath, destPath: element.getFullPath() });
-	}
-
-	copy(sourcePath, destPath) {
-		const elementToCopy = this.findByPath(sourcePath);
-		const destFolder = this.findByPath(destPath);
-
-		if (!elementToCopy) throw new Error('Source element not found.');
-		if (!(destFolder instanceof Folder)) throw new Error('Destination is not a folder.');
-
-		const getBaseNameAndExtension = (filename) => {
-			const lastDot = filename.lastIndexOf('.');
-			if (lastDot === -1 || lastDot === 0) return [filename, ''];
-			return [filename.substring(0, lastDot), filename.substring(lastDot)];
-		};
-
-		const [baseName, ext] = getBaseNameAndExtension(elementToCopy.name);
-		let finalName = `Copy of ${baseName}${ext}`;
-		let counter = 2;
-		while (destFolder.children.has(finalName)) {
-			finalName = `Copy (${counter}) of ${baseName}${ext}`;
-			counter++;
-		}
-
-		const newElement = elementToCopy.copy();
-		newElement.name = finalName;
-		destFolder.add(newElement);
-		this.undoStack.push({
-			type: 'copy',
-			path: newElement.getFullPath(),
-			elementData: newElement.toJSON()
-		});
-		this.redoStack = [];
-		this.save();
-		this.emitEvent('fs:created', { element: newElement, path: newElement.getFullPath() });
-		return newElement;
-	}
-
-	compressToZip(sourcePath, destPath = null) {
-		const element = this.findByPath(sourcePath);
-		if (!element || !element.parent) throw new Error('Cannot compress root or non-existent element.');
-		const targetFolder = destPath ? this.findByPath(destPath) : element.parent;
-		if (!(targetFolder instanceof Folder)) throw new Error('Target destination is not a valid folder.');
-
-		const zipName = `${element.name}.zip`;
-		const serializedData = JSON.stringify(element.toJSON());
-		const zipFile = new File(zipName, null, serializedData);
-		zipFile.icon = '../assets/images/desk/icons/Folder Closed.webp';
-
-		const [base, ext] = [element.name, '.zip'];
-		zipFile.name = targetFolder.getUniqueName(base, ext);
-		targetFolder.add(zipFile);
-		this.save();
-		this.emitEvent('fs:created', { element: zipFile, path: zipFile.getFullPath() });
-		return zipFile;
-	}
-
-	extractZip(zipFilePath, destPath = null) {
-		const zipFile = this.findByPath(zipFilePath);
-		if (!zipFile || !(zipFile instanceof File)) throw new Error('Invalid archive file.');
-		const targetFolder = destPath ? this.findByPath(destPath) : (zipFile.parent || this.root);
-		if (!(targetFolder instanceof Folder)) throw new Error('Extraction folder is invalid.');
-
-		try {
-			const parsed = JSON.parse(zipFile.content);
-			const extracted = this.rehydrate(parsed, null);
-			const baseName = extracted.name;
-			const lastDot = baseName.lastIndexOf('.');
-			const [bName, ext] = (lastDot > 0) ? [baseName.substring(0, lastDot), baseName.substring(lastDot)] : [baseName, ''];
-			extracted.name = targetFolder.getUniqueName(bName, ext);
-			targetFolder.add(extracted);
-			this.save();
-			this.emitEvent('fs:created', { element: extracted, path: extracted.getFullPath() });
-			return extracted;
-		} catch (e) {
-			const fallbackName = targetFolder.getUniqueName('Extracted Text', '.txt');
-			const txtFile = new File(fallbackName, null, zipFile.content);
-			targetFolder.add(txtFile);
-			this.save();
-			this.emitEvent('fs:created', { element: txtFile, path: txtFile.getFullPath() });
-			return txtFile;
-		}
-	}
-
-	moveToRecycleBin(path) {
-		const element = this.findByPath(path);
-		if (!element || !element.parent) {
-			throw new Error('Cannot recycle root or non-existent element.');
-		}
-		if (element instanceof File && element.savedFromNotepad && window.AchievementsManager) {
-			window.AchievementsManager.progress('notepad_save_delete', 1);
-		}
-		if (element instanceof Folder && (element.name.toLowerCase() === 'music' || element.getFullPath() === '/Music') && window.AchievementsManager) {
-			window.AchievementsManager.progress('delete_music_library', 1);
-		}
-		const originalPath = element.parent.getFullPath();
-		const serialized = element.toJSON();
-		element.parent.remove(element.name);
-
-		const uid = `rb-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
-		const recycleItems = this.loadRecycleBinItems();
-		recycleItems.push({
-			uid,
-			originalPath,
-			deletedAt: new Date().toISOString(),
-			data: serialized
-		});
-		this.saveRecycleBinItems(recycleItems);
-		this.undoStack.push({
-			type: 'recycle',
-			uid,
-			originalPath,
-			data: serialized
-		});
-		this.redoStack = [];
-		this.save();
-		if (window.SettingsApp && typeof window.SettingsApp.playSound === 'function') {
-			window.SettingsApp.playSound('recycle');
-		}
-		this.emitEvent('fs:recycled', { path, originalPath });
-	}
-
-	loadRecycleBinItems() {
-		try {
-			const raw = localStorage.getItem('recycleBinItems');
-			return raw ? JSON.parse(raw) : [];
-		} catch (error) {
-			return [];
-		}
-	}
-
-	saveRecycleBinItems(items) {
-		localStorage.setItem('recycleBinItems', JSON.stringify(items));
-	}
-
-	restoreFromRecycleBin(uid) {
-		const items = this.loadRecycleBinItems();
-		const index = items.findIndex(item => item.uid === uid);
-		if (index === -1) {
-			throw new Error('Item not found in Recycle Bin.');
-		}
-		const item = items[index];
-		let destFolder = this.findByPath(item.originalPath);
-		if (!(destFolder instanceof Folder)) {
-			destFolder = this.root;
-		}
-		const restored = this.rehydrate(item.data, null);
-		const lastDot = restored.name.lastIndexOf('.');
-		const [bName, ext] = (lastDot > 0 && !(restored instanceof Folder)) ? [restored.name.substring(0, lastDot), restored.name.substring(lastDot)] : [restored.name, ''];
-		restored.name = destFolder.getUniqueName(bName, ext);
-		destFolder.add(restored);
-		items.splice(index, 1);
-		this.saveRecycleBinItems(items);
-		this.undoStack.push({
-			type: 'restore',
-			path: restored.getFullPath(),
-			originalPath: item.originalPath,
-			data: item.data
-		});
-		this.redoStack = [];
-		this.save();
-		if (window.SettingsApp && typeof window.SettingsApp.playSound === 'function') {
-			window.SettingsApp.playSound('window');
-		}
-		this.emitEvent('fs:restored', { element: restored, path: restored.getFullPath() });
-		return restored;
-	}
-
-	deletePermanentlyFromRecycleBin(uid) {
-		const items = this.loadRecycleBinItems();
-		const filtered = items.filter(item => item.uid !== uid);
-		this.saveRecycleBinItems(filtered);
-		if (window.SettingsApp && typeof window.SettingsApp.playSound === 'function') {
-			window.SettingsApp.playSound('recycle');
-		}
-		this.emitEvent('fs:changed', { uid });
-	}
-
-	emptyRecycleBin() {
-		const items = this.loadRecycleBinItems();
-		if (items.length > 0 && window.AchievementsManager) {
-			window.AchievementsManager.progress('recycle_cleaner', 1);
-		}
-		this.saveRecycleBinItems([]);
-		if (window.SettingsApp && typeof window.SettingsApp.playSound === 'function') {
-			window.SettingsApp.playSound('recycle');
-		}
-		this.emitEvent('fs:recycle-emptied', {});
-	}
-
-	undo() {
-		if (this.undoStack.length === 0) return false;
-		const op = this.undoStack.pop();
-		if (op.type === 'batch') {
-			for (let i = op.operations.length - 1; i >= 0; i--) {
-				this.undoStack.push(op.operations[i]);
-				this.undo();
-			}
-			return true;
-		}
-		if (op.type === 'desktop-layout') {
-			const currentPos = loadDesktopIconPositions();
-			this.redoStack.push({
-				type: 'desktop-layout',
-				positions: currentPos
-			});
-			saveDesktopIconPositions(op.positions);
-			arrangeIcons('none');
-			return true;
-		}
-		if (op.type === 'move') {
-			const el = this.findByPath(op.toPath);
-			const dest = this.findByPath(op.fromParentPath);
-			if (el && dest instanceof Folder) {
-				el.parent.remove(el.name);
-				el.name = op.originalName;
-				dest.add(el);
-				this.redoStack.push({
-					type: 'move',
-					fromParentPath: op.toPath.substring(0, op.toPath.lastIndexOf('/')) || '/',
-					fromPath: el.getFullPath(),
-					toPath: op.toPath,
-					originalName: op.originalName,
-					destName: op.destName
-				});
-				this.save();
-				this.emitEvent('fs:moved', { element: el, sourcePath: op.toPath, destPath: el.getFullPath() });
-				return true;
-			}
-		} else if (op.type === 'create' || op.type === 'copy') {
-			const el = this.findByPath(op.path);
-			if (el && el.parent) {
-				const parent = el.parent;
-				const name = el.name;
-				parent.remove(name);
-				this.redoStack.push(op);
-				this.save();
-				this.emitEvent('fs:deleted', { path: op.path, name });
-				return true;
-			}
-		} else if (op.type === 'recycle') {
-			const items = this.loadRecycleBinItems();
-			const idx = items.findIndex(i => i.uid === op.uid);
-			if (idx !== -1) {
-				const item = items[idx];
-				let destFolder = this.findByPath(item.originalPath);
-				if (!(destFolder instanceof Folder)) destFolder = this.root;
-				const restored = this.rehydrate(item.data, null);
-				destFolder.add(restored);
-				items.splice(idx, 1);
-				this.saveRecycleBinItems(items);
-				this.redoStack.push({
-					type: 'restore',
-					path: restored.getFullPath(),
-					originalPath: item.originalPath,
-					data: item.data
-				});
-				this.save();
-				this.emitEvent('fs:restored', { element: restored, path: restored.getFullPath() });
-				return true;
-			}
-		} else if (op.type === 'restore') {
-			const el = this.findByPath(op.path);
-			if (el && el.parent) {
-				const originalPath = el.parent.getFullPath();
-				const serialized = el.toJSON();
-				el.parent.remove(el.name);
-				const uid = `rb-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
-				const recycleItems = this.loadRecycleBinItems();
-				recycleItems.push({
-					uid,
-					originalPath,
-					deletedAt: new Date().toISOString(),
-					data: serialized
-				});
-				this.saveRecycleBinItems(recycleItems);
-				this.redoStack.push({
-					type: 'recycle',
-					uid,
-					originalPath,
-					data: serialized
-				});
-				this.save();
-				this.emitEvent('fs:recycled', { path: op.path, originalPath });
-				return true;
-			}
-		} else if (op.type === 'rename') {
-			const el = this.findByPath(op.newPath);
-			if (el) {
-				el.rename(op.oldName);
-				this.redoStack.push({
-					type: 'rename',
-					oldPath: op.oldPath,
-					newPath: el.getFullPath(),
-					oldName: op.oldName,
-					newName: op.newName
-				});
-				this.save();
-				return true;
-			}
-		}
-		return false;
-	}
-
-	redo() {
-		if (this.redoStack.length === 0) return false;
-		const op = this.redoStack.pop();
-		if (op.type === 'batch') {
-			for (let i = 0; i < op.operations.length; i++) {
-				this.redoStack.push(op.operations[i]);
-				this.redo();
-			}
-			return true;
-		}
-		if (op.type === 'desktop-layout') {
-			const currentPos = loadDesktopIconPositions();
-			this.undoStack.push({
-				type: 'desktop-layout',
-				positions: currentPos
-			});
-			saveDesktopIconPositions(op.positions);
-			arrangeIcons('none');
-			return true;
-		}
-		if (op.type === 'move') {
-			const el = this.findByPath(op.fromPath);
-			const destFolder = this.findByPath(op.fromParentPath);
-			if (el && destFolder instanceof Folder) {
-				this.move(el.getFullPath(), destFolder.getFullPath());
-				return true;
-			}
-		} else if (op.type === 'create' || op.type === 'copy') {
-			const parentPath = op.path.substring(0, op.path.lastIndexOf('/')) || '/';
-			const parent = this.findByPath(parentPath);
-			if (parent instanceof Folder) {
-				const recreated = this.rehydrate(op.elementData, parent);
-				parent.add(recreated);
-				this.undoStack.push(op);
-				this.save();
-				this.emitEvent('fs:created', { element: recreated, path: recreated.getFullPath() });
-				return true;
-			}
-		} else if (op.type === 'recycle') {
-			if (op.path) {
-				const el = this.findByPath(op.path);
-				if (el) {
-					this.moveToRecycleBin(op.path);
-					return true;
-				}
-			}
-		} else if (op.type === 'restore') {
-			if (op.uid) {
-				this.restoreFromRecycleBin(op.uid);
-				return true;
-			}
-		} else if (op.type === 'rename') {
-			const el = this.findByPath(op.oldPath);
-			if (el) {
-				el.rename(op.newName);
-				this.undoStack.push(op);
-				this.save();
-				return true;
-			}
-		}
-		return false;
-	}
-
-	search(query) {
-		if (!query || typeof query !== 'string') return [];
-		const q = query.toLowerCase().trim();
-		const results = [];
-		const walk = (folder) => {
-			for (const child of folder.children.values()) {
-				if (child.name.toLowerCase().includes(q)) {
-					results.push(child);
-				}
-				if (child instanceof Folder) {
-					walk(child);
-				}
-			}
-		};
-		walk(this.root);
-		return results;
-	}
-
-	save() {
-		localStorage.setItem('fileSystem', JSON.stringify(this.root.toJSON()));
-	}
-
-	load() {
-		const savedData = localStorage.getItem('fileSystem');
-		if (savedData) {
-			try {
-				const data = JSON.parse(savedData);
-				this.root = this.rehydrate(data, null);
-			} catch (e) {
-				this.root = new Folder('Desktop');
-			}
-		}
-	}
-
-	rehydrate(data, parent) {
-		let element;
-		const ConstructorClass = FileSystemManager.typeRegistry.get(data.type) || File;
-		if (data.type === 'Folder') {
-			element = new ConstructorClass(data.name, parent);
-			if (data.children) {
-				data.children.forEach(childData => {
-					const childElement = this.rehydrate(childData, element);
-					element.add(childElement);
-				});
-			}
-		} else if (data.type === 'Shortcut') {
-			element = new ConstructorClass(data.name, parent, data.targetPath, data.icon);
-		} else if (data.type === 'ProjectFile') {
-			element = new ConstructorClass(data.name, parent, data.projectData);
-		} else {
-			element = new ConstructorClass(data.name, parent, data.content || '');
-			element.readOnly = !!data.readOnly;
-			element.remoteUrl = data.remoteUrl || null;
-			element.savedFromNotepad = !!data.savedFromNotepad;
-		}
-		element.createdAt = new Date(data.createdAt || Date.now());
-		element.modifiedAt = new Date(data.modifiedAt || Date.now());
-		element.hidden = !!data.hidden;
-		if (data.attributes) element.attributes = Object.assign({}, data.attributes);
-		if (data.icon) {
-			element.icon = data.icon;
-		} else if (window.ShellAssociations) {
-			element.icon = window.ShellAssociations.getIcon(element);
-		}
-		return element;
-	}
-}
-
 let openWindows = window.WindowManager ? window.WindowManager.windows : {};
 let zIndexCounter = 100;
 let activeWindow = null;
@@ -1382,36 +424,13 @@ document.addEventListener('DOMContentLoaded', async () => {
 });
 
 function initDocuments() {
-	if (typeof window.libraryData === 'undefined' || !window.libraryData.documents) return;
-
-	const folderName = "PDFs";
-	let docFolder = fs.root.getByName(folderName);
-
-	if (!docFolder) {
-		docFolder = new Folder(folderName);
-		docFolder.icon = "../assets/images/desk/icons/Folder Closed.webp";
-		fs.root.add(docFolder);
-	}
-
-	window.libraryData.documents.forEach(doc => {
-		const fileName = doc.filePath.split('/').pop();
-		let file;
-
-		if (docFolder.children.has(fileName)) {
-			file = docFolder.getByName(fileName);
-			file.write(doc.filePath);
-		} else {
-			file = new File(fileName, null, doc.filePath);
-			file.icon = "../assets/images/desk/icons/List File.webp";
-			docFolder.add(file);
+	if (!fs) return;
+	['/PDFs', '/Music', '/Others/Poems', '/Others/Projects'].forEach(mountPath => {
+		const mount = fs.mountPoints.get(mountPath);
+		if (mount && typeof mount.refresh === 'function') {
+			mount.refresh();
 		}
-
-		const resolvedSize = doc.size || doc.fileSize || (doc.filePath ? Math.floor(180000 + (Math.abs(doc.filePath.split('').reduce((acc, c) => acc + c.charCodeAt(0), 0)) * 9271) % 2400000) : 245000);
-		file.size = resolvedSize;
-		file.createdAt = new Date(doc.timestamp);
-		file.modifiedAt = new Date(doc.timestamp);
 	});
-	fs.save();
 }
 
 function setupDesktopSelection() {
@@ -1687,66 +706,123 @@ function migrateProjectFileLocations(othersFolder, othersProjectsFolder) {
 }
 
 function initializeFileSystem() {
-	fs = new FileSystemManager();
+	fs = new VFSManager();
 	window.fs = fs;
+	window.vfs = fs;
 	fs.load();
 
-	let musicFolder = fs.root.getByName('Music');
-	if (!musicFolder) {
-		musicFolder = new Folder('Music');
-		musicFolder.icon = '../assets/images/desk/icons/Folder Closed.webp';
-		fs.root.add(musicFolder);
+	const pdfProvider = new DynamicLibraryVFSProvider('dynamic-documents', {
+		rootName: 'PDFs',
+		generator: () => {
+			if (!window.libraryData || !window.libraryData.documents) return [];
+			return window.libraryData.documents.map(doc => {
+				const fileName = doc.filePath.split('/').pop();
+				const file = new File(fileName, null, doc.filePath);
+				file.icon = '../assets/images/desk/icons/List File.webp';
+				file.size = doc.size || doc.fileSize || 245000;
+				file.createdAt = new Date(doc.timestamp);
+				file.modifiedAt = new Date(doc.timestamp);
+				return file;
+			});
+		}
+	});
+	fs.mount('/PDFs', pdfProvider);
+
+	const musicProvider = new DynamicLibraryVFSProvider('dynamic-music', {
+		rootName: 'Music',
+		generator: () => {
+			if (!window.MusicStore || !window.MusicStore.tracks) return [];
+			return window.MusicStore.tracks.map(t => {
+				const f = new File(t.title || 'Track.mp3', null, t.url || '');
+				f.icon = '../assets/images/desk/icons/Music File.webp';
+				f.musicTrack = t;
+				return f;
+			});
+		}
+	});
+	fs.mount('/Music', musicProvider);
+
+	const poemsProvider = new DynamicLibraryVFSProvider('dynamic-poetry', {
+		rootName: 'Poems',
+		generator: () => {
+			if (!window.poetryData || !window.poetryData.documents) return [];
+			return window.poetryData.documents.map(poem => {
+				const fileName = poem.filePath.split('/').pop();
+				const file = new File(fileName, null, '');
+				file.icon = '../assets/images/desk/icons/File.webp';
+				file.readOnly = true;
+				file.remoteUrl = poem.filePath;
+				file.createdAt = new Date(poem.timestamp);
+				file.modifiedAt = new Date(poem.timestamp);
+				return file;
+			});
+		}
+	});
+	fs.mount('/Others/Poems', poemsProvider);
+
+	let othersFolder = fs.findByPath('/Others');
+	if (othersFolder instanceof Folder) {
+		othersFolder.hidden = true;
 	}
 
-	let docFolder = fs.root.getByName('PDFs');
-	if (!docFolder) {
-		docFolder = new Folder('PDFs');
-		docFolder.icon = '../assets/images/desk/icons/Folder Closed.webp';
-		fs.root.add(docFolder);
-	}
+	const projectsProvider = new DynamicLibraryVFSProvider('dynamic-projects', {
+		rootName: 'Projects',
+		generator: () => {
+			if (typeof projects === 'undefined' || !Array.isArray(projects)) return [];
+			return projects.flat().filter(p => p && typeof p === 'object' && p.title).map(project => {
+				const titleText = resolveProjectTitle(project.title);
+				const projectFile = new ProjectFile(titleText, null, project);
+				projectFile.createdAt = new Date(project.timestamp || Date.now());
+				return projectFile;
+			});
+		}
+	});
+	fs.mount('/Others/Projects', projectsProvider);
 
-	let othersFolder = fs.root.getByName('Others');
-	if (!othersFolder) {
-		othersFolder = new Folder('Others');
-		othersFolder.icon = '../assets/images/desk/icons/Folder Closed.webp';
-		fs.root.add(othersFolder);
-	}
-	othersFolder.hidden = true;
+	const userStorageProvider = new IndexedDBVFSProvider('user-data-store', {
+		rootName: 'UserData',
+		dbName: 'Wartets_XP_UserData_DB',
+		storeName: 'files',
+		hidden: true
+	});
+	fs.mount('/UserData', userStorageProvider, { hidden: true });
 
-	let othersProjectsFolder = othersFolder.getByName('Projects');
-	if (!othersProjectsFolder) {
-		othersProjectsFolder = new Folder('Projects');
-		othersProjectsFolder.icon = '../assets/images/desk/icons/Folder Closed.webp';
-		othersFolder.add(othersProjectsFolder);
-	}
-
-	migrateProjectFileLocations(othersFolder, othersProjectsFolder);
+	const configuredDrives = (window.SettingsApp && window.SettingsApp.get('vfsDrives')) || [];
+	configuredDrives.forEach(drv => {
+		if (drv.letter && !fs.getDrive(drv.letter)) {
+			const mountPath = drv.letter === 'C' ? '/' : `/Volumes/${drv.letter}`;
+			const provider = new VirtualDriveProvider(drv.letter, {
+				volumeLabel: drv.label,
+				driveType: drv.type,
+				totalBytes: drv.totalBytes,
+				freeBytes: drv.freeBytes,
+				icon: drv.icon,
+				isReady: drv.type !== 'removable'
+			});
+			if (mountPath !== '/') fs.mount(mountPath, provider);
+			fs.registerDrive(drv.letter, provider, mountPath);
+		}
+	});
 
 	const existingDesktopProjectNames = new Set(
 		fs.root.listContent().filter(el => el instanceof ProjectFile).map(el => el.name)
 	);
-	const existingHiddenProjectNames = new Set(othersProjectsFolder.listContent().map(el => el.name));
 
-	projects.flat().forEach(project => {
-		if (typeof project !== 'object' || project === null || !project.title) return;
-		const titleText = resolveProjectTitle(project.title);
-		if (!titleText) return;
+	if (typeof projects !== 'undefined' && Array.isArray(projects)) {
+		projects.flat().forEach(project => {
+			if (typeof project !== 'object' || project === null || !project.title) return;
+			if (project.show === false) return;
+			const titleText = resolveProjectTitle(project.title);
+			if (!titleText || existingDesktopProjectNames.has(titleText)) return;
 
-		const isVisible = project.show !== false;
-		const targetFolder = isVisible ? fs.root : othersProjectsFolder;
-		const existingNames = isVisible ? existingDesktopProjectNames : existingHiddenProjectNames;
+			const projectFile = new ProjectFile(titleText, null, project);
+			projectFile.createdAt = new Date(project.timestamp || Date.now());
+			fs.root.add(projectFile);
+			existingDesktopProjectNames.add(titleText);
+		});
+	}
 
-		if (existingNames.has(titleText)) return;
-
-		const projectFile = new ProjectFile(titleText, null, project);
-		projectFile.createdAt = new Date(project.timestamp || Date.now());
-		targetFolder.add(projectFile);
-		existingNames.add(titleText);
-	});
-
-	initPoemsFolder(othersFolder);
 	initWallpaperFolder();
-
 	fs.save();
 }
 
@@ -1786,31 +862,24 @@ function initWallpaperFolder() {
 		webFolder.icon = '../assets/images/desk/icons/Folder Closed.webp';
 		winFolder.add(webFolder);
 	}
-	let wpFolder = webFolder.getByName('Wallpaper');
-	if (!wpFolder) {
-		wpFolder = new Folder('Wallpaper');
-		wpFolder.icon = '../assets/images/desk/icons/Folder Closed.webp';
-		webFolder.add(wpFolder);
-	}
 
-	fetch('../data/desk-wallpaper.json')
-		.then(r => r.ok ? r.json() : [])
-		.then(items => {
-			if (Array.isArray(items)) {
-				items.forEach(item => {
-					const fileName = item.filename || `${item.name}.webp`;
-					if (!wpFolder.children.has(fileName)) {
-						const file = new File(fileName, null, item.path);
-						file.remoteUrl = item.path;
-						file.icon = '../assets/images/desk/icons/Picture.webp';
-						file.size = 285000;
-						wpFolder.add(file);
-					}
-				});
-				fs.save();
-			}
-		})
-		.catch(() => {});
+	const wallpaperProvider = new StaticJSONVFSProvider('static-wallpapers', {
+		endpoint: '../data/desk-wallpaper.json',
+		rootName: 'Wallpaper',
+		transform: (items) => {
+			if (!Array.isArray(items)) return [];
+			return items.map(item => {
+				const fileName = item.filename || `${item.name}.webp`;
+				const file = new File(fileName, null, item.path);
+				file.remoteUrl = item.path;
+				file.icon = '../assets/images/desk/icons/Picture.webp';
+				file.size = 285000;
+				file.readOnly = true;
+				return file;
+			});
+		}
+	});
+	fs.mount('/WINDOWS/Web/Wallpaper', wallpaperProvider);
 }
 
 function initPoemsFolder(othersFolder) {
@@ -3327,7 +2396,8 @@ function openFileSystemElement(element, windowContext = null) {
 	if (!element) return;
 	let targetElement = element;
 	if (typeof element === 'string' && fs) {
-		targetElement = fs.findByPath(element);
+		const normalized = VFSPath.normalize(element);
+		targetElement = fs.findByPath(normalized);
 	}
 	if (!targetElement) return;
 
@@ -4614,6 +3684,38 @@ function openMyComputerWindow(options = {}) {
 		return existing;
 	}
 
+	const drivesList = (fs && typeof fs.getDrives === 'function') ? fs.getDrives() : [];
+	const hardDrives = drivesList.filter(d => d.driveType === 'fixed');
+	const removableDrives = drivesList.filter(d => d.driveType !== 'fixed');
+
+	let hardDrivesHtml = '';
+	hardDrives.forEach(d => {
+		const totalGb = (d.totalBytes / (1024 * 1024 * 1024)).toFixed(1);
+		const freeGb = (d.freeBytes / (1024 * 1024 * 1024)).toFixed(1);
+		hardDrivesHtml += `
+			<div class="my-comp-item" data-drive="${d.letter}" data-path="${d.mountPath}">
+				<img src="${d.icon}" alt="${d.volumeLabel}">
+				<div class="my-comp-texts">
+					<strong>${d.volumeLabel}</strong>
+					<span>${freeGb} GB free of ${totalGb} GB</span>
+				</div>
+			</div>
+		`;
+	});
+
+	let removableDrivesHtml = '';
+	removableDrives.forEach(d => {
+		removableDrivesHtml += `
+			<div class="my-comp-item" data-drive="${d.letter}" data-path="${d.mountPath}">
+				<img src="${d.icon}" alt="${d.volumeLabel}">
+				<div class="my-comp-texts">
+					<strong>${d.volumeLabel}</strong>
+					<span>${d.driveType === 'cdrom' ? 'Compact Disc' : '3½-Inch Floppy Disk'}</span>
+				</div>
+			</div>
+		`;
+	});
+
 	const contentHTML = `
 		<div class="xp-explorer-layout">
 			<div class="xp-explorer-menubar">
@@ -4682,14 +3784,14 @@ function openMyComputerWindow(options = {}) {
 						<div class="my-comp-group">
 							<div class="my-comp-group-title">Files Stored on This Computer</div>
 							<div class="my-comp-grid">
-								<div class="my-comp-item" id="mycomp-item-shared">
+								<div class="my-comp-item" id="mycomp-item-shared" data-path="/PDFs">
 									<img src="../assets/images/desk/icons/Folder Closed (Alt).webp" alt="Shared Documents">
 									<div class="my-comp-texts">
 										<strong>Shared Documents</strong>
 										<span>System Folder</span>
 									</div>
 								</div>
-								<div class="my-comp-item" id="mycomp-item-userdocs">
+								<div class="my-comp-item" id="mycomp-item-userdocs" data-path="/">
 									<img src="../assets/images/desk/icons/My Profile Folder.webp" alt="User's Documents">
 									<div class="my-comp-texts">
 										<strong>Colin's Documents</strong>
@@ -4702,40 +3804,21 @@ function openMyComputerWindow(options = {}) {
 						<div class="my-comp-group">
 							<div class="my-comp-group-title">Hard Disk Drives</div>
 							<div class="my-comp-grid">
-								<div class="my-comp-item" id="mycomp-item-drive-c">
-									<img src="../assets/images/desk/icons/User's Computer.webp" alt="Drive C">
-									<div class="my-comp-texts">
-										<strong>Local Disk (C:)</strong>
-										<span>24.8 GB free of 40.0 GB</span>
-									</div>
-								</div>
+								${hardDrivesHtml}
 							</div>
 						</div>
 
 						<div class="my-comp-group">
 							<div class="my-comp-group-title">Devices with Removable Storage</div>
 							<div class="my-comp-grid">
-								<div class="my-comp-item" id="mycomp-item-floppy">
-									<img src="../assets/images/desk/icons/Floppy Drive.webp" alt="Floppy A">
-									<div class="my-comp-texts">
-										<strong>3½ Floppy (A:)</strong>
-										<span>3½-Inch Floppy Disk</span>
-									</div>
-								</div>
-								<div class="my-comp-item" id="mycomp-item-cdrom">
-									<img src="../assets/images/desk/icons/Disk Image File.webp" alt="CD Drive D">
-									<div class="my-comp-texts">
-										<strong>CD Drive (D:) XP_SP3</strong>
-										<span>Compact Disc</span>
-									</div>
-								</div>
+								${removableDrivesHtml}
 							</div>
 						</div>
 					</div>
 				</div>
 			</div>
 			<div class="xp-explorer-statusbar">
-				<div class="xp-sb-pane xp-sb-count">5 objects</div>
+				<div class="xp-sb-pane xp-sb-count">${2 + drivesList.length} objects</div>
 				<div class="xp-sb-pane xp-sb-zone"><img src="../assets/images/desk/icons/My Computer.webp" alt=""><span>Local Computer</span></div>
 			</div>
 		</div>
@@ -4780,20 +3863,25 @@ function openMyComputerWindow(options = {}) {
 		openAllProjectsFolder();
 	});
 
-	win.querySelector('#mycomp-item-shared').addEventListener('dblclick', () => {
-		if (fs.root.getByName('PDFs')) openFolderWindow(fs.root.getByName('PDFs'));
-	});
-	win.querySelector('#mycomp-item-userdocs').addEventListener('dblclick', () => {
-		openFolderWindow(fs.root);
-	});
-	win.querySelector('#mycomp-item-drive-c').addEventListener('dblclick', () => {
-		openFolderWindow(fs.root);
-	});
-	win.querySelector('#mycomp-item-floppy').addEventListener('dblclick', () => {
-		showXPDialog('Drive A:', 'Please insert a disk into drive A:.', 'error');
-	});
-	win.querySelector('#mycomp-item-cdrom').addEventListener('dblclick', () => {
-		showXPDialog('CD Drive (D:)', 'Microsoft Windows XP Professional SP3 Installation Media.', 'info');
+	win.querySelectorAll('.my-comp-item[data-path]').forEach(itemEl => {
+		itemEl.addEventListener('dblclick', () => {
+			const driveLetter = itemEl.dataset.drive;
+			const targetPath = itemEl.dataset.path;
+			const driveObj = driveLetter ? (fs && fs.getDrive(driveLetter)) : null;
+
+			if (driveObj && !driveObj.provider.isReady) {
+				showXPDialog(`Drive ${driveLetter}:`, `Please insert a disk into drive ${driveLetter}:.`, 'error');
+				return;
+			}
+
+			const normalized = VFSPath.normalize(targetPath);
+			const targetFolder = fs ? fs.findByPath(normalized) : null;
+			if (targetFolder instanceof Folder) {
+				openFolderWindow(targetFolder);
+			} else {
+				showXPDialog(itemEl.querySelector('strong')?.textContent || 'Drive', 'Volume accessible and mounted.', 'info');
+			}
+		});
 	});
 
 	win.querySelectorAll('.xp-task-header').forEach(header => {

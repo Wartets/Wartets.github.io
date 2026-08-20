@@ -9,7 +9,13 @@
 			if (!folder) return null;
 			let targetFolder = null;
 			if (typeof folder === 'string') {
-				targetFolder = fs ? fs.findByPath(folder) : null;
+				const norm = VFSPath.normalize(folder);
+				targetFolder = fs ? fs.findByPath(norm) : null;
+				if (!targetFolder && fs && /^[a-zA-Z]:?$/i.test(folder.trim())) {
+					const letter = folder.trim().charAt(0).toUpperCase();
+					const drv = fs.getDrive(letter);
+					if (drv) targetFolder = fs.findByPath(drv.mountPath);
+				}
 			} else {
 				targetFolder = folder;
 			}
@@ -277,6 +283,7 @@
 		},
 
 		buildWindowTemplate(folder) {
+			const winPath = VFSPath.toWindowsPath(folder.getFullPath());
 			return `
 				<div class="xp-explorer-layout">
 					<div class="xp-explorer-menubar">
@@ -353,7 +360,7 @@
 						<span class="xp-address-label">Address</span>
 						<div class="xp-address-combo">
 							<img src="../assets/images/desk/icons/Folder Closed.webp" class="xp-address-icon" alt="">
-							<input type="text" class="xp-address-input" value="${folder.getFullPath()}">
+							<input type="text" class="xp-address-input" value="${winPath}">
 							<div class="xp-address-dropdown-arrow" title="Address Bar Locations">▼</div>
 						</div>
 						<button type="button" class="xp-address-go-btn" title="Go to Address">
@@ -562,6 +569,14 @@
 							action: () => this.navigateTo(fs.root, win, true)
 						},
 						{
+							label: 'CD Drive (D:)',
+							icon: '../assets/images/desk/icons/Disk Image File.webp',
+							action: () => {
+								const dDrive = fs.findByPath('/Volumes/D');
+								if (dDrive) this.navigateTo(dDrive, win, true);
+							}
+						},
+						{
 							label: 'My Network Places',
 							icon: '../assets/images/desk/icons/My Network Places.webp',
 							action: () => {
@@ -593,7 +608,10 @@
 					const el = fs.findByPath(selected[0].dataset.path);
 					if (el) {
 						fs.clipboard.mode = 'cut';
+						fs.clipboard.elements = selected.map(s => fs.findByPath(s.dataset.path)).filter(Boolean);
+						fs.clipboard.paths = fs.clipboard.elements.map(e => e.getFullPath());
 						fs.clipboard.element = el;
+						if (typeof setCutVisuals === 'function') setCutVisuals(fs.clipboard.paths);
 					}
 				}
 			});
@@ -604,22 +622,30 @@
 					const el = fs.findByPath(selected[0].dataset.path);
 					if (el) {
 						fs.clipboard.mode = 'copy';
+						fs.clipboard.elements = selected.map(s => fs.findByPath(s.dataset.path)).filter(Boolean);
+						fs.clipboard.paths = fs.clipboard.elements.map(e => e.getFullPath());
 						fs.clipboard.element = el;
+						if (typeof clearCutVisuals === 'function') clearCutVisuals();
 					}
 				}
 			});
 
 			pasteBtn.addEventListener('click', () => {
-				if (fs && fs.clipboard && fs.clipboard.element) {
+				if (fs && fs.clipboard && fs.clipboard.elements && fs.clipboard.elements.length > 0) {
 					const dest = state.currentFolder.getFullPath();
-					const src = fs.clipboard.element.getFullPath();
+					const mode = fs.clipboard.mode || 'copy';
 					try {
-						if (fs.clipboard.mode === 'cut') {
-							fs.move(src, dest);
+						fs.clipboard.elements.forEach(el => {
+							const src = el.getFullPath();
+							if (mode === 'cut') {
+								fs.move(src, dest);
+							} else {
+								fs.copy(src, dest);
+							}
+						});
+						if (mode === 'cut') {
 							fs.clipboard.mode = null;
-							fs.clipboard.element = null;
-						} else {
-							fs.copy(src, dest);
+							if (typeof clearCutVisuals === 'function') clearCutVisuals();
 						}
 						refreshUI();
 					} catch (e) {
@@ -671,20 +697,29 @@
 			});
 
 			const handleAddressSubmit = () => {
-				let targetPath = addressInput.value.trim();
-				if (!targetPath.startsWith('/')) {
-					if (targetPath.toLowerCase() === 'desktop' || targetPath.toLowerCase() === 'c:\\' || targetPath.toLowerCase() === 'c:') {
-						targetPath = '/';
-					} else {
-						targetPath = '/' + targetPath;
+				const rawInput = addressInput.value.trim();
+				if (rawInput.toLowerCase() === 'recycle bin' || rawInput.toLowerCase() === 'trash') {
+					this.openRecycleBin();
+					return;
+				}
+				const driveMatch = rawInput.match(/^([a-zA-Z]):?\\?$/);
+				if (driveMatch) {
+					const drvLetter = driveMatch[1].toUpperCase();
+					const driveObj = fs ? fs.getDrive(drvLetter) : null;
+					if (driveObj && !driveObj.provider.isReady) {
+						showXPDialog(`Drive ${drvLetter}:`, `Please insert a disk into drive ${drvLetter}:.`, 'error');
+						addressInput.value = state.isRecycleBin ? 'Recycle Bin' : VFSPath.toWindowsPath(state.currentFolder.getFullPath());
+						return;
 					}
 				}
-				const folder = fs.findByPath(targetPath);
+				const normalized = VFSPath.normalize(rawInput);
+
+				const folder = fs.findByPath(normalized);
 				if (folder instanceof Folder) {
 					this.navigateTo(folder, win, true);
 				} else {
 					showXPDialog('Address Bar', `Cannot find '${addressInput.value}'. Check the spelling and try again.`, 'error');
-					addressInput.value = state.currentFolder.getFullPath();
+					addressInput.value = state.isRecycleBin ? 'Recycle Bin' : VFSPath.toWindowsPath(state.currentFolder.getFullPath());
 				}
 			};
 
@@ -830,7 +865,7 @@
 			const state = win.explorerState;
 			const currentFolder = state.currentFolder;
 			const hasSelection = state.selectedItems.size > 0;
-			const hasClipboard = fs && fs.clipboard && fs.clipboard.element;
+			const hasClipboard = fs && fs.clipboard && fs.clipboard.elements && fs.clipboard.elements.length > 0;
 			const newTemplates = window.ShellAssociations ? window.ShellAssociations.getNewFileTemplates() : [];
 
 			let items = [];
@@ -1134,8 +1169,8 @@
 						label: 'Paste Shortcut',
 						disabled: !hasClipboard,
 						action: () => {
-							if (fs && fs.clipboard && fs.clipboard.element) {
-								const el = fs.clipboard.element;
+							if (fs && fs.clipboard && fs.clipboard.elements && fs.clipboard.elements.length > 0) {
+								const el = fs.clipboard.elements[0];
 								fs.create('Shortcut', currentFolder.getFullPath(), `${el.name} - Shortcut`, {
 									targetPath: el.getFullPath(),
 									icon: el.icon
@@ -1376,7 +1411,7 @@
 			}
 
 			if (titleEl) titleEl.textContent = folder.name;
-			if (addressInput) addressInput.value = folder.getFullPath();
+			if (addressInput) addressInput.value = VFSPath.toWindowsPath(folder.getFullPath());
 			contentContainer.dataset.path = folder.getFullPath();
 
 			backBtn.disabled = state.historyIndex <= 0;
@@ -1917,7 +1952,7 @@
 			const copyBtn = win.querySelector('.tb-copy');
 			const pasteBtn = win.querySelector('.tb-paste');
 			const deleteBtn = win.querySelector('.tb-delete');
-			const hasClipboard = fs && fs.clipboard && fs.clipboard.element;
+			const hasClipboard = fs && fs.clipboard && fs.clipboard.elements && fs.clipboard.elements.length > 0;
 
 			if (cutBtn) cutBtn.disabled = selectedCount === 0 || state.isRecycleBin;
 			if (copyBtn) copyBtn.disabled = selectedCount === 0 || state.isRecycleBin;
@@ -2182,27 +2217,25 @@
 			if (!treeContainer || !fs) return;
 			treeContainer.innerHTML = '';
 
-			const buildNode = (folder, depth = 0) => {
+			const buildNode = (title, iconSrc, targetPath, depth = 0, isExpandable = false, onExpand = null) => {
 				const node = document.createElement('div');
 				node.className = 'xp-tree-node';
-				node.dataset.path = folder.getFullPath();
-				node.dataset.type = 'folder';
+				node.dataset.path = targetPath || '';
 				node.style.paddingLeft = `${depth * 14 + 4}px`;
 
-				const hasSubfolders = folder.listContent().some(c => c instanceof Folder);
-				const isCurrent = win.explorerState.currentFolder === folder;
+				const isCurrent = win.explorerState.currentFolder && win.explorerState.currentFolder.getFullPath && win.explorerState.currentFolder.getFullPath() === targetPath;
 
 				const expandBtn = document.createElement('span');
-				expandBtn.className = `xp-tree-expander ${hasSubfolders ? 'expandable' : 'leaf'}`;
-				expandBtn.textContent = hasSubfolders ? '+' : '';
+				expandBtn.className = `xp-tree-expander ${isExpandable ? 'expandable' : 'leaf'}`;
+				expandBtn.textContent = isExpandable ? '+' : '';
 
 				const iconImg = document.createElement('img');
-				iconImg.src = folder.icon || '../assets/images/desk/icons/Folder Closed.webp';
+				iconImg.src = iconSrc;
 				iconImg.alt = '';
 
 				const label = document.createElement('span');
 				label.className = `xp-tree-label ${isCurrent ? 'active' : ''}`;
-				label.textContent = folder.name;
+				label.textContent = title;
 
 				node.appendChild(expandBtn);
 				node.appendChild(iconImg);
@@ -2213,29 +2246,34 @@
 				childContainer.className = 'xp-tree-children hidden';
 				treeContainer.appendChild(childContainer);
 
-				expandBtn.addEventListener('click', (e) => {
-					e.stopPropagation();
-					if (!hasSubfolders) return;
-					const isExpanded = !childContainer.classList.contains('hidden');
-					if (isExpanded) {
-						childContainer.classList.add('hidden');
-						expandBtn.textContent = '+';
-					} else {
-						childContainer.classList.remove('hidden');
-						expandBtn.textContent = '-';
-						if (childContainer.children.length === 0) {
-							folder.listContent().filter(c => c instanceof Folder).forEach(sub => {
-								const subNode = buildNode(sub, depth + 1);
-								childContainer.appendChild(subNode);
-							});
+				if (isExpandable) {
+					expandBtn.addEventListener('click', (e) => {
+						e.stopPropagation();
+						const isExpanded = !childContainer.classList.contains('hidden');
+						if (isExpanded) {
+							childContainer.classList.add('hidden');
+							expandBtn.textContent = '+';
+						} else {
+							childContainer.classList.remove('hidden');
+							expandBtn.textContent = '-';
+							if (onExpand && childContainer.children.length === 0) {
+								onExpand(childContainer, depth + 1);
+							}
 						}
-					}
-				});
+					});
+				}
 
 				label.addEventListener('click', () => {
 					treeContainer.querySelectorAll('.xp-tree-label').forEach(l => l.classList.remove('active'));
 					label.classList.add('active');
-					this.navigateTo(folder, win, true);
+					if (targetPath === 'recycle-bin') {
+						this.openRecycleBin();
+					} else if (targetPath) {
+						const targetFolder = fs.findByPath(targetPath);
+						if (targetFolder instanceof Folder) {
+							this.navigateTo(targetFolder, win, true);
+						}
+					}
 				});
 
 				node.addEventListener('dragover', handleDragOver);
@@ -2245,7 +2283,85 @@
 				return node;
 			};
 
-			buildNode(fs.root, 0);
+			const renderFolderChildren = (parentFolder, container, depth) => {
+				parentFolder.listContent().filter(c => c instanceof Folder).forEach(sub => {
+					const hasSub = sub.listContent().some(c => c instanceof Folder);
+					const subNode = document.createElement('div');
+					subNode.className = 'xp-tree-node';
+					subNode.dataset.path = sub.getFullPath();
+					subNode.style.paddingLeft = `${depth * 14 + 4}px`;
+
+					const isCur = win.explorerState.currentFolder === sub;
+					const expBtn = document.createElement('span');
+					expBtn.className = `xp-tree-expander ${hasSub ? 'expandable' : 'leaf'}`;
+					expBtn.textContent = hasSub ? '+' : '';
+
+					const iconImg = document.createElement('img');
+					iconImg.src = sub.icon || '../assets/images/desk/icons/Folder Closed.webp';
+					iconImg.alt = '';
+
+					const label = document.createElement('span');
+					label.className = `xp-tree-label ${isCur ? 'active' : ''}`;
+					label.textContent = sub.name;
+
+					subNode.appendChild(expBtn);
+					subNode.appendChild(iconImg);
+					subNode.appendChild(label);
+					container.appendChild(subNode);
+
+					const subChildrenContainer = document.createElement('div');
+					subChildrenContainer.className = 'xp-tree-children hidden';
+					container.appendChild(subChildrenContainer);
+
+					if (hasSub) {
+						expBtn.addEventListener('click', (e) => {
+							e.stopPropagation();
+							const isExp = !subChildrenContainer.classList.contains('hidden');
+							if (isExp) {
+								subChildrenContainer.classList.add('hidden');
+								expBtn.textContent = '+';
+							} else {
+								subChildrenContainer.classList.remove('hidden');
+								expBtn.textContent = '-';
+								if (subChildrenContainer.children.length === 0) {
+									renderFolderChildren(sub, subChildrenContainer, depth + 1);
+								}
+							}
+						});
+					}
+
+					label.addEventListener('click', () => {
+						treeContainer.querySelectorAll('.xp-tree-label').forEach(l => l.classList.remove('active'));
+						label.classList.add('active');
+						this.navigateTo(sub, win, true);
+					});
+
+					subNode.addEventListener('dragover', handleDragOver);
+					subNode.addEventListener('dragleave', handleDragLeave);
+					subNode.addEventListener('drop', handleDrop);
+				});
+			};
+
+			buildNode('Desktop', '../assets/images/desk/icons/Display.webp', '/', 0, true, (container, d) => {
+				const userDocs = fs.findByPath('/PDFs') || fs.root;
+				buildNode("Colin's Documents", '../assets/images/desk/icons/My Profile Folder.webp', userDocs.getFullPath(), d, true, (docContainer, docD) => {
+					renderFolderChildren(userDocs, docContainer, docD);
+				});
+
+				buildNode('My Computer', '../assets/images/desk/icons/My Computer.webp', null, d, true, (compContainer, compD) => {
+					const drives = fs.getDrives ? fs.getDrives() : [];
+					drives.forEach(drv => {
+						const driveFolder = fs.findByPath(drv.mountPath);
+						const hasChildren = driveFolder instanceof Folder && driveFolder.listContent().some(c => c instanceof Folder);
+						buildNode(`${drv.volumeLabel}`, drv.icon, drv.mountPath, compD, hasChildren, (drvContainer, drvD) => {
+							if (driveFolder && drv.isReady) renderFolderChildren(driveFolder, drvContainer, drvD);
+						});
+					});
+				});
+
+				buildNode('My Network Places', '../assets/images/desk/icons/My Network Places.webp', '/Others', d, false);
+				buildNode('Recycle Bin', '../assets/images/desk/icons/Trash.webp', 'recycle-bin', d, false);
+			});
 		}
 	};
 

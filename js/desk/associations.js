@@ -476,7 +476,10 @@
 				defaultIcon: '../assets/images/desk/icons/Disk Image File.webp',
 				defaultApp: 'explorer',
 				openHandler: (file) => {
-					if (typeof showXPDialog === 'function') {
+					const dDrive = fs ? fs.findByPath('/Volumes/D') : null;
+					if (dDrive && window.FileExplorer) {
+						window.FileExplorer.open(dDrive);
+					} else if (typeof showXPDialog === 'function') {
 						showXPDialog('Disc Image', `Mounted virtual volume "${file.name}" to Drive D:.`, 'info');
 					}
 				}

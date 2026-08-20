@@ -55,31 +55,28 @@
 
 	function resolveFsFromVirtualPath(vPath, currentFolder = fs.root) {
 		if (!vPath || vPath === '.' || vPath === './') return currentFolder;
-		let clean = vPath.replace(/\\/g, '/').replace(/^C:/i, '');
+		let clean = String(vPath).trim().replace(/\\/g, '/');
 
-		if (!clean.startsWith('/')) {
-			clean = (currentFolder.getFullPath() + '/' + clean).replace(/\/+/g, '/');
-		}
-
-		if (clean === '/' || clean === '/Desktop' || clean === '/Documents and Settings/Colin B.R./Desktop') {
+		if (clean === '/' || clean === '/Desktop' || clean === '/Documents and Settings/Colin B.R./Desktop' || clean.toLowerCase() === 'c:' || clean.toLowerCase() === 'c:/') {
 			return fs.root;
 		}
 
-		if (clean.startsWith('/Desktop/')) {
-			clean = clean.slice('/Desktop'.length);
-		} else if (clean.startsWith('/Documents and Settings/Colin B.R./Desktop/')) {
-			clean = clean.slice('/Documents and Settings/Colin B.R./Desktop'.length);
+		if (clean.startsWith('C:/Documents and Settings/Colin B.R./Desktop')) {
+			clean = clean.substring('C:/Documents and Settings/Colin B.R./Desktop'.length) || '/';
 		}
 
-		return fs.findByPath(clean);
+		if (!clean.startsWith('/') && !/^[a-zA-Z]:/i.test(clean)) {
+			const basePath = currentFolder ? currentFolder.getFullPath() : '/';
+			clean = VFSPath.join(basePath, clean);
+		}
+
+		const normalized = VFSPath.normalize(clean);
+		return fs.findByPath(normalized);
 	}
 
 	function formatVirtualPath(folder) {
-		if (!folder || folder === fs.root) {
-			return 'C:\\Documents and Settings\\Colin B.R.\\Desktop';
-		}
-		const full = folder.getFullPath().replace(/\//g, '\\');
-		return `C:\\Documents and Settings\\Colin B.R.\\Desktop${full}`;
+		if (!folder) return 'C:\\';
+		return VFSPath.toWindowsPath(folder.getFullPath());
 	}
 
 	function padRight(str, len) {
@@ -1037,6 +1034,21 @@
 					closeWindow(this.win, this.win.id);
 					break;
 				default:
+					const driveChangeMatch = tokens[0].match(/^([a-zA-Z]):$/);
+					if (driveChangeMatch) {
+						const drvLetter = driveChangeMatch[1].toUpperCase();
+						const drv = fs.getDrive(drvLetter);
+						if (drv && !drv.provider.isReady) {
+							this.println(`The device is not ready.\n`);
+							return;
+						}
+						const drvFolder = drv ? fs.findByPath(drv.mountPath) : (drvLetter === 'C' ? fs.root : null);
+						if (drvFolder instanceof Folder) {
+							this.currentFolder = drvFolder;
+							return;
+						}
+					}
+
 					const maybeBatch = this.currentFolder.getByName(tokens[0]);
 					if (maybeBatch instanceof File && (maybeBatch.name.endsWith('.bat') || maybeBatch.name.endsWith('.cmd'))) {
 						await this.executeBatch(maybeBatch.content);
@@ -1212,13 +1224,28 @@
 				return;
 			}
 
+			const driveMatch = target.match(/^([a-zA-Z]):\\?$/);
+			if (driveMatch) {
+				const letter = driveMatch[1].toUpperCase();
+				const drv = fs.getDrive(letter);
+				if (drv && !drv.provider.isReady) {
+					this.println(`The device is not ready.\n`);
+					return;
+				}
+				const drvFolder = drv ? fs.findByPath(drv.mountPath) : (letter === 'C' ? fs.root : null);
+				if (drvFolder instanceof Folder) {
+					this.currentFolder = drvFolder;
+					return;
+				}
+			}
+
 			const child = this.currentFolder.getByName(target);
 			if (child instanceof Folder) {
 				this.currentFolder = child;
 				return;
 			}
 
-			const full = resolveFsFromVirtualPath(target.startsWith('/') || target.startsWith('C:') ? target : `${this.currentFolder.getFullPath()}/${target}`);
+			const full = resolveFsFromVirtualPath(target, this.currentFolder);
 			if (full instanceof Folder) {
 				this.currentFolder = full;
 			} else {
