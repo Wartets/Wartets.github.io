@@ -1,20 +1,13 @@
 (function () {
 	const QUICK_LAUNCH_STORAGE_KEY = 'xp_quick_launch_items';
 
-	const DEFAULT_QUICK_LAUNCH = [
-		{ id: 'ql-show-desktop', name: 'Show Desktop', icon: '../assets/images/desk/XPIcon.png', action: 'show-desktop', system: true },
-		{ id: 'ql-achievements', name: 'Milestones & Achievements', icon: '../assets/images/desk/icons/Trophy.webp', action: 'open-achievements' },
-		{ id: 'ql-settings', name: 'Control Panel & Settings', icon: '../assets/images/desk/icons/System Properties.webp', action: 'open-settings' },
-		{ id: 'ql-ie', name: 'Internet Explorer', icon: '../assets/images/desk/icons/Internet Explorer.webp', action: 'open-ie' },
-		{ id: 'ql-oe', name: 'Outlook Express', icon: '../assets/images/desk/icons/Mail.webp', action: 'open-oe', hasBadge: true },
-		{ id: 'ql-cmd', name: 'Command Prompt', icon: '../assets/images/desk/icons/Command Prompt.webp', action: 'open-cmd' },
-		{ id: 'ql-notepad', name: 'Notepad', icon: '../assets/images/desk/icons/Notepad.webp', action: 'open-notepad' },
-		{ id: 'ql-calc', name: 'Calculator', icon: '../assets/images/desk/icons/Calculator.webp', action: 'open-calc' },
-		{ id: 'ql-paint', name: 'Paint', icon: '../assets/images/desk/icons/Paint.webp', action: 'open-paint' },
-		{ id: 'ql-wmp', name: 'Windows Media Player', icon: '../assets/images/desk/icons/Video File.webp', action: 'open-media-player' },
-		{ id: 'ql-winamp', name: 'Winamp Media Player', icon: '../assets/images/desk/icons/Winamp.webp', action: 'open-winamp' },
-		{ id: 'ql-mine', name: 'Minesweeper', icon: '../assets/images/desk/icons/Minesweeper.webp', action: 'open-mine' },
-	];
+	function getDefaultQuickLaunch() {
+		if (window.SettingsApp && typeof window.SettingsApp.get === 'function') {
+			const cfg = window.SettingsApp.get('quickLaunchDefaultItems');
+			if (Array.isArray(cfg)) return cfg;
+		}
+		return [];
+	}
 
 	let taskbarEl = null;
 	let startBtnEl = null;
@@ -84,160 +77,65 @@
 
 		getTrayServices() {
 			const lang = (window.SettingsApp && window.SettingsApp.get('systemLanguage')) || 'EN';
-			return [
-				{
-					id: 'security',
-					name: 'Windows Security Center',
-					icon: 'https://api.iconify.design/mdi/shield-check.svg?color=%2355aa55',
-					title: 'Your computer is protected: Firewall and Antivirus active',
-					hidden: true,
+			const configuredServices = (window.SettingsApp && window.SettingsApp.get('systemTrayServices')) || [];
+			
+			const handlers = {
+				security: {
 					onClick: (e) => this.showSecurityAlertsPopup(e),
-					onContextMenu: (e) => {
-						if (window.ContextMenu) {
-							window.ContextMenu.show(window.ContextMenu.getTrayItems('security'), e.clientX, e.clientY);
-						}
-					}
+					onContextMenu: (e) => { if (window.ContextMenu) window.ContextMenu.show(window.ContextMenu.getTrayItems('security'), e.clientX, e.clientY); }
 				},
-				{
-					id: 'hardware',
-					name: 'Safely Remove Hardware',
-					icon: 'https://api.iconify.design/mdi/usb.svg?color=%23ffffff',
-					title: 'Safely Remove Hardware and Eject Media',
-					hidden: true,
+				hardware: {
 					onClick: (e) => this.showSafelyRemoveHardwareDialog(e),
-					onContextMenu: (e) => {
-						if (window.ContextMenu) {
-							window.ContextMenu.show(window.ContextMenu.getTrayItems('hardware'), e.clientX, e.clientY);
-						}
-					}
+					onContextMenu: (e) => { if (window.ContextMenu) window.ContextMenu.show(window.ContextMenu.getTrayItems('hardware'), e.clientX, e.clientY); }
 				},
-				{
-					id: 'update',
-					name: 'Automatic Updates',
-					icon: 'https://api.iconify.design/mdi/shield-sync-outline.svg?color=%23ffcc00',
-					title: 'Automatic Updates are configured and active',
-					hidden: true,
+				update: {
 					onClick: (e) => this.showWindowsUpdateDialog(e),
-					onContextMenu: (e) => {
-						if (window.ContextMenu) {
-							window.ContextMenu.show(window.ContextMenu.getTrayItems('update'), e.clientX, e.clientY);
-						}
-					}
+					onContextMenu: (e) => { if (window.ContextMenu) window.ContextMenu.show(window.ContextMenu.getTrayItems('update'), e.clientX, e.clientY); }
 				},
-				{
-					id: 'power',
-					name: 'Power Meter',
+				power: {
 					icon: this.getBatteryIconUrl(),
 					title: this.getBatteryStatusText(),
-					isBatteryWidget: true,
-					hidden: false,
 					onClick: (e) => this.showPowerMeterPopup(e),
-					onContextMenu: (e) => {
-						if (window.ContextMenu) {
-							window.ContextMenu.show(window.ContextMenu.getTrayItems('power'), e.clientX, e.clientY);
-						}
-					}
+					onContextMenu: (e) => { if (window.ContextMenu) window.ContextMenu.show(window.ContextMenu.getTrayItems('power'), e.clientX, e.clientY); }
 				},
-				{
-					id: 'network',
-					name: 'Local Area Connection',
-					icon: 'https://api.iconify.design/mdi/lan-connect.svg?color=%23ffffff',
-					title: 'Local Area Connection - Speed: 100.0 Mbps - Status: Connected',
-					hidden: false,
+				network: {
 					onClick: (e) => this.showNetworkStatusDialog(e),
-					onContextMenu: (e) => {
-						if (window.ContextMenu) {
-							window.ContextMenu.show(window.ContextMenu.getTrayItems('network'), e.clientX, e.clientY);
-						}
-					}
+					onContextMenu: (e) => { if (window.ContextMenu) window.ContextMenu.show(window.ContextMenu.getTrayItems('network'), e.clientX, e.clientY); }
 				},
-				{
-					id: 'mail',
-					name: 'Outlook Express Mail Notifier',
-					icon: 'https://api.iconify.design/mdi/email-outline.svg?color=%23ffffff',
-					title: 'Outlook Express - Mail Notifications',
-					hidden: false,
-					onClick: () => {
-						if (typeof openOutlookExpress === 'function') openOutlookExpress();
-					},
+				mail: {
+					onClick: () => { if (typeof openOutlookExpress === 'function') openOutlookExpress(); },
 					onContextMenu: (e) => {
 						if (window.ContextMenu) {
 							const items = [
-								{
-									label: 'Open Outlook Express',
-									bold: true,
-									action: () => {
-										if (typeof openOutlookExpress === 'function') openOutlookExpress();
-									}
-								},
-								{
-									label: 'Send and Receive All',
-									action: () => {
-										if (window.MailStore) {
-											window.MailStore.ensureDailyContent().then(() => {
-												Taskbar.updateUnreadBadges();
-												showXPDialog('Outlook Express', 'All mail folders are up to date.', 'info');
-											});
-										}
-									}
-								},
+								{ label: 'Open Outlook Express', bold: true, action: () => { if (typeof openOutlookExpress === 'function') openOutlookExpress(); } },
+								{ label: 'Send and Receive All', action: () => { if (window.MailStore) { window.MailStore.ensureDailyContent().then(() => { Taskbar.updateUnreadBadges(); showXPDialog('Outlook Express', 'All mail folders are up to date.', 'info'); }); } } },
 								{ separator: true },
-								{
-									label: 'Properties',
-									action: () => {
-										if (typeof openOutlookExpress === 'function') openOutlookExpress();
-									}
-								}
+								{ label: 'Properties', action: () => { if (typeof openOutlookExpress === 'function') openOutlookExpress(); } }
 							];
 							window.ContextMenu.show(items, e.clientX, e.clientY);
 						}
 					}
 				},
-				{
-					id: 'volume',
-					name: 'Volume Control',
-					icon: 'https://api.iconify.design/mdi/volume-high.svg?color=%23ffffff',
-					title: 'Volume',
-					hidden: false,
+				volume: {
 					onClick: (e) => this.toggleVolumePopup(e),
-					onContextMenu: (e) => {
-						if (window.ContextMenu) {
-							window.ContextMenu.show(window.ContextMenu.getTrayItems('volume'), e.clientX, e.clientY);
-						}
-					}
+					onContextMenu: (e) => { if (window.ContextMenu) window.ContextMenu.show(window.ContextMenu.getTrayItems('volume'), e.clientX, e.clientY); }
 				},
-				{
-					id: 'lang',
-					name: 'Language Bar',
-					isTextBadge: true,
+				lang: {
 					textBadge: lang,
 					title: `Keyboard Language: ${lang === 'FR' ? 'French (France)' : 'English (United States)'}`,
-					hidden: false,
 					onClick: () => this.toggleLanguage(),
-					onContextMenu: (e) => {
-						if (window.ContextMenu) {
-							window.ContextMenu.show(window.ContextMenu.getTrayItems('lang'), e.clientX, e.clientY);
-						}
-					}
+					onContextMenu: (e) => { if (window.ContextMenu) window.ContextMenu.show(window.ContextMenu.getTrayItems('lang'), e.clientX, e.clientY); }
 				},
-				{
-					id: 'clippy',
-					name: 'Clippy Assistant',
-					icon: '../assets/images/desk/clippy/idle.png',
-					title: 'Microsoft Clippy Assistant',
-					hidden: false,
-					onClick: () => {
-						if (window.ClippyAgent && typeof window.ClippyAgent.toggle === 'function') {
-							window.ClippyAgent.toggle();
-						}
-					},
-					onContextMenu: (e) => {
-						if (window.ContextMenu) {
-							window.ContextMenu.show(window.ContextMenu.getTrayItems('clippy'), e.clientX, e.clientY);
-						}
-					}
+				clippy: {
+					onClick: () => { if (window.ClippyAgent && typeof window.ClippyAgent.toggle === 'function') window.ClippyAgent.toggle(); },
+					onContextMenu: (e) => { if (window.ContextMenu) window.ContextMenu.show(window.ContextMenu.getTrayItems('clippy'), e.clientX, e.clientY); }
 				}
-			];
+			};
+
+			return configuredServices.map(srv => {
+				const handler = handlers[srv.id] || {};
+				return Object.assign({}, srv, handler);
+			});
 		},
 
 		async initBatteryMonitoring() {
@@ -731,10 +629,10 @@
 				if (saved) {
 					quickLaunchItems = JSON.parse(saved);
 				} else {
-					quickLaunchItems = JSON.parse(JSON.stringify(DEFAULT_QUICK_LAUNCH));
+					quickLaunchItems = JSON.parse(JSON.stringify(getDefaultQuickLaunch()));
 				}
 			} catch (e) {
-				quickLaunchItems = JSON.parse(JSON.stringify(DEFAULT_QUICK_LAUNCH));
+				quickLaunchItems = JSON.parse(JSON.stringify(getDefaultQuickLaunch()));
 			}
 		},
 
@@ -800,7 +698,7 @@
 		},
 
 		resetQuickLaunchDefaults() {
-			quickLaunchItems = JSON.parse(JSON.stringify(DEFAULT_QUICK_LAUNCH));
+			quickLaunchItems = JSON.parse(JSON.stringify(getDefaultQuickLaunch()));
 			this.saveQuickLaunchItems();
 			this.renderQuickLaunch();
 		},
@@ -950,106 +848,13 @@
 				return;
 			}
 
-			if (item.action === 'open-path' && item.path && typeof fs !== 'undefined') {
-				const el = fs.findByPath(item.path);
-				if (el && typeof openFileSystemElement === 'function') openFileSystemElement(el);
+			const normalizedAppId = item.action ? item.action.replace(/^(open-|link-)/, '') : '';
+			if (normalizedAppId && window.DeskAppRegistry && (window.DeskAppRegistry.get(normalizedAppId) || window.DeskAppRegistry.get(item.action))) {
+				window.DeskAppRegistry.launch(window.DeskAppRegistry.get(normalizedAppId) ? normalizedAppId : item.action, item.args || {});
 				return;
 			}
 
-			const actionMap = {
-				'open-media-player': () => {
-					if (window.MediaPlayerApp) window.MediaPlayerApp.open();
-					else if (window.DeskAppRegistry) window.DeskAppRegistry.launch('mediaplayer');
-					else if (window.DeskAPI && window.DeskAPI.openMediaPlayer) window.DeskAPI.openMediaPlayer();
-				},
-				'open-wmp': () => {
-					if (window.MediaPlayerApp) window.MediaPlayerApp.open();
-					else if (window.DeskAppRegistry) window.DeskAppRegistry.launch('mediaplayer');
-					else if (window.DeskAPI && window.DeskAPI.openMediaPlayer) window.DeskAPI.openMediaPlayer();
-				},
-				'open-mediaplayer': () => {
-					if (window.MediaPlayerApp) window.MediaPlayerApp.open();
-					else if (window.DeskAppRegistry) window.DeskAppRegistry.launch('mediaplayer');
-					else if (window.DeskAPI && window.DeskAPI.openMediaPlayer) window.DeskAPI.openMediaPlayer();
-				},
-				'open-winamp': () => {
-					if (window.DeskAPI && window.DeskAPI.openWinampPlayer) window.DeskAPI.openWinampPlayer();
-					else if (typeof openWinamp === 'function') openWinamp();
-					else if (window.DeskAppRegistry) window.DeskAppRegistry.launch('winamp');
-				},
-				'open-ie': () => {
-					if (window.DeskAppRegistry) window.DeskAppRegistry.launch('ie');
-					else if (typeof openInternetExplorer === 'function') openInternetExplorer();
-				},
-				'open-oe': () => {
-					if (window.DeskAppRegistry) window.DeskAppRegistry.launch('outlook');
-					else if (typeof openOutlookExpress === 'function') openOutlookExpress();
-				},
-				'open-outlook': () => {
-					if (window.DeskAppRegistry) window.DeskAppRegistry.launch('outlook');
-					else if (typeof openOutlookExpress === 'function') openOutlookExpress();
-				},
-				'open-cmd': () => {
-					if (window.DeskAppRegistry) window.DeskAppRegistry.launch('cmd');
-				},
-				'open-notepad': () => {
-					if (window.NotepadApp) window.NotepadApp.openNew();
-					else if (window.DeskAppRegistry) window.DeskAppRegistry.launch('notepad');
-				},
-				'open-calc': () => {
-					if (window.DeskAppRegistry) window.DeskAppRegistry.launch('calculator');
-					else if (typeof openCalculator === 'function') openCalculator();
-				},
-				'open-calculator': () => {
-					if (window.DeskAppRegistry) window.DeskAppRegistry.launch('calculator');
-					else if (typeof openCalculator === 'function') openCalculator();
-				},
-				'open-paint': () => {
-					if (window.DeskAppRegistry) window.DeskAppRegistry.launch('paint');
-					else if (typeof openPaint === 'function') openPaint();
-				},
-				'open-mine': () => {
-					if (window.DeskAppRegistry) window.DeskAppRegistry.launch('minesweeper');
-					else if (typeof openMinesweeper === 'function') openMinesweeper();
-				},
-				'open-minesweeper': () => {
-					if (window.DeskAppRegistry) window.DeskAppRegistry.launch('minesweeper');
-					else if (typeof openMinesweeper === 'function') openMinesweeper();
-				},
-				'open-solitaire': () => {
-					if (window.DeskAppRegistry) window.DeskAppRegistry.launch('solitaire');
-					else if (typeof openSolitaire === 'function') openSolitaire();
-				},
-				'open-achievements': () => {
-					if (window.DeskAPI && window.DeskAPI.openAchievements) window.DeskAPI.openAchievements();
-					else if (window.AchievementsManager) window.AchievementsManager.open();
-				},
-				'open-settings': () => {
-					if (window.SettingsApp) window.SettingsApp.open('system');
-					else if (window.DeskAppRegistry) window.DeskAppRegistry.launch('settings');
-				},
-				'open-sound-recorder': () => {
-					if (window.SoundRecorderApp) window.SoundRecorderApp.open();
-					else if (window.DeskAppRegistry) window.DeskAppRegistry.launch('soundrecorder');
-				},
-				'open-charmap': () => {
-					if (window.CharacterMapApp) window.CharacterMapApp.open();
-					else if (window.DeskAppRegistry) window.DeskAppRegistry.launch('charmap');
-				}
-			};
-
-			if (actionMap[item.action]) {
-				actionMap[item.action]();
-				return;
-			}
-
-			const normalizedAppId = item.action.replace(/^open-/, '');
-			if (window.DeskAppRegistry && window.DeskAppRegistry.get(normalizedAppId)) {
-				window.DeskAppRegistry.launch(normalizedAppId);
-				return;
-			}
-
-			if (item.path && typeof fs !== 'undefined') {
+			if (item.path && typeof fs !== 'undefined' && fs) {
 				const el = fs.findByPath(item.path);
 				if (el && typeof openFileSystemElement === 'function') openFileSystemElement(el);
 			}

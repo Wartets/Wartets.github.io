@@ -1182,14 +1182,14 @@ window.DeskAPI = {
 	openMailApp: () => (window.DeskAppRegistry ? window.DeskAppRegistry.launch('outlook') : openOutlookExpress()),
 	openProjectsFolder: () => (window.DeskAppRegistry ? window.DeskAppRegistry.launch('projects') : openAllProjectsFolder()),
 	openRecycleBin: () => (window.DeskAppRegistry ? window.DeskAppRegistry.launch('recyclebin') : openRecycleBinWindow()),
-	openCalculator: () => (window.DeskAppRegistry ? window.DeskAppRegistry.launch('calculator') : (window.CalculatorApp ? window.CalculatorApp.open() : openCalculator())),
+	openCalculator: () => (window.DeskAppRegistry ? window.DeskAppRegistry.launch('calculator') : (window.CalculatorApp ? window.CalculatorApp.open() : null)),
 	openCharacterMap: () => (window.DeskAppRegistry ? window.DeskAppRegistry.launch('charmap') : (window.CharacterMapApp ? window.CharacterMapApp.open() : null)),
-	openPaint: (file) => (window.DeskAppRegistry ? window.DeskAppRegistry.launch('paint', file) : (window.PaintApp ? window.PaintApp.open(file) : openPaint(file))),
+	openPaint: (file) => (window.DeskAppRegistry ? window.DeskAppRegistry.launch('paint', file) : (window.PaintApp ? window.PaintApp.open(file) : null)),
 	openSoundRecorder: (file) => (window.DeskAppRegistry ? window.DeskAppRegistry.launch('soundrecorder', file) : (window.SoundRecorderApp ? window.SoundRecorderApp.open(file) : null)),
-	openMediaPlayer: (track) => (window.MediaPlayerApp ? window.MediaPlayerApp.open(track) : null),
-	openPictureViewer: (file) => (window.PictureViewerApp ? window.PictureViewerApp.open(file) : null),
-	openMinesweeperGame: () => (window.DeskAppRegistry ? window.DeskAppRegistry.launch('minesweeper') : (window.MinesweeperApp ? window.MinesweeperApp.open() : openMinesweeper())),
-	openSolitaireGame: () => (window.DeskAppRegistry ? window.DeskAppRegistry.launch('solitaire') : (window.SolitaireApp ? window.SolitaireApp.open() : openSolitaire())),
+	openMediaPlayer: (track) => (window.DeskAppRegistry ? window.DeskAppRegistry.launch('mediaplayer', track) : (window.MediaPlayerApp ? window.MediaPlayerApp.open(track) : null)),
+	openPictureViewer: (file) => (window.DeskAppRegistry ? window.DeskAppRegistry.launch('pictureviewer', file) : (window.PictureViewerApp ? window.PictureViewerApp.open(file) : null)),
+	openMinesweeperGame: () => (window.DeskAppRegistry ? window.DeskAppRegistry.launch('minesweeper') : (window.MinesweeperApp ? window.MinesweeperApp.open() : null)),
+	openSolitaireGame: () => (window.DeskAppRegistry ? window.DeskAppRegistry.launch('solitaire') : (window.SolitaireApp ? window.SolitaireApp.open() : null)),
 	openWinampPlayer: (track) => (window.DeskAppRegistry ? window.DeskAppRegistry.launch('winamp', track) : openWinamp(track)),
 	getMoonPhaseDay: () => (typeof getMoonPhaseDayNumber === 'function') ? getMoonPhaseDayNumber() : null,
 	getRecycleBinCount: () => (typeof fs !== 'undefined' && fs) ? fs.loadRecycleBinItems().length : 0,
@@ -1200,17 +1200,13 @@ window.DeskAPI = {
 	openSearch: (query) => (window.DeskAppRegistry ? window.DeskAppRegistry.launch('search', { query }) : openSearchWindow(query)),
 	openPrinters: () => (window.DeskAppRegistry ? window.DeskAppRegistry.launch('printers') : openPrintersWindow()),
 	openNetworkPlaces: () => (window.DeskAppRegistry ? window.DeskAppRegistry.launch('network') : openNetworkPlacesWindow()),
-	openDisplaySettings: () => (window.DeskAppRegistry ? window.DeskAppRegistry.launch('display') : openDisplaySettings()),
+	openDisplaySettings: (tab = 'desktop') => (window.DeskAppRegistry ? window.DeskAppRegistry.launch('display', { tab }) : openDisplaySettings(tab)),
 	openAchievements: (targetId = null) => {
 		if (window.DeskAppRegistry) return window.DeskAppRegistry.launch('achievements', { targetId });
 		if (window.AchievementsManager) return window.AchievementsManager.open(targetId);
 	},
-	openTaskManager: (tab = 'applications') => {
-		if (window.TaskManagerApp) return window.TaskManagerApp.open(tab);
-	},
-	openEncartaGlobe: () => {
-		if (window.EncartaGlobeApp) return window.EncartaGlobeApp.open();
-	},
+	openTaskManager: (tab = 'applications') => (window.DeskAppRegistry ? window.DeskAppRegistry.launch('taskmgr', { tab }) : (window.TaskManagerApp ? window.TaskManagerApp.open(tab) : null)),
+	openEncartaGlobe: () => (window.DeskAppRegistry ? window.DeskAppRegistry.launch('encarta') : (window.EncartaGlobeApp ? window.EncartaGlobeApp.open() : null)),
 	getNowPlaying: () => {
 		if (window.MediaPlayerApp && typeof window.MediaPlayerApp.getNowPlaying === 'function') {
 			const current = window.MediaPlayerApp.getNowPlaying();
@@ -1251,7 +1247,11 @@ window.DeskAPI = {
 	}
 };
 
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
+	if (window.SettingsApp && typeof window.SettingsApp.ready === 'function') {
+		await window.SettingsApp.ready();
+	}
+
 	initializeFileSystem();
 	initDocuments();
 	if (window.MusicStore) {
@@ -1297,7 +1297,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
 	if (window.DeskEventBus) {
 		window.DeskEventBus.on('fs:changed', () => refreshUI());
-		window.DeskEventBus.on('settings:changed', () => arrangeIcons('none'));
+		window.DeskEventBus.on('settings:changed', () => {
+			applyInitialDesktopBackground();
+			arrangeIcons('none');
+		});
 		window.DeskEventBus.on('window:focused', (payload) => {
 			activeWindow = payload.win;
 		});
@@ -1840,37 +1843,25 @@ function renderDesktopIcons() {
 	if (!container || !fs || !fs.root) return;
 	container.innerHTML = '';
 
-	const appIcons = [{
-		name: "My Computer",
-		icon: "../assets/images/desk/icons/My Computer.webp",
-		action: openMyComputerWindow,
-		type: "system",
-		systemType: "my-computer"
-	}, {
-		name: "Recycle Bin",
-		icon: "../assets/images/desk/icons/Trash.webp",
-		action: openRecycleBinWindow,
-		type: "system",
-		systemType: "recycle-bin"
-	}, {
-		name: "Milestones",
-		icon: "../assets/images/desk/icons/Trophy.webp",
-		action: () => {
-			if (window.AchievementsManager) window.AchievementsManager.open();
-		},
-		type: "application",
-		systemType: "achievements"
-	}];
+	const systemIconsConfig = (window.SettingsApp && window.SettingsApp.get('desktopSystemIcons')) || [];
 
-	appIcons.forEach(app => {
+	systemIconsConfig.forEach(sysIcon => {
+		const appId = sysIcon.appId;
+		const actionHandler = () => {
+			if (window.DeskAppRegistry) {
+				window.DeskAppRegistry.launch(appId);
+			}
+		};
+
 		const icon = createIconElement({
-			name: app.name,
-			icon: app.icon,
-			path: `app://${app.name.toLowerCase().replace(/\s/g, '-')}`,
+			name: sysIcon.name,
+			icon: sysIcon.icon,
+			path: `app://${appId}`,
 			type: 'application',
 			element: null,
-			systemType: app.systemType
-		}, app.action);
+			systemType: sysIcon.systemType
+		}, actionHandler);
+
 		container.appendChild(icon);
 	});
 
@@ -2407,7 +2398,10 @@ function setupGlobalKeyboardShortcuts() {
 			if (container) {
 				e.preventDefault();
 				try {
-					fs.create('File', getActiveContainerDestPath(), 'New Text Document.txt');
+					const tpl = (window.ShellAssociations && window.ShellAssociations.getNewFileTemplates().length > 0)
+						? window.ShellAssociations.getNewFileTemplates()[0]
+						: { defaultName: 'New Text Document.txt', content: '' };
+					fs.create('File', getActiveContainerDestPath(), tpl.defaultName, { content: tpl.content });
 					refreshUI();
 				} catch (error) {
 					showXPDialog('Error', error.message, 'error');
@@ -2697,8 +2691,8 @@ async function openElementInfoWindow(element, options = {}) {
 		? window.WindowManager.getWorkspaceBounds() 
 		: { left: 0, top: 0, width: window.innerWidth, height: window.innerHeight - 36, right: window.innerWidth, bottom: window.innerHeight - 36 };
 
-	let targetX = options.x;
-	let targetY = options.y;
+	let targetX = options ? options.x : undefined;
+	let targetY = options ? options.y : undefined;
 	if (typeof targetX === 'number' && typeof targetY === 'number') {
 		targetX = Math.max(bounds.left + 8, Math.min(targetX, bounds.right - 450 - 8));
 		targetY = Math.max(bounds.top + 8, Math.min(targetY, bounds.bottom - 520 - 8));
@@ -2859,6 +2853,7 @@ function closeWindow(win, id) {
 	if (window.WindowManager) {
 		window.WindowManager.close(win, id);
 		activeWindow = window.WindowManager.activeWindow;
+		openWindows = window.WindowManager.windows;
 	}
 }
 
@@ -2866,6 +2861,7 @@ function forceCloseWindow(win, id) {
 	if (window.WindowManager) {
 		window.WindowManager.forceClose(win, id);
 		activeWindow = window.WindowManager.activeWindow;
+		openWindows = window.WindowManager.windows;
 	}
 }
 
@@ -2874,21 +2870,14 @@ function openProjectWindow(project) {
 	const id = `window-${projectTitle.replace(/\s/g, '-')}`;
 
 	const languageNames = {
-		en: 'English',
-		fr: 'French',
-		de: 'German',
-		es: 'Spanish',
-		it: 'Italian',
-		pt: 'Portuguese',
-		la: 'Latin',
-		zh: 'Chinese',
-		ja: 'Japanese',
-		ko: 'Korean',
-		ru: 'Russian',
-		ar: 'Arabic',
-		nl: 'Dutch',
-		pl: 'Polish',
-		sv: 'Swedish'
+		en: 'English', fr: 'French',
+		de: 'German', es: 'Spanish',
+		it: 'Italian', pt: 'Portuguese',
+		la: 'Latin', zh: 'Chinese',
+		ja: 'Japanese', ko: 'Korean',
+		ru: 'Russian', ar: 'Arabic',
+		nl: 'Dutch', pl: 'Polish',
+		sv: 'Swedish', fi: 'Finnish'
 	};
 
 	const projectLangs = project.languages || [];
@@ -3161,15 +3150,23 @@ async function openWinamp(targetTrack = null) {
 }
 
 function openMinesweeper() {
+	if (window.DeskAppRegistry) {
+		return window.DeskAppRegistry.launch('minesweeper');
+	}
 	if (window.MinesweeperApp && typeof window.MinesweeperApp.open === 'function') {
 		return window.MinesweeperApp.open();
 	}
+	return null;
 }
 
 function openSolitaire() {
+	if (window.DeskAppRegistry) {
+		return window.DeskAppRegistry.launch('solitaire');
+	}
 	if (window.SolitaireApp && typeof window.SolitaireApp.open === 'function') {
 		return window.SolitaireApp.open();
 	}
+	return null;
 }
 
 function renderCalendar(year, month) {
@@ -3379,17 +3376,20 @@ function arrangeIcons(sortBy = 'none') {
 	const icons = Array.from(container.children).filter(el => el.classList.contains('project-icon'));
 	if (icons.length === 0) return;
 
-	const customGapX = (window.SettingsApp && window.SettingsApp.get('desktopGridSpacingX')) || 75;
-	const customGapY = (window.SettingsApp && window.SettingsApp.get('desktopGridSpacingY')) || 100;
+	const customGapX = window.SettingsApp ? (window.SettingsApp.get('desktopGridSpacingX') || 75) : 75;
+	const customGapY = window.SettingsApp ? (window.SettingsApp.get('desktopGridSpacingY') || 100) : 100;
 	const iconWidth = customGapX;
 	const iconHeight = customGapY;
 	const startX = 10;
 	const startY = 10;
-	const desktopWidth = window.innerWidth;
-	const desktopHeight = window.innerHeight - 40;
+	const bounds = (window.WindowManager && typeof window.WindowManager.getWorkspaceBounds === 'function') 
+		? window.WindowManager.getWorkspaceBounds() 
+		: { left: 0, top: 0, width: window.innerWidth, height: window.innerHeight - 40 };
+	const desktopWidth = bounds.width;
+	const desktopHeight = bounds.height;
 
-	const gridDirection = (window.SettingsApp && window.SettingsApp.get('desktopGridDirection')) || localStorage.getItem('desktopGridDirection') || 'top-to-bottom';
-	const gridOrigin = (window.SettingsApp && window.SettingsApp.get('desktopGridOrigin')) || localStorage.getItem('desktopGridOrigin') || 'top-left';
+	const gridDirection = (window.SettingsApp && window.SettingsApp.get('desktopGridDirection')) || 'top-to-bottom';
+	const gridOrigin = (window.SettingsApp && window.SettingsApp.get('desktopGridOrigin')) || 'top-left';
 
 	const iconsPerColumn = Math.max(1, Math.floor((desktopHeight - startY) / iconHeight));
 	const iconsPerRow = Math.max(1, Math.floor((desktopWidth - startX) / (iconWidth + 10)));
@@ -3825,8 +3825,8 @@ function handleDrop(e) {
 	const desktopContainer = document.getElementById('project-icons-container');
 	const containerRect = desktopContainer ? desktopContainer.getBoundingClientRect() : { left: 0, top: 0, width: window.innerWidth, height: window.innerHeight - 40 };
 
-	const customGapX = (window.SettingsApp && window.SettingsApp.get('desktopGridSpacingX')) || 75;
-	const customGapY = (window.SettingsApp && window.SettingsApp.get('desktopGridSpacingY')) || 100;
+	const customGapX = window.SettingsApp ? (window.SettingsApp.get('desktopGridSpacingX') || 75) : 75;
+	const customGapY = window.SettingsApp ? (window.SettingsApp.get('desktopGridSpacingY') || 100) : 100;
 	const iconWidth = customGapX;
 	const iconHeight = customGapY;
 
@@ -4303,24 +4303,41 @@ function applyInitialDesktopBackground() {
 
 	desktop.style.backgroundColor = bgColor;
 
-	if (layerA) {
-		layerA.style.backgroundColor = bgColor;
+	if (layerA && layerB) {
+		const activeLayer = currentWallpaperLayer === 'a' ? layerA : layerB;
+		const inactiveLayer = currentWallpaperLayer === 'a' ? layerB : layerA;
+
+		activeLayer.style.backgroundColor = bgColor;
+		inactiveLayer.style.backgroundColor = bgColor;
+
 		if (mode === 'color') {
-			layerA.style.backgroundImage = 'none';
+			activeLayer.style.backgroundImage = 'none';
+			activeLayer.className = 'desktop-wallpaper-layer active';
+			activeLayer.style.opacity = '1';
+			inactiveLayer.style.backgroundImage = 'none';
+			inactiveLayer.className = 'desktop-wallpaper-layer';
+			inactiveLayer.style.opacity = '0';
 		} else {
-			layerA.style.backgroundImage = `url('${current}')`;
-			layerA.style.backgroundSize = fit === 'fit' ? 'contain' : (fit === 'stretch' ? '100% 100%' : (fit === 'tile' || fit === 'center' ? 'auto' : 'cover'));
-			layerA.style.backgroundRepeat = fit === 'tile' ? 'repeat' : 'no-repeat';
-			layerA.style.backgroundPosition = fit === 'tile' ? 'top left' : 'center center';
-			layerA.className = 'desktop-wallpaper-layer active';
+			activeLayer.style.backgroundImage = `url('${current}')`;
+			activeLayer.style.backgroundSize = fit === 'fit' ? 'contain' : (fit === 'stretch' ? '100% 100%' : (fit === 'tile' || fit === 'center' ? 'auto' : 'cover'));
+			activeLayer.style.backgroundRepeat = fit === 'tile' ? 'repeat' : 'no-repeat';
+			activeLayer.style.backgroundPosition = fit === 'tile' ? 'top left' : 'center center';
+			activeLayer.className = 'desktop-wallpaper-layer active';
+			activeLayer.style.opacity = '1';
+
+			inactiveLayer.className = 'desktop-wallpaper-layer';
+			inactiveLayer.style.opacity = '0';
+			inactiveLayer.style.backgroundImage = 'none';
+
 			preloadWallpaperImage(current);
 			trackWallpaperViewed(current);
 		}
-	}
-
-	if (layerB) {
-		layerB.className = 'desktop-wallpaper-layer';
-		layerB.style.backgroundImage = 'none';
+	} else if (desktop) {
+		if (mode === 'color') {
+			desktop.style.backgroundImage = 'none';
+		} else {
+			desktop.style.backgroundImage = `url('${current}')`;
+		}
 	}
 
 	document.body.classList.remove('wallpaper-fit-cover', 'wallpaper-fit-stretch', 'wallpaper-fit-center', 'wallpaper-fit-tile', 'wallpaper-fit-fit');
@@ -4374,446 +4391,14 @@ async function fetchWallpaperRegistry() {
 	}
 }
 
-async function openDisplaySettings(initialTab = 'desktop', options = {}) {
-	const id = 'window-display-properties';
-	const existingWindow = document.getElementById(id);
-	if (existingWindow) {
-		bringWindowToFront(existingWindow);
-		const tabBtn = existingWindow.querySelector(`.xp-tab-btn[data-tab="${initialTab}"]`);
-		if (tabBtn) tabBtn.click();
-		return;
+function openDisplaySettings(initialTab = 'desktop', options = {}) {
+	if (window.SettingsApp) {
+		return window.SettingsApp.open(initialTab, options);
 	}
-
-	const bounds = (window.WindowManager && typeof window.WindowManager.getWorkspaceBounds === 'function') 
-		? window.WindowManager.getWorkspaceBounds() 
-		: { left: 0, top: 0, width: window.innerWidth, height: window.innerHeight - 36, right: window.innerWidth, bottom: window.innerHeight - 36 };
-
-	let targetX = options.x;
-	let targetY = options.y;
-	if (typeof targetX === 'number' && typeof targetY === 'number') {
-		targetX = Math.max(bounds.left + 8, Math.min(targetX, bounds.right - 470 - 8));
-		targetY = Math.max(bounds.top + 8, Math.min(targetY, bounds.bottom - 520 - 8));
+	if (window.DeskAppRegistry) {
+		return window.DeskAppRegistry.launch('display', { tab: initialTab, ...options });
 	}
-
-	let currentBg = (window.SettingsApp && window.SettingsApp.get('desktopBackground')) || localStorage.getItem('desktopBackground') || DEFAULT_DESKTOP_WALLPAPER;
-	let currentFit = (window.SettingsApp && window.SettingsApp.get('wallpaperFit')) || localStorage.getItem('wallpaperFit') || 'cover';
-	let currentMode = (window.SettingsApp && window.SettingsApp.get('wallpaperMode')) || localStorage.getItem('wallpaperMode') || 'picture';
-	let currentBgColor = (window.SettingsApp && window.SettingsApp.get('desktopBackgroundColor')) || localStorage.getItem('desktopBackgroundColor') || '#004e98';
-	let currentInterval = (window.SettingsApp && window.SettingsApp.get('wallpaperSlideshowInterval')) || localStorage.getItem('wallpaperSlideshowInterval') || '30';
-	let currentRandom = (window.SettingsApp && window.SettingsApp.get('wallpaperSlideshowRandom')) || localStorage.getItem('wallpaperSlideshowRandom') === 'true';
-	let currentTransition = (window.SettingsApp && window.SettingsApp.get('wallpaperTransition')) || localStorage.getItem('wallpaperTransition') || 'none';
-	let currentTransDuration = (window.SettingsApp && window.SettingsApp.get('wallpaperTransitionDuration')) || localStorage.getItem('wallpaperTransitionDuration') || '1.0';
-
-	let selectedWallpaperPath = currentBg;
-	let selectedFit = currentFit;
-	let selectedMode = currentMode;
-	let selectedBgColor = currentBgColor;
-	let selectedInterval = currentInterval;
-	let selectedRandom = currentRandom;
-	let selectedTransition = currentTransition;
-	let selectedTransDuration = currentTransDuration;
-
-	const ssSettings = window.ScreenSaverManager ? window.ScreenSaverManager.settings : { activeSaver: 'xp-flying-logo', timeoutMinutes: 5, enabled: true };
-	let currentSSEnabled = ssSettings.enabled !== false;
-	let currentSS = currentSSEnabled ? (ssSettings.activeSaver || 'xp-flying-logo') : 'none';
-	let currentSSTimeout = ssSettings.timeoutMinutes !== undefined ? ssSettings.timeoutMinutes : 5;
-
-	const contentHTML = `
-		<div class="xp-tabs-container">
-			<div class="xp-tabs-bar">
-				<button type="button" class="xp-tab-btn active" data-tab="desktop">Desktop</button>
-				<button type="button" class="xp-tab-btn" data-tab="screensaver">Screen Saver</button>
-			</div>
-
-			<div class="xp-tab-page-wrapper">
-				<div class="xp-tab-page active" data-page="desktop">
-					<div class="wallpaper-monitor-container" style="margin-bottom: 6px;">
-						<div class="wallpaper-monitor-bezel">
-							<div class="wallpaper-monitor-screen" id="disp-monitor-preview" style="background-image: ${selectedMode === 'color' ? 'none' : `url('${selectedWallpaperPath}')`}; background-color: ${selectedBgColor};"></div>
-						</div>
-						<div class="wallpaper-monitor-stand"></div>
-						<div class="wallpaper-monitor-base"></div>
-					</div>
-
-					<fieldset class="xp-groupbox">
-						<legend>Background Selection</legend>
-						<div class="xp-form-row" style="margin-bottom: 6px;">
-							<label for="disp-wallpaper-mode" style="width: 80px;">Mode:</label>
-							<select id="disp-wallpaper-mode" class="xp-select" style="flex: 1;">
-								<option value="picture" ${selectedMode === 'picture' ? 'selected' : ''}>Single Picture</option>
-								<option value="slideshow" ${selectedMode === 'slideshow' ? 'selected' : ''}>Wallpaper Slideshow</option>
-								<option value="color" ${selectedMode === 'color' ? 'selected' : ''}>Solid Background Color</option>
-							</select>
-						</div>
-						<div style="display: flex; gap: 8px; align-items: flex-start;">
-							<div class="xp-listbox-frame" id="disp-wp-listbox" style="height: 110px;"></div>
-							<div style="display: flex; flex-direction: column; gap: 6px; width: 145px;">
-								<button type="button" class="xp-button-small" id="disp-btn-browse-folder">Open Wallpaper Folder</button>
-								<button type="button" class="xp-button-small" id="disp-btn-restore-bliss">Default Bliss</button>
-								<div class="xp-form-row" style="flex-direction: column; align-items: flex-start; margin-top: 2px;">
-									<label for="disp-select-fit" style="font-size: 10px;">Position:</label>
-									<select id="disp-select-fit" class="xp-select" style="width: 100%;">
-										<option value="cover" ${selectedFit === 'cover' ? 'selected' : ''}>Fill Screen (Cover)</option>
-										<option value="fit" ${selectedFit === 'fit' ? 'selected' : ''}>Fit (Keep Aspect)</option>
-										<option value="stretch" ${selectedFit === 'stretch' ? 'selected' : ''}>Stretch to Screen</option>
-										<option value="center" ${selectedFit === 'center' ? 'selected' : ''}>Center</option>
-										<option value="tile" ${selectedFit === 'tile' ? 'selected' : ''}>Tile</option>
-									</select>
-								</div>
-								<div class="xp-form-row" style="align-items: center; margin-top: 2px;">
-									<label for="disp-color-picker" style="font-size: 10px; width: 55px;">Color:</label>
-									<input type="color" id="disp-color-picker" value="${selectedBgColor}" style="width: 60px; height: 20px; cursor: pointer;">
-								</div>
-							</div>
-						</div>
-						<div id="disp-slideshow-panel" style="margin-top: 8px; display: ${selectedMode === 'slideshow' ? 'flex' : 'none'}; flex-direction: column; gap: 4px; border-top: 1px dashed #aca899; padding-top: 6px;">
-							<div class="xp-form-row">
-								<label for="disp-slideshow-interval" style="width: 120px;">Change picture every:</label>
-								<select id="disp-slideshow-interval" class="xp-select" style="flex: 1;">
-									<option value="10" ${String(selectedInterval) === '10' ? 'selected' : ''}>10 seconds</option>
-									<option value="30" ${String(selectedInterval) === '30' ? 'selected' : ''}>30 seconds</option>
-									<option value="60" ${String(selectedInterval) === '60' ? 'selected' : ''}>1 minute</option>
-									<option value="300" ${String(selectedInterval) === '300' ? 'selected' : ''}>5 minutes</option>
-									<option value="900" ${String(selectedInterval) === '900' ? 'selected' : ''}>15 minutes</option>
-									<option value="1800" ${String(selectedInterval) === '1800' ? 'selected' : ''}>30 minutes</option>
-									<option value="3600" ${String(selectedInterval) === '3600' ? 'selected' : ''}>1 hour</option>
-								</select>
-							</div>
-							<div class="xp-form-row">
-								<label for="disp-slideshow-transition" style="width: 120px;">Transition Effect:</label>
-								<select id="disp-slideshow-transition" class="xp-select" style="flex: 1;">
-									<option value="none" ${selectedTransition === 'none' ? 'selected' : ''}>None (Instant Cut)</option>
-									<option value="fade" ${selectedTransition === 'fade' ? 'selected' : ''}>Crossfade</option>
-									<option value="slide-left" ${selectedTransition === 'slide-left' ? 'selected' : ''}>Slide Left</option>
-									<option value="slide-right" ${selectedTransition === 'slide-right' ? 'selected' : ''}>Slide Right</option>
-									<option value="slide-up" ${selectedTransition === 'slide-up' ? 'selected' : ''}>Slide Up</option>
-									<option value="slide-down" ${selectedTransition === 'slide-down' ? 'selected' : ''}>Slide Down</option>
-									<option value="zoom-in" ${selectedTransition === 'zoom-in' ? 'selected' : ''}>Zoom In</option>
-									<option value="zoom-out" ${selectedTransition === 'zoom-out' ? 'selected' : ''}>Zoom Out</option>
-									<option value="rotate" ${selectedTransition === 'rotate' ? 'selected' : ''}>Rotate & Zoom</option>
-								</select>
-							</div>
-							<div class="xp-form-row">
-								<label for="disp-slideshow-trans-dur" style="width: 120px;">Transition Duration:</label>
-								<select id="disp-slideshow-trans-dur" class="xp-select" style="flex: 1;">
-									<option value="0.5" ${String(selectedTransDuration) === '0.5' ? 'selected' : ''}>0.5 seconds</option>
-									<option value="1.0" ${String(selectedTransDuration) === '1.0' ? 'selected' : ''}>1.0 second</option>
-									<option value="1.5" ${String(selectedTransDuration) === '1.5' ? 'selected' : ''}>1.5 seconds</option>
-									<option value="2.0" ${String(selectedTransDuration) === '2.0' ? 'selected' : ''}>2.0 seconds</option>
-								</select>
-							</div>
-							<div class="xp-checkbox-row">
-								<input type="checkbox" id="disp-slideshow-random" ${selectedRandom ? 'checked' : ''}>
-								<label for="disp-slideshow-random">Shuffle pictures randomly</label>
-							</div>
-						</div>
-					</fieldset>
-				</div>
-
-				<div class="xp-tab-page" data-page="screensaver">
-					<div class="wallpaper-monitor-container" style="margin-bottom: 6px;">
-						<div class="wallpaper-monitor-bezel">
-							<canvas id="disp-ss-monitor-canvas" class="wallpaper-monitor-screen" width="126" height="91" style="width:100%;height:100%;display:block;background:#000000;"></canvas>
-						</div>
-						<div class="wallpaper-monitor-stand"></div>
-						<div class="wallpaper-monitor-base"></div>
-					</div>
-
-					<fieldset class="xp-groupbox">
-						<legend>Screen Saver</legend>
-						<div style="display: flex; gap: 8px; align-items: center; margin-bottom: 8px;">
-							<select id="disp-ss-select" class="xp-select" style="flex: 1;">
-								<option value="xp-flying-logo" ${currentSS === 'xp-flying-logo' ? 'selected' : ''}>3D Flying Windows XP Logo</option>
-								<option value="bubbles" ${currentSS === 'bubbles' ? 'selected' : ''}>Bubbles (Bulles Physiques 3D)</option>
-								<option value="starfield" ${currentSS === 'starfield' ? 'selected' : ''}>Starfield Simulation</option>
-								<option value="pipes" ${currentSS === 'pipes' ? 'selected' : ''}>3D Pipes (Tubes 3D)</option>
-								<option value="mystify" ${currentSS === 'mystify' ? 'selected' : ''}>Mystify (Polygones)</option>
-								<option value="bezier" ${currentSS === 'bezier' ? 'selected' : ''}>Bouncing Curves (Bézier)</option>
-								<option value="blank" ${currentSS === 'blank' ? 'selected' : ''}>Blank Screen</option>
-								<option value="random" ${currentSS === 'random' ? 'selected' : ''}>Random (Au hasard)</option>
-								<option value="none" ${currentSS === 'none' ? 'selected' : ''}>(None)</option>
-							</select>
-							<button type="button" class="xp-button-small" id="disp-ss-btn-preview" ${currentSS === 'none' ? 'disabled' : ''}>Preview</button>
-						</div>
-						<div class="xp-form-row">
-							<label for="disp-ss-wait-input" style="width: 50px;">Wait:</label>
-							<input type="number" id="disp-ss-wait-input" min="0.1" max="120" step="0.5" value="${currentSSTimeout}" class="xp-input" style="width: 60px;">
-							<span>minutes</span>
-						</div>
-						<div id="disp-ss-custom-settings-panel" class="ss-dynamic-config-panel"></div>
-					</fieldset>
-				</div>
-			</div>
-
-			<div class="xp-dialog-action-footer">
-				<button type="button" class="xp-button" id="disp-btn-ok">OK</button>
-				<button type="button" class="xp-button" id="disp-btn-cancel">Cancel</button>
-				<button type="button" class="xp-button" id="disp-btn-apply" disabled>Apply</button>
-			</div>
-		</div>
-	`;
-
-	const win = createXPWindow(id, 'Display Properties', contentHTML, 470, 520, {
-		iconSrc: '../assets/images/desk/icons/Display.webp',
-		resizable: false,
-		x: targetX,
-		y: targetY
-	});
-	win.querySelector('.xp-window-content').style.padding = '0';
-	win.querySelector('.xp-window-content').style.overflowX = 'hidden';
-
-	win.getWindowState = () => {
-		const activeBtn = win.querySelector('.xp-tab-btn.active');
-		return {
-			appId: 'display',
-			activeTab: activeBtn ? activeBtn.dataset.tab : 'desktop'
-		};
-	};
-
-	const tabBtns = win.querySelectorAll('.xp-tab-btn');
-	const tabPages = win.querySelectorAll('.xp-tab-page');
-	const applyBtn = win.querySelector('#disp-btn-apply');
-	const okBtn = win.querySelector('#disp-btn-ok');
-	const cancelBtn = win.querySelector('#disp-btn-cancel');
-	const wpListbox = win.querySelector('#disp-wp-listbox');
-	const monitorPreview = win.querySelector('#disp-monitor-preview');
-	const selectFit = win.querySelector('#disp-select-fit');
-	const modeSelect = win.querySelector('#disp-wallpaper-mode');
-	const colorPicker = win.querySelector('#disp-color-picker');
-	const slideshowPanel = win.querySelector('#disp-slideshow-panel');
-	const slideshowInterval = win.querySelector('#disp-slideshow-interval');
-	const slideshowRandom = win.querySelector('#disp-slideshow-random');
-	const slideshowTransition = win.querySelector('#disp-slideshow-transition');
-	const slideshowTransDur = win.querySelector('#disp-slideshow-trans-dur');
-
-	if (slideshowTransition) {
-		slideshowTransition.addEventListener('change', () => {
-			selectedTransition = slideshowTransition.value;
-			markDirty();
-		});
-	}
-
-	if (slideshowTransDur) {
-		slideshowTransDur.addEventListener('change', () => {
-			selectedTransDuration = slideshowTransDur.value;
-			markDirty();
-		});
-	}
-
-	const ssSelect = win.querySelector('#disp-ss-select');
-	const ssCanvas = win.querySelector('#disp-ss-monitor-canvas');
-	const ssPreviewBtn = win.querySelector('#disp-ss-btn-preview');
-	const ssWaitInput = win.querySelector('#disp-ss-wait-input');
-	const ssCustomPanel = win.querySelector('#disp-ss-custom-settings-panel');
-
-	const markDirty = () => {
-		if (applyBtn) applyBtn.disabled = false;
-	};
-
-	const renderEmbeddedScreensaverSettings = () => {
-		if (!ssCustomPanel) return;
-		ssCustomPanel.innerHTML = '';
-		if (currentSS === 'none' || !window.ScreenSaverManager) return;
-		const targetSaver = currentSS === 'random' ? 'xp-flying-logo' : currentSS;
-		window.ScreenSaverManager.renderConfigUI(ssCustomPanel, targetSaver, (updatedCfg) => {
-			markDirty();
-			if (ssCanvas && currentSS !== 'none') {
-				window.ScreenSaverManager.updateActivePreviewConfig(ssCanvas, updatedCfg);
-			}
-		});
-	};
-
-	renderEmbeddedScreensaverSettings();
-
-	const refreshWallpaperList = async () => {
-		const wallpapers = await fetchWallpaperRegistry();
-		wpListbox.innerHTML = '';
-		wallpapers.forEach(item => {
-			const row = document.createElement('div');
-			row.className = 'xp-listbox-item';
-			if (item.path === selectedWallpaperPath) row.classList.add('active');
-			row.textContent = item.name;
-			row.addEventListener('click', () => {
-				wpListbox.querySelectorAll('.xp-listbox-item').forEach(r => r.classList.remove('active'));
-				row.classList.add('active');
-				selectedWallpaperPath = item.path;
-				if (selectedMode !== 'color') {
-					monitorPreview.style.backgroundImage = `url('${item.path}')`;
-				}
-				markDirty();
-			});
-			wpListbox.appendChild(row);
-		});
-	};
-
-	refreshWallpaperList();
-
-	const updateMonitorScreen = () => {
-		monitorPreview.style.backgroundColor = selectedBgColor;
-		if (selectedMode === 'color') {
-			monitorPreview.style.backgroundImage = 'none';
-		} else {
-			monitorPreview.style.backgroundImage = `url('${selectedWallpaperPath}')`;
-		}
-	};
-
-	tabBtns.forEach(btn => {
-		btn.addEventListener('click', () => {
-			tabBtns.forEach(b => b.classList.toggle('active', b === btn));
-			tabPages.forEach(p => p.classList.toggle('active', p.dataset.page === btn.dataset.tab));
-			if (btn.dataset.tab === 'screensaver' && window.ScreenSaverManager && ssCanvas) {
-				if (currentSS !== 'none') {
-					window.ScreenSaverManager.startPreview(ssCanvas, currentSS);
-				} else {
-					window.ScreenSaverManager.stopPreview(ssCanvas, true);
-				}
-			} else if (window.ScreenSaverManager && ssCanvas) {
-				window.ScreenSaverManager.stopPreview(ssCanvas, true);
-			}
-		});
-	});
-
-	if (initialTab && initialTab !== 'desktop') {
-		const targetTab = win.querySelector(`.xp-tab-btn[data-tab="${initialTab}"]`);
-		if (targetTab) targetTab.click();
-	}
-
-	modeSelect.addEventListener('change', () => {
-		selectedMode = modeSelect.value;
-		slideshowPanel.style.display = selectedMode === 'slideshow' ? 'flex' : 'none';
-		updateMonitorScreen();
-		markDirty();
-	});
-
-	colorPicker.addEventListener('input', () => {
-		selectedBgColor = colorPicker.value;
-		updateMonitorScreen();
-		markDirty();
-	});
-
-	selectFit.addEventListener('change', () => {
-		selectedFit = selectFit.value;
-		markDirty();
-	});
-
-	slideshowInterval.addEventListener('change', () => {
-		selectedInterval = slideshowInterval.value;
-		markDirty();
-	});
-
-	slideshowRandom.addEventListener('change', () => {
-		selectedRandom = slideshowRandom.checked;
-		markDirty();
-	});
-
-	win.querySelector('#disp-btn-browse-folder').addEventListener('click', () => {
-		if (fs) {
-			let wpFolder = fs.findByPath('/WINDOWS/Web/Wallpaper');
-			if (!wpFolder) wpFolder = fs.root;
-			if (window.FileExplorer) window.FileExplorer.open(wpFolder);
-		}
-	});
-
-	win.querySelector('#disp-btn-restore-bliss').addEventListener('click', () => {
-		selectedWallpaperPath = DEFAULT_DESKTOP_WALLPAPER;
-		selectedMode = 'picture';
-		modeSelect.value = 'picture';
-		slideshowPanel.style.display = 'none';
-		updateMonitorScreen();
-		wpListbox.querySelectorAll('.xp-listbox-item').forEach(r => {
-			r.classList.toggle('active', r.textContent === 'Windows XP Bliss' || r.textContent === 'Bliss');
-		});
-		markDirty();
-	});
-
-	ssSelect.addEventListener('change', () => {
-		currentSS = ssSelect.value;
-		if (ssPreviewBtn) ssPreviewBtn.disabled = currentSS === 'none';
-		renderEmbeddedScreensaverSettings();
-		markDirty();
-		const currentCanvas = win.querySelector('#disp-ss-monitor-canvas') || ssCanvas;
-		if (window.ScreenSaverManager && currentCanvas) {
-			if (currentSS !== 'none') {
-				window.ScreenSaverManager.startPreview(currentCanvas, currentSS);
-			} else {
-				window.ScreenSaverManager.stopPreview(currentCanvas, true);
-			}
-		}
-	});
-
-	if (ssPreviewBtn) {
-		ssPreviewBtn.addEventListener('click', () => {
-			if (currentSS !== 'none' && window.ScreenSaverManager) {
-				window.ScreenSaverManager.settings.activeSaver = currentSS;
-				window.ScreenSaverManager.start(true);
-			}
-		});
-	}
-
-	ssWaitInput.addEventListener('input', () => {
-		const val = parseFloat(ssWaitInput.value);
-		currentSSTimeout = (!isNaN(val) && val > 0) ? val : 1;
-		markDirty();
-	});
-
-	const saveChanges = () => {
-		if (window.SettingsApp) {
-			window.SettingsApp.set('wallpaperMode', selectedMode);
-			window.SettingsApp.set('desktopBackgroundColor', selectedBgColor);
-			window.SettingsApp.set('wallpaperSlideshowInterval', selectedInterval);
-			window.SettingsApp.set('wallpaperSlideshowRandom', selectedRandom);
-			window.SettingsApp.set('wallpaperTransition', selectedTransition);
-			window.SettingsApp.set('wallpaperTransitionDuration', parseFloat(selectedTransDuration));
-			window.SettingsApp.set('desktopBackground', selectedWallpaperPath);
-			window.SettingsApp.set('wallpaperFit', selectedFit);
-		} else {
-			localStorage.setItem('wallpaperMode', selectedMode);
-			localStorage.setItem('desktopBackgroundColor', selectedBgColor);
-			localStorage.setItem('wallpaperSlideshowInterval', String(selectedInterval));
-			localStorage.setItem('wallpaperSlideshowRandom', String(selectedRandom));
-			localStorage.setItem('wallpaperTransition', selectedTransition);
-			localStorage.setItem('wallpaperTransitionDuration', String(selectedTransDuration));
-			localStorage.setItem('desktopBackground', selectedWallpaperPath);
-			localStorage.setItem('wallpaperFit', selectedFit);
-		}
-
-		applyInitialDesktopBackground();
-
-		if (window.ScreenSaverManager) {
-			window.ScreenSaverManager.settings.activeSaver = currentSS;
-			window.ScreenSaverManager.settings.enabled = (currentSS !== 'none');
-			window.ScreenSaverManager.settings.timeoutMinutes = currentSSTimeout;
-			window.ScreenSaverManager.saveSettings();
-			window.ScreenSaverManager.resetIdleTimer();
-		}
-		if (applyBtn) applyBtn.disabled = true;
-	};
-
-	applyBtn.addEventListener('click', saveChanges);
-	okBtn.addEventListener('click', () => {
-		saveChanges();
-		if (window.ScreenSaverManager && ssCanvas) {
-			window.ScreenSaverManager.stopPreview(ssCanvas);
-		}
-		closeWindow(win, id);
-	});
-	cancelBtn.addEventListener('click', () => {
-		if (window.ScreenSaverManager && ssCanvas) {
-			window.ScreenSaverManager.stopPreview(ssCanvas);
-		}
-		closeWindow(win, id);
-	});
-
-	if (window.DeskEventBus) {
-		const unsub = window.DeskEventBus.on('fs:changed', () => refreshWallpaperList());
-		win.beforeClose = (force) => {
-			unsub();
-			if (window.ScreenSaverManager && ssCanvas) {
-				window.ScreenSaverManager.stopPreview(ssCanvas);
-			}
-			force();
-		};
-	}
+	return null;
 }
 
 function openRecycleBinWindow() {
@@ -4828,7 +4413,7 @@ function renderRecycleBinContent(win) {
 	}
 }
 
-function openRunDialog() {
+function openRunDialog(options = {}) {
 	const id = 'window-run-dialog';
 	const title = 'Run';
 	const existingWindow = document.getElementById(id);
@@ -4839,7 +4424,7 @@ function openRunDialog() {
 			input.focus();
 			input.select();
 		}
-		return;
+		return existingWindow;
 	}
 
 	const contentHTML = `
@@ -4868,7 +4453,23 @@ function openRunDialog() {
 		</div>
 	`;
 
-	const runWindow = createXPWindow(id, title, contentHTML, 400, 180, { resizable: false, iconSrc: '../assets/images/desk/icons/Command Prompt.webp' });
+	const bounds = (window.WindowManager && typeof window.WindowManager.getWorkspaceBounds === 'function') 
+		? window.WindowManager.getWorkspaceBounds() 
+		: { left: 0, top: 0, width: window.innerWidth, height: window.innerHeight - 36, right: window.innerWidth, bottom: window.innerHeight - 36 };
+
+	let targetX = options ? options.x : undefined;
+	let targetY = options ? options.y : undefined;
+	if (typeof targetX === 'number' && typeof targetY === 'number') {
+		targetX = Math.max(bounds.left + 8, Math.min(targetX, bounds.right - 400 - 8));
+		targetY = Math.max(bounds.top + 8, Math.min(targetY, bounds.bottom - 180 - 8));
+	}
+
+	const runWindow = createXPWindow(id, title, contentHTML, 400, 180, {
+		resizable: false,
+		iconSrc: '../assets/images/desk/icons/Command Prompt.webp',
+		x: targetX,
+		y: targetY
+	});
 	
 	const input = runWindow.querySelector('#run-input');
 	const okBtn = runWindow.querySelector('#run-ok');
@@ -4887,11 +4488,32 @@ function openRunDialog() {
 
 	okBtn.addEventListener('click', execute);
 	cancelBtn.addEventListener('click', () => closeWindow(runWindow, id));
-	browseBtn.addEventListener('click', () => alert('Browse feature is not implemented.'));
+	browseBtn.addEventListener('click', () => {
+		if (window.FileDialog) {
+			window.FileDialog.open({
+				mode: 'open',
+				title: 'Browse',
+				filterTypes: [
+					{ label: 'Programs (*.exe;*.pif;*.com;*.bat;*.cmd)', ext: '.exe;.pif;.com;.bat;.cmd', mime: '*/*' },
+					{ label: 'All Files (*.*)', ext: '.*', mime: '*/*' }
+				],
+				onConfirm: (folder, fileName, targetItem) => {
+					if (targetItem) {
+						input.value = targetItem.getFullPath();
+					} else if (folder) {
+						input.value = `${folder.getFullPath() === '/' ? '' : folder.getFullPath()}/${fileName}`;
+					}
+					input.focus();
+				}
+			});
+		}
+	});
 	
 	input.addEventListener('keydown', (e) => {
 		if (e.key === 'Enter') execute();
 	});
+
+	return runWindow;
 }
 
 function processRunCommand(command) {
@@ -4903,7 +4525,8 @@ function processRunCommand(command) {
 	const args = raw.substring(cmd.length).trim();
 
 	if (lowerCmd === 'shutdown') {
-		openShutdownDialog();
+		if (window.DeskAppRegistry) window.DeskAppRegistry.launch('shutdown');
+		else openShutdownDialog();
 		return;
 	}
 
@@ -4946,50 +4569,7 @@ function processRunCommand(command) {
 		return;
 	}
 
-	const aliases = {
-		'mspaint': 'paint',
-		'pbrush': 'paint',
-		'paint': 'paint',
-		'calc': 'calculator',
-		'calculator': 'calculator',
-		'winmine': 'minesweeper',
-		'minesweeper': 'minesweeper',
-		'sol': 'solitaire',
-		'solitaire': 'solitaire',
-		'sndrec32': 'soundrecorder',
-		'soundrecorder': 'soundrecorder',
-		'charmap': 'charmap',
-		'wmplayer': 'mediaplayer',
-		'wmp': 'mediaplayer',
-		'mediaplayer': 'mediaplayer',
-		'winamp': 'winamp',
-		'iexplore': 'ie',
-		'ie': 'ie',
-		'msimn': 'outlook',
-		'outlook': 'outlook',
-		'mail': 'outlook',
-		'cmd': 'cmd',
-		'command': 'cmd',
-		'notepad': 'notepad',
-		'write': 'notepad',
-		'wordpad': 'notepad',
-		'photoviewer': 'pictureviewer',
-		'shimgvw': 'pictureviewer',
-		'explorer': 'explorer',
-		'control': 'settings',
-		'cleanmgr': 'recyclebin',
-		'recyclebin': 'recyclebin',
-		'clippy': 'clippy',
-		'taskmgr': 'taskmgr',
-		'taskmanager': 'taskmgr',
-		'encarta': 'encarta',
-		'globe': 'encarta',
-		'map': 'encarta',
-		'atlas': 'encarta'
-	};
-	const resolvedApp = aliases[lowerCmd] || lowerCmd;
-
-	if (resolvedApp === 'clippy') {
+	if (lowerCmd === 'clippy') {
 		if (window.ClippyAgent && typeof window.ClippyAgent.open === 'function') {
 			window.ClippyAgent.open();
 			if (args) window.ClippyAgent.prompt(args);
@@ -4997,15 +4577,18 @@ function processRunCommand(command) {
 		}
 	}
 
-	if (window.DeskAppRegistry && window.DeskAppRegistry.get(resolvedApp)) {
-		let launchArgs = args || undefined;
-		if (args && (resolvedApp === 'notepad' || resolvedApp === 'paint' || resolvedApp === 'pictureviewer' || resolvedApp === 'soundrecorder')) {
-			let filePath = args.replace(/\\/g, '/');
-			if (filePath.startsWith('C:/') || filePath.startsWith('c:/')) filePath = filePath.substring(2);
-			if (fs && fs.exists(filePath)) launchArgs = fs.findByPath(filePath);
+	if (window.DeskAppRegistry) {
+		const app = window.DeskAppRegistry.get(lowerCmd);
+		if (app) {
+			let launchArgs = args || undefined;
+			if (args && (app.id === 'notepad' || app.id === 'paint' || app.id === 'pictureviewer' || app.id === 'soundrecorder')) {
+				let filePath = args.replace(/\\/g, '/');
+				if (filePath.startsWith('C:/') || filePath.startsWith('c:/')) filePath = filePath.substring(2);
+				if (fs && fs.exists(filePath)) launchArgs = fs.findByPath(filePath);
+			}
+			window.DeskAppRegistry.launch(app.id, launchArgs);
+			return;
 		}
-		window.DeskAppRegistry.launch(resolvedApp, launchArgs);
-		return;
 	}
 
 	let pathCandidate = raw;
@@ -5023,12 +4606,12 @@ function processRunCommand(command) {
 	showXPDialog(command, `Cannot find '${command}'. Make sure you typed the name correctly, and then try again.`, 'error');
 }
 
-function openMyComputerWindow() {
+function openMyComputerWindow(options = {}) {
 	const id = 'window-my-computer';
 	const existing = document.getElementById(id);
 	if (existing) {
 		bringWindowToFront(existing);
-		return;
+		return existing;
 	}
 
 	const contentHTML = `
@@ -5158,8 +4741,21 @@ function openMyComputerWindow() {
 		</div>
 	`;
 
+	const bounds = (window.WindowManager && typeof window.WindowManager.getWorkspaceBounds === 'function') 
+		? window.WindowManager.getWorkspaceBounds() 
+		: { left: 0, top: 0, width: window.innerWidth, height: window.innerHeight - 36, right: window.innerWidth, bottom: window.innerHeight - 36 };
+
+	let targetX = options ? options.x : undefined;
+	let targetY = options ? options.y : undefined;
+	if (typeof targetX === 'number' && typeof targetY === 'number') {
+		targetX = Math.max(bounds.left + 8, Math.min(targetX, bounds.right - 720 - 8));
+		targetY = Math.max(bounds.top + 8, Math.min(targetY, bounds.bottom - 500 - 8));
+	}
+
 	const win = createXPWindow(id, 'My Computer', contentHTML, 720, 500, {
-		iconSrc: '../assets/images/desk/icons/My Computer.webp'
+		iconSrc: '../assets/images/desk/icons/My Computer.webp',
+		x: targetX,
+		y: targetY
 	});
 	win.querySelector('.xp-window-content').style.padding = '0';
 
@@ -5206,9 +4802,11 @@ function openMyComputerWindow() {
 			if (box) box.classList.toggle('collapsed');
 		});
 	});
+
+	return win;
 }
 
-function openSearchWindow(initialQuery = '') {
+function openSearchWindow(initialQuery = '', options = {}) {
 	const id = 'window-search-companion';
 	const existing = document.getElementById(id);
 	if (existing) {
@@ -5218,7 +4816,7 @@ function openSearchWindow(initialQuery = '') {
 			input.value = initialQuery;
 			input.focus();
 		}
-		return;
+		return existing;
 	}
 
 	const contentHTML = `
@@ -5255,8 +4853,21 @@ function openSearchWindow(initialQuery = '') {
 		</div>
 	`;
 
+	const bounds = (window.WindowManager && typeof window.WindowManager.getWorkspaceBounds === 'function') 
+		? window.WindowManager.getWorkspaceBounds() 
+		: { left: 0, top: 0, width: window.innerWidth, height: window.innerHeight - 36, right: window.innerWidth, bottom: window.innerHeight - 36 };
+
+	let targetX = options ? options.x : undefined;
+	let targetY = options ? options.y : undefined;
+	if (typeof targetX === 'number' && typeof targetY === 'number') {
+		targetX = Math.max(bounds.left + 8, Math.min(targetX, bounds.right - 680 - 8));
+		targetY = Math.max(bounds.top + 8, Math.min(targetY, bounds.bottom - 420 - 8));
+	}
+
 	const win = createXPWindow(id, 'Search Results', contentHTML, 680, 420, {
-		iconSrc: '../assets/images/desk/icons/Search.webp'
+		iconSrc: '../assets/images/desk/icons/Search.webp',
+		x: targetX,
+		y: targetY
 	});
 	win.querySelector('.xp-window-content').style.padding = '0';
 
@@ -5339,14 +4950,15 @@ function openSearchWindow(initialQuery = '') {
 	});
 
 	if (initialQuery) runSearch();
+	return win;
 }
 
-function openPrintersWindow() {
+function openPrintersWindow(options = {}) {
 	const id = 'window-printers-faxes';
 	const existing = document.getElementById(id);
 	if (existing) {
 		bringWindowToFront(existing);
-		return;
+		return existing;
 	}
 
 	const contentHTML = `
@@ -5454,8 +5066,21 @@ function openPrintersWindow() {
 		</div>
 	`;
 
+	const bounds = (window.WindowManager && typeof window.WindowManager.getWorkspaceBounds === 'function') 
+		? window.WindowManager.getWorkspaceBounds() 
+		: { left: 0, top: 0, width: window.innerWidth, height: window.innerHeight - 36, right: window.innerWidth, bottom: window.innerHeight - 36 };
+
+	let targetX = options ? options.x : undefined;
+	let targetY = options ? options.y : undefined;
+	if (typeof targetX === 'number' && typeof targetY === 'number') {
+		targetX = Math.max(bounds.left + 8, Math.min(targetX, bounds.right - 720 - 8));
+		targetY = Math.max(bounds.top + 8, Math.min(targetY, bounds.bottom - 480 - 8));
+	}
+
 	const win = createXPWindow(id, 'Printers and Faxes', contentHTML, 720, 480, {
-		iconSrc: '../assets/images/desk/icons/Fax.webp'
+		iconSrc: '../assets/images/desk/icons/Fax.webp',
+		x: targetX,
+		y: targetY
 	});
 	win.querySelector('.xp-window-content').style.padding = '0';
 
@@ -5487,14 +5112,16 @@ function openPrintersWindow() {
 		e.preventDefault();
 		if (fs.root.getByName('PDFs')) openFolderWindow(fs.root.getByName('PDFs'));
 	});
+
+	return win;
 }
 
-function openNetworkPlacesWindow() {
+function openNetworkPlacesWindow(options = {}) {
 	const id = 'window-network-places';
 	const existing = document.getElementById(id);
 	if (existing) {
 		bringWindowToFront(existing);
-		return;
+		return existing;
 	}
 
 	const contentHTML = `
@@ -5625,8 +5252,21 @@ function openNetworkPlacesWindow() {
 		</div>
 	`;
 
+	const bounds = (window.WindowManager && typeof window.WindowManager.getWorkspaceBounds === 'function') 
+		? window.WindowManager.getWorkspaceBounds() 
+		: { left: 0, top: 0, width: window.innerWidth, height: window.innerHeight - 36, right: window.innerWidth, bottom: window.innerHeight - 36 };
+
+	let targetX = options ? options.x : undefined;
+	let targetY = options ? options.y : undefined;
+	if (typeof targetX === 'number' && typeof targetY === 'number') {
+		targetX = Math.max(bounds.left + 8, Math.min(targetX, bounds.right - 740 - 8));
+		targetY = Math.max(bounds.top + 8, Math.min(targetY, bounds.bottom - 500 - 8));
+	}
+
 	const win = createXPWindow(id, 'My Network Places', contentHTML, 740, 500, {
-		iconSrc: '../assets/images/desk/icons/My Network Places.webp'
+		iconSrc: '../assets/images/desk/icons/My Network Places.webp',
+		x: targetX,
+		y: targetY
 	});
 	win.querySelector('.xp-window-content').style.padding = '0';
 
@@ -5665,6 +5305,8 @@ function openNetworkPlacesWindow() {
 		e.preventDefault();
 		if (window.DeskAPI && window.DeskAPI.openPrinters) window.DeskAPI.openPrinters();
 	});
+
+	return win;
 }
 
 function openShutdownDialog() {
@@ -5816,11 +5458,11 @@ function openInternetExplorer(url = 'about:home') {
 	}
 }
 
-async function openOutlookExpress() {
+async function openOutlookExpress(options = {}) {
 	const id = 'window-outlook-express';
 	if (document.getElementById(id)) {
 		bringWindowToFront(document.getElementById(id));
-		return;
+		return document.getElementById(id);
 	}
 
 	MailStore.init();
@@ -5875,7 +5517,22 @@ async function openOutlookExpress() {
 			</div>
 		</div>
 	`;
-	const outlookWindow = createXPWindow(id, 'Outlook Express', contentHTML, APP_WINDOW_BASE_SIZES.outlook.width, APP_WINDOW_BASE_SIZES.outlook.height, { iconSrc: '../assets/images/desk/icons/Mail.webp' });
+	const bounds = (window.WindowManager && typeof window.WindowManager.getWorkspaceBounds === 'function') 
+		? window.WindowManager.getWorkspaceBounds() 
+		: { left: 0, top: 0, width: window.innerWidth, height: window.innerHeight - 36, right: window.innerWidth, bottom: window.innerHeight - 36 };
+
+	let targetX = options ? options.x : undefined;
+	let targetY = options ? options.y : undefined;
+	if (typeof targetX === 'number' && typeof targetY === 'number') {
+		targetX = Math.max(bounds.left + 8, Math.min(targetX, bounds.right - APP_WINDOW_BASE_SIZES.outlook.width - 8));
+		targetY = Math.max(bounds.top + 8, Math.min(targetY, bounds.bottom - APP_WINDOW_BASE_SIZES.outlook.height - 8));
+	}
+
+	const outlookWindow = createXPWindow(id, 'Outlook Express', contentHTML, APP_WINDOW_BASE_SIZES.outlook.width, APP_WINDOW_BASE_SIZES.outlook.height, {
+		iconSrc: '../assets/images/desk/icons/Mail.webp',
+		x: targetX,
+		y: targetY
+	});
 	outlookWindow.querySelector('.xp-window-content').style.padding = '0';
 
 	const folderListEl = outlookWindow.querySelector('#oe-folder-list');
@@ -6571,4 +6228,6 @@ async function openOutlookExpress() {
 			if (currentFolderId === 'inbox') renderMessageList();
 		}
 	});
+
+	return outlookWindow;
 }

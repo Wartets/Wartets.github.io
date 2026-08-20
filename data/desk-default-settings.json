@@ -163,6 +163,253 @@
 	"startButtonText": "start",
 	"startMenuSearchVisible": true,
 	"startMenuRecentDocsCount": 15,
+	"startMenuPinnedApps": [
+		"achievements",
+		"ie",
+		"outlook"
+	],
+	"startMenuRightItems": [
+		{
+			"id": "my-documents",
+			"name": "My Documents",
+			"icon": "../assets/images/desk/icons/My Profile Folder.webp",
+			"action": "my-documents",
+			"bold": true
+		},
+		{
+			"id": "my-pictures",
+			"name": "My Pictures",
+			"icon": "../assets/images/desk/icons/Camera.webp",
+			"action": "my-pictures",
+			"bold": true
+		},
+		{
+			"id": "my-music",
+			"name": "My Music",
+			"icon": "../assets/images/desk/icons/Music File.webp",
+			"action": "my-music",
+			"bold": true
+		},
+		{
+			"id": "my-computer",
+			"name": "My Computer",
+			"icon": "../assets/images/desk/icons/My Computer.webp",
+			"action": "my-computer",
+			"bold": true
+		},
+		{
+			"id": "my-network-places",
+			"name": "My Network Places",
+			"icon": "../assets/images/desk/icons/My Network Places.webp",
+			"action": "my-network-places",
+			"bold": false
+		},
+		{
+			"divider": true
+		},
+		{
+			"id": "control-panel",
+			"name": "Control Panel",
+			"icon": "../assets/images/desk/icons/System Properties.webp",
+			"action": "control-panel",
+			"flyout": "control-panel-flyout"
+		},
+		{
+			"id": "printers-faxes",
+			"name": "Printers and Faxes",
+			"icon": "../assets/images/desk/icons/Printer.webp",
+			"action": "printers-faxes"
+		},
+		{
+			"id": "recent-docs",
+			"name": "My Recent Documents",
+			"icon": "../assets/images/desk/icons/List File.webp",
+			"flyout": "recent-docs"
+		},
+		{
+			"divider": true
+		},
+		{
+			"id": "help",
+			"name": "Help and Support",
+			"icon": "../assets/images/desk/icons/User Support.webp",
+			"action": "help"
+		},
+		{
+			"id": "search",
+			"name": "Search",
+			"icon": "../assets/images/desk/icons/Search.webp",
+			"action": "search",
+			"flyout": "search-flyout"
+		},
+		{
+			"id": "run",
+			"name": "Run...",
+			"icon": "../assets/images/desk/icons/Command Prompt.webp",
+			"action": "run"
+		}
+	],
+	"internetExplorerHomePage": "about:home",
+	"internetExplorerSearchUrl": "about:search",
+	"internetExplorerQuickLinks": [
+		{
+			"name": "MSN Start",
+			"url": "about:home"
+		},
+		{
+			"name": "Web Search",
+			"url": "about:search"
+		},
+		{
+			"name": "Projects Directory",
+			"url": "about:projects"
+		},
+		{
+			"name": "GitHub Profile",
+			"url": "https://github.com/wartets"
+		},
+		{
+			"name": "Wikipedia",
+			"url": "https://en.wikipedia.org"
+		},
+		{
+			"name": "MSDN Reference",
+			"url": "http://msdn.microsoft.com/"
+		}
+	],
+	"systemTrayServices": [
+		{
+			"id": "security",
+			"name": "Windows Security Center",
+			"icon": "https://api.iconify.design/mdi/shield-check.svg?color=%2355aa55",
+			"title": "Your computer is protected: Firewall and Antivirus active",
+			"hidden": true
+		},
+		{
+			"id": "hardware",
+			"name": "Safely Remove Hardware",
+			"icon": "https://api.iconify.design/mdi/usb.svg?color=%23ffffff",
+			"title": "Safely Remove Hardware and Eject Media",
+			"hidden": true
+		},
+		{
+			"id": "update",
+			"name": "Automatic Updates",
+			"icon": "https://api.iconify.design/mdi/shield-sync-outline.svg?color=%23ffcc00",
+			"title": "Automatic Updates are configured and active",
+			"hidden": true
+		},
+		{
+			"id": "power",
+			"name": "Power Meter",
+			"isBatteryWidget": true,
+			"hidden": false
+		},
+		{
+			"id": "network",
+			"name": "Local Area Connection",
+			"icon": "https://api.iconify.design/mdi/lan-connect.svg?color=%23ffffff",
+			"title": "Local Area Connection - Speed: 100.0 Mbps - Status: Connected",
+			"hidden": false
+		},
+		{
+			"id": "mail",
+			"name": "Outlook Express Mail Notifier",
+			"icon": "https://api.iconify.design/mdi/email-outline.svg?color=%23ffffff",
+			"title": "Outlook Express - Mail Notifications",
+			"hidden": false
+		},
+		{
+			"id": "volume",
+			"name": "Volume Control",
+			"icon": "https://api.iconify.design/mdi/volume-high.svg?color=%23ffffff",
+			"title": "Volume",
+			"hidden": false
+		},
+		{
+			"id": "lang",
+			"name": "Language Bar",
+			"isTextBadge": true,
+			"hidden": false
+		},
+		{
+			"id": "clippy",
+			"name": "Clippy Assistant",
+			"icon": "../assets/images/desk/clippy/idle.png",
+			"title": "Microsoft Clippy Assistant",
+			"hidden": false
+		},
+		{
+			"id": "clock",
+			"name": "Taskbar Clock",
+			"icon": "../assets/images/desk/icons/Calendar.webp",
+			"title": "Date and Time",
+			"hidden": false
+		}
+	],
+	"avatarPresets": [
+		"../assets/images/desk/icons/User 1.webp",
+		"../assets/images/desk/icons/User 2.webp",
+		"../assets/images/desk/icons/User Accounts.webp",
+		"../assets/images/desk/icons/User Personalization.webp",
+		"../assets/images/desk/icons/User Support.webp",
+		"../assets/images/desk/icons/User's Computer.webp",
+		"../assets/images/desk/icons/My Profile Folder.webp",
+		"../assets/images/desk/icons/My Computer.webp",
+		"../assets/images/desk/icons/My Network Places.webp",
+		"../assets/images/desk/icons/Display.webp",
+		"../assets/images/desk/icons/Monitor.webp",
+		"../assets/images/desk/icons/Laptop.webp",
+		"../assets/images/desk/icons/Camera.webp",
+		"../assets/images/desk/icons/Picture.webp",
+		"../assets/images/desk/icons/Phone.webp",
+		"../assets/images/desk/icons/Earth (fixed).webp",
+		"../assets/images/desk/icons/Network Computers.webp",
+		"../assets/images/desk/icons/Trophy.webp",
+		"../assets/images/desk/icons/Hearts.webp",
+		"../assets/images/desk/icons/Minesweeper.webp",
+		"../assets/images/desk/icons/Winamp.webp",
+		"../assets/images/desk/icons/Music File.webp",
+		"../assets/images/desk/icons/Video File.webp",
+		"../assets/images/desk/icons/Paint.webp",
+		"../assets/images/desk/icons/Notepad.webp",
+		"../assets/images/desk/icons/File.webp",
+		"../assets/images/desk/icons/List File.webp",
+		"../assets/images/desk/icons/Disk Image File.webp",
+		"../assets/images/desk/icons/Floppy Drive.webp",
+		"../assets/images/desk/icons/Folder Closed.webp",
+		"../assets/images/desk/icons/Folder Closed (Alt).webp",
+		"../assets/images/desk/icons/Folder Open.webp",
+		"../assets/images/desk/icons/Folder Search.webp",
+		"../assets/images/desk/icons/Trash.webp",
+		"../assets/images/desk/icons/Calculator.webp",
+		"../assets/images/desk/icons/Calendar.webp",
+		"../assets/images/desk/icons/Fax.webp",
+		"../assets/images/desk/icons/Printer.webp",
+		"../assets/images/desk/icons/Search.webp",
+		"../assets/images/desk/icons/System Properties.webp",
+		"../assets/images/desk/icons/Sounds, Speech, and Audio Devices.webp",
+		"../assets/images/desk/icons/Internet Explorer.webp",
+		"../assets/images/desk/icons/Internet Properties.webp",
+		"../assets/images/desk/icons/Mail.webp",
+		"../assets/images/desk/icons/Activate Windows.webp",
+		"../assets/images/desk/icons/Command Prompt.webp"
+	],
+	"systemProcessesList": [
+		{ "name": "System", "pid": 4, "user": "SYSTEM", "cpu": 0.8, "mem": 240, "desc": "NT Kernel & System", "critical": true, "icon": "../assets/images/desk/icons/System Properties.webp" },
+		{ "name": "smss.exe", "pid": 440, "user": "SYSTEM", "cpu": 0.0, "mem": 480, "desc": "Session Manager Subsystem", "critical": true, "icon": "../assets/images/desk/icons/System Properties.webp" },
+		{ "name": "csrss.exe", "pid": 512, "user": "SYSTEM", "cpu": 0.4, "mem": 3420, "desc": "Client Server Runtime Process", "critical": true, "icon": "../assets/images/desk/icons/System Properties.webp" },
+		{ "name": "winlogon.exe", "pid": 536, "user": "SYSTEM", "cpu": 0.1, "mem": 4180, "desc": "Windows Logon Application", "critical": true, "icon": "../assets/images/desk/icons/User Accounts.webp" },
+		{ "name": "services.exe", "pid": 584, "user": "SYSTEM", "cpu": 0.3, "mem": 3820, "desc": "Services and Controller app", "critical": true, "icon": "../assets/images/desk/icons/System Properties.webp" },
+		{ "name": "lsass.exe", "pid": 596, "user": "SYSTEM", "cpu": 0.2, "mem": 5640, "desc": "LSA Shell (Export Version)", "critical": true, "icon": "../assets/images/desk/icons/User Support.webp" },
+		{ "name": "svchost.exe", "pid": 748, "user": "SYSTEM", "cpu": 0.5, "mem": 14200, "desc": "Generic Host Process for Win32 Services", "critical": false, "icon": "../assets/images/desk/icons/System Properties.webp" },
+		{ "name": "svchost.exe", "pid": 824, "user": "NETWORK SERVICE", "cpu": 0.1, "mem": 4890, "desc": "Generic Host Process for Win32 Services", "critical": false, "icon": "../assets/images/desk/icons/Network Computers.webp" },
+		{ "name": "svchost.exe", "pid": 912, "user": "LOCAL SERVICE", "cpu": 0.1, "mem": 3950, "desc": "Generic Host Process for Win32 Services", "critical": false, "icon": "../assets/images/desk/icons/System Properties.webp" },
+		{ "name": "spoolsv.exe", "pid": 1044, "user": "SYSTEM", "cpu": 0.0, "mem": 4620, "desc": "Print Spooler Service", "critical": false, "icon": "../assets/images/desk/icons/Printer.webp" },
+		{ "name": "explorer.exe", "pid": 1480, "user": "Colin B.R.", "cpu": 1.8, "mem": 24800, "desc": "Windows Explorer Shell", "critical": false, "isExplorer": true, "icon": "../assets/images/desk/icons/Folder Closed.webp" },
+		{ "name": "taskmgr.exe", "pid": 2140, "user": "Colin B.R.", "cpu": 0.9, "mem": 6240, "desc": "Windows Task Manager", "critical": false, "icon": "../assets/images/desk/icons/System Properties.webp" },
+		{ "name": "alg.exe", "pid": 1288, "user": "LOCAL SERVICE", "cpu": 0.0, "mem": 3410, "desc": "Application Layer Gateway Service", "critical": false, "icon": "../assets/images/desk/icons/Network Computers.webp" }
+	],
 	"skipBootScreen": false,
 	"bootLogoPreset": "default",
 	"clippyEnabled": true,
@@ -181,19 +428,147 @@
 	"soundEventClick": true,
 	"soundEventRecycle": true,
 	"soundEventWindow": true,
+	"defaultAudioPlayer": "mediaplayer",
+	"mediaPlayerVizPreset": "albumart",
 	"showHiddenFiles": false,
 	"showFileExtensions": true,
 	"systemLanguage": "EN",
+	"desktopSystemIcons": [
+		{
+			"appId": "mycomputer",
+			"name": "My Computer",
+			"icon": "../assets/images/desk/icons/My Computer.webp",
+			"systemType": "my-computer"
+		},
+		{
+			"appId": "recyclebin",
+			"name": "Recycle Bin",
+			"icon": "../assets/images/desk/icons/Trash.webp",
+			"systemType": "recycle-bin"
+		},
+		{
+			"appId": "achievements",
+			"name": "Milestones",
+			"icon": "../assets/images/desk/icons/Trophy.webp",
+			"systemType": "achievements"
+		}
+	],
+	"quickLaunchDefaultItems": [
+		{
+			"id": "ql-show-desktop",
+			"name": "Show Desktop",
+			"icon": "../assets/images/desk/XPIcon.png",
+			"action": "show-desktop",
+			"system": true
+		},
+		{
+			"id": "ql-achievements",
+			"name": "Milestones & Achievements",
+			"icon": "../assets/images/desk/icons/Trophy.webp",
+			"action": "open-achievements"
+		},
+		{
+			"id": "ql-settings",
+			"name": "Control Panel & Settings",
+			"icon": "../assets/images/desk/icons/System Properties.webp",
+			"action": "open-settings"
+		},
+		{
+			"id": "ql-ie",
+			"name": "Internet Explorer",
+			"icon": "../assets/images/desk/icons/Internet Explorer.webp",
+			"action": "open-ie"
+		},
+		{
+			"id": "ql-oe",
+			"name": "Outlook Express",
+			"icon": "../assets/images/desk/icons/Mail.webp",
+			"action": "open-oe",
+			"hasBadge": true
+		},
+		{
+			"id": "ql-cmd",
+			"name": "Command Prompt",
+			"icon": "../assets/images/desk/icons/Command Prompt.webp",
+			"action": "open-cmd"
+		},
+		{
+			"id": "ql-notepad",
+			"name": "Notepad",
+			"icon": "../assets/images/desk/icons/Notepad.webp",
+			"action": "open-notepad"
+		},
+		{
+			"id": "ql-calc",
+			"name": "Calculator",
+			"icon": "../assets/images/desk/icons/Calculator.webp",
+			"action": "open-calc"
+		},
+		{
+			"id": "ql-paint",
+			"name": "Paint",
+			"icon": "../assets/images/desk/icons/Paint.webp",
+			"action": "open-paint"
+		},
+		{
+			"id": "ql-wmp",
+			"name": "Windows Media Player",
+			"icon": "../assets/images/desk/icons/Video File.webp",
+			"action": "open-media-player"
+		},
+		{
+			"id": "ql-winamp",
+			"name": "Winamp Media Player",
+			"icon": "../assets/images/desk/icons/Winamp.webp",
+			"action": "open-winamp"
+		},
+		{
+			"id": "ql-mine",
+			"name": "Minesweeper",
+			"icon": "../assets/images/desk/icons/Minesweeper.webp",
+			"action": "open-mine"
+		}
+	],
 	"trayConfig": {
-		"security": { "enabled": true, "hidden": true },
-		"hardware": { "enabled": true, "hidden": true },
-		"update": { "enabled": true, "hidden": true },
-		"power": { "enabled": true, "hidden": true },
-		"network": { "enabled": true, "hidden": false },
-		"mail": { "enabled": true, "hidden": false },
-		"volume": { "enabled": true, "hidden": false },
-		"lang": { "enabled": true, "hidden": false },
-		"clippy": { "enabled": true, "hidden": false },
-		"clock": { "enabled": true, "hidden": false }
+		"security": {
+			"enabled": true,
+			"hidden": true
+		},
+		"hardware": {
+			"enabled": true,
+			"hidden": true
+		},
+		"update": {
+			"enabled": true,
+			"hidden": true
+		},
+		"power": {
+			"enabled": true,
+			"hidden": false
+		},
+		"network": {
+			"enabled": true,
+			"hidden": false
+		},
+		"mail": {
+			"enabled": true,
+			"hidden": false
+		},
+		"volume": {
+			"enabled": true,
+			"hidden": false
+		},
+		"lang": {
+			"enabled": true,
+			"hidden": false
+		},
+		"clippy": {
+			"enabled": true,
+			"hidden": false
+		},
+		"clock": {
+			"enabled": true,
+			"hidden": false
+		}
 	}
 }

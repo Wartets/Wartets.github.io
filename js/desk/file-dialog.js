@@ -299,13 +299,13 @@
 					if (place === 'desktop') {
 						currentFolder = fs.root;
 					} else if (place === 'documents') {
-						currentFolder = fs.root.getByName('PDFs') || fs.root;
+						currentFolder = (fs && fs.root) ? (fs.root.getByName('PDFs') || fs.root) : fs.root;
 					} else if (place === 'recent') {
 						currentFolder = fs.root;
 					} else if (place === 'computer') {
 						currentFolder = fs.root;
 					} else if (place === 'network') {
-						currentFolder = fs.root;
+						currentFolder = (fs && fs.root) ? (fs.root.getByName('Others') || fs.root) : fs.root;
 					}
 					buildFolderDropdown();
 					renderFileList();

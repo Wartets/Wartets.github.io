@@ -1,27 +1,28 @@
 (function () {
 	const SETTINGS_STORAGE_KEY = 'xp_system_settings';
 
-	const KNOWN_ICON_FILENAMES = [
-		'User 1.webp', 'User 2.webp', 'User Accounts.webp', 'User Personalization.webp', 'User Support.webp', "User's Computer.webp",
-		'My Profile Folder.webp', 'My Computer.webp', 'My Network Places.webp', 'Display.webp', 'Monitor.webp', 'Laptop.webp',
-		'Camera.webp', 'Picture.webp', 'Phone.webp', 'Earth (fixed).webp', 'Network Computers.webp', 'Trophy.webp',
-		'Game Controller.webp', 'Hearts.webp', 'Minesweeper.webp', 'Winamp.webp', 'Music File.webp', 'Video File.webp',
-		'Paint.webp', 'Notepad.webp', 'File.webp', 'List File.webp', 'Disk Image File.webp', 'Floppy Drive.webp',
-		'Folder Closed.webp', 'Folder Closed (Alt).webp', 'Folder Open.webp', 'Folder Search.webp', 'Trash.webp',
-		'Calculator.webp', 'Calendar.webp', 'Fax.webp', 'Printer.webp', 'Search.webp', 'System Properties.webp',
-		'Sounds, Speech, and Audio Devices.webp', 'Internet Explorer.webp', 'Internet Properties.webp', 'Mail.webp',
-		'Activate Windows.webp', 'Command Prompt.webp'
-	];
+	let baseConfig = null;
+	let currentSettings = null;
+	let pendingSettings = null;
+	let settingsReadyResolve = null;
+	const settingsReadyPromise = new Promise(resolve => {
+		settingsReadyResolve = resolve;
+	});
 
 	function buildDynamicAvatarPresets() {
-		const list = [];
 		const iconMap = new Map();
+		const configuredPresets = (currentSettings && Array.isArray(currentSettings.avatarPresets))
+			? currentSettings.avatarPresets
+			: ((baseConfig && Array.isArray(baseConfig.avatarPresets)) ? baseConfig.avatarPresets : []);
 
-		KNOWN_ICON_FILENAMES.forEach(filename => {
-			const rawName = filename.replace(/\.[^/.]+$/, '');
-			const id = rawName.toLowerCase().replace(/[^\w-]/g, '-');
-			const url = `../assets/images/desk/icons/${filename}`;
-			iconMap.set(url, { id, name: rawName, url });
+		configuredPresets.forEach(preset => {
+			if (typeof preset === 'string') {
+				const rawName = preset.split('/').pop().replace(/\.[^/.]+$/, '');
+				const id = rawName.toLowerCase().replace(/[^\w-]/g, '-');
+				iconMap.set(preset, { id, name: rawName, url: preset });
+			} else if (preset && typeof preset === 'object' && preset.url) {
+				iconMap.set(preset.url, preset);
+			}
 		});
 
 		if (typeof fs !== 'undefined' && fs && fs.root) {
@@ -47,37 +48,53 @@
 		return Array.from(iconMap.values());
 	}
 
-	const AVATAR_PRESETS = buildDynamicAvatarPresets();
-
-	let DEFAULT_SETTINGS = {}; // never to modifiy, use data/desk-default-settings.json to change default settings
+	function haltSystemWithConfigError(errorMsg) {
+		const screen = document.getElementById('boot-screen') || document.body;
+		screen.innerHTML = `
+			<div style="background-color: #000082; color: #ffffff; width: 100vw; height: 100vh; padding: 40px; box-sizing: border-box; font-family: 'Lucida Console', monospace; font-size: 14px; position: fixed; inset: 0; z-index: 9999999;">
+				<p>*** STOP: 0x0000007B (INACCESSIBLE_CONFIG_INITIALIZATION_DEVICE)</p>
+				<br>
+				<p>A fatal initialization error occurred: Required system configuration 'data/desk-default-settings.json' could not be loaded.</p>
+				<p>Details: ${errorMsg}</p>
+				<br>
+				<p>Check that the file exists and contains valid JSON configuration parameters.</p>
+			</div>
+		`;
+	}
 
 	function loadDefaultSettingsAsync() {
 		fetch('../data/desk-default-settings.json')
-			.then(r => r.ok ? r.json() : Promise.reject())
+			.then(r => {
+				if (!r.ok) throw new Error(String(r.status));
+				return r.json();
+			})
 			.then(data => {
-				DEFAULT_SETTINGS = data;
+				if (!data || typeof data !== 'object') throw new Error('Invalid JSON structure');
+				baseConfig = data;
 				loadSavedSettings();
 				applyAllSettings();
+				if (settingsReadyResolve) settingsReadyResolve(currentSettings);
 			})
 			.catch(() => {
 				fetch('data/desk-default-settings.json')
-					.then(r => r.ok ? r.json() : {})
-					.then(data => {
-						DEFAULT_SETTINGS = data;
-						loadSavedSettings();
-						applyAllSettings();
+					.then(r => {
+						if (!r.ok) throw new Error(String(r.status));
+						return r.json();
 					})
-					.catch(() => {
+					.then(data => {
+						if (!data || typeof data !== 'object') throw new Error('Invalid JSON structure');
+						baseConfig = data;
 						loadSavedSettings();
 						applyAllSettings();
+						if (settingsReadyResolve) settingsReadyResolve(currentSettings);
+					})
+					.catch(fatalErr => {
+						haltSystemWithConfigError(fatalErr.message || 'File not found');
 					});
 			});
 	}
 
 	loadDefaultSettingsAsync();
-
-	let currentSettings = { ...DEFAULT_SETTINGS };
-	let pendingSettings = { ...DEFAULT_SETTINGS };
 
 
 	const SoundEngine = {
@@ -241,26 +258,27 @@
 	};
 
 	function loadSavedSettings() {
+		if (!baseConfig) return;
 		try {
 			const saved = localStorage.getItem(SETTINGS_STORAGE_KEY);
 			if (saved) {
 				const parsed = JSON.parse(saved);
-				currentSettings = Object.assign({}, DEFAULT_SETTINGS, parsed);
-				if (DEFAULT_SETTINGS.screensaverSavers) {
-					currentSettings.screensaverSavers = Object.assign({}, DEFAULT_SETTINGS.screensaverSavers, parsed.screensaverSavers || {});
+				currentSettings = Object.assign({}, baseConfig, parsed);
+				if (baseConfig.screensaverSavers) {
+					currentSettings.screensaverSavers = Object.assign({}, baseConfig.screensaverSavers, parsed.screensaverSavers || {});
 				}
-				if (DEFAULT_SETTINGS.trayConfig) {
-					currentSettings.trayConfig = Object.assign({}, DEFAULT_SETTINGS.trayConfig, parsed.trayConfig || {});
+				if (baseConfig.trayConfig) {
+					currentSettings.trayConfig = Object.assign({}, baseConfig.trayConfig, parsed.trayConfig || {});
 				}
 			} else {
-				currentSettings = Object.assign({}, DEFAULT_SETTINGS);
+				currentSettings = Object.assign({}, baseConfig);
 			}
 			const legacyHidden = localStorage.getItem('desktopShowHidden');
 			if (legacyHidden !== null) currentSettings.showHiddenFiles = legacyHidden === 'true';
 			const legacyBg = localStorage.getItem('desktopBackground');
 			if (legacyBg) currentSettings.desktopBackground = legacyBg;
 		} catch (e) {
-			currentSettings = Object.assign({}, DEFAULT_SETTINGS);
+			currentSettings = Object.assign({}, baseConfig);
 		}
 		pendingSettings = Object.assign({}, currentSettings);
 	}
@@ -398,6 +416,10 @@
 		const fitMode = currentSettings.wallpaperFit || 'cover';
 		document.body.classList.remove('wallpaper-fit-cover', 'wallpaper-fit-stretch', 'wallpaper-fit-center', 'wallpaper-fit-tile', 'wallpaper-fit-fit');
 		document.body.classList.add(`wallpaper-fit-${fitMode}`);
+
+		if (typeof applyInitialDesktopBackground === 'function') {
+			applyInitialDesktopBackground();
+		}
 
 		document.body.classList.remove('icon-size-mini', 'icon-size-small', 'icon-size-normal', 'icon-size-large', 'icon-size-xlarge');
 		document.body.classList.add(`icon-size-${currentSettings.iconSize || 'normal'}`);
@@ -567,7 +589,7 @@
 		return `${(bytes / 1024).toFixed(1)} KB`;
 	}
 
-	function openSettingsDialog(defaultTab = 'system') {
+	function openSettingsDialog(defaultTab = 'system', options = {}) {
 		const id = 'window-control-panel-properties';
 		const existing = document.getElementById(id);
 		if (existing) {
@@ -576,7 +598,7 @@
 				unminimizeWindow(existing);
 			}
 			switchTab(existing, defaultTab);
-			return;
+			return existing;
 		}
 
 		pendingSettings = { ...currentSettings };
@@ -1531,9 +1553,22 @@
 			</div>
 		`;
 
+		const bounds = (window.WindowManager && typeof window.WindowManager.getWorkspaceBounds === 'function') 
+			? window.WindowManager.getWorkspaceBounds() 
+			: { left: 0, top: 0, width: window.innerWidth, height: window.innerHeight - 36, right: window.innerWidth, bottom: window.innerHeight - 36 };
+
+		let targetX = options ? options.x : undefined;
+		let targetY = options ? options.y : undefined;
+		if (typeof targetX === 'number' && typeof targetY === 'number') {
+			targetX = Math.max(bounds.left + 8, Math.min(targetX, bounds.right - 680 - 8));
+			targetY = Math.max(bounds.top + 8, Math.min(targetY, bounds.bottom - 570 - 8));
+		}
+
 		const win = createXPWindow(id, 'Control Panel & System Settings', contentHTML, 680, 570, {
 			iconSrc: '../assets/images/desk/icons/System Properties.webp',
-			resizable: false
+			resizable: false,
+			x: targetX,
+			y: targetY
 		});
 		win.querySelector('.xp-window-content').style.padding = '0';
 
@@ -1546,6 +1581,7 @@
 		};
 
 		bindSettingsDialogEvents(win, id, defaultTab);
+		return win;
 	}
 
 	function switchTab(win, tabName) {
@@ -1678,25 +1714,16 @@
 		if (!grid) return;
 		grid.innerHTML = '';
 
-		const trayServices = [
-			{ id: 'security', name: 'Security Center', icon: '../assets/images/desk/icons/User Support.webp', defaultHidden: true },
-			{ id: 'hardware', name: 'Safely Remove Hardware', icon: '../assets/images/desk/icons/Laptop.webp', defaultHidden: true },
-			{ id: 'update', name: 'Automatic Updates', icon: '../assets/images/desk/icons/Activate Windows.webp', defaultHidden: true },
-			{ id: 'power', name: 'Power Meter', icon: '../assets/images/desk/icons/Laptop.webp', defaultHidden: true },
-			{ id: 'network', name: 'Network Connection', icon: '../assets/images/desk/icons/Network Computers.webp', defaultHidden: false },
-			{ id: 'mail', name: 'Outlook Express Mail', icon: '../assets/images/desk/icons/Mail.webp', defaultHidden: false },
-			{ id: 'volume', name: 'Volume Control', icon: '../assets/images/desk/icons/Sounds, Speech, and Audio Devices.webp', defaultHidden: false },
-			{ id: 'lang', name: 'Language Indicator', icon: '../assets/images/desk/icons/Internet Properties.webp', defaultHidden: false },
-			{ id: 'clippy', name: 'Clippy Assistant', icon: '../assets/images/desk/clippy/idle.png', defaultHidden: false },
-			{ id: 'clock', name: 'Taskbar Clock', icon: '../assets/images/desk/icons/Calendar.webp', defaultHidden: false }
-		];
+		const trayServices = (window.Taskbar && typeof window.Taskbar.getTrayServices === 'function')
+			? window.Taskbar.getTrayServices()
+			: ((currentSettings && Array.isArray(currentSettings.systemTrayServices)) ? currentSettings.systemTrayServices : []);
 
 		const config = pendingSettings.trayConfig || {};
 
 		trayServices.forEach(srv => {
 			const srvCfg = config[srv.id] || {};
 			const isEn = srvCfg.enabled !== undefined ? srvCfg.enabled : true;
-			const isHid = srvCfg.hidden !== undefined ? srvCfg.hidden : srv.defaultHidden;
+			const isHid = srvCfg.hidden !== undefined ? srvCfg.hidden : !!srv.hidden;
 
 			const row = document.createElement('div');
 			row.className = 'settings-tray-item-row';
@@ -2245,7 +2272,7 @@
 		const restoreBlissBtn = win.querySelector('#settings-btn-restore-bliss');
 		if (restoreBlissBtn) {
 			restoreBlissBtn.addEventListener('click', () => {
-				const defaultPath = (DEFAULT_SETTINGS && DEFAULT_SETTINGS.desktopBackground) || '../assets/images/desk/wallpapers/wallpaper-default.webp';
+				const defaultPath = (baseConfig && baseConfig.desktopBackground) || '../assets/images/desk/wallpapers/wallpaper-default.webp';
 				pendingSettings.desktopBackground = defaultPath;
 				const monitor = win.querySelector('#settings-monitor-screen');
 				if (monitor) monitor.style.backgroundImage = `url('${defaultPath}')`;
@@ -2905,7 +2932,7 @@
 
 		const commitChanges = () => {
 			if (window.AchievementsManager) {
-				if (pendingSettings.userName !== DEFAULT_SETTINGS.userName && pendingSettings.userAvatar !== DEFAULT_SETTINGS.userAvatar) {
+				if (baseConfig && pendingSettings.userName !== baseConfig.userName && pendingSettings.userAvatar !== baseConfig.userAvatar) {
 					window.AchievementsManager.progress('identity_crisis', 1);
 				}
 				if (pendingSettings.startButtonText && pendingSettings.startButtonText.toLowerCase() !== 'start') {
@@ -2924,6 +2951,9 @@
 			currentSettings = { ...pendingSettings };
 			saveCurrentSettings();
 			applyAllSettings();
+			if (typeof applyInitialDesktopBackground === 'function') {
+				applyInitialDesktopBackground();
+			}
 			if (window.ScreenSaverManager) {
 				window.ScreenSaverManager.settings.activeSaver = currentSettings.screensaverActive || 'xp-flying-logo';
 				window.ScreenSaverManager.settings.enabled = (currentSettings.screensaverActive !== 'none');
@@ -2968,17 +2998,23 @@
 		};
 	}
 
-	loadSavedSettings();
 	document.addEventListener('DOMContentLoaded', () => {
-		applyAllSettings();
+		if (currentSettings) {
+			applyAllSettings();
+		}
 	});
 
 	window.SettingsApp = {
-		open: (tab = 'system') => openSettingsDialog(tab),
-		get: (key) => (currentSettings && currentSettings[key] !== undefined ? currentSettings[key] : (DEFAULT_SETTINGS ? DEFAULT_SETTINGS[key] : undefined)),
-		getAll: () => Object.assign({}, currentSettings),
+		ready: () => settingsReadyPromise,
+		open: (tab = 'system', options = {}) => openSettingsDialog(tab, options),
+		get: (key) => {
+			if (currentSettings && currentSettings[key] !== undefined) return currentSettings[key];
+			if (baseConfig && baseConfig[key] !== undefined) return baseConfig[key];
+			return undefined;
+		},
+		getAll: () => Object.assign({}, baseConfig || {}, currentSettings || {}),
 		set: (key, value) => {
-			if (!currentSettings) currentSettings = Object.assign({}, DEFAULT_SETTINGS);
+			if (!currentSettings) currentSettings = Object.assign({}, baseConfig || {});
 			if (!pendingSettings) pendingSettings = Object.assign({}, currentSettings);
 			currentSettings[key] = value;
 			pendingSettings[key] = value;

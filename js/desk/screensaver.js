@@ -1,66 +1,5 @@
 (function () {
 	const STORAGE_KEY = 'xp_screensaver_settings';
-	const DEFAULT_SETTINGS = {
-		activeSaver: 'xp-flying-logo',
-		timeoutMinutes: 5,
-		enabled: true,
-		savers: {
-			'xp-flying-logo': {
-				speed: 4,
-				logoScale: 1.0,
-				rotationSpeed: 3,
-				waveIntensity: 5,
-				extrusionDepth: 12,
-				trailEffect: true,
-				trailDensity: 40,
-				starfieldBackground: true,
-				starCount: 200
-			},
-			'starfield': {
-				speed: 6,
-				starCount: 500,
-				streakLength: 6,
-				colorMode: 'white',
-				centerGlow: true
-			},
-			'pipes': {
-				pipeSpeed: 4,
-				maxPipes: 5,
-				pipeRadius: 10,
-				jointType: 'mixed',
-				shading: 'shiny',
-				colorScheme: 'classic'
-			},
-			'mystify': {
-				speed: 4,
-				linesCount: 12,
-				polygonCount: 2,
-				vertexCount: 4,
-				lineWidth: 1.5,
-				colorScheme: 'rainbow',
-				colorCycleSpeed: 3
-			},
-			'bezier': {
-				speed: 4,
-				curveCount: 3,
-				segments: 25,
-				lineWidth: 1.5,
-				colorScheme: 'vibrant'
-			},
-			'bubbles': {
-				bubbleCount: 80,
-				baseRadius: 22,
-				radiusVariation: 0.6,
-				speed: 3.5,
-				massExponent: 2,
-				restitution: 1.0,
-				gravityY: 0.0,
-				colorScheme: 'soap',
-				specularHighlights: true
-			},
-			'blank': {}
-		}
-	};
 
 	const V_WIDTH = 800;
 
@@ -93,21 +32,36 @@
 		}
 
 		loadSettings() {
+			const defaults = (window.SettingsApp && typeof window.SettingsApp.getAll === 'function') 
+				? window.SettingsApp.getAll() 
+				: {};
+			const baseSavers = defaults.screensaverSavers || {};
+			const baseActive = defaults.screensaverActive || 'xp-flying-logo';
+			const baseTimeout = defaults.screensaverTimeoutMinutes !== undefined ? defaults.screensaverTimeoutMinutes : 5;
+			const baseEnabled = defaults.screensaverEnabled !== undefined ? defaults.screensaverEnabled : true;
+
 			try {
 				const saved = localStorage.getItem(STORAGE_KEY);
 				if (saved) {
 					const parsed = JSON.parse(saved);
 					return {
-						...DEFAULT_SETTINGS,
-						...parsed,
+						activeSaver: parsed.activeSaver || baseActive,
+						timeoutMinutes: parsed.timeoutMinutes !== undefined ? parsed.timeoutMinutes : baseTimeout,
+						enabled: parsed.enabled !== undefined ? parsed.enabled : baseEnabled,
 						savers: {
-							...DEFAULT_SETTINGS.savers,
+							...baseSavers,
 							...(parsed.savers || {})
 						}
 					};
 				}
 			} catch (e) {}
-			return JSON.parse(JSON.stringify(DEFAULT_SETTINGS));
+
+			return {
+				activeSaver: baseActive,
+				timeoutMinutes: baseTimeout,
+				enabled: baseEnabled,
+				savers: JSON.parse(JSON.stringify(baseSavers))
+			};
 		}
 
 		saveSettings() {
@@ -292,7 +246,8 @@
 		getSaverConfig(saverId) {
 			if (!this.settings.savers) this.settings.savers = {};
 			if (!this.settings.savers[saverId]) {
-				this.settings.savers[saverId] = JSON.parse(JSON.stringify(DEFAULT_SETTINGS.savers[saverId] || {}));
+				const appSavers = (window.SettingsApp && window.SettingsApp.get('screensaverSavers')) || {};
+				this.settings.savers[saverId] = JSON.parse(JSON.stringify(appSavers[saverId] || {}));
 			}
 			return this.settings.savers[saverId];
 		}

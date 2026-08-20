@@ -610,6 +610,7 @@
 						this.bringToFront(win);
 					}
 				});
+				this.bringToFront(win);
 				this.setActive(win);
 				if (window.Taskbar) {
 					window.Taskbar.addWindowButton(id, title, options.iconSrc);
@@ -1300,11 +1301,15 @@
 			allWindows.forEach(w => {
 				const header = w.querySelector('.xp-window-header');
 				if (header) header.classList.add('inactive');
+				w.classList.add('window-inactive');
 			});
 
 			this.activeWindow = win;
-			const currentHeader = win ? win.querySelector('.xp-window-header') : null;
-			if (currentHeader) currentHeader.classList.remove('inactive');
+			if (win) {
+				const currentHeader = win.querySelector('.xp-window-header');
+				if (currentHeader) currentHeader.classList.remove('inactive');
+				win.classList.remove('window-inactive');
+			}
 
 			if (window.Taskbar) {
 				window.Taskbar.setActiveButton(win ? win.id : null);

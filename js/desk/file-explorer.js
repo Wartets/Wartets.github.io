@@ -717,14 +717,20 @@
 				if (place === 'desktop') {
 					this.navigateTo(fs.root, win, true);
 				} else if (place === 'my-documents') {
-					const pdfs = fs.root.getByName('PDFs') || fs.root;
-					this.navigateTo(pdfs, win, true);
+					if (window.DeskAppRegistry) window.DeskAppRegistry.launch('documents');
+					else {
+						const pdfs = fs.root.getByName('PDFs') || fs.root;
+						this.navigateTo(pdfs, win, true);
+					}
 				} else if (place === 'my-computer') {
-					if (window.DeskAPI && window.DeskAPI.openMyComputer) window.DeskAPI.openMyComputer();
+					if (window.DeskAppRegistry) window.DeskAppRegistry.launch('mycomputer');
+					else if (window.DeskAPI && window.DeskAPI.openMyComputer) window.DeskAPI.openMyComputer();
 				} else if (place === 'my-network') {
-					if (window.DeskAPI && window.DeskAPI.openNetworkPlaces) window.DeskAPI.openNetworkPlaces();
+					if (window.DeskAppRegistry) window.DeskAppRegistry.launch('network');
+					else if (window.DeskAPI && window.DeskAPI.openNetworkPlaces) window.DeskAPI.openNetworkPlaces();
 				} else if (place === 'recycle-bin') {
-					if (typeof openRecycleBinWindow === 'function') openRecycleBinWindow();
+					if (window.DeskAppRegistry) window.DeskAppRegistry.launch('recyclebin');
+					else if (typeof openRecycleBinWindow === 'function') openRecycleBinWindow();
 				}
 			});
 
@@ -1070,13 +1076,13 @@
 					{
 						label: 'Properties',
 						bold: true,
-						action: () => {
+						action: (ctx) => {
 							if (hasSelection) {
 								const icon = Array.from(state.selectedItems)[0];
 								const el = fs.findByPath(icon.dataset.path);
-								if (el) openElementInfoWindow(el);
+								if (el) openElementInfoWindow(el, ctx);
 							} else {
-								openElementInfoWindow(currentFolder);
+								openElementInfoWindow(currentFolder, ctx);
 							}
 						}
 					},
@@ -1251,22 +1257,22 @@
 					{ label: 'Organize Favorites...', action: () => showXPDialog('Favorites', 'Manage folder bookmarks.', 'info') },
 					{ separator: true },
 					{ label: 'Desktop', icon: '../assets/images/desk/icons/Display.webp', action: () => this.navigateTo(fs.root, win, true) },
-					{ label: 'My Documents', icon: '../assets/images/desk/icons/My Profile Folder.webp', action: () => this.navigateTo(fs.root.getByName('PDFs') || fs.root, win, true) },
-					{ label: 'My Computer', icon: '../assets/images/desk/icons/My Computer.webp', action: () => { if (window.DeskAPI && window.DeskAPI.openMyComputer) window.DeskAPI.openMyComputer(); } },
-					{ label: 'My Network Places', icon: '../assets/images/desk/icons/My Network Places.webp', action: () => { if (window.DeskAPI && window.DeskAPI.openNetworkPlaces) window.DeskAPI.openNetworkPlaces(); } }
+					{ label: 'My Documents', icon: '../assets/images/desk/icons/My Profile Folder.webp', action: () => { if (window.DeskAppRegistry) window.DeskAppRegistry.launch('documents'); else this.navigateTo(fs.root.getByName('PDFs') || fs.root, win, true); } },
+					{ label: 'My Computer', icon: '../assets/images/desk/icons/My Computer.webp', action: () => { if (window.DeskAppRegistry) window.DeskAppRegistry.launch('mycomputer'); else if (window.DeskAPI && window.DeskAPI.openMyComputer) window.DeskAPI.openMyComputer(); } },
+					{ label: 'My Network Places', icon: '../assets/images/desk/icons/My Network Places.webp', action: () => { if (window.DeskAppRegistry) window.DeskAppRegistry.launch('network'); else if (window.DeskAPI && window.DeskAPI.openNetworkPlaces) window.DeskAPI.openNetworkPlaces(); } }
 				];
 			} else if (menuType === 'tools') {
 				items = [
 					{ label: 'Map Network Drive...', action: () => showXPDialog('Map Network Drive', 'Specify the drive letter and folder path to connect.', 'info') },
 					{ label: 'Disconnect Network Drive...', disabled: true, action: () => {} },
 					{ separator: true },
-					{ label: 'Folder Options...', action: () => { if (window.SettingsApp) window.SettingsApp.open('input'); } }
+					{ label: 'Folder Options...', action: (ctx) => { if (window.SettingsApp) window.SettingsApp.open('input', ctx); } }
 				];
 			} else if (menuType === 'help') {
 				items = [
 					{ label: 'Help and Support Center', action: () => window.open('https://github.com/wartets/Wartets.github.io', '_blank') },
 					{ separator: true },
-					{ label: 'About Windows XP', bold: true, action: () => { if (window.SettingsApp) window.SettingsApp.open('system'); } }
+					{ label: 'About Windows XP', bold: true, action: (ctx) => { if (window.SettingsApp) window.SettingsApp.open('system', ctx); } }
 				];
 			}
 
@@ -1708,7 +1714,7 @@
 				row.addEventListener('click', (e) => {
 					const isSingleClick = window.SettingsApp && window.SettingsApp.get('singleClickOpen');
 					if (isSingleClick && e.button === 0 && !e.ctrlKey && !e.shiftKey) {
-						this.handleRecycleItemExecute(el);
+						openFileSystemElement(el, win);
 						return;
 					}
 					this.handleItemSelection(row, win, e);

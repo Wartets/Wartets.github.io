@@ -9,74 +9,25 @@
 	let processMetricsCache = new Map();
 	let baseSystemBootTime = Date.now() - 3600000 * 4;
 
-	const SYSTEM_PROCESSES = [
-		{ name: 'System', pid: 4, user: 'SYSTEM', cpu: 0.8, mem: 240, desc: 'NT Kernel & System', critical: true, icon: '../assets/images/desk/icons/System Properties.webp' },
-		{ name: 'smss.exe', pid: 440, user: 'SYSTEM', cpu: 0.0, mem: 480, desc: 'Session Manager Subsystem', critical: true, icon: '../assets/images/desk/icons/System Properties.webp' },
-		{ name: 'csrss.exe', pid: 512, user: 'SYSTEM', cpu: 0.4, mem: 3420, desc: 'Client Server Runtime Process', critical: true, icon: '../assets/images/desk/icons/System Properties.webp' },
-		{ name: 'winlogon.exe', pid: 536, user: 'SYSTEM', cpu: 0.1, mem: 4180, desc: 'Windows Logon Application', critical: true, icon: '../assets/images/desk/icons/User Accounts.webp' },
-		{ name: 'services.exe', pid: 584, user: 'SYSTEM', cpu: 0.3, mem: 3820, desc: 'Services and Controller app', critical: true, icon: '../assets/images/desk/icons/System Properties.webp' },
-		{ name: 'lsass.exe', pid: 596, user: 'SYSTEM', cpu: 0.2, mem: 5640, desc: 'LSA Shell (Export Version)', critical: true, icon: '../assets/images/desk/icons/User Support.webp' },
-		{ name: 'svchost.exe', pid: 748, user: 'SYSTEM', cpu: 0.5, mem: 14200, desc: 'Generic Host Process for Win32 Services', critical: false, icon: '../assets/images/desk/icons/System Properties.webp' },
-		{ name: 'svchost.exe', pid: 824, user: 'NETWORK SERVICE', cpu: 0.1, mem: 4890, desc: 'Generic Host Process for Win32 Services', critical: false, icon: '../assets/images/desk/icons/Network Computers.webp' },
-		{ name: 'svchost.exe', pid: 912, user: 'LOCAL SERVICE', cpu: 0.1, mem: 3950, desc: 'Generic Host Process for Win32 Services', critical: false, icon: '../assets/images/desk/icons/System Properties.webp' },
-		{ name: 'spoolsv.exe', pid: 1044, user: 'SYSTEM', cpu: 0.0, mem: 4620, desc: 'Print Spooler Service', critical: false, icon: '../assets/images/desk/icons/Printer.webp' },
-		{ name: 'explorer.exe', pid: 1480, user: 'Colin B.R.', cpu: 1.8, mem: 24800, desc: 'Windows Explorer Shell', critical: false, isExplorer: true, icon: '../assets/images/desk/icons/Folder Closed.webp' },
-		{ name: 'taskmgr.exe', pid: 2140, user: 'Colin B.R.', cpu: 0.9, mem: 6240, desc: 'Windows Task Manager', critical: false, icon: '../assets/images/desk/icons/System Properties.webp' },
-		{ name: 'alg.exe', pid: 1288, user: 'LOCAL SERVICE', cpu: 0.0, mem: 3410, desc: 'Application Layer Gateway Service', critical: false, icon: '../assets/images/desk/icons/Network Computers.webp' }
-	];
+	function getSystemProcessDefinitions() {
+		if (window.SettingsApp && typeof window.SettingsApp.get === 'function') {
+			const configured = window.SettingsApp.get('systemProcessesList');
+			if (Array.isArray(configured)) return configured.map(p => Object.assign({}, p));
+		}
+		return [];
+	}
 
 	function getProcessIconForApp(appId) {
-		const mapping = {
-			'notepad': '../assets/images/desk/icons/Notepad.webp',
-			'paint': '../assets/images/desk/icons/Paint.webp',
-			'calculator': '../assets/images/desk/icons/Calculator.webp',
-			'cmd': '../assets/images/desk/icons/Command Prompt.webp',
-			'charmap': '../assets/images/desk/icons/List File.webp',
-			'soundrecorder': '../assets/images/desk/icons/Music File.webp',
-			'mediaplayer': '../assets/images/desk/icons/Video File.webp',
-			'winamp': '../assets/images/desk/icons/Winamp.webp',
-			'minesweeper': '../assets/images/desk/icons/Minesweeper.webp',
-			'solitaire': '../assets/images/desk/icons/Hearts.webp',
-			'ie': '../assets/images/desk/icons/Internet Explorer.webp',
-			'outlook': '../assets/images/desk/icons/Mail.webp',
-			'settings': '../assets/images/desk/icons/System Properties.webp',
-			'display': '../assets/images/desk/icons/Display.webp',
-			'mycomputer': '../assets/images/desk/icons/My Computer.webp',
-			'network': '../assets/images/desk/icons/My Network Places.webp',
-			'printers': '../assets/images/desk/icons/Fax.webp',
-			'search': '../assets/images/desk/icons/Search.webp',
-			'recyclebin': '../assets/images/desk/icons/Trash.webp',
-			'achievements': '../assets/images/desk/icons/Trophy.webp',
-			'encarta': '../assets/images/desk/icons/Earth (fixed).webp'
-		};
-		return mapping[appId] || '../assets/images/desk/icons/File.webp';
+		const app = window.DeskAppRegistry ? window.DeskAppRegistry.get(appId) : null;
+		if (app && app.icon) return app.icon;
+		return '../assets/images/desk/icons/File.webp';
 	}
 
 	function mapAppIdToExecutable(appId, winId) {
-		const mapping = {
-			'notepad': 'notepad.exe',
-			'paint': 'mspaint.exe',
-			'calculator': 'calc.exe',
-			'cmd': 'cmd.exe',
-			'charmap': 'charmap.exe',
-			'soundrecorder': 'sndrec32.exe',
-			'mediaplayer': 'wmplayer.exe',
-			'winamp': 'winamp.exe',
-			'minesweeper': 'winmine.exe',
-			'solitaire': 'sol.exe',
-			'ie': 'iexplore.exe',
-			'outlook': 'msimn.exe',
-			'settings': 'control.exe',
-			'display': 'desk.cpl',
-			'mycomputer': 'explorer.exe',
-			'network': 'explorer.exe',
-			'printers': 'explorer.exe',
-			'search': 'search.exe',
-			'recyclebin': 'explorer.exe',
-			'achievements': 'achievements.exe',
-			'encarta': 'encarta.exe'
-		};
-		return mapping[appId] || `${(winId || 'app').replace(/^window-/, '')}.exe`;
+		const app = window.DeskAppRegistry ? window.DeskAppRegistry.get(appId) : null;
+		if (app && app.executable) return app.executable;
+		const cleanId = (appId || (winId || 'app').replace(/^window-/, '')).toLowerCase();
+		return `${cleanId}.exe`;
 	}
 
 	const TaskManagerApp = {
@@ -490,7 +441,8 @@
 		},
 
 		getAllProcesses() {
-			const activeList = [...SYSTEM_PROCESSES];
+			const baseProcesses = getSystemProcessDefinitions();
+			const activeList = [...baseProcesses];
 			const openWins = (window.WindowManager ? Object.values(window.WindowManager.windows) : Object.values(openWindows || {})).filter(w => {
 				return w && !w.classList.contains('xp-modal-overlay') && w.id !== 'window-task-manager' && !w.id.startsWith('dialog-');
 			});

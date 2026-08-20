@@ -132,6 +132,13 @@
 				result = app.handler(args);
 			}
 
+			if (result && result instanceof HTMLElement && window.WindowManager) {
+				window.WindowManager.bringToFront(result);
+				if (result.classList.contains('minimized')) {
+					window.WindowManager.unminimize(result);
+				}
+			}
+
 			if (window.DeskEventBus) {
 				window.DeskEventBus.emit('app:after-launch', { id: app.id, args, result });
 			}
@@ -146,9 +153,11 @@
 				subtitle: 'E-mail Client',
 				icon: '../assets/images/desk/icons/Mail.webp',
 				category: 'Internet',
-				aliases: ['mail', 'oe', 'email', 'inbox', 'msimn', 'msimn.exe'],
-				handler: () => {
-					if (typeof openOutlookExpress === 'function') openOutlookExpress();
+				executable: 'msimn.exe',
+				aliases: ['mail', 'oe', 'email', 'inbox', 'msimn', 'msimn.exe', 'open-oe'],
+				handler: (args) => {
+					if (typeof openOutlookExpress === 'function') return openOutlookExpress(args);
+					return null;
 				}
 			});
 
@@ -158,11 +167,13 @@
 				subtitle: 'Web Browser',
 				icon: '../assets/images/desk/icons/Internet Explorer.webp',
 				category: 'Internet',
-				aliases: ['internet', 'browser', 'web', 'explore', 'iexplore', 'iexplore.exe'],
+				executable: 'iexplore.exe',
+				aliases: ['internet', 'browser', 'web', 'explore', 'iexplore', 'iexplore.exe', 'open-ie'],
 				handler: (args) => {
-					const url = typeof args === 'string' ? args : (args && args.url ? args.url : 'about:home');
-					if (window.InternetExplorerApp) window.InternetExplorerApp.open(url);
-					else if (typeof openInternetExplorer === 'function') openInternetExplorer(url);
+					const url = typeof args === 'string' ? args : (args && args.url ? args.url : (args && args.path ? args.path : 'about:home'));
+					if (window.InternetExplorerApp) return window.InternetExplorerApp.open(url, args);
+					if (typeof openInternetExplorer === 'function') return openInternetExplorer(url, args);
+					return null;
 				}
 			});
 
@@ -171,10 +182,12 @@
 				name: 'Calculator',
 				icon: '../assets/images/desk/icons/Calculator.webp',
 				category: 'Accessories',
+				executable: 'calc.exe',
 				aliases: ['calc', 'calc.exe'],
-				handler: () => {
-					if (window.CalculatorApp) window.CalculatorApp.open();
-					else if (typeof openCalculator === 'function') openCalculator();
+				handler: (args) => {
+					if (window.CalculatorApp) return window.CalculatorApp.open(args);
+					else if (typeof openCalculator === 'function') return openCalculator(args);
+					return null;
 				}
 			});
 
@@ -183,10 +196,12 @@
 				name: 'Paint',
 				icon: '../assets/images/desk/icons/Paint.webp',
 				category: 'Accessories',
+				executable: 'mspaint.exe',
 				aliases: ['mspaint', 'mspaint.exe', 'pbrush', 'pbrush.exe', 'draw'],
 				handler: (args) => {
-					if (window.PaintApp) window.PaintApp.open(args);
-					else if (typeof openPaint === 'function') openPaint(args);
+					if (window.PaintApp) return window.PaintApp.open(args);
+					else if (typeof openPaint === 'function') return openPaint(args);
+					return null;
 				}
 			});
 
@@ -195,14 +210,16 @@
 				name: 'Notepad',
 				icon: '../assets/images/desk/icons/Notepad.webp',
 				category: 'Accessories',
+				executable: 'notepad.exe',
 				aliases: ['text', 'editor', 'notes', 'notepad.exe'],
 				handler: (args) => {
 					if (window.NotepadApp) {
-						if (args && args.name) window.NotepadApp.open(args);
-						else window.NotepadApp.openNew();
+						if (args && args.name) return window.NotepadApp.open(args);
+						return window.NotepadApp.openNew(args);
 					} else if (typeof openTextEditorWindow === 'function' && args) {
-						openTextEditorWindow(args);
+						return openTextEditorWindow(args);
 					}
+					return null;
 				}
 			});
 
@@ -211,10 +228,12 @@
 				name: 'Command Prompt',
 				icon: '../assets/images/desk/icons/Command Prompt.webp',
 				category: 'Accessories',
+				executable: 'cmd.exe',
 				aliases: ['terminal', 'prompt', 'console', 'command', 'cmd.exe'],
 				handler: (args) => {
-					if (window.CommandPrompt) window.CommandPrompt.open(args);
-					else if (typeof processRunCommand === 'function') processRunCommand('cmd');
+					if (window.CommandPrompt) return window.CommandPrompt.open(args);
+					else if (typeof processRunCommand === 'function') return processRunCommand('cmd', args);
+					return null;
 				}
 			});
 
@@ -223,9 +242,11 @@
 				name: 'Sound Recorder',
 				icon: '../assets/images/desk/icons/Music File.webp',
 				category: 'Entertainment',
+				executable: 'sndrec32.exe',
 				aliases: ['sound-recorder', 'sndrec32', 'sndrec32.exe', 'recorder', 'voice', 'audio'],
 				handler: (args) => {
-					if (window.SoundRecorderApp) window.SoundRecorderApp.open(args);
+					if (window.SoundRecorderApp) return window.SoundRecorderApp.open(args);
+					return null;
 				}
 			});
 
@@ -234,9 +255,39 @@
 				name: 'Character Map',
 				icon: '../assets/images/desk/icons/List File.webp',
 				category: 'System Tools',
+				executable: 'charmap.exe',
 				aliases: ['character-map', 'charactermap', 'symbols', 'characters', 'charmap.exe'],
-				handler: () => {
-					if (window.CharacterMapApp) window.CharacterMapApp.open();
+				handler: (args) => {
+					if (window.CharacterMapApp) return window.CharacterMapApp.open(args);
+					return null;
+				}
+			});
+
+			this.register({
+				id: 'mediaplayer',
+				name: 'Windows Media Player',
+				subtitle: 'Digital Audio & Video Player',
+				icon: '../assets/images/desk/icons/Video File.webp',
+				category: 'Entertainment',
+				executable: 'wmplayer.exe',
+				aliases: ['wmp', 'wmplayer', 'media-player', 'wmplayer.exe'],
+				handler: (args) => {
+					if (window.MediaPlayerApp) return window.MediaPlayerApp.open(args);
+					return null;
+				}
+			});
+
+			this.register({
+				id: 'pictureviewer',
+				name: 'Picture and Fax Viewer',
+				subtitle: 'Image Viewer',
+				icon: '../assets/images/desk/icons/Picture.webp',
+				category: 'Accessories',
+				executable: 'shimgvw.dll',
+				aliases: ['picview', 'photoviewer', 'shimgvw.dll'],
+				handler: (args) => {
+					if (window.PictureViewerApp) return window.PictureViewerApp.open(args);
+					return null;
 				}
 			});
 
@@ -245,9 +296,11 @@
 				name: 'Winamp Media Player',
 				icon: '../assets/images/desk/icons/Winamp.webp',
 				category: 'Entertainment',
+				executable: 'winamp.exe',
 				aliases: ['music', 'mp3', 'player', 'audio-player', 'winamp.exe'],
-				handler: () => {
-					if (typeof openWinamp === 'function') openWinamp();
+				handler: (args) => {
+					if (typeof openWinamp === 'function') return openWinamp(args);
+					return null;
 				}
 			});
 
@@ -256,10 +309,12 @@
 				name: 'Minesweeper',
 				icon: '../assets/images/desk/icons/Minesweeper.webp',
 				category: 'Games',
+				executable: 'winmine.exe',
 				aliases: ['mine', 'mines', 'winmine', 'winmine.exe'],
-				handler: () => {
-					if (window.MinesweeperApp) window.MinesweeperApp.open();
-					else if (typeof openMinesweeper === 'function') openMinesweeper();
+				handler: (args) => {
+					if (window.MinesweeperApp) return window.MinesweeperApp.open(args);
+					else if (typeof openMinesweeper === 'function') return openMinesweeper(args);
+					return null;
 				}
 			});
 
@@ -268,10 +323,12 @@
 				name: 'Solitaire',
 				icon: '../assets/images/desk/icons/Hearts.webp',
 				category: 'Games',
+				executable: 'sol.exe',
 				aliases: ['sol', 'cards', 'klondike', 'patience', 'sol.exe'],
-				handler: () => {
-					if (window.SolitaireApp) window.SolitaireApp.open();
-					else if (typeof openSolitaire === 'function') openSolitaire();
+				handler: (args) => {
+					if (window.SolitaireApp) return window.SolitaireApp.open(args);
+					else if (typeof openSolitaire === 'function') return openSolitaire(args);
+					return null;
 				}
 			});
 
@@ -280,10 +337,12 @@
 				name: 'Control Panel',
 				icon: '../assets/images/desk/icons/System Properties.webp',
 				category: 'System Tools',
+				executable: 'control.exe',
 				aliases: ['controlpanel', 'preferences', 'config', 'control', 'control.exe', 'msconfig', 'sysdm.cpl', 'taskmgr', 'taskmgr.exe', 'regedit', 'regedit.exe'],
 				handler: (args) => {
 					const tab = typeof args === 'string' ? args : (args && args.tab ? args.tab : 'system');
-					if (window.SettingsApp) window.SettingsApp.open(tab);
+					if (window.SettingsApp) return window.SettingsApp.open(tab, args);
+					return null;
 				}
 			});
 
@@ -292,10 +351,12 @@
 				name: 'Display & Wallpapers',
 				icon: '../assets/images/desk/icons/Display.webp',
 				category: 'Appearance',
+				executable: 'desk.cpl',
 				aliases: ['wallpaper', 'themes', 'screensaver', 'desk.cpl'],
-				handler: () => {
-					if (typeof openDisplaySettings === 'function') openDisplaySettings();
-					else if (window.SettingsApp) window.SettingsApp.open('appearance');
+				handler: (args) => {
+					const tab = typeof args === 'string' ? args : (args && args.tab ? args.tab : 'desktop');
+					if (window.SettingsApp) return window.SettingsApp.open(tab, args);
+					return null;
 				}
 			});
 
@@ -304,9 +365,12 @@
 				name: 'My Computer',
 				icon: '../assets/images/desk/icons/My Computer.webp',
 				category: 'System Tools',
-				aliases: ['computer', 'explorer', 'explorer.exe', 'drives'],
-				handler: () => {
-					if (typeof openMyComputerWindow === 'function') openMyComputerWindow();
+				executable: 'explorer.exe',
+				aliases: ['computer', 'explorer', 'explorer.exe', 'drives', 'my-computer'],
+				handler: (args) => {
+					if (typeof openMyComputerWindow === 'function') return openMyComputerWindow(args);
+					if (window.FileExplorer && typeof fs !== 'undefined') return window.FileExplorer.open(fs.root, args);
+					return null;
 				}
 			});
 
@@ -315,9 +379,11 @@
 				name: 'Printers and Faxes',
 				icon: '../assets/images/desk/icons/Fax.webp',
 				category: 'System Tools',
-				aliases: ['faxes', 'printer', 'printers'],
-				handler: () => {
-					if (typeof openPrintersWindow === 'function') openPrintersWindow();
+				executable: 'explorer.exe',
+				aliases: ['faxes', 'printer', 'printers', 'printers-faxes'],
+				handler: (args) => {
+					if (typeof openPrintersWindow === 'function') return openPrintersWindow(args);
+					return null;
 				}
 			});
 
@@ -326,9 +392,37 @@
 				name: 'My Network Places',
 				icon: '../assets/images/desk/icons/My Network Places.webp',
 				category: 'System Tools',
-				aliases: ['networkplaces', 'netplaces', 'shares'],
-				handler: () => {
-					if (typeof openNetworkPlacesWindow === 'function') openNetworkPlacesWindow();
+				executable: 'explorer.exe',
+				aliases: ['networkplaces', 'netplaces', 'shares', 'my-network-places'],
+				handler: (args) => {
+					if (typeof openNetworkPlacesWindow === 'function') return openNetworkPlacesWindow(args);
+					return null;
+				}
+			});
+
+			this.register({
+				id: 'run',
+				name: 'Run Command',
+				icon: '../assets/images/desk/icons/Command Prompt.webp',
+				category: 'System Tools',
+				executable: 'run.exe',
+				aliases: ['execute', 'run.exe'],
+				handler: (args) => {
+					if (typeof openRunDialog === 'function') return openRunDialog(args);
+					return null;
+				}
+			});
+
+			this.register({
+				id: 'shutdown',
+				name: 'Shut Down Windows',
+				icon: 'https://api.iconify.design/mdi/power.svg',
+				category: 'System Tools',
+				executable: 'shutdown.exe',
+				aliases: ['turnoff', 'poweroff', 'shutdown.exe'],
+				handler: (args) => {
+					if (typeof openShutdownDialog === 'function') return openShutdownDialog(args);
+					return null;
 				}
 			});
 
@@ -337,10 +431,12 @@
 				name: 'Search Companion',
 				icon: '../assets/images/desk/icons/Search.webp',
 				category: 'System Tools',
+				executable: 'search.exe',
 				aliases: ['find', 'locate'],
 				handler: (args) => {
 					const q = typeof args === 'string' ? args : (args && args.query ? args.query : '');
-					if (typeof openSearchWindow === 'function') openSearchWindow(q);
+					if (typeof openSearchWindow === 'function') return openSearchWindow(q, args);
+					return null;
 				}
 			});
 
@@ -349,9 +445,12 @@
 				name: 'Recycle Bin',
 				icon: '../assets/images/desk/icons/Trash.webp',
 				category: 'System Tools',
+				executable: 'explorer.exe',
 				aliases: ['trash', 'garbage', 'bin'],
-				handler: () => {
-					if (typeof openRecycleBinWindow === 'function') openRecycleBinWindow();
+				handler: (args) => {
+					if (window.FileExplorer) return window.FileExplorer.openRecycleBin(args);
+					if (typeof openRecycleBinWindow === 'function') return openRecycleBinWindow(args);
+					return null;
 				}
 			});
 
@@ -361,10 +460,12 @@
 				subtitle: 'Desktop Quests',
 				icon: '../assets/images/desk/icons/Trophy.webp',
 				category: 'Entertainment',
+				executable: 'achievements.exe',
 				aliases: ['trophies', 'quests', 'milestones'],
 				handler: (args) => {
 					const id = typeof args === 'string' ? args : (args && args.targetId ? args.targetId : null);
-					if (window.AchievementsManager) window.AchievementsManager.open(id);
+					if (window.AchievementsManager) return window.AchievementsManager.open(id, args);
+					return null;
 				}
 			});
 
@@ -374,9 +475,86 @@
 				subtitle: 'Portfolio Works',
 				icon: '../assets/images/desk/icons/Folder Open.webp',
 				category: 'Portfolio Projects',
-				aliases: ['portfolio', 'work', 'showcase'],
+				executable: 'explorer.exe',
+				aliases: ['portfolio', 'work', 'showcase', 'my-projects'],
+				handler: (args) => {
+					if (args && args.category && typeof openFilteredProjectsFolder === 'function') {
+						return openFilteredProjectsFolder(args.category, args);
+					}
+					if (typeof openAllProjectsFolder === 'function') return openAllProjectsFolder(args);
+					return null;
+				}
+			});
+
+			this.register({
+				id: 'documents',
+				name: 'My Documents',
+				icon: '../assets/images/desk/icons/My Profile Folder.webp',
+				category: 'Accessories',
+				aliases: ['mydocuments', 'my-documents', 'docs', 'pdf', 'pdfs'],
 				handler: () => {
-					if (typeof openAllProjectsFolder === 'function') openAllProjectsFolder();
+					if (typeof fs !== 'undefined' && fs && fs.root) {
+						const pdfs = fs.root.getByName('PDFs') || fs.root;
+						if (window.FileExplorer) return window.FileExplorer.open(pdfs);
+					}
+					return null;
+				}
+			});
+
+			this.register({
+				id: 'pictures',
+				name: 'My Pictures',
+				icon: '../assets/images/desk/icons/Camera.webp',
+				category: 'Accessories',
+				aliases: ['mypictures', 'my-pictures', 'photos', 'wallpapers'],
+				handler: () => {
+					if (typeof fs !== 'undefined' && fs) {
+						let wpFolder = fs.findByPath('/WINDOWS/Web/Wallpaper');
+						if (wpFolder && window.FileExplorer) return window.FileExplorer.open(wpFolder);
+					}
+					if (window.DeskAppRegistry) return window.DeskAppRegistry.launch('display');
+					return null;
+				}
+			});
+
+			this.register({
+				id: 'music',
+				name: 'My Music',
+				icon: '../assets/images/desk/icons/Music File.webp',
+				category: 'Entertainment',
+				aliases: ['mymusic', 'my-music', 'audio-library'],
+				handler: () => {
+					if (typeof fs !== 'undefined' && fs) {
+						let musicFolder = fs.root.getByName('Music');
+						if (!musicFolder) {
+							musicFolder = new Folder('Music');
+							musicFolder.icon = '../assets/images/desk/icons/Folder Closed.webp';
+							fs.root.add(musicFolder);
+						}
+						if (window.FileExplorer) return window.FileExplorer.open(musicFolder);
+					}
+					if (window.DeskAppRegistry) return window.DeskAppRegistry.launch('mediaplayer');
+					return null;
+				}
+			});
+
+			this.register({
+				id: 'pdf',
+				name: 'PDF Document Viewer',
+				icon: '../assets/images/desk/icons/List File.webp',
+				category: 'Accessories',
+				aliases: ['acrobat', 'reader', 'pdfviewer'],
+				handler: (args) => {
+					if (typeof openPDFWindow === 'function') {
+						if (args instanceof File || (args && args.content)) {
+							return openPDFWindow(args);
+						}
+						if (typeof args === 'string' && typeof fs !== 'undefined' && fs) {
+							const file = fs.findByPath(args);
+							if (file) return openPDFWindow(file);
+						}
+					}
+					return null;
 				}
 			});
 
@@ -412,6 +590,28 @@
 				aliases: ['globe', 'map', 'worldmap', 'atlas', 'encarta.exe'],
 				handler: () => {
 					if (window.EncartaGlobeApp) window.EncartaGlobeApp.open();
+				}
+			});
+
+			this.register({
+				id: 'soundcloud',
+				name: 'SoundCloud Channel',
+				icon: 'https://api.iconify.design/mdi/soundcloud.svg',
+				category: 'Entertainment',
+				aliases: ['link-soundcloud', 'sc'],
+				handler: () => {
+					window.open('https://soundcloud.com/wartets', '_blank');
+				}
+			});
+
+			this.register({
+				id: 'youtubemusic',
+				name: 'YouTube Music',
+				icon: 'https://api.iconify.design/mdi/youtube.svg',
+				category: 'Entertainment',
+				aliases: ['link-youtube-music', 'yt'],
+				handler: () => {
+					window.open('https://www.youtube.com/@Wartets', '_blank');
 				}
 			});
 

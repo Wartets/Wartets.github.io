@@ -397,13 +397,10 @@
 			if (!container) return;
 			container.innerHTML = '';
 
-			const links = [
+			const links = (window.SettingsApp && window.SettingsApp.get('internetExplorerQuickLinks')) || [
 				{ name: 'MSN Start', url: 'about:home' },
 				{ name: 'Web Search', url: 'about:search' },
-				{ name: 'Projects Directory', url: 'about:projects' },
-				{ name: 'GitHub Profile', url: 'https://github.com/wartets' },
-				{ name: 'Wikipedia', url: 'https://en.wikipedia.org' },
-				{ name: 'MSDN Reference', url: 'http://msdn.microsoft.com/' }
+				{ name: 'Projects Directory', url: 'about:projects' }
 			];
 
 			links.forEach(link => {

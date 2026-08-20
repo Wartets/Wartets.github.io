@@ -44,6 +44,43 @@
 			const userAvatar = (window.SettingsApp && window.SettingsApp.get('userAvatar')) || '../assets/images/desk/icons/User 1.webp';
 			const avatarShape = (window.SettingsApp && window.SettingsApp.get('userAvatarShape')) || 'square';
 			const shapeClass = avatarShape === 'circle' ? 'xp-start-avatar-circle' : (avatarShape === 'round' ? 'xp-start-avatar-round' : 'xp-start-avatar-square');
+			const pinnedKeys = (window.SettingsApp && window.SettingsApp.get('startMenuPinnedApps')) || ['achievements', 'ie', 'outlook'];
+			const rightItemsConfig = (window.SettingsApp && window.SettingsApp.get('startMenuRightItems')) || [];
+
+			let pinnedHTML = '';
+			pinnedKeys.forEach(key => {
+				const app = window.DeskAppRegistry ? window.DeskAppRegistry.get(key) : null;
+				if (app) {
+					pinnedHTML += `
+						<div class="xp-start-item xp-start-pinned" data-action="open-${app.id}">
+							<img src="${app.icon}" class="xp-start-item-icon" alt="${app.name}">
+							<div class="xp-start-item-texts">
+								<strong class="xp-start-title">${app.name}</strong>
+								<span class="xp-start-subtitle">${app.subtitle || ''}</span>
+							</div>
+							${app.id === 'outlook' ? '<span id="start-menu-mail-badge" class="xp-start-badge hidden">0</span>' : ''}
+						</div>
+					`;
+				}
+			});
+
+			let rightColHTML = '';
+			rightItemsConfig.forEach(item => {
+				if (item.divider) {
+					rightColHTML += '<div class="xp-start-divider right-divider"></div>';
+					return;
+				}
+				const flyoutAttr = item.flyout ? `class="xp-start-item xp-start-right-item has-flyout" id="start-${item.id}-trigger"` : 'class="xp-start-item xp-start-right-item"';
+				const arrowHTML = item.flyout ? '<span class="xp-start-flyout-arrow">►</span>' : '';
+				const nameHTML = item.bold ? `<strong>${item.name}</strong>` : item.name;
+				rightColHTML += `
+					<div ${flyoutAttr} data-action="${item.action || ''}">
+						<img src="${item.icon}" class="xp-start-item-icon" alt="${item.name}">
+						<span class="xp-start-title">${nameHTML}</span>
+						${arrowHTML}
+					</div>
+				`;
+			});
 
 			startMenuEl.innerHTML = `
 				<div class="xp-start-header" id="start-menu-profile-header" title="Click to change user account picture and settings">
@@ -56,82 +93,12 @@
 				<div class="xp-start-body">
 					<div class="xp-start-left-column">
 						<div class="xp-start-pinned-section">
-							<div class="xp-start-item xp-start-pinned" data-action="open-achievements">
-								<img src="../assets/images/desk/icons/Trophy.webp" class="xp-start-item-icon" alt="Achievements">
-								<div class="xp-start-item-texts">
-									<strong class="xp-start-title">Milestones & Trophies</strong>
-									<span class="xp-start-subtitle">Desktop Quests</span>
-								</div>
-							</div>
-							<div class="xp-start-item xp-start-pinned" data-action="open-ie">
-								<img src="../assets/images/desk/icons/Internet Explorer.webp" class="xp-start-item-icon" alt="Internet">
-								<div class="xp-start-item-texts">
-									<strong class="xp-start-title">Internet</strong>
-									<span class="xp-start-subtitle">Internet Explorer</span>
-								</div>
-							</div>
-							<div class="xp-start-item xp-start-pinned" data-action="open-outlook">
-								<img src="../assets/images/desk/icons/Mail.webp" class="xp-start-item-icon" alt="E-mail">
-								<div class="xp-start-item-texts">
-									<strong class="xp-start-title">E-mail</strong>
-									<span class="xp-start-subtitle">Outlook Express</span>
-								</div>
-								<span id="start-menu-mail-badge" class="xp-start-badge hidden">0</span>
-							</div>
+							${pinnedHTML}
 						</div>
 
 						<div class="xp-start-divider"></div>
 
-						<div class="xp-start-frequent-section">
-							<div class="xp-start-item" data-action="open-media-player">
-								<img src="../assets/images/desk/icons/Video File.webp" class="xp-start-item-icon" alt="Media Player">
-								<div class="xp-start-item-texts">
-									<span class="xp-start-title">Windows Media Player</span>
-								</div>
-							</div>
-							<div class="xp-start-item" data-action="open-winamp">
-								<img src="../assets/images/desk/icons/Winamp.webp" class="xp-start-item-icon" alt="Winamp">
-								<div class="xp-start-item-texts">
-									<span class="xp-start-title">Winamp Media Player</span>
-								</div>
-							</div>
-							<div class="xp-start-item" data-action="open-calculator">
-								<img src="../assets/images/desk/icons/Calculator.webp" class="xp-start-item-icon" alt="Calculator">
-								<div class="xp-start-item-texts">
-									<span class="xp-start-title">Calculator</span>
-								</div>
-							</div>
-							<div class="xp-start-item" data-action="open-paint">
-								<img src="../assets/images/desk/icons/Paint.webp" class="xp-start-item-icon" alt="Paint">
-								<div class="xp-start-item-texts">
-									<span class="xp-start-title">Paint</span>
-								</div>
-							</div>
-							<div class="xp-start-item" data-action="open-minesweeper">
-								<img src="../assets/images/desk/icons/Minesweeper.webp" class="xp-start-item-icon" alt="Minesweeper">
-								<div class="xp-start-item-texts">
-									<span class="xp-start-title">Minesweeper</span>
-								</div>
-							</div>
-							<div class="xp-start-item" data-action="new-text-document">
-								<img src="../assets/images/desk/icons/Notepad.webp" class="xp-start-item-icon" alt="Notepad">
-								<div class="xp-start-item-texts">
-									<span class="xp-start-title">Notepad</span>
-								</div>
-							</div>
-							<div class="xp-start-item" data-action="open-cmd">
-								<img src="../assets/images/desk/icons/Command Prompt.webp" class="xp-start-item-icon" alt="Command Prompt">
-								<div class="xp-start-item-texts">
-									<span class="xp-start-title">Command Prompt</span>
-								</div>
-							</div>
-							<div class="xp-start-item" data-action="open-today-anecdote">
-								<img src="../assets/images/desk/icons/Calendar.webp" class="xp-start-item-icon" alt="Daily Anecdote">
-								<div class="xp-start-item-texts">
-									<span class="xp-start-title">Today's Anecdote</span>
-								</div>
-							</div>
-						</div>
+						<div class="xp-start-frequent-section"></div>
 
 						<div class="xp-start-divider"></div>
 
@@ -142,59 +109,7 @@
 					</div>
 
 					<div class="xp-start-right-column">
-						<div class="xp-start-item xp-start-right-item" data-action="my-documents">
-							<img src="../assets/images/desk/icons/My Profile Folder.webp" class="xp-start-item-icon" alt="My Documents">
-							<span class="xp-start-title"><strong>My Documents</strong></span>
-						</div>
-						<div class="xp-start-item xp-start-right-item" data-action="my-pictures">
-							<img src="../assets/images/desk/icons/Camera.webp" class="xp-start-item-icon" alt="My Pictures">
-							<span class="xp-start-title"><strong>My Pictures</strong></span>
-						</div>
-						<div class="xp-start-item xp-start-right-item" data-action="my-music">
-							<img src="../assets/images/desk/icons/Music File.webp" class="xp-start-item-icon" alt="My Music">
-							<span class="xp-start-title"><strong>My Music</strong></span>
-						</div>
-						<div class="xp-start-item xp-start-right-item" data-action="my-computer">
-							<img src="../assets/images/desk/icons/My Computer.webp" class="xp-start-item-icon" alt="My Computer">
-							<span class="xp-start-title"><strong>My Computer</strong></span>
-						</div>
-						<div class="xp-start-item xp-start-right-item" data-action="my-network-places">
-							<img src="../assets/images/desk/icons/My Network Places.webp" class="xp-start-item-icon" alt="My Network Places">
-							<span class="xp-start-title">My Network Places</span>
-						</div>
-
-						<div class="xp-start-divider right-divider"></div>
-
-						<div class="xp-start-item xp-start-right-item has-flyout" id="start-control-panel-trigger" data-action="control-panel">
-							<img src="../assets/images/desk/icons/System Properties.webp" class="xp-start-item-icon" alt="Control Panel">
-							<span class="xp-start-title">Control Panel</span>
-							<span class="xp-start-flyout-arrow">►</span>
-						</div>
-						<div class="xp-start-item xp-start-right-item" data-action="printers-faxes">
-							<img src="../assets/images/desk/icons/Printer.webp" class="xp-start-item-icon" alt="Printers">
-							<span class="xp-start-title">Printers and Faxes</span>
-						</div>
-						<div class="xp-start-item xp-start-right-item has-flyout" id="start-recent-docs-trigger">
-							<img src="../assets/images/desk/icons/List File.webp" class="xp-start-item-icon" alt="Recent Documents">
-							<span class="xp-start-title">My Recent Documents</span>
-							<span class="xp-start-flyout-arrow">►</span>
-						</div>
-
-						<div class="xp-start-divider right-divider"></div>
-
-						<div class="xp-start-item xp-start-right-item" data-action="help">
-							<img src="../assets/images/desk/icons/User Support.webp" class="xp-start-item-icon" alt="Help">
-							<span class="xp-start-title">Help and Support</span>
-						</div>
-						<div class="xp-start-item xp-start-right-item has-flyout" id="start-search-trigger" data-action="search">
-							<img src="../assets/images/desk/icons/Search.webp" class="xp-start-item-icon" alt="Search">
-							<span class="xp-start-title">Search</span>
-							<span class="xp-start-flyout-arrow">►</span>
-						</div>
-						<div class="xp-start-item xp-start-right-item" data-action="run">
-							<img src="../assets/images/desk/icons/Command Prompt.webp" class="xp-start-item-icon" alt="Run">
-							<span class="xp-start-title">Run...</span>
-						</div>
+						${rightColHTML}
 					</div>
 				</div>
 
@@ -348,6 +263,21 @@
 					`;
 				});
 
+				const appCategories = window.DeskAppRegistry ? window.DeskAppRegistry.getCategories() : ['Accessories', 'Games', 'Entertainment', 'System Tools'];
+				let appCategorySubmenusHtml = '';
+
+				appCategories.forEach(catName => {
+					if (catName === 'Portfolio Projects' || catName === 'Internet') return;
+					const subKey = catName.toLowerCase().replace(/[^\w-]/g, '-');
+					appCategorySubmenusHtml += `
+						<div class="xp-start-flyout-item has-sub" data-sub="${subKey}" data-cat-name="${catName}">
+							<img src="../assets/images/desk/icons/Folder Closed.webp" class="xp-start-item-icon" alt="">
+							<span class="xp-start-title">${catName}</span>
+							<span class="xp-start-flyout-arrow">►</span>
+						</div>
+					`;
+				});
+
 				flyout.innerHTML = `
 					<div class="xp-start-search-box">
 						<img src="https://api.iconify.design/mdi/magnify.svg?color=%23555555" style="width: 14px; height: 14px;" alt="">
@@ -359,26 +289,7 @@
 							<span class="xp-start-title"><strong>All Project Shortcuts</strong></span>
 						</div>
 						<div class="xp-start-divider"></div>
-						<div class="xp-start-flyout-item has-sub" data-sub="accessories">
-							<img src="../assets/images/desk/icons/Folder Closed.webp" class="xp-start-item-icon" alt="">
-							<span class="xp-start-title">Accessories</span>
-							<span class="xp-start-flyout-arrow">►</span>
-						</div>
-						<div class="xp-start-flyout-item has-sub" data-sub="games">
-							<img src="../assets/images/desk/icons/Game Controller.webp" class="xp-start-item-icon" alt="">
-							<span class="xp-start-title">Games</span>
-							<span class="xp-start-flyout-arrow">►</span>
-						</div>
-						<div class="xp-start-flyout-item has-sub" data-sub="media">
-							<img src="../assets/images/desk/icons/Video File.webp" class="xp-start-item-icon" alt="">
-							<span class="xp-start-title">Entertainment</span>
-							<span class="xp-start-flyout-arrow">►</span>
-						</div>
-						<div class="xp-start-flyout-item has-sub" data-sub="system-tools">
-							<img src="../assets/images/desk/icons/System Properties.webp" class="xp-start-item-icon" alt="">
-							<span class="xp-start-title">System Tools</span>
-							<span class="xp-start-flyout-arrow">►</span>
-						</div>
+						${appCategorySubmenusHtml}
 						<div class="xp-start-divider"></div>
 						<div class="xp-start-flyout-category-header">Portfolio Projects</div>
 						${categoriesHtml}
@@ -440,97 +351,21 @@
 						nestedFlyout.className = 'xp-start-flyout-menu xp-start-flyout-nested';
 						nestedFlyout.dataset.parentFlyout = 'all-programs';
 
-						const subKey = subTrigger.dataset.sub;
+						const catName = subTrigger.dataset.catName;
 						const catKey = subTrigger.dataset.category;
 
-						if (subKey === 'accessories') {
-							nestedFlyout.innerHTML = `
-								<div class="xp-start-flyout-item" data-action="open-calculator">
-									<img src="../assets/images/desk/icons/Calculator.webp" class="xp-start-item-icon" alt="">
-									<span class="xp-start-title">Calculator</span>
-								</div>
-								<div class="xp-start-flyout-item" data-action="open-paint">
-									<img src="../assets/images/desk/icons/Paint.webp" class="xp-start-item-icon" alt="">
-									<span class="xp-start-title">Paint</span>
-								</div>
-								<div class="xp-start-flyout-item" data-action="open-sound-recorder">
-									<img src="../assets/images/desk/icons/Music File.webp" class="xp-start-item-icon" alt="">
-									<span class="xp-start-title">Sound Recorder</span>
-								</div>
-								<div class="xp-start-flyout-item" data-action="open-charmap">
-									<img src="../assets/images/desk/icons/List File.webp" class="xp-start-item-icon" alt="">
-									<span class="xp-start-title">Character Map</span>
-								</div>
-								<div class="xp-start-flyout-item" data-action="new-text-document">
-									<img src="../assets/images/desk/icons/File.webp" class="xp-start-item-icon" alt="">
-									<span class="xp-start-title">Notepad</span>
-								</div>
-								<div class="xp-start-flyout-item" data-action="open-cmd">
-									<img src="../assets/images/desk/icons/Command Prompt.webp" class="xp-start-item-icon" alt="">
-									<span class="xp-start-title">Command Prompt</span>
-								</div>
-								<div class="xp-start-flyout-item" data-action="open-today-anecdote">
-									<img src="../assets/images/desk/icons/Calendar.webp" class="xp-start-item-icon" alt="">
-									<span class="xp-start-title">Daily Anecdotes</span>
-								</div>
-								<div class="xp-start-flyout-item" data-action="my-documents">
-									<img src="../assets/images/desk/icons/List File.webp" class="xp-start-item-icon" alt="">
-									<span class="xp-start-title">PDF Documents Archive</span>
-								</div>
-							`;
-						} else if (subKey === 'games') {
-							nestedFlyout.innerHTML = `
-								<div class="xp-start-flyout-item" data-action="open-minesweeper">
-									<img src="../assets/images/desk/icons/Minesweeper.webp" class="xp-start-item-icon" alt="">
-									<span class="xp-start-title">Minesweeper</span>
-								</div>
-								<div class="xp-start-flyout-item" data-action="open-solitaire">
-									<img src="../assets/images/desk/icons/Hearts.webp" class="xp-start-item-icon" alt="">
-									<span class="xp-start-title">Solitaire</span>
-								</div>
-							`;
-						} else if (subKey === 'media') {
-							nestedFlyout.innerHTML = `
-								<div class="xp-start-flyout-item" data-action="open-media-player">
-									<img src="../assets/images/desk/icons/Video File.webp" class="xp-start-item-icon" alt="">
-									<span class="xp-start-title">Windows Media Player</span>
-								</div>
-								<div class="xp-start-flyout-item" data-action="open-winamp">
-									<img src="../assets/images/desk/icons/Winamp.webp" class="xp-start-item-icon" alt="">
-									<span class="xp-start-title">Winamp Media Player</span>
-								</div>
-								<div class="xp-start-flyout-item" data-action="open-sound-recorder">
-									<img src="../assets/images/desk/icons/Music File.webp" class="xp-start-item-icon" alt="">
-									<span class="xp-start-title">Sound Recorder</span>
-								</div>
-								<div class="xp-start-flyout-item" data-action="link-soundcloud">
-									<img src="https://api.iconify.design/mdi/soundcloud.svg" class="xp-start-item-icon" alt="">
-									<span class="xp-start-title">SoundCloud Channel</span>
-								</div>
-								<div class="xp-start-flyout-item" data-action="link-youtube-music">
-									<img src="https://api.iconify.design/mdi/youtube.svg" class="xp-start-item-icon" alt="">
-									<span class="xp-start-title">YouTube Music</span>
-								</div>
-							`;
-						} else if (subKey === 'system-tools') {
-							nestedFlyout.innerHTML = `
-								<div class="xp-start-flyout-item" data-action="open-taskmgr">
-									<img src="../assets/images/desk/icons/System Properties.webp" class="xp-start-item-icon" alt="">
-									<span class="xp-start-title"><strong>Task Manager</strong></span>
-								</div>
-								<div class="xp-start-flyout-item" data-action="control-panel">
-									<img src="../assets/images/desk/icons/System Properties.webp" class="xp-start-item-icon" alt="">
-									<span class="xp-start-title">Control Panel</span>
-								</div>
-								<div class="xp-start-flyout-item" data-action="recycle-bin">
-									<img src="../assets/images/desk/icons/Trash.webp" class="xp-start-item-icon" alt="">
-									<span class="xp-start-title">Recycle Bin</span>
-								</div>
-								<div class="xp-start-flyout-item" data-action="my-computer">
-									<img src="../assets/images/desk/icons/My Computer.webp" class="xp-start-item-icon" alt="">
-									<span class="xp-start-title">System Properties</span>
-								</div>
-							`;
+						if (catName && window.DeskAppRegistry) {
+							const categoryApps = window.DeskAppRegistry.getByCategory(catName);
+							let appsHtml = '';
+							categoryApps.forEach(app => {
+								appsHtml += `
+									<div class="xp-start-flyout-item" data-action="open-${app.id}">
+										<img src="${app.icon}" class="xp-start-item-icon" alt="">
+										<span class="xp-start-title">${app.name}</span>
+									</div>
+								`;
+							});
+							nestedFlyout.innerHTML = appsHtml;
 						} else if (catKey) {
 							const categoryProjects = this.getProjectsByCategory(catKey);
 							let prjHtml = `
@@ -863,131 +698,46 @@
 				window.SettingsApp.playSound('click');
 			}
 
-			const directApp = window.DeskAppRegistry ? window.DeskAppRegistry.get(action.replace(/^(open-|link-)/, '')) : null;
-			if (directApp) {
-				window.DeskAppRegistry.launch(directApp.id);
+			const normalizedAppId = action.replace(/^(open-|link-)/, '');
+
+			if (window.DeskAppRegistry && (window.DeskAppRegistry.get(normalizedAppId) || window.DeskAppRegistry.get(action))) {
+				window.DeskAppRegistry.launch(window.DeskAppRegistry.get(normalizedAppId) ? normalizedAppId : action);
 				return;
 			}
 
-			switch (action) {
-				case 'open-achievements':
-					if (window.DeskAppRegistry) window.DeskAppRegistry.launch('achievements');
-					else if (window.AchievementsManager) window.AchievementsManager.open();
-					break;
-				case 'my-projects':
-					if (window.DeskAppRegistry) window.DeskAppRegistry.launch('projects');
-					else if (typeof openAllProjectsFolder === 'function') openAllProjectsFolder();
-					break;
-				case 'my-documents':
-					if (typeof fs !== 'undefined') {
-						const pdfs = fs.root.getByName('PDFs') || fs.root;
-						if (typeof openFolderWindow === 'function') openFolderWindow(pdfs);
-					}
-					break;
-				case 'my-pictures':
-					if (typeof fs !== 'undefined') {
-						const musicFolder = fs.root.getByName('Music');
-						if (musicFolder && typeof openFolderWindow === 'function') {
-							openFolderWindow(musicFolder);
-							break;
-						}
-					}
-					if (window.DeskAppRegistry) window.DeskAppRegistry.launch('display');
-					else if (typeof openDisplaySettings === 'function') openDisplaySettings();
-					break;
-				case 'my-music':
-					if (typeof fs !== 'undefined') {
-						let musicFolder = fs.root.getByName('Music');
-						if (!musicFolder) {
-							musicFolder = new Folder('Music');
-							musicFolder.icon = '../assets/images/desk/icons/Folder Closed.webp';
-							fs.root.add(musicFolder);
-						}
-						if (typeof openFolderWindow === 'function') {
-							openFolderWindow(musicFolder);
-							break;
-						}
-					}
-					if (window.MediaPlayerApp) window.MediaPlayerApp.open();
-					else if (typeof openWinamp === 'function') openWinamp();
-					break;
-				case 'open-media-player':
-					if (window.MediaPlayerApp) window.MediaPlayerApp.open();
-					break;
-				case 'my-computer':
-					if (window.DeskAppRegistry) window.DeskAppRegistry.launch('mycomputer');
-					else if (window.DeskAPI && window.DeskAPI.openMyComputer) window.DeskAPI.openMyComputer();
-					break;
-				case 'my-network-places':
-					if (window.DeskAppRegistry) window.DeskAppRegistry.launch('network');
-					else if (window.DeskAPI && window.DeskAPI.openNetworkPlaces) window.DeskAPI.openNetworkPlaces();
-					break;
-				case 'printers-faxes':
-					if (window.DeskAppRegistry) window.DeskAppRegistry.launch('printers');
-					else if (window.DeskAPI && window.DeskAPI.openPrinters) window.DeskAPI.openPrinters();
-					break;
-				case 'search':
-					if (window.DeskAppRegistry) window.DeskAppRegistry.launch('search');
-					else if (window.DeskAPI && window.DeskAPI.openSearch) window.DeskAPI.openSearch('');
-					break;
-				case 'recycle-bin':
-					if (window.DeskAppRegistry) window.DeskAppRegistry.launch('recyclebin');
-					else if (typeof openRecycleBinWindow === 'function') openRecycleBinWindow();
-					break;
-				case 'new-text-document':
-					if (window.NotepadApp) {
-						window.NotepadApp.openNew();
-					} else if (typeof fs !== 'undefined') {
-						try {
-							const newFile = fs.create('File', '/', 'New Document.txt');
-							if (typeof openTextEditorWindow === 'function') openTextEditorWindow(newFile);
-							if (typeof refreshUI === 'function') refreshUI();
-						} catch (e) {
-							if (typeof showXPDialog === 'function') showXPDialog('Error', e.message, 'error');
-						}
-					}
-					break;
-				case 'control-panel':
-					if (window.DeskAppRegistry) window.DeskAppRegistry.launch('settings', 'system');
-					else if (window.SettingsApp) window.SettingsApp.open('system');
-					break;
-				case 'control-panel-appearance':
-					if (window.DeskAppRegistry) window.DeskAppRegistry.launch('display');
-					else if (window.SettingsApp) window.SettingsApp.open('appearance');
-					break;
-				case 'run':
-					if (typeof openRunDialog === 'function') openRunDialog();
-					break;
-				case 'turn-off':
-					if (window.AchievementsManager) window.AchievementsManager.progress('turn_off_action', 1);
-					if (typeof openShutdownDialog === 'function') openShutdownDialog();
-					break;
-				case 'log-off':
-					if (typeof showXPDialog === 'function') {
-						showXPDialog('Log Off Windows', 'Are you sure you want to log off?', 'question', {
-							buttons: ['Log Off', 'Cancel'],
-							callback: (res) => {
-								if (res === 'Log Off') {
-									const welcome = document.getElementById('welcome-screen');
-									if (welcome) {
-										welcome.classList.remove('hidden');
-										welcome.style.opacity = '1';
-										welcome.style.display = 'flex';
-									}
+			if (action === 'turn-off') {
+				if (window.AchievementsManager) window.AchievementsManager.progress('turn_off_action', 1);
+				if (typeof openShutdownDialog === 'function') openShutdownDialog();
+				return;
+			}
+
+			if (action === 'log-off') {
+				if (typeof showXPDialog === 'function') {
+					showXPDialog('Log Off Windows', 'Are you sure you want to log off?', 'question', {
+						buttons: ['Log Off', 'Cancel'],
+						callback: (res) => {
+							if (res === 'Log Off') {
+								const welcome = document.getElementById('welcome-screen');
+								if (welcome) {
+									welcome.classList.remove('hidden');
+									welcome.style.opacity = '1';
+									welcome.style.display = 'flex';
 								}
 							}
-						});
-					}
-					break;
-				case 'help':
-					window.open('https://github.com/wartets/Wartets.github.io', '_blank');
-					break;
-				case 'link-soundcloud':
-					window.open('https://soundcloud.com/wartets', '_blank');
-					break;
-				case 'link-youtube-music':
-					window.open('https://www.youtube.com/@Wartets', '_blank');
-					break;
+						}
+					});
+				}
+				return;
+			}
+
+			if (action === 'help') {
+				window.open('https://github.com/wartets/Wartets.github.io', '_blank');
+				return;
+			}
+
+			if (action === 'control-panel') {
+				if (window.DeskAppRegistry) window.DeskAppRegistry.launch('settings', 'system');
+				return;
 			}
 		},
 

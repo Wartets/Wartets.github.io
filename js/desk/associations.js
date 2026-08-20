@@ -59,12 +59,13 @@
 				}
 			});
 
-			this.register(['.txt', '.text', '.log', '.ini', '.cfg', '.js', '.css', '.xml', '.csv', '.ts', '.py', '.c', '.cpp', '.h', '.sql'], {
+			this.register(['.txt', '.text', '.log', '.ini', '.cfg', '.md', '.js', '.css', '.xml', '.csv', '.ts', '.py', '.c', '.cpp', '.h', '.sql'], {
 				typeLabel: 'Text Document',
 				defaultIcon: '../assets/images/desk/icons/File.webp',
 				defaultApp: 'notepad',
 				openHandler: (file) => {
-					if (window.NotepadApp) window.NotepadApp.open(file);
+					if (window.DeskAppRegistry) window.DeskAppRegistry.launch('notepad', file);
+					else if (window.NotepadApp) window.NotepadApp.open(file);
 				},
 				openWith: [
 					{
@@ -72,7 +73,8 @@
 						name: 'Notepad',
 						icon: '../assets/images/desk/icons/Notepad.webp',
 						action: (file) => {
-							if (window.NotepadApp) window.NotepadApp.open(file);
+							if (window.DeskAppRegistry) window.DeskAppRegistry.launch('notepad', file);
+							else if (window.NotepadApp) window.NotepadApp.open(file);
 						}
 					},
 					{
@@ -80,7 +82,8 @@
 						name: 'Internet Explorer',
 						icon: '../assets/images/desk/icons/Internet Explorer.webp',
 						action: (file) => {
-							if (window.InternetExplorerApp) window.InternetExplorerApp.open(`file://${file.getFullPath()}`);
+							if (window.DeskAppRegistry) window.DeskAppRegistry.launch('ie', `file://${file.getFullPath()}`);
+							else if (window.InternetExplorerApp) window.InternetExplorerApp.open(`file://${file.getFullPath()}`);
 						}
 					}
 				],
@@ -100,7 +103,13 @@
 					if (window.AchievementsManager) {
 						window.AchievementsManager.progress('bat_runner', 1);
 					}
-					if (window.CommandPrompt) {
+					if (window.DeskAppRegistry) {
+						window.DeskAppRegistry.launch('cmd', {
+							script: file.content,
+							title: file.name,
+							initialFolder: file.parent || (fs ? fs.root : null)
+						});
+					} else if (window.CommandPrompt) {
 						window.CommandPrompt.open({
 							script: file.content,
 							title: file.name,
@@ -114,7 +123,13 @@
 						name: 'Command Prompt (Execute)',
 						icon: '../assets/images/desk/icons/Command Prompt.webp',
 						action: (file) => {
-							if (window.CommandPrompt) {
+							if (window.DeskAppRegistry) {
+								window.DeskAppRegistry.launch('cmd', {
+									script: file.content,
+									title: file.name,
+									initialFolder: file.parent || (fs ? fs.root : null)
+								});
+							} else if (window.CommandPrompt) {
 								window.CommandPrompt.open({
 									script: file.content,
 									title: file.name,
@@ -128,7 +143,8 @@
 						name: 'Notepad (Edit)',
 						icon: '../assets/images/desk/icons/Notepad.webp',
 						action: (file) => {
-							if (window.NotepadApp) window.NotepadApp.open(file);
+							if (window.DeskAppRegistry) window.DeskAppRegistry.launch('notepad', file);
+							else if (window.NotepadApp) window.NotepadApp.open(file);
 						}
 					}
 				],
@@ -145,7 +161,9 @@
 				defaultIcon: '../assets/images/desk/icons/Picture.webp',
 				defaultApp: 'pictureviewer',
 				openHandler: (file) => {
-					if (window.PictureViewerApp) {
+					if (window.DeskAppRegistry) {
+						window.DeskAppRegistry.launch('pictureviewer', file);
+					} else if (window.PictureViewerApp) {
 						window.PictureViewerApp.open(file);
 					} else if (window.PaintApp) {
 						window.PaintApp.open(file);
@@ -157,7 +175,8 @@
 						name: 'Windows Picture and Fax Viewer',
 						icon: '../assets/images/desk/icons/Picture.webp',
 						action: (file) => {
-							if (window.PictureViewerApp) window.PictureViewerApp.open(file);
+							if (window.DeskAppRegistry) window.DeskAppRegistry.launch('pictureviewer', file);
+							else if (window.PictureViewerApp) window.PictureViewerApp.open(file);
 						}
 					},
 					{
@@ -165,7 +184,8 @@
 						name: 'Paint',
 						icon: '../assets/images/desk/icons/Paint.webp',
 						action: (file) => {
-							if (window.PaintApp) window.PaintApp.open(file);
+							if (window.DeskAppRegistry) window.DeskAppRegistry.launch('paint', file);
+							else if (window.PaintApp) window.PaintApp.open(file);
 						}
 					},
 					{
@@ -173,7 +193,7 @@
 						name: 'Internet Explorer',
 						icon: '../assets/images/desk/icons/Internet Explorer.webp',
 						action: (file) => {
-							if (window.InternetExplorerApp) window.InternetExplorerApp.open(file.remoteUrl || file.content || `file://${file.getFullPath()}`);
+							if (window.DeskAppRegistry) window.DeskAppRegistry.launch('ie', file.remoteUrl || file.content || `file://${file.getFullPath()}`);
 						}
 					}
 				],
@@ -193,12 +213,10 @@
 					const defaultPlayer = (window.SettingsApp && typeof window.SettingsApp.get === 'function')
 						? (window.SettingsApp.get('defaultAudioPlayer') || 'mediaplayer')
 						: 'mediaplayer';
-					if (defaultPlayer === 'winamp' && typeof openWinamp === 'function') {
-						openWinamp(file);
+					if (window.DeskAppRegistry) {
+						window.DeskAppRegistry.launch(defaultPlayer, file);
 					} else if (window.MediaPlayerApp) {
 						window.MediaPlayerApp.open(file);
-					} else if (typeof openWinamp === 'function') {
-						openWinamp(file);
 					}
 				},
 				openWith: [
@@ -207,7 +225,8 @@
 						name: 'Windows Media Player',
 						icon: '../assets/images/desk/icons/Video File.webp',
 						action: (file) => {
-							if (window.MediaPlayerApp) window.MediaPlayerApp.open(file);
+							if (window.DeskAppRegistry) window.DeskAppRegistry.launch('mediaplayer', file);
+							else if (window.MediaPlayerApp) window.MediaPlayerApp.open(file);
 						}
 					},
 					{
@@ -215,7 +234,8 @@
 						name: 'Winamp Media Player',
 						icon: '../assets/images/desk/icons/Winamp.webp',
 						action: (file) => {
-							if (typeof openWinamp === 'function') openWinamp(file);
+							if (window.DeskAppRegistry) window.DeskAppRegistry.launch('winamp', file);
+							else if (typeof openWinamp === 'function') openWinamp(file);
 						}
 					},
 					{
@@ -223,7 +243,8 @@
 						name: 'Sound Recorder',
 						icon: '../assets/images/desk/icons/Music File.webp',
 						action: (file) => {
-							if (window.SoundRecorderApp) window.SoundRecorderApp.open(file);
+							if (window.DeskAppRegistry) window.DeskAppRegistry.launch('soundrecorder', file);
+							else if (window.SoundRecorderApp) window.SoundRecorderApp.open(file);
 						}
 					},
 					{
@@ -231,7 +252,7 @@
 						name: 'Internet Explorer',
 						icon: '../assets/images/desk/icons/Internet Explorer.webp',
 						action: (file) => {
-							if (window.InternetExplorerApp) window.InternetExplorerApp.open(file.remoteUrl || file.content);
+							if (window.DeskAppRegistry) window.DeskAppRegistry.launch('ie', file.remoteUrl || file.content);
 						}
 					}
 				],
@@ -321,7 +342,13 @@
 				defaultIcon: '../assets/images/desk/icons/List File.webp',
 				defaultApp: 'pdf',
 				openHandler: (file) => {
-					if (typeof openPDFWindow === 'function') openPDFWindow(file);
+					if (window.DeskAppRegistry && window.DeskAppRegistry.get('pdf')) {
+						window.DeskAppRegistry.launch('pdf', file);
+					} else if (typeof openPDFWindow === 'function') {
+						openPDFWindow(file);
+					} else if (window.DeskAppRegistry) {
+						window.DeskAppRegistry.launch('ie', file.content || file.remoteUrl);
+					}
 				},
 				openWith: [
 					{
@@ -329,7 +356,11 @@
 						name: 'PDF Document Viewer',
 						icon: '../assets/images/desk/icons/List File.webp',
 						action: (file) => {
-							if (typeof openPDFWindow === 'function') openPDFWindow(file);
+							if (window.DeskAppRegistry && window.DeskAppRegistry.get('pdf')) {
+								window.DeskAppRegistry.launch('pdf', file);
+							} else if (typeof openPDFWindow === 'function') {
+								openPDFWindow(file);
+							}
 						}
 					},
 					{
@@ -337,7 +368,7 @@
 						name: 'Internet Explorer',
 						icon: '../assets/images/desk/icons/Internet Explorer.webp',
 						action: (file) => {
-							if (window.InternetExplorerApp) window.InternetExplorerApp.open(file.content || file.remoteUrl);
+							if (window.DeskAppRegistry) window.DeskAppRegistry.launch('ie', file.content || file.remoteUrl);
 						}
 					}
 				]
@@ -524,7 +555,8 @@
 					name: 'Notepad',
 					icon: '../assets/images/desk/icons/Notepad.webp',
 					action: () => {
-						if (window.NotepadApp) window.NotepadApp.open(element);
+						if (window.DeskAppRegistry) window.DeskAppRegistry.launch('notepad', element);
+						else if (window.NotepadApp) window.NotepadApp.open(element);
 					}
 				},
 				{
@@ -532,7 +564,8 @@
 					name: 'Paint',
 					icon: '../assets/images/desk/icons/Paint.webp',
 					action: () => {
-						if (window.PaintApp) window.PaintApp.open(element);
+						if (window.DeskAppRegistry) window.DeskAppRegistry.launch('paint', element);
+						else if (window.PaintApp) window.PaintApp.open(element);
 					}
 				},
 				{
@@ -540,7 +573,8 @@
 					name: 'Internet Explorer',
 					icon: '../assets/images/desk/icons/Internet Explorer.webp',
 					action: () => {
-						if (window.InternetExplorerApp) window.InternetExplorerApp.open(`file://${element.getFullPath()}`);
+						if (window.DeskAppRegistry) window.DeskAppRegistry.launch('ie', `file://${element.getFullPath()}`);
+						else if (window.InternetExplorerApp) window.InternetExplorerApp.open(`file://${element.getFullPath()}`);
 					}
 				}
 			];

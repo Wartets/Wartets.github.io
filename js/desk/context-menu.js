@@ -480,10 +480,14 @@
 				},
 				{
 					label: 'Properties',
-					bold: true,
+					bold: false,
 					icon: '../assets/images/desk/icons/Display.webp',
 					action: (ctx) => {
-						if (typeof openDisplaySettings === 'function') openDisplaySettings('desktop', ctx);
+						if (window.DeskAppRegistry) {
+							window.DeskAppRegistry.launch('display', Object.assign({ tab: 'desktop' }, ctx || {}));
+						} else if (window.SettingsApp) {
+							window.SettingsApp.open('desktop', ctx);
+						}
 					}
 				}
 			];
@@ -1260,8 +1264,8 @@
 					},
 					{
 						label: 'Manage',
-						action: () => {
-							if (window.SettingsApp) window.SettingsApp.open('system');
+						action: (ctx) => {
+							if (window.SettingsApp) window.SettingsApp.open('system', ctx);
 						}
 					},
 					{ separator: true },
@@ -1287,8 +1291,8 @@
 					{
 						label: 'Properties',
 						bold: true,
-						action: () => {
-							if (window.SettingsApp) window.SettingsApp.open('system');
+						action: (ctx) => {
+							if (window.SettingsApp) window.SettingsApp.open('system', ctx);
 						}
 					}
 				];
@@ -1395,8 +1399,8 @@
 				{ separator: true },
 				{
 					label: 'Properties',
-					action: () => {
-						if (window.SettingsApp) window.SettingsApp.open('taskbar');
+					action: (ctx) => {
+						if (window.SettingsApp) window.SettingsApp.open('taskbar', ctx);
 					}
 				}
 			];
@@ -1433,8 +1437,8 @@
 				{
 					label: 'Properties',
 					bold: true,
-					action: () => {
-						if (window.SettingsApp) window.SettingsApp.open('taskbar');
+					action: (ctx) => {
+						if (window.SettingsApp) window.SettingsApp.open('taskbar', ctx);
 					}
 				}
 			];
@@ -1515,14 +1519,14 @@
 					{
 						label: 'Open Volume Control',
 						bold: true,
-						action: () => {
-							if (window.SettingsApp) window.SettingsApp.open('audio');
+						action: (ctx) => {
+							if (window.SettingsApp) window.SettingsApp.open('audio', ctx);
 						}
 					},
 					{
 						label: 'Adjust Audio Properties',
-						action: () => {
-							if (window.SettingsApp) window.SettingsApp.open('audio');
+						action: (ctx) => {
+							if (window.SettingsApp) window.SettingsApp.open('audio', ctx);
 						}
 					},
 					{ separator: true },
@@ -1541,15 +1545,15 @@
 					{
 						label: 'Open Windows Security Center',
 						bold: true,
-						action: () => {
-							if (window.Taskbar && window.Taskbar.showSecurityAlertsPopup) window.Taskbar.showSecurityAlertsPopup();
+						action: (ctx) => {
+							if (window.Taskbar && window.Taskbar.showSecurityAlertsPopup) window.Taskbar.showSecurityAlertsPopup(ctx);
 						}
 					},
 					{ separator: true },
 					{
 						label: 'Security Settings...',
-						action: () => {
-							if (window.SettingsApp) window.SettingsApp.open('system');
+						action: (ctx) => {
+							if (window.SettingsApp) window.SettingsApp.open('system', ctx);
 						}
 					}
 				];
@@ -1560,15 +1564,15 @@
 					{
 						label: 'Safely Remove USB Mass Storage Device',
 						bold: true,
-						action: () => {
-							if (window.Taskbar && window.Taskbar.showSafelyRemoveHardwareDialog) window.Taskbar.showSafelyRemoveHardwareDialog();
+						action: (ctx) => {
+							if (window.Taskbar && window.Taskbar.showSafelyRemoveHardwareDialog) window.Taskbar.showSafelyRemoveHardwareDialog(ctx);
 						}
 					},
 					{ separator: true },
 					{
 						label: 'Hardware Properties...',
-						action: () => {
-							if (window.SettingsApp) window.SettingsApp.open('system');
+						action: (ctx) => {
+							if (window.SettingsApp) window.SettingsApp.open('system', ctx);
 						}
 					}
 				];
@@ -1579,15 +1583,15 @@
 					{
 						label: 'Check for Updates Now',
 						bold: true,
-						action: () => {
-							if (window.Taskbar && window.Taskbar.showWindowsUpdateDialog) window.Taskbar.showWindowsUpdateDialog();
+						action: (ctx) => {
+							if (window.Taskbar && window.Taskbar.showWindowsUpdateDialog) window.Taskbar.showWindowsUpdateDialog(ctx);
 						}
 					},
 					{ separator: true },
 					{
 						label: 'Automatic Updates Settings...',
-						action: () => {
-							if (window.SettingsApp) window.SettingsApp.open('system');
+						action: (ctx) => {
+							if (window.SettingsApp) window.SettingsApp.open('system', ctx);
 						}
 					}
 				];
@@ -1598,15 +1602,15 @@
 					{
 						label: 'Power Meter',
 						bold: true,
-						action: () => {
-							if (window.Taskbar && window.Taskbar.showPowerMeterPopup) window.Taskbar.showPowerMeterPopup();
+						action: (ctx) => {
+							if (window.Taskbar && window.Taskbar.showPowerMeterPopup) window.Taskbar.showPowerMeterPopup(ctx);
 						}
 					},
 					{ separator: true },
 					{
 						label: 'Adjust Power Properties...',
-						action: () => {
-							if (window.SettingsApp) window.SettingsApp.open('system');
+						action: (ctx) => {
+							if (window.SettingsApp) window.SettingsApp.open('system', ctx);
 						}
 					}
 				];
@@ -2093,8 +2097,8 @@
 				{
 					label: 'Properties',
 					bold: true,
-					action: () => {
-						if (window.SettingsApp) window.SettingsApp.open('taskbar');
+					action: (ctx) => {
+						if (window.SettingsApp) window.SettingsApp.open('taskbar', ctx);
 					}
 				}
 			];
