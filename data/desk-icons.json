@@ -53,11 +53,11 @@
 		{ "id": "video-file", "name": "Video Media File", "file": "Video File.webp", "category": "media" },
 		{ "id": "video", "name": "Media Player", "file": "Video.webp", "category": "media" },
 		{ "id": "winamp", "name": "Winamp", "file": "Winamp.webp", "category": "media" },
-		{ "id": "window-logo", "name": "Windows Logo", "file": "../window_logo.png", "category": "system" },
-		{ "id": "xp-icon", "name": "Windows XP Icon", "file": "../XPIcon.png", "category": "system" },
-		{ "id": "xp-computer-icon", "name": "XP Workstation", "file": "../xp-computer-icon.webp", "category": "system" },
-		{ "id": "clippy-idle", "name": "Clippy Assistant", "file": "../clippy/idle.png", "category": "system" },
-		{ "id": "clippy-think", "name": "Clippy Thinking", "file": "../clippy/think.png", "category": "system" },
+		{ "id": "window-logo", "name": "Windows Logo", "url": "../assets/images/desk/window_logo.png", "category": "system" },
+		{ "id": "xp-icon", "name": "Windows XP Icon", "url": "../assets/images/desk/XPIcon.png", "category": "system" },
+		{ "id": "xp-computer-icon", "name": "XP Workstation", "url": "../assets/images/desk/xp-computer-icon.webp", "category": "system" },
+		{ "id": "clippy-idle", "name": "Clippy Assistant", "url": "../assets/images/desk/clippy/idle.png", "category": "system" },
+		{ "id": "clippy-think", "name": "Clippy Thinking", "url": "../assets/images/desk/clippy/think.png", "category": "system" },
 		{ "id": "github", "name": "GitHub Profile", "url": "https://img.icons8.com/fluent/48/000000/github.png", "category": "network" },
 		{ "id": "github-small", "name": "GitHub Small", "url": "https://img.icons8.com/fluent/24/000000/github.png", "category": "network" },
 		{ "id": "soundcloud", "name": "SoundCloud Channel", "url": "https://api.iconify.design/mdi/soundcloud.svg?color=%23ff5500", "category": "media" },
@@ -208,7 +208,13 @@
 		"outlook": "mail",
 		"email": "mail",
 		"internet": "ie",
-		"browser": "ie"
+		"browser": "ie",
+		"windows-logo": "window-logo",
+		"win-logo": "window-logo",
+		"xp-flag": "window-logo",
+		"user": "user-1",
+		"profile": "user-1",
+		"help-support": "user-support"
 	},
 	"themes": {
 		"default": {
@@ -236,7 +242,10 @@
 		"zune": {
 			"id": "zune",
 			"name": "Zune Noir",
-			"overrides": {}
+			"overrides": {
+				"display": "display",
+				"system-properties": "system-properties"
+			}
 		}
 	}
 }
