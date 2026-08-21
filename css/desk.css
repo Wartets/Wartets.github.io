@@ -1974,6 +1974,7 @@ body.theme-zune .xp-context-menu li.separator {
 	right: 0;
 	bottom: 0;
 	padding: 0;
+	z-index: 10;
 }
 
 .project-icon {
@@ -1991,6 +1992,7 @@ body.theme-zune .xp-context-menu li.separator {
 	vertical-align: top;
 	padding: 5px;
 	box-sizing: border-box;
+	z-index: 11;
 }
 
 .project-icon img {
@@ -2446,6 +2448,25 @@ body.theme-zune .xp-context-menu li.separator {
 .project-icon.drop-target span {
 	background-color: var(--xp-selection-blue) !important;
 	color: #ffffff !important;
+}
+
+.project-icon.hidden-item,
+.xp-explorer-item.hidden-item,
+.xp-details-row.hidden-item,
+.xp-tree-node.hidden-item,
+.xp-fd-item.hidden-item {
+	opacity: 0.55 !important;
+	z-index: 11 !important;
+}
+
+.project-icon.hidden-item img,
+.xp-explorer-item.hidden-item img {
+	opacity: 0.85 !important;
+}
+
+.project-icon.hidden-item span,
+.xp-explorer-item.hidden-item span {
+	opacity: 0.95 !important;
 }
 
 .folder-content.drop-target,

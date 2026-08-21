@@ -27,7 +27,7 @@
 	function loadSavedState() {
 		if (stateCache) return stateCache;
 		try {
-			const raw = localStorage.getItem(STORAGE_KEY_STATE);
+			const raw = window.DeskStorage ? window.DeskStorage.getItem(STORAGE_KEY_STATE) : localStorage.getItem(STORAGE_KEY_STATE);
 			stateCache = raw ? JSON.parse(raw) : {};
 		} catch (e) {
 			stateCache = {};
@@ -37,7 +37,9 @@
 
 	function saveCurrentState() {
 		try {
-			localStorage.setItem(STORAGE_KEY_STATE, JSON.stringify(stateCache));
+			const payload = JSON.stringify(stateCache);
+			if (window.DeskStorage) window.DeskStorage.setItem(STORAGE_KEY_STATE, payload);
+			else localStorage.setItem(STORAGE_KEY_STATE, payload);
 		} catch (e) {}
 	}
 
@@ -424,8 +426,10 @@
 				return existing;
 			}
 
-			let visits = parseInt(localStorage.getItem('xp_achievements_open_count') || '0', 10) + 1;
-			localStorage.setItem('xp_achievements_open_count', String(visits));
+			const rawCount = window.DeskStorage ? window.DeskStorage.getItem('xp_achievements_open_count') : localStorage.getItem('xp_achievements_open_count');
+			let visits = parseInt(rawCount || '0', 10) + 1;
+			if (window.DeskStorage) window.DeskStorage.setItem('xp_achievements_open_count', String(visits));
+			else localStorage.setItem('xp_achievements_open_count', String(visits));
 			this.setProgress('achievements_frequent_visitor', visits);
 
 			const layoutMarkup = `

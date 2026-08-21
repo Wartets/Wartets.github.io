@@ -167,7 +167,8 @@
 				const activeFilterIdx = parseInt(filterSelectEl.value, 10) || 0;
 				const activeFilter = filterTypes[activeFilterIdx] || filterTypes[0];
 
-				const items = currentFolder.listContent();
+				const showHidden = typeof window.isShowHiddenEnabled === 'function' ? window.isShowHiddenEnabled() : (window.SettingsApp ? !!window.SettingsApp.get('showHiddenFiles') : false);
+				const items = currentFolder.listContent().filter(item => !item.hidden || showHidden);
 
 				items.forEach(item => {
 					const isDir = item instanceof Folder;
@@ -196,6 +197,11 @@
 
 					row.appendChild(iconImg);
 					row.appendChild(labelSpan);
+
+					if (item.hidden) {
+						row.classList.add('hidden-item');
+						row.style.opacity = '0.55';
+					}
 
 					row.addEventListener('click', () => {
 						filesListEl.querySelectorAll('.xp-fd-item').forEach(el => el.classList.remove('selected'));

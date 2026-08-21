@@ -1424,10 +1424,12 @@
 
 			if (window.AchievementsManager && state.viewMode) {
 				try {
-					let tested = JSON.parse(localStorage.getItem('xp_tested_view_modes') || '[]');
+					const raw = window.DeskStorage ? window.DeskStorage.getItem('xp_tested_view_modes') : localStorage.getItem('xp_tested_view_modes');
+					let tested = JSON.parse(raw || '[]');
 					if (!tested.includes(state.viewMode)) {
 						tested.push(state.viewMode);
-						localStorage.setItem('xp_tested_view_modes', JSON.stringify(tested));
+						if (window.DeskStorage) window.DeskStorage.setItem('xp_tested_view_modes', JSON.stringify(tested));
+						else localStorage.setItem('xp_tested_view_modes', JSON.stringify(tested));
 					}
 					window.AchievementsManager.setProgress('explorer_view_modes', tested.length);
 				} catch (e) {}
@@ -1436,7 +1438,7 @@
 			contentContainer.className = `folder-content xp-file-grid view-${state.viewMode}`;
 			contentContainer.innerHTML = '';
 
-			const showHidden = isShowHiddenEnabled();
+			const showHidden = typeof window.isShowHiddenEnabled === 'function' ? window.isShowHiddenEnabled() : (window.SettingsApp ? !!window.SettingsApp.get('showHiddenFiles') : false);
 			let items = folder.listContent().filter(item => !item.hidden || showHidden);
 
 			items.sort((a, b) => {
@@ -1637,6 +1639,11 @@
 				icon.appendChild(span);
 			}
 
+			if (element.hidden) {
+				icon.classList.add('hidden-item');
+				icon.style.opacity = '0.55';
+			}
+
 			icon.addEventListener('click', (e) => {
 				const isSingleClick = window.SettingsApp && window.SettingsApp.get('singleClickOpen');
 				if (isSingleClick && e.button === 0 && !e.ctrlKey && !e.shiftKey) {
@@ -1745,6 +1752,11 @@
 					<div class="xp-details-td col-type">${typeStr}</div>
 					<div class="xp-details-td col-modified">${modStr}</div>
 				`;
+
+				if (el.hidden) {
+					row.classList.add('hidden-item');
+					row.style.opacity = '0.55';
+				}
 
 				row.addEventListener('click', (e) => {
 					const isSingleClick = window.SettingsApp && window.SettingsApp.get('singleClickOpen');
@@ -1867,6 +1879,11 @@
 				const span = document.createElement('span');
 				span.textContent = element.name;
 				icon.appendChild(span);
+			}
+
+			if (element.hidden) {
+				icon.classList.add('hidden-item');
+				icon.style.opacity = '0.55';
 			}
 
 			icon.addEventListener('click', (e) => {
@@ -2283,11 +2300,13 @@
 				return node;
 			};
 
+			const showHidden = typeof window.isShowHiddenEnabled === 'function' ? window.isShowHiddenEnabled() : (window.SettingsApp ? !!window.SettingsApp.get('showHiddenFiles') : false);
 			const renderFolderChildren = (parentFolder, container, depth) => {
-				parentFolder.listContent().filter(c => c instanceof Folder).forEach(sub => {
-					const hasSub = sub.listContent().some(c => c instanceof Folder);
+				parentFolder.listContent().filter(c => c instanceof Folder && (!c.hidden || showHidden)).forEach(sub => {
+					const hasSub = sub.listContent().some(c => c instanceof Folder && (!c.hidden || showHidden));
 					const subNode = document.createElement('div');
-					subNode.className = 'xp-tree-node';
+					subNode.className = `xp-tree-node ${sub.hidden ? 'hidden-item' : ''}`;
+					if (sub.hidden) subNode.style.opacity = '0.55';
 					subNode.dataset.path = sub.getFullPath();
 					subNode.style.paddingLeft = `${depth * 14 + 4}px`;
 
@@ -2343,10 +2362,7 @@
 			};
 
 			buildNode('Desktop', '../assets/images/desk/icons/Display.webp', '/', 0, true, (container, d) => {
-				const userDocs = fs.findByPath('/PDFs') || fs.root;
-				buildNode("Colin's Documents", '../assets/images/desk/icons/My Profile Folder.webp', userDocs.getFullPath(), d, true, (docContainer, docD) => {
-					renderFolderChildren(userDocs, docContainer, docD);
-				});
+				renderFolderChildren(fs.root, container, d);
 
 				buildNode('My Computer', '../assets/images/desk/icons/My Computer.webp', null, d, true, (compContainer, compD) => {
 					const drives = fs.getDrives ? fs.getDrives() : [];

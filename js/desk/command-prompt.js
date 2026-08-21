@@ -667,10 +667,12 @@
 
 			if (window.AchievementsManager) {
 				try {
-					let cmdList = JSON.parse(localStorage.getItem('xp_cmd_history_executed') || '[]');
+					const raw = window.DeskStorage ? window.DeskStorage.getItem('xp_cmd_history_executed') : localStorage.getItem('xp_cmd_history_executed');
+					let cmdList = JSON.parse(raw || '[]');
 					if (!cmdList.includes(cmd)) {
 						cmdList.push(cmd);
-						localStorage.setItem('xp_cmd_history_executed', JSON.stringify(cmdList));
+						if (window.DeskStorage) window.DeskStorage.setItem('xp_cmd_history_executed', JSON.stringify(cmdList));
+						else localStorage.setItem('xp_cmd_history_executed', JSON.stringify(cmdList));
 					}
 					window.AchievementsManager.setProgress('cmd_master', cmdList.length);
 				} catch (e) {}
@@ -1747,22 +1749,31 @@
 			if (sub === 'QUERY') {
 				const key = args[1];
 				if (!key) {
-					for (let i = 0; i < localStorage.length; i++) {
-						this.println(`HKEY_CURRENT_USER\\Software\\Wartets\\${localStorage.key(i)}`);
+					const store = window.DeskStorage ? window.DeskStorage.getAll() : {};
+					const keys = window.DeskStorage ? Object.keys(store) : [];
+					if (!window.DeskStorage) {
+						for (let i = 0; i < localStorage.length; i++) {
+							keys.push(localStorage.key(i));
+						}
 					}
+					keys.forEach(k => {
+						this.println(`HKEY_CURRENT_USER\\Software\\Wartets\\${k}`);
+					});
 				} else {
-					const val = localStorage.getItem(key);
+					const val = window.DeskStorage ? window.DeskStorage.getItem(key) : localStorage.getItem(key);
 					this.println(`HKEY_CURRENT_USER\\Software\\Wartets\\${key}`);
 					this.println(`    ${key}    REG_SZ    ${val || ''}`);
 				}
 			} else if (sub === 'ADD' && args.length >= 3) {
 				const key = args[1];
 				const val = args.slice(2).join(' ');
-				localStorage.setItem(key, val);
+				if (window.DeskStorage) window.DeskStorage.setItem(key, val);
+				else localStorage.setItem(key, val);
 				this.println('The operation completed successfully.');
 			} else if (sub === 'DELETE' && args.length >= 2) {
 				const key = args[1];
-				localStorage.removeItem(key);
+				if (window.DeskStorage) window.DeskStorage.removeItem(key);
+				else localStorage.removeItem(key);
 				this.println('The operation completed successfully.');
 			}
 		}
@@ -2289,7 +2300,8 @@
 	const CommandPrompt = {
 		seedMatrixEasterEgg() {
 			try {
-				let items = JSON.parse(localStorage.getItem('recycleBinItems') || '[]');
+				const raw = window.DeskStorage ? window.DeskStorage.getItem('recycleBinItems') : localStorage.getItem('recycleBinItems');
+				let items = JSON.parse(raw || '[]');
 				const exists = items.some(i => i.data && i.data.name === 'matrix.bat');
 				if (!exists) {
 					items.push({
@@ -2309,7 +2321,9 @@
 							remoteUrl: null
 						}
 					});
-					localStorage.setItem('recycleBinItems', JSON.stringify(items));
+					const payload = JSON.stringify(items);
+					if (window.DeskStorage) window.DeskStorage.setItem('recycleBinItems', payload);
+					else localStorage.setItem('recycleBinItems', payload);
 				}
 			} catch (e) {}
 		},

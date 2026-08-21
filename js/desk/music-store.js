@@ -470,7 +470,7 @@
 		if (isInitialized) return Promise.resolve(libraryPrimaries);
 		if (initPromise) return initPromise;
 
-		const cachedRaw = localStorage.getItem(STORAGE_CACHE_KEY) || sessionStorage.getItem(STORAGE_CACHE_KEY);
+		const cachedRaw = (window.DeskStorage ? window.DeskStorage.getItem(STORAGE_CACHE_KEY) : localStorage.getItem(STORAGE_CACHE_KEY)) || sessionStorage.getItem(STORAGE_CACHE_KEY);
 		if (cachedRaw) {
 			try {
 				rawBibData = JSON.parse(cachedRaw);
@@ -503,7 +503,11 @@
 
 					try {
 						const strData = JSON.stringify(freshData);
-						localStorage.setItem(STORAGE_CACHE_KEY, strData);
+						if (window.DeskStorage) {
+							window.DeskStorage.setItem(STORAGE_CACHE_KEY, strData);
+						} else {
+							localStorage.setItem(STORAGE_CACHE_KEY, strData);
+						}
 						sessionStorage.setItem(STORAGE_CACHE_KEY, strData);
 					} catch (e) {}
 				}

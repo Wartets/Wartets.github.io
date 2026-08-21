@@ -260,7 +260,7 @@
 	function loadSavedSettings() {
 		if (!baseConfig) return;
 		try {
-			const saved = localStorage.getItem(SETTINGS_STORAGE_KEY);
+			const saved = window.DeskStorage ? window.DeskStorage.getItem(SETTINGS_STORAGE_KEY) : localStorage.getItem(SETTINGS_STORAGE_KEY);
 			if (saved) {
 				const parsed = JSON.parse(saved);
 				currentSettings = Object.assign({}, baseConfig, parsed);
@@ -273,9 +273,9 @@
 			} else {
 				currentSettings = Object.assign({}, baseConfig);
 			}
-			const legacyHidden = localStorage.getItem('desktopShowHidden');
+			const legacyHidden = window.DeskStorage ? window.DeskStorage.getItem('desktopShowHidden') : localStorage.getItem('desktopShowHidden');
 			if (legacyHidden !== null) currentSettings.showHiddenFiles = legacyHidden === 'true';
-			const legacyBg = localStorage.getItem('desktopBackground');
+			const legacyBg = window.DeskStorage ? window.DeskStorage.getItem('desktopBackground') : localStorage.getItem('desktopBackground');
 			if (legacyBg) currentSettings.desktopBackground = legacyBg;
 		} catch (e) {
 			currentSettings = Object.assign({}, baseConfig);
@@ -285,9 +285,16 @@
 
 	function saveCurrentSettings() {
 		try {
-			localStorage.setItem(SETTINGS_STORAGE_KEY, JSON.stringify(currentSettings));
-			localStorage.setItem('desktopShowHidden', currentSettings.showHiddenFiles ? 'true' : 'false');
-			localStorage.setItem('desktopBackground', currentSettings.desktopBackground);
+			const payload = JSON.stringify(currentSettings);
+			if (window.DeskStorage) {
+				window.DeskStorage.setItem(SETTINGS_STORAGE_KEY, payload);
+				window.DeskStorage.setItem('desktopShowHidden', currentSettings.showHiddenFiles ? 'true' : 'false');
+				window.DeskStorage.setItem('desktopBackground', currentSettings.desktopBackground);
+			} else {
+				localStorage.setItem(SETTINGS_STORAGE_KEY, payload);
+				localStorage.setItem('desktopShowHidden', currentSettings.showHiddenFiles ? 'true' : 'false');
+				localStorage.setItem('desktopBackground', currentSettings.desktopBackground);
+			}
 		} catch (e) {
 			console.error('Failed to save settings:', e);
 		}
@@ -575,6 +582,9 @@
 	}
 
 	function calculateStorageUsage() {
+		if (window.DeskStorage && typeof window.DeskStorage.calculateUsage === 'function') {
+			return window.DeskStorage.calculateUsage();
+		}
 		let total = 0;
 		for (let i = 0; i < localStorage.length; i++) {
 			const k = localStorage.key(i);
@@ -2478,10 +2488,12 @@
 			themeSelect.addEventListener('change', () => {
 				pendingSettings.theme = themeSelect.value;
 				try {
-					const tested = JSON.parse(localStorage.getItem('xp_tested_themes') || '[]');
+					const raw = window.DeskStorage ? window.DeskStorage.getItem('xp_tested_themes') : localStorage.getItem('xp_tested_themes');
+					const tested = JSON.parse(raw || '[]');
 					if (!tested.includes(themeSelect.value)) {
 						tested.push(themeSelect.value);
-						localStorage.setItem('xp_tested_themes', JSON.stringify(tested));
+						if (window.DeskStorage) window.DeskStorage.setItem('xp_tested_themes', JSON.stringify(tested));
+						else localStorage.setItem('xp_tested_themes', JSON.stringify(tested));
 					}
 					if (window.AchievementsManager) {
 						window.AchievementsManager.setProgress('themes_connoisseur', tested.length);
@@ -2834,11 +2846,12 @@
 		const exportBtn = win.querySelector('#settings-export-btn');
 		if (exportBtn) {
 			exportBtn.addEventListener('click', () => {
+				const getVal = (k) => window.DeskStorage ? window.DeskStorage.getItem(k) : localStorage.getItem(k);
 				const backupData = {
 					settings: currentSettings,
-					fileSystem: localStorage.getItem('fileSystem') || null,
-					recycleBin: localStorage.getItem('recycleBinItems') || null,
-					mailStore: localStorage.getItem('wartets_xp_mailstore_v1') || null,
+					fileSystem: getVal('fileSystem') || null,
+					recycleBin: getVal('recycleBinItems') || null,
+					mailStore: getVal('wartets_xp_mailstore_v1') || null,
 					exportedAt: new Date().toISOString()
 				};
 				const blob = new Blob([JSON.stringify(backupData, null, 2)], { type: 'application/json' });
@@ -2858,13 +2871,15 @@
 				const file = e.target.files[0];
 				if (!file) return;
 				const reader = new FileReader();
-				reader.onload = (event) => {
+				reader.onload = async (event) => {
 					try {
 						const data = JSON.parse(event.target.result);
-						if (data.settings) localStorage.setItem(SETTINGS_STORAGE_KEY, JSON.stringify(data.settings));
-						if (data.fileSystem) localStorage.setItem('fileSystem', data.fileSystem);
-						if (data.recycleBin) localStorage.setItem('recycleBinItems', data.recycleBin);
-						if (data.mailStore) localStorage.setItem('wartets_xp_mailstore_v1', data.mailStore);
+						const setVal = (k, v) => window.DeskStorage ? window.DeskStorage.setItem(k, typeof v === 'string' ? v : JSON.stringify(v)) : localStorage.setItem(k, typeof v === 'string' ? v : JSON.stringify(v));
+						if (data.settings) setVal(SETTINGS_STORAGE_KEY, data.settings);
+						if (data.fileSystem) setVal('fileSystem', data.fileSystem);
+						if (data.recycleBin) setVal('recycleBinItems', data.recycleBin);
+						if (data.mailStore) setVal('wartets_xp_mailstore_v1', data.mailStore);
+						if (window.DeskStorage) await window.DeskStorage.flush();
 						SoundEngine.play('startup');
 						location.reload();
 					} catch (err) {
@@ -2909,14 +2924,22 @@
 				if (typeof showXPDialog === 'function') {
 					showXPDialog('Reset Personal Data', 'Are you sure you want to reset all personal files, mails and system preferences to defaults?', 'warning', {
 						buttons: ['Yes', 'No'],
-						callback: (res) => {
+						callback: async (res) => {
 							if (res === 'Yes') {
 								if (window.AchievementsManager) window.AchievementsManager.progress('factory_reset', 1);
-								const achState = localStorage.getItem('xp_achievements_state');
-								const bibCache = localStorage.getItem('xp_music_bib_isolated_cache');
-								localStorage.clear();
-								if (achState) localStorage.setItem('xp_achievements_state', achState);
-								if (bibCache) localStorage.setItem('xp_music_bib_isolated_cache', bibCache);
+								const achState = window.DeskStorage ? window.DeskStorage.getItem('xp_achievements_state') : localStorage.getItem('xp_achievements_state');
+								const bibCache = window.DeskStorage ? window.DeskStorage.getItem('xp_music_bib_isolated_cache') : localStorage.getItem('xp_music_bib_isolated_cache');
+								if (window.DeskStorage) window.DeskStorage.clear();
+								else localStorage.clear();
+								if (achState) {
+									if (window.DeskStorage) window.DeskStorage.setItem('xp_achievements_state', achState);
+									else localStorage.setItem('xp_achievements_state', achState);
+								}
+								if (bibCache) {
+									if (window.DeskStorage) window.DeskStorage.setItem('xp_music_bib_isolated_cache', bibCache);
+									else localStorage.setItem('xp_music_bib_isolated_cache', bibCache);
+								}
+								if (window.DeskStorage) await window.DeskStorage.flush();
 								SoundEngine.play('startup');
 								location.reload();
 							}

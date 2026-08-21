@@ -911,7 +911,7 @@
 
 			const escaped = (query || '').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 			const qLower = query.toLowerCase().trim();
-			const safeSearchProvider = localStorage.getItem(SAFESEARCH_STORAGE_KEY) || 'duckduckgo';
+			const safeSearchProvider = (window.DeskStorage ? window.DeskStorage.getItem(SAFESEARCH_STORAGE_KEY) : localStorage.getItem(SAFESEARCH_STORAGE_KEY)) || 'duckduckgo';
 
 			let results = [];
 
@@ -1028,7 +1028,8 @@
 			const engineSelect = container.querySelector('#search-safesearch-engine');
 
 			engineSelect.addEventListener('change', () => {
-				localStorage.setItem(SAFESEARCH_STORAGE_KEY, engineSelect.value);
+				if (window.DeskStorage) window.DeskStorage.setItem(SAFESEARCH_STORAGE_KEY, engineSelect.value);
+				else localStorage.setItem(SAFESEARCH_STORAGE_KEY, engineSelect.value);
 				const directLink = container.querySelector('#search-direct-link');
 				if (directLink && queryInput.value.trim()) {
 					directLink.href = buildSafeUrl(engineSelect.value, queryInput.value.trim());
@@ -1605,7 +1606,8 @@
 			const clearBtn = container.querySelector('#ie-hist-clear-btn');
 
 			clearBtn.addEventListener('click', () => {
-				localStorage.removeItem(HISTORY_STORAGE_KEY);
+				if (window.DeskStorage) window.DeskStorage.removeItem(HISTORY_STORAGE_KEY);
+				else localStorage.removeItem(HISTORY_STORAGE_KEY);
 				ieWindowState.history = [];
 				this.renderHistorySidebar(container, win);
 			});
@@ -1850,7 +1852,9 @@
 					: 'https://api.iconify.design/mdi/web.svg?color=%231b4b9b'
 			};
 			favs.push(newFav);
-			localStorage.setItem(FAVORITES_STORAGE_KEY, JSON.stringify(favs));
+			const payload = JSON.stringify(favs);
+			if (window.DeskStorage) window.DeskStorage.setItem(FAVORITES_STORAGE_KEY, payload);
+			else localStorage.setItem(FAVORITES_STORAGE_KEY, payload);
 			ieWindowState.favorites = favs;
 			showXPDialog('Add Favorite', `"${newFav.title}" has been added to your Favorites list.`, 'info');
 		},
@@ -1858,13 +1862,15 @@
 		removeFavorite(id) {
 			let favs = this.loadFavorites();
 			favs = favs.filter(f => f.id !== id);
-			localStorage.setItem(FAVORITES_STORAGE_KEY, JSON.stringify(favs));
+			const payload = JSON.stringify(favs);
+			if (window.DeskStorage) window.DeskStorage.setItem(FAVORITES_STORAGE_KEY, payload);
+			else localStorage.setItem(FAVORITES_STORAGE_KEY, payload);
 			ieWindowState.favorites = favs;
 		},
 
 		loadFavorites() {
 			try {
-				const raw = localStorage.getItem(FAVORITES_STORAGE_KEY);
+				const raw = window.DeskStorage ? window.DeskStorage.getItem(FAVORITES_STORAGE_KEY) : localStorage.getItem(FAVORITES_STORAGE_KEY);
 				return raw ? JSON.parse(raw) : JSON.parse(JSON.stringify(DEFAULT_FAVORITES));
 			} catch (e) {
 				return JSON.parse(JSON.stringify(DEFAULT_FAVORITES));
@@ -1873,7 +1879,7 @@
 
 		loadHistory() {
 			try {
-				const raw = localStorage.getItem(HISTORY_STORAGE_KEY);
+				const raw = window.DeskStorage ? window.DeskStorage.getItem(HISTORY_STORAGE_KEY) : localStorage.getItem(HISTORY_STORAGE_KEY);
 				return raw ? JSON.parse(raw) : [];
 			} catch (e) {
 				return [];
@@ -1885,7 +1891,9 @@
 			hist = hist.filter(h => h.url !== url);
 			hist.unshift({ url, title: title || url, timestamp: Date.now() });
 			if (hist.length > 50) hist = hist.slice(0, 50);
-			localStorage.setItem(HISTORY_STORAGE_KEY, JSON.stringify(hist));
+			const payload = JSON.stringify(hist);
+			if (window.DeskStorage) window.DeskStorage.setItem(HISTORY_STORAGE_KEY, payload);
+			else localStorage.setItem(HISTORY_STORAGE_KEY, payload);
 			if (ieWindowState) ieWindowState.history = hist;
 		},
 

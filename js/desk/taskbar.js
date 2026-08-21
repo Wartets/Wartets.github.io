@@ -625,7 +625,7 @@
 
 		loadQuickLaunchItems() {
 			try {
-				const saved = localStorage.getItem(QUICK_LAUNCH_STORAGE_KEY);
+				const saved = window.DeskStorage ? window.DeskStorage.getItem(QUICK_LAUNCH_STORAGE_KEY) : localStorage.getItem(QUICK_LAUNCH_STORAGE_KEY);
 				if (saved) {
 					quickLaunchItems = JSON.parse(saved);
 				} else {
@@ -638,7 +638,9 @@
 
 		saveQuickLaunchItems() {
 			try {
-				localStorage.setItem(QUICK_LAUNCH_STORAGE_KEY, JSON.stringify(quickLaunchItems));
+				const payload = JSON.stringify(quickLaunchItems);
+				if (window.DeskStorage) window.DeskStorage.setItem(QUICK_LAUNCH_STORAGE_KEY, payload);
+				else localStorage.setItem(QUICK_LAUNCH_STORAGE_KEY, payload);
 			} catch (e) {}
 		},
 
@@ -660,9 +662,12 @@
 			this.saveQuickLaunchItems();
 			this.renderQuickLaunch();
 			try {
-				let adds = parseInt(localStorage.getItem('xp_ql_adds') || '0', 10) + 1;
-				localStorage.setItem('xp_ql_adds', String(adds));
-				let removes = parseInt(localStorage.getItem('xp_ql_removes') || '0', 10);
+				const rawAdds = window.DeskStorage ? window.DeskStorage.getItem('xp_ql_adds') : localStorage.getItem('xp_ql_adds');
+				let adds = parseInt(rawAdds || '0', 10) + 1;
+				if (window.DeskStorage) window.DeskStorage.setItem('xp_ql_adds', String(adds));
+				else localStorage.setItem('xp_ql_adds', String(adds));
+				const rawRemoves = window.DeskStorage ? window.DeskStorage.getItem('xp_ql_removes') : localStorage.getItem('xp_ql_removes');
+				let removes = parseInt(rawRemoves || '0', 10);
 				if (adds >= 2 && removes >= 3 && window.AchievementsManager) {
 					window.AchievementsManager.progress('quicklaunch_customizer', 1);
 				}
@@ -677,9 +682,12 @@
 			this.saveQuickLaunchItems();
 			this.renderQuickLaunch();
 			try {
-				let removes = parseInt(localStorage.getItem('xp_ql_removes') || '0', 10) + 1;
-				localStorage.setItem('xp_ql_removes', String(removes));
-				let adds = parseInt(localStorage.getItem('xp_ql_adds') || '0', 10);
+				const rawRemoves = window.DeskStorage ? window.DeskStorage.getItem('xp_ql_removes') : localStorage.getItem('xp_ql_removes');
+				let removes = parseInt(rawRemoves || '0', 10) + 1;
+				if (window.DeskStorage) window.DeskStorage.setItem('xp_ql_removes', String(removes));
+				else localStorage.setItem('xp_ql_removes', String(removes));
+				const rawAdds = window.DeskStorage ? window.DeskStorage.getItem('xp_ql_adds') : localStorage.getItem('xp_ql_adds');
+				let adds = parseInt(rawAdds || '0', 10);
 				if (adds >= 2 && removes >= 3 && window.AchievementsManager) {
 					window.AchievementsManager.progress('quicklaunch_customizer', 1);
 				}

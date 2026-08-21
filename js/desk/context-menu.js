@@ -452,9 +452,13 @@
 				},
 				{ separator: true },
 				{
-					label: isHiddenShown ? 'Hide Hidden Files' : 'Show Hidden Files',
-					checked: isHiddenShown,
-					action: () => toggleShowHidden()
+					label: (typeof window.isShowHiddenEnabled === 'function' ? window.isShowHiddenEnabled() : false) ? 'Hide Hidden Files' : 'Show Hidden Files',
+					checked: (typeof window.isShowHiddenEnabled === 'function' ? window.isShowHiddenEnabled() : false),
+					action: () => {
+						if (typeof window.toggleShowHidden === 'function') {
+							window.toggleShowHidden();
+						}
+					}
 				},
 				{
 					label: 'New',
@@ -463,12 +467,12 @@
 				{ separator: true },
 				{
 					label: 'Next Desktop Background',
-					disabled: ((window.SettingsApp && window.SettingsApp.get('wallpaperMode')) || localStorage.getItem('wallpaperMode') || 'picture') !== 'slideshow',
+					disabled: ((window.SettingsApp && window.SettingsApp.get('wallpaperMode')) || (window.DeskStorage ? window.DeskStorage.getItem('wallpaperMode') : localStorage.getItem('wallpaperMode')) || 'picture') !== 'slideshow',
 					action: async () => {
 						if (typeof fetchWallpaperRegistry === 'function') {
 							const list = await fetchWallpaperRegistry();
 							if (list && list.length > 0) {
-								const curr = localStorage.getItem('desktopBackground');
+								const curr = window.DeskStorage ? window.DeskStorage.getItem('desktopBackground') : localStorage.getItem('desktopBackground');
 								const idx = list.findIndex(w => w.path === curr);
 								const next = list[(idx + 1) % list.length];
 								if (next && window.SettingsApp) {
@@ -669,6 +673,7 @@
 			}
 			const destPath = folder.getFullPath();
 			const hasClipboard = fs && fs.clipboard && fs.clipboard.element;
+			const isHiddenShown = typeof window.isShowHiddenEnabled === 'function' ? window.isShowHiddenEnabled() : false;
 
 			return [
 				{
@@ -851,6 +856,16 @@
 								}
 							});
 							updateFolderUISelection(win);
+						}
+					}
+				},
+				{ separator: true },
+				{
+					label: isHiddenShown ? 'Hide Hidden Files' : 'Show Hidden Files',
+					checked: isHiddenShown,
+					action: () => {
+						if (typeof window.toggleShowHidden === 'function') {
+							window.toggleShowHidden();
 						}
 					}
 				},

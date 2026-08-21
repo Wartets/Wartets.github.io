@@ -11,7 +11,7 @@
 
 		loadUsageMetrics() {
 			try {
-				const raw = localStorage.getItem(USAGE_STORAGE_KEY);
+				const raw = window.DeskStorage ? window.DeskStorage.getItem(USAGE_STORAGE_KEY) : localStorage.getItem(USAGE_STORAGE_KEY);
 				return raw ? JSON.parse(raw) : {};
 			} catch (e) {
 				return {};
@@ -20,7 +20,9 @@
 
 		saveUsageMetrics() {
 			try {
-				localStorage.setItem(USAGE_STORAGE_KEY, JSON.stringify(this.usageMetrics));
+				const payload = JSON.stringify(this.usageMetrics);
+				if (window.DeskStorage) window.DeskStorage.setItem(USAGE_STORAGE_KEY, payload);
+				else localStorage.setItem(USAGE_STORAGE_KEY, payload);
 			} catch (e) {}
 		}
 

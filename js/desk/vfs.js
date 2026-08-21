@@ -629,13 +629,18 @@
 
 		save() {
 			try {
-				localStorage.setItem(this.storageKey, JSON.stringify(this.rootNode.toJSON()));
+				const payload = JSON.stringify(this.rootNode.toJSON());
+				if (window.DeskStorage) {
+					window.DeskStorage.setItem(this.storageKey, payload);
+				} else {
+					localStorage.setItem(this.storageKey, payload);
+				}
 			} catch (e) {}
 		}
 
 		load() {
 			try {
-				const savedData = localStorage.getItem(this.storageKey);
+				const savedData = window.DeskStorage ? window.DeskStorage.getItem(this.storageKey) : localStorage.getItem(this.storageKey);
 				if (savedData) {
 					const data = JSON.parse(savedData);
 					this.rootNode = this.rehydrate(data, null);
@@ -1066,6 +1071,11 @@
 			});
 			this.registerDrive('C', driveC, '/');
 
+			const volumesFolder = this.ensureDirectory('/Volumes');
+			if (volumesFolder instanceof Folder) {
+				volumesFolder.hidden = true;
+			}
+
 			const driveD = new VirtualDriveProvider('D', {
 				volumeLabel: 'CD Drive (D:) XP_SP3',
 				totalBytes: 700 * 1024 * 1024,
@@ -1073,7 +1083,7 @@
 				driveType: 'cdrom',
 				icon: '../assets/images/desk/icons/Disk Image File.webp'
 			});
-			this.mount('/Volumes/D', driveD);
+			this.mount('/Volumes/D', driveD, { hidden: true });
 			this.registerDrive('D', driveD, '/Volumes/D');
 
 			const driveA = new VirtualDriveProvider('A', {
@@ -1084,13 +1094,14 @@
 				icon: '../assets/images/desk/icons/Floppy Drive.webp',
 				isReady: false
 			});
-			this.mount('/Volumes/A', driveA);
+			this.mount('/Volumes/A', driveA, { hidden: true });
 			this.registerDrive('A', driveA, '/Volumes/A');
 
 			const tempProvider = new MemoryVFSProvider('temp-storage', {
-				rootName: 'Temp'
+				rootName: 'Temp',
+				hidden: true
 			});
-			this.mount('/Temp', tempProvider);
+			this.mount('/Temp', tempProvider, { hidden: true });
 		}
 
 		get root() {
@@ -1138,11 +1149,9 @@
 						rootNode.name = mountName;
 						rootNode.mountPoint = normPath;
 						rootNode.parent = parentFolder;
+						rootNode.icon = rootNode.icon || options.icon || provider.options.icon || '../assets/images/desk/icons/Folder Closed.webp';
 						if (options.hidden !== undefined || provider.options.hidden !== undefined) {
 							rootNode.hidden = options.hidden !== undefined ? !!options.hidden : !!provider.options.hidden;
-						}
-						if (options.icon || provider.options.icon) {
-							rootNode.icon = options.icon || provider.options.icon;
 						}
 						if (!parentFolder.children.has(mountName)) {
 							parentFolder.add(rootNode);
@@ -1550,7 +1559,7 @@
 
 		loadRecycleBinItems() {
 			try {
-				const raw = localStorage.getItem('recycleBinItems');
+				const raw = window.DeskStorage ? window.DeskStorage.getItem('recycleBinItems') : localStorage.getItem('recycleBinItems');
 				return raw ? JSON.parse(raw) : [];
 			} catch (error) {
 				return [];
@@ -1559,7 +1568,12 @@
 
 		saveRecycleBinItems(items) {
 			try {
-				localStorage.setItem('recycleBinItems', JSON.stringify(items));
+				const payload = JSON.stringify(items);
+				if (window.DeskStorage) {
+					window.DeskStorage.setItem('recycleBinItems', payload);
+				} else {
+					localStorage.setItem('recycleBinItems', payload);
+				}
 			} catch (e) {}
 		}
 

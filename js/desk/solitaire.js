@@ -67,7 +67,7 @@
 
 		loadOptions() {
 			try {
-				const raw = localStorage.getItem(STORAGE_KEY_OPTIONS);
+				const raw = window.DeskStorage ? window.DeskStorage.getItem(STORAGE_KEY_OPTIONS) : localStorage.getItem(STORAGE_KEY_OPTIONS);
 				if (raw) {
 					return Object.assign({
 						drawMode: 1,
@@ -94,7 +94,9 @@
 
 		saveOptions(options) {
 			try {
-				localStorage.setItem(STORAGE_KEY_OPTIONS, JSON.stringify(options));
+				const payload = JSON.stringify(options);
+				if (window.DeskStorage) window.DeskStorage.setItem(STORAGE_KEY_OPTIONS, payload);
+				else localStorage.setItem(STORAGE_KEY_OPTIONS, payload);
 			} catch (e) {}
 		},
 
@@ -1208,10 +1210,12 @@
 			}
 
 			try {
-				const seen = JSON.parse(localStorage.getItem('xp_solitaire_seen_anims') || '[]');
+				const raw = window.DeskStorage ? window.DeskStorage.getItem('xp_solitaire_seen_anims') : localStorage.getItem('xp_solitaire_seen_anims');
+				const seen = JSON.parse(raw || '[]');
 				if (!seen.includes(mode)) {
 					seen.push(mode);
-					localStorage.setItem('xp_solitaire_seen_anims', JSON.stringify(seen));
+					if (window.DeskStorage) window.DeskStorage.setItem('xp_solitaire_seen_anims', JSON.stringify(seen));
+					else localStorage.setItem('xp_solitaire_seen_anims', JSON.stringify(seen));
 				}
 				if (window.AchievementsManager) {
 					window.AchievementsManager.setProgress('solitaire_animations', seen.length);

@@ -74,11 +74,11 @@
 			win.classList.add('calc-window');
 
 			win.dataset.appId = 'calculator';
-			this.initCalculatorEngine(win);
+			this.initCalculatorEngine(win, options);
 			return win;
 		},
 
-		initCalculatorEngine(win) {
+		initCalculatorEngine(win, options = {}) {
 			const display = win.querySelector('#calc-display');
 			const memBox = win.querySelector('#calc-mem-box');
 
@@ -88,6 +88,15 @@
 			let isNewEntry = true;
 			let memoryVal = 0;
 			let hasMemory = false;
+
+			if (options && options.restoreState) {
+				const st = options.restoreState;
+				if (st.currentVal !== undefined) currentVal = st.currentVal;
+				if (st.storedVal !== undefined) storedVal = st.storedVal;
+				if (st.pendingOp !== undefined) pendingOp = st.pendingOp;
+				if (st.memoryVal !== undefined) memoryVal = st.memoryVal;
+				if (st.hasMemory !== undefined) hasMemory = st.hasMemory;
+			}
 
 			const updateDisplay = () => {
 				let text = currentVal;

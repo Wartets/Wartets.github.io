@@ -29,7 +29,14 @@
 	}
 
 	function persist() {
-		localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+		const payload = JSON.stringify(state);
+		if (window.DeskStorage) {
+			window.DeskStorage.setItem(STORAGE_KEY, payload);
+			window.DeskStorage.setItem("wartets_xp_mailstore_v1", payload);
+		} else {
+			localStorage.setItem(STORAGE_KEY, payload);
+			localStorage.setItem("wartets_xp_mailstore_v1", payload);
+		}
 	}
 
 	function generateId(prefix) {
@@ -55,7 +62,7 @@
 
 	function loadState() {
 		try {
-			const raw = localStorage.getItem(STORAGE_KEY);
+			const raw = window.DeskStorage ? (window.DeskStorage.getItem(STORAGE_KEY) || window.DeskStorage.getItem("wartets_xp_mailstore_v1")) : (localStorage.getItem(STORAGE_KEY) || localStorage.getItem("wartets_xp_mailstore_v1"));
 			if (raw) {
 				state = JSON.parse(raw);
 				if (!Array.isArray(state.customFolders)) state.customFolders = [];

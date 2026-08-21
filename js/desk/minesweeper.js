@@ -35,7 +35,7 @@
 
 	function loadScores() {
 		try {
-			const saved = localStorage.getItem(STORAGE_KEY_SCORES);
+			const saved = window.DeskStorage ? window.DeskStorage.getItem(STORAGE_KEY_SCORES) : localStorage.getItem(STORAGE_KEY_SCORES);
 			return saved ? { ...DEFAULT_SCORES, ...JSON.parse(saved) } : { ...DEFAULT_SCORES };
 		} catch (e) {
 			return { ...DEFAULT_SCORES };
@@ -44,13 +44,15 @@
 
 	function saveScores(scores) {
 		try {
-			localStorage.setItem(STORAGE_KEY_SCORES, JSON.stringify(scores));
+			const payload = JSON.stringify(scores);
+			if (window.DeskStorage) window.DeskStorage.setItem(STORAGE_KEY_SCORES, payload);
+			else localStorage.setItem(STORAGE_KEY_SCORES, payload);
 		} catch (e) {}
 	}
 
 	function loadConfig() {
 		try {
-			const saved = localStorage.getItem(STORAGE_KEY_CONFIG);
+			const saved = window.DeskStorage ? window.DeskStorage.getItem(STORAGE_KEY_CONFIG) : localStorage.getItem(STORAGE_KEY_CONFIG);
 			return saved ? JSON.parse(saved) : { difficulty: 'beginner', marksEnabled: true, soundEnabled: true, custom: { rows: 9, cols: 9, mines: 10 } };
 		} catch (e) {
 			return { difficulty: 'beginner', marksEnabled: true, soundEnabled: true, custom: { rows: 9, cols: 9, mines: 10 } };
@@ -59,7 +61,9 @@
 
 	function saveConfig(cfg) {
 		try {
-			localStorage.setItem(STORAGE_KEY_CONFIG, JSON.stringify(cfg));
+			const payload = JSON.stringify(cfg);
+			if (window.DeskStorage) window.DeskStorage.setItem(STORAGE_KEY_CONFIG, payload);
+			else localStorage.setItem(STORAGE_KEY_CONFIG, payload);
 		} catch (e) {}
 	}
 
@@ -657,10 +661,12 @@
 
 			if (PRESETS[gameState.difficulty]) {
 				try {
-					const wonDiffs = JSON.parse(localStorage.getItem('xp_minesweeper_won_diffs') || '[]');
+					const raw = window.DeskStorage ? window.DeskStorage.getItem('xp_minesweeper_won_diffs') : localStorage.getItem('xp_minesweeper_won_diffs');
+					const wonDiffs = JSON.parse(raw || '[]');
 					if (!wonDiffs.includes(gameState.difficulty)) {
 						wonDiffs.push(gameState.difficulty);
-						localStorage.setItem('xp_minesweeper_won_diffs', JSON.stringify(wonDiffs));
+						if (window.DeskStorage) window.DeskStorage.setItem('xp_minesweeper_won_diffs', JSON.stringify(wonDiffs));
+						else localStorage.setItem('xp_minesweeper_won_diffs', JSON.stringify(wonDiffs));
 					}
 					if (window.AchievementsManager) {
 						window.AchievementsManager.setProgress('minesweeper_triathlon', wonDiffs.length);

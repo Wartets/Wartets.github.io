@@ -164,6 +164,10 @@
 			win.querySelector('.xp-window-content').style.padding = '0';
 			win.dataset.appId = 'soundrecorder';
 			win.dataset.appArgs = file ? JSON.stringify({ path: file.getFullPath() }) : '';
+			win.getWindowState = () => ({
+				appId: 'soundrecorder',
+				filePath: file ? file.getFullPath() : null
+			});
 
 			this.initInstance(win, file);
 			return win;

@@ -23,7 +23,7 @@
 
 		loadSavedGeometries() {
 			try {
-				const raw = localStorage.getItem(STORAGE_KEY_GEOMETRIES);
+				const raw = window.DeskStorage ? window.DeskStorage.getItem(STORAGE_KEY_GEOMETRIES) : localStorage.getItem(STORAGE_KEY_GEOMETRIES);
 				return raw ? JSON.parse(raw) : {};
 			} catch (e) {
 				return {};
@@ -32,7 +32,9 @@
 
 		saveGeometries() {
 			try {
-				localStorage.setItem(STORAGE_KEY_GEOMETRIES, JSON.stringify(this.savedGeometries));
+				const payload = JSON.stringify(this.savedGeometries);
+				if (window.DeskStorage) window.DeskStorage.setItem(STORAGE_KEY_GEOMETRIES, payload);
+				else localStorage.setItem(STORAGE_KEY_GEOMETRIES, payload);
 			} catch (e) {}
 		}
 
@@ -143,13 +145,15 @@
 					});
 				});
 
-				localStorage.setItem(STORAGE_KEY_SESSION_WINDOWS, JSON.stringify(windowStates));
+				const payload = JSON.stringify(windowStates);
+				if (window.DeskStorage) window.DeskStorage.setItem(STORAGE_KEY_SESSION_WINDOWS, payload);
+				else localStorage.setItem(STORAGE_KEY_SESSION_WINDOWS, payload);
 			} catch (e) {}
 		}
 
 		restoreOpenWindowsState() {
 			try {
-				const raw = localStorage.getItem(STORAGE_KEY_SESSION_WINDOWS);
+				const raw = window.DeskStorage ? window.DeskStorage.getItem(STORAGE_KEY_SESSION_WINDOWS) : localStorage.getItem(STORAGE_KEY_SESSION_WINDOWS);
 				if (!raw) return;
 				const windowStates = JSON.parse(raw);
 				if (!Array.isArray(windowStates) || windowStates.length === 0) return;

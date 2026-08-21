@@ -7,7 +7,23 @@
 		italic: false
 	};
 
-	let fontSettings = { ...DEFAULT_FONT_SETTINGS };
+	function loadFontSettings() {
+		try {
+			const raw = window.DeskStorage ? window.DeskStorage.getItem('xp_notepad_font_settings') : localStorage.getItem('xp_notepad_font_settings');
+			if (raw) return { ...DEFAULT_FONT_SETTINGS, ...JSON.parse(raw) };
+		} catch (e) {}
+		return { ...DEFAULT_FONT_SETTINGS };
+	}
+
+	function saveFontSettings(settings) {
+		try {
+			const payload = JSON.stringify(settings);
+			if (window.DeskStorage) window.DeskStorage.setItem('xp_notepad_font_settings', payload);
+			else localStorage.setItem('xp_notepad_font_settings', payload);
+		} catch (e) {}
+	}
+
+	let fontSettings = loadFontSettings();
 
 	class NotepadSession {
 		constructor(win, file = null, options = {}) {
@@ -592,6 +608,7 @@
 				fontSettings.size = parseInt(sizeSelect.value, 10);
 				fontSettings.bold = styleSelect.value.includes('bold');
 				fontSettings.italic = styleSelect.value.includes('italic');
+				saveFontSettings(fontSettings);
 				this.applyFontStyles();
 				closeWindow(dlg, dialogId);
 			});

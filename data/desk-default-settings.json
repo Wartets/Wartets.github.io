@@ -404,11 +404,11 @@
 		{ "path": "/", "provider": "local", "options": { "storageKey": "fileSystem", "rootName": "Desktop" } },
 		{ "path": "/PDFs", "provider": "dynamic", "options": { "rootName": "PDFs" } },
 		{ "path": "/Music", "provider": "dynamic", "options": { "rootName": "Music" } },
-		{ "path": "/WINDOWS/Web/Wallpaper", "provider": "static-json", "options": { "endpoint": "../data/desk-wallpaper.json", "rootName": "Wallpaper" } },
-		{ "path": "/Others/Poems", "provider": "dynamic", "options": { "rootName": "Poems" } },
-		{ "path": "/Others/Projects", "provider": "dynamic", "options": { "rootName": "Projects" } },
-		{ "path": "/UserData", "provider": "indexeddb", "options": { "rootName": "UserData", "dbName": "Wartets_XP_UserData_DB", "storeName": "files" } },
-		{ "path": "/Temp", "provider": "memory", "options": { "rootName": "Temp" } }
+		{ "path": "/WINDOWS/Web/Wallpaper", "provider": "static-json", "options": { "endpoint": "../data/desk-wallpaper.json", "rootName": "Wallpaper", "hidden": true } },
+		{ "path": "/Others/Poems", "provider": "dynamic", "options": { "rootName": "Poems", "hidden": true } },
+		{ "path": "/Others/Projects", "provider": "dynamic", "options": { "rootName": "Projects", "hidden": true } },
+		{ "path": "/UserData", "provider": "indexeddb", "options": { "rootName": "UserData", "dbName": "Wartets_XP_UserData_DB", "storeName": "files", "hidden": true } },
+		{ "path": "/Temp", "provider": "memory", "options": { "rootName": "Temp", "hidden": true } }
 	],
 	"systemProcessesList": [
 		{ "name": "System", "pid": 4, "user": "SYSTEM", "cpu": 0.8, "mem": 240, "desc": "NT Kernel & System", "critical": true, "icon": "../assets/images/desk/icons/System Properties.webp" },

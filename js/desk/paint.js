@@ -6,10 +6,29 @@
 		'#ffff80', '#00ff80', '#80ffff', '#8080ff', '#ff0080', '#ff8040'
 	];
 
-	let customColors = [
-		'#ffffff', '#ffffff', '#ffffff', '#ffffff', '#ffffff', '#ffffff', '#ffffff', '#ffffff',
-		'#ffffff', '#ffffff', '#ffffff', '#ffffff', '#ffffff', '#ffffff', '#ffffff', '#ffffff'
-	];
+	function loadCustomColors() {
+		try {
+			const raw = window.DeskStorage ? window.DeskStorage.getItem('xp_paint_custom_colors') : localStorage.getItem('xp_paint_custom_colors');
+			if (raw) {
+				const parsed = JSON.parse(raw);
+				if (Array.isArray(parsed) && parsed.length === 16) return parsed;
+			}
+		} catch (e) {}
+		return [
+			'#ffffff', '#ffffff', '#ffffff', '#ffffff', '#ffffff', '#ffffff', '#ffffff', '#ffffff',
+			'#ffffff', '#ffffff', '#ffffff', '#ffffff', '#ffffff', '#ffffff', '#ffffff', '#ffffff'
+		];
+	}
+
+	function saveCustomColors(colors) {
+		try {
+			const payload = JSON.stringify(colors);
+			if (window.DeskStorage) window.DeskStorage.setItem('xp_paint_custom_colors', payload);
+			else localStorage.setItem('xp_paint_custom_colors', payload);
+		} catch (e) {}
+	}
+
+	let customColors = loadCustomColors();
 
 	let paintClipboard = null;
 
@@ -1786,6 +1805,7 @@
 
 				dlg.querySelector('#paint-dlg-btn-ok').addEventListener('click', () => {
 					if (onConfirmColor) onConfirmColor(chosenColor);
+					saveCustomColors(customColors);
 					closeWindow(dlg, dialogId);
 				});
 

@@ -6,7 +6,7 @@ let fs;
 let currentContextMenuTarget = null;
 let currentCalendarDate = new Date();
 let isContextMenuVisible = false;
-let customIcons = JSON.parse(localStorage.getItem('customIcons')) || [];
+let customIcons = JSON.parse((window.DeskStorage ? window.DeskStorage.getItem('customIcons') : localStorage.getItem('customIcons')) || '[]');
 let webampInstance = null;
 let lastClickedIconForRange = null;
 let desktopDragOffset = { x: 0, y: 0 };
@@ -62,7 +62,7 @@ function getActiveSelectedElements() {
 
 function loadDesktopIconPositions() {
 	try {
-		const raw = localStorage.getItem('desktopIconPositions');
+		const raw = window.DeskStorage ? window.DeskStorage.getItem('desktopIconPositions') : localStorage.getItem('desktopIconPositions');
 		return raw ? JSON.parse(raw) : {};
 	} catch (e) {
 		return {};
@@ -71,7 +71,9 @@ function loadDesktopIconPositions() {
 
 function saveDesktopIconPositions(positions) {
 	try {
-		localStorage.setItem('desktopIconPositions', JSON.stringify(positions));
+		const payload = JSON.stringify(positions);
+		if (window.DeskStorage) window.DeskStorage.setItem('desktopIconPositions', payload);
+		else localStorage.setItem('desktopIconPositions', payload);
 	} catch (e) {}
 }
 
@@ -80,13 +82,15 @@ function isAutoArrangeEnabled() {
 		const val = window.SettingsApp.get('desktopAutoArrange');
 		if (val !== undefined) return !!val;
 	}
-	return localStorage.getItem('desktopAutoArrange') === 'true';
+	const stored = window.DeskStorage ? window.DeskStorage.getItem('desktopAutoArrange') : localStorage.getItem('desktopAutoArrange');
+	return stored === 'true';
 }
 
 function toggleAutoArrange() {
 	const current = isAutoArrangeEnabled();
 	const nextVal = !current;
-	localStorage.setItem('desktopAutoArrange', nextVal.toString());
+	if (window.DeskStorage) window.DeskStorage.setItem('desktopAutoArrange', nextVal.toString());
+	else localStorage.setItem('desktopAutoArrange', nextVal.toString());
 	if (window.SettingsApp && typeof window.SettingsApp.set === 'function') {
 		window.SettingsApp.set('desktopAutoArrange', nextVal);
 	}
@@ -102,14 +106,15 @@ function isAlignToGridEnabled() {
 		const val = window.SettingsApp.get('desktopAlignToGrid');
 		if (val !== undefined) return !!val;
 	}
-	const stored = localStorage.getItem('desktopAlignToGrid');
+	const stored = window.DeskStorage ? window.DeskStorage.getItem('desktopAlignToGrid') : localStorage.getItem('desktopAlignToGrid');
 	return stored === null ? true : stored === 'true';
 }
 
 function toggleAlignToGrid() {
 	const current = isAlignToGridEnabled();
 	const nextVal = !current;
-	localStorage.setItem('desktopAlignToGrid', nextVal.toString());
+	if (window.DeskStorage) window.DeskStorage.setItem('desktopAlignToGrid', nextVal.toString());
+	else localStorage.setItem('desktopAlignToGrid', nextVal.toString());
 	if (window.SettingsApp && typeof window.SettingsApp.set === 'function') {
 		window.SettingsApp.set('desktopAlignToGrid', nextVal);
 	}
@@ -120,8 +125,11 @@ window.isAutoArrangeEnabled = isAutoArrangeEnabled;
 window.toggleAutoArrange = toggleAutoArrange;
 window.isAlignToGridEnabled = isAlignToGridEnabled;
 window.toggleAlignToGrid = toggleAlignToGrid;
+window.isShowHiddenEnabled = isShowHiddenEnabled;
+window.toggleShowHidden = toggleShowHidden;
 window.loadDesktopIconPositions = loadDesktopIconPositions;
 window.saveDesktopIconPositions = saveDesktopIconPositions;
+window.refreshUI = refreshUI;
 
 function getNextWindowPosition(width, height) {
 	if (window.WindowManager) {
@@ -135,7 +143,8 @@ const RECENT_DOCUMENTS_STORAGE_KEY = 'xp_recent_documents';
 function addToRecentDocs(item) {
 	if (!item || !item.name) return;
 	try {
-		let list = JSON.parse(localStorage.getItem(RECENT_DOCUMENTS_STORAGE_KEY) || '[]');
+		const raw = window.DeskStorage ? window.DeskStorage.getItem(RECENT_DOCUMENTS_STORAGE_KEY) : localStorage.getItem(RECENT_DOCUMENTS_STORAGE_KEY);
+		let list = JSON.parse(raw || '[]');
 		list = list.filter(doc => doc.name !== item.name);
 		list.unshift({
 			name: item.name,
@@ -147,7 +156,9 @@ function addToRecentDocs(item) {
 		});
 		const maxDocs = (window.SettingsApp && window.SettingsApp.get('startMenuRecentDocsCount')) || 15;
 		if (list.length > maxDocs) list = list.slice(0, maxDocs);
-		localStorage.setItem(RECENT_DOCUMENTS_STORAGE_KEY, JSON.stringify(list));
+		const payload = JSON.stringify(list);
+		if (window.DeskStorage) window.DeskStorage.setItem(RECENT_DOCUMENTS_STORAGE_KEY, payload);
+		else localStorage.setItem(RECENT_DOCUMENTS_STORAGE_KEY, payload);
 	} catch (e) {
 		console.warn('Failed to save recent document:', e);
 	}
@@ -155,14 +166,16 @@ function addToRecentDocs(item) {
 
 function getRecentDocs() {
 	try {
-		return JSON.parse(localStorage.getItem(RECENT_DOCUMENTS_STORAGE_KEY) || '[]');
+		const raw = window.DeskStorage ? window.DeskStorage.getItem(RECENT_DOCUMENTS_STORAGE_KEY) : localStorage.getItem(RECENT_DOCUMENTS_STORAGE_KEY);
+		return JSON.parse(raw || '[]');
 	} catch (e) {
 		return [];
 	}
 }
 
 function clearRecentDocs() {
-	localStorage.removeItem(RECENT_DOCUMENTS_STORAGE_KEY);
+	if (window.DeskStorage) window.DeskStorage.removeItem(RECENT_DOCUMENTS_STORAGE_KEY);
+	else localStorage.removeItem(RECENT_DOCUMENTS_STORAGE_KEY);
 }
 
 window.DeskAPI = {
@@ -290,6 +303,9 @@ window.DeskAPI = {
 };
 
 document.addEventListener('DOMContentLoaded', async () => {
+	if (window.DeskStorage && typeof window.DeskStorage.ready === 'function') {
+		await window.DeskStorage.ready();
+	}
 	if (window.SettingsApp && typeof window.SettingsApp.ready === 'function') {
 		await window.SettingsApp.ready();
 	}
@@ -341,6 +357,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 		window.DeskEventBus.on('fs:changed', () => refreshUI());
 		window.DeskEventBus.on('settings:changed', () => {
 			applyInitialDesktopBackground();
+			refreshUI();
 			arrangeIcons('none');
 		});
 		window.DeskEventBus.on('window:focused', (payload) => {
@@ -742,6 +759,12 @@ function initializeFileSystem() {
 	});
 	fs.mount('/Music', musicProvider);
 
+	const othersFolder = fs.ensureDirectory('/Others');
+	if (othersFolder instanceof Folder) {
+		othersFolder.hidden = true;
+		othersFolder.icon = '../assets/images/desk/icons/Folder Closed.webp';
+	}
+
 	const poemsProvider = new DynamicLibraryVFSProvider('dynamic-poetry', {
 		rootName: 'Poems',
 		generator: () => {
@@ -758,12 +781,7 @@ function initializeFileSystem() {
 			});
 		}
 	});
-	fs.mount('/Others/Poems', poemsProvider);
-
-	let othersFolder = fs.findByPath('/Others');
-	if (othersFolder instanceof Folder) {
-		othersFolder.hidden = true;
-	}
+	fs.mount('/Others/Poems', poemsProvider, { hidden: true });
 
 	const projectsProvider = new DynamicLibraryVFSProvider('dynamic-projects', {
 		rootName: 'Projects',
@@ -777,7 +795,40 @@ function initializeFileSystem() {
 			});
 		}
 	});
-	fs.mount('/Others/Projects', projectsProvider);
+	fs.mount('/Others/Projects', projectsProvider, { hidden: true });
+
+	const volumesFolder = fs.ensureDirectory('/Volumes');
+	if (volumesFolder instanceof Folder) {
+		volumesFolder.hidden = true;
+		volumesFolder.icon = '../assets/images/desk/icons/Folder Closed.webp';
+	}
+
+	const driveD = new VirtualDriveProvider('D', {
+		volumeLabel: 'CD Drive (D:) XP_SP3',
+		totalBytes: 734003200,
+		freeBytes: 0,
+		driveType: 'cdrom',
+		icon: '../assets/images/desk/icons/Disk Image File.webp'
+	});
+	fs.mount('/Volumes/D', driveD, { hidden: true });
+	fs.registerDrive('D', driveD, '/Volumes/D');
+
+	const driveA = new VirtualDriveProvider('A', {
+		volumeLabel: '3½ Floppy (A:)',
+		totalBytes: 1474560,
+		freeBytes: 1474560,
+		driveType: 'removable',
+		icon: '../assets/images/desk/icons/Floppy Drive.webp',
+		isReady: false
+	});
+	fs.mount('/Volumes/A', driveA, { hidden: true });
+	fs.registerDrive('A', driveA, '/Volumes/A');
+
+	const tempProvider = new MemoryVFSProvider('temp-storage', {
+		rootName: 'Temp',
+		hidden: true
+	});
+	fs.mount('/Temp', tempProvider, { hidden: true });
 
 	const userStorageProvider = new IndexedDBVFSProvider('user-data-store', {
 		rootName: 'UserData',
@@ -787,20 +838,13 @@ function initializeFileSystem() {
 	});
 	fs.mount('/UserData', userStorageProvider, { hidden: true });
 
-	const configuredDrives = (window.SettingsApp && window.SettingsApp.get('vfsDrives')) || [];
-	configuredDrives.forEach(drv => {
-		if (drv.letter && !fs.getDrive(drv.letter)) {
-			const mountPath = drv.letter === 'C' ? '/' : `/Volumes/${drv.letter}`;
-			const provider = new VirtualDriveProvider(drv.letter, {
-				volumeLabel: drv.label,
-				driveType: drv.type,
-				totalBytes: drv.totalBytes,
-				freeBytes: drv.freeBytes,
-				icon: drv.icon,
-				isReady: drv.type !== 'removable'
-			});
-			if (mountPath !== '/') fs.mount(mountPath, provider);
-			fs.registerDrive(drv.letter, provider, mountPath);
+	initWallpaperFolder();
+
+	['/Others', '/Volumes', '/Temp', '/UserData', '/WINDOWS'].forEach(hiddenPath => {
+		const target = fs.findByPath(hiddenPath);
+		if (target instanceof Folder) {
+			target.hidden = true;
+			target.icon = target.icon || '../assets/images/desk/icons/Folder Closed.webp';
 		}
 	});
 
@@ -862,6 +906,7 @@ function initWallpaperFolder() {
 		webFolder.icon = '../assets/images/desk/icons/Folder Closed.webp';
 		winFolder.add(webFolder);
 	}
+	webFolder.hidden = true;
 
 	const wallpaperProvider = new StaticJSONVFSProvider('static-wallpapers', {
 		endpoint: '../data/desk-wallpaper.json',
@@ -879,7 +924,7 @@ function initWallpaperFolder() {
 			});
 		}
 	});
-	fs.mount('/WINDOWS/Web/Wallpaper', wallpaperProvider);
+	fs.mount('/WINDOWS/Web/Wallpaper', wallpaperProvider, { hidden: true });
 }
 
 function initPoemsFolder(othersFolder) {
@@ -946,7 +991,7 @@ function renderDesktopIcons() {
 
 		const icon = createIconElement({
 			name: element.name,
-			icon: element.icon,
+			icon: element.icon || (type === 'folder' ? '../assets/images/desk/icons/Folder Closed.webp' : '../assets/images/desk/icons/File.webp'),
 			path: element.getFullPath(),
 			type: type,
 			element: element
@@ -954,7 +999,6 @@ function renderDesktopIcons() {
 
 		if (element.hidden) {
 			icon.classList.add('hidden-item');
-			icon.style.opacity = '0.55';
 		}
 
 		container.appendChild(icon);
@@ -968,13 +1012,15 @@ function isShowHiddenEnabled() {
 		const val = window.SettingsApp.get('showHiddenFiles');
 		if (val !== undefined) return !!val;
 	}
-	return localStorage.getItem('desktopShowHidden') === 'true';
+	const stored = window.DeskStorage ? window.DeskStorage.getItem('desktopShowHidden') : localStorage.getItem('desktopShowHidden');
+	return stored === 'true';
 }
 
 function toggleShowHidden() {
 	const current = isShowHiddenEnabled();
 	const nextVal = !current;
-	localStorage.setItem('desktopShowHidden', nextVal.toString());
+	if (window.DeskStorage) window.DeskStorage.setItem('desktopShowHidden', nextVal.toString());
+	else localStorage.setItem('desktopShowHidden', nextVal.toString());
 	if (window.SettingsApp && typeof window.SettingsApp.set === 'function') {
 		window.SettingsApp.set('showHiddenFiles', nextVal);
 	}
@@ -982,6 +1028,7 @@ function toggleShowHidden() {
 		window.AchievementsManager.progress('hidden_revealer', 1);
 	}
 	refreshUI();
+	arrangeIcons('none');
 }
 
 function createIconElement(data, dblClickHandler) {
@@ -993,15 +1040,23 @@ function createIconElement(data, dblClickHandler) {
 		icon.dataset.systemType = data.systemType;
 	}
 	icon.draggable = true;
-	icon.title = data.name;
+	icon.title = data.name || '';
 
 	const img = document.createElement('img');
-	img.src = data.icon || '../assets/images/desk/icons/File.webp';
-	img.alt = data.name;
+	let iconSrc = data.icon;
+	if (!iconSrc || iconSrc === '') {
+		iconSrc = data.type === 'folder' ? '../assets/images/desk/icons/Folder Closed.webp' : '../assets/images/desk/icons/File.webp';
+	}
+	img.src = iconSrc;
+	img.alt = data.name || '';
+	img.onerror = () => {
+		img.onerror = null;
+		img.src = data.type === 'folder' ? '../assets/images/desk/icons/Folder Closed.webp' : '../assets/images/desk/icons/File.webp';
+	};
 	icon.appendChild(img);
 
 	const span = document.createElement('span');
-	span.textContent = data.name;
+	span.textContent = data.name || '';
 	icon.appendChild(span);
 
 	icon.addEventListener('click', (e) => {
@@ -2011,10 +2066,12 @@ function openProjectWindow(project) {
 
 	addToRecentDocs({ name: projectTitle, icon: project.icon, type: 'project', path: `project://${projectTitle}` });
 	try {
-		const viewed = JSON.parse(localStorage.getItem('xp_viewed_projects') || '[]');
+		const raw = window.DeskStorage ? window.DeskStorage.getItem('xp_viewed_projects') : localStorage.getItem('xp_viewed_projects');
+		const viewed = JSON.parse(raw || '[]');
 		if (!viewed.includes(projectTitle)) {
 			viewed.push(projectTitle);
-			localStorage.setItem('xp_viewed_projects', JSON.stringify(viewed));
+			if (window.DeskStorage) window.DeskStorage.setItem('xp_viewed_projects', JSON.stringify(viewed));
+			else localStorage.setItem('xp_viewed_projects', JSON.stringify(viewed));
 		}
 		if (window.AchievementsManager) {
 			window.AchievementsManager.setProgress('portfolio_explorer', viewed.length);
@@ -2192,8 +2249,10 @@ async function openWinamp(targetTrack = null) {
 				return;
 			}
 			if (webampInstance.getMediaStatus && webampInstance.getMediaStatus() === 'PLAYING') {
-				let totalSecs = parseInt(localStorage.getItem('xp_music_playback_seconds') || '0', 10) + 1;
-				localStorage.setItem('xp_music_playback_seconds', String(totalSecs));
+				const raw = window.DeskStorage ? window.DeskStorage.getItem('xp_music_playback_seconds') : localStorage.getItem('xp_music_playback_seconds');
+				let totalSecs = parseInt(raw || '0', 10) + 1;
+				if (window.DeskStorage) window.DeskStorage.setItem('xp_music_playback_seconds', String(totalSecs));
+				else localStorage.setItem('xp_music_playback_seconds', String(totalSecs));
 				if (window.AchievementsManager) {
 					window.AchievementsManager.setProgress('music_ten_minutes', totalSecs);
 					window.AchievementsManager.progress('first_music_track', 1);
@@ -2548,6 +2607,27 @@ function arrangeIcons(sortBy = 'none') {
 		const occupiedGridSlots = new Set();
 		let unpositionedIndex = 0;
 
+		const findNextFreeSlot = () => {
+			let col = 0;
+			let row = 0;
+			if (gridDirection === 'left-to-right') {
+				while (occupiedGridSlots.has(`${unpositionedIndex % iconsPerRow},${Math.floor(unpositionedIndex / iconsPerRow)}`)) {
+					unpositionedIndex++;
+				}
+				row = Math.floor(unpositionedIndex / iconsPerRow);
+				col = unpositionedIndex % iconsPerRow;
+			} else {
+				while (occupiedGridSlots.has(`${Math.floor(unpositionedIndex / iconsPerColumn)},${unpositionedIndex % iconsPerColumn}`)) {
+					unpositionedIndex++;
+				}
+				col = Math.floor(unpositionedIndex / iconsPerColumn);
+				row = unpositionedIndex % iconsPerColumn;
+			}
+			occupiedGridSlots.add(`${col},${row}`);
+			unpositionedIndex++;
+			return computeSlotCoords(col, row);
+		};
+
 		icons.forEach((icon) => {
 			const path = icon.dataset.path;
 			let pos = path ? positions[path] : null;
@@ -2562,41 +2642,30 @@ function arrangeIcons(sortBy = 'none') {
 				posX = Math.max(10, Math.min(posX, desktopWidth - iconWidth - 10));
 				posY = Math.max(10, Math.min(posY, desktopHeight - iconHeight - 10));
 
-				icon.style.position = 'absolute';
-				icon.style.left = `${posX}px`;
-				icon.style.top = `${posY}px`;
-
 				const colSlot = Math.round((posX - startX) / (iconWidth + 10));
 				const rowSlot = Math.round((posY - startY) / iconHeight);
-				occupiedGridSlots.add(`${colSlot},${rowSlot}`);
-			} else {
-				let col = 0;
-				let row = 0;
-				if (gridDirection === 'left-to-right') {
-					while (occupiedGridSlots.has(`${unpositionedIndex % iconsPerRow},${Math.floor(unpositionedIndex / iconsPerRow)}`)) {
-						unpositionedIndex++;
-					}
-					row = Math.floor(unpositionedIndex / iconsPerRow);
-					col = unpositionedIndex % iconsPerRow;
+				const slotKey = `${colSlot},${rowSlot}`;
+
+				if (!occupiedGridSlots.has(slotKey)) {
+					occupiedGridSlots.add(slotKey);
+					icon.style.position = 'absolute';
+					icon.style.left = `${posX}px`;
+					icon.style.top = `${posY}px`;
 				} else {
-					while (occupiedGridSlots.has(`${Math.floor(unpositionedIndex / iconsPerColumn)},${unpositionedIndex % iconsPerColumn}`)) {
-						unpositionedIndex++;
-					}
-					col = Math.floor(unpositionedIndex / iconsPerColumn);
-					row = unpositionedIndex % iconsPerColumn;
+					const coords = findNextFreeSlot();
+					icon.style.position = 'absolute';
+					icon.style.left = `${coords.x}px`;
+					icon.style.top = `${coords.y}px`;
+					if (path) positions[path] = { x: coords.x, y: coords.y };
 				}
-
-				const coords = computeSlotCoords(col, row);
-
+			} else {
+				const coords = findNextFreeSlot();
 				icon.style.position = 'absolute';
 				icon.style.left = `${coords.x}px`;
 				icon.style.top = `${coords.y}px`;
-
-				occupiedGridSlots.add(`${col},${row}`);
 				if (path) {
 					positions[path] = { x: coords.x, y: coords.y };
 				}
-				unpositionedIndex++;
 			}
 		});
 		saveDesktopIconPositions(positions);
@@ -3145,11 +3214,13 @@ function downloadFileSystemElement(element) {
 function trackWallpaperViewed(source) {
 	if (!source || typeof source !== 'string') return;
 	try {
-		let viewed = JSON.parse(localStorage.getItem('xp_viewed_wallpapers') || '[]');
+		const raw = window.DeskStorage ? window.DeskStorage.getItem('xp_viewed_wallpapers') : localStorage.getItem('xp_viewed_wallpapers');
+		let viewed = JSON.parse(raw || '[]');
 		const key = source.toLowerCase();
 		if (!viewed.includes(key)) {
 			viewed.push(key);
-			localStorage.setItem('xp_viewed_wallpapers', JSON.stringify(viewed));
+			if (window.DeskStorage) window.DeskStorage.setItem('xp_viewed_wallpapers', JSON.stringify(viewed));
+			else localStorage.setItem('xp_viewed_wallpapers', JSON.stringify(viewed));
 		}
 		if (window.AchievementsManager) {
 			window.AchievementsManager.setProgress('wallpaper_collector', viewed.length);
@@ -3164,8 +3235,8 @@ function setImageAsWallpaper(source, fitMode = 'cover', transitionType = null) {
 	const desktop = document.getElementById('desktop');
 	const layerA = document.getElementById('desktop-wallpaper-layer-a');
 	const layerB = document.getElementById('desktop-wallpaper-layer-b');
-	const transMode = transitionType || (window.SettingsApp && window.SettingsApp.get('wallpaperTransition')) || localStorage.getItem('wallpaperTransition') || 'none';
-	const transDuration = parseFloat((window.SettingsApp && window.SettingsApp.get('wallpaperTransitionDuration')) || localStorage.getItem('wallpaperTransitionDuration') || '1.0');
+	const transMode = transitionType || (window.SettingsApp && window.SettingsApp.get('wallpaperTransition')) || (window.DeskStorage ? window.DeskStorage.getItem('wallpaperTransition') : localStorage.getItem('wallpaperTransition')) || 'none';
+	const transDuration = parseFloat((window.SettingsApp && window.SettingsApp.get('wallpaperTransitionDuration')) || (window.DeskStorage ? window.DeskStorage.getItem('wallpaperTransitionDuration') : localStorage.getItem('wallpaperTransitionDuration')) || '1.0');
 
 	document.documentElement.style.setProperty('--wp-trans-duration', `${transDuration}s`);
 
@@ -3221,7 +3292,8 @@ function setImageAsWallpaper(source, fitMode = 'cover', transitionType = null) {
 		desktop.style.backgroundImage = `url('${source}')`;
 	}
 
-	localStorage.setItem('desktopBackground', source);
+	if (window.DeskStorage) window.DeskStorage.setItem('desktopBackground', source);
+	else localStorage.setItem('desktopBackground', source);
 	if (window.SettingsApp) {
 		window.SettingsApp.set('desktopBackground', source);
 		window.SettingsApp.set('wallpaperFit', fitMode);
@@ -3257,17 +3329,17 @@ function updateWallpaperSlideshow() {
 		wallpaperSlideshowTimer = null;
 	}
 
-	const mode = (window.SettingsApp && window.SettingsApp.get('wallpaperMode')) || localStorage.getItem('wallpaperMode') || 'picture';
+	const mode = (window.SettingsApp && window.SettingsApp.get('wallpaperMode')) || (window.DeskStorage ? window.DeskStorage.getItem('wallpaperMode') : localStorage.getItem('wallpaperMode')) || 'picture';
 	if (mode !== 'slideshow') return;
 
-	let intervalSec = parseFloat((window.SettingsApp && window.SettingsApp.get('wallpaperSlideshowInterval')) || localStorage.getItem('wallpaperSlideshowInterval') || '30');
+	let intervalSec = parseFloat((window.SettingsApp && window.SettingsApp.get('wallpaperSlideshowInterval')) || (window.DeskStorage ? window.DeskStorage.getItem('wallpaperSlideshowInterval') : localStorage.getItem('wallpaperSlideshowInterval')) || '30');
 	if (isNaN(intervalSec) || intervalSec < 3) intervalSec = 30;
 
 	const prepareNextPreload = async () => {
 		const list = await fetchWallpaperRegistry();
 		if (!list || list.length === 0) return;
-		const isRandom = (window.SettingsApp && window.SettingsApp.get('wallpaperSlideshowRandom')) || localStorage.getItem('wallpaperSlideshowRandom') === 'true';
-		const curr = (window.SettingsApp && window.SettingsApp.get('desktopBackground')) || localStorage.getItem('desktopBackground');
+		const isRandom = (window.SettingsApp && window.SettingsApp.get('wallpaperSlideshowRandom')) || ((window.DeskStorage ? window.DeskStorage.getItem('wallpaperSlideshowRandom') : localStorage.getItem('wallpaperSlideshowRandom')) === 'true');
+		const curr = (window.SettingsApp && window.SettingsApp.get('desktopBackground')) || (window.DeskStorage ? window.DeskStorage.getItem('desktopBackground') : localStorage.getItem('desktopBackground'));
 		const idx = list.findIndex(w => w.path === curr);
 		const nextCandidate = isRandom ? list[Math.floor(Math.random() * list.length)] : list[(idx + 1) % list.length];
 		if (nextCandidate && nextCandidate.path) {
@@ -3280,9 +3352,9 @@ function updateWallpaperSlideshow() {
 	wallpaperSlideshowTimer = setInterval(async () => {
 		const list = await fetchWallpaperRegistry();
 		if (!list || list.length === 0) return;
-		const isRandom = (window.SettingsApp && window.SettingsApp.get('wallpaperSlideshowRandom')) || localStorage.getItem('wallpaperSlideshowRandom') === 'true';
+		const isRandom = (window.SettingsApp && window.SettingsApp.get('wallpaperSlideshowRandom')) || ((window.DeskStorage ? window.DeskStorage.getItem('wallpaperSlideshowRandom') : localStorage.getItem('wallpaperSlideshowRandom')) === 'true');
 		let nextWp;
-		const curr = (window.SettingsApp && window.SettingsApp.get('desktopBackground')) || localStorage.getItem('desktopBackground');
+		const curr = (window.SettingsApp && window.SettingsApp.get('desktopBackground')) || (window.DeskStorage ? window.DeskStorage.getItem('desktopBackground') : localStorage.getItem('desktopBackground'));
 		const idx = list.findIndex(w => w.path === curr);
 
 		if (isRandom) {
@@ -3292,8 +3364,8 @@ function updateWallpaperSlideshow() {
 		}
 
 		if (nextWp) {
-			const fit = (window.SettingsApp && window.SettingsApp.get('wallpaperFit')) || localStorage.getItem('wallpaperFit') || 'cover';
-			const transition = (window.SettingsApp && window.SettingsApp.get('wallpaperTransition')) || localStorage.getItem('wallpaperTransition') || 'none';
+			const fit = (window.SettingsApp && window.SettingsApp.get('wallpaperFit')) || (window.DeskStorage ? window.DeskStorage.getItem('wallpaperFit') : localStorage.getItem('wallpaperFit')) || 'cover';
+			const transition = (window.SettingsApp && window.SettingsApp.get('wallpaperTransition')) || (window.DeskStorage ? window.DeskStorage.getItem('wallpaperTransition') : localStorage.getItem('wallpaperTransition')) || 'none';
 			setImageAsWallpaper(nextWp.path, fit, transition);
 		}
 
@@ -3302,6 +3374,10 @@ function updateWallpaperSlideshow() {
 }
 
 async function purgeAllClientData() {
+	if (window.DeskStorage) {
+		window.DeskStorage.clear();
+	}
+
 	try {
 		localStorage.clear();
 	} catch (e) {}
@@ -3361,10 +3437,10 @@ window.purgeAll = purgeAllClientData;
 window.wipeAllData = purgeAllClientData;
 
 function applyInitialDesktopBackground() {
-	const mode = (window.SettingsApp && window.SettingsApp.get('wallpaperMode')) || localStorage.getItem('wallpaperMode') || 'picture';
-	const bgColor = (window.SettingsApp && window.SettingsApp.get('desktopBackgroundColor')) || localStorage.getItem('desktopBackgroundColor') || '#004e98';
-	const current = (window.SettingsApp && window.SettingsApp.get('desktopBackground')) || localStorage.getItem('desktopBackground') || DEFAULT_DESKTOP_WALLPAPER;
-	const fit = (window.SettingsApp && window.SettingsApp.get('wallpaperFit')) || localStorage.getItem('wallpaperFit') || 'cover';
+	const mode = (window.SettingsApp && window.SettingsApp.get('wallpaperMode')) || (window.DeskStorage ? window.DeskStorage.getItem('wallpaperMode') : localStorage.getItem('wallpaperMode')) || 'picture';
+	const bgColor = (window.SettingsApp && window.SettingsApp.get('desktopBackgroundColor')) || (window.DeskStorage ? window.DeskStorage.getItem('desktopBackgroundColor') : localStorage.getItem('desktopBackgroundColor')) || '#004e98';
+	const current = (window.SettingsApp && window.SettingsApp.get('desktopBackground')) || (window.DeskStorage ? window.DeskStorage.getItem('desktopBackground') : localStorage.getItem('desktopBackground')) || DEFAULT_DESKTOP_WALLPAPER;
+	const fit = (window.SettingsApp && window.SettingsApp.get('wallpaperFit')) || (window.DeskStorage ? window.DeskStorage.getItem('wallpaperFit') : localStorage.getItem('wallpaperFit')) || 'cover';
 
 	const desktop = document.getElementById('desktop');
 	const layerA = document.getElementById('desktop-wallpaper-layer-a');
