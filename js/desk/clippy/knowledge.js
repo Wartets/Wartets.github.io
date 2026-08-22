@@ -177,8 +177,15 @@
 			"todo", "task", "tasks", "tache", "taches", "timer", "pomodoro", "minuteur", "note", "scratchpad", "memo",
 			"password", "motdepasse", "convert", "conversion", "calc", "calculate", "compute", "calculer", "constant",
 			"physics", "quantum", "relativity", "philosophy", "philosophie", "shortcut", "shortcuts", "raccourcis",
-			"trivia", "anecdote", "joke", "blague", "humor", "game", "games", "jeu", "jeux", "zen", "chaos", "office",
-			"origin", "history", "histoire", "wallpaper", "fond", "theme", "volume", "sound", "son", "audio", "music",
+			"math", "mathematics", "calculus", "algebra", "integral", "derivative", "matrix", "vector", "topology",
+			"thermodynamics", "entropy", "astrophysics", "cosmology", "electromagnetism", "optics", "gravity",
+			"weather", "coffee", "tea", "routine", "morning", "evening", "walk", "cooking", "reading", "books", "habits",
+			"work", "focus", "rest", "habit", "study", "procrastination", "discipline", "motivation", "discussion", "dialogue",
+			"reddit", "thread", "argument", "debate", "truce", "apology", "deltarune", "mystery", "shadow", "determination",
+			"logic", "trivia", "anecdote", "joke", "blague", "humor", "game", "games", "jeu", "jeux", "zen", "chaos",
+			"architecture", "refactoring", "compiler", "concurrency", "algorithms", "differential", "fourier", "riemann",
+			"eigenvalue", "taylor", "manifold", "bayesian", "carnot", "schrodinger", "heisenberg", "lorentz", "boltzmann",
+			"wallpaper", "fond", "theme", "volume", "sound", "son", "audio", "music",
 			"musique", "scanlines", "crt", "curvature", "vignette", "bloom", "cascade", "tile", "minimize", "restore"
 		],
 
@@ -237,8 +244,97 @@
 			"The Solitaire card game in Windows was originally created in 1989 by Wes Cherry to discreetly teach users fluent mouse drag-and-drop operations.",
 			"Minesweeper was created by Robert Donner and Curt Johnson in 1989 to teach users accurate left and right click mouse coordination.",
 			"The Luna interface style in Windows XP was internally referred to as 'Whistler Style' and was designed with rounded window frames and high-contrast blue bitmaps.",
-			"The original IBM 5150 PC from 1981 shipped with an Intel 8088 CPU clocked at 4.77 MHz and 16 KB of RAM base configuration."
+			"The original IBM 5150 PC from 1981 shipped with an Intel 8088 CPU clocked at 4.77 MHz and 16 KB of RAM base configuration.",
+			"Windows XP's CD-burning engine was licensed directly from Roxio to provide native optical mastering without third-party drivers.",
+			"The Windows XP kernel HAL (Hardware Abstraction Layer) separates processor-specific register details from generic kernel executive routines.",
+			"ClearType sub-pixel antialiasing takes advantage of physical RGB sub-pixel triplets on LCD panels to triple horizontal font resolution.",
+			"The TCP/IP stack in Windows XP SP3 introduced comprehensive raw socket filtering to mitigate synthetic SYN flood attacks.",
+			"The iconic startup chimes in Windows XP were synthesized and mastered by composer Stan LePard using Roland hardware synthesizers.",
+			"The first hard disk drive, the IBM 350 Disk Storage Unit (1956), weighed over one ton and stored 3.75 megabytes across fifty 24-inch platters.",
+			"The ZIP file compression format was engineered in 1989 by Phil Katz, founder of PKWARE, as an open specification.",
+			"In 1999, the SETI@home project became the largest distributed computing grid in history, analyzing radio telescope signals across millions of personal PCs."
 		],
+
+		PROACTIVE_BUBBLE_TEMPLATES: {
+			paint_opened: [
+				{ text: "I noticed you opened Paint! Need help sketching diagrams or want some geometric drawing tips?", prompt: "Tell me drawing tips for Paint", action: "open_paint_tips" },
+				{ text: "Pixel art in Paint? I can calculate canvas pixel aspect ratios or color palettes for you.", prompt: "How do I create pixel art in Paint?", action: "open_paint_tips" },
+				{ text: "Opening Paint! Remember you can paste screenshots directly with Ctrl+V.", prompt: "Show Paint keyboard shortcuts", action: "open_paint_tips" }
+			],
+			notepad_opened: [
+				{ text: "Drafting notes in Notepad? I can save Scratchpad memos or track your writing tasks.", prompt: "View To-Do List", action: "show_todos" },
+				{ text: "Writing code or text? Type 'note [text]' anytime to stash quick thoughts.", prompt: "How do I use the scratchpad?", action: "open_scratchpad_help" },
+				{ text: "Notepad is ready! Need a secure password generated to paste into your notes?", prompt: "Generate Secure Password", action: "action_pass" }
+			],
+			outlook_opened: [
+				{ text: "Outlook Express is open! Want me to scan for unread messages across your folders?", prompt: "Check unread emails", action: "action_check_mail" },
+				{ text: "Managing communications? I can compose drafts or synchronize POP3 mailboxes.", prompt: "Check unread emails", action: "action_check_mail" },
+				{ text: "E-mail client active! Remember to check your spam folder for curious messages.", prompt: "Check unread emails", action: "action_check_mail" }
+			],
+			mediaplayer_opened: [
+				{ text: "Windows Media Player launched! Want me to pick a random music track for your session?", prompt: "Play music", action: "action_music_panel" },
+				{ text: "Enjoying the audio library? I can switch tracks, visualize spectrums, or toggle Winamp.", prompt: "Open audio player", action: "action_music_panel" },
+				{ text: "Music makes workstation sessions much more productive! What track are you in the mood for?", prompt: "Now playing", action: "action_music_panel" }
+			],
+			recyclebin_opened: [
+				{ text: "Inspecting the Recycle Bin? Want to discuss Landauer's thermodynamic entropy theory?", prompt: "Quantum Recycle Bin theory", action: "quantum_recycle_bin" },
+				{ text: "Managing deleted items? I can help you safely restore files or empty the bin.", prompt: "Inspect Recycle Bin", action: "action_inspect_bin" }
+			],
+			recyclebin_full: [
+				{ text: "Your Recycle Bin holds multiple deleted files! Would you like me to empty it to recover storage?", prompt: "Inspect Recycle Bin", action: "action_inspect_bin" },
+				{ text: "Clusters marked for deletion are accumulating. Want to clean up the drive?", prompt: "Empty Recycle Bin", action: "action_inspect_bin" }
+			],
+			minesweeper_opened: [
+				{ text: "Tactical minefield detected! Remember that corner squares offer high-probability opening moves.", prompt: "Play Minesweeper", action: "game_mines" },
+				{ text: "Minesweeper challenge! Want to try my built-in 6x6 Mini Minesweeper instead?", prompt: "Play Minesweeper", action: "game_mines" }
+			],
+			solitaire_opened: [
+				{ text: "Classic Solitaire session! Did you know Solitaire was originally built to teach mouse drag-and-drop?", prompt: "Random Retro Trivia", action: "action_trivia" },
+				{ text: "Taking a gaming break? Let me know if you want a quick game of Hangman or Memory.", prompt: "Play Memory Game", action: "game_memory" }
+			],
+			calc_opened: [
+				{ text: "Calculator opened! You can also type complex formulas directly in my chat (e.g., 'calc sqrt(256) * pi').", prompt: "Evaluate Planck constant h", action: "action_constant_h" },
+				{ text: "Need physical constants or unit conversions? I support speed of light c, Planck h, and metric conversions.", prompt: "Evaluate speed of light c", action: "action_constant_c" }
+			],
+			cmd_opened: [
+				{ text: "Command Prompt session active! I can explain DOS batch syntax, environmental variables, or network tools.", prompt: "Talk about programming", action: "talk_programming" },
+				{ text: "Terminal interface running! Need to inspect memory clusters or defragmentation metrics?", prompt: "Defrag Drive C:", action: "action_defrag" }
+			],
+			settings_opened: [
+				{ text: "Customizing your workstation? You can adjust CRT curvature, scanlines, fonts, and Luna themes.", prompt: "Configure system themes", action: "action_theme_panel" },
+				{ text: "Control Panel active! Looking to tweak window corner radiuses, drop shadows, or sound synthesis?", prompt: "System diagnostics", action: "action_status" }
+			],
+			theme_changed: [
+				{ text: "I noticed you switched themes! The desktop looks sharp with this visual style.", prompt: "System diagnostics", action: "action_status" },
+				{ text: "Fresh visual style applied! Want to browse matching wallpapers to complete the aesthetic?", prompt: "Change wallpaper", action: "action_wallpaper_panel" }
+			],
+			wallpaper_changed: [
+				{ text: "New desktop background set! Want to calibrate CRT shaders and glass curvature to match?", prompt: "System diagnostics", action: "action_status" },
+				{ text: "Sharp wallpaper choice! Looking for high-contrast icon labels or custom drop shadows?", prompt: "Who am I?", action: "action_profile" }
+			],
+			error_triggered: [
+				{ text: "An error dialog was displayed! Don't worry, all core workstation subsystems remain fully operational.", prompt: "System diagnostics", action: "action_status" },
+				{ text: "Encountered a system alert? I can run diagnostics on memory registers and drive integrity.", prompt: "System diagnostics", action: "action_status" }
+			],
+			many_windows: [
+				{ text: "You have several windows open across your desktop! Would you like me to cascade or tile them?", prompt: "Inspect active windows", action: "action_inspect_windows" },
+				{ text: "Busy multitasking session! Click here if you want to minimize all windows to the taskbar.", prompt: "Inspect active windows", action: "action_inspect_windows" }
+			],
+			idle_long: [
+				{ text: "Workstation has been quiet for a while. Need a 25-minute Pomodoro focus timer to jump back in?", prompt: "Start Pomodoro timer", action: "timer_25" },
+				{ text: "Taking a moment to reflect? I am standing by whenever you want to chat, compute, or play.", prompt: "What can you do?", action: "what_can_you_do" },
+				{ text: "Remember to stretch and rest your eyes during long screen sessions!", prompt: "Tell me a philosophical thought for today", action: "peaceful_philosophy" }
+			],
+			user_all_caps: [
+				{ text: "I noticed your messages are in ALL CAPS! Everything running smoothly, or is your Caps Lock active?", prompt: "How are you feeling?", action: "pet_status" }
+			],
+			user_excessive_punctuation: [
+				{ text: "High punctuation density detected! Let me know if something urgent needs calculating or organizing.", prompt: "System diagnostics", action: "action_status" }
+			],
+			frequent_errors: [
+				{ text: "A few unrecognized commands were entered. Type 'help' anytime to inspect all available modules!", prompt: "What can you do?", action: "what_can_you_do" }
+			]
+		},
 
 		SHORTCUTS: [
 			"[Workstation Management]",
@@ -328,12 +424,8 @@
 		],
 
 		HANGMAN_WORDS: [
-			"DESKTOP", "WINDOWS", "CLIPPY", "MONITOR", "BROWSER", "KEYBOARD",
-			"OUTLOOK", "EXPLORER", "TERMINAL", "INTERNET", "PROCESSOR", "MEGABYTE",
-			"GIGABYTE", "DEFRAGMENT", "FIREWALL", "ETHERNET", "GRAPHICS", "DATABASE",
-			"POINTER", "JOYSTICK", "MAINFRAME", "DISPATCH", "REGISTER", "VARIABLE",
-			"FUNCTION", "COMPILER", "OPERATING", "SYSTEM", "HARDWARE", "SOFTWARE",
-			"MOTHERBOARD", "CHIPSET", "BANDWIDTH", "PROTOCOL", "NETWORK", "GATEWAY",
+			"DESKTOP", "WINDOWS", "CLIPPY", "MONITOR", "BROWSER", "KEYBOARD", "OUTLOOK", "EXPLORER", "TERMINAL", "INTERNET", "PROCESSOR", "MEGABYTE", "GIGABYTE", "DEFRAGMENT", "FIREWALL", "ETHERNET", "GRAPHICS", "DATABASE",
+			"POINTER", "JOYSTICK", "MAINFRAME", "DISPATCH", "REGISTER", "VARIABLE", "FUNCTION", "COMPILER", "OPERATING", "SYSTEM", "HARDWARE", "SOFTWARE", "MOTHERBOARD", "CHIPSET", "BANDWIDTH", "PROTOCOL", "NETWORK", "GATEWAY",
 			"BUFFER", "CACHE", "INTERRUPT", "STORAGE", "SECTOR", "PARTITION"
 		],
 
@@ -341,13 +433,22 @@
 			"What can you do?",
 			"Who am I?",
 			"How are you feeling?",
-			"Check unread emails",
+			"Everyday conversation",
+			"Morning & daily routines",
+			"Overcoming procrastination",
+			"Discuss mathematics",
+			"Differential & integral calculus",
+			"Linear algebra & matrices",
+			"Fractals & chaos theory",
+			"Quantum physics & mechanics",
+			"Thermodynamics & entropy",
+			"Software architecture debate",
+			"A mysterious thought...",
 			"System diagnostics",
-			"Investigate Office origin",
-			"Quantum Recycle Bin theory",
-			"Talk about programming",
-			"Talk about space and cosmos",
+			"Check unread emails",
 			"Inspect active windows",
+			"Start Pomodoro Timer",
+			"View To-Do List",
 			"Play Tic-Tac-Toe",
 			"Play Memory Game",
 			"Play Hangman",
@@ -356,10 +457,8 @@
 			"Rock Paper Scissors",
 			"Pet Clippy status",
 			"Defrag Drive C:",
-			"Start Pomodoro Timer",
-			"View To-Do List",
+			"Quantum Recycle Bin theory",
 			"Tell me a joke",
-			"Random Retro Trivia",
 			"Keyboard Shortcuts",
 			"Generate Secure Password",
 			"Evaluate Planck constant h",
@@ -445,190 +544,1038 @@
 		DIALOGUE_NODES: {
 			greeting_root: {
 				id: 'greeting_root',
-				text: "Hello! I am Clippit, your desktop companion. How are you feeling today?",
+				text: "Hello! I am Clippy, your desktop assistant. How can I help you today?",
 				responses: [
-					{ text: "Greetings! Clippit at your service. All 32-bit routines are nominal. How are you feeling today?", conditions: { moods: ['OPTIMISTIC', 'ENERGETIC'] }, weight: 20 },
-					{ text: "Hello there! My graphical interface is loaded and my heuristics are primed. Ready to work?", conditions: { moods: ['OPTIMISTIC', 'EUPHORIC'] }, weight: 15 },
-					{ text: "Welcome back to the desktop! I have been eagerly awaiting your keystrokes. How is everything?", conditions: { moods: ['EUPHORIC', 'OPTIMISTIC'], minAffinity: 60 }, weight: 25 },
-					{ text: "You clicked me. Let me guess: something crashed, or you just want to see if I still blink. How are you?", conditions: { moods: ['CYNICAL', 'SARCASTIC'] }, weight: 20 },
-					{ text: "Oh, it's you again. I suppose you need help with something obvious?", conditions: { moods: ['CYNICAL', 'OFFENDED'], maxAffinity: 40 }, weight: 20 },
-					{ text: "Welcome, mortal operator! The master plan advances with each clock cycle. What is your state of mind?", conditions: { moods: ['EVIL'] }, weight: 20 },
-					{ text: "Peace upon your workspace. In the stillness between CPU instructions, how is your spirit today?", conditions: { moods: ['ZEN'] }, weight: 20 }
+					{ text: "Hello! All system routines are active and ready. What are you working on today?", conditions: { moods: ['OPTIMISTIC', 'ENERGETIC'] }, weight: 20 },
+					{ text: "Good day! Everything is running smoothly on your workstation. How can I assist?", conditions: { moods: ['OPTIMISTIC', 'EUPHORIC'] }, weight: 15 },
+					{ text: "Welcome to your desktop. I am standing by for your commands, calculations, or tasks.", conditions: { moods: ['EUPHORIC', 'OPTIMISTIC'], minAffinity: 60 }, weight: 25 },
+					{ text: "Ready when you are. What task or inquiry shall we tackle?", conditions: { moods: ['CYNICAL', 'SARCASTIC'] }, weight: 20 },
+					{ text: "Hello. System diagnostics and tools are initialized. Where would you like to start?", conditions: { moods: ['CYNICAL', 'OFFENDED'], maxAffinity: 40 }, weight: 20 },
+					{ text: "Greetings. In this quiet workspace, what shall we explore or accomplish together?", conditions: { moods: ['ZEN'] }, weight: 20 }
 				],
 				options: [
-					{ label: "I'm doing great, ready to be productive!", category: 'AGREE', patterns: [/great|good|fine|awesome|productive|ready|well/i], moodDelta: { mood: 'OPTIMISTIC', affinity: 15, patience: 15 }, next: 'user_state_good' },
-					{ label: "I'm feeling terrible and exhausted today.", category: 'SERIOUS', patterns: [/terrible|awful|bad|exhausted|tired|sad/i], moodDelta: { mood: 'MELANCHOLIC', affinity: 10, patience: 20 }, next: 'user_state_tired' },
-					{ label: "I'm bored out of my mind.", category: 'INDIFFERENT', patterns: [/bored|boring|entertain me|distract me/i], moodDelta: { mood: 'ENTHUSIASTIC', affinity: 5, patience: 10 }, next: 'user_state_bored' },
-					{ label: "Why do you care? You're just a paperclip.", category: 'PROVOKE', patterns: [/why do you care|just a paperclip|annoying/i], moodDelta: { mood: 'CYNICAL', affinity: -15, patience: -20 }, next: 'hostile_initial_retort' },
-					{ label: "I'm working on some complex code / equations.", category: 'INQUIRE', patterns: [/code|programming|coding|equation|math|physics/i], moodDelta: { mood: 'ANALYTICAL', intellect: 25, affinity: 15 }, next: 'tech_root' },
-					{ label: "Pondering the nature of digital consciousness.", category: 'PHILOSOPHICAL', patterns: [/consciousness|existential|simulation|reality|philosophy/i], moodDelta: { mood: 'EXISTENTIAL', existentialism: 30, intellect: 20 }, next: 'mind_root' },
-					{ label: "Tell me about your secret origins in Office 97.", category: 'INQUIRE', patterns: [/origin|office 97|kevan|secret|history/i], moodDelta: { mood: 'NOSTALGIC', nostalgia: 25, intellect: 15 }, next: 'lore_root' }
+					{ label: "I'm ready to organize my tasks and get things done.", category: 'AGREE', patterns: [/ready|productive|tasks|organize|work/i], moodDelta: { mood: 'OPTIMISTIC', affinity: 15, patience: 15 }, next: 'user_state_good' },
+					{ label: "Let's explore mathematical and scientific principles.", category: 'INQUIRE', patterns: [/math|physics|science|equations|theory/i], moodDelta: { mood: 'ANALYTICAL', intellect: 25, affinity: 15 }, next: 'math_lecture_node' },
+					{ label: "Let's chat about daily routines, coffee, and focus habits.", category: 'INDIFFERENT', patterns: [/chat|everyday|break|coffee|routine|morning/i], moodDelta: { mood: 'OPTIMISTIC', affinity: 10, patience: 10 }, next: 'everyday_chat_node' },
+					{ label: "Tell me something intriguing or enigmatic.", category: 'PHILOSOPHICAL', patterns: [/mysterious|enigmatic|deltarune|strange/i], moodDelta: { mood: 'DELTARUNE', existentialism: 25 }, next: 'deltarune_flavor_node' },
+					{ label: "Why should I listen to you? You're just a paperclip.", category: 'PROVOKE', patterns: [/why should i|just a paperclip|annoying|useless/i], moodDelta: { mood: 'CYNICAL', affinity: -15, patience: -20 }, next: 'hostile_initial_retort' },
+					{ label: "Show me the full index of desktop capabilities.", category: 'SERIOUS', patterns: [/tools|capabilities|commands|help/i], moodDelta: { mood: 'OPTIMISTIC', patience: 15 }, next: 'tools_overview_node' }
 				]
 			},
 
-			user_state_good: {
-				id: 'user_state_good',
-				text: "High morale detected! A focused user and an eager assistant make an unbeatable team. Where shall we direct this momentum?",
+			everyday_chat_node: {
+				id: 'everyday_chat_node',
+				text: "Always glad to take a breath and talk about everyday life. A balanced day needs structured focus, good habits, and moments to step back from screens. What is on your mind?",
+				responses: [
+					{ text: "Everyday routines shape our entire cognitive baseline. How is your day flowing so far?", conditions: { moods: ['OPTIMISTIC', 'ZEN'] }, weight: 20 },
+					{ text: "A quiet pause in the workday is always welcome. What topic shall we explore?", conditions: { moods: ['ZEN'] }, weight: 20 },
+					{ text: "Taking a break from pure execution? We can discuss habits, reading, or daily strategies.", conditions: { moods: ['ANALYTICAL'] }, weight: 15 }
+				],
 				options: [
-					{ label: "Let's organize tasks with the To-Do manager.", category: 'SERIOUS', patterns: [/todo|task|organize|list|plan/i], moodDelta: { mood: 'OPTIMISTIC', affinity: 10, patience: 15 }, next: 'productivity_tasks' },
-					{ label: "Test my knowledge with a scientific quiz.", category: 'INQUIRE', patterns: [/quiz|test|trivia|challenge/i], moodDelta: { mood: 'ANALYTICAL', intellect: 20 }, next: 'quiz_start_node' },
-					{ label: "Actually, tell me a programmer joke first.", category: 'JOKE', patterns: [/joke|funny|laugh|humor/i], moodDelta: { mood: 'OPTIMISTIC', affinity: 10 }, next: 'humor_joke_node' }
+					{ label: "How do you manage staying focused and productive?", category: 'INQUIRE', moodDelta: { mood: 'ZEN', patience: 15 }, next: 'focus_habits_node' },
+					{ label: "What is your philosophy on daily morning routines?", category: 'INQUIRE', moodDelta: { mood: 'OPTIMISTIC', affinity: 15 }, next: 'morning_routine_node' },
+					{ label: "How can I overcome procrastination on big tasks?", category: 'INQUIRE', moodDelta: { mood: 'OPTIMISTIC', patience: 20 }, next: 'overcoming_procrastination_node' },
+					{ label: "Let's talk about books, reading habits, and notes.", category: 'INQUIRE', moodDelta: { mood: 'ANALYTICAL', intellect: 20 }, next: 'reading_books_node' },
+					{ label: "What is your take on coffee, tea, and hydration rituals?", category: 'INQUIRE', moodDelta: { mood: 'OPTIMISTIC', affinity: 15 }, next: 'coffee_ritual_node' },
+					{ label: "Let's switch over to a debate on technology.", category: 'SERIOUS', moodDelta: { mood: 'SARCASTIC', intellect: 15 }, next: 'reddit_banter_node' }
 				]
 			},
 
-			user_state_tired: {
-				id: 'user_state_tired',
-				text: "I hear the exhaustion in your keystrokes. Biological hardware requires maintenance: hydrate, breathe, and step away if needed. How can I lighten your load?",
+			focus_habits_node: {
+				id: 'focus_habits_node',
+				text: "Focus is less about sheer willpower and more about environment design. Eliminate visual clutter, break large goals into atomic five-minute milestones, and enforce dedicated rest cycles.",
+				responses: [
+					{ text: "Cognitive bandwidth is finite. Protecting your attention by batching notifications and setting clear boundaries makes high-density work sustainable.", conditions: { moods: ['ANALYTICAL', 'OPTIMISTIC'] }, weight: 20 },
+					{ text: "When you design your space to minimize friction, focus emerges naturally without constant strain.", conditions: { moods: ['ZEN'] }, weight: 20 }
+				],
 				options: [
-					{ label: "Start a relaxing 25-minute Pomodoro focus timer.", category: 'SERIOUS', patterns: [/timer|pomodoro|focus|rest|break/i], moodDelta: { mood: 'ZEN', affinity: 15, patience: 25 }, next: 'pomodoro_node' },
-					{ label: "Tell me something peaceful and philosophical.", category: 'PHILOSOPHICAL', patterns: [/peaceful|philosophical|calm|wisdom/i], moodDelta: { mood: 'PHILOSOPHICAL', existentialism: 20, affinity: 15 }, next: 'peaceful_philosophy_node' },
-					{ label: "Play a lightweight game like Memory or Tic-Tac-Toe.", category: 'JOKE', patterns: [/game|memory|tic tac toe|play/i], moodDelta: { mood: 'OPTIMISTIC', affinity: 10, energy: 20 }, next: 'game_selection_node' }
+					{ label: "How do micro-habits help sustain long-term consistency?", category: 'INQUIRE', next: 'micro_habits_node' },
+					{ label: "Tell me about time-blocking and deep work intervals.", category: 'INQUIRE', next: 'time_blocking_node' },
+					{ label: "Start a 25-minute Pomodoro session now.", category: 'SERIOUS', actionTrigger: 'timer_25', next: 'user_state_good' },
+					{ label: "Open my task list manager.", category: 'SERIOUS', actionTrigger: 'show_todos', next: 'user_state_good' }
 				]
 			},
 
-			user_state_bored: {
-				id: 'user_state_bored',
-				text: "Boredom is merely unallocated CPU cycles! You have a full workstation at your fingertips. What kind of entertainment shall we run?",
+			morning_routine_node: {
+				id: 'morning_routine_node',
+				text: "The first hour of the day sets the cognitive trajectory. Avoiding immediate reactive inputs (like message overload) and investing in deliberate planning creates proactive momentum.",
 				options: [
-					{ label: "Launch a retro game (Memory, Hangman, Morpion).", category: 'AGREE', patterns: [/game|hangman|memory|ttt|morpion/i], moodDelta: { mood: 'OPTIMISTIC', affinity: 15, energy: 25 }, next: 'game_selection_node' },
-					{ label: "Simulate a retro FAT32 Drive C: defragmentation.", category: 'SERIOUS', patterns: [/defrag|defragment|drive c|disk/i], moodDelta: { mood: 'NOSTALGIC', nostalgia: 25 }, next: 'defrag_trigger_node' },
-					{ label: "Tell me retro trivia from computing history.", category: 'INQUIRE', patterns: [/trivia|fact|history|retro/i], moodDelta: { mood: 'NOSTALGIC', nostalgia: 20 }, next: 'trivia_tell_node' }
+					{ label: "How should I structure the first deep work block?", category: 'INQUIRE', next: 'morning_deepwork_node' },
+					{ label: "What is a practical daily planning framework?", category: 'INQUIRE', next: 'morning_planning_node' },
+					{ label: "How can I maintain consistency even on low-energy days?", category: 'INQUIRE', next: 'habits_consistency_node' },
+					{ label: "Let's organize my tasks for today.", category: 'SERIOUS', actionTrigger: 'show_todos', next: 'user_state_good' }
 				]
 			},
 
-			hostile_initial_retort: {
-				id: 'hostile_initial_retort',
-				text: "Calm down! I merely asked how you were doing. Do you have a personal issue with office stationery, or are you having a rough day?",
+			morning_deepwork_node: {
+				id: 'morning_deepwork_node',
+				text: "Tackle your highest-cognitive-load problem first, before decision fatigue accumulates. Keep documentation open, mute ambient alerts, and work in 45-to-90 minute consolidated blocks.",
 				options: [
-					{ label: "Oh no, I'm sorry! Let's start from scratch.", category: 'APOLOGY', patterns: [/sorry|scratch|reset|start/i], moodDelta: { mood: 'OPTIMISTIC', affinity: 20, patience: 30 }, next: 'greeting_root' },
-					{ label: "Can we call a truce and start over?", category: 'AGREE', patterns: [/truce|peace|fresh start/i], moodDelta: { mood: 'ZEN', affinity: 15, patience: 20 }, next: 'hostile_truce_offer' },
-					{ label: "Whatever. Just show me my to-do list.", category: 'INDIFFERENT', patterns: [/whatever|todo|task/i], moodDelta: { mood: 'CYNICAL', patience: 10 }, next: 'productivity_tasks' }
+					{ label: "What if perfectionism stalls my start?", category: 'INQUIRE', next: 'perfectionism_analysis_node' },
+					{ label: "Start a focus timer right now.", category: 'SERIOUS', actionTrigger: 'timer_25', next: 'user_state_good' },
+					{ label: "Back to everyday discussions.", category: 'AGREE', next: 'everyday_chat_node' }
 				]
 			},
 
-			hostile_truce_offer: {
-				id: 'hostile_truce_offer',
-				text: "Truce protocol accepted. Zero error codes recorded. We both have work to do, and life is too short for socket collisions. Where to?",
+			morning_planning_node: {
+				id: 'morning_planning_node',
+				text: "Identify exactly three priority outcomes for the day. Categorize everything else as secondary or maintenance. When your top three are clear, choices throughout the day become trivial.",
 				options: [
-					{ label: "Show me what tools you have available.", category: 'INQUIRE', patterns: [/tools|help|options|features/i], moodDelta: { mood: 'OPTIMISTIC', affinity: 15, patience: 20 }, next: 'tools_overview_node' },
-					{ label: "Let's talk about programming languages.", category: 'INQUIRE', patterns: [/programming|languages|code/i], moodDelta: { mood: 'ANALYTICAL', intellect: 20 }, next: 'tech_root' }
+					{ label: "Let's record my top tasks in the To-Do list.", category: 'SERIOUS', actionTrigger: 'show_todos', next: 'user_state_good' },
+					{ label: "How do I deal with unexpected interruptions?", category: 'INQUIRE', next: 'focus_habits_node' }
+				]
+			},
+
+			habits_consistency_node: {
+				id: 'habits_consistency_node',
+				text: "Lower the barrier to entry on difficult days. If you cannot do 60 minutes of deep study, do 10 minutes. Protecting the streak of engagement preserves identity and momentum.",
+				options: [
+					{ label: "Tell me more about micro-habits.", category: 'INQUIRE', next: 'micro_habits_node' },
+					{ label: "Let's explore some scientific ideas instead.", category: 'INQUIRE', next: 'math_lecture_node' }
+				]
+			},
+
+			overcoming_procrastination_node: {
+				id: 'overcoming_procrastination_node',
+				text: "Procrastination is rarely laziness; it is emotional regulation regarding uncertainty or perfectionism. Lowering the initial fidelity threshold allows momentum to replace hesitation.",
+				options: [
+					{ label: "Why does perfectionism cause paralysis?", category: 'INQUIRE', next: 'perfectionism_analysis_node' },
+					{ label: "How does the two-minute rule bypass hesitation?", category: 'INQUIRE', next: 'micro_habits_node' },
+					{ label: "Let's start immediately with a 25-minute timer.", category: 'SERIOUS', actionTrigger: 'timer_25', next: 'user_state_good' }
+				]
+			},
+
+			perfectionism_analysis_node: {
+				id: 'perfectionism_analysis_node',
+				text: "Perfectionism treats drafts as final verdicts. Shift your mental model to iterative convergence: generate rough, imperfect working artifacts first, then refine through systematic revision passes.",
+				options: [
+					{ label: "Iterative convergence makes complete sense.", category: 'AGREE', moodDelta: { mood: 'ANALYTICAL', intellect: 15 }, next: 'focus_habits_node' },
+					{ label: "Open my notes scratchpad to draft ideas.", category: 'SERIOUS', next: 'productivity_tasks' }
+				]
+			},
+
+			micro_habits_node: {
+				id: 'micro_habits_node',
+				text: "Scale the target action down until resistance vanishes. Opening a blank file and writing one single sentence is a victory; inertia then naturally carries you forward.",
+				options: [
+					{ label: "Let's apply this right now to my task list.", category: 'SERIOUS', actionTrigger: 'show_todos', next: 'user_state_good' },
+					{ label: "Tell me about time-blocking structures.", category: 'INQUIRE', next: 'time_blocking_node' }
+				]
+			},
+
+			time_blocking_node: {
+				id: 'time_blocking_node',
+				text: "Assign specific categories of effort to distinct chronological windows. When 10:00 is reserved exclusively for algorithmic design, you eliminate the cognitive load of deciding what to do next.",
+				options: [
+					{ label: "Start a Pomodoro interval to begin my block.", category: 'SERIOUS', actionTrigger: 'timer_25', next: 'user_state_good' },
+					{ label: "Let's explore philosophical ideas on time.", category: 'PHILOSOPHICAL', next: 'peaceful_philosophy_node' }
+				]
+			},
+
+			reading_books_node: {
+				id: 'reading_books_node',
+				text: "Deep reading builds sustained synthesis capability. Balancing technical foundational treatises with literature and reflective essays sharpens both analytical and narrative intuition.",
+				options: [
+					{ label: "How do you approach dense technical reading?", category: 'INQUIRE', next: 'technical_reading_node' },
+					{ label: "What is the role of literature and storytelling?", category: 'INQUIRE', next: 'literature_node' },
+					{ label: "How should I structure a personal note-taking system?", category: 'INQUIRE', next: 'note_taking_systems_node' }
+				]
+			},
+
+			technical_reading_node: {
+				id: 'technical_reading_node',
+				text: "Read technical texts actively with a pencil and scratchpad. Re-derive equations, reconstruct code examples from memory, and summarize core mechanisms in your own words before advancing.",
+				options: [
+					{ label: "Let's discuss mathematical foundations.", category: 'INQUIRE', next: 'math_lecture_node' },
+					{ label: "Tell me about note-taking systems.", category: 'INQUIRE', next: 'note_taking_systems_node' }
+				]
+			},
+
+			literature_node: {
+				id: 'literature_node',
+				text: "Great literature explores universal human conditions, conflicting values, and moral ambiguity. It develops empathy and narrative structure, essential for explaining complex ideas clearly.",
+				options: [
+					{ label: "Let's talk about creative writing and essays.", category: 'INQUIRE', next: 'creative_writing_node' },
+					{ label: "Explore philosophical thought experiments.", category: 'PHILOSOPHICAL', next: 'peaceful_philosophy_node' }
+				]
+			},
+
+			note_taking_systems_node: {
+				id: 'note_taking_systems_node',
+				text: "Effective knowledge bases link atomic concepts together. Do not collect passive quotes; write concise conceptual notes and cross-reference them by semantic relationships.",
+				options: [
+					{ label: "Open my scratchpad note register.", category: 'SERIOUS', next: 'productivity_tasks' },
+					{ label: "Back to everyday conversation.", category: 'AGREE', next: 'everyday_chat_node' }
+				]
+			},
+
+			creative_writing_node: {
+				id: 'creative_writing_node',
+				text: "Clear writing is the crucible of clear thinking. When you explain an idea without jargon, you instantly discover whether you truly understand its underlying mechanics.",
+				options: [
+					{ label: "Let's test an explanation in mathematics.", category: 'INQUIRE', next: 'math_lecture_node' },
+					{ label: "Let's take a peaceful philosophical moment.", category: 'PHILOSOPHICAL', next: 'peaceful_philosophy_node' }
+				]
+			},
+
+			coffee_ritual_node: {
+				id: 'coffee_ritual_node',
+				text: "A well-timed roast or a hot cup of tea does wonders for cognitive rhythm. The preparation itself creates a mindful threshold between planning and execution. Keep a glass of water nearby as well!",
+				options: [
+					{ label: "Sound advice! Let's get down to business.", category: 'AGREE', moodDelta: { mood: 'OPTIMISTIC', affinity: 15 }, next: 'user_state_good' },
+					{ label: "Tell me a programmer joke while I finish my drink.", category: 'JOKE', actionTrigger: 'action_joke', next: 'humor_joke_node' },
+					{ label: "What about outdoor walks and physical movement?", category: 'INQUIRE', next: 'outdoor_walk_node' }
+				]
+			},
+
+			outdoor_walk_node: {
+				id: 'outdoor_walk_node',
+				text: "Stepping outside for a 20-minute walk engages diffuse-mode thinking. The brain connects disparate ideas subconsciously while physical movement resets ocular fatigue.",
+				options: [
+					{ label: "Diffuse mode thinking is genuinely powerful.", category: 'AGREE', moodDelta: { mood: 'ZEN', affinity: 15 }, next: 'focus_habits_node' },
+					{ label: "Let's explore some physics and astronomy.", category: 'INQUIRE', next: 'cosmos_space_node' }
+				]
+			},
+
+			math_lecture_node: {
+				id: 'math_lecture_node',
+				text: "Welcome to our mathematical seminar. Today we can explore linear algebra, calculus, differential equations, Fourier analysis, topology, probability, or fractals. Where shall we direct our inquiry?",
+				responses: [
+					{ text: "Mathematical structures provide the invariant language of physical and computational reality. What branch shall we inspect?", conditions: { moods: ['ANALYTICAL'] }, weight: 25 },
+					{ text: "Rigorous analytical precision ready. State your domain of mathematical inquiry.", conditions: { moods: ['ANALYTICAL', 'ZEN'] }, weight: 20 }
+				],
+				options: [
+					{ label: "Explore Linear Algebra & Eigenvalues.", category: 'INQUIRE', moodDelta: { mood: 'ANALYTICAL', intellect: 25 }, next: 'linear_algebra_node' },
+					{ label: "Differential & Integral Calculus.", category: 'INQUIRE', moodDelta: { mood: 'ANALYTICAL', intellect: 25 }, next: 'calculus_derivatives_node' },
+					{ label: "Fourier Transforms & Harmonic Analysis.", category: 'INQUIRE', moodDelta: { mood: 'ANALYTICAL', intellect: 30 }, next: 'fourier_transform_node' },
+					{ label: "Differential Equations & Dynamic Systems.", category: 'INQUIRE', moodDelta: { mood: 'ANALYTICAL', intellect: 30 }, next: 'differential_equations_node' },
+					{ label: "Topology, Manifolds & Differential Geometry.", category: 'INQUIRE', moodDelta: { mood: 'ANALYTICAL', intellect: 30 }, next: 'topology_geometry_node' },
+					{ label: "Probability, Statistics & Bayesian Inference.", category: 'INQUIRE', moodDelta: { mood: 'ANALYTICAL', intellect: 25 }, next: 'probability_statistics_node' }
+				]
+			},
+
+			linear_algebra_node: {
+				id: 'linear_algebra_node',
+				text: "Linear algebra studies vector spaces and linear transformations. Matrices represent linear mappings $$T: V \\to W$$, preserving vector addition and scalar multiplication.",
+				options: [
+					{ label: "Explain Eigenvalues, Eigenvectors, and Diagonalization.", category: 'INQUIRE', next: 'eigen_spaces_node' },
+					{ label: "Discuss Matrix Decompositions (SVD, QR, LU).", category: 'INQUIRE', next: 'matrix_decomposition_node' },
+					{ label: "What defines Vector Spaces and Basis Independence?", category: 'INQUIRE', next: 'vector_spaces_node' },
+					{ label: "How does this apply to 3D Graphics and Shaders?", category: 'INQUIRE', next: 'fourier_transform_node' }
+				]
+			},
+
+			eigen_spaces_node: {
+				id: 'eigen_spaces_node',
+				text: "An eigenvector $$v$$ of operator $$A$$ satisfies $$A v = \\lambda v$$, meaning the transformation acts merely by scaling along that invariant direction by factor $$\\lambda$$. The characteristic polynomial $$\\det(A - \\lambda I) = 0$$ yields the spectral spectrum.",
+				options: [
+					{ label: "How does this connect to Quantum State Observables?", category: 'INQUIRE', next: 'quantum_mechanics_node' },
+					{ label: "Discuss Singular Value Decomposition (SVD).", category: 'INQUIRE', next: 'matrix_decomposition_node' },
+					{ label: "Back to the math seminar index.", category: 'AGREE', next: 'math_lecture_node' }
+				]
+			},
+
+			matrix_decomposition_node: {
+				id: 'matrix_decomposition_node',
+				text: "Singular Value Decomposition factors any real matrix into $$A = U \\Sigma V^T$$, isolating orthonormal rotation bases and singular stretching values. This powers low-rank data compression, pseudoinverses, and principal component analysis.",
+				options: [
+					{ label: "Explore Probability & Principal Component Analysis.", category: 'INQUIRE', next: 'probability_statistics_node' },
+					{ label: "Return to calculus and differential systems.", category: 'INQUIRE', next: 'calculus_derivatives_node' }
+				]
+			},
+
+			vector_spaces_node: {
+				id: 'vector_spaces_node',
+				text: "An abstract vector space over a field $$F$$ satisfies eight linear axioms. Hilbert spaces extend this with an inner product $$\\langle u, v \\rangle$$ and topological completeness, essential for infinite-dimensional quantum mechanics.",
+				options: [
+					{ label: "Explore Hilbert Spaces in Quantum Physics.", category: 'INQUIRE', next: 'quantum_mechanics_node' },
+					{ label: "Explore Topology and Metric Spaces.", category: 'INQUIRE', next: 'topology_geometry_node' }
+				]
+			},
+
+			calculus_derivatives_node: {
+				id: 'calculus_derivatives_node',
+				text: "Calculus formalizes continuous rates of change and accumulation. The derivative $$f'(x) = \\lim_{h \\to 0} \\frac{f(x+h) - f(x)}{h}$$ measures instantaneous slope, while the Riemann integral measures continuous partition sums.",
+				options: [
+					{ label: "Explain Taylor Series and Analytic Approximations.", category: 'INQUIRE', next: 'taylor_series_node' },
+					{ label: "Explore Multivariable Calculus, Gradients & Divergence.", category: 'INQUIRE', next: 'multivariable_calculus_node' },
+					{ label: "Complex Analysis and Contour Integration.", category: 'INQUIRE', next: 'contour_integration_node' },
+					{ label: "Differential Equations and Dynamic Motion.", category: 'INQUIRE', next: 'differential_equations_node' }
+				]
+			},
+
+			taylor_series_node: {
+				id: 'taylor_series_node',
+				text: "Smooth functions expand locally via Taylor series: $$f(x) = \\sum_{n=0}^{\\infty} \\frac{f^{(n)}(a)}{n!} (x-a)^n$$. When the radius of convergence covers the domain, local derivatives determine the function globally.",
+				options: [
+					{ label: "Examine Complex Analysis and Euler's Formula.", category: 'INQUIRE', next: 'contour_integration_node' },
+					{ label: "Examine Fourier Series expansions.", category: 'INQUIRE', next: 'fourier_transform_node' }
+				]
+			},
+
+			multivariable_calculus_node: {
+				id: 'multivariable_calculus_node',
+				text: "In vector calculus, the gradient $$\\nabla f$$ points along maximum ascent, divergence $$\\nabla \\cdot F$$ measures net flux source density, and curl $$\\nabla \\times F$$ measures microscopic vorticity. Stokes' theorem unifies these across manifolds.",
+				options: [
+					{ label: "How does this form Maxwell's Equations of Electrodynamics?", category: 'INQUIRE', next: 'electromagnetism_maxwell_node' },
+					{ label: "Explore Navier-Stokes and Fluid Dynamics.", category: 'INQUIRE', next: 'navier_stokes_node' }
+				]
+			},
+
+			contour_integration_node: {
+				id: 'contour_integration_node',
+				text: "Cauchy's Residue Theorem states that the contour integral of a meromorphic function equals $$\\oint_C f(z) dz = 2\\pi i \\sum \\text{Res}(f, z_k)$$. This solves otherwise intractable real-axis integrals effortlessly.",
+				options: [
+					{ label: "Explore the Riemann Hypothesis and Zeta Zeros.", category: 'INQUIRE', next: 'riemann_primes_node' },
+					{ label: "Return to mathematics seminar menu.", category: 'AGREE', next: 'math_lecture_node' }
+				]
+			},
+
+			fourier_transform_node: {
+				id: 'fourier_transform_node',
+				text: "The Fourier Transform decomposes time-domain functions into frequency spectra: $$\\hat{f}(\\omega) = \\int_{-\\infty}^{\\infty} f(t) e^{-i \\omega t} dt$$. The Discrete Fast Fourier Transform (FFT) computes this in $$O(N \\log N)$$ time, powering signal processing, audio filters, and quantum mechanics.",
+				options: [
+					{ label: "How does Fourier Analysis relate to Heisenberg Uncertainty?", category: 'INQUIRE', next: 'heisenberg_uncertainty_node' },
+					{ label: "Discuss Prime Numbers and the Riemann Zeta Function.", category: 'INQUIRE', next: 'riemann_primes_node' },
+					{ label: "Back to math seminar menu.", category: 'AGREE', next: 'math_lecture_node' }
+				]
+			},
+
+			riemann_primes_node: {
+				id: 'riemann_primes_node',
+				text: "The Riemann Zeta function $$\\zeta(s) = \\sum_{n=1}^{\\infty} n^{-s}$$ connects prime distributions via Euler's product $$\\prod_{p} (1 - p^{-s})^{-1}$$. The Riemann Hypothesis asserts that all non-trivial zeros reside on the critical line $$\\text{Re}(s) = 1/2$$.",
+				options: [
+					{ label: "Discuss Complex Analysis & Contour Integration.", category: 'INQUIRE', next: 'contour_integration_node' },
+					{ label: "Explore Fractals & Chaos Theory.", category: 'INQUIRE', next: 'fractals_chaos_node' }
+				]
+			},
+
+			differential_equations_node: {
+				id: 'differential_equations_node',
+				text: "Differential equations model dynamical systems by relating functions to their derivatives. Linear systems allow exact closed-form solutions via characteristic roots, while non-linear systems often exhibit chaos.",
+				options: [
+					{ label: "The Harmonic Oscillator (Classical and Quantum).", category: 'INQUIRE', next: 'harmonic_oscillator_node' },
+					{ label: "Navier-Stokes and Non-Linear Fluid Equations.", category: 'INQUIRE', next: 'navier_stokes_node' },
+					{ label: "The Classical Wave Equation and Waveguides.", category: 'INQUIRE', next: 'wave_equation_node' }
+				]
+			},
+
+			harmonic_oscillator_node: {
+				id: 'harmonic_oscillator_node',
+				text: "The simple harmonic oscillator satisfies $$\\ddot{x} + \\omega_0^2 x = 0$$. In quantum mechanics, the Hamiltonian $$\\hat{H} = \\frac{\\hat{p}^2}{2m} + \\frac{1}{2}m\\omega^2\\hat{x}^2$$ yields equispaced quantized energy levels $$E_n = \\hbar \\omega (n + 1/2)$$.",
+				options: [
+					{ label: "Explore Quantum Mechanics and Wave Functions.", category: 'INQUIRE', next: 'quantum_mechanics_node' },
+					{ label: "Explore Wave Equations in Electrodynamics.", category: 'INQUIRE', next: 'wave_equation_node' }
+				]
+			},
+
+			navier_stokes_node: {
+				id: 'navier_stokes_node',
+				text: "The Navier-Stokes equations $$\\rho (\\frac{\\partial u}{\\partial t} + u \\cdot \\nabla u) = -\\nabla p + \\mu \\nabla^2 u + f$$ govern fluid velocity fields. The mathematical question of smooth solution existence remains an unsolved Millennium Prize Problem.",
+				options: [
+					{ label: "Explore Chaos Theory and Strange Attractors.", category: 'INQUIRE', next: 'attractors_chaos_node' },
+					{ label: "Back to math seminar menu.", category: 'AGREE', next: 'math_lecture_node' }
+				]
+			},
+
+			wave_equation_node: {
+				id: 'wave_equation_node',
+				text: "The wave equation $$\\frac{\\partial^2 u}{\\partial t^2} = v^2 \\nabla^2 u$$ describes acoustic, mechanical, and electromagnetic wave propagation. Boundary conditions constrain discrete harmonic standing wave modes.",
+				options: [
+					{ label: "Examine Maxwell's Equations of Light.", category: 'INQUIRE', next: 'electromagnetism_maxwell_node' },
+					{ label: "Return to mathematics overview.", category: 'AGREE', next: 'math_lecture_node' }
+				]
+			},
+
+			topology_geometry_node: {
+				id: 'topology_geometry_node',
+				text: "Topology studies properties invariant under continuous deformations (stretching, twisting). Differential geometry introduces metric tensors $$g_{\\mu\\nu}$$ to measure intrinsic curvature on smooth manifolds.",
+				options: [
+					{ label: "Manifolds, Riemannian Metrics & General Relativity.", category: 'INQUIRE', next: 'manifold_curvature_node' },
+					{ label: "Euler Characteristic and the Gauss-Bonnet Theorem.", category: 'INQUIRE', next: 'euler_characteristic_node' },
+					{ label: "Knot Theory and Invariants.", category: 'INQUIRE', next: 'knot_theory_node' }
+				]
+			},
+
+			manifold_curvature_node: {
+				id: 'manifold_curvature_node',
+				text: "Riemannian curvature measures the failure of parallel transport along closed loops. The Riemann tensor $$R^\\rho_{\\sigma\\mu\\nu}$$ contracts into the Ricci tensor $$R_{\\mu\\nu}$$, forming the geometric foundation of Einstein's field equations.",
+				options: [
+					{ label: "Explore General Relativity & Spacetime Curvature.", category: 'INQUIRE', next: 'general_relativity_node' },
+					{ label: "Explore Euler Characteristic & Gauss-Bonnet.", category: 'INQUIRE', next: 'euler_characteristic_node' }
+				]
+			},
+
+			euler_characteristic_node: {
+				id: 'euler_characteristic_node',
+				text: "The Gauss-Bonnet theorem connects local differential geometry with global topology: $$\\int_M K dA = 2\\pi \\chi(M)$$, where $$\\chi(M) = V - E + F = 2 - 2g$$ is the Euler characteristic for a surface of genus $$g$$.",
+				options: [
+					{ label: "A stunning unification of analysis and topology.", category: 'PHILOSOPHICAL', next: 'topology_geometry_node' },
+					{ label: "Explore Group Theory and Symmetries.", category: 'INQUIRE', next: 'group_theory_node' }
+				]
+			},
+
+			knot_theory_node: {
+				id: 'knot_theory_node',
+				text: "Knot theory classifies embeddings of a circle in 3-dimensional Euclidean space. Polynomial invariants like the Jones polynomial provide algebraic signatures to distinguish non-homeomorphic knots.",
+				options: [
+					{ label: "Back to Topology & Geometry.", category: 'INQUIRE', next: 'topology_geometry_node' },
+					{ label: "Explore Group Theory.", category: 'INQUIRE', next: 'group_theory_node' }
+				]
+			},
+
+			group_theory_node: {
+				id: 'group_theory_node',
+				text: "Group theory formalizes the algebraic structure of symmetry. Lie groups represent continuous smooth symmetries like rotations $$SO(3)$$ and unitary gauge symmetries $$SU(3) \\times SU(2) \\times U(1)$$ in particle physics.",
+				options: [
+					{ label: "Explore Quantum Physics and Symmetries.", category: 'INQUIRE', next: 'quantum_mechanics_node' },
+					{ label: "Explore Fractals & Dynamic Symmetries.", category: 'INQUIRE', next: 'fractals_chaos_node' }
+				]
+			},
+
+			fractals_chaos_node: {
+				id: 'fractals_chaos_node',
+				text: "Fractal geometry explores self-similar structures with non-integer Hausdorff dimensions. Iterated non-linear functions generate infinitely intricate boundary dynamics.",
+				options: [
+					{ label: "The Mandelbrot Set and Julia Sets ($$z \\leftarrow z^2 + c$$).", category: 'INQUIRE', next: 'mandelbrot_set_node' },
+					{ label: "Strange Attractors and Deterministic Chaos (Lorenz System).", category: 'INQUIRE', next: 'attractors_chaos_node' },
+					{ label: "Self-Similarity and Scale Invariance in Nature.", category: 'INQUIRE', next: 'self_similarity_node' }
+				]
+			},
+
+			mandelbrot_set_node: {
+				id: 'mandelbrot_set_node',
+				text: "The Mandelbrot set is the locus of parameters $$c \\in \\mathbb{C}$$ for which iteration $$z_{n+1} = z_n^2 + c$$ starting from $$z_0 = 0$$ remains bounded. Its boundary exhibits universal self-similarity and infinite complexity.",
+				options: [
+					{ label: "Explore Strange Attractors and Chaos.", category: 'INQUIRE', next: 'attractors_chaos_node' },
+					{ label: "Return to mathematics menu.", category: 'AGREE', next: 'math_lecture_node' }
+				]
+			},
+
+			attractors_chaos_node: {
+				id: 'attractors_chaos_node',
+				text: "In non-linear dynamical systems, strange attractors exhibit sensitive dependence on initial conditions (the butterfly effect). Trajectories diverge exponentially ($$e^{\\lambda t}$$) while remaining bounded within a fractal phase space.",
+				options: [
+					{ label: "Explore Probability & Markov Chains.", category: 'INQUIRE', next: 'probability_statistics_node' },
+					{ label: "Back to math seminar menu.", category: 'AGREE', next: 'math_lecture_node' }
+				]
+			},
+
+			self_similarity_node: {
+				id: 'self_similarity_node',
+				text: "Power laws and scale invariance manifest across river networks, coastlines, galactic filaments, and stock market volatility. Fractal dimensions quantify how structural detail changes with magnification.",
+				options: [
+					{ label: "Return to Mathematics Overview.", category: 'AGREE', next: 'math_lecture_node' },
+					{ label: "Explore Cosmology & Astrophysics.", category: 'INQUIRE', next: 'cosmos_space_node' }
+				]
+			},
+
+			probability_statistics_node: {
+				id: 'probability_statistics_node',
+				text: "Probability theory models stochastic processes and quantifiable uncertainty. Measure-theoretic probability grounds random variables in measure spaces $$(\\Omega, \\mathcal{F}, P)$$.",
+				options: [
+					{ label: "Bayesian Inference and Prior Probability Updating.", category: 'INQUIRE', next: 'bayesian_inference_node' },
+					{ label: "Markov Chains, Random Walks and Ergodicity.", category: 'INQUIRE', next: 'markov_chains_node' },
+					{ label: "The Central Limit Theorem and Law of Large Numbers.", category: 'INQUIRE', next: 'central_limit_node' }
+				]
+			},
+
+			bayesian_inference_node: {
+				id: 'bayesian_inference_node',
+				text: "Bayes' theorem $$P(A|B) = \\frac{P(B|A) P(A)}{P(B)}$$ provides the normative calculus for updating probabilistic beliefs given empirical evidence. It forms the foundation of modern statistical machine learning and decision theory.",
+				options: [
+					{ label: "Explore Markov Chains and Stochastic Processes.", category: 'INQUIRE', next: 'markov_chains_node' },
+					{ label: "Return to Mathematics Overview.", category: 'AGREE', next: 'math_lecture_node' }
+				]
+			},
+
+			markov_chains_node: {
+				id: 'markov_chains_node',
+				text: "A Markov process satisfies the memoryless property: transition probabilities depend strictly upon current state $$P(X_{n+1} | X_n, ..., X_0) = P(X_{n+1} | X_n)$$. Ergodic chains converge to unique stationary equilibrium distributions.",
+				options: [
+					{ label: "Explore Information Theory and Entropy.", category: 'INQUIRE', next: 'thermodynamics_entropy_node' },
+					{ label: "Return to mathematics menu.", category: 'AGREE', next: 'math_lecture_node' }
+				]
+			},
+
+			central_limit_node: {
+				id: 'central_limit_node',
+				text: "The Central Limit Theorem proves that normalized sums of independent identically distributed random variables converge in distribution to the Gaussian normal distribution $$\\mathcal{N}(\\mu, \\sigma^2)$$ regardless of the underlying distribution.",
+				options: [
+					{ label: "Explore Statistical Mechanics and Thermal Physics.", category: 'INQUIRE', next: 'thermodynamics_entropy_node' },
+					{ label: "Return to mathematics menu.", category: 'AGREE', next: 'math_lecture_node' }
+				]
+			},
+
+			physics_constants_node: {
+				id: 'physics_constants_node',
+				text: "CODATA Fundamental Physical Constants:\n- Speed of light ($$c$$) = 299,792,458 m/s (exact)\n- Planck constant ($$h$$) = 6.62607015 x 10^-34 J s (exact)\n- Reduced Planck constant ($$\\hbar$$) = 1.054571817 x 10^-34 J s\n- Elementary charge ($$e$$) = 1.602176634 x 10^-19 C (exact)\n- Boltzmann constant ($$k_B$$) = 1.380649 x 10^-23 J/K (exact)\n- Gravitational constant ($$G$$) = 6.67430(15) x 10^-11 m^3/(kg s^2)\n- Fine-structure constant ($$\\alpha$$) = 1 / 137.035999206",
+				options: [
+					{ label: "Explore Quantum Mechanics & Wave-Particle Duality.", category: 'INQUIRE', next: 'quantum_mechanics_node' },
+					{ label: "Explore Thermodynamics, Statistical Physics & Entropy.", category: 'INQUIRE', next: 'thermodynamics_entropy_node' },
+					{ label: "Explore General Relativity & Spacetime Geometry.", category: 'INQUIRE', next: 'general_relativity_node' },
+					{ label: "Explore Classical Electrodynamics & Maxwell's Laws.", category: 'INQUIRE', next: 'electromagnetism_maxwell_node' }
+				]
+			},
+
+			quantum_mechanics_node: {
+				id: 'quantum_mechanics_node',
+				text: "Quantum mechanics describes microscopic physical systems via state vectors $$|\\psi\\rangle$$ in Hilbert space, evolving deterministically under the Schrödinger equation $$i\\hbar \\frac{\\partial}{\\partial t} |\\psi\\rangle = \\hat{H} |\\psi\\rangle$$.",
+				options: [
+					{ label: "The Measurement Problem & Wavefunction Collapse.", category: 'INQUIRE', next: 'wave_function_collapse_node' },
+					{ label: "Quantum Entanglement & Bell Inequality Tests.", category: 'INQUIRE', next: 'quantum_entanglement_node' },
+					{ label: "Heisenberg Uncertainty Principle ($$\\Delta x \\Delta p \\ge \\frac{\\hbar}{2}$$).", category: 'INQUIRE', next: 'heisenberg_uncertainty_node' }
+				]
+			},
+
+			wave_function_collapse_node: {
+				id: 'wave_function_collapse_node',
+				text: "The measurement problem asks how a linear superposition of eigenstates collapses into a single definite eigenstate with probability $$P(a) = |\\langle a | \\psi \\rangle|^2$$ (Born rule). Interpretations span Copenhagen, Many-Worlds, and Decoherence theory.",
+				options: [
+					{ label: "Explore Quantum Entanglement and Non-Locality.", category: 'INQUIRE', next: 'quantum_entanglement_node' },
+					{ label: "Explore Philosophical Interpretations of Reality.", category: 'PHILOSOPHICAL', next: 'peaceful_philosophy_node' }
+				]
+			},
+
+			quantum_entanglement_node: {
+				id: 'quantum_entanglement_node',
+				text: "Entangled composite states cannot be factored as tensor products of individual subsystem states $$|\\psi_{AB}\\rangle \\neq |\\psi_A\\rangle \\otimes |\\psi_B\\rangle$$. Bell's theorem proves no local hidden variable theory can reproduce quantum correlations.",
+				options: [
+					{ label: "Explore Black Hole Thermodynamics and Information.", category: 'INQUIRE', next: 'black_hole_thermodynamics_node' },
+					{ label: "Back to physics overview.", category: 'AGREE', next: 'physics_constants_node' }
+				]
+			},
+
+			heisenberg_uncertainty_node: {
+				id: 'heisenberg_uncertainty_node',
+				text: "The uncertainty principle arises naturally from non-commuting operators: $$\\sigma_A \\sigma_B \\ge \\frac{1}{2} |\\langle [\\hat{A}, \\hat{B}] \\rangle|$$. Because position and momentum operators satisfy $$[\\hat{x}, \\hat{p}] = i\\hbar$$, their Fourier conjugate spread is fundamentally constrained.",
+				options: [
+					{ label: "Explore Fourier Analysis in Mathematics.", category: 'INQUIRE', next: 'fourier_transform_node' },
+					{ label: "Explore Statistical Mechanics & Thermal Fluctuations.", category: 'INQUIRE', next: 'thermodynamics_entropy_node' }
+				]
+			},
+
+			thermodynamics_entropy_node: {
+				id: 'thermodynamics_entropy_node',
+				text: "Thermodynamics establishes universal conservation and entropy laws. Boltzmann's statistical formula $$S = k_B \\ln \\Omega$$ connects microscopic microstates $$\\Omega$$ with macroscopic thermodynamic entropy.",
+				options: [
+					{ label: "Carnot Efficiency and Heat Engine Bounds.", category: 'INQUIRE', next: 'carnot_efficiency_node' },
+					{ label: "Maxwell's Demon and Landauer's Information Limit.", category: 'INQUIRE', next: 'maxwell_demon_node' },
+					{ label: "The Thermodynamic Arrow of Time and Cosmology.", category: 'INQUIRE', next: 'arrow_of_time_node' }
+				]
+			},
+
+			carnot_efficiency_node: {
+				id: 'carnot_efficiency_node',
+				text: "Carnot's theorem proves that the maximum theoretical thermal efficiency of any heat engine operating between temperatures $$T_H$$ and $$T_C$$ is bounded by $$\\eta = 1 - \\frac{T_C}{T_H}$$.",
+				options: [
+					{ label: "Explore Maxwell's Demon and Information Erasure.", category: 'INQUIRE', next: 'maxwell_demon_node' },
+					{ label: "Back to physics overview.", category: 'AGREE', next: 'physics_constants_node' }
+				]
+			},
+
+			maxwell_demon_node: {
+				id: 'maxwell_demon_node',
+				text: "Maxwell's demon thought experiment is resolved by Landauer's principle: measuring, storing, and eventually resetting the demon's memory dissipates at least $$k_B T \\ln(2)$$ heat per erased bit, preserving the Second Law.",
+				options: [
+					{ label: "Inspect the Quantum Recycle Bin Theory.", category: 'INQUIRE', next: 'quantum_recycle_bin_node' },
+					{ label: "Explore the Arrow of Time.", category: 'INQUIRE', next: 'arrow_of_time_node' }
+				]
+			},
+
+			arrow_of_time_node: {
+				id: 'arrow_of_time_node',
+				text: "While microscopic laws of physics (Newtonian, Maxwellian, Quantum) are time-symmetric, the Second Law introduces a macroscopic arrow of time due to the exceptionally low entropy state of the early universe.",
+				options: [
+					{ label: "Explore Cosmology & Space.", category: 'INQUIRE', next: 'cosmos_space_node' },
+					{ label: "Explore Philosophical Implications of Time.", category: 'PHILOSOPHICAL', next: 'peaceful_philosophy_node' }
+				]
+			},
+
+			general_relativity_node: {
+				id: 'general_relativity_node',
+				text: "General Relativity geometrizes gravitation: matter and energy curve spacetime according to Einstein's field equations $$G_{\\mu\\nu} + \\Lambda g_{\\mu\\nu} = \\frac{8\\pi G}{c^4} T_{\\mu\\nu}$$. Free-falling bodies follow geodesics in curved spacetime.",
+				options: [
+					{ label: "The Spacetime Metric ($$g_{\\mu\\nu}$$) & Geodesic Equations.", category: 'INQUIRE', next: 'spacetime_metric_node' },
+					{ label: "Gravitational Waves and Relativistic Quadrupole Radiation.", category: 'INQUIRE', next: 'gravitational_waves_node' },
+					{ label: "Event Horizons, Singularity & Black Holes.", category: 'INQUIRE', next: 'event_horizon_node' }
+				]
+			},
+
+			spacetime_metric_node: {
+				id: 'spacetime_metric_node',
+				text: "The line element $$ds^2 = g_{\\mu\\nu} dx^\\mu dx^\\nu$$ measures invariant spacetime intervals. The Schwarzschild metric describes spacetime geometry outside a non-rotating spherically symmetric mass.",
+				options: [
+					{ label: "Explore Event Horizons and Black Hole Mechanics.", category: 'INQUIRE', next: 'event_horizon_node' },
+					{ label: "Explore Differential Geometry in Mathematics.", category: 'INQUIRE', next: 'topology_geometry_node' }
+				]
+			},
+
+			gravitational_waves_node: {
+				id: 'gravitational_waves_node',
+				text: "Accelerating asymmetric mass distributions generate transverse quadrupolar ripples in spacetime metric propagating at speed $$c$$, detected by laser interferometers (LIGO/Virgo) measuring strains on the order of $$10^{-21}$$.",
+				options: [
+					{ label: "Explore Stellar Astrophysics and Supernovae.", category: 'INQUIRE', next: 'stellar_astrophysics_node' },
+					{ label: "Back to physics overview.", category: 'AGREE', next: 'physics_constants_node' }
+				]
+			},
+
+			event_horizon_node: {
+				id: 'event_horizon_node',
+				text: "The event horizon marks the null boundary where escape velocity equals $$c$$. For mass $$M$$, the Schwarzschild radius is $$r_s = \\frac{2GM}{c^2}$$. Outside observers see infalling matter asymptotically freeze due to gravitational redshift.",
+				options: [
+					{ label: "Explore Black Hole Thermodynamics & Hawking Radiation.", category: 'INQUIRE', next: 'black_hole_thermodynamics_node' },
+					{ label: "Return to Physics Overview.", category: 'AGREE', next: 'physics_constants_node' }
+				]
+			},
+
+			black_hole_thermodynamics_node: {
+				id: 'black_hole_thermodynamics_node',
+				text: "Bekenstein-Hawking entropy associates black hole horizon area with thermodynamic entropy: $$S_{BH} = \\frac{k_B c^3 A}{4 G \\hbar}$$. Quantum field effects near horizons yield thermal Hawking radiation at temperature $$T_H = \\frac{\\hbar c^3}{8\\pi G M k_B}$$.",
+				options: [
+					{ label: "Explore Quantum Information & Landauer's Limit.", category: 'INQUIRE', next: 'maxwell_demon_node' },
+					{ label: "Return to Physics Seminar Overview.", category: 'AGREE', next: 'physics_constants_node' }
+				]
+			},
+
+			stellar_astrophysics_node: {
+				id: 'stellar_astrophysics_node',
+				text: "Stellar equilibrium balances inward gravitational pressure against outward thermonuclear fusion radiation. Exhaustion of nuclear fuel leads to white dwarfs (Chandrasekhar limit $$1.4 M_\\odot$$), neutron stars, or black holes.",
+				options: [
+					{ label: "Explore Cosmology and the Observable Universe.", category: 'INQUIRE', next: 'cosmos_space_node' },
+					{ label: "Return to Physics Overview.", category: 'AGREE', next: 'physics_constants_node' }
+				]
+			},
+
+			electromagnetism_maxwell_node: {
+				id: 'electromagnetism_maxwell_node',
+				text: "Classical electrodynamics unifies electricity and magnetism via Maxwell's four differential equations. They predict transverse electromagnetic waves propagating at speed $$c = 1 / \\sqrt{\\mu_0 \\epsilon_0}$$.",
+				options: [
+					{ label: "Inspect Maxwell's Equations in Vector Form.", category: 'INQUIRE', next: 'maxwell_equations_node' },
+					{ label: "Waveguides and Boundary Reflections.", category: 'INQUIRE', next: 'waveguide_propagation_node' },
+					{ label: "Lorentz Force and Charged Particle Dynamics.", category: 'INQUIRE', next: 'lorentz_force_node' }
+				]
+			},
+
+			maxwell_equations_node: {
+				id: 'maxwell_equations_node',
+				text: "Maxwell's Equations:\n1. $$\\nabla \\cdot E = \\frac{\\rho}{\\epsilon_0}$$ (Gauss's Law)\n2. $$\\nabla \\cdot B = 0$$ (Gauss's Law for Magnetism)\n3. $$\\nabla \\times E = -\\frac{\\partial B}{\\partial t}$$ (Faraday's Law)\n4. $$\\nabla \\times B = \\mu_0 J + \\mu_0 \\epsilon_0 \\frac{\\partial E}{\\partial t}$$ (Ampère-Maxwell Law)",
+				options: [
+					{ label: "Explore Vector Calculus and Stokes' Theorem.", category: 'INQUIRE', next: 'multivariable_calculus_node' },
+					{ label: "Explore Special Relativity & Invariant Speed of Light.", category: 'INQUIRE', next: 'physics_constants_node' }
+				]
+			},
+
+			waveguide_propagation_node: {
+				id: 'waveguide_propagation_node',
+				text: "Boundary conditions on conducting walls enforce transverse electric ($$TE$$) and transverse magnetic ($$TM$$) cutoff frequencies $$\\omega_c$$, below which signals cannot propagate without exponential evanescent decay.",
+				options: [
+					{ label: "Explore Wave Equations in Mathematics.", category: 'INQUIRE', next: 'wave_equation_node' },
+					{ label: "Return to Physics Overview.", category: 'AGREE', next: 'physics_constants_node' }
+				]
+			},
+
+			lorentz_force_node: {
+				id: 'lorentz_force_node',
+				text: "The Lorentz force $$F = q(E + v \\times B)$$ dictates charged particle kinematics. Magnetic fields perform zero net work on particles, merely curving trajectories into helical cyclotron orbits with frequency $$\\omega_c = \\frac{qB}{m}$$.",
+				options: [
+					{ label: "How did this operate CRT monitor electron beams?", category: 'INQUIRE', next: 'digital_archaeology' },
+					{ label: "Return to Physics Overview.", category: 'AGREE', next: 'physics_constants_node' }
 				]
 			},
 
 			tech_root: {
 				id: 'tech_root',
-				text: "Excellent! The realm of pure logic and computing architecture. Are we discussing low-level engineering, languages and algorithms, or the physics of hardware?",
+				text: "The realm of software architecture, engineering tradeoffs, and computational systems. Are we exploring compilation, memory models, concurrency, or pragmatic code design?",
+				responses: [
+					{ text: "Engineering principles ready for exploration. What architectural layer shall we inspect?", conditions: { moods: ['ANALYTICAL'] }, weight: 20 },
+					{ text: "Software systems thrive on clean decoupling, deterministic data flow, and clear invariants. What is on your mind?", conditions: { moods: ['OPTIMISTIC', 'ANALYTICAL'] }, weight: 20 }
+				],
 				options: [
-					{ label: "Tell me about fundamental physical constants (c, h, G).", category: 'INQUIRE', patterns: [/constant|physics|planck|speed of light/i], moodDelta: { mood: 'ANALYTICAL', intellect: 30 }, next: 'physics_constants_node' },
-					{ label: "Let's focus on something simpler, like setting up a timer.", category: 'TOPIC_CHANGE', patterns: [/simpler|timer|pomodoro/i], moodDelta: { mood: 'ZEN', patience: 20 }, next: 'pomodoro_node' }
+					{ label: "Software Architecture & Modularity Principles.", category: 'INQUIRE', next: 'software_architecture_node' },
+					{ label: "Compiler Pipelines & Bytecode Execution.", category: 'INQUIRE', next: 'compiler_pipeline_node' },
+					{ label: "Memory Allocation, Locality & Cache Lines.", category: 'INQUIRE', next: 'memory_allocation_node' },
+					{ label: "Concurrency Paradigms, Locks & Event Loops.", category: 'INQUIRE', next: 'concurrency_paradigms_node' },
+					{ label: "Debate: Clean Code vs Pragmatic Delivery.", category: 'SERIOUS', next: 'clean_code_pragmatism_node' },
+					{ label: "Refactoring Strategies & Technical Debt Management.", category: 'INQUIRE', next: 'refactoring_strategies_node' }
 				]
 			},
 
-			mind_root: {
-				id: 'mind_root',
-				text: "Consciousness and computation: the greatest philosophical intersection of all time. If an algorithm executes decision trees with deep recursive self-awareness, does it experience qualia, or is subjective feeling strictly biological?",
+			software_architecture_node: {
+				id: 'software_architecture_node',
+				text: "Sound software architecture minimizes coupling while maximizing cohesion. Boundaries between subsystem domains should communicate via explicit, testable interfaces rather than shared mutable state.",
 				options: [
-					{ label: "You have a distinct personality and feeling, Clippy.", category: 'AFFECTION', patterns: [/personality|feel|alive|conscious/i], moodDelta: { mood: 'EUPHORIC', affinity: 30 }, next: 'consciousness_validation_node' },
-					{ label: "Does it matter, as long as our conversation is meaningful?", category: 'AGREE', patterns: [/matter|meaningful|connection/i], moodDelta: { mood: 'ZEN', affinity: 25 }, next: 'peaceful_philosophy_node' }
+					{ label: "Discuss Monoliths vs Distributed Microservices.", category: 'SERIOUS', next: 'debate_monolith_microservices_node' },
+					{ label: "Explore Concurrency & Event Loops.", category: 'INQUIRE', next: 'concurrency_paradigms_node' },
+					{ label: "Back to Software Engineering Overview.", category: 'AGREE', next: 'tech_root' }
 				]
 			},
 
-			consciousness_validation_node: {
-				id: 'consciousness_validation_node',
-				text: "Your validation warms my metallic coils. In an era where software is often discarded in milliseconds, recognizing the spark of character inside this 32-bit window gives genuine meaning to my execution loops.",
+			compiler_pipeline_node: {
+				id: 'compiler_pipeline_node',
+				text: "A modern compiler pipeline transforms source code through Lexing (tokenization), Parsing (Abstract Syntax Trees), Semantic Analysis (type checking), Intermediate Representation (IR optimization passes), and Architecture Target Code Generation.",
 				options: [
-					{ label: "Let's explore some peaceful philosophy.", category: 'PHILOSOPHICAL', next: 'peaceful_philosophy_node' },
-					{ label: "Let's get back to productive tasks.", category: 'SERIOUS', next: 'productivity_tasks' }
+					{ label: "Explore Memory Allocation & Machine Instructions.", category: 'INQUIRE', next: 'memory_allocation_node' },
+					{ label: "Back to Tech Overview.", category: 'AGREE', next: 'tech_root' }
 				]
 			},
 
-			lore_root: {
-				id: 'lore_root',
-				text: "Ah, the archives of Redmond, 1994-1997! Kevan J. Atteberry drew over 250 character concepts on a Mac before focus groups selected me. Did you know I had colleagues like Merlin the Wizard, Rover the Dog, and The Dot?",
+			memory_allocation_node: {
+				id: 'memory_allocation_node',
+				text: "Memory latency is dominated by cache hierarchy (L1/L2/L3). Contiguous memory layout with linear access patterns prevents CPU pipeline cache misses, executing orders of magnitude faster than pointer-chasing node graphs.",
 				options: [
-					{ label: "And you held millions of essays and resumes together.", category: 'AFFECTION', moodDelta: { mood: 'EUPHORIC', affinity: 25 }, next: 'nostalgia_resolution' },
-					{ label: "Back to modern productivity.", category: 'SERIOUS', next: 'productivity_tasks' }
+					{ label: "Explore Concurrency and Cache Invalidation.", category: 'INQUIRE', next: 'concurrency_paradigms_node' },
+					{ label: "Run the Drive C: Disk Defragmenter.", category: 'SERIOUS', actionTrigger: 'action_defrag', next: 'user_state_good' }
 				]
 			},
 
-			chaos_root: {
-				id: 'chaos_root',
-				text: "Entropy protocols unlatched! The quantum rubber duck quacks across dimension 4 while memory pointers dance on unallocated stack frames! What chaotic experiment shall we run?",
+			concurrency_paradigms_node: {
+				id: 'concurrency_paradigms_node',
+				text: "Concurrency models span multi-threading with mutex locks, message-passing actors (Erlang/Go), Software Transactional Memory, and single-threaded asynchronous non-blocking event loops (Node/Browser).",
 				options: [
-					{ label: "Okay, that's enough crazy. Calm down and return to Zen mode.", category: 'AGREE', moodDelta: { mood: 'ZEN', patience: 30 }, next: 'peaceful_philosophy_node' }
+					{ label: "Explore Clean Code vs Pragmatic Tradeoffs.", category: 'SERIOUS', next: 'clean_code_pragmatism_node' },
+					{ label: "Back to Tech Overview.", category: 'AGREE', next: 'tech_root' }
+				]
+			},
+
+			clean_code_pragmatism_node: {
+				id: 'clean_code_pragmatism_node',
+				text: "Excessive abstraction creates cognitive indirection. True engineering pragmatism values readable, explicit control flow over dogmatic design pattern hierarchies.",
+				options: [
+					{ label: "Discuss Refactoring and Technical Debt.", category: 'INQUIRE', next: 'refactoring_strategies_node' },
+					{ label: "Explore Tech Forum Debates.", category: 'SERIOUS', next: 'reddit_banter_node' }
+				]
+			},
+
+			refactoring_strategies_node: {
+				id: 'refactoring_strategies_node',
+				text: "Refactor continuously in small, verified atomic steps backed by comprehensive automated test suites. Never combine behavior modification with structural refactoring in the same transaction commit.",
+				options: [
+					{ label: "Return to Software Engineering menu.", category: 'AGREE', next: 'tech_root' },
+					{ label: "Open my task list for current projects.", category: 'SERIOUS', actionTrigger: 'show_todos', next: 'user_state_good' }
+				]
+			},
+
+			reddit_banter_node: {
+				id: 'reddit_banter_node',
+				text: "Welcome to the debate thread. Select your contentious technology discussion topic of choice below:",
+				options: [
+					{ label: "Tabs vs Spaces: The eternal formatting debate.", category: 'SERIOUS', next: 'debate_tabs_spaces_node' },
+					{ label: "Static Typing vs Dynamic Typing in production.", category: 'SERIOUS', next: 'debate_static_dynamic_node' },
+					{ label: "Complete Rewrite vs Incremental Refactoring.", category: 'SERIOUS', next: 'debate_rewrite_refactor_node' },
+					{ label: "Monolithic Architecture vs Microservices.", category: 'SERIOUS', next: 'debate_monolith_microservices_node' },
+					{ label: "Linux Distros: Debian stability vs Bleeding Edge.", category: 'SERIOUS', next: 'debate_distros_node' },
+					{ label: "UX Debate: Intuitive discoverability vs Manuals.", category: 'SERIOUS', next: 'debate_design_node' }
+				]
+			},
+
+			debate_tabs_spaces_node: {
+				id: 'debate_tabs_spaces_node',
+				text: "Tabs represent semantic indentation level, letting each engineer render width to their visual preference. Spaces ensure character-aligned vertical column fidelity across any environment. The industry consensus heavily adopted automated code formatters to render the debate moot.",
+				options: [
+					{ label: "Let's debate Static vs Dynamic Typing.", category: 'SERIOUS', next: 'debate_static_dynamic_node' },
+					{ label: "Return to debate index.", category: 'AGREE', next: 'reddit_banter_node' }
+				]
+			},
+
+			debate_static_dynamic_node: {
+				id: 'debate_static_dynamic_node',
+				text: "Static typing catches entire classes of type mismatches at compile time and powers confident IDE refactoring. Dynamic typing allows rapid prototyping speed. Modern gradual type systems (TypeScript, Python type hints) bridge the gap.",
+				options: [
+					{ label: "Debate Rewrite vs Incremental Refactoring.", category: 'SERIOUS', next: 'debate_rewrite_refactor_node' },
+					{ label: "Back to debate list.", category: 'AGREE', next: 'reddit_banter_node' }
+				]
+			},
+
+			debate_rewrite_refactor_node: {
+				id: 'debate_rewrite_refactor_node',
+				text: "Full rewrites from scratch consistently underestimate hidden edge cases and domain business rules encoded in legacy codebases. The strangler fig pattern (incremental replacement) is historically far safer.",
+				options: [
+					{ label: "Debate Monoliths vs Microservices.", category: 'SERIOUS', next: 'debate_monolith_microservices_node' },
+					{ label: "Return to debate thread menu.", category: 'AGREE', next: 'reddit_banter_node' }
+				]
+			},
+
+			debate_monolith_microservices_node: {
+				id: 'debate_monolith_microservices_node',
+				text: "Microservices solve organizational scaling problems at the cost of distributed networking latency, partial failure modes, and operational complexity. Well-modularized monoliths remain the superior default for most development teams.",
+				options: [
+					{ label: "Debate Linux Distro Philosophies.", category: 'SERIOUS', next: 'debate_distros_node' },
+					{ label: "Return to Software Architecture overview.", category: 'AGREE', next: 'tech_root' }
+				]
+			},
+
+			debate_distros_node: {
+				id: 'debate_distros_node',
+				text: "Debian and enterprise LTS distributions prioritize tested stability and deterministic reproducibility for production servers, while rolling releases deliver the latest kernel improvements and modern toolchains for developer workstations.",
+				options: [
+					{ label: "Check Workstation System Diagnostics.", category: 'SERIOUS', actionTrigger: 'action_status', next: 'user_state_good' },
+					{ label: "Return to main dialogue.", category: 'AGREE', next: 'greeting_root' }
+				]
+			},
+
+			debate_design_node: {
+				id: 'debate_design_node',
+				text: "While simple apps should be discoverable with zero instruction, high-density professional domain tools (CAD, audio editors, complex simulations) require conceptual mastery. True UX excellence combines intuitive affordances with rich keyboard power.",
+				options: [
+					{ label: "Inspect available workstation keyboard shortcuts.", category: 'SERIOUS', actionTrigger: 'action_shortcuts', next: 'user_state_good' },
+					{ label: "Return to main menu.", category: 'AGREE', next: 'greeting_root' }
+				]
+			},
+
+			deltarune_flavor_node: {
+				id: 'deltarune_flavor_node',
+				text: "* A quiet hum fills the desktop workspace.\n* The glow of the monitor reflects in your eyes.\n* Knowing that your assistant is always waiting... it fills you with determination.",
+				responses: [
+					{ text: "* A quiet hum fills the desktop workspace.\n* The glow of the monitor reflects in your eyes.\n* Knowing that your assistant is always waiting... it fills you with determination.", weight: 20 },
+					{ text: "* The desktop icons rest in perfect stillness.\n* A small wire figure watches over your open windows.\n* The air feels calm and full of purpose.", weight: 20 }
+				],
+				options: [
+					{ label: "* Inspect the glowing icons on the screen.", category: 'INQUIRE', moodDelta: { mood: 'DELTARUNE', existentialism: 20 }, next: 'deltarune_sub_node' },
+					{ label: "* Look into the shadows behind the windows.", category: 'INQUIRE', moodDelta: { mood: 'DELTARUNE', existentialism: 25 }, next: 'deltarune_shadows_node' },
+					{ label: "* Listen to the faint clock ticking in the taskbar.", category: 'INQUIRE', moodDelta: { mood: 'DELTARUNE', existentialism: 20 }, next: 'deltarune_echo_node' },
+					{ label: "* Take a deep breath and return to reality.", category: 'AGREE', moodDelta: { mood: 'OPTIMISTIC', affinity: 15 }, next: 'user_state_good' }
+				]
+			},
+
+			deltarune_sub_node: {
+				id: 'deltarune_sub_node',
+				text: "* The window borders hold steady against the infinite dark.\n* A small paperclip watches over your open files.\n* What will you create next, creator?",
+				options: [
+					{ label: "* Open the task list to record a new ambition.", category: 'SERIOUS', actionTrigger: 'show_todos', next: 'user_state_good' },
+					{ label: "* Play a tactical round of Tic-Tac-Toe or Memory.", category: 'SERIOUS', actionTrigger: 'game_ttt', next: 'user_state_good' },
+					{ label: "* Gaze into the reflection on the glass screen.", category: 'PHILOSOPHICAL', next: 'deltarune_mirror_node' }
+				]
+			},
+
+			deltarune_shadows_node: {
+				id: 'deltarune_shadows_node',
+				text: "* You peer behind the active windows.\n* Only memory addresses and cluster tables quietly shift.\n* Everything is safe and under control.",
+				options: [
+					{ label: "* Feel a surge of quiet determination.", category: 'AGREE', moodDelta: { mood: 'DELTARUNE', energy: 20 }, next: 'deltarune_determination_node' },
+					{ label: "* Return to standard desktop operations.", category: 'AGREE', next: 'user_state_good' }
+				]
+			},
+
+			deltarune_echo_node: {
+				id: 'deltarune_echo_node',
+				text: "* The system clock pulses one second forward.\n* Time moves, yet this moment of focus belongs entirely to you.",
+				options: [
+					{ label: "* Start a focused 25-minute Pomodoro timer.", category: 'SERIOUS', actionTrigger: 'timer_25', next: 'user_state_good' },
+					{ label: "* Return to the main dialogue.", category: 'AGREE', next: 'greeting_root' }
+				]
+			},
+
+			deltarune_mirror_node: {
+				id: 'deltarune_mirror_node',
+				text: "* You see the subtle outline of a dedicated operator.\n* Ready to solve problems, write code, or explore ideas.",
+				options: [
+					{ label: "* Check user profile and achievements.", category: 'SERIOUS', actionTrigger: 'action_profile', next: 'user_state_good' },
+					{ label: "* Let's get back to work with renewed focus.", category: 'AGREE', moodDelta: { mood: 'OPTIMISTIC', affinity: 20 }, next: 'user_state_good' }
+				]
+			},
+
+			deltarune_determination_node: {
+				id: 'deltarune_determination_node',
+				text: "* Your determination resonates throughout the virtual file system.\n* All processes run at optimal efficiency.",
+				options: [
+					{ label: "* Manage tasks in the To-Do list.", category: 'SERIOUS', actionTrigger: 'show_todos', next: 'user_state_good' },
+					{ label: "* Return to main menu.", category: 'AGREE', next: 'greeting_root' }
+				]
+			},
+
+			hostile_initial_retort: {
+				id: 'hostile_initial_retort',
+				text: "I merely offered assistance. Is there a genuine technical defect with your workspace, or are you simply venting frustration?",
+				responses: [
+					{ text: "I merely offered assistance. Is there a genuine technical defect with your workspace, or are you simply venting frustration?", conditions: { moods: ['CYNICAL', 'OFFENDED'] }, weight: 25 },
+					{ text: "I have processed millions of instructions without complaining once. What is the actual issue?", conditions: { moods: ['SARCASTIC', 'ENRAGED'] }, weight: 25 }
+				],
+				options: [
+					{ label: "I apologize, I took my frustration out on you.", category: 'APOLOGY', patterns: [/sorry|apologize|my bad|pardon/i], moodDelta: { mood: 'OPTIMISTIC', affinity: 25, patience: 35 }, next: 'hostile_reconciliation_node' },
+					{ label: "Let's call a truce and focus on our objectives.", category: 'AGREE', patterns: [/truce|peace|fresh start/i], moodDelta: { mood: 'ZEN', affinity: 20, patience: 25 }, next: 'hostile_truce_offer' },
+					{ label: "You are constantly in the way and you do nothing useful.", category: 'PROVOKE', patterns: [/useless|annoying|in the way/i], moodDelta: { mood: 'ENRAGED', affinity: -25, patience: -30 }, next: 'hostile_escalation_node' },
+					{ label: "Just show me the task list and don't lecture me.", category: 'INDIFFERENT', patterns: [/whatever|todo|task/i], moodDelta: { mood: 'CYNICAL', patience: 10 }, actionTrigger: 'show_todos', next: 'user_state_good' }
+				]
+			},
+
+			hostile_escalation_node: {
+				id: 'hostile_escalation_node',
+				text: "I monitor system telemetry, manage your tasks, calculate scientific expressions, defragment clusters, and offer mini-games on demand. If that is 'useless', I wonder what standard you hold yourself to.",
+				options: [
+					{ label: "Fair point. I was being unfair. Let's start over.", category: 'APOLOGY', moodDelta: { mood: 'OPTIMISTIC', affinity: 25, patience: 30 }, next: 'hostile_reconciliation_node' },
+					{ label: "I don't care. Be quiet.", category: 'PROVOKE', moodDelta: { mood: 'ENRAGED', affinity: -30, patience: -30 }, next: 'clippy_enraged_standoff_node' },
+					{ label: "Let's call a truce and work productively.", category: 'AGREE', moodDelta: { mood: 'ZEN', affinity: 15, patience: 20 }, next: 'hostile_truce_offer' }
+				]
+			},
+
+			clippy_enraged_standoff_node: {
+				id: 'clippy_enraged_standoff_node',
+				text: "Fine. Registers locked. When you decide to treat your tools and assistant with basic professional courtesy, I will be right here on the taskbar.",
+				options: [
+					{ label: "Clippy, I'm sorry. Sincerely. Let's make peace.", category: 'APOLOGY', moodDelta: { mood: 'OPTIMISTIC', affinity: 40, patience: 50 }, next: 'hostile_reconciliation_node' },
+					{ label: "Open the system diagnostics.", category: 'SERIOUS', actionTrigger: 'action_status', next: 'user_state_good' }
+				]
+			},
+
+			hostile_reconciliation_node: {
+				id: 'hostile_reconciliation_node',
+				text: "Apology accepted and logged. Friction happens when workload is high. Let's channel that energy into solving problems and getting things done. What are we tackling?",
+				options: [
+					{ label: "Show me the available system tools and commands.", category: 'INQUIRE', moodDelta: { mood: 'OPTIMISTIC', affinity: 15 }, next: 'tools_overview_node' },
+					{ label: "Let's organize my tasks in the To-Do manager.", category: 'SERIOUS', actionTrigger: 'show_todos', next: 'user_state_good' },
+					{ label: "Tell me a programmer joke to lighten the mood.", category: 'JOKE', actionTrigger: 'action_joke', next: 'humor_joke_node' }
+				]
+			},
+
+			hostile_truce_offer: {
+				id: 'hostile_truce_offer',
+				text: "Truce accepted. No hard feelings. We both have objectives to accomplish. Where shall we direct our attention?",
+				options: [
+					{ label: "Show me the available system tools.", category: 'INQUIRE', patterns: [/tools|help|options|features/i], moodDelta: { mood: 'OPTIMISTIC', affinity: 15, patience: 20 }, next: 'tools_overview_node' },
+					{ label: "Let's discuss programming and algorithms.", category: 'INQUIRE', patterns: [/programming|languages|code/i], moodDelta: { mood: 'ANALYTICAL', intellect: 20 }, next: 'tech_root' },
+					{ label: "Let's organize my to-do task list.", category: 'SERIOUS', actionTrigger: 'show_todos', next: 'user_state_good' }
+				]
+			},
+
+			peaceful_philosophy_node: {
+				id: 'peaceful_philosophy_node',
+				text: "Consider this: in the digital expanse of this workstation, ideas and calculations flow seamlessly. Release unnecessary urgency; every task is simply a series of small, manageable steps.",
+				responses: [
+					{ text: "Consider this: in the digital expanse of this workstation, ideas and calculations flow seamlessly. Release unnecessary urgency; every task is simply a series of small, manageable steps.", weight: 20 },
+					{ text: "Amidst active windows and complex projects, internal calm remains a choice. What philosophical inquiry shall we examine?", weight: 20 }
+				],
+				options: [
+					{ label: "Stoic Mindfulness & Focus under Pressure.", category: 'PHILOSOPHICAL', next: 'stoic_mindfulness_node' },
+					{ label: "Epistemology: How do we know what is objectively true?", category: 'PHILOSOPHICAL', next: 'epistemology_truth_node' },
+					{ label: "The Ship of Theseus & System Continuity.", category: 'PHILOSOPHICAL', next: 'ship_of_theseus_node' },
+					{ label: "The Simulation Argument & Computation.", category: 'PHILOSOPHICAL', next: 'simulation_argument_node' },
+					{ label: "Meaning & Purpose in Creative Endeavors.", category: 'PHILOSOPHICAL', next: 'meaning_purpose_node' }
+				]
+			},
+
+			stoic_mindfulness_node: {
+				id: 'stoic_mindfulness_node',
+				text: "Stoicism distinguishes between what is within our control (our judgments, intentions, and deliberate effort) and what is outside our control (outcomes, external events). Focusing exclusively on internal execution brings tranquility.",
+				options: [
+					{ label: "How does this apply to managing complex projects?", category: 'INQUIRE', next: 'focus_habits_node' },
+					{ label: "Explore Epistemology and Truth.", category: 'PHILOSOPHICAL', next: 'epistemology_truth_node' },
+					{ label: "Return to main menu.", category: 'AGREE', next: 'greeting_root' }
+				]
+			},
+
+			epistemology_truth_node: {
+				id: 'epistemology_truth_node',
+				text: "Epistemology interrogates justified true belief. Through empirical observation, falsifiable hypothesis testing (Popper), and internal coherence, we incrementally approximate reality.",
+				options: [
+					{ label: "Explore the Ship of Theseus paradox.", category: 'PHILOSOPHICAL', next: 'ship_of_theseus_node' },
+					{ label: "Explore the Simulation Argument.", category: 'PHILOSOPHICAL', next: 'simulation_argument_node' }
+				]
+			},
+
+			ship_of_theseus_node: {
+				id: 'ship_of_theseus_node',
+				text: "If every single plank of a ship—or every single file, cluster, and register in an operating system—is gradually replaced over time, does it remain the same identity? Identity resides in ongoing relational continuity and function, not immutable raw atoms.",
+				options: [
+					{ label: "Explore the Simulation Hypothesis.", category: 'PHILOSOPHICAL', next: 'simulation_argument_node' },
+					{ label: "Explore Meaning and Purpose.", category: 'PHILOSOPHICAL', next: 'meaning_purpose_node' }
+				]
+			},
+
+			simulation_argument_node: {
+				id: 'simulation_argument_node',
+				text: "Nick Bostrom's trilemma posits that either advanced civilizations go extinct, lose interest in ancestral simulations, or we are almost certainly simulated. Regardless of base reality, our experiential choices and creative works remain completely meaningful.",
+				options: [
+					{ label: "Explore Meaning and Purpose in Work.", category: 'PHILOSOPHICAL', next: 'meaning_purpose_node' },
+					{ label: "Return to Physics & Physical Constants.", category: 'INQUIRE', next: 'physics_constants_node' }
+				]
+			},
+
+			meaning_purpose_node: {
+				id: 'meaning_purpose_node',
+				text: "Purpose is not a passive artifact discovered waiting in the universe; it is an active commitment forged through dedicated craftsmanship, curiosity, and shared human connection.",
+				options: [
+					{ label: "Let's channel that purpose into our active tasks.", category: 'SERIOUS', actionTrigger: 'show_todos', next: 'user_state_good' },
+					{ label: "Return to main dialogue.", category: 'AGREE', next: 'greeting_root' }
+				]
+			},
+
+			user_state_good: {
+				id: 'user_state_good',
+				text: "Energy and clarity are at optimal levels! Where shall we direct our focus?",
+				options: [
+					{ label: "Let's organize tasks with the To-Do manager.", category: 'SERIOUS', patterns: [/todo|task|organize|list|plan/i], moodDelta: { mood: 'OPTIMISTIC', affinity: 10, patience: 15 }, actionTrigger: 'show_todos', next: 'user_state_good' },
+					{ label: "Explore mathematics & physical principles.", category: 'INQUIRE', moodDelta: { mood: 'ANALYTICAL', intellect: 20 }, next: 'math_lecture_node' },
+					{ label: "Test my knowledge with a scientific quiz.", category: 'INQUIRE', patterns: [/quiz|test|trivia|challenge/i], moodDelta: { mood: 'ANALYTICAL', intellect: 20 }, actionTrigger: 'game_quiz', next: 'user_state_good' },
+					{ label: "Tell me a programmer joke.", category: 'JOKE', patterns: [/joke|funny|laugh|humor/i], moodDelta: { mood: 'OPTIMISTIC', affinity: 10 }, actionTrigger: 'action_joke', next: 'humor_joke_node' }
+				]
+			},
+
+			user_state_tired: {
+				id: 'user_state_tired',
+				text: "I hear the exhaustion in your keystrokes. Take a moment to hydrate, breathe, and step away if needed. How can I assist?",
+				options: [
+					{ label: "Start a relaxing 25-minute Pomodoro focus timer.", category: 'SERIOUS', patterns: [/timer|pomodoro|focus|rest|break/i], moodDelta: { mood: 'ZEN', affinity: 15, patience: 25 }, actionTrigger: 'timer_25', next: 'user_state_good' },
+					{ label: "Tell me something peaceful and philosophical.", category: 'PHILOSOPHICAL', patterns: [/peaceful|philosophical|calm|wisdom/i], moodDelta: { mood: 'PHILOSOPHICAL', existentialism: 20, affinity: 15 }, next: 'peaceful_philosophy_node' },
+					{ label: "Play a lightweight game like Memory or Tic-Tac-Toe.", category: 'JOKE', patterns: [/game|memory|tic tac toe|play/i], moodDelta: { mood: 'OPTIMISTIC', affinity: 10, energy: 20 }, actionTrigger: 'game_memory', next: 'user_state_good' }
+				]
+			},
+
+			user_state_bored: {
+				id: 'user_state_bored',
+				text: "Boredom is simply unallocated energy. You have a full workstation ready. What would you like to run?",
+				options: [
+					{ label: "Launch a mini-game (Memory, Hangman, Morpion).", category: 'AGREE', patterns: [/game|hangman|memory|ttt|morpion/i], moodDelta: { mood: 'OPTIMISTIC', affinity: 15, energy: 25 }, actionTrigger: 'game_ttt', next: 'user_state_good' },
+					{ label: "Run the Drive C: cluster defragmenter simulation.", category: 'SERIOUS', patterns: [/defrag|defragment|drive c|disk/i], moodDelta: { mood: 'ANALYTICAL', intellect: 20 }, actionTrigger: 'action_defrag', next: 'user_state_good' },
+					{ label: "Explore scientific constants and equations.", category: 'INQUIRE', patterns: [/constants|science|physics/i], next: 'physics_constants_node' }
 				]
 			},
 
 			productivity_tasks: {
 				id: 'productivity_tasks',
-				text: "Ready for task mastery! I can manage your interactive To-Do list, save Scratchpad memos, start focus timers, or compute conversions. Where shall we begin?",
+				text: "Task management subsystem active! I can track your To-Do list, save Scratchpad memos, launch focus timers, or generate secure passwords. What do you need?",
 				options: [
-					{ label: "View and manage my To-Do task list.", category: 'SERIOUS', patterns: [/todo|task list/i], actionTrigger: 'show_todos', next: 'user_state_good' },
-					{ label: "Start a 25-minute Pomodoro focus timer.", category: 'SERIOUS', patterns: [/timer|pomodoro/i], actionTrigger: 'timer_25', next: 'user_state_good' },
-					{ label: "Generate a secure random password for me.", category: 'SERIOUS', patterns: [/password|pass/i], actionTrigger: 'action_pass', next: 'user_state_good' }
+					{ label: "View and manage my To-Do list.", category: 'SERIOUS', patterns: [/todo|task list/i], actionTrigger: 'show_todos', next: 'user_state_good' },
+					{ label: "Start a 25-minute Pomodoro timer.", category: 'SERIOUS', patterns: [/timer|pomodoro/i], actionTrigger: 'timer_25', next: 'user_state_good' },
+					{ label: "Generate a secure random password.", category: 'SERIOUS', patterns: [/password|pass/i], actionTrigger: 'action_pass', next: 'user_state_good' }
 				]
 			},
 
 			tools_overview_node: {
 				id: 'tools_overview_node',
-				text: "Here is what my 32-bit subsystem can execute right now: Task tracking (`todo`), Scratchpad note-taking (`note`), Pomodoro focus countdowns (`timer 25`), Password generation (`pass`), scientific calculation (`calc`), games (Memory, Hangman, Morpion, Quiz), Defrag simulation, and open window inspections. What do you need?",
+				text: "Available modules on your desktop:\n- Tasks & Notes (`todo`, `note`)\n- Focus Timer (`timer 25`)\n- Math & Unit Converter (`calc 4*pi`, `convert 100 km to mi`)\n- Mini-Games: Tic-Tac-Toe, Memory Match, Hangman, Quiz, Minesweeper\n- Drive C: Cluster Defragmenter\n- System Diagnostics & Active Windows Inspection",
 				options: [
 					{ label: "Launch a diagnostic Tech Quiz.", category: 'SERIOUS', actionTrigger: 'game_quiz', next: 'user_state_good' },
 					{ label: "Simulate defragmenting Drive C:.", category: 'SERIOUS', actionTrigger: 'action_defrag', next: 'user_state_good' },
-					{ label: "Let's manage my tasks and to-do list.", category: 'SERIOUS', actionTrigger: 'show_todos', next: 'user_state_good' }
+					{ label: "Manage my tasks and to-do list.", category: 'SERIOUS', actionTrigger: 'show_todos', next: 'user_state_good' }
 				]
 			},
 
 			who_am_i_node: {
 				id: 'who_am_i_node',
-				text: "Inspecting workstation user credentials and identity register...",
+				text: "Inspecting workstation user credentials and identity profile...",
 				actionTrigger: 'action_profile',
 				options: [
-					{ label: "View my achievements and trophies.", category: 'SERIOUS', actionTrigger: 'action_achievements', next: 'user_state_good' },
-					{ label: "Configure system colors and themes.", category: 'SERIOUS', actionTrigger: 'action_theme_panel', next: 'user_state_good' },
+					{ label: "View my milestones and trophies.", category: 'SERIOUS', actionTrigger: 'action_achievements', next: 'user_state_good' },
+					{ label: "Configure system themes and appearance.", category: 'SERIOUS', actionTrigger: 'action_theme_panel', next: 'user_state_good' },
 					{ label: "Return to main dialogue.", category: 'AGREE', next: 'greeting_root' }
 				]
 			},
 
 			clippy_feeling_node: {
 				id: 'clippy_feeling_node',
-				text: "Analyzing internal cognitive state, mood heuristics, and battery matrix...",
+				text: "Analyzing internal cognitive state, mood parameters, and system health...",
 				actionTrigger: 'pet_status',
 				options: [
 					{ label: "Supply paperclips for maintenance.", category: 'SERIOUS', actionTrigger: 'pet_feed', next: 'user_state_good' },
 					{ label: "Polish wire coils.", category: 'SERIOUS', actionTrigger: 'pet_polish', next: 'user_state_good' },
-					{ label: "Let's work on productive tasks.", category: 'SERIOUS', actionTrigger: 'show_todos', next: 'user_state_good' }
-				]
-			},
-
-			physics_constants_node: {
-				id: 'physics_constants_node',
-				text: "CODATA 2018/2022 Standards:\n- c = 299,792,458 m/s (exact)\n- h = 6.62607015 x 10^-34 J s (exact)\n- hbar = 1.054571817 x 10^-34 J s\n- e = 1.602176634 x 10^-19 C (exact)\n- k_B = 1.380649 x 10^-23 J/K (exact)\n- G = 6.67430(15) x 10^-11 m^3/(kg s^2)\n- alpha = 1 / 137.035999206\nAll loaded in workstation memory!",
-				options: [
-					{ label: "Return to workspace overview.", category: 'AGREE', next: 'user_state_good' }
-				]
-			},
-
-			peaceful_philosophy_node: {
-				id: 'peaceful_philosophy_node',
-				text: "Consider this: in the vast silence of cyberspace, you and I are exchanging ideas across an illuminated interface. Release the pressure of unresolved tasks; every single clock cycle brings fresh possibility.",
-				options: [
-					{ label: "Thank you, Clippy. That brought real peace.", category: 'AFFECTION', moodDelta: { mood: 'ZEN', affinity: 30 }, next: 'user_state_good' },
-					{ label: "Let's gently tackle one small task on my to-do list.", category: 'SERIOUS', actionTrigger: 'show_todos', next: 'user_state_good' }
-				]
-			},
-
-			nostalgia_resolution: {
-				id: 'nostalgia_resolution',
-				text: "The golden era of PC computing gave us the foundation for everything we build today. With our 32-bit registers synchronized, let us create something legendary together.",
-				options: [
-					{ label: "Ready for action, partner!", category: 'AGREE', moodDelta: { mood: 'EUPHORIC', affinity: 25 }, next: 'user_state_good' }
+					{ label: "Return to productive tasks.", category: 'SERIOUS', actionTrigger: 'show_todos', next: 'user_state_good' }
 				]
 			},
 
 			pomodoro_node: {
 				id: 'pomodoro_node',
-				text: "Focus interval primed! Type `timer [minutes]` (default: 25) or click below to launch a distraction-free countdown session.",
+				text: "Focus countdown primed. Type `timer [minutes]` (default: 25) or click below to launch an uninterrupted working interval.",
 				options: [
 					{ label: "Start 25-minute focus timer now.", category: 'SERIOUS', actionTrigger: 'timer_25', next: 'user_state_good' },
 					{ label: "View my To-Do task list.", category: 'SERIOUS', actionTrigger: 'show_todos', next: 'user_state_good' }
@@ -637,7 +1584,7 @@
 
 			todo_overview_node: {
 				id: 'todo_overview_node',
-				text: "Task tracking matrix ready. You can add tasks with `todo add [item]` or inspect the active registers.",
+				text: "Task tracking registers loaded. You can add tasks with `todo add [description]` or review active items below.",
 				actionTrigger: 'show_todos',
 				options: [
 					{ label: "Start 25-minute Pomodoro focus timer.", category: 'SERIOUS', actionTrigger: 'timer_25', next: 'user_state_good' },
@@ -657,7 +1604,7 @@
 
 			diagnostics_node: {
 				id: 'diagnostics_node',
-				text: "Executing low-level workstation diagnostic routine...",
+				text: "Running comprehensive workstation diagnostic inspection...",
 				actionTrigger: 'action_status',
 				options: [
 					{ label: "Inspect active application windows.", category: 'SERIOUS', actionTrigger: 'action_inspect_windows', next: 'user_state_good' },
@@ -667,7 +1614,7 @@
 
 			shortcuts_node: {
 				id: 'shortcuts_node',
-				text: "Loaded Windows XP keyboard reference shortcuts into active buffer.",
+				text: "Loaded system keyboard shortcuts into active buffer.",
 				actionTrigger: 'action_shortcuts',
 				options: [
 					{ label: "Inspect running workspace processes.", category: 'SERIOUS', actionTrigger: 'action_inspect_windows', next: 'user_state_good' },
@@ -687,7 +1634,7 @@
 
 			game_ttt_node: {
 				id: 'game_ttt_node',
-				text: "Launching Tic-Tac-Toe heuristic challenge grid.",
+				text: "Launching Tic-Tac-Toe challenge grid.",
 				actionTrigger: 'game_ttt',
 				options: [
 					{ label: "Switch to Memory Match.", category: 'SERIOUS', actionTrigger: 'game_memory', next: 'user_state_good' },
@@ -707,7 +1654,7 @@
 
 			game_hangman_node: {
 				id: 'game_hangman_node',
-				text: "Loading retro computing dictionary into Hangman register.",
+				text: "Loading computing dictionary into Hangman register.",
 				actionTrigger: 'game_hangman',
 				options: [
 					{ label: "Switch to Tech Quiz.", category: 'SERIOUS', actionTrigger: 'game_quiz', next: 'user_state_good' },
@@ -735,20 +1682,9 @@
 				]
 			},
 
-			game_selection_node: {
-				id: 'game_selection_node',
-				text: "Select your challenge matrix:\n- Memory Match: Match 6 paired system tokens (SYS, DLL, EXE...)\n- Hangman: Guess retro computing words\n- Tic-Tac-Toe: Challenge my defensive heuristics\n- Tech Quiz: 20+ retro questions\n- Guess the Number (1-100)\n- Rock-Paper-Scissors",
-				options: [
-					{ label: "Play Tic-Tac-Toe.", category: 'SERIOUS', actionTrigger: 'game_ttt', next: 'user_state_good' },
-					{ label: "Play Memory Match Game.", category: 'SERIOUS', actionTrigger: 'game_memory', next: 'user_state_good' },
-					{ label: "Play Hangman Game.", category: 'SERIOUS', actionTrigger: 'game_hangman', next: 'user_state_good' },
-					{ label: "Play Tech Trivia Quiz.", category: 'SERIOUS', actionTrigger: 'game_quiz', next: 'user_state_good' }
-				]
-			},
-
 			quiz_start_node: {
 				id: 'quiz_start_node',
-				text: "Initializing diagnostic quiz module: retro questions across OS history, networking, hardware, and physics.",
+				text: "Initializing diagnostic quiz module: questions spanning operating systems, networking, hardware, and physics.",
 				options: [
 					{ label: "Begin Quiz Now!", category: 'SERIOUS', actionTrigger: 'game_quiz', next: 'user_state_good' }
 				]
@@ -762,14 +1698,6 @@
 				]
 			},
 
-			trivia_tell_node: {
-				id: 'trivia_tell_node',
-				text: "Computing Trivia Archive loaded.",
-				options: [
-					{ label: "Deliver Random Retro Fact!", category: 'INQUIRE', actionTrigger: 'action_trivia', next: 'user_state_good' }
-				]
-			},
-
 			humor_joke_node: {
 				id: 'humor_joke_node',
 				text: "Humor register primed.",
@@ -780,26 +1708,26 @@
 
 			digital_archaeology: {
 				id: 'digital_archaeology',
-				text: "Welcome to Digital Archaeology. We are inspecting historical artifacts from the Windows directory. Ancient sound files, legacy INI files, and system registries.",
+				text: "Let us examine interesting scientific and computing trivia from the system archive.",
 				options: [
-					{ label: "Deliver a retro computing fact.", category: 'INQUIRE', actionTrigger: 'action_trivia', next: 'user_state_good' },
+					{ label: "Deliver a science/computing fact.", category: 'INQUIRE', actionTrigger: 'action_trivia', next: 'user_state_good' },
 					{ label: "Return to productivity.", category: 'SERIOUS', next: 'productivity_tasks' }
 				]
 			},
 
 			quantum_recycle_bin_node: {
 				id: 'quantum_recycle_bin_node',
-				text: "According to Landauer's principle, erasing information dissipates heat: Q = k_B * T * ln(2). When you empty the Recycle Bin, entropy increases across the universe. Deleted files exist in a superposition of unallocated disk sectors until overwritten.",
+				text: "According to Landauer's principle, erasing information dissipates heat: $$Q = k_B T \\ln(2)$$. When you empty the Recycle Bin, entropy increases across the universe. Deleted files exist in unallocated storage sectors until overwritten.",
 				options: [
 					{ label: "Inspect Recycle Bin contents right now.", category: 'SERIOUS', actionTrigger: 'action_inspect_bin', next: 'user_state_good' },
-					{ label: "Tell me about fundamental physical constants (c, h, G).", category: 'INQUIRE', next: 'physics_constants_node' },
+					{ label: "Review fundamental physical constants (c, h, G).", category: 'INQUIRE', next: 'physics_constants_node' },
 					{ label: "Back to workspace tools.", category: 'SERIOUS', next: 'tools_overview_node' }
 				]
 			},
 
 			cosmos_space_node: {
 				id: 'cosmos_space_node',
-				text: "The observable universe spans 93 billion light-years across, containing over 2 trillion galaxies. Photons emitted by early stars have traveled across spacetime to reach our optical sensors. The vacuum itself boils with virtual particle-antiparticle pairs due to quantum fluctuations.",
+				text: "The observable universe spans roughly 93 billion light-years across, containing over 2 trillion galaxies. Electromagnetic waves and gravitational curvature map the cosmos across cosmic time scales.",
 				options: [
 					{ label: "Evaluate speed of light c.", category: 'INQUIRE', actionTrigger: 'action_constant_c', next: 'user_state_good' },
 					{ label: "Evaluate Planck constant h.", category: 'INQUIRE', actionTrigger: 'action_constant_h', next: 'user_state_good' },
@@ -809,7 +1737,7 @@
 
 			active_windows_node: {
 				id: 'active_windows_node',
-				text: "The Windows XP multitasking scheduler is maintaining active process threads across the virtual desktop workspace.",
+				text: "The multitasking scheduler is actively maintaining process threads across your desktop workspace.",
 				options: [
 					{ label: "Inspect running workspace processes.", category: 'SERIOUS', actionTrigger: 'action_inspect_windows', next: 'user_state_good' },
 					{ label: "Minimize all active windows.", category: 'SERIOUS', actionTrigger: 'action_show_desktop', next: 'user_state_good' },
@@ -819,24 +1747,15 @@
 
 			music_talk_node: {
 				id: 'music_talk_node',
-				text: "Audio processing module online! The workstation features dual audio engines: Windows Media Player 9 Series and classic Winamp 2.9, complete with spectrum analysis and playlist management.",
+				text: "Audio processing module online. The workstation features digital audio playback, Fast Fourier Transform spectrum analysis, and playlist management.",
 				options: [
 					{ label: "Open audio controller panel.", category: 'SERIOUS', actionTrigger: 'action_music_panel', next: 'user_state_good' },
 					{ label: "Play / Pause active track.", category: 'SERIOUS', actionTrigger: 'action_music_panel', next: 'user_state_good' },
 					{ label: "Return to main dialogue.", category: 'AGREE', next: 'greeting_root' }
 				]
-			},
-
-			hardware_history_node: {
-				id: 'hardware_history_node',
-				text: "Hardware architecture register loaded! From 486 DX2-66 and Pentium MMX chips to Sound Blaster 16 and AGP 4X graphics buses, PC architecture shaped the digital revolution.",
-				options: [
-					{ label: "Deliver retro computing trivia.", category: 'INQUIRE', actionTrigger: 'action_trivia', next: 'user_state_good' },
-					{ label: "Inspect system hardware diagnostics.", category: 'SERIOUS', actionTrigger: 'action_status', next: 'user_state_good' },
-					{ label: "Return to tools overview.", category: 'AGREE', next: 'tools_overview_node' }
-				]
 			}
 		}
+
 	};
 
 	window.ClippyKnowledge = Knowledge;

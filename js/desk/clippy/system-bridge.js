@@ -2,7 +2,7 @@
 	'use strict';
 
 	const SystemBridge = {
-		recordTelemetryEvent(eventType) {
+		recordTelemetryEvent(eventType, metadata = {}) {
 			try {
 				if (window.ClippyBrain && window.ClippyBrain.memory && window.ClippyBrain.memory.telemetryEvents) {
 					const events = window.ClippyBrain.memory.telemetryEvents;
@@ -13,7 +13,42 @@
 					}
 					window.ClippyBrain.saveMemory();
 				}
+
+				this.handleProactiveObservation(eventType, metadata);
 			} catch (e) {}
+		},
+
+		handleProactiveObservation(eventType, metadata = {}) {
+			if (!window.SettingsApp || window.SettingsApp.get('clippyContextualBubbles') === false) return;
+			if (window.ClippyUI && window.ClippyUI.isOpen) return;
+
+			const templatesDict = (window.ClippyKnowledge && window.ClippyKnowledge.PROACTIVE_BUBBLE_TEMPLATES) || {};
+			let candidateList = templatesDict[eventType] || null;
+
+			if (!candidateList && eventType === 'app_launched' && metadata.appId) {
+				const appKey = `${metadata.appId}_opened`;
+				candidateList = templatesDict[appKey] || null;
+			}
+
+			if (!candidateList || candidateList.length === 0) return;
+
+			const item = candidateList[Math.floor(Math.random() * candidateList.length)];
+			if (!item || !item.text) return;
+
+			setTimeout(() => {
+				if (window.ClippyUI && !window.ClippyUI.isOpen) {
+					window.ClippyUI.showIdleBubble(item.text, () => {
+						if (window.ClippyAgent) {
+							window.ClippyAgent.open();
+							if (item.prompt) {
+								window.ClippyAgent.prompt(item.prompt);
+							} else if (item.action) {
+								window.ClippyAgent.executeAction(item.action);
+							}
+						}
+					});
+				}
+			}, 900);
 		},
 
 		getStatisticalTelemetrySummary() {

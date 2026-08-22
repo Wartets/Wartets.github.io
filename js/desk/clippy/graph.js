@@ -98,10 +98,16 @@
 				}
 			}
 
-			return results.map(opt => ({
-				...opt,
-				label: opt.label || "Continue..."
-			}));
+			return results.map(opt => {
+				let labelText = opt.label || "Continue...";
+				if (currentMood === 'DELTARUNE' && !labelText.startsWith('*')) {
+					labelText = `* ${labelText}`;
+				}
+				return {
+					...opt,
+					label: labelText
+				};
+			});
 		}
 
 		evaluateTransition(currentNodeId, rawText, brain) {
@@ -149,8 +155,41 @@
 			if (/\b(system diagnostics|diagnostics|specs|system specs|statut systeme|diagnostic)\b/i.test(norm)) {
 				return { label: "System diagnostics", next: 'diagnostics_node', moodDelta: { mood: 'ANALYTICAL', intellect: 15 } };
 			}
-			if (/\b(investigate office origin|office origin|kevan|clippit history|origine office|histoire clippy)\b/i.test(norm)) {
-				return { label: "Investigate Office origin", next: 'lore_root', moodDelta: { mood: 'NOSTALGIC', nostalgia: 25 } };
+			if (/\b(math|mathematics|mathematiques|analyse|geometrie)\b/i.test(norm)) {
+				return { label: "Discuss mathematical principles", next: 'math_lecture_node', moodDelta: { mood: 'ANALYTICAL', intellect: 25 } };
+			}
+			if (/\b(calculus|derivatives|integrals|integration|derivee|integrale|taylor)\b/i.test(norm)) {
+				return { label: "Differential and Integral Calculus", next: 'calculus_derivatives_node', moodDelta: { mood: 'ANALYTICAL', intellect: 25 } };
+			}
+			if (/\b(linear algebra|eigenvalue|eigenvalues|matrix|matrices|algebre lineaire|vecteur)\b/i.test(norm)) {
+				return { label: "Linear Algebra and Matrices", next: 'linear_algebra_node', moodDelta: { mood: 'ANALYTICAL', intellect: 25 } };
+			}
+			if (/\b(fractal|fractals|mandelbrot|chaos theory|strange attractor|attracteur)\b/i.test(norm)) {
+				return { label: "Fractals and Chaos Theory", next: 'fractals_chaos_node', moodDelta: { mood: 'ANALYTICAL', intellect: 25 } };
+			}
+			if (/\b(topology|manifold|manifolds|euler characteristic|topologie|variete)\b/i.test(norm)) {
+				return { label: "Topology and Geometry", next: 'topology_geometry_node', moodDelta: { mood: 'ANALYTICAL', intellect: 25 } };
+			}
+			if (/\b(physics|quantum|relativity|thermodynamics|physique|quantique)\b/i.test(norm)) {
+				return { label: "Discuss physics & cosmology", next: 'physics_constants_node', moodDelta: { mood: 'ANALYTICAL', intellect: 25 } };
+			}
+			if (/\b(routine|morning routine|matin|planning|habits|habitudes)\b/i.test(norm)) {
+				return { label: "Morning and Daily Routines", next: 'morning_routine_node', moodDelta: { mood: 'OPTIMISTIC', affinity: 15 } };
+			}
+			if (/\b(procrastination|procrastiner|motivation|discipline|perfectionism)\b/i.test(norm)) {
+				return { label: "Overcoming Procrastination", next: 'overcoming_procrastination_node', moodDelta: { mood: 'OPTIMISTIC', patience: 20 } };
+			}
+			if (/\b(reading|books|livres|lecture|notes|note taking)\b/i.test(norm)) {
+				return { label: "Reading Habits & Notes", next: 'reading_books_node', moodDelta: { mood: 'ANALYTICAL', intellect: 20 } };
+			}
+			if (/\b(everyday|routine|coffee|tea|weather|daily life|conversation|discuter|parler de tout|cafe|journee)\b/i.test(norm)) {
+				return { label: "Everyday conversation", next: 'everyday_chat_node', moodDelta: { mood: 'OPTIMISTIC', affinity: 15 } };
+			}
+			if (/\b(deltarune|mysterious|dark world|rpg flavor|ombre|mystere|determinisme)\b/i.test(norm)) {
+				return { label: "A mysterious thought...", next: 'deltarune_flavor_node', moodDelta: { mood: 'DELTARUNE', existentialism: 25 } };
+			}
+			if (/\b(reddit|reddit mode|karma|sub|forum|thread|tabs vs spaces|tabs or spaces|debat internet)\b/i.test(norm)) {
+				return { label: "Technology Debate", next: 'reddit_banter_node', moodDelta: { mood: 'SARCASTIC', intellect: 15 } };
 			}
 			if (/\b(quantum recycle bin theory|recycle bin theory|landauer|theorie corbeille quantique)\b/i.test(norm)) {
 				return { label: "Quantum Recycle Bin theory", next: 'quantum_recycle_bin_node', moodDelta: { mood: 'ANALYTICAL', intellect: 20 } };
@@ -186,7 +225,7 @@
 				return { label: "Pet Clippy status", next: 'clippy_feeling_node', moodDelta: { mood: 'OPTIMISTIC', affinity: 15 } };
 			}
 			if (/\b(defrag drive c:|defrag|defragment|defragmentation)\b/i.test(norm)) {
-				return { label: "Defrag Drive C:", next: 'defrag_trigger_node', moodDelta: { mood: 'NOSTALGIC', nostalgia: 20 } };
+				return { label: "Defrag Drive C:", next: 'defrag_trigger_node', moodDelta: { mood: 'ANALYTICAL', intellect: 15 } };
 			}
 			if (/\b(start pomodoro timer|pomodoro timer|pomodoro|focus timer|minuteur)\b/i.test(norm)) {
 				return { label: "Start Pomodoro Timer", next: 'pomodoro_node', moodDelta: { mood: 'ZEN', patience: 20 } };
@@ -197,35 +236,20 @@
 			if (/\b(tell me a joke|joke|blague|raconte une blague)\b/i.test(norm)) {
 				return { label: "Tell me a joke", next: 'humor_joke_node', moodDelta: { mood: 'OPTIMISTIC', affinity: 10 } };
 			}
-			if (/\b(random retro trivia|retro trivia|trivia|anecdote retro)\b/i.test(norm)) {
-				return { label: "Random Retro Trivia", next: 'trivia_tell_node', moodDelta: { mood: 'NOSTALGIC', nostalgia: 15 } };
-			}
 			if (/\b(keyboard shortcuts|shortcuts|raccourcis claviers|raccourcis)\b/i.test(norm)) {
 				return { label: "Keyboard Shortcuts", next: 'shortcuts_node', moodDelta: { mood: 'ANALYTICAL', intellect: 10 } };
 			}
 			if (/\b(generate secure password|secure password|generer mot de passe|password generator)\b/i.test(norm)) {
 				return { label: "Generate Secure Password", next: 'password_gen_node', moodDelta: { mood: 'ANALYTICAL', intellect: 15 } };
 			}
-			if (/\b(evaluate planck constant h|planck constant|constante de planck)\b/i.test(norm)) {
-				return { label: "Evaluate Planck constant h", next: 'physics_constants_node', moodDelta: { mood: 'ANALYTICAL', intellect: 20 } };
-			}
-			if (/\b(evaluate speed of light c|speed of light|vitesse de la lumiere)\b/i.test(norm)) {
-				return { label: "Evaluate speed of light c", next: 'physics_constants_node', moodDelta: { mood: 'ANALYTICAL', intellect: 20 } };
-			}
-			if (/\b(bad bad bad|you suck|useless|annoying|hate you|shut up|tais toi|inutile)\b/i.test(norm)) {
+			if (/\b(bad bad bad|you suck|useless|annoying|hate you|shut up|tais toi|inutile|tu sers a rien)\b/i.test(norm)) {
 				return { label: "Why do you care? You're just a paperclip.", next: 'hostile_initial_retort', moodDelta: { mood: 'CYNICAL', affinity: -15, patience: -20 } };
 			}
-			if (/\b(sorry|i apologize|my bad|forgive me|pardon me|desole|pardon)\b/i.test(norm)) {
+			if (/\b(sorry|i apologize|my bad|forgive me|pardon me|desole|pardon|excuse moi)\b/i.test(norm)) {
 				return { label: "I'm sorry, I took my frustration out on you.", next: 'hostile_truce_offer', moodDelta: { mood: 'OPTIMISTIC', affinity: 25, patience: 30 } };
-			}
-			if (/\b(constant|constants|codata|physique|constantes)\b/i.test(norm)) {
-				return { label: "Tell me about fundamental physical constants (c, h, G).", next: 'physics_constants_node', moodDelta: { mood: 'ANALYTICAL', intellect: 25 } };
 			}
 			if (/\b(music|audio|sound|player|winamp|wmp|musique|chanson)\b/i.test(norm)) {
 				return { label: "Discuss audio and media players", next: 'music_talk_node', moodDelta: { mood: 'OPTIMISTIC', energy: 15 } };
-			}
-			if (/\b(hardware|cpu|motherboard|soundcard|retro hardware|materiel|processeur)\b/i.test(norm)) {
-				return { label: "Explore retro PC hardware history", next: 'hardware_history_node', moodDelta: { mood: 'NOSTALGIC', nostalgia: 25 } };
 			}
 			return null;
 		}

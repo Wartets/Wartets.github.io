@@ -43,6 +43,9 @@
 						executeActionTrigger(response.actionTrigger);
 					}
 				});
+				if (response.options && Array.isArray(response.options) && response.options.length > 0) {
+					window.ClippyUI.updateSuggestions(response.options.map(o => o.label));
+				}
 			}
 		}, 140 + Math.random() * 120);
 	}
@@ -203,15 +206,14 @@
 			};
 		}
 
-		if (norm === 'investigate office origin' || norm.includes('office origin') || norm.includes('origine office')) {
-			const lorePool = (window.ClippyKnowledge && window.ClippyKnowledge.TOPIC_RESPONSES && window.ClippyKnowledge.TOPIC_RESPONSES.office_lore) || [];
-			return {
-				text: pickFrom(lorePool),
-				actions: [
-					{ label: "Random Retro Trivia", onClick: () => handleUserInput("Random Retro Trivia") },
-					{ label: "Keyboard Shortcuts", onClick: () => handleUserInput("Keyboard Shortcuts") }
-				]
-			};
+		if (norm === 'talk about mathematics' || norm === 'mathematics' || norm === 'math' || norm === 'maths' || norm === 'calculus' || norm === 'algebra') {
+			const node = window.ClippyBrain ? window.ClippyBrain.navigateGraphNode('math_lecture_node') : null;
+			return node ? { text: node.text, actions: window.ClippyBrain.buildGraphActions(node.options) } : { text: "Opening mathematics seminar...", actionTrigger: 'tools_overview_node' };
+		}
+
+		if (norm === 'everyday conversation' || norm === 'chat' || norm === 'daily life' || norm === 'coffee' || norm === 'routine') {
+			const node = window.ClippyBrain ? window.ClippyBrain.navigateGraphNode('everyday_chat_node') : null;
+			return node ? { text: node.text, actions: window.ClippyBrain.buildGraphActions(node.options) } : { text: "Starting everyday chat...", actionTrigger: 'tools_overview_node' };
 		}
 
 		if (norm === 'quantum recycle bin theory' || norm.includes('quantum recycle bin') || norm.includes('corbeille quantique')) {
@@ -1091,10 +1093,53 @@
 
 	function startIdleDaemon() {
 		if (idleTimer) clearInterval(idleTimer);
+		const intervalMs = (window.SettingsApp && window.SettingsApp.get('clippyProactiveInterval')) 
+			? (window.SettingsApp.get('clippyProactiveInterval') * 1000) 
+			: IDLE_MESSAGE_INTERVAL_MS;
+
 		idleTimer = setInterval(() => {
 			if (window.ClippyUI.isOpen) return;
 			if (Math.random() > IDLE_MESSAGE_CHANCE) return;
+
 			const unread = window.ClippySystemBridge.getUnreadMailCount();
+			const openWinsCount = window.ClippySystemBridge.getOpenWindowCount();
+			const recycleCount = window.ClippySystemBridge.getRecycleBinCount();
+
+			if (unread > 0) {
+				window.ClippyUI.showIdleBubble(`You have ${unread} unread email(s) waiting in Outlook Express!`, () => {
+					window.ClippyAgent.open();
+					window.ClippyAgent.prompt("Check unread emails");
+				});
+				return;
+			}
+
+			if (recycleCount >= 4 && Math.random() < 0.4) {
+				window.ClippyUI.showIdleBubble(`The Recycle Bin has ${recycleCount} items. Would you like me to empty it or explain quantum information loss?`, () => {
+					window.ClippyAgent.open();
+					window.ClippyAgent.prompt("Quantum Recycle Bin theory");
+				});
+				return;
+			}
+
+			if (openWinsCount >= 3 && Math.random() < 0.4) {
+				window.ClippyUI.showIdleBubble(`You have ${openWinsCount} active windows. Would you like me to tile or cascade them?`, () => {
+					window.ClippyAgent.open();
+					window.ClippyAgent.prompt("Inspect active windows");
+				});
+				return;
+			}
+
+			const idleTemplates = (window.ClippyKnowledge && window.ClippyKnowledge.PROACTIVE_BUBBLE_TEMPLATES && window.ClippyKnowledge.PROACTIVE_BUBBLE_TEMPLATES.idle_long) || [];
+			if (idleTemplates.length > 0) {
+				const chosen = pickFrom(idleTemplates);
+				window.ClippyUI.showIdleBubble(chosen.text, () => {
+					window.ClippyAgent.open();
+					if (chosen.prompt) window.ClippyAgent.prompt(chosen.prompt);
+					else if (chosen.action) window.ClippyAgent.executeAction(chosen.action);
+				});
+				return;
+			}
+
 			const idlePool = [
 				"Need a hand with your tasks or want to discuss a new idea? Click me anytime!",
 				"It looks like you're exploring the desktop. Let me know if you need assistance!",
@@ -1102,10 +1147,8 @@
 				"Curious about retro computing trivia or physical constants? I am ready to assist!",
 				"Remember to stay hydrated and take brief breaks during long workstation sessions."
 			];
-			let msg = pickFrom(idlePool);
-			if (unread > 0) msg = `You have ${unread} unread email(s) waiting in Outlook Express!`;
-			window.ClippyUI.showIdleBubble(msg);
-		}, IDLE_MESSAGE_INTERVAL_MS);
+			window.ClippyUI.showIdleBubble(pickFrom(idlePool));
+		}, intervalMs);
 	}
 
 	function openAssistant() {
@@ -1229,6 +1272,9 @@
 							executeActionTrigger(result.actionTrigger);
 						}
 					});
+					if (result.options && Array.isArray(result.options) && result.options.length > 0) {
+						window.ClippyUI.updateSuggestions(result.options.map(o => o.label));
+					}
 				}
 			}, 160 + Math.random() * 140);
 		}

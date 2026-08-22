@@ -360,9 +360,9 @@ document.addEventListener('DOMContentLoaded', async () => {
 			}
 			refreshUI();
 		});
-		window.DeskEventBus.on('settings:changed', () => {
+		window.DeskEventBus.on('settings:changed', (payload) => {
 			if (window.ClippySystemBridge && typeof window.ClippySystemBridge.recordTelemetryEvent === 'function') {
-				window.ClippySystemBridge.recordTelemetryEvent('themeChanges');
+				window.ClippySystemBridge.recordTelemetryEvent('theme_changed', payload);
 			}
 			applyInitialDesktopBackground();
 			refreshUI();
@@ -371,9 +371,13 @@ document.addEventListener('DOMContentLoaded', async () => {
 		window.DeskEventBus.on('window:focused', (payload) => {
 			activeWindow = payload.win;
 		});
-		window.DeskEventBus.on('window:opened', () => {
+		window.DeskEventBus.on('window:opened', (payload) => {
 			if (window.ClippySystemBridge && typeof window.ClippySystemBridge.recordTelemetryEvent === 'function') {
-				window.ClippySystemBridge.recordTelemetryEvent('windowsOpened');
+				const appId = payload && payload.win ? payload.win.dataset.appId : null;
+				window.ClippySystemBridge.recordTelemetryEvent('app_launched', { appId, win: payload.win });
+				if (window.WindowManager && Object.keys(window.WindowManager.windows).length >= 4) {
+					window.ClippySystemBridge.recordTelemetryEvent('many_windows');
+				}
 			}
 		});
 		window.DeskEventBus.on('window:closed', () => {
@@ -2962,6 +2966,9 @@ function handleDrop(e) {
 		if (window.SettingsApp && window.SettingsApp.playSound) {
 			window.SettingsApp.playSound('recycle');
 		}
+		if (window.ClippySystemBridge && typeof window.ClippySystemBridge.recordTelemetryEvent === 'function') {
+			window.ClippySystemBridge.recordTelemetryEvent('recyclebin_full', { count: sourcePaths.length });
+		}
 		refreshUI();
 		const rbWindow = document.getElementById('window-recycle-bin');
 		if (rbWindow) renderRecycleBinContent(rbWindow);
@@ -3318,6 +3325,9 @@ function setImageAsWallpaper(source, fitMode = 'cover', transitionType = null) {
 
 	if (window.AchievementsManager && (source.includes('artwork') || source.includes('/music/') || source.includes('track_artwork') || source.includes('album_artwork'))) {
 		window.AchievementsManager.progress('artwork_wallpaper', 1);
+	}
+	if (window.ClippySystemBridge && typeof window.ClippySystemBridge.recordTelemetryEvent === 'function') {
+		window.ClippySystemBridge.recordTelemetryEvent('wallpaper_changed', { source });
 	}
 	if (typeof refreshUI === 'function') refreshUI();
 }

@@ -69,17 +69,7 @@
 
 			this.makeDraggable(this.popupElement, headerHandle);
 
-			const suggestions = (window.ClippyKnowledge && window.ClippyKnowledge.QUICK_SUGGESTIONS) || [];
-			suggestions.forEach(sug => {
-				const chip = document.createElement('button');
-				chip.type = 'button';
-				chip.className = 'clippy-suggestion-chip';
-				chip.textContent = sug;
-				chip.addEventListener('click', () => {
-					if (this.onSendHandler) this.onSendHandler(sug);
-				});
-				this.suggestionsContainer.appendChild(chip);
-			});
+			this.renderSuggestions();
 
 			soundBtn.addEventListener('click', () => {
 				if (window.ClippyAudio) {
@@ -320,15 +310,43 @@
 			}
 		}
 
-		showIdleBubble(text) {
+		showIdleBubble(text, onClickAction = null) {
 			if (this.isOpen) return;
 			const bubble = this.ensureBubble();
-			bubble.textContent = text;
+			bubble.innerHTML = '';
+
+			const contentSpan = document.createElement('span');
+			contentSpan.textContent = text;
+			contentSpan.style.cursor = 'pointer';
+			bubble.appendChild(contentSpan);
+
+			const closeBtn = document.createElement('button');
+			closeBtn.type = 'button';
+			closeBtn.className = 'clippy-idle-bubble-close';
+			closeBtn.innerHTML = '&times;';
+			closeBtn.title = 'Dismiss';
+			closeBtn.addEventListener('click', (e) => {
+				e.stopPropagation();
+				this.hideBubble();
+			});
+			bubble.appendChild(closeBtn);
+
 			bubble.classList.remove('hidden');
 			if (window.ClippyAudio) window.ClippyAudio.play('popup');
 
+			const executeBubble = () => {
+				this.hideBubble();
+				if (typeof onClickAction === 'function') {
+					onClickAction();
+				} else if (window.ClippyAgent) {
+					window.ClippyAgent.open();
+				}
+			};
+
+			contentSpan.onclick = executeBubble;
+
 			if (this.bubbleHideTimer) clearTimeout(this.bubbleHideTimer);
-			this.bubbleHideTimer = setTimeout(() => this.hideBubble(), 8000);
+			this.bubbleHideTimer = setTimeout(() => this.hideBubble(), 9500);
 		}
 
 		open() {
@@ -342,6 +360,26 @@
 			setTimeout(() => {
 				if (this.inputElement) this.inputElement.focus();
 			}, 50);
+		}
+
+		renderSuggestions(customSuggestions = null) {
+			if (!this.suggestionsContainer) return;
+			this.suggestionsContainer.innerHTML = '';
+			const pool = customSuggestions || (window.ClippyKnowledge && window.ClippyKnowledge.QUICK_SUGGESTIONS) || [];
+			pool.slice(0, 10).forEach(sug => {
+				const chip = document.createElement('button');
+				chip.type = 'button';
+				chip.className = 'clippy-suggestion-chip';
+				chip.textContent = sug;
+				chip.addEventListener('click', () => {
+					if (this.onSendHandler) this.onSendHandler(sug);
+				});
+				this.suggestionsContainer.appendChild(chip);
+			});
+		}
+
+		updateSuggestions(customList) {
+			this.renderSuggestions(customList);
 		}
 
 		close() {

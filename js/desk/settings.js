@@ -154,6 +154,9 @@
 						osc.stop(now + idx * 0.07 + 0.95);
 					});
 				} else if (type === 'error' || type === 'bonk') {
+					if (window.ClippySystemBridge && typeof window.ClippySystemBridge.recordTelemetryEvent === 'function') {
+						window.ClippySystemBridge.recordTelemetryEvent('error_triggered');
+					}
 					if (!currentSettings.soundEventError) return;
 					const osc = this.ctx.createOscillator();
 					const g = this.ctx.createGain();

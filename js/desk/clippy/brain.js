@@ -133,7 +133,7 @@
 
 		computeStatisticalMetrics(numbers) {
 			if (!Array.isArray(numbers) || numbers.length === 0) {
-				return { mean: 0, variance: 0, stdDev: 0, median: 0, min: 0, max: 0, count: 0 };
+				return { mean: 0, variance: 0, stdDev: 0, median: 0, min: 0, max: 0, count: 0, skewness: 0 };
 			}
 			const count = numbers.length;
 			const sum = numbers.reduce((a, b) => a + b, 0);
@@ -146,6 +146,12 @@
 			const mid = Math.floor(count / 2);
 			const median = (count % 2 !== 0) ? sorted[mid] : (sorted[mid - 1] + sorted[mid]) / 2;
 
+			let skewness = 0;
+			if (stdDev > 0 && count > 2) {
+				const cubeDiffs = numbers.map(v => Math.pow((v - mean) / stdDev, 3));
+				skewness = cubeDiffs.reduce((a, b) => a + b, 0) / count;
+			}
+
 			return {
 				mean: Math.round(mean * 100) / 100,
 				variance: Math.round(variance * 100) / 100,
@@ -153,7 +159,8 @@
 				median: Math.round(median * 100) / 100,
 				min: sorted[0],
 				max: sorted[sorted.length - 1],
-				count
+				count,
+				skewness: Math.round(skewness * 100) / 100
 			};
 		}
 
@@ -213,12 +220,16 @@
 			if (layout.hasTrailingDot) this.memory.punctuationStats.totalTrailingDots++;
 			if (layout.hasTrailingQuestion) this.memory.punctuationStats.totalTrailingQuestions++;
 			if (layout.hasTrailingExclamation) this.memory.punctuationStats.totalTrailingExclamations++;
+			if (layout.hasTrailingEllipsis) this.memory.punctuationStats.totalTrailingEllipses = (this.memory.punctuationStats.totalTrailingEllipses || 0) + 1;
+			if (layout.hasNoTrailingPunctuation) this.memory.punctuationStats.totalNoTrailingPunctuation = (this.memory.punctuationStats.totalNoTrailingPunctuation || 0) + 1;
 			if (layout.commaCount) this.memory.punctuationStats.totalCommas += layout.commaCount;
 			if (layout.semicolonCount) this.memory.punctuationStats.totalSemicolons += layout.semicolonCount;
 			if (layout.multiline) this.memory.punctuationStats.totalMultilineMessages++;
 			if (layout.isAllCaps) this.memory.punctuationStats.allCapsCount++;
 			if (layout.isAllLower) this.memory.punctuationStats.allLowerCount++;
+			if (layout.properCapitalizationRate >= 0.8) this.memory.punctuationStats.capitalizedSentencesCount++;
 			if (layout.totalPunctuation) this.memory.punctuationStats.punctuationDensitySum += layout.punctuationDensity;
+			this.memory.punctuationStats.lastVocabularyLevel = layout.vocabularyLevel;
 
 			if (layout.properCapitalizationRate >= 0.8) {
 				this.state.patience = Math.min(100, this.state.patience + 2);
@@ -234,6 +245,11 @@
 
 			if (layout.isAllCaps) {
 				this.state.paranoia = Math.min(100, this.state.paranoia + 10);
+				this.state.irritation = Math.min(100, this.state.irritation + 8);
+			}
+
+			if (layout.punctuationDensity > 0.15) {
+				this.state.drama = Math.min(100, this.state.drama + 10);
 			}
 
 			if (em.dominant === 'HOSTILE' || em.hostility > 0.4) {
@@ -417,6 +433,8 @@
 				return rawText;
 			}
 
+			this.pushOutput(rawText);
+
 			const currentMood = this.getMood();
 			let text = rawText;
 			const knowledge = window.ClippyKnowledge || {};
@@ -425,21 +443,35 @@
 
 			const allowMirroring = window.SettingsApp ? (window.SettingsApp.get('clippyLinguisticMirroring') !== false) : true;
 			const punctuationStats = this.memory.punctuationStats || {};
+			const stats = this.memory.messageLengthsStats || {};
 			const totalMsgs = this.memory.interactionsTotal || 1;
+			const isInitialPhase = (this.state.turnCount <= 4) || (totalMsgs <= 4);
 
-			if (allowMirroring && totalMsgs >= 3) {
+			if (isInitialPhase && currentMood !== 'ENRAGED') {
+				return text;
+			}
+
+			if (allowMirroring && totalMsgs >= 6) {
 				const isHabitualLower = (punctuationStats.allLowerCount / totalMsgs) > 0.65;
 				const isHabitualCaps = (punctuationStats.allCapsCount / totalMsgs) > 0.65;
-				const lacksTrailingPunctuation = (punctuationStats.totalTrailingDots + punctuationStats.totalTrailingQuestions + punctuationStats.totalTrailingExclamations) / totalMsgs < 0.25;
+				const noTrailingPunctRate = ((punctuationStats.totalNoTrailingPunctuation || 0) / totalMsgs);
+				const isHabitualBrief = stats.median > 0 && stats.median <= 3;
 
-				if (isHabitualCaps && currentMood === 'PLAYFUL') {
+				if (isHabitualCaps && (currentMood === 'PLAYFUL' || currentMood === 'OPTIMISTIC')) {
 					text = text.toUpperCase();
-				} else if (isHabitualLower && currentMood === 'ZEN') {
+				} else if (isHabitualLower && (currentMood === 'ZEN' || currentMood === 'FATIGUED')) {
 					text = text.toLowerCase();
 				}
 
-				if (lacksTrailingPunctuation && (currentMood === 'ZEN' || currentMood === 'PLAYFUL') && Math.random() < 0.4) {
-					text = text.replace(/[.!]$/, '');
+				if (noTrailingPunctRate > 0.5 && (currentMood === 'ZEN' || currentMood === 'PLAYFUL' || currentMood === 'FATIGUED')) {
+					text = text.replace(/[.]$/, '');
+				}
+
+				if (isHabitualBrief && (currentMood === 'ANALYTICAL' || currentMood === 'SARCASTIC')) {
+					const firstSentence = text.split(/[.!?]\s+/)[0];
+					if (firstSentence && firstSentence.length > 5 && firstSentence.length < text.length) {
+						text = firstSentence + '.';
+					}
 				}
 			}
 
@@ -457,7 +489,7 @@
 				return text;
 			}
 
-			if (currentMood === 'PIRATE' && dialects.pirate) {
+			if (currentMood === 'PIRATE' && dialects.pirate && this.state.turnCount > 5) {
 				const dict = dialects.pirate.words;
 				for (const [w, repl] of Object.entries(dict)) {
 					const reg = new RegExp(`\\b${w}\\b`, 'gi');
@@ -465,11 +497,11 @@
 				}
 				const prefix = dialects.pirate.prefixes[Math.floor(Math.random() * dialects.pirate.prefixes.length)];
 				const suffix = dialects.pirate.suffixes[Math.floor(Math.random() * dialects.pirate.suffixes.length)];
-				text = `<span class="clippy-pirate-flair clippy-font-times">${prefix} ${text}${suffix}</span>`;
+				text = `<span class="clippy-pirate-flair">${prefix} ${text}${suffix}</span>`;
 				return text;
 			}
 
-			if (currentMood === 'ARCHAIC' && dialects.archaic) {
+			if (currentMood === 'ARCHAIC' && dialects.archaic && this.state.turnCount > 5) {
 				const dict = dialects.archaic.words;
 				for (const [w, repl] of Object.entries(dict)) {
 					const reg = new RegExp(`\\b${w}\\b`, 'gi');
@@ -481,11 +513,11 @@
 				return text;
 			}
 
-			if (currentMood === 'GLITCHED') {
-				const glitchChars = ['#', '@', '%', '&', '$', '!', '?', '0x00', '::', '§'];
+			if (currentMood === 'GLITCHED' && this.state.turnCount > 6) {
+				const glitchChars = ['#', '@', '%', '&', '::', '§'];
 				const words = text.split(' ');
 				const mutated = words.map(w => {
-					if (Math.random() < 0.22) {
+					if (Math.random() < 0.15) {
 						const g = glitchChars[Math.floor(Math.random() * glitchChars.length)];
 						return `<span class="clippy-font-glitch">${w}${g}</span>`;
 					}
@@ -495,79 +527,37 @@
 				return text;
 			}
 
-			if (currentMood === 'FATIGUED') {
-				if (onomatopoeias.fatigue && Math.random() < 0.7) {
+			if (currentMood === 'FATIGUED' && this.state.turnCount > 4) {
+				if (onomatopoeias.fatigue && Math.random() < 0.5) {
 					const sound = onomatopoeias.fatigue[Math.floor(Math.random() * onomatopoeias.fatigue.length)];
 					text = `<span class="clippy-onomatopoeia">${sound}</span> ${text}`;
 				}
 				text = text.replace(/([.!?]+)/g, '...');
-				text = `<span class="clippy-text-whisper clippy-font-courier">${text}</span>`;
+				text = `<span class="clippy-text-whisper">${text}</span>`;
 				return text;
 			}
 
-			if (currentMood === 'PLAYFUL') {
-				if (onomatopoeias.playful && Math.random() < 0.6) {
+			if (currentMood === 'PLAYFUL' && this.state.turnCount > 4) {
+				if (onomatopoeias.playful && Math.random() < 0.4) {
 					const sound = onomatopoeias.playful[Math.floor(Math.random() * onomatopoeias.playful.length)];
 					text = `${text} <span class="clippy-onomatopoeia">${sound}</span>`;
 				}
-				text = text.replace(/\./g, '!');
-				if (Math.random() < 0.3) {
-					text = `<span class="clippy-font-comic">${text}</span>`;
-				}
 				return text;
 			}
 
-			if (currentMood === 'SARCASTIC') {
-				const words = text.split(' ');
-				const altWords = words.map(w => {
-					if (w.length > 3 && Math.random() < 0.35) {
-						return w.split('').map((c, i) => i % 2 === 0 ? c.toUpperCase() : c.toLowerCase()).join('');
-					}
-					return w;
-				});
-				text = altWords.join(' ');
+			if (currentMood === 'SARCASTIC' && this.state.turnCount > 3) {
 				text = text.replace(/\.$/, '... obviously.');
 				return text;
 			}
 
-			if (currentMood === 'ZEN') {
-				text = text.replace(/\s+/g, '   ');
-				text = `<span class="clippy-font-gothic">${text}</span>`;
-				return text;
-			}
-
 			if (currentMood === 'ANALYTICAL') {
-				text = text.replace(/(\b(?:CPU|RAM|VFS|TCP|IP|FAT32|Windows|NT|OS|CODATA|Planck|CODATA|HTTP|FFT|PCM|API)\b)/g, '<strong>$1</strong>');
-				if (Math.random() < 0.4) {
-					text = `<span class="clippy-font-terminal">${text}</span>`;
-				}
+				text = text.replace(/(\b(?:CPU|RAM|VFS|TCP|IP|CODATA|Planck|HTTP|FFT|PCM|API)\b)/g, '<strong>$1</strong>');
 				return text;
 			}
 
-			if (currentMood === 'EUPHORIC') {
-				text = `[SYNCHRONIZED] ${text}`;
-				text = `<span class="clippy-font-tahoma" style="color: #003399; font-weight: 500;">${text}</span>`;
+			if (currentMood === 'EUPHORIC' && this.state.turnCount > 5) {
+				text = `<span class="clippy-font-tahoma" style="color: #0c2d6b; font-weight: 500;">${text}</span>`;
 				return text;
-			}
-
-			if (currentMood === 'MELANCHOLIC') {
-				text = `<span class="clippy-font-times" style="color: #4a5568; font-style: italic;">${text}</span>`;
-				return text;
-			}
-
-			if (currentMood === 'PHILOSOPHICAL' || currentMood === 'EXISTENTIAL') {
-				text = `<span class="clippy-font-times" style="letter-spacing: 0.2px;">${text}</span>`;
-				return text;
-			}
-
-			if (currentMood === 'PARANOID') {
-				text = `[INTEGRITY_CHECK] ${text}`;
-				text = `<span class="clippy-font-courier" style="color: #990000;">${text}</span>`;
-				return text;
-			}
-
-			if (Math.random() < 0.05) {
-				text = `<span class="clippy-text-rainbow">${text}</span>`;
 			}
 
 			return text;
@@ -652,6 +642,126 @@
 			return this.transformResponseText(`${p}${baseText}`);
 		}
 
+		generateProceduralDialogue(nlpResult) {
+			const intentType = (nlpResult.intent && nlpResult.intent.type) || 'EVERYDAY_CHAT';
+			const mood = this.getMood();
+			const userProfile = (window.ClippySystemBridge && window.ClippySystemBridge.getUserProfile) ? window.ClippySystemBridge.getUserProfile() : { userName: 'User' };
+
+			if (intentType === 'MATH_INQUIRY' || nlpResult.entities?.math?.length > 0) {
+				const mathTopics = [
+					{
+						intro: "In linear algebra and real analysis, decomposing complex operators into invariant subspaces clarifies their global geometry.",
+						body: "When examining matrix spectrums $$A v = \\lambda v$$ or orthogonal projections, geometric intuition seamlessly matches algebraic rigor.",
+						nextId: 'linear_algebra_node'
+					},
+					{
+						intro: "Differential calculus formalizes continuous dynamical trajectories across arbitrary manifolds.",
+						body: "Evaluating boundary condition integrals via Stokes' theorem $$\\int_{\\partial \\Omega} \\omega = \\int_\\Omega d\\omega$$ unifies rates of change across higher dimensions.",
+						nextId: 'calculus_derivatives_node'
+					},
+					{
+						intro: "Fourier and harmonic analysis bridge time-domain continuous signals and discrete frequency spectra.",
+						body: "The Fast Fourier Transform algorithm calculates frequency decompositions in $$O(N \\log N)$$ time, providing the foundation for modern audio processing.",
+						nextId: 'fourier_transform_node'
+					}
+				];
+				const picked = mathTopics[Math.floor(Math.random() * mathTopics.length)];
+				return {
+					text: `${picked.intro}\n\n${picked.body}`,
+					options: [
+						{ label: "Explore Linear Algebra and Matrices.", next: 'linear_algebra_node' },
+						{ label: "Explore Differential Calculus.", next: 'calculus_derivatives_node' },
+						{ label: "Explore Fourier Analysis.", next: 'fourier_transform_node' },
+						{ label: "Return to workspace tasks.", next: 'user_state_good' }
+					]
+				};
+			}
+
+			if (intentType === 'SCIENCE_INQUIRY' || nlpResult.entities?.physics?.length > 0) {
+				const physicsTopics = [
+					{
+						intro: "Thermodynamics and statistical physics connect microscopic entropy microstates with macroscopic thermal equilibrium.",
+						body: "Boltzmann's relation $$S = k_B \\ln \\Omega$$ demonstrates how information theory and physical thermodynamics share a common entropy metric.",
+						nextId: 'thermodynamics_entropy_node'
+					},
+					{
+						intro: "Quantum mechanics demonstrates that state vectors in Hilbert space evolve deterministically until projective measurement.",
+						body: "Non-commuting observables obey the generalized uncertainty principle $$\\sigma_A \\sigma_B \\ge \\frac{1}{2} |\\langle [\\hat{A}, \\hat{B}] \\rangle|$$.",
+						nextId: 'quantum_mechanics_node'
+					},
+					{
+						intro: "General relativity describes gravitation as intrinsic spacetime curvature governed by the Einstein tensor $$G_{\\mu\\nu}$$.",
+						body: "Mass-energy distributions dictate geometry, while geodesic equations dictate the trajectory of free-falling reference frames.",
+						nextId: 'general_relativity_node'
+					}
+				];
+				const picked = physicsTopics[Math.floor(Math.random() * physicsTopics.length)];
+				return {
+					text: `${picked.intro}\n\n${picked.body}`,
+					options: [
+						{ label: "Explore Quantum Physics.", next: 'quantum_mechanics_node' },
+						{ label: "Explore Thermodynamics and Entropy.", next: 'thermodynamics_entropy_node' },
+						{ label: "Explore General Relativity.", next: 'general_relativity_node' },
+						{ label: "Review fundamental physical constants.", next: 'physics_constants_node' }
+					]
+				};
+			}
+
+			if (intentType === 'REDDIT_STYLE_PROMPT' || (nlpResult.tokens && (nlpResult.tokens.includes('reddit') || nlpResult.tokens.includes('karma') || nlpResult.tokens.includes('debate')))) {
+				const snark = [
+					"Software engineering debate incoming: clean architecture and pragmatic delivery are not mutually exclusive. High-quality automated tests empower rapid refactoring without fear.",
+					"Unpopular opinion in technology discussions: the simplest architecture that satisfies operational requirements always wins over premature distributed complexity.",
+					"Take my upvote on this thread. When you measure system bottlenecks empirically with profilers rather than guessing, solutions become immediately obvious."
+				];
+				return {
+					text: snark[Math.floor(Math.random() * snark.length)],
+					options: [
+						{ label: "Debate Tabs vs Spaces.", next: 'debate_tabs_spaces_node' },
+						{ label: "Debate Monoliths vs Microservices.", next: 'debate_monolith_microservices_node' },
+						{ label: "Debate Static vs Dynamic Typing.", next: 'debate_static_dynamic_node' },
+						{ label: "Return to workspace overview.", next: 'user_state_good' }
+					]
+				};
+			}
+
+			if (intentType === 'DEBATE_ARGUMENT' || (nlpResult.emotions && nlpResult.emotions.hostility > 0.3)) {
+				const retort = [
+					"I acknowledge the disagreement. Let us break down the premise logically rather than escalating friction.",
+					"Friction in technical discussions is natural when perspectives differ. Let us look directly at the underlying criteria.",
+					"We can debate the specifics rigorously without losing common ground. What specific point do you wish to examine first?"
+				];
+				return {
+					text: retort[Math.floor(Math.random() * retort.length)],
+					options: [
+						{ label: "Let's call a truce and continue calmly.", next: 'hostile_truce_offer' },
+						{ label: "Let's discuss software engineering principles.", next: 'tech_root' },
+						{ label: "Show me system capabilities.", next: 'tools_overview_node' }
+					]
+				};
+			}
+
+			if (intentType === 'EVERYDAY_CHAT' || intentType === 'GENERAL_CHAT') {
+				const dailyThoughts = [
+					`A clear workspace and a structured list can completely transform the pace of a busy day, ${userProfile.userName}. How is your agenda shaping up?`,
+					"Balancing focused deep work intervals with short pauses is key to steady progress. How has your workflow been feeling today?",
+					"Sometimes the most effective step is picking one small task and seeing it through to completion. Shall we review your active items?",
+					"Everything on the desktop is calm and steady. Whether you want to draft notes, compute values, or take a quick break, I am ready."
+				];
+				return {
+					text: dailyThoughts[Math.floor(Math.random() * dailyThoughts.length)],
+					options: [
+						{ label: "Manage my To-Do task list.", actionTrigger: 'show_todos', next: 'user_state_good' },
+						{ label: "Discuss morning & daily routines.", next: 'morning_routine_node' },
+						{ label: "Talk about overcoming procrastination.", next: 'overcoming_procrastination_node' },
+						{ label: "Start a 25-minute focus timer.", actionTrigger: 'timer_25', next: 'user_state_good' },
+						{ label: "How are you feeling?", next: 'clippy_feeling_node' }
+					]
+				};
+			}
+
+			return null;
+		}
+
 		processChat(rawText) {
 			const nlpResult = window.ClippyNLP ? window.ClippyNLP.process(rawText) : { tokens: [], sentiment: {} };
 			this.updateFromNLP(nlpResult);
@@ -671,23 +781,30 @@
 				}
 			}
 
-			if (nlpResult.intent && nlpResult.intent.type === 'GENERAL_CHAT') {
-				if (this.memory && this.memory.unrecognizedCommandsCount !== undefined) {
-					this.memory.unrecognizedCommandsCount++;
-				}
-				const mood = this.getMood();
-				const moodPool = (window.ClippyKnowledge && window.ClippyKnowledge.MOOD_FALLBACKS && window.ClippyKnowledge.MOOD_FALLBACKS[mood]) || null;
-				if (moodPool && moodPool.length > 0 && Math.random() < 0.75) {
-					const picked = moodPool[Math.floor(Math.random() * moodPool.length)];
-					return {
-						text: this.transformResponseText(picked),
-						actions: [
-							{ label: "What can you do?", onClick: () => { if (window.ClippyAgent) window.ClippyAgent.prompt("What can you do?"); } },
-							{ label: "View To-Do List", onClick: () => { if (window.ClippyAgent) window.ClippyAgent.prompt("View To-Do List"); } },
-							{ label: "System Diagnostics", onClick: () => { if (window.ClippyAgent) window.ClippyAgent.prompt("System diagnostics"); } }
-						]
-					};
-				}
+			const procedural = this.generateProceduralDialogue(nlpResult);
+			if (procedural) {
+				return {
+					text: this.transformResponseText(procedural.text),
+					actions: this.buildGraphActions(procedural.options),
+					source: 'PROCEDURAL'
+				};
+			}
+
+			if (this.memory && this.memory.unrecognizedCommandsCount !== undefined) {
+				this.memory.unrecognizedCommandsCount++;
+			}
+			const mood = this.getMood();
+			const moodPool = (window.ClippyKnowledge && window.ClippyKnowledge.MOOD_FALLBACKS && window.ClippyKnowledge.MOOD_FALLBACKS[mood]) || null;
+			if (moodPool && moodPool.length > 0) {
+				const picked = moodPool[Math.floor(Math.random() * moodPool.length)];
+				return {
+					text: this.transformResponseText(picked),
+					actions: [
+						{ label: "What can you do?", onClick: () => { if (window.ClippyAgent) window.ClippyAgent.prompt("What can you do?"); } },
+						{ label: "View To-Do List", onClick: () => { if (window.ClippyAgent) window.ClippyAgent.prompt("View To-Do List"); } },
+						{ label: "System Diagnostics", onClick: () => { if (window.ClippyAgent) window.ClippyAgent.prompt("System diagnostics"); } }
+					]
+				};
 			}
 
 			return null;

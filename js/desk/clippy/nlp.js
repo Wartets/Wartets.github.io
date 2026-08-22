@@ -217,37 +217,43 @@
 			const lines = rawText.split(/\r\n|\r|\n/);
 			const lineCount = lines.length;
 			const multiline = lineCount > 1;
+			const blankLinesCount = lines.filter(l => l.trim().length === 0).length;
+			const hasIndentation = lines.some(l => /^[\t ]{2,}/.test(l));
 
-			const hasTrailingDot = /\.\s*$/.test(trimmed);
+			const hasTrailingDot = /\.\s*$/.test(trimmed) && !/\.{2,}\s*$/.test(trimmed);
 			const hasTrailingQuestion = /\?\s*$/.test(trimmed);
 			const hasTrailingExclamation = /!\s*$/.test(trimmed);
 			const hasTrailingEllipsis = /\.{3,}\s*$/.test(trimmed);
+			const hasNoTrailingPunctuation = !/[.!?…]\s*$/.test(trimmed);
 
 			const commaCount = (rawText.match(/,/g) || []).length;
 			const semicolonCount = (rawText.match(/;/g) || []).length;
 			const colonCount = (rawText.match(/:/g) || []).length;
-			const quoteCount = (rawText.match(/["'«»]/g) || []).length;
+			const quoteCount = (rawText.match(/["'«»`]/g) || []).length;
 			const parenthesisCount = (rawText.match(/[()\[\]{}]/g) || []).length;
 			const periodCount = (rawText.match(/\./g) || []).length;
 			const exclamationCount = (rawText.match(/!/g) || []).length;
 			const questionCount = (rawText.match(/\?/g) || []).length;
-			const totalPunctuation = commaCount + semicolonCount + colonCount + quoteCount + parenthesisCount + periodCount + exclamationCount + questionCount;
+			const hyphenCount = (rawText.match(/[-—–]/g) || []).length;
+			const totalPunctuation = commaCount + semicolonCount + colonCount + quoteCount + parenthesisCount + periodCount + exclamationCount + questionCount + hyphenCount;
 
 			const punctuationDensity = charLength > 0 ? totalPunctuation / charLength : 0;
 
 			let uppercaseLetterCount = 0;
 			let lowercaseLetterCount = 0;
+			let digitCount = 0;
 			for (let i = 0; i < rawText.length; i++) {
 				const c = rawText[i];
 				if (c >= 'A' && c <= 'Z') uppercaseLetterCount++;
 				else if (c >= 'a' && c <= 'z') lowercaseLetterCount++;
+				else if (c >= '0' && c <= '9') digitCount++;
 			}
 			const totalLetters = uppercaseLetterCount + lowercaseLetterCount;
 			const uppercaseRatio = totalLetters > 0 ? uppercaseLetterCount / totalLetters : 0;
-			const isAllCaps = totalLetters > 3 && uppercaseRatio > 0.85;
+			const isAllCaps = totalLetters > 3 && uppercaseRatio > 0.82;
 			const isAllLower = totalLetters > 3 && uppercaseRatio === 0;
 
-			const sentenceStarts = trimmed.split(/(?<=[.!?])\s+/);
+			const sentenceStarts = trimmed.split(/(?<=[.!?])\s+/).filter(Boolean);
 			let capitalizedSentencesCount = 0;
 			sentenceStarts.forEach(s => {
 				const firstChar = s.trim().charAt(0);
@@ -256,25 +262,44 @@
 			const properCapitalizationRate = sentenceStarts.length > 0 ? capitalizedSentencesCount / sentenceStarts.length : 0;
 
 			const avgWordLength = tokens.length > 0 ? tokens.reduce((sum, t) => sum + t.length, 0) / tokens.length : 0;
+			const uniqueTokens = new Set(tokens.map(t => t.toLowerCase()));
+			const lexicalDiversity = tokens.length > 0 ? uniqueTokens.size / tokens.length : 0;
+
+			let vocabularyLevel = 'standard';
+			if (avgWordLength > 6.8 && lexicalDiversity > 0.8) vocabularyLevel = 'academic';
+			else if (avgWordLength > 5.5) vocabularyLevel = 'technical';
+			else if (avgWordLength < 3.8 && isAllLower) vocabularyLevel = 'casual';
 
 			return {
 				charLength,
 				lineCount,
 				multiline,
+				blankLinesCount,
+				hasIndentation,
 				hasTrailingDot,
 				hasTrailingQuestion,
 				hasTrailingExclamation,
 				hasTrailingEllipsis,
+				hasNoTrailingPunctuation,
 				commaCount,
 				semicolonCount,
 				colonCount,
+				quoteCount,
+				parenthesisCount,
+				periodCount,
+				exclamationCount,
+				questionCount,
+				hyphenCount,
+				digitCount,
 				totalPunctuation,
 				punctuationDensity,
 				uppercaseRatio,
 				isAllCaps,
 				isAllLower,
 				properCapitalizationRate,
-				avgWordLength
+				avgWordLength,
+				lexicalDiversity,
+				vocabularyLevel
 			};
 		}
 
@@ -353,6 +378,30 @@
 				return { type: 'CANCEL', confidence: 1.0 };
 			}
 
+			if (/\b(reddit|upvote|karma|downvote|thread|sub|op|tldr|tl;dr|debate|tabs vs spaces|monolith)\b/i.test(norm)) {
+				return { type: 'REDDIT_STYLE_PROMPT', confidence: 0.9 };
+			}
+
+			if (/\b(quantum|physics|relativity|thermodynamics|gravity|speed of light|planck|physique|science|cosmologie|astronomie|univers|cosmos|maxwell|carnot|schrodinger|heisenberg)\b/i.test(norm)) {
+				return { type: 'SCIENCE_INQUIRY', confidence: 0.9 };
+			}
+
+			if (/\b(math|maths|equation|calculus|derivative|integral|matrix|algebra|fourier|algebre|matrice|theoreme|eigenvalue|taylor|topology|manifold|bayesian|riemann|fractal|mandelbrot)\b/i.test(norm)) {
+				return { type: 'MATH_INQUIRY', confidence: 0.9 };
+			}
+
+			if (/\b(routine|morning|evening|coffee|tea|procrastination|focus|habits|habit|reading|books|writing|walk|lifestyle|sommeil|cafe|repas)\b/i.test(norm)) {
+				return { type: 'EVERYDAY_CHAT', confidence: 0.9 };
+			}
+
+			if (/\b(disagree|wrong|stupid|annoying|hate|shut up|idiot|argue|debate|faux|pas d'accord|nul|inutile|tais-toi)\b/i.test(norm)) {
+				return { type: 'DEBATE_ARGUMENT', confidence: 0.88 };
+			}
+
+			if (/\b(sorry|apologize|apologies|truce|forgive|pardon|desole|excuse|recommencer|paix)\b/i.test(norm)) {
+				return { type: 'RECONCILIATION', confidence: 0.92 };
+			}
+
 			if (/^(open|launch|start|demarre|ouvre|lancer|ouvrir)\b/i.test(norm) || entities.app) {
 				return { type: 'APP_LAUNCH', targetApp: entities.app, confidence: 0.9 };
 			}
@@ -419,6 +468,10 @@
 
 			if (/\b(who am i|qui suis-je|mon profil|profile|identity|identite)\b/i.test(norm)) {
 				return { type: 'USER_PROFILE', confidence: 0.95 };
+			}
+
+			if (/\b(weather|coffee|routine|day|morning|evening|weekend|travail|journee|cafe|sommeil|humeur|meteo|fatigue|pause)\b/i.test(norm)) {
+				return { type: 'EVERYDAY_CHAT', confidence: 0.85 };
 			}
 
 			return { type: 'GENERAL_CHAT', confidence: 0.5 };
