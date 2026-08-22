@@ -2,6 +2,48 @@
 	'use strict';
 
 	const SystemBridge = {
+		recordTelemetryEvent(eventType) {
+			try {
+				if (window.ClippyBrain && window.ClippyBrain.memory && window.ClippyBrain.memory.telemetryEvents) {
+					const events = window.ClippyBrain.memory.telemetryEvents;
+					if (events[eventType] !== undefined) {
+						events[eventType]++;
+					} else {
+						events[eventType] = 1;
+					}
+					window.ClippyBrain.saveMemory();
+				}
+			} catch (e) {}
+		},
+
+		getStatisticalTelemetrySummary() {
+			try {
+				if (window.ClippyBrain && window.ClippyBrain.memory) {
+					const mem = window.ClippyBrain.memory;
+					const stats = mem.messageLengthsStats || {};
+					const punct = mem.punctuationStats || {};
+					const telemetry = mem.telemetryEvents || {};
+					return {
+						interactionsTotal: mem.interactionsTotal || 0,
+						meanWordCount: stats.mean || 0,
+						medianWordCount: stats.median || 0,
+						stdDevWordCount: stats.stdDev || 0,
+						minWordCount: stats.min || 0,
+						maxWordCount: stats.max || 0,
+						totalTrailingDots: punct.totalTrailingDots || 0,
+						totalTrailingQuestions: punct.totalTrailingQuestions || 0,
+						totalTrailingExclamations: punct.totalTrailingExclamations || 0,
+						totalMultilineMessages: punct.totalMultilineMessages || 0,
+						allCapsCount: punct.allCapsCount || 0,
+						allLowerCount: punct.allLowerCount || 0,
+						unrecognizedCommandsCount: mem.unrecognizedCommandsCount || 0,
+						telemetry
+					};
+				}
+			} catch (e) {}
+			return null;
+		},
+
 		getUnreadMailCount() {
 			try {
 				if (window.DeskAPI && typeof window.DeskAPI.getUnreadMailCount === 'function') {
@@ -636,6 +678,8 @@
 			const moon = this.getMoonPhaseLabel() || 'Unavailable';
 			const bat = this.getBatteryInfo();
 			const batText = bat.supported ? `${bat.level}% (${bat.charging ? 'Charging' : 'Discharging'})` : 'AC Line Connected';
+			const stats = this.getStatisticalTelemetrySummary();
+			const statsRow = stats ? `<tr><td><b>Linguistic Telemetry</b></td><td>Mean: ${stats.meanWordCount} words, Med: ${stats.medianWordCount}, StdDev: ${stats.stdDevWordCount} (${stats.interactionsTotal} inputs)</td></tr>` : '';
 
 			return `<div class="clippy-structured-section">
 				<div class="clippy-section-title">Workstation Diagnostics Log</div>
@@ -651,6 +695,7 @@
 					<tr><td><b>RAM Memory</b></td><td>${mem}</td></tr>
 					<tr><td><b>Power Source</b></td><td>${batText}</td></tr>
 					<tr><td><b>Lunar Metric</b></td><td>${moon}</td></tr>
+					${statsRow}
 				</table>
 			</div>`;
 		},

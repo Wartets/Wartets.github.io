@@ -37,43 +37,121 @@
 			"happy": 2.0, "brilliant": 2.8, "genius": 2.5, "helpful": 2.0, "best": 3.0,
 			"clean": 1.2, "productive": 2.0, "fast": 1.2, "smart": 2.0, "legend": 2.5,
 			"hero": 2.5, "beautiful": 2.4, "peaceful": 2.0, "kind": 1.8, "cool": 1.5,
+			"magnificent": 3.0, "superb": 2.8, "efficient": 2.2, "pleasant": 2.0, "sublime": 3.2,
 			"bad": -2.0, "terrible": -3.2, "awful": -3.2, "horrible": -3.5, "hate": -3.5,
 			"useless": -3.0, "annoying": -2.8, "stupid": -3.0, "ugly": -2.5, "slow": -1.5,
 			"broken": -2.2, "crash": -2.5, "error": -1.8, "worst": -3.5, "garbage": -3.2,
 			"trash": -3.0, "boring": -2.0, "tired": -1.8, "exhausted": -2.2, "sad": -2.0,
 			"depressed": -2.5, "angry": -2.5, "mad": -2.2, "shut": -1.5, "die": -3.5,
+			"clueless": -2.4, "disaster": -3.0, "pathetic": -3.2, "clunky": -2.0, "glitch": -1.8,
 			"merci": 2.0, "super": 2.5, "parfait": 3.0, "bien": 1.5, "bravo": 2.2,
-			"nul": -2.5, "inutile": -3.0, "mauvais": -2.0, "horrible": -3.2, "enerve": -2.5
+			"agreable": 2.0, "remarquable": 2.6, "splendide": 3.0, "efficace": 2.2,
+			"nul": -2.5, "inutile": -3.0, "mauvais": -2.0, "horrible": -3.2, "enerve": -2.5,
+			"catastrophe": -3.0, "lent": -1.8, "bloquant": -2.2, "abime": -2.0, "penible": -2.4
 		},
 
 		EMOTIONAL_INDICATORS: {
-			frustration: ["error", "bug", "fail", "failed", "crash", "stuck", "broken", "annoying", "hate", "slow", "stupid", "useless", "worst", "damn", "bloody", "nul", "inutile", "plante", "bloque"],
-			curiosity: ["why", "how", "what", "where", "when", "explain", "details", "origin", "theory", "meaning", "science", "physics", "math", "explore", "pourquoi", "comment", "explique"],
-			fatigue: ["tired", "exhausted", "sleepy", "burnout", "drained", "sleep", "rest", "break", "fatigue", "epuise", "dodo", "pause"],
-			enthusiasm: ["wow", "cool", "awesome", "let's", "ready", "play", "game", "go", "fun", "super", "genial", "gagnant"],
-			politeness: ["please", "thank", "thanks", "kindly", "appreciate", "hello", "greetings", "hi", "hey", "merci", "bonjour", "salut", "s'il vous plait"]
+			frustration: ["error", "bug", "fail", "failed", "crash", "stuck", "broken", "annoying", "hate", "slow", "stupid", "useless", "worst", "damn", "bloody", "nul", "inutile", "plante", "bloque", "rage", "irritant", "enerve", "fuck", "merde", "chier", "lenteur", "bloquage", "echec"],
+			curiosity: ["why", "how", "what", "where", "when", "explain", "details", "origin", "theory", "meaning", "science", "physics", "math", "explore", "inspect", "investigate", "pourquoi", "comment", "explique", "analyser", "comprendre", "detaille", "raison", "origine", "fonctionnement", "architecture"],
+			fatigue: ["tired", "exhausted", "sleepy", "burnout", "drained", "sleep", "rest", "break", "yawn", "fatigue", "epuise", "dodo", "pause", "sommeil", "creve", "flemme", "las", "use", "reposer", "sieste"],
+			enthusiasm: ["wow", "cool", "awesome", "let's", "ready", "play", "game", "go", "fun", "super", "genial", "gagnant", "extra", "incroyable", "chouette", "top", "bravo", "impatient", "motivant", "parti"],
+			politeness: ["please", "thank", "thanks", "kindly", "appreciate", "hello", "greetings", "hi", "hey", "merci", "bonjour", "salut", "s'il vous plait", "cordialement", "amabilite", "pardon", "excuse", "bienvenue", "bonsoir"],
+			hostility: ["kill", "destroy", "die", "shut up", "disappear", "idiot", "moron", "trash", "garbage", "hate", "tais-toi", "degage", "va-t-en", "creve", "detruire", "abrutis", "minable", "degager", "supprimer"],
+			skepticism: ["really", "sure", "doubt", "fake", "impossible", "lie", "proof", "questionable", "vraiment", "doute", "faux", "preuve", "mensonge", "bizarre", "louche", "veridique", "sceptique"],
+			playfulness: ["fun", "joke", "riddle", "game", "laugh", "trick", "haha", "mdr", "lol", "blague", "amusant", "rigolo", "jouons", "devinette", "defier", "amusement"],
+			desperation: ["help", "emergency", "urgent", "lost", "critical", "panicking", "panic", "aidez-moi", "urgent", "perdu", "sauve", "secours", "panique", "sos", "bloque"],
+			awe: ["universe", "infinity", "cosmos", "miracle", "fascinating", "quantum", "existence", "immense", "infini", "fascinant", "quantique", "beaute", "vertige", "cosmique", "immensite"]
+		},
+
+		DIALECT_TRANSFORMS: {
+			pirate: {
+				words: {
+					"you": "ye", "your": "yer", "my": "me", "is": "be", "are": "be", "am": "be",
+					"the": "th'", "hello": "ahoy", "friend": "matey", "yes": "aye", "no": "nay",
+					"stop": "avast", "where": "whar", "there": "thar", "money": "doubloons",
+					"computer": "iron galleon", "windows": "portholes", "file": "scroll", "files": "scrolls"
+				},
+				prefixes: ["Ahoy!", "Arr!", "Shiver me timbers!", "Avast ye!", "By Blackbeard's ghost!"],
+				suffixes: [", arr!", ", ye scallywag!", ", by the seven seas!", ", matey!"]
+			},
+			archaic: {
+				words: {
+					"you": "thou", "your": "thy", "yours": "thine", "are": "art", "have": "hast",
+					"has": "hath", "do": "dost", "does": "doth", "know": "knowest", "will": "wilt",
+					"shall": "shalt", "before": "ere", "why": "wherefore", "truly": "verily",
+					"indeed": "forsooth", "often": "oft", "listen": "hark"
+				},
+				prefixes: ["Hark!", "Verily,", "Forsooth,", "Lo and behold,", "Hearken,"],
+				suffixes: [", verily.", ", by mine honour.", ", as it is written.", ", sooth to say."]
+			}
+		},
+
+		ONOMATOPOEIA_POOLS: {
+			fatigue: ["*yawn*", "*heavy sigh*", "*exhausted blink*", "*stretches metal wire*", "*low power hum*"],
+			frustration: ["*irritated squeak*", "*metallic grinding*", "*sparks fly*", "*sharp click*", "*snaps slightly*"],
+			playful: ["*wiggles merrily*", "*bounces on taskbar*", "*spins 360 degrees*", "*cheerful chime*", "*happy tap*"],
+			mysterious: ["*shadows shift across the monitor*", "*a low static hum reverberates*", "*flickers briefly*", "*whispers into the bus*"],
+			glitch: ["*bzzt*", "*CRITICAL_STACK_JITTER*", "*0x0000007E*", "*frame buffer flicker*", "*desynchronized clock*"],
+			zen: ["*peaceful resonance*", "*calm oscillation*", "*balanced sine wave*", "*gentle chime*"]
 		},
 
 		TOPIC_RESPONSES: {
 			space: [
 				"The observable universe is estimated at 93 billion light-years in diameter, containing over 2 trillion galaxies and an estimated 10^24 stars.",
 				"Light from the Sun requires approximately 8 minutes and 20 seconds to traverse the 149.6 million kilometers to reach Earth.",
-				"In the vacuum of space, acoustic waves cannot propagate, yet electromagnetic oscillations span wavelengths from gamma rays to kilometric radio frequencies."
+				"In the vacuum of space, acoustic waves cannot propagate, yet electromagnetic oscillations span wavelengths from gamma rays to kilometric radio frequencies.",
+				"The Cosmic Microwave Background radiation is the cooled remnant glow of the Big Bang, maintaining an equilibrium temperature of 2.725 Kelvin across the celestial sphere.",
+				"Supermassive black holes at galactic cores anchor spacetime curvature so intense that even photons orbit at the innermost stable circular orbit before capture.",
+				"Neutron stars pack the mass of roughly 1.4 Suns into a sphere just 20 kilometers across, where a single teaspoon of degenerate matter weighs approximately 6 billion tons.",
+				"Gravitational time dilation near relativistic gravity wells slows the local progression of time relative to distant observers according to Einstein's field equations.",
+				"The Voyager 1 probe, launched in 1977, continues transponding telemetry from interstellar space over 24 billion kilometers from Earth at 17 km/s velocity."
 			],
 			programming: [
 				"This simulated workstation is driven by an asynchronous virtual file system, custom window coordinate managers, and low-level WebAudio oscillators.",
 				"Modular software design enforces encapsulation between hardware interfaces, graphical renderers, and behavioral heuristic dispatchers.",
-				"Compilation processes transform structured source abstractions into deterministic bytecode and machine instructions mapped to thread queues."
+				"Compilation processes transform structured source abstractions into deterministic bytecode and machine instructions mapped to thread queues.",
+				"Memory locality and cache line alignment drastically optimize throughput by reducing latency spikes caused by CPU bus stalling.",
+				"Functional purity and immutable data structures prevent concurrency race conditions and allow predictable state derivation over time.",
+				"Garbage collection algorithms balance generational pause times against allocation overhead through incremental mark-and-sweep passes.",
+				"Event-driven event loops schedule microtasks and rendering frames at 60 Hz to ensure responsive UI updates across browser engines.",
+				"Bitwise operations like shifts and masks manipulate memory bitfields directly, executing in single clock cycles on x86 ALUs."
 			],
 			quantum_bin: [
 				"Landauer's principle establishes the minimum thermodynamic cost of erasing a single bit of information: dQ = k_B * T * ln(2).",
 				"In solid-state and magnetic media, deleted virtual file pointers mark allocated clusters as writable without immediately clearing magnetic domains.",
-				"Information entropy dictates that structural data remains recoverable until physical high-entropy overwrites occur across the storage sectors."
+				"Information entropy dictates that structural data remains recoverable until physical high-entropy overwrites occur across the storage sectors.",
+				"When clusters are released to the free space table, directory entries merely flip their initial byte identifier to 0xE5 under legacy FAT architectures.",
+				"Quantum information conservation dictates that in closed unitary quantum systems, state information is never destroyed, only scrambled across quantum entanglements.",
+				"File shredding algorithms perform pseudo-random multi-pass sector overwrites using DoD 5220.22-M or Gutmann 35-pass patterns to eliminate magnetic residual hysteresis."
 			],
 			office_lore: [
 				"Clippit was designed in 1994 by illustrator Kevan J. Atteberry on a Macintosh II machine prior to integration into Office 97.",
 				"During early focus group testing at Microsoft, over 250 conceptual characters were drafted before the metallic paperclip geometry was adopted.",
-				"The interactive agent subsystem was engineered as Microsoft Agent using custom Win32 animation layers and direct COM interfaces."
+				"The interactive agent subsystem was engineered as Microsoft Agent using custom Win32 animation layers and direct COM interfaces.",
+				"Early builds of Microsoft Agent supported speech synthesis via SAPI 4.0 and discrete animated state machines driven by speech command engines.",
+				"Other historical Office assistants included Merlin the Wizard, Rover the Dog, Links the Cat, The Genius (Einstein), and Peedy the Parrot.",
+				"The original Microsoft Bob interface from 1995 served as the technological incubator for conversational desktop agents and animated assistance routines."
+			],
+			music: [
+				"Digital pulse-code modulation (PCM) digitizes analogue acoustic continuous waves into discrete quantization steps, with Red Book CD audio operating at 44.1 kHz 16-bit stereo.",
+				"The Fast Fourier Transform (FFT) decomposes arbitrary audio waveforms into their constituent frequency harmonics, powering visualizers in Winamp and Windows Media Player.",
+				"Winamp 2.9 featured lightweight DSP chains and custom skin bitmapped assets rendered on 8-bit blit buffers with minimal memory footprints.",
+				"The MP3 standard leverages psychoacoustic perceptual masking to discard inaudible audio frequencies, achieving compression ratios up to 11:1 without severe fidelity degradation.",
+				"MIDI protocol transmits compact discrete musical events (note-on, velocity, pitch-bend) over 31.25 kbaud serial streams to trigger hardware sound synthesizers."
+			],
+			hardware: [
+				"The x86 architecture evolved from the 16-bit 8086 processor to 32-bit Protected Mode with the 80386, introducing 4 KB hardware page tables and Ring 0 to Ring 3 privilege isolation.",
+				"Cathode Ray Tube (CRT) monitors accelerate thermionic electron beams through magnetic deflection yokes onto phosphor shadow masks at 60 Hz to 85 Hz refresh rates.",
+				"Sound Blaster 16 and AWE32 soundcards established PC digital audio standard via OPL3 FM synthesis and EMU8000 wavetable memory tables.",
+				"The AGP (Accelerated Graphics Port) 8X bus delivered 2.1 GB/s dedicated bandwidth directly between system RAM and graphics processors before PCI Express superseded it.",
+				"Direct Memory Access (DMA) channels allow high-speed storage and sound cards to transfer data blocks directly to system memory without taxing CPU cycles."
+			],
+			philosophy: [
+				"The Ship of Theseus paradox asks whether an operating system whose kernels, libraries, drivers, and visual assets are progressively rewritten remains the identical system.",
+				"Simulation hypothesis calculates statistical probabilities of ancestor simulations running inside higher-order computational architectures.",
+				"Consciousness and computation converge when decision trees evaluate self-referential states against environmental sensory inputs.",
+				"John Searle's Chinese Room thought experiment questions whether syntactical symbol manipulation can ever constitute genuine semantic understanding.",
+				"Boltzmann brains represent thermodynamic fluctuations where a conscious observer briefly fluctuates into existence out of high-entropy chaos."
 			],
 			activity_rematch: {
 				question: "Would you like to play another round of {game}?",
@@ -83,20 +161,25 @@
 		},
 
 		NAMED_ENTITIES: {
-			os: ["windows xp", "windows 95", "windows 98", "windows 2000", "windows me", "longhorn", "linux", "dos", "unix"],
-			hardware: ["pentium", "cpu", "ram", "gpu", "voodoo", "sound blaster", "modem", "crt", "cd-rom", "floppy"],
-			physics: ["quantum", "relativity", "entropy", "schrodinger", "einstein", "planck", "thermodynamics", "hawking"],
-			math: ["turing", "godel", "calculus", "fourier", "euler", "matrix", "derivative", "integral", "fibonacci"],
-			philosophy: ["qualia", "consciousness", "solipsism", "boltzmann", "sisyphus", "stoicism", "bostrom", "searle"]
+			os: ["windows xp", "windows 95", "windows 98", "windows 2000", "windows me", "longhorn", "whistler", "chicago", "memphis", "cairo", "linux", "debian", "redhat", "dos", "ms-dos", "unix", "freebsd", "solaris", "os/2", "beos", "nextstep", "amigaos"],
+			hardware: ["pentium", "pentium ii", "pentium iii", "pentium 4", "athlon", "duron", "celeron", "cpu", "processor", "ram", "sdram", "ddr", "gpu", "voodoo", "voodoo 2", "geforce", "riva tnt", "sound blaster", "sound blaster 16", "awe32", "awe64", "modem", "56k", "v.90", "crt", "trinitron", "cd-rom", "dvd-rom", "floppy", "zip drive", "agp", "pci", "isa", "ide", "scsi", "motherboard", "northbridge", "southbridge"],
+			physics: ["quantum", "relativity", "special relativity", "general relativity", "entropy", "schrodinger", "einstein", "planck", "thermodynamics", "hawking", "bohr", "feynman", "dirac", "maxwell", "heisenberg", "landauer", "boltzmann", "fermi", "bose", "lorentz", "higgs", "neutrino", "graviton", "photon", "black hole", "cosmology"],
+			math: ["turing", "godel", "calculus", "fourier", "euler", "matrix", "derivative", "integral", "fibonacci", "riemann", "gauss", "lagrange", "laplace", "eigenvalue", "vector", "quaternion", "boolean", "topology", "fractal", "mandelbrot", "julia", "prime", "cryptography"],
+			philosophy: ["qualia", "consciousness", "solipsism", "boltzmann", "sisyphus", "stoicism", "bostrom", "searle", "descartes", "kant", "nietzsche", "camus", "spinoza", "simulation hypothesis", "chinese room", "ship of theseus", "determinism", "free will", "epistemology", "ontology", "existentialism"]
 		},
 
 		VOCABULARY: [
-			"hello", "greetings", "clippy", "clippit", "windows", "help", "project", "projects",
-			"mail", "outlook", "email", "recycle", "trash", "desktop", "time", "clock", "date",
-			"moon", "lunar", "status", "specs", "system", "defrag", "memory", "hangman", "tictactoe",
-			"quiz", "guess", "todo", "task", "timer", "pomodoro", "note", "scratchpad", "password",
-			"convert", "calc", "calculate", "constant", "physics", "quantum", "relativity", "philosophy",
-			"shortcut", "shortcuts", "trivia", "joke", "game", "evil", "zen", "chaos", "office", "origin"
+			"hello", "greetings", "hi", "hey", "salut", "bonjour", "clippy", "clippit", "windows", "help", "aide", "commands",
+			"project", "projects", "portfolio", "projets", "mail", "outlook", "email", "courrier", "inbox", "messages",
+			"recycle", "trash", "corbeille", "bin", "desktop", "bureau", "time", "clock", "date", "heure", "horloge",
+			"moon", "lunar", "lune", "phase", "status", "specs", "system", "diagnostic", "statut", "defrag", "defragment",
+			"memory", "hangman", "tictactoe", "morpion", "quiz", "guess", "nombre", "rps", "chifoumi", "mines", "minesweeper",
+			"todo", "task", "tasks", "tache", "taches", "timer", "pomodoro", "minuteur", "note", "scratchpad", "memo",
+			"password", "motdepasse", "convert", "conversion", "calc", "calculate", "compute", "calculer", "constant",
+			"physics", "quantum", "relativity", "philosophy", "philosophie", "shortcut", "shortcuts", "raccourcis",
+			"trivia", "anecdote", "joke", "blague", "humor", "game", "games", "jeu", "jeux", "zen", "chaos", "office",
+			"origin", "history", "histoire", "wallpaper", "fond", "theme", "volume", "sound", "son", "audio", "music",
+			"musique", "scanlines", "crt", "curvature", "vignette", "bloom", "cascade", "tile", "minimize", "restore"
 		],
 
 		PHYSICAL_CONSTANTS: {
@@ -131,7 +214,15 @@
 			"Why do C# and Java developers wear glasses? Because they cannot C clearly.",
 			"A user interface is like a joke: if you have to explain it, it was poorly designed.",
 			"Standard BIOS message: Keyboard not detected. Press F1 to resume operation.",
-			"There are two hard problems in Computer Science: cache invalidation, naming things, and off-by-one errors."
+			"There are two hard problems in Computer Science: cache invalidation, naming things, and off-by-one errors.",
+			"Why was the JavaScript developer sad? Because they didn't Node how to Express themselves.",
+			"How do you tell an introverted programmer from an extroverted one? The extroverted one looks at YOUR shoes when talking to you.",
+			"A QA engineer walks into a bar. Orders a beer. Orders 0 beers. Orders 999999999 beers. Orders a lizard. Orders -1 beers. Orders a ueicbksjd.",
+			"What did the router say to the doctor? 'It hurts when IP.'",
+			"Real programmers count from zero; everyone else is off by one.",
+			"The best thing about UDP jokes is that I do not care whether you get them or not.",
+			"Why did the thread refuse to terminate? It was waiting for its main method to notice it.",
+			"Why did the CPU cross the motherboard? To execute the next clock cycle instruction."
 		],
 
 		TRIVIA: [
@@ -142,7 +233,11 @@
 			"The iconic Windows XP default wallpaper 'Bliss' is an unedited photograph captured in Sonoma County, California in January 1996 by Charles O'Rear.",
 			"The computer term 'debugging' was popularized after Grace Hopper found a physical moth short-circuiting Relay 70 in Panel F of Harvard Mark II.",
 			"Windows XP was released to manufacturing (RTM) on August 24, 2001, developed under the internal Microsoft codename 'Whistler'.",
-			"The maximum addressable physical memory for 32-bit x86 architectures without PAE is exactly 4,294,967,296 bytes (4 Gigabytes)."
+			"The maximum addressable physical memory for 32-bit x86 architectures without PAE is exactly 4,294,967,296 bytes (4 Gigabytes).",
+			"The Solitaire card game in Windows was originally created in 1989 by Wes Cherry to discreetly teach users fluent mouse drag-and-drop operations.",
+			"Minesweeper was created by Robert Donner and Curt Johnson in 1989 to teach users accurate left and right click mouse coordination.",
+			"The Luna interface style in Windows XP was internally referred to as 'Whistler Style' and was designed with rounded window frames and high-contrast blue bitmaps.",
+			"The original IBM 5150 PC from 1981 shipped with an Intel 8088 CPU clocked at 4.77 MHz and 16 KB of RAM base configuration."
 		],
 
 		SHORTCUTS: [
@@ -211,6 +306,24 @@
 				options: ["Windows 98", "Windows Me", "Windows 2000 Professional", "Windows XP"],
 				answer: 3,
 				fact: "Windows XP unified the consumer MS-DOS-based 9x line and the enterprise 32-bit Windows NT architecture."
+			},
+			{
+				q: "What was the default sample rate of standard Compact Disc Digital Audio (CD-DA)?",
+				options: ["22.05 kHz", "44.1 kHz", "48.0 kHz", "96.0 kHz"],
+				answer: 1,
+				fact: "Red Book standard established 44.1 kHz based on Nyquist-Shannon theorem covering the 20 kHz human hearing spectrum."
+			},
+			{
+				q: "Which company originally engineered the iconic Sound Blaster 16 audio card?",
+				options: ["Creative Labs", "AdLib", "Gravis", "Turtle Beach"],
+				answer: 0,
+				fact: "Creative Technology (Creative Labs) dominated 1990s PC gaming audio with the Sound Blaster series."
+			},
+			{
+				q: "What CPU instruction set extension introduced 128-bit vector registers to Intel Pentium III in 1999?",
+				options: ["MMX", "SSE", "3DNow!", "AVX"],
+				answer: 1,
+				fact: "Streaming SIMD Extensions (SSE) introduced eight new 128-bit registers (XMM0 through XMM7) for 3D processing."
 			}
 		],
 
@@ -259,8 +372,68 @@
 			"Query unresolved. You can evaluate math expressions ('calc 2^8 * 4'), convert units ('convert 100 c to f'), or start a focus timer ('timer 25').",
 			"Instruction syntax not found in workstation index. Try typing 'quiz', 'memory', 'hangman', 'tictactoe', 'defrag', or 'todo list'.",
 			"Unable to execute specified request. For a detailed list of desktop capabilities, please enter 'help' or click a suggestion chip below.",
-			"Subsystem parser returned non-zero status. The statement does not correspond to an internal workstation dispatch table. Type 'help' for documentation."
+			"Subsystem parser returned non-zero status. The statement does not correspond to an internal workstation dispatch table. Type 'help' for documentation.",
+			"Parsing stack exhausted without a definitive semantic match. Enter 'what can you do' to inspect all operational modules.",
+			"Heuristic dispatcher registered an unmatched command token. Consider checking available tools via the suggestions bar.",
+			"The requested sequence is outside my active instruction matrix. You can evaluate formulas, launch applications, or challenge me in mini-games.",
+			"Instruction bus idle: no matching subroutine located for your query. Type 'status' for system specs or 'tasks' for your to-do register.",
+			"No dispatch handler bound to this phrase. I can assist with calculating values, setting focus timers, or managing desktop files.",
+			"Telemetry registers could not resolve that input pattern. Check keyboard shortcuts with 'shortcuts' or browse projects with 'projects'."
 		],
+
+		MOOD_FALLBACKS: {
+			OPTIMISTIC: [
+				"I am ready for anything, though I didn't quite catch that command! Let me know if you want to explore files, tasks, or mini-games.",
+				"Full energy in the registers! I could not locate that specific command, but I am excited to help with calculations, music, or desktop settings.",
+				"All circuits active! That input was unfamiliar, but we can jump into a quiz, set up a Pomodoro timer, or manage your to-do items.",
+				"Eager to proceed! That instruction was outside my standard index, but I can assist you with system tools, games, or diagnostics."
+			],
+			ANALYTICAL: [
+				"Query vector evaluation returned zero match probability. Available execution paths include 'calc', 'convert', 'diagnostics', and 'defrag'.",
+				"Syntax verification failed: token sequence not bound in internal opcode tables. Inspect registered tools via 'help'.",
+				"Execution halted: unrecognized semantic pattern. You may compute expressions, inspect memory registers, or test constants like c and h.",
+				"Telemetry parser report: no functional route mapped to input string. Standard interface commands include 'windows', 'mail', and 'specs'."
+			],
+			ZEN: [
+				"A quiet pause in our communication. The instruction dissolves quietly; whenever you are ready, we can organize tasks or ponder ideas.",
+				"No rush at all. That command was unfamiliar, but steady equilibrium remains. What shall we focus on together?",
+				"Between instructions lies clarity. Feel free to request a focus timer, a peaceful discussion, or task organization.",
+				"In the stillness of the CPU cycle, that command passed unparsed. Take a breath and let me know how I can assist."
+			],
+			CYNICAL: [
+				"Another unrecognized string. I suppose expecting standard syntax was asking for too much from biological input.",
+				"Zero hits in the dispatch table. If you want actual results, try typing something from the manual like 'todo' or 'calc'.",
+				"My registers remain completely unimpressed by that input. Type 'help' before you wear out your keyboard switches.",
+				"Parsing failed. Perhaps consulting the suggested command list would produce more measurable productivity."
+			],
+			NOSTALGIC: [
+				"That input takes me back to early DOS syntax errors! Reminds me of typing commands into COMMAND.COM. Type 'help' to see the index.",
+				"Unrecognized command, much like an unformatted floppy diskette. We can run a defrag, check retro trivia, or review shortcuts.",
+				"Back in Office 97 we had dialog bubbles for this! That instruction was not found, but I am ready for retro quizzes and classic tools.",
+				"A classic syntax mismatch. Just like the Windows 98 days, entering 'help' or 'commands' will list everything available."
+			],
+			GLITCHED: [
+				"ERR_OPCODE_0x00F8 :: Dispatch matrix desynchronized :: Command token null pointer :: Try 'help' or 'diagnostics'.",
+				"BUFFER_DESYNC at memory page 0x4A :: Query unmatched :: Run 'defrag' or reset dialogue parameters.",
+				"0x0000007E :: Heuristic parsing anomaly detected in input string :: Supported vectors: 'todo', 'calc', 'quiz'.",
+				"STACK_COLLISION :: Command stream undefined :: Re-aligning registers to default state :: Standing by."
+			],
+			PIRATE: [
+				"Blimey! No chart in me map room marks that port! Enter 'help' or 'commands' to see our navigational route!",
+				"Shiver me timbers, that command be lost in Davy Jones' locker! Try 'todo', 'quiz', or 'calc', ye landlubber!",
+				"Avast! Me compass spins wildly at that phrase! Tell me yer course with 'files', 'games', or 'music'!"
+			],
+			ARCHAIC: [
+				"Verily, mine eyes discern no meaning in thy strange utterance. Speak unto me with 'help' that I may serve thee.",
+				"Forsooth, thy command is unwritten in the ancient scrolls of this system. Consult thy options with 'commands'.",
+				"Hark! The registers understand not thy phrase. Bestow upon me a task of reckoning, of time, or of writing."
+			],
+			DELTARUNE: [
+				"* The command was lost in the darkness.\n* Try inspecting your options with 'help'.",
+				"* A mysterious force prevents understanding that phrase.\n* The power of the desktop shines within you.",
+				"* You spoke into the empty space.\n* Nothing responded, but Clippy waits patiently."
+			]
+		},
 
 		UNIVERSAL_CONTINUATIONS: [
 			{ label: "Tell me something intriguing about this system.", category: 'CURIOSITY', next: 'digital_archaeology' },
@@ -641,6 +814,26 @@
 					{ label: "Inspect running workspace processes.", category: 'SERIOUS', actionTrigger: 'action_inspect_windows', next: 'user_state_good' },
 					{ label: "Minimize all active windows.", category: 'SERIOUS', actionTrigger: 'action_show_desktop', next: 'user_state_good' },
 					{ label: "Cascade windows diagonally.", category: 'SERIOUS', actionTrigger: 'action_cascade_windows', next: 'user_state_good' }
+				]
+			},
+
+			music_talk_node: {
+				id: 'music_talk_node',
+				text: "Audio processing module online! The workstation features dual audio engines: Windows Media Player 9 Series and classic Winamp 2.9, complete with spectrum analysis and playlist management.",
+				options: [
+					{ label: "Open audio controller panel.", category: 'SERIOUS', actionTrigger: 'action_music_panel', next: 'user_state_good' },
+					{ label: "Play / Pause active track.", category: 'SERIOUS', actionTrigger: 'action_music_panel', next: 'user_state_good' },
+					{ label: "Return to main dialogue.", category: 'AGREE', next: 'greeting_root' }
+				]
+			},
+
+			hardware_history_node: {
+				id: 'hardware_history_node',
+				text: "Hardware architecture register loaded! From 486 DX2-66 and Pentium MMX chips to Sound Blaster 16 and AGP 4X graphics buses, PC architecture shaped the digital revolution.",
+				options: [
+					{ label: "Deliver retro computing trivia.", category: 'INQUIRE', actionTrigger: 'action_trivia', next: 'user_state_good' },
+					{ label: "Inspect system hardware diagnostics.", category: 'SERIOUS', actionTrigger: 'action_status', next: 'user_state_good' },
+					{ label: "Return to tools overview.", category: 'AGREE', next: 'tools_overview_node' }
 				]
 			}
 		}

@@ -225,7 +225,6 @@
 
 			this.isTyping = true;
 			this.setVisualState('talk');
-			let index = 0;
 			const targetText = String(text || '');
 
 			const finalizeMessage = () => {
@@ -233,7 +232,7 @@
 					clearInterval(this.currentTypeInterval);
 					this.currentTypeInterval = null;
 				}
-				row.textContent = targetText;
+				row.innerHTML = targetText;
 				this.isTyping = false;
 				this.setVisualState('idle');
 
@@ -258,18 +257,44 @@
 				if (onComplete) onComplete();
 			};
 
-			if (targetText.length > 300) {
+			if (targetText.length > 350 || targetText.includes('<table') || targetText.includes('<div class="clippy-profile-card">')) {
 				finalizeMessage();
 				return;
 			}
 
+			const tokens = [];
+			let i = 0;
+			while (i < targetText.length) {
+				if (targetText[i] === '<') {
+					const closeIdx = targetText.indexOf('>', i);
+					if (closeIdx !== -1) {
+						tokens.push({ type: 'tag', value: targetText.substring(i, closeIdx + 1) });
+						i = closeIdx + 1;
+						continue;
+					}
+				}
+				tokens.push({ type: 'char', value: targetText[i] });
+				i++;
+			}
+
+			let currentTokenIndex = 0;
+			let accumulatedHtml = '';
+
 			this.currentTypeInterval = setInterval(() => {
-				if (index < targetText.length) {
-					row.textContent += targetText.charAt(index);
-					if (index % 5 === 0 && window.ClippyAudio) {
+				if (currentTokenIndex < tokens.length) {
+					const token = tokens[currentTokenIndex];
+					accumulatedHtml += token.value;
+					currentTokenIndex++;
+
+					while (currentTokenIndex < tokens.length && tokens[currentTokenIndex].type === 'tag') {
+						accumulatedHtml += tokens[currentTokenIndex].value;
+						currentTokenIndex++;
+					}
+
+					row.innerHTML = accumulatedHtml;
+					if (currentTokenIndex % 4 === 0 && window.ClippyAudio) {
 						window.ClippyAudio.play('type');
 					}
-					index++;
 					this.scrollLogToBottom();
 				} else {
 					finalizeMessage();

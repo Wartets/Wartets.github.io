@@ -221,6 +221,12 @@
 			if (/\b(constant|constants|codata|physique|constantes)\b/i.test(norm)) {
 				return { label: "Tell me about fundamental physical constants (c, h, G).", next: 'physics_constants_node', moodDelta: { mood: 'ANALYTICAL', intellect: 25 } };
 			}
+			if (/\b(music|audio|sound|player|winamp|wmp|musique|chanson)\b/i.test(norm)) {
+				return { label: "Discuss audio and media players", next: 'music_talk_node', moodDelta: { mood: 'OPTIMISTIC', energy: 15 } };
+			}
+			if (/\b(hardware|cpu|motherboard|soundcard|retro hardware|materiel|processeur)\b/i.test(norm)) {
+				return { label: "Explore retro PC hardware history", next: 'hardware_history_node', moodDelta: { mood: 'NOSTALGIC', nostalgia: 25 } };
+			}
 			return null;
 		}
 	}

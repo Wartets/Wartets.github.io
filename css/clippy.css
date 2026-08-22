@@ -1335,3 +1335,42 @@
 	padding: 6px 8px;
 	border-radius: 3px;
 }
+
+.clippy-font-tahoma { font-family: 'Tahoma', sans-serif; }
+.clippy-font-courier { font-family: 'Courier New', 'Lucida Console', monospace; }
+.clippy-font-comic { font-family: 'Comic Sans MS', cursive, sans-serif; }
+.clippy-font-impact { font-family: 'Impact', 'Arial Black', sans-serif; letter-spacing: 0.5px; }
+.clippy-font-times { font-family: 'Times New Roman', Times, serif; }
+.clippy-font-terminal { font-family: 'Lucida Console', monospace; background: #000000; color: #00ff00; padding: 1px 4px; border-radius: 2px; }
+.clippy-font-pixel { font-family: 'Press Start 2P', monospace; font-size: 9px; line-height: 1.6; }
+.clippy-font-script { font-family: 'Brush Script MT', 'Lucida Handwriting', cursive; font-size: 14px; }
+.clippy-font-gothic { font-family: 'Century Gothic', 'Franklin Gothic Medium', sans-serif; }
+.clippy-font-deltarune { font-family: 'Lucida Console', 'Courier New', monospace; letter-spacing: 1px; color: #ffffff; background: #000000; padding: 6px 8px; display: block; margin: 4px 0; border: 2px solid #ffffff; border-radius: 2px; box-shadow: inset 0 0 4px #444444; }
+.clippy-font-glitch { font-family: 'Lucida Console', monospace; color: #d90429; text-shadow: 1px 0 #00ffff, -1px 0 #ff00ff; animation: clippyTextGlitch 0.2s infinite; }
+
+.clippy-text-bold { font-weight: bold; }
+.clippy-text-italic { font-style: italic; }
+.clippy-text-spaced { letter-spacing: 3px; }
+.clippy-text-dotted { letter-spacing: 1px; word-spacing: 2px; }
+.clippy-text-dashed { text-decoration: underline dashed #0055ea; }
+.clippy-text-shout { font-weight: 900; letter-spacing: 1px; color: #b91c1c; }
+.clippy-text-whisper { font-size: 10px; opacity: 0.75; font-style: italic; }
+.clippy-text-jitter { display: inline-block; animation: clippyJitter 0.1s infinite alternate; }
+.clippy-text-rainbow { background: linear-gradient(to right, #ff0000, #ff7f00, #ffff00, #00ff00, #0000ff, #8b00ff); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; font-weight: bold; }
+.clippy-onomatopoeia { display: inline-block; font-style: italic; color: #64748b; margin: 0 4px; }
+.clippy-pirate-flair { color: #854d0e; font-weight: bold; font-family: 'Georgia', serif; }
+.clippy-archaic-flair { font-family: 'Times New Roman', serif; font-style: italic; color: #334155; }
+
+@keyframes clippyTextGlitch {
+	0% { transform: translate(0); }
+	20% { transform: translate(-1px, 1px); }
+	40% { transform: translate(-1px, -1px); }
+	60% { transform: translate(1px, 1px); }
+	80% { transform: translate(1px, -1px); }
+	100% { transform: translate(0); }
+}
+
+@keyframes clippyJitter {
+	0% { transform: translateY(0); }
+	100% { transform: translateY(-1.5px); }
+}

@@ -354,8 +354,16 @@ document.addEventListener('DOMContentLoaded', async () => {
 	});
 
 	if (window.DeskEventBus) {
-		window.DeskEventBus.on('fs:changed', () => refreshUI());
+		window.DeskEventBus.on('fs:changed', () => {
+			if (window.ClippySystemBridge && typeof window.ClippySystemBridge.recordTelemetryEvent === 'function') {
+				window.ClippySystemBridge.recordTelemetryEvent('filesAccessed');
+			}
+			refreshUI();
+		});
 		window.DeskEventBus.on('settings:changed', () => {
+			if (window.ClippySystemBridge && typeof window.ClippySystemBridge.recordTelemetryEvent === 'function') {
+				window.ClippySystemBridge.recordTelemetryEvent('themeChanges');
+			}
 			applyInitialDesktopBackground();
 			refreshUI();
 			arrangeIcons('none');
@@ -363,7 +371,15 @@ document.addEventListener('DOMContentLoaded', async () => {
 		window.DeskEventBus.on('window:focused', (payload) => {
 			activeWindow = payload.win;
 		});
+		window.DeskEventBus.on('window:opened', () => {
+			if (window.ClippySystemBridge && typeof window.ClippySystemBridge.recordTelemetryEvent === 'function') {
+				window.ClippySystemBridge.recordTelemetryEvent('windowsOpened');
+			}
+		});
 		window.DeskEventBus.on('window:closed', () => {
+			if (window.ClippySystemBridge && typeof window.ClippySystemBridge.recordTelemetryEvent === 'function') {
+				window.ClippySystemBridge.recordTelemetryEvent('windowsClosed');
+			}
 			if (window.WindowManager) {
 				activeWindow = window.WindowManager.activeWindow;
 				openWindows = window.WindowManager.windows;

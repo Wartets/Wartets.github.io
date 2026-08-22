@@ -30,13 +30,15 @@
 			try {
 				response = processDispatch(rawText);
 			} catch (e) {
-				response = { text: pickFrom(window.ClippyKnowledge ? window.ClippyKnowledge.FALLBACK_RESPONSES : []) };
+				const fallback = pickFrom(window.ClippyKnowledge ? window.ClippyKnowledge.FALLBACK_RESPONSES : []);
+				response = { text: window.ClippyBrain ? window.ClippyBrain.transformResponseText(fallback) : fallback };
 			} finally {
 				isThinking = false;
 			}
 
 			if (response && response.text) {
-				window.ClippyUI.appendAssistantMessage(response.text, response.actions, () => {
+				const formattedText = (window.ClippyBrain && !response.source) ? window.ClippyBrain.transformResponseText(response.text) : response.text;
+				window.ClippyUI.appendAssistantMessage(formattedText, response.actions, () => {
 					if (response.actionTrigger) {
 						executeActionTrigger(response.actionTrigger);
 					}
@@ -135,8 +137,15 @@
 		const norm = rawText.toLowerCase().trim();
 
 		if (norm === 'exit' || norm === 'quit' || norm === 'cancel' || norm === 'stop' || norm === 'menu' || norm === 'back' || norm === 'annuler' || norm === 'quitter') {
+			const standbyVariants = [
+				"Standing by for instructions.",
+				"All active routines paused. Ready when you are.",
+				"Dialogue reset. Telemetry registers ready for input.",
+				"Awaiting your next command, operator."
+			];
+			const chosenStandby = pickFrom(standbyVariants);
 			return {
-				text: "Standing by for instructions.",
+				text: window.ClippyBrain ? window.ClippyBrain.formatWithMood(chosenStandby) : chosenStandby,
 				actions: [
 					{ label: "What can you do?", onClick: () => handleUserInput("What can you do?") },
 					{ label: "View To-Do List", onClick: () => handleUserInput("View To-Do List") },
@@ -183,8 +192,15 @@
 			return { text: "Retrieving messages from Outlook Express store...", actionTrigger: 'action_check_mail' };
 		}
 
-		if (norm === 'system diagnostics' || norm === 'specs' || norm === 'diagnostic' || norm === 'status' || norm === 'statut systeme') {
-			return { text: window.ClippySystemBridge.getSystemSpecs() };
+		if (norm === 'system diagnostics' || norm === 'specs' || norm === 'diagnostic' || norm === 'status' || norm === 'statut systeme' || norm === 'telemetry') {
+			return {
+				text: window.ClippySystemBridge.getSystemSpecs(),
+				actions: [
+					{ label: "Inspect active windows", onClick: () => handleUserInput("Inspect active windows") },
+					{ label: "Check unread emails", onClick: () => handleUserInput("Check unread emails") },
+					{ label: "Defrag Drive C:", onClick: () => handleUserInput("Defrag Drive C:") }
+				]
+			};
 		}
 
 		if (norm === 'investigate office origin' || norm.includes('office origin') || norm.includes('origine office')) {
@@ -359,22 +375,42 @@
 
 		if (norm === 'minimize all' || norm === 'show desktop' || norm === 'hide windows') {
 			window.ClippySystemBridge.minimizeAllWindows();
-			return { text: "All windows have been minimized to the taskbar." };
+			const msg = pickFrom([
+				"All windows have been minimized to the taskbar.",
+				"Workspace cleared: all active windows minimized.",
+				"Desktop exposed; all running processes parked on taskbar."
+			]);
+			return { text: window.ClippyBrain ? window.ClippyBrain.formatWithMood(msg) : msg };
 		}
 
 		if (norm === 'restore all' || norm === 'restore windows') {
 			window.ClippySystemBridge.restoreAllWindows();
-			return { text: "All windows restored to workspace." };
+			const msg = pickFrom([
+				"All windows restored to workspace.",
+				"Restored previous window layout across the desktop.",
+				"Application surfaces brought back to active view."
+			]);
+			return { text: window.ClippyBrain ? window.ClippyBrain.formatWithMood(msg) : msg };
 		}
 
 		if (norm === 'cascade windows' || norm === 'cascade') {
 			window.ClippySystemBridge.cascadeWindows();
-			return { text: "Windows have been cascaded across the workspace." };
+			const msg = pickFrom([
+				"Windows have been cascaded across the workspace.",
+				"Diagonal cascade arrangement applied to active windows.",
+				"Tidy cascade layout established across the display."
+			]);
+			return { text: window.ClippyBrain ? window.ClippyBrain.formatWithMood(msg) : msg };
 		}
 
 		if (norm === 'tile windows' || norm === 'tile') {
 			window.ClippySystemBridge.tileWindows(true);
-			return { text: "Windows have been tiled horizontally." };
+			const msg = pickFrom([
+				"Windows have been tiled horizontally.",
+				"Workspace partitioned into horizontal tiles.",
+				"Evenly distributed window tiles across the desktop."
+			]);
+			return { text: window.ClippyBrain ? window.ClippyBrain.formatWithMood(msg) : msg };
 		}
 
 		if (norm === 'play music' || norm === 'toggle music' || norm === 'resume music') {
@@ -1059,8 +1095,15 @@
 			if (window.ClippyUI.isOpen) return;
 			if (Math.random() > IDLE_MESSAGE_CHANCE) return;
 			const unread = window.ClippySystemBridge.getUnreadMailCount();
-			let msg = "Need a hand with your tasks or want to discuss a new idea? Click me anytime!";
-			if (unread > 0) msg = `You have ${unread} unread email(s) waiting in Outlook!`;
+			const idlePool = [
+				"Need a hand with your tasks or want to discuss a new idea? Click me anytime!",
+				"It looks like you're exploring the desktop. Let me know if you need assistance!",
+				"Your 32-bit companion is standing by on the taskbar. Click to chat or play a game!",
+				"Curious about retro computing trivia or physical constants? I am ready to assist!",
+				"Remember to stay hydrated and take brief breaks during long workstation sessions."
+			];
+			let msg = pickFrom(idlePool);
+			if (unread > 0) msg = `You have ${unread} unread email(s) waiting in Outlook Express!`;
 			window.ClippyUI.showIdleBubble(msg);
 		}, IDLE_MESSAGE_INTERVAL_MS);
 	}

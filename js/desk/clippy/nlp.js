@@ -122,7 +122,7 @@
 						if (moderators[prev]) multiplier *= moderators[prev];
 					}
 
-					if (isNegated) val = -val * 0.8;
+					if (isNegated) val = -val * 0.85;
 					sentimentScore += val * multiplier;
 					hitCount++;
 				}
@@ -130,53 +130,173 @@
 
 			const normalizedValence = hitCount > 0 ? Math.max(-1, Math.min(1, (sentimentScore / hitCount) / 3.0)) : 0;
 
-			let frustrationCount = 0;
-			let curiosityCount = 0;
-			let fatigueCount = 0;
-			let enthusiasmCount = 0;
-			let politenessCount = 0;
+			let counts = {
+				frustration: 0, curiosity: 0, fatigue: 0, enthusiasm: 0,
+				politeness: 0, hostility: 0, skepticism: 0, playfulness: 0,
+				desperation: 0, awe: 0
+			};
 
 			tokens.forEach(tok => {
-				if (indicators.frustration && indicators.frustration.includes(tok)) frustrationCount++;
-				if (indicators.curiosity && indicators.curiosity.includes(tok)) curiosityCount++;
-				if (indicators.fatigue && indicators.fatigue.includes(tok)) fatigueCount++;
-				if (indicators.enthusiasm && indicators.enthusiasm.includes(tok)) enthusiasmCount++;
-				if (indicators.politeness && indicators.politeness.includes(tok)) politenessCount++;
+				for (const [key, wordList] of Object.entries(indicators)) {
+					if (Array.isArray(wordList) && wordList.includes(tok)) {
+						counts[key] = (counts[key] || 0) + 1;
+					}
+				}
 			});
 
-			const hasExclamation = /!{1,}/.test(rawText);
-			const hasQuestion = /\?{1,}/.test(rawText);
+			const exclamationCount = (rawText.match(/!/g) || []).length;
+			const questionCount = (rawText.match(/\?/g) || []).length;
+			const suspensionCount = (rawText.match(/\.{3,}/g) || []).length;
 			const isAllCaps = rawText.length > 4 && rawText === rawText.toUpperCase() && /[A-Z]/.test(rawText);
+			const repeatedCharMatch = /(.)\1{2,}/.test(rawText);
 
-			let arousal = 0.3;
-			if (hasExclamation) arousal += 0.25;
+			let arousal = 0.25;
+			if (exclamationCount > 0) arousal += Math.min(0.4, exclamationCount * 0.15);
 			if (isAllCaps) arousal += 0.35;
-			if (enthusiasmCount > 0 || frustrationCount > 0) arousal += 0.2;
-			arousal = Math.min(1.0, arousal);
+			if (repeatedCharMatch) arousal += 0.15;
+			if (counts.enthusiasm > 0 || counts.frustration > 0 || counts.hostility > 0) arousal += 0.2;
+			arousal = Math.max(0, Math.min(1.0, arousal));
 
-			const frustrationLevel = Math.min(1.0, (frustrationCount * 0.3) + (isAllCaps ? 0.3 : 0) + (normalizedValence < -0.4 ? 0.3 : 0));
-			const curiosityLevel = Math.min(1.0, (curiosityCount * 0.35) + (hasQuestion ? 0.3 : 0));
-			const fatigueLevel = Math.min(1.0, fatigueCount * 0.45);
-			const politenessLevel = Math.min(1.0, politenessCount * 0.4);
+			const frustrationLevel = Math.min(1.0, (counts.frustration * 0.3) + (isAllCaps ? 0.35 : 0) + (normalizedValence < -0.3 ? 0.25 : 0));
+			const hostilityLevel = Math.min(1.0, (counts.hostility * 0.4) + (isAllCaps && normalizedValence < -0.2 ? 0.3 : 0));
+			const curiosityLevel = Math.min(1.0, (counts.curiosity * 0.3) + (questionCount > 0 ? 0.25 : 0));
+			const fatigueLevel = Math.min(1.0, (counts.fatigue * 0.4) + (suspensionCount > 0 && arousal < 0.4 ? 0.25 : 0));
+			const politenessLevel = Math.min(1.0, counts.politeness * 0.35);
+			const skepticismLevel = Math.min(1.0, (counts.skepticism * 0.35) + (questionCount > 1 ? 0.2 : 0));
+			const playfulnessLevel = Math.min(1.0, (counts.playfulness * 0.35) + (exclamationCount > 0 && normalizedValence > 0 ? 0.2 : 0));
+			const desperationLevel = Math.min(1.0, (counts.desperation * 0.4) + (exclamationCount > 1 && normalizedValence < 0 ? 0.3 : 0));
+			const aweLevel = Math.min(1.0, (counts.awe * 0.35) + (normalizedValence > 0.4 ? 0.2 : 0));
 
 			let dominantEmotion = 'NEUTRAL';
-			if (frustrationLevel >= 0.5) dominantEmotion = 'FRUSTRATED';
-			else if (fatigueLevel >= 0.4) dominantEmotion = 'FATIGUED';
-			else if (curiosityLevel >= 0.45) dominantEmotion = 'CURIOUS';
-			else if (normalizedValence >= 0.35 || enthusiasmCount > 0) dominantEmotion = 'POSITIVE';
-			else if (normalizedValence <= -0.35) dominantEmotion = 'NEGATIVE';
+			let maxScore = 0.2;
+
+			const candidates = [
+				{ name: 'HOSTILE', score: hostilityLevel },
+				{ name: 'FRUSTRATED', score: frustrationLevel },
+				{ name: 'DESPERATE', score: desperationLevel },
+				{ name: 'FATIGUED', score: fatigueLevel },
+				{ name: 'SKEPTICAL', score: skepticismLevel },
+				{ name: 'CURIOUS', score: curiosityLevel },
+				{ name: 'PLAYFUL', score: playfulnessLevel },
+				{ name: 'AWE', score: aweLevel },
+				{ name: 'POSITIVE', score: normalizedValence > 0.3 ? normalizedValence : 0 },
+				{ name: 'NEGATIVE', score: normalizedValence < -0.3 ? Math.abs(normalizedValence) : 0 }
+			];
+
+			candidates.forEach(c => {
+				if (c.score > maxScore) {
+					maxScore = c.score;
+					dominantEmotion = c.name;
+				}
+			});
 
 			return {
 				valence: normalizedValence,
 				arousal: arousal,
 				frustration: frustrationLevel,
+				hostility: hostilityLevel,
 				curiosity: curiosityLevel,
 				fatigue: fatigueLevel,
 				politeness: politenessLevel,
+				skepticism: skepticismLevel,
+				playfulness: playfulnessLevel,
+				desperation: desperationLevel,
+				awe: aweLevel,
 				dominant: dominantEmotion,
-				isPositive: normalizedValence > 0.25,
-				isNegative: normalizedValence < -0.25,
-				isUrgent: isAllCaps || frustrationLevel > 0.7
+				isPositive: normalizedValence > 0.2,
+				isNegative: normalizedValence < -0.2,
+				isUrgent: isAllCaps || desperationLevel > 0.6 || frustrationLevel > 0.75,
+				isSuspicious: skepticismLevel > 0.5,
+				isExhausted: fatigueLevel > 0.55
+			};
+		}
+
+		evaluateTextLayoutAndPunctuation(rawText, tokens) {
+			const trimmed = rawText.trim();
+			const charLength = trimmed.length;
+			const lines = rawText.split(/\r\n|\r|\n/);
+			const lineCount = lines.length;
+			const multiline = lineCount > 1;
+
+			const hasTrailingDot = /\.\s*$/.test(trimmed);
+			const hasTrailingQuestion = /\?\s*$/.test(trimmed);
+			const hasTrailingExclamation = /!\s*$/.test(trimmed);
+			const hasTrailingEllipsis = /\.{3,}\s*$/.test(trimmed);
+
+			const commaCount = (rawText.match(/,/g) || []).length;
+			const semicolonCount = (rawText.match(/;/g) || []).length;
+			const colonCount = (rawText.match(/:/g) || []).length;
+			const quoteCount = (rawText.match(/["'«»]/g) || []).length;
+			const parenthesisCount = (rawText.match(/[()\[\]{}]/g) || []).length;
+			const periodCount = (rawText.match(/\./g) || []).length;
+			const exclamationCount = (rawText.match(/!/g) || []).length;
+			const questionCount = (rawText.match(/\?/g) || []).length;
+			const totalPunctuation = commaCount + semicolonCount + colonCount + quoteCount + parenthesisCount + periodCount + exclamationCount + questionCount;
+
+			const punctuationDensity = charLength > 0 ? totalPunctuation / charLength : 0;
+
+			let uppercaseLetterCount = 0;
+			let lowercaseLetterCount = 0;
+			for (let i = 0; i < rawText.length; i++) {
+				const c = rawText[i];
+				if (c >= 'A' && c <= 'Z') uppercaseLetterCount++;
+				else if (c >= 'a' && c <= 'z') lowercaseLetterCount++;
+			}
+			const totalLetters = uppercaseLetterCount + lowercaseLetterCount;
+			const uppercaseRatio = totalLetters > 0 ? uppercaseLetterCount / totalLetters : 0;
+			const isAllCaps = totalLetters > 3 && uppercaseRatio > 0.85;
+			const isAllLower = totalLetters > 3 && uppercaseRatio === 0;
+
+			const sentenceStarts = trimmed.split(/(?<=[.!?])\s+/);
+			let capitalizedSentencesCount = 0;
+			sentenceStarts.forEach(s => {
+				const firstChar = s.trim().charAt(0);
+				if (firstChar >= 'A' && firstChar <= 'Z') capitalizedSentencesCount++;
+			});
+			const properCapitalizationRate = sentenceStarts.length > 0 ? capitalizedSentencesCount / sentenceStarts.length : 0;
+
+			const avgWordLength = tokens.length > 0 ? tokens.reduce((sum, t) => sum + t.length, 0) / tokens.length : 0;
+
+			return {
+				charLength,
+				lineCount,
+				multiline,
+				hasTrailingDot,
+				hasTrailingQuestion,
+				hasTrailingExclamation,
+				hasTrailingEllipsis,
+				commaCount,
+				semicolonCount,
+				colonCount,
+				totalPunctuation,
+				punctuationDensity,
+				uppercaseRatio,
+				isAllCaps,
+				isAllLower,
+				properCapitalizationRate,
+				avgWordLength
+			};
+		}
+
+		evaluateStatementComplexity(tokens, entities, emotions, layout) {
+			const wordCount = tokens.length;
+			const uniqueCount = new Set(tokens).size;
+			const lexicalDiversity = wordCount > 0 ? uniqueCount / wordCount : 0;
+			let entityHits = 0;
+			for (const cat in entities) {
+				if (Array.isArray(entities[cat])) entityHits += entities[cat].length;
+				else if (entities[cat]) entityHits += 1;
+			}
+			const complexityScore = Math.min(1.0, (wordCount * 0.03) + (lexicalDiversity * 0.3) + (entityHits * 0.15) + (layout ? layout.avgWordLength * 0.05 : 0));
+			const abstractionLevel = (entities.philosophy.length * 0.35) + (entities.physics.length * 0.3) + (entities.math.length * 0.25);
+
+			return {
+				wordCount,
+				lexicalDiversity,
+				entityHits,
+				complexityScore,
+				abstractionLevel: Math.min(1.0, abstractionLevel),
+				isDeepInquiry: complexityScore > 0.6 || abstractionLevel > 0.4
 			};
 		}
 
@@ -331,8 +451,10 @@
 			const tokens = this.tokenize(rawText);
 			const correctedTokens = tokens.map(t => this.correctSpelling(t));
 			const stems = correctedTokens.map(t => this.stem(t));
+			const layout = this.evaluateTextLayoutAndPunctuation(rawText, correctedTokens);
 			const emotions = this.analyzeEmotionalState(rawText, correctedTokens);
 			const entities = this.extractEntities(rawText, correctedTokens);
+			const evaluation = this.evaluateStatementComplexity(correctedTokens, entities, emotions, layout);
 			const intent = this.classifyIntent(rawText, entities);
 			const syntaxType = this.classifySyntax(rawText);
 
@@ -341,8 +463,10 @@
 				cleaned: correctedTokens.join(' '),
 				tokens: correctedTokens,
 				stems,
+				layout,
 				sentiment: emotions,
 				emotions: emotions,
+				evaluation: evaluation,
 				entities,
 				intent,
 				syntaxType
