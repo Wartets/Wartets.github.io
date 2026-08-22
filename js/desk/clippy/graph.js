@@ -137,11 +137,26 @@
 			if (/\b(what can you do|commands|what do you do|help|aide|features|capabilities)\b/i.test(norm)) {
 				return { label: "What can you do?", next: 'tools_overview_node', moodDelta: { mood: 'OPTIMISTIC', patience: 15 } };
 			}
-			if (/\b(who am i|who i am|my profile|my identity)\b/i.test(norm)) {
-				return { label: "Who am I?", next: 'greeting_root', moodDelta: { mood: 'ANALYTICAL', intellect: 10 } };
+			if (/\b(who am i|who i am|my profile|my identity|identity|user profile)\b/i.test(norm)) {
+				return { label: "Who am I?", next: 'who_am_i_node', moodDelta: { mood: 'ANALYTICAL', intellect: 10 } };
 			}
-			if (/\b(how are you feeling|how do you feel|how are you|how is it going)\b/i.test(norm)) {
-				return { label: "How are you feeling?", next: 'greeting_root', moodDelta: { mood: 'OPTIMISTIC', affinity: 10 } };
+			if (/\b(how are you feeling|how do you feel|how are you|how is it going|mood|feeling)\b/i.test(norm)) {
+				return { label: "How are you feeling?", next: 'clippy_feeling_node', moodDelta: { mood: 'OPTIMISTIC', affinity: 10 } };
+			}
+			if (/\b(quantum recycle bin theory|recycle bin theory|landauer)\b/i.test(norm)) {
+				return { label: "Quantum Recycle Bin theory", next: 'quantum_recycle_bin_node', moodDelta: { mood: 'ANALYTICAL', intellect: 20 } };
+			}
+			if (/\b(talk about space and cosmos|space and cosmos|cosmos|universe|astronomy)\b/i.test(norm)) {
+				return { label: "Talk about space and cosmos", next: 'cosmos_space_node', moodDelta: { mood: 'PHILOSOPHICAL', intellect: 20 } };
+			}
+			if (/\b(inspect active windows|list windows|running windows|open windows)\b/i.test(norm)) {
+				return { label: "Inspect active windows", next: 'active_windows_node', moodDelta: { mood: 'ANALYTICAL', patience: 10 } };
+			}
+			if (/\b(investigate office origin|office origin|kevan|clippit history)\b/i.test(norm)) {
+				return { label: "Investigate Office origin", next: 'lore_root', moodDelta: { mood: 'NOSTALGIC', nostalgia: 25 } };
+			}
+			if (/\b(talk about programming|programming|coding|software engineering)\b/i.test(norm)) {
+				return { label: "Talk about programming", next: 'tech_root', moodDelta: { mood: 'ANALYTICAL', intellect: 20 } };
 			}
 			if (/\b(bad bad bad|you suck|useless|annoying|hate you|shut up)\b/i.test(norm)) {
 				return { label: "Why do you care? You're just a paperclip.", next: 'hostile_initial_retort', moodDelta: { mood: 'CYNICAL', affinity: -15, patience: -20 } };

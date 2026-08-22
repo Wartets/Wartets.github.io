@@ -41,7 +41,13 @@
 		activePomodoroTimer: null,
 
 		evaluateMathExpression(str) {
-			let exp = str.toLowerCase()
+			let cleaned = str.toLowerCase()
+				.replace(/^(evaluate|calc|calculate|compute)\s+/i, '')
+				.replace(/\bplanck constant h\b/g, 'h')
+				.replace(/\bspeed of light c\b/g, 'c')
+				.trim();
+
+			let exp = cleaned
 				.replace(/\bhbar\b/g, '(1.054571817e-34)')
 				.replace(/\bh\b/g, '(6.62607015e-34)')
 				.replace(/\bc_light\b/g, '(299792458)')

@@ -133,8 +133,10 @@
 				posY = mouseY - e.clientY;
 				mouseX = e.clientX;
 				mouseY = e.clientY;
-				element.style.top = Math.max(10, Math.min(window.innerHeight - element.offsetHeight - 10, element.offsetTop - posY)) + "px";
-				element.style.left = Math.max(10, Math.min(window.innerWidth - element.offsetWidth - 10, element.offsetLeft - posX)) + "px";
+				const maxTop = Math.max(0, window.innerHeight - element.offsetHeight - 36);
+				const maxLeft = Math.max(0, window.innerWidth - element.offsetWidth - 4);
+				element.style.top = Math.max(4, Math.min(maxTop, element.offsetTop - posY)) + "px";
+				element.style.left = Math.max(4, Math.min(maxLeft, element.offsetLeft - posX)) + "px";
 				element.style.bottom = 'auto';
 				element.style.right = 'auto';
 			};
@@ -179,6 +181,11 @@
 
 		appendAssistantMessage(text, actions = null, onComplete = null) {
 			if (!this.logElement) return;
+			if (this.currentTypeInterval) {
+				clearInterval(this.currentTypeInterval);
+				this.currentTypeInterval = null;
+			}
+
 			const row = document.createElement('div');
 			row.className = 'clippy-message clippy-message-assistant';
 			this.logElement.appendChild(row);
@@ -186,39 +193,53 @@
 			this.isTyping = true;
 			this.setVisualState('talk');
 			let index = 0;
+			const targetText = String(text || '');
 
-			const interval = setInterval(() => {
-				if (index < text.length) {
-					row.textContent += text.charAt(index);
-					if (index % 4 === 0 && window.ClippyAudio) {
+			const finalizeMessage = () => {
+				if (this.currentTypeInterval) {
+					clearInterval(this.currentTypeInterval);
+					this.currentTypeInterval = null;
+				}
+				row.textContent = targetText;
+				this.isTyping = false;
+				this.setVisualState('idle');
+
+				if (actions && Array.isArray(actions) && actions.length > 0) {
+					const btnBar = document.createElement('div');
+					btnBar.className = 'clippy-actions-bar';
+					actions.forEach(act => {
+						const actBtn = document.createElement('button');
+						actBtn.type = 'button';
+						actBtn.className = 'clippy-action-btn';
+						actBtn.textContent = act.label;
+						actBtn.addEventListener('click', () => {
+							if (window.ClippyAudio) window.ClippyAudio.play('action');
+							if (act.onClick) act.onClick();
+						});
+						btnBar.appendChild(actBtn);
+					});
+					this.logElement.appendChild(btnBar);
+					this.scrollLogToBottom();
+				}
+
+				if (onComplete) onComplete();
+			};
+
+			if (targetText.length > 300) {
+				finalizeMessage();
+				return;
+			}
+
+			this.currentTypeInterval = setInterval(() => {
+				if (index < targetText.length) {
+					row.textContent += targetText.charAt(index);
+					if (index % 5 === 0 && window.ClippyAudio) {
 						window.ClippyAudio.play('type');
 					}
 					index++;
 					this.scrollLogToBottom();
 				} else {
-					clearInterval(interval);
-					this.isTyping = false;
-					this.setVisualState('idle');
-
-					if (actions && Array.isArray(actions) && actions.length > 0) {
-						const btnBar = document.createElement('div');
-						btnBar.className = 'clippy-actions-bar';
-						actions.forEach(act => {
-							const actBtn = document.createElement('button');
-							actBtn.type = 'button';
-							actBtn.className = 'clippy-action-btn';
-							actBtn.textContent = act.label;
-							actBtn.addEventListener('click', () => {
-								if (window.ClippyAudio) window.ClippyAudio.play('action');
-								if (act.onClick) act.onClick();
-							});
-							btnBar.appendChild(actBtn);
-						});
-						this.logElement.appendChild(btnBar);
-						this.scrollLogToBottom();
-					}
-
-					if (onComplete) onComplete();
+					finalizeMessage();
 				}
 			}, TYPEWRITER_SPEED_MS);
 		}

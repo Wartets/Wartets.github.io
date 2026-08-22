@@ -16,7 +16,13 @@
 	}
 
 	function handleUserInput(rawText) {
-		if (!rawText || isThinking || (window.ClippyUI && window.ClippyUI.isTyping)) return;
+		if (!rawText || isThinking) return;
+		if (window.ClippyUI && window.ClippyUI.isTyping && window.ClippyUI.currentTypeInterval) {
+			clearInterval(window.ClippyUI.currentTypeInterval);
+			window.ClippyUI.currentTypeInterval = null;
+			window.ClippyUI.isTyping = false;
+		}
+
 		window.ClippyUI.appendUserMessage(rawText);
 		isThinking = true;
 		window.ClippyUI.setVisualState('think');
@@ -27,8 +33,9 @@
 				response = processDispatch(rawText);
 			} catch (e) {
 				response = { text: pickFrom(window.ClippyKnowledge ? window.ClippyKnowledge.FALLBACK_RESPONSES : []) };
+			} finally {
+				isThinking = false;
 			}
-			isThinking = false;
 
 			if (response && response.text) {
 				window.ClippyUI.appendAssistantMessage(response.text, response.actions, () => {
@@ -37,7 +44,7 @@
 					}
 				});
 			}
-		}, 200 + Math.random() * 200);
+		}, 140 + Math.random() * 120);
 	}
 
 	function executeActionTrigger(actionId) {
@@ -64,11 +71,61 @@
 		} else if (actionId === 'action_pass') {
 			const pwd = window.ClippyActivities.generatePassword(16);
 			window.ClippyUI.appendAssistantMessage(`Generated Secure Password (16 chars):\n**\`${pwd}\`**`);
+		} else if (actionId === 'action_inspect_windows') {
+			renderActiveWindowsList();
+		} else if (actionId === 'action_show_desktop') {
+			window.ClippySystemBridge.minimizeAllWindows();
+			window.ClippyUI.appendAssistantMessage("All open windows have been minimized to the taskbar.");
+		} else if (actionId === 'action_cascade_windows') {
+			window.ClippySystemBridge.cascadeWindows();
+			window.ClippyUI.appendAssistantMessage("Windows arranged in cascade layout.");
+		} else if (actionId === 'action_tile_windows') {
+			window.ClippySystemBridge.tileWindows(true);
+			window.ClippyUI.appendAssistantMessage("Windows tiled horizontally across the workspace.");
+		} else if (actionId === 'action_constant_c') {
+			window.ClippyUI.appendAssistantMessage("Speed of light in vacuum (c):\n**299,792,458 m/s** (exact)");
+		} else if (actionId === 'action_constant_h') {
+			window.ClippyUI.appendAssistantMessage("Planck constant (h):\n**6.62607015 x 10^-34 J s** (exact)");
+		} else if (actionId === 'action_profile') {
+			renderUserProfileCard();
+		} else if (actionId === 'action_achievements') {
+			renderAchievementsList();
+		} else if (actionId === 'action_theme_panel') {
+			renderThemeSelectorCard();
+		} else if (actionId === 'action_wallpaper_panel') {
+			renderWallpaperSelectorCard();
+		} else if (actionId === 'action_music_panel') {
+			renderMusicPlayerController();
+		} else if (actionId === 'pet_status') {
+			handlePetAction('status');
+		} else if (actionId === 'pet_feed') {
+			handlePetAction('feed');
+		} else if (actionId === 'pet_polish') {
+			handlePetAction('pet');
+		} else if (actionId === 'action_inspect_bin') {
+			const count = window.ClippySystemBridge.getRecycleBinCount();
+			window.ClippyUI.appendAssistantMessage(count > 0 ? `The Recycle Bin currently holds ${count} item(s).` : "The Recycle Bin is completely empty.", [
+				{ label: "Open Recycle Bin", onClick: () => window.ClippySystemBridge.launchApp('recyclebin') },
+				{ label: "Empty Recycle Bin", onClick: () => { window.ClippySystemBridge.emptyRecycleBin(); window.ClippyUI.appendAssistantMessage("Recycle Bin emptied."); } }
+			]);
 		}
 	}
 
 	function processDispatch(rawText) {
 		const norm = rawText.toLowerCase().trim();
+
+		if (norm === 'exit' || norm === 'quit' || norm === 'cancel' || norm === 'stop' || norm === 'menu' || norm === 'back') {
+			activeGameContext = null;
+			gameState = {};
+			return {
+				text: "Active session stopped. Standing by for instructions.",
+				actions: [
+					{ label: "What can you do?", onClick: () => handleUserInput("What can you do?") },
+					{ label: "View To-Do List", onClick: () => renderTodoList() },
+					{ label: "System Diagnostics", onClick: () => handleUserInput("System diagnostics") }
+				]
+			};
+		}
 
 		if (activeGameContext === 'guess' && /^\d+$/.test(norm)) {
 			handleGuessInput(parseInt(norm, 10));
@@ -77,6 +134,151 @@
 		if (activeGameContext === 'hangman' && /^[a-zA-Z]$/.test(norm)) {
 			handleHangmanInput(norm.toUpperCase());
 			return null;
+		}
+
+		if (norm === 'who am i' || norm === 'who am i?' || norm === 'my profile' || norm === 'identity') {
+			renderUserProfileCard();
+			return null;
+		}
+
+		if (norm === 'how are you feeling' || norm === 'how are you feeling?' || norm === 'how are you' || norm === 'how do you feel') {
+			handlePetAction('status');
+			return null;
+		}
+
+		if (norm === 'what can you do' || norm === 'what can you do?' || norm === 'help' || norm === 'commands') {
+			return {
+				text: "Here is what my system integration can execute:\n- Task & Project Management (`todo`, `projects`)\n- Focus & Scratchpad (`timer 25`, `note [text]`)\n- System Settings (`theme [name]`, `wallpaper`, `scanlines`, `crt`, `volume`)\n- Mail & Diagnostics (`mail`, `diagnostics`, `windows`)\n- Games & Entertainment (`tictactoe`, `memory`, `hangman`, `quiz`, `music`, `joke`)\n- Utilities (`calc [math]`, `convert [unit]`, `pass [length]`)",
+				actions: [
+					{ label: "View To-Do List", onClick: () => renderTodoList() },
+					{ label: "System Diagnostics", onClick: () => handleUserInput("System diagnostics") },
+					{ label: "Play a Game", onClick: () => handleUserInput("Play Tic-Tac-Toe") },
+					{ label: "Control Music", onClick: () => renderMusicPlayerController() }
+				]
+			};
+		}
+
+		if (norm === 'evaluate planck constant h' || norm === 'planck constant' || norm === 'constant h') {
+			return { text: "Planck constant (h):\n**6.62607015 x 10^-34 J s** (CODATA exact standard)" };
+		}
+		if (norm === 'evaluate speed of light c' || norm === 'speed of light' || norm === 'constant c') {
+			return { text: "Speed of light in vacuum (c):\n**299,792,458 m/s** (CODATA exact standard)" };
+		}
+
+		if (norm === 'achievements' || norm === 'milestones' || norm === 'trophies' || norm === 'view achievements') {
+			renderAchievementsList();
+			return null;
+		}
+
+		if (norm === 'wallpapers' || norm === 'wallpaper' || norm === 'change wallpaper') {
+			renderWallpaperSelectorCard();
+			return null;
+		}
+
+		if (norm === 'music' || norm === 'audio player' || norm === 'music player') {
+			renderMusicPlayerController();
+			return null;
+		}
+
+		if (norm === 'inspect active windows' || norm === 'active windows' || norm === 'list windows' || norm === 'open windows') {
+			renderActiveWindowsList();
+			return null;
+		}
+		if (norm === 'minimize all' || norm === 'show desktop' || norm === 'hide windows') {
+			window.ClippySystemBridge.minimizeAllWindows();
+			return { text: "All windows have been minimized to the taskbar." };
+		}
+		if (norm === 'cascade windows' || norm === 'cascade') {
+			window.ClippySystemBridge.cascadeWindows();
+			return { text: "Windows have been cascaded across the workspace." };
+		}
+		if (norm === 'tile windows' || norm === 'tile') {
+			window.ClippySystemBridge.tileWindows(true);
+			return { text: "Windows have been tiled horizontally." };
+		}
+
+		if (norm === 'play music' || norm === 'toggle music' || norm === 'resume music') {
+			window.ClippySystemBridge.toggleMusicPlayback();
+			const track = window.ClippySystemBridge.getNowPlaying();
+			return {
+				text: track ? `Playback toggled: "${track.title || 'Audio Track'}"` : "Audio player initiated.",
+				actions: [
+					{ label: "Next Track", onClick: () => { window.ClippySystemBridge.nextMusicTrack(); } },
+					{ label: "Open Media Player", onClick: () => window.ClippySystemBridge.launchApp('mediaplayer') }
+				]
+			};
+		}
+		if (norm === 'next music track' || norm === 'next track' || norm === 'next song') {
+			window.ClippySystemBridge.nextMusicTrack();
+			return { text: "Advanced to next audio track." };
+		}
+		if (norm === 'now playing' || norm === 'current song') {
+			const track = window.ClippySystemBridge.getNowPlaying();
+			return {
+				text: track ? `Now Playing: **${track.title || 'Audio Track'}** by **${track.artist || 'Artist'}**` : "No media track is currently active.",
+				actions: [{ label: "Open Media Player", onClick: () => window.ClippySystemBridge.launchApp('mediaplayer') }]
+			};
+		}
+
+		if (norm.startsWith('open ') || norm.startsWith('launch ') || norm.startsWith('start app ')) {
+			const appTarget = norm.replace(/^(open|launch|start app)\s+/i, '').trim();
+			const appAliases = {
+				'calc': 'calculator', 'calculator': 'calculator',
+				'paint': 'paint', 'mspaint': 'paint',
+				'notepad': 'notepad', 'text editor': 'notepad',
+				'cmd': 'cmd', 'command prompt': 'cmd', 'terminal': 'cmd',
+				'ie': 'ie', 'internet explorer': 'ie', 'browser': 'ie',
+				'outlook': 'outlook', 'outlook express': 'outlook', 'mail': 'outlook', 'email': 'outlook',
+				'winamp': 'winamp',
+				'media player': 'mediaplayer', 'windows media player': 'mediaplayer', 'wmp': 'mediaplayer',
+				'minesweeper': 'minesweeper', 'mine': 'minesweeper',
+				'solitaire': 'solitaire', 'sol': 'solitaire',
+				'control panel': 'settings', 'settings': 'settings',
+				'display': 'display', 'wallpapers': 'display',
+				'my computer': 'mycomputer', 'computer': 'mycomputer',
+				'recycle bin': 'recyclebin', 'trash': 'recyclebin',
+				'achievements': 'achievements', 'trophies': 'achievements', 'milestones': 'achievements',
+				'projects': 'projects', 'portfolio': 'projects',
+				'sound recorder': 'soundrecorder',
+				'character map': 'charmap', 'charmap': 'charmap',
+				'encarta': 'encarta', 'globe': 'encarta', 'world globe': 'encarta',
+				'task manager': 'taskmgr', 'taskmgr': 'taskmgr'
+			};
+			const targetId = appAliases[appTarget] || appTarget;
+			if (window.DeskAppRegistry && window.DeskAppRegistry.get(targetId)) {
+				window.DeskAppRegistry.launch(targetId);
+				return { text: `Launched application: **${window.DeskAppRegistry.get(targetId).name}**.` };
+			}
+		}
+
+		if (norm.startsWith('theme ') || norm.startsWith('set theme ')) {
+			const theme = norm.replace(/^(theme|set theme)\s+/i, '').trim();
+			const validThemes = ['luna-blue', 'royale', 'silver', 'olive', 'classic', 'zune', 'noir', 'matrix', 'high-contrast'];
+			if (validThemes.includes(theme)) {
+				window.ClippySystemBridge.setTheme(theme);
+				return { text: `Theme updated to: **${theme}**.` };
+			}
+			return {
+				text: `Available themes: ${validThemes.join(', ')}.`,
+				actions: validThemes.slice(0, 4).map(t => ({ label: t, onClick: () => { window.ClippySystemBridge.setTheme(t); window.ClippyUI.appendAssistantMessage(`Theme set to ${t}.`); } }))
+			};
+		}
+
+		if (norm === 'scanlines on' || norm === 'enable scanlines') {
+			window.ClippySystemBridge.toggleScanlines(true);
+			return { text: "Scanlines overlay enabled." };
+		}
+		if (norm === 'scanlines off' || norm === 'disable scanlines') {
+			window.ClippySystemBridge.toggleScanlines(false);
+			return { text: "Scanlines overlay disabled." };
+		}
+		if (norm === 'crt on' || norm === 'enable crt') {
+			window.ClippySystemBridge.toggleCrt(true);
+			return { text: "CRT glass curvature filter enabled." };
+		}
+		if (norm === 'crt off' || norm === 'disable crt') {
+			window.ClippySystemBridge.toggleCrt(false);
+			return { text: "CRT glass curvature filter disabled." };
 		}
 
 		if (norm.startsWith('todo add ') || norm.startsWith('task add ')) {
@@ -127,36 +329,56 @@
 			return { text: `Unit Conversion Result: **${conv}**` };
 		}
 
-		if (norm.startsWith('calc ') || norm.startsWith('calculate ') || /^[\d\s\+\-\*\/\(\)\.\^\%]+$/.test(norm)) {
-			const exp = norm.replace(/^(calc|calculate)\s+/i, '');
-			const mathRes = window.ClippyActivities.evaluateMathExpression(exp);
+		if (norm.startsWith('calc ') || norm.startsWith('calculate ') || norm.startsWith('evaluate ') || /^[\d\s\+\-\*\/\(\)\.\^\%]+$/.test(norm)) {
+			const mathRes = window.ClippyActivities.evaluateMathExpression(norm);
 			if (mathRes !== null) {
-				return { text: `Calculation: ${exp} = **${mathRes}**` };
+				return { text: `Calculation Result: **${mathRes}**` };
 			}
 		}
 
-		if (window.ClippyBrain) {
-			const brainReply = window.ClippyBrain.processChat(rawText);
-			if (brainReply && brainReply.text) {
-				return brainReply;
+		if (norm.startsWith('find ') || norm.startsWith('search ')) {
+			const q = rawText.replace(/^(find|search)\s+/i, '').trim();
+			if (q) {
+				const hits = window.ClippySystemBridge.searchFiles(q);
+				if (hits.length > 0) {
+					return {
+						text: `Found ${hits.length} matching item(s) in VFS:`,
+						actions: hits.slice(0, 4).map(h => ({
+							label: h.name,
+							onClick: () => { if (window.ShellAssociations) window.ShellAssociations.open(h); }
+						}))
+					};
+				}
+				return { text: `No filesystem entries found for query: "${q}".` };
 			}
 		}
 
-		if (norm.includes('mail') || norm.includes('email') || norm.includes('outlook') || norm.includes('unread')) {
+		if (norm === 'check unread emails' || norm.includes('unread email') || norm.includes('unread mail')) {
 			const unread = window.ClippySystemBridge.getUnreadMailCount();
 			return {
 				text: unread > 0 ? `You have ${unread} unread message(s) waiting in Outlook Express!` : "Your inbox is completely up to date. Zero unread messages!",
 				actions: [{ label: "Open Mail", onClick: () => window.ClippySystemBridge.launchApp('outlook') }]
 			};
 		}
-		if (norm.includes('project') || norm.includes('portfolio') || norm.includes('showcase')) {
-			const p = window.ClippySystemBridge.getRandomProject();
-			const title = (p && p.title) ? (typeof p.title === 'object' ? (p.title.en || p.title.fr || "Project") : p.title) : "Portfolio";
+
+		if (norm.includes('mail') || norm.includes('email') || norm.includes('outlook')) {
+			const unread = window.ClippySystemBridge.getUnreadMailCount();
 			return {
-				text: `Featured project showcase: "${title}".`,
-				actions: [{ label: "Open Projects", onClick: () => window.ClippySystemBridge.launchApp('projects') }]
+				text: unread > 0 ? `You have ${unread} unread message(s) waiting in Outlook Express!` : "Your inbox is completely up to date. Zero unread messages!",
+				actions: [{ label: "Open Mail", onClick: () => window.ClippySystemBridge.launchApp('outlook') }]
 			};
 		}
+
+		if (norm === 'quantum recycle bin theory') {
+			return {
+				text: "Landauer's principle indicates that bit erasure has a thermodynamic cost (k_B * T * ln 2). Erased files persist in virtual unallocated clusters until overwritten.",
+				actions: [
+					{ label: "Open Recycle Bin", onClick: () => window.ClippySystemBridge.launchApp('recyclebin') },
+					{ label: "Empty Recycle Bin", onClick: () => { window.ClippySystemBridge.emptyRecycleBin(); window.ClippyUI.appendAssistantMessage("Recycle Bin emptied."); } }
+				]
+			};
+		}
+
 		if (norm.includes('recycle') || norm.includes('trash') || norm.includes('corbeille')) {
 			const count = window.ClippySystemBridge.getRecycleBinCount();
 			return {
@@ -167,51 +389,432 @@
 				]
 			};
 		}
-		if (norm.includes('defrag') || norm.includes('defragment')) {
-			startDefrag();
-			return null;
-		}
-		if (norm.includes('pet') || norm.includes('tamagotchi')) {
-			handlePetAction('status');
-			return null;
-		}
-		if (norm.includes('memory') || norm.includes('pairs')) {
-			startMemory();
-			return null;
-		}
-		if (norm.includes('hangman') || norm.includes('pendu')) {
-			startHangman();
-			return null;
-		}
-		if (norm.includes('tic tac toe') || norm.includes('tictactoe') || norm.includes('morpion')) {
-			startTicTacToe();
-			return null;
-		}
-		if (norm.includes('quiz') || norm.includes('trivia quiz')) {
-			startQuiz();
-			return null;
-		}
-		if (norm.includes('guess the number') || norm.includes('guess number')) {
-			startGuess();
-			return null;
-		}
-		if (norm.includes('rock paper scissors') || norm.includes('rps') || norm.includes('chifoumi')) {
-			return startRPS();
-		}
-		if (norm.includes('joke') || norm.includes('blague')) {
-			return { text: pickFrom(window.ClippyKnowledge ? window.ClippyKnowledge.JOKES : []) };
-		}
-		if (norm.includes('trivia') || norm.includes('fact')) {
-			return { text: pickFrom(window.ClippyKnowledge ? window.ClippyKnowledge.TRIVIA : []) };
-		}
-		if (norm.includes('shortcut') || norm.includes('hotkey')) {
-			return { text: (window.ClippyKnowledge ? window.ClippyKnowledge.SHORTCUTS : []).join('\n') };
-		}
-		if (norm.includes('diagnostic') || norm.includes('specs') || norm.includes('status')) {
+
+		if (norm === 'system diagnostics' || norm === 'specs' || norm === 'diagnostic' || norm === 'status') {
 			return { text: window.ClippySystemBridge.getSystemSpecs() };
 		}
 
-		return { text: pickFrom(window.ClippyKnowledge ? window.ClippyKnowledge.FALLBACK_RESPONSES : []) };
+		if (norm === 'investigate office origin' || norm.includes('office origin')) {
+			return {
+				text: "Clippit was designed in 1994 by Kevan J. Atteberry on a Mac workstation. Introduced in Office 97, he held documents, letters, and resumes together across millions of PCs.",
+				actions: [
+					{ label: "Random Retro Trivia", onClick: () => handleUserInput("Random Retro Trivia") },
+					{ label: "Keyboard Shortcuts", onClick: () => handleUserInput("Keyboard Shortcuts") }
+				]
+			};
+		}
+
+		if (norm === 'talk about space and cosmos' || norm === 'space' || norm === 'cosmos') {
+			return {
+				text: "The observable universe is 93 billion light-years in diameter. Space is rich with cosmological phenomena, dark energy, and relativistic speeds.",
+				actions: [
+					{ label: "Evaluate speed of light c", onClick: () => handleUserInput("Evaluate speed of light c") },
+					{ label: "Evaluate Planck constant h", onClick: () => handleUserInput("Evaluate Planck constant h") }
+				]
+			};
+		}
+
+		if (norm === 'talk about programming') {
+			return {
+				text: "This workstation executes modular Win32 simulation architecture, VFS layers, dynamic Window management, and synthesized audio.",
+				actions: [
+					{ label: "Open Command Prompt", onClick: () => window.ClippySystemBridge.launchApp('cmd') },
+					{ label: "Open Projects", onClick: () => window.ClippySystemBridge.launchApp('projects') }
+				]
+			};
+		}
+
+		if (norm === 'pet clippy status' || norm.includes('pet clippy') || norm.includes('tamagotchi')) {
+			handlePetAction('status');
+			return null;
+		}
+
+		if (norm === 'defrag drive c:' || norm.includes('defrag') || norm.includes('defragment')) {
+			startDefrag();
+			return null;
+		}
+
+		if (norm === 'play memory game' || norm.includes('memory') || norm.includes('pairs')) {
+			startMemory();
+			return null;
+		}
+
+		if (norm === 'play hangman' || norm.includes('hangman') || norm.includes('pendu')) {
+			startHangman();
+			return null;
+		}
+
+		if (norm === 'play tic-tac-toe' || norm.includes('tic tac toe') || norm.includes('tictactoe') || norm.includes('morpion')) {
+			startTicTacToe();
+			return null;
+		}
+
+		if (norm === 'tech trivia quiz' || norm.includes('quiz') || norm.includes('trivia quiz')) {
+			startQuiz();
+			return null;
+		}
+
+		if (norm === 'guess the number' || norm.includes('guess number')) {
+			startGuess();
+			return null;
+		}
+
+		if (norm === 'rock paper scissors' || norm.includes('rps') || norm.includes('chifoumi')) {
+			return startRPS();
+		}
+
+		if (norm === 'tell me a joke' || norm.includes('joke') || norm.includes('blague')) {
+			return {
+				text: pickFrom(window.ClippyKnowledge ? window.ClippyKnowledge.JOKES : []),
+				actions: [{ label: "Another Joke", onClick: () => handleUserInput("tell me a joke") }]
+			};
+		}
+
+		if (norm === 'random retro trivia' || norm.includes('trivia') || norm.includes('fact')) {
+			return {
+				text: pickFrom(window.ClippyKnowledge ? window.ClippyKnowledge.TRIVIA : []),
+				actions: [{ label: "More Trivia", onClick: () => handleUserInput("Random Retro Trivia") }]
+			};
+		}
+
+		if (norm === 'keyboard shortcuts' || norm.includes('shortcut') || norm.includes('hotkey')) {
+			return { text: (window.ClippyKnowledge ? window.ClippyKnowledge.SHORTCUTS : []).join('\n') };
+		}
+
+		if (norm.includes('project') || norm.includes('portfolio') || norm.includes('showcase')) {
+			const p = window.ClippySystemBridge.getRandomProject();
+			const title = (p && p.title) ? (typeof p.title === 'object' ? (p.title.en || p.title.fr || "Project") : p.title) : "Portfolio";
+			return {
+				text: `Featured project showcase: "${title}".`,
+				actions: [{ label: "Open Projects", onClick: () => window.ClippySystemBridge.launchApp('projects') }]
+			};
+		}
+
+		if (window.ClippyBrain) {
+			const brainReply = window.ClippyBrain.processChat(rawText);
+			if (brainReply && brainReply.text) {
+				return brainReply;
+			}
+		}
+
+		return {
+			text: pickFrom(window.ClippyKnowledge ? window.ClippyKnowledge.FALLBACK_RESPONSES : []),
+			actions: [
+				{ label: "What can you do?", onClick: () => handleUserInput("What can you do?") },
+				{ label: "View To-Do List", onClick: () => renderTodoList() },
+				{ label: "System Diagnostics", onClick: () => handleUserInput("System diagnostics") }
+			]
+		};
+	}
+
+	function renderUserProfileCard() {
+		if (!window.ClippyUI.logElement) return;
+		const prof = window.ClippySystemBridge.getUserProfile();
+		const ach = window.ClippySystemBridge.getAchievementsSummary();
+		const row = document.createElement('div');
+		row.className = 'clippy-message clippy-message-assistant';
+
+		row.innerHTML = `
+			<div class="clippy-profile-card">
+				<div class="clippy-profile-header">
+					<img src="${prof.userAvatar}" class="clippy-profile-avatar ${prof.avatarShape === 'circle' ? 'circle' : (prof.avatarShape === 'round' ? 'round' : '')}" alt="">
+					<div class="clippy-profile-info">
+						<strong>${prof.userName}</strong>
+						<span>${prof.userJobTitle}</span>
+						<span style="font-size: 10px; color: #555;">Theme: ${prof.theme}</span>
+					</div>
+				</div>
+				<div class="clippy-profile-stats">
+					<div class="clippy-profile-stat-row">
+						<span>Milestones Unlocked:</span>
+						<strong>${ach.unlockedCount} / ${ach.total} (${ach.percentage}%)</strong>
+					</div>
+					<div class="clippy-ach-progress-bar"><div class="clippy-ach-progress-fill" style="width: ${ach.percentage}%;"></div></div>
+				</div>
+			</div>
+		`;
+
+		const btnBar = document.createElement('div');
+		btnBar.className = 'clippy-actions-bar';
+		[
+			{ label: "Change User Identity", onClick: () => window.ClippySystemBridge.launchApp('settings', 'system') },
+			{ label: "Open Milestones", onClick: () => window.ClippySystemBridge.launchApp('achievements') },
+			{ label: "Display Settings", onClick: () => window.ClippySystemBridge.launchApp('display') }
+		].forEach(act => {
+			const btn = document.createElement('button');
+			btn.type = 'button';
+			btn.className = 'clippy-action-btn';
+			btn.textContent = act.label;
+			btn.addEventListener('click', act.onClick);
+			btnBar.appendChild(btn);
+		});
+
+		row.appendChild(btnBar);
+		window.ClippyUI.logElement.appendChild(row);
+		window.ClippyUI.scrollLogToBottom();
+	}
+
+	function renderAchievementsList() {
+		if (!window.ClippyUI.logElement) return;
+		const ach = window.ClippySystemBridge.getAchievementsSummary();
+		const row = document.createElement('div');
+		row.className = 'clippy-message clippy-message-assistant';
+
+		let itemsHtml = '';
+		const sampleList = ach.unlocked.slice(0, 4);
+		sampleList.forEach(a => {
+			itemsHtml += `
+				<div class="clippy-ach-item unlocked">
+					<img src="${a.icon || '../assets/images/desk/icons/Trophy.webp'}" alt="">
+					<div style="flex:1;">
+						<strong>${a.title}</strong>
+						<div style="font-size:10px; color:#444;">${a.description}</div>
+					</div>
+				</div>
+			`;
+		});
+
+		row.innerHTML = `
+			<div>[MILESTONES SUMMARY] <b>Unlocked: ${ach.unlockedCount} / ${ach.total} (${ach.percentage}%)</b></div>
+			<div class="clippy-ach-progress-bar" style="margin: 6px 0;"><div class="clippy-ach-progress-fill" style="width: ${ach.percentage}%;"></div></div>
+			<div class="clippy-ach-list">${itemsHtml || '<div style="font-size:11px; color:#666;">No milestones unlocked yet. Explore the workstation!</div>'}</div>
+		`;
+
+		const btnBar = document.createElement('div');
+		btnBar.className = 'clippy-actions-bar';
+		const openBtn = document.createElement('button');
+		openBtn.type = 'button';
+		openBtn.className = 'clippy-action-btn';
+		openBtn.textContent = "Open Full Milestones Window";
+		openBtn.addEventListener('click', () => window.ClippySystemBridge.launchApp('achievements'));
+		btnBar.appendChild(openBtn);
+
+		row.appendChild(btnBar);
+		window.ClippyUI.logElement.appendChild(row);
+		window.ClippyUI.scrollLogToBottom();
+	}
+
+	function renderThemeSelectorCard() {
+		if (!window.ClippyUI.logElement) return;
+		const row = document.createElement('div');
+		row.className = 'clippy-message clippy-message-assistant';
+		const currentTheme = window.ClippySystemBridge.getSetting('theme') || 'luna-blue';
+		const themes = ['luna-blue', 'royale', 'silver', 'olive', 'classic', 'zune', 'noir', 'matrix', 'high-contrast'];
+
+		row.innerHTML = `<div>[THEME SWITCHER] Active Theme: <b>${currentTheme}</b></div>`;
+		const grid = document.createElement('div');
+		grid.className = 'clippy-actions-bar';
+		themes.forEach(t => {
+			const b = document.createElement('button');
+			b.type = 'button';
+			b.className = `clippy-action-btn ${t === currentTheme ? 'active' : ''}`;
+			b.textContent = t;
+			b.addEventListener('click', () => {
+				window.ClippySystemBridge.setTheme(t);
+				window.ClippyUI.appendAssistantMessage(`Workstation theme switched to: **${t}**.`);
+			});
+			grid.appendChild(b);
+		});
+
+		row.appendChild(grid);
+		window.ClippyUI.logElement.appendChild(row);
+		window.ClippyUI.scrollLogToBottom();
+	}
+
+	async function renderWallpaperSelectorCard() {
+		if (!window.ClippyUI.logElement) return;
+		const row = document.createElement('div');
+		row.className = 'clippy-message clippy-message-assistant';
+		row.innerHTML = `<div>[DESKTOP BACKGROUNDS] Loading wallpaper catalog...</div>`;
+		window.ClippyUI.logElement.appendChild(row);
+		window.ClippyUI.scrollLogToBottom();
+
+		const wallpapers = await window.ClippySystemBridge.getAvailableWallpapers();
+		row.innerHTML = `<div>[DESKTOP BACKGROUNDS] Select a background image:</div>`;
+
+		const grid = document.createElement('div');
+		grid.className = 'clippy-actions-bar';
+		(wallpapers || []).slice(0, 6).forEach(wp => {
+			const b = document.createElement('button');
+			b.type = 'button';
+			b.className = 'clippy-action-btn';
+			b.textContent = wp.name;
+			b.addEventListener('click', () => {
+				window.ClippySystemBridge.setWallpaper(wp.path);
+				window.ClippyUI.appendAssistantMessage(`Desktop wallpaper set to: **${wp.name}**.`);
+			});
+			grid.appendChild(b);
+		});
+
+		const dispBtn = document.createElement('button');
+		dispBtn.type = 'button';
+		dispBtn.className = 'clippy-action-btn';
+		dispBtn.textContent = "Open Display Properties...";
+		dispBtn.addEventListener('click', () => window.ClippySystemBridge.launchApp('display'));
+		grid.appendChild(dispBtn);
+
+		row.appendChild(grid);
+		window.ClippyUI.scrollLogToBottom();
+	}
+
+	function renderMusicPlayerController() {
+		if (!window.ClippyUI.logElement) return;
+		const row = document.createElement('div');
+		row.className = 'clippy-message clippy-message-assistant';
+		const track = window.ClippySystemBridge.getNowPlaying();
+		const tracks = window.ClippySystemBridge.getMusicTracks();
+
+		row.innerHTML = `
+			<div class="clippy-music-card">
+				<div class="clippy-music-header">
+					<img src="../assets/images/desk/icons/Music File.webp" style="width:24px;height:24px;" alt="">
+					<div style="flex:1; overflow:hidden;">
+						<strong>${track ? track.title : 'Audio Player Standby'}</strong>
+						<div style="font-size:10px; color:#555;">${track ? (track.artist || 'Windows XP Audio') : 'No track currently active'}</div>
+					</div>
+				</div>
+			</div>
+		`;
+
+		const btnBar = document.createElement('div');
+		btnBar.className = 'clippy-actions-bar';
+
+		const playBtn = document.createElement('button');
+		playBtn.type = 'button';
+		playBtn.className = 'clippy-action-btn';
+		playBtn.textContent = "Play / Pause";
+		playBtn.addEventListener('click', () => {
+			window.ClippySystemBridge.toggleMusicPlayback();
+			const now = window.ClippySystemBridge.getNowPlaying();
+			window.ClippyUI.appendAssistantMessage(now ? `Playback toggled: "${now.title}"` : "Audio player initiated.");
+		});
+		btnBar.appendChild(playBtn);
+
+		const nextBtn = document.createElement('button');
+		nextBtn.type = 'button';
+		nextBtn.className = 'clippy-action-btn';
+		nextBtn.textContent = "Next Track";
+		nextBtn.addEventListener('click', () => {
+			window.ClippySystemBridge.nextMusicTrack();
+			window.ClippyUI.appendAssistantMessage("Advanced to next track.");
+		});
+		btnBar.appendChild(nextBtn);
+
+		if (tracks.length > 0) {
+			const rndBtn = document.createElement('button');
+			rndBtn.type = 'button';
+			rndBtn.className = 'clippy-action-btn';
+			rndBtn.textContent = "Play Random Track";
+			rndBtn.addEventListener('click', () => {
+				const rnd = Math.floor(Math.random() * tracks.length);
+				window.ClippySystemBridge.playTrackIndex(rnd);
+				window.ClippyUI.appendAssistantMessage(`Playing track: **${tracks[rnd].title || 'Track'}**.`);
+			});
+			btnBar.appendChild(rndBtn);
+		}
+
+		const openWmpBtn = document.createElement('button');
+		openWmpBtn.type = 'button';
+		openWmpBtn.className = 'clippy-action-btn';
+		openWmpBtn.textContent = "Open Media Player";
+		openWmpBtn.addEventListener('click', () => window.ClippySystemBridge.launchApp('mediaplayer'));
+		btnBar.appendChild(openWmpBtn);
+
+		const openWinampBtn = document.createElement('button');
+		openWinampBtn.type = 'button';
+		openWinampBtn.className = 'clippy-action-btn';
+		openWinampBtn.textContent = "Open Winamp";
+		openWinampBtn.addEventListener('click', () => window.ClippySystemBridge.launchApp('winamp'));
+		btnBar.appendChild(openWinampBtn);
+
+		row.appendChild(btnBar);
+		window.ClippyUI.logElement.appendChild(row);
+		window.ClippyUI.scrollLogToBottom();
+	}
+
+	function renderActiveWindowsList() {
+		if (!window.ClippyUI.logElement) return;
+		const row = document.createElement('div');
+		row.className = 'clippy-message clippy-message-assistant';
+
+		const windowsMap = (window.WindowManager && window.WindowManager.windows) ? window.WindowManager.windows : {};
+		const winList = Object.values(windowsMap).filter(w => !w.classList.contains('xp-modal-overlay'));
+
+		const hdr = document.createElement('div');
+		hdr.innerHTML = `[PROCESS INSPECTOR] <b>Active Windows (${winList.length}):</b>`;
+		row.appendChild(hdr);
+
+		if (winList.length === 0) {
+			const emptyMsg = document.createElement('div');
+			emptyMsg.textContent = "No active application windows on the desktop.";
+			row.appendChild(emptyMsg);
+		} else {
+			const listContainer = document.createElement('div');
+			listContainer.className = 'clippy-win-list';
+
+			winList.forEach(w => {
+				const item = document.createElement('div');
+				item.className = 'clippy-win-item';
+				const title = w.querySelector('.xp-window-header .title')?.textContent || 'Window';
+				const icon = w.querySelector('.xp-window-header img')?.src || '../assets/images/desk/icons/File.webp';
+				const isMin = w.classList.contains('minimized');
+
+				item.innerHTML = `
+					<img src="${icon}" class="clippy-win-icon" alt="">
+					<span class="clippy-win-title">${title} ${isMin ? '(Minimized)' : ''}</span>
+				`;
+
+				const focusBtn = document.createElement('button');
+				focusBtn.type = 'button';
+				focusBtn.className = 'clippy-action-btn';
+				focusBtn.textContent = isMin ? 'Restore' : 'Focus';
+				focusBtn.addEventListener('click', () => {
+					window.ClippySystemBridge.focusWindow(w.id);
+				});
+				item.appendChild(focusBtn);
+
+				const closeBtn = document.createElement('button');
+				closeBtn.type = 'button';
+				closeBtn.className = 'clippy-action-btn';
+				closeBtn.textContent = 'Close';
+				closeBtn.addEventListener('click', () => {
+					if (window.WindowManager) window.WindowManager.close(w, w.id);
+					renderActiveWindowsList();
+				});
+				item.appendChild(closeBtn);
+
+				listContainer.appendChild(item);
+			});
+
+			row.appendChild(listContainer);
+		}
+
+		const btnBar = document.createElement('div');
+		btnBar.className = 'clippy-actions-bar';
+
+		const minAllBtn = document.createElement('button');
+		minAllBtn.type = 'button';
+		minAllBtn.className = 'clippy-action-btn';
+		minAllBtn.textContent = 'Minimize All';
+		minAllBtn.addEventListener('click', () => {
+			window.ClippySystemBridge.minimizeAllWindows();
+			window.ClippyUI.appendAssistantMessage("All windows minimized.");
+		});
+		btnBar.appendChild(minAllBtn);
+
+		const cascadeBtn = document.createElement('button');
+		cascadeBtn.type = 'button';
+		cascadeBtn.className = 'clippy-action-btn';
+		cascadeBtn.textContent = 'Cascade';
+		cascadeBtn.addEventListener('click', () => {
+			window.ClippySystemBridge.cascadeWindows();
+			window.ClippyUI.appendAssistantMessage("Windows cascaded.");
+		});
+		btnBar.appendChild(cascadeBtn);
+
+		row.appendChild(btnBar);
+		window.ClippyUI.logElement.appendChild(row);
+		window.ClippyUI.scrollLogToBottom();
 	}
 
 	function startTicTacToe() {

@@ -184,6 +184,235 @@
 			return false;
 		},
 
+		focusWindow(windowIdOrTitle) {
+			try {
+				if (!windowIdOrTitle) return false;
+				const win = document.getElementById(windowIdOrTitle) || Array.from(document.querySelectorAll('.xp-window')).find(w => {
+					const title = w.querySelector('.xp-window-header .title')?.textContent || '';
+					return title.toLowerCase().includes(String(windowIdOrTitle).toLowerCase());
+				});
+				if (win && window.WindowManager) {
+					if (win.classList.contains('minimized')) window.WindowManager.unminimize(win);
+					window.WindowManager.bringToFront(win);
+					return true;
+				}
+			} catch (e) {}
+			return false;
+		},
+
+		cascadeWindows() {
+			try {
+				if (window.WindowManager && typeof window.WindowManager.cascade === 'function') {
+					window.WindowManager.cascade();
+					return true;
+				}
+			} catch (e) {}
+			return false;
+		},
+
+		tileWindows(horizontal = true) {
+			try {
+				if (window.WindowManager && typeof window.WindowManager.tile === 'function') {
+					window.WindowManager.tile(horizontal);
+					return true;
+				}
+			} catch (e) {}
+			return false;
+		},
+
+		setTheme(themeName) {
+			try {
+				if (window.SettingsApp && typeof window.SettingsApp.set === 'function') {
+					window.SettingsApp.set('theme', themeName);
+					return true;
+				}
+			} catch (e) {}
+			return false;
+		},
+
+		setWallpaper(path) {
+			try {
+				if (typeof window.setImageAsWallpaper === 'function') {
+					window.setImageAsWallpaper(path);
+					return true;
+				}
+			} catch (e) {}
+			return false;
+		},
+
+		toggleScanlines(enabled) {
+			try {
+				if (window.SettingsApp && typeof window.SettingsApp.set === 'function') {
+					const val = enabled !== undefined ? !!enabled : !window.SettingsApp.get('scanlinesEnabled');
+					window.SettingsApp.set('scanlinesEnabled', val);
+					return val;
+				}
+			} catch (e) {}
+			return false;
+		},
+
+		toggleCrt(enabled) {
+			try {
+				if (window.SettingsApp && typeof window.SettingsApp.set === 'function') {
+					const val = enabled !== undefined ? !!enabled : !window.SettingsApp.get('crtCurvatureEnabled');
+					window.SettingsApp.set('crtCurvatureEnabled', val);
+					return val;
+				}
+			} catch (e) {}
+			return false;
+		},
+
+		searchFiles(query) {
+			try {
+				if (typeof fs !== 'undefined' && fs && typeof fs.search === 'function') {
+					return fs.search(query);
+				}
+			} catch (e) {}
+			return [];
+		},
+
+		listDesktopFiles() {
+			try {
+				if (typeof fs !== 'undefined' && fs && fs.root) {
+					return fs.root.listContent().map(el => ({
+						name: el.name,
+						type: el instanceof Folder ? 'folder' : 'file',
+						path: el.getFullPath(),
+						icon: el.icon,
+						size: el.size || 0,
+						modifiedAt: el.modifiedAt || el.createdAt
+					}));
+				}
+			} catch (e) {}
+			return [];
+		},
+
+		readVFSFile(path) {
+			try {
+				if (typeof fs !== 'undefined' && fs) {
+					const el = fs.findByPath(path);
+					if (el && el instanceof File) {
+						return el.content || '';
+					}
+				}
+			} catch (e) {}
+			return null;
+		},
+
+		createDesktopFile(name, content = '') {
+			try {
+				if (typeof fs !== 'undefined' && fs) {
+					const f = fs.create('File', '/', name, { content });
+					if (typeof refreshUI === 'function') refreshUI();
+					return f;
+				}
+			} catch (e) {}
+			return null;
+		},
+
+		deleteVFSFile(path) {
+			try {
+				if (typeof fs !== 'undefined' && fs) {
+					fs.moveToRecycleBin(path);
+					if (typeof refreshUI === 'function') refreshUI();
+					return true;
+				}
+			} catch (e) {}
+			return false;
+		},
+
+		getAchievementsSummary() {
+			try {
+				if (window.AchievementsManager && typeof window.AchievementsManager.getAll === 'function') {
+					const list = window.AchievementsManager.getAll();
+					const unlocked = list.filter(a => a.unlocked);
+					return {
+						total: list.length,
+						unlockedCount: unlocked.length,
+						percentage: list.length > 0 ? Math.round((unlocked.length / list.length) * 100) : 0,
+						unlocked,
+						locked: list.filter(a => !a.unlocked)
+					};
+				}
+			} catch (e) {}
+			return { total: 0, unlockedCount: 0, percentage: 0, unlocked: [], locked: [] };
+		},
+
+		getUserProfile() {
+			const userName = (window.SettingsApp && window.SettingsApp.get('userName')) || 'Colin B.R.';
+			const userJobTitle = (window.SettingsApp && window.SettingsApp.get('userJobTitle')) || 'Student';
+			const userAvatar = (window.SettingsApp && window.SettingsApp.get('userAvatar')) || '../assets/images/desk/icons/User 1.webp';
+			const avatarShape = (window.SettingsApp && window.SettingsApp.get('userAvatarShape')) || 'square';
+			const theme = (window.SettingsApp && window.SettingsApp.get('theme')) || 'luna-blue';
+			return { userName, userJobTitle, userAvatar, avatarShape, theme };
+		},
+
+		getMusicTracks() {
+			try {
+				if (window.MusicStore && Array.isArray(window.MusicStore.tracks)) {
+					return window.MusicStore.tracks;
+				}
+			} catch (e) {}
+			return [];
+		},
+
+		playTrackIndex(index) {
+			try {
+				if (window.MediaPlayerApp && typeof window.MediaPlayerApp.open === 'function') {
+					const tracks = this.getMusicTracks();
+					if (tracks[index]) {
+						window.MediaPlayerApp.open(tracks[index]);
+						return tracks[index];
+					}
+				}
+			} catch (e) {}
+			return null;
+		},
+
+		getAvailableWallpapers() {
+			try {
+				if (typeof fetchWallpaperRegistry === 'function') {
+					return fetchWallpaperRegistry();
+				}
+			} catch (e) {}
+			return Promise.resolve([]);
+		},
+
+		getSetting(key) {
+			try {
+				if (window.SettingsApp && typeof window.SettingsApp.get === 'function') {
+					return window.SettingsApp.get(key);
+				}
+			} catch (e) {}
+			return undefined;
+		},
+
+		setSetting(key, val) {
+			try {
+				if (window.SettingsApp && typeof window.SettingsApp.set === 'function') {
+					window.SettingsApp.set(key, val);
+					return true;
+				}
+			} catch (e) {}
+			return false;
+		},
+
+		restoreAllWindows() {
+			try {
+				if (window.WindowManager && typeof window.WindowManager.restoreAll === 'function') {
+					window.WindowManager.restoreAll();
+					return;
+				}
+				if (typeof openWindows !== 'undefined') {
+					Object.values(openWindows).forEach(win => {
+						if (win && win.classList.contains('minimized') && typeof unminimizeWindow === 'function') {
+							unminimizeWindow(win);
+						}
+					});
+				}
+			} catch (e) {}
+		},
+
 		launchApp(appId, args = {}) {
 			try {
 				if (window.DeskAppRegistry && typeof window.DeskAppRegistry.launch === 'function') {

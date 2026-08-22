@@ -368,6 +368,28 @@
 				]
 			},
 
+			who_am_i_node: {
+				id: 'who_am_i_node',
+				text: "Inspecting workstation user credentials and identity register...",
+				actionTrigger: 'action_profile',
+				options: [
+					{ label: "View my achievements and trophies.", category: 'SERIOUS', actionTrigger: 'action_achievements', next: 'user_state_good' },
+					{ label: "Configure system colors and themes.", category: 'SERIOUS', actionTrigger: 'action_theme_panel', next: 'user_state_good' },
+					{ label: "Return to main dialogue.", category: 'AGREE', next: 'greeting_root' }
+				]
+			},
+
+			clippy_feeling_node: {
+				id: 'clippy_feeling_node',
+				text: "Analyzing internal cognitive state, mood heuristics, and battery matrix...",
+				actionTrigger: 'pet_status',
+				options: [
+					{ label: "Supply paperclips for maintenance.", category: 'SERIOUS', actionTrigger: 'pet_feed', next: 'user_state_good' },
+					{ label: "Polish wire coils.", category: 'SERIOUS', actionTrigger: 'pet_polish', next: 'user_state_good' },
+					{ label: "Let's work on productive tasks.", category: 'SERIOUS', actionTrigger: 'show_todos', next: 'user_state_good' }
+				]
+			},
+
 			physics_constants_node: {
 				id: 'physics_constants_node',
 				text: "CODATA 2018/2022 Standards:\n- c = 299,792,458 m/s (exact)\n- h = 6.62607015 x 10^-34 J s (exact)\n- hbar = 1.054571817 x 10^-34 J s\n- e = 1.602176634 x 10^-19 C (exact)\n- k_B = 1.380649 x 10^-23 J/K (exact)\n- G = 6.67430(15) x 10^-11 m^3/(kg s^2)\n- alpha = 1 / 137.035999206\nAll loaded in workstation memory!",
@@ -450,6 +472,36 @@
 				options: [
 					{ label: "Deliver a retro computing fact.", category: 'INQUIRE', actionTrigger: 'action_trivia', next: 'user_state_good' },
 					{ label: "Return to productivity.", category: 'SERIOUS', next: 'productivity_tasks' }
+				]
+			},
+
+			quantum_recycle_bin_node: {
+				id: 'quantum_recycle_bin_node',
+				text: "According to Landauer's principle, erasing information dissipates heat: Q = k_B * T * ln(2). When you empty the Recycle Bin, entropy increases across the universe. Deleted files exist in a superposition of unallocated disk sectors until overwritten.",
+				options: [
+					{ label: "Inspect Recycle Bin contents right now.", category: 'SERIOUS', actionTrigger: 'action_inspect_bin', next: 'user_state_good' },
+					{ label: "Tell me about fundamental physical constants (c, h, G).", category: 'INQUIRE', next: 'physics_constants_node' },
+					{ label: "Back to workspace tools.", category: 'SERIOUS', next: 'tools_overview_node' }
+				]
+			},
+
+			cosmos_space_node: {
+				id: 'cosmos_space_node',
+				text: "The observable universe spans 93 billion light-years across, containing over 2 trillion galaxies. Photons emitted by early stars have traveled across spacetime to reach our optical sensors. The vacuum itself boils with virtual particle-antiparticle pairs due to quantum fluctuations.",
+				options: [
+					{ label: "Evaluate speed of light c.", category: 'INQUIRE', actionTrigger: 'action_constant_c', next: 'user_state_good' },
+					{ label: "Evaluate Planck constant h.", category: 'INQUIRE', actionTrigger: 'action_constant_h', next: 'user_state_good' },
+					{ label: "Return to workspace overview.", category: 'AGREE', next: 'user_state_good' }
+				]
+			},
+
+			active_windows_node: {
+				id: 'active_windows_node',
+				text: "The Windows XP multitasking scheduler is maintaining active process threads across the virtual desktop workspace.",
+				options: [
+					{ label: "Inspect running workspace processes.", category: 'SERIOUS', actionTrigger: 'action_inspect_windows', next: 'user_state_good' },
+					{ label: "Minimize all active windows.", category: 'SERIOUS', actionTrigger: 'action_show_desktop', next: 'user_state_good' },
+					{ label: "Cascade windows diagonally.", category: 'SERIOUS', actionTrigger: 'action_cascade_windows', next: 'user_state_good' }
 				]
 			}
 		}

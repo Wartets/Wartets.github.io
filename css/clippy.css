@@ -677,3 +677,145 @@
 .clippy-pet-bar-fill.happiness {
 	background: linear-gradient(to right, #06b6d4, #3b82f6);
 }
+
+.clippy-win-list {
+	margin-top: 6px;
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+	background: #ffffff;
+	border: 1px inset #d4d0c8;
+	padding: 4px;
+	border-radius: 3px;
+	max-height: 180px;
+	overflow-y: auto;
+}
+
+.clippy-win-item {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	padding: 3px 4px;
+	border-bottom: 1px dotted #e2e8f0;
+	font-size: 11px;
+}
+
+.clippy-win-item:last-child {
+	border-bottom: none;
+}
+
+.clippy-win-icon {
+	width: 16px;
+	height: 16px;
+	object-fit: contain;
+}
+
+.clippy-win-title {
+	flex: 1;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+.clippy-profile-card {
+	background: #ffffff;
+	border: 1px solid #c8c4a0;
+	border-radius: 4px;
+	padding: 8px;
+	margin: 6px 0;
+	display: flex;
+	flex-direction: column;
+	gap: 6px;
+}
+
+.clippy-profile-header {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+}
+
+.clippy-profile-avatar {
+	width: 36px;
+	height: 36px;
+	object-fit: cover;
+	border: 1px solid #7f9db9;
+	background: #ece9d8;
+}
+
+.clippy-profile-avatar.circle {
+	border-radius: 50%;
+}
+
+.clippy-profile-avatar.round {
+	border-radius: 6px;
+}
+
+.clippy-profile-info {
+	display: flex;
+	flex-direction: column;
+	font-size: 11px;
+}
+
+.clippy-profile-stats {
+	border-top: 1px dotted #d0cbae;
+	padding-top: 5px;
+	font-size: 11px;
+}
+
+.clippy-profile-stat-row {
+	display: flex;
+	justify-content: space-between;
+	margin-bottom: 3px;
+}
+
+.clippy-ach-progress-bar {
+	height: 8px;
+	background: #e2e8f0;
+	border: 1px inset #cbd5e1;
+	border-radius: 2px;
+	overflow: hidden;
+}
+
+.clippy-ach-progress-fill {
+	height: 100%;
+	background: linear-gradient(to right, #3b82f6, #10b981);
+	transition: width 0.25s ease;
+}
+
+.clippy-ach-list {
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+	margin-top: 6px;
+}
+
+.clippy-ach-item {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	padding: 4px;
+	border: 1px dotted #d0cbae;
+	background: #ffffff;
+	border-radius: 3px;
+	font-size: 11px;
+}
+
+.clippy-ach-item img {
+	width: 20px;
+	height: 20px;
+	object-fit: contain;
+}
+
+.clippy-music-card {
+	background: #ffffff;
+	border: 1px solid #c8c4a0;
+	border-radius: 4px;
+	padding: 8px;
+	margin: 6px 0;
+}
+
+.clippy-music-header {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+}
