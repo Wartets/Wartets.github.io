@@ -819,3 +819,105 @@
 	align-items: center;
 	gap: 8px;
 }
+
+.clippy-file-list {
+	margin-top: 6px;
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+	background: #ffffff;
+	border: 1px inset #d4d0c8;
+	padding: 4px;
+	border-radius: 3px;
+	max-height: 180px;
+	overflow-y: auto;
+}
+
+.clippy-file-item {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	padding: 3px 4px;
+	border-bottom: 1px dotted #e2e8f0;
+	font-size: 11px;
+}
+
+.clippy-file-item:last-child {
+	border-bottom: none;
+}
+
+.clippy-file-icon {
+	width: 16px;
+	height: 16px;
+	object-fit: contain;
+}
+
+.clippy-file-name {
+	flex: 1;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+.clippy-mail-list {
+	margin-top: 6px;
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+	background: #ffffff;
+	border: 1px inset #d4d0c8;
+	padding: 4px;
+	border-radius: 3px;
+	max-height: 180px;
+	overflow-y: auto;
+}
+
+.clippy-mail-item {
+	display: flex;
+	flex-direction: column;
+	gap: 2px;
+	padding: 4px 6px;
+	border-bottom: 1px dotted #cbd5e1;
+	font-size: 11px;
+	cursor: pointer;
+}
+
+.clippy-mail-item:hover {
+	background: #eaf2ff;
+}
+
+.clippy-mail-item.unread {
+	font-weight: bold;
+	background: #fdfae5;
+}
+
+.clippy-mail-header {
+	display: flex;
+	justify-content: space-between;
+	font-size: 11px;
+}
+
+.clippy-mail-date {
+	font-size: 10px;
+	color: #64748b;
+	font-weight: normal;
+}
+
+.clippy-mail-subj {
+	font-size: 11px;
+	color: #1e293b;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+.clippy-slider-control {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	margin: 6px 0;
+	background: #ffffff;
+	border: 1px inset #d4d0c8;
+	padding: 6px 8px;
+	border-radius: 3px;
+}

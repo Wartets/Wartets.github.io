@@ -4,6 +4,28 @@
 	class NaturalLanguageProcessor {
 		constructor() {
 			this.knowledge = window.ClippyKnowledge || {};
+			this.appAliases = {
+				'calculator': ['calc', 'calculator', 'calculatrice', 'calc.exe'],
+				'paint': ['paint', 'mspaint', 'mspaint.exe', 'drawing', 'dessin', 'pbrush'],
+				'notepad': ['notepad', 'text editor', 'notes', 'editeur', 'notepad.exe'],
+				'cmd': ['cmd', 'command prompt', 'terminal', 'console', 'invite de commandes', 'cmd.exe'],
+				'ie': ['ie', 'internet explorer', 'browser', 'web', 'navigateur', 'iexplore'],
+				'outlook': ['outlook', 'outlook express', 'mail', 'email', 'e-mail', 'courrier', 'inbox', 'boite de reception'],
+				'winamp': ['winamp', 'winamp player', 'retro player'],
+				'mediaplayer': ['mediaplayer', 'media player', 'windows media player', 'wmp', 'lecteur media'],
+				'minesweeper': ['minesweeper', 'demineur', 'mine', 'mines', 'winmine'],
+				'solitaire': ['solitaire', 'cards', 'cartes', 'klondike', 'patience'],
+				'settings': ['settings', 'control panel', 'panneau de configuration', 'preferences', 'configuration', 'config'],
+				'display': ['display', 'display properties', 'affichage', 'wallpapers', 'fonds d ecran', 'wallpaper', 'screensaver'],
+				'mycomputer': ['mycomputer', 'my computer', 'poste de travail', 'ordinateur', 'drives'],
+				'recyclebin': ['recyclebin', 'recycle bin', 'corbeille', 'trash', 'poubelle'],
+				'achievements': ['achievements', 'trophies', 'milestones', 'succes', 'trophees', 'exploits'],
+				'projects': ['projects', 'portfolio', 'showcase', 'mes projets', 'projets'],
+				'soundrecorder': ['soundrecorder', 'sound recorder', 'enregistreur audio', 'dictaphone'],
+				'charmap': ['charmap', 'character map', 'table des caracteres', 'symboles', 'symbols'],
+				'encarta': ['encarta', 'encarta globe', 'globe', 'atlas', 'world map', 'mappemonde'],
+				'taskmgr': ['taskmgr', 'task manager', 'gestionnaire des taches', 'processes', 'processus']
+			};
 		}
 
 		expandContractions(text) {
@@ -130,7 +152,10 @@
 				hardware: [],
 				physics: [],
 				math: [],
-				philosophy: []
+				philosophy: [],
+				app: null,
+				theme: null,
+				action: null
 			};
 
 			const textLower = text.toLowerCase();
@@ -144,7 +169,104 @@
 				}
 			}
 
+			for (const [appId, aliases] of Object.entries(this.appAliases)) {
+				for (const alias of aliases) {
+					const reg = new RegExp(`\\b${alias.replace('.', '\\.')}\\b`, 'i');
+					if (reg.test(textLower)) {
+						found.app = appId;
+						break;
+					}
+				}
+				if (found.app) break;
+			}
+
+			const themes = ['luna-blue', 'royale', 'silver', 'olive', 'classic', 'zune', 'noir', 'matrix', 'high-contrast'];
+			for (const t of themes) {
+				if (textLower.includes(t)) {
+					found.theme = t;
+					break;
+				}
+			}
+
 			return found;
+		}
+
+		classifyIntent(rawText, entities) {
+			const norm = rawText.toLowerCase().trim();
+
+			if (/^(exit|quit|cancel|stop|menu|back|annuler|quitter)\b/i.test(norm)) {
+				return { type: 'CANCEL', confidence: 1.0 };
+			}
+
+			if (/^(open|launch|start|demarre|ouvre|lancer|ouvrir)\b/i.test(norm) || entities.app) {
+				return { type: 'APP_LAUNCH', targetApp: entities.app, confidence: 0.9 };
+			}
+
+			if (/^(theme|set theme|changer de theme)\b/i.test(norm) || entities.theme) {
+				return { type: 'THEME_CHANGE', targetTheme: entities.theme, confidence: 0.9 };
+			}
+
+			if (/\b(wallpaper|wallpapers|background|fond d ecran|arriere-plan)\b/i.test(norm)) {
+				return { type: 'WALLPAPER_CONTROL', confidence: 0.85 };
+			}
+
+			if (/\b(music|song|track|audio|chanson|musique|mp3)\b/i.test(norm)) {
+				return { type: 'MEDIA_CONTROL', confidence: 0.85 };
+			}
+
+			if (/\b(mail|email|e-mail|courrier|inbox|messages|message)\b/i.test(norm)) {
+				return { type: 'MAIL_CONTROL', confidence: 0.85 };
+			}
+
+			if (/\b(window|windows|fenetre|fenetres|process|taches|processes)\b/i.test(norm)) {
+				return { type: 'WINDOW_CONTROL', confidence: 0.85 };
+			}
+
+			if (/\b(file|files|folder|folders|fichier|fichiers|dossier|dossiers|vfs)\b/i.test(norm)) {
+				return { type: 'FILE_CONTROL', confidence: 0.85 };
+			}
+
+			if (/\b(todo|task|tasks|tache|taches|liste)\b/i.test(norm)) {
+				return { type: 'TODO_CONTROL', confidence: 0.9 };
+			}
+
+			if (/\b(note|memo|scratchpad|bloc-notes)\b/i.test(norm)) {
+				return { type: 'NOTE_CONTROL', confidence: 0.9 };
+			}
+
+			if (/\b(timer|pomodoro|minuteur|chrono)\b/i.test(norm)) {
+				return { type: 'TIMER_CONTROL', confidence: 0.9 };
+			}
+
+			if (/\b(calc|calculate|evaluate|compute|calculer)\b/i.test(norm) || /^[\d\s\+\-\*\/\(\)\.\^\%]+$/.test(norm)) {
+				return { type: 'CALC_CONTROL', confidence: 0.95 };
+			}
+
+			if (/\b(convert|conversion|vers|into|en)\b/i.test(norm)) {
+				return { type: 'UNIT_CONVERT', confidence: 0.9 };
+			}
+
+			if (/\b(joke|blague|humour|funny)\b/i.test(norm)) {
+				return { type: 'JOKE_REQUEST', confidence: 0.95 };
+			}
+
+			if (/\b(trivia|fact|anecdote|histoire|histoire retro)\b/i.test(norm)) {
+				return { type: 'TRIVIA_REQUEST', confidence: 0.9 };
+			}
+
+			if (/\b(game|play|jeu|jouer|tictactoe|morpion|memory|hangman|pendu|quiz)\b/i.test(norm)) {
+				return { type: 'GAME_CONTROL', confidence: 0.9 };
+			}
+
+			if (/\b(diagnostics|diagnostic|specs|specs systeme|status|statut|specs)\b/i.test(norm)) {
+				return { type: 'DIAGNOSTICS', confidence: 0.95 };
+			}
+
+			if (/\b(who am i|qui suis-je|mon profil|profile|identity|identite)\b/i.test(norm)) {
+				return { type: 'USER_PROFILE', confidence: 0.95 };
+			}
+
+			return { type: 'GENERAL_CHAT', confidence: 0.5 };
 		}
 
 		classifySyntax(text) {
@@ -165,7 +287,8 @@
 					tokens: [],
 					stems: [],
 					sentiment: { score: 0, rawSum: 0, hitCount: 0, isPositive: false, isNegative: false },
-					entities: { os: [], hardware: [], physics: [], math: [], philosophy: [] },
+					entities: { os: [], hardware: [], physics: [], math: [], philosophy: [], app: null, theme: null, action: null },
+					intent: { type: 'GENERAL_CHAT', confidence: 0.5 },
 					syntaxType: 'DECLARATIVE'
 				};
 			}
@@ -175,6 +298,7 @@
 			const stems = correctedTokens.map(t => this.stem(t));
 			const sentiment = this.analyzeSentiment(correctedTokens);
 			const entities = this.extractEntities(rawText, correctedTokens);
+			const intent = this.classifyIntent(rawText, entities);
 			const syntaxType = this.classifySyntax(rawText);
 
 			return {
@@ -184,6 +308,7 @@
 				stems,
 				sentiment,
 				entities,
+				intent,
 				syntaxType
 			};
 		}

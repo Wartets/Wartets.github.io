@@ -16,6 +16,47 @@
 			return 0;
 		},
 
+		getMailFolders() {
+			try {
+				if (window.MailStore && typeof window.MailStore.getFolders === 'function') {
+					return window.MailStore.getFolders();
+				}
+			} catch (e) {}
+			return [];
+		},
+
+		getMailMessages(folderId = 'inbox') {
+			try {
+				if (window.MailStore && typeof window.MailStore.getMessages === 'function') {
+					return window.MailStore.getMessages(folderId);
+				}
+			} catch (e) {}
+			return [];
+		},
+
+		sendMail(to, subject, body) {
+			try {
+				if (window.MailStore && typeof window.MailStore.sendMessage === 'function') {
+					window.MailStore.sendMessage({ to, subject, body });
+					if (window.AchievementsManager) {
+						window.AchievementsManager.progress('mail_sender', 1);
+					}
+					return true;
+				}
+			} catch (e) {}
+			return false;
+		},
+
+		markMailRead(messageId, read = true) {
+			try {
+				if (window.MailStore && typeof window.MailStore.markRead === 'function') {
+					window.MailStore.markRead(messageId, read);
+					return true;
+				}
+			} catch (e) {}
+			return false;
+		},
+
 		getRandomProject() {
 			try {
 				if (window.DeskAPI && typeof window.DeskAPI.getRandomProject === 'function') {
@@ -39,6 +80,17 @@
 				}
 			} catch (e) {}
 			return [];
+		},
+
+		searchProjects(keyword) {
+			const q = String(keyword || '').toLowerCase().trim();
+			if (!q) return this.getAllProjects();
+			return this.getAllProjects().filter(p => {
+				const title = (typeof p.title === 'object' ? (p.title.en || p.title.fr || '') : String(p.title || '')).toLowerCase();
+				const desc = (typeof p.description === 'object' ? (p.description.en || p.description.fr || '') : String(p.description || '')).toLowerCase();
+				const kw = Array.isArray(p.keywords) ? p.keywords.join(' ').toLowerCase() : '';
+				return title.includes(q) || desc.includes(q) || kw.includes(q);
+			});
 		},
 
 		getDesktopItemCount() {
@@ -105,6 +157,18 @@
 			return [];
 		},
 
+		getOpenWindowDetails() {
+			const map = (window.WindowManager && window.WindowManager.windows) ? window.WindowManager.windows : (typeof openWindows !== 'undefined' ? openWindows : {});
+			return Object.entries(map).map(([id, win]) => ({
+				id,
+				title: win.querySelector('.xp-window-header .title')?.textContent || 'Window',
+				icon: win.querySelector('.xp-window-header img')?.src || '../assets/images/desk/icons/File.webp',
+				isMinimized: win.classList.contains('minimized'),
+				isMaximized: win.classList.contains('maximized'),
+				isActive: typeof activeWindow !== 'undefined' && activeWindow === win
+			}));
+		},
+
 		closeAllWindows() {
 			try {
 				if (window.DeskAPI && typeof window.DeskAPI.closeAllWindows === 'function') {
@@ -127,6 +191,88 @@
 					window.WindowManager.minimizeAll();
 				}
 			} catch (e) {}
+		},
+
+		restoreAllWindows() {
+			try {
+				if (window.WindowManager && typeof window.WindowManager.restoreAll === 'function') {
+					window.WindowManager.restoreAll();
+					return;
+				}
+				if (typeof openWindows !== 'undefined') {
+					Object.values(openWindows).forEach(win => {
+						if (win && win.classList.contains('minimized') && typeof unminimizeWindow === 'function') {
+							unminimizeWindow(win);
+						}
+					});
+				}
+			} catch (e) {}
+		},
+
+		focusWindow(windowIdOrTitle) {
+			try {
+				if (!windowIdOrTitle) return false;
+				const win = document.getElementById(windowIdOrTitle) || Array.from(document.querySelectorAll('.xp-window')).find(w => {
+					const title = w.querySelector('.xp-window-header .title')?.textContent || '';
+					return title.toLowerCase().includes(String(windowIdOrTitle).toLowerCase());
+				});
+				if (win && window.WindowManager) {
+					if (win.classList.contains('minimized')) window.WindowManager.unminimize(win);
+					window.WindowManager.bringToFront(win);
+					return true;
+				}
+			} catch (e) {}
+			return false;
+		},
+
+		closeWindow(windowIdOrTitle) {
+			try {
+				if (!windowIdOrTitle) return false;
+				const win = document.getElementById(windowIdOrTitle) || Array.from(document.querySelectorAll('.xp-window')).find(w => {
+					const title = w.querySelector('.xp-window-header .title')?.textContent || '';
+					return title.toLowerCase().includes(String(windowIdOrTitle).toLowerCase());
+				});
+				if (win && window.WindowManager) {
+					window.WindowManager.close(win, win.id);
+					return true;
+				}
+			} catch (e) {}
+			return false;
+		},
+
+		maximizeWindow(windowIdOrTitle) {
+			try {
+				if (!windowIdOrTitle) return false;
+				const win = document.getElementById(windowIdOrTitle) || Array.from(document.querySelectorAll('.xp-window')).find(w => {
+					const title = w.querySelector('.xp-window-header .title')?.textContent || '';
+					return title.toLowerCase().includes(String(windowIdOrTitle).toLowerCase());
+				});
+				if (win && window.WindowManager) {
+					window.WindowManager.maximize(win);
+					return true;
+				}
+			} catch (e) {}
+			return false;
+		},
+
+		cascadeWindows() {
+			try {
+				if (window.WindowManager && typeof window.WindowManager.cascade === 'function') {
+					window.WindowManager.cascade();
+					return true;
+				}
+			} catch (e) {}
+			return false;
+		},
+
+		tileWindows(horizontal = true) {
+			try {
+				if (window.WindowManager && typeof window.WindowManager.tile === 'function') {
+					window.WindowManager.tile(horizontal);
+					return true;
+				}
+			} catch (e) {}
+			return false;
 		},
 
 		getMoonPhaseDay() {
@@ -184,40 +330,47 @@
 			return false;
 		},
 
-		focusWindow(windowIdOrTitle) {
+		prevMusicTrack() {
 			try {
-				if (!windowIdOrTitle) return false;
-				const win = document.getElementById(windowIdOrTitle) || Array.from(document.querySelectorAll('.xp-window')).find(w => {
-					const title = w.querySelector('.xp-window-header .title')?.textContent || '';
-					return title.toLowerCase().includes(String(windowIdOrTitle).toLowerCase());
-				});
-				if (win && window.WindowManager) {
-					if (win.classList.contains('minimized')) window.WindowManager.unminimize(win);
-					window.WindowManager.bringToFront(win);
+				if (window.MediaPlayerApp && typeof window.MediaPlayerApp.playPrevious === 'function') {
+					window.MediaPlayerApp.playPrevious();
 					return true;
 				}
 			} catch (e) {}
 			return false;
 		},
 
-		cascadeWindows() {
+		getMusicTracks() {
 			try {
-				if (window.WindowManager && typeof window.WindowManager.cascade === 'function') {
-					window.WindowManager.cascade();
-					return true;
+				if (window.MusicStore && Array.isArray(window.MusicStore.tracks)) {
+					return window.MusicStore.tracks;
 				}
 			} catch (e) {}
-			return false;
+			return [];
 		},
 
-		tileWindows(horizontal = true) {
+		playTrackIndex(index) {
 			try {
-				if (window.WindowManager && typeof window.WindowManager.tile === 'function') {
-					window.WindowManager.tile(horizontal);
-					return true;
+				if (window.MediaPlayerApp && typeof window.MediaPlayerApp.open === 'function') {
+					const tracks = this.getMusicTracks();
+					if (tracks[index]) {
+						window.MediaPlayerApp.open(tracks[index]);
+						return tracks[index];
+					}
 				}
 			} catch (e) {}
-			return false;
+			return null;
+		},
+
+		playTrackByName(name) {
+			const tracks = this.getMusicTracks();
+			const q = String(name || '').toLowerCase();
+			const match = tracks.find(t => (t.title || '').toLowerCase().includes(q) || (t.artist || '').toLowerCase().includes(q));
+			if (match && window.MediaPlayerApp) {
+				window.MediaPlayerApp.open(match);
+				return match;
+			}
+			return null;
 		},
 
 		setTheme(themeName) {
@@ -230,14 +383,27 @@
 			return false;
 		},
 
-		setWallpaper(path) {
+		getAvailableThemes() {
+			return ['luna-blue', 'royale', 'silver', 'olive', 'classic', 'zune', 'noir', 'matrix', 'high-contrast'];
+		},
+
+		setWallpaper(path, fit = 'cover') {
 			try {
 				if (typeof window.setImageAsWallpaper === 'function') {
-					window.setImageAsWallpaper(path);
+					window.setImageAsWallpaper(path, fit);
 					return true;
 				}
 			} catch (e) {}
 			return false;
+		},
+
+		getAvailableWallpapers() {
+			try {
+				if (typeof fetchWallpaperRegistry === 'function') {
+					return fetchWallpaperRegistry();
+				}
+			} catch (e) {}
+			return Promise.resolve([]);
 		},
 
 		toggleScanlines(enabled) {
@@ -262,6 +428,30 @@
 			return false;
 		},
 
+		getVolume() {
+			return (window.SettingsApp && window.SettingsApp.get('soundVolume')) !== undefined ? window.SettingsApp.get('soundVolume') : 0.7;
+		},
+
+		setVolume(val) {
+			const clamped = Math.max(0, Math.min(1, parseFloat(val)));
+			if (!isNaN(clamped) && window.SettingsApp) {
+				window.SettingsApp.set('soundVolume', clamped);
+				return clamped;
+			}
+			return this.getVolume();
+		},
+
+		isMuted() {
+			return !(window.SettingsApp && window.SettingsApp.get('soundEnabled'));
+		},
+
+		toggleMute(mute = null) {
+			if (!window.SettingsApp) return false;
+			const nextState = mute !== null ? !mute : !window.SettingsApp.get('soundEnabled');
+			window.SettingsApp.set('soundEnabled', nextState);
+			return !nextState;
+		},
+
 		searchFiles(query) {
 			try {
 				if (typeof fs !== 'undefined' && fs && typeof fs.search === 'function') {
@@ -271,20 +461,27 @@
 			return [];
 		},
 
-		listDesktopFiles() {
+		listFiles(path = '/') {
 			try {
-				if (typeof fs !== 'undefined' && fs && fs.root) {
-					return fs.root.listContent().map(el => ({
-						name: el.name,
-						type: el instanceof Folder ? 'folder' : 'file',
-						path: el.getFullPath(),
-						icon: el.icon,
-						size: el.size || 0,
-						modifiedAt: el.modifiedAt || el.createdAt
-					}));
+				if (typeof fs !== 'undefined' && fs) {
+					const folder = fs.findByPath(path) || fs.root;
+					if (folder && folder instanceof Folder) {
+						return folder.listContent().map(el => ({
+							name: el.name,
+							type: el instanceof Folder ? 'folder' : (el instanceof Shortcut ? 'shortcut' : (el instanceof ProjectFile ? 'project' : 'file')),
+							path: el.getFullPath(),
+							icon: el.icon,
+							size: el.size || 0,
+							modifiedAt: el.modifiedAt || el.createdAt
+						}));
+					}
 				}
 			} catch (e) {}
 			return [];
+		},
+
+		listDesktopFiles() {
+			return this.listFiles('/');
 		},
 
 		readVFSFile(path) {
@@ -299,15 +496,19 @@
 			return null;
 		},
 
-		createDesktopFile(name, content = '') {
+		createFile(path, name, content = '') {
 			try {
 				if (typeof fs !== 'undefined' && fs) {
-					const f = fs.create('File', '/', name, { content });
+					const f = fs.create('File', path || '/', name, { content });
 					if (typeof refreshUI === 'function') refreshUI();
 					return f;
 				}
 			} catch (e) {}
 			return null;
+		},
+
+		createDesktopFile(name, content = '') {
+			return this.createFile('/', name, content);
 		},
 
 		deleteVFSFile(path) {
@@ -338,6 +539,10 @@
 			return { total: 0, unlockedCount: 0, percentage: 0, unlocked: [], locked: [] };
 		},
 
+		getAchievementsDetailed() {
+			return (window.AchievementsManager && typeof window.AchievementsManager.getAll === 'function') ? window.AchievementsManager.getAll() : [];
+		},
+
 		getUserProfile() {
 			const userName = (window.SettingsApp && window.SettingsApp.get('userName')) || 'Colin B.R.';
 			const userJobTitle = (window.SettingsApp && window.SettingsApp.get('userJobTitle')) || 'Student';
@@ -347,35 +552,21 @@
 			return { userName, userJobTitle, userAvatar, avatarShape, theme };
 		},
 
-		getMusicTracks() {
-			try {
-				if (window.MusicStore && Array.isArray(window.MusicStore.tracks)) {
-					return window.MusicStore.tracks;
-				}
-			} catch (e) {}
-			return [];
+		setUserProfile(data = {}) {
+			if (!window.SettingsApp) return false;
+			if (data.userName) window.SettingsApp.set('userName', data.userName);
+			if (data.userJobTitle) window.SettingsApp.set('userJobTitle', data.userJobTitle);
+			if (data.userAvatar) window.SettingsApp.set('userAvatar', data.userAvatar);
+			if (data.userAvatarShape) window.SettingsApp.set('userAvatarShape', data.userAvatarShape);
+			return true;
 		},
 
-		playTrackIndex(index) {
-			try {
-				if (window.MediaPlayerApp && typeof window.MediaPlayerApp.open === 'function') {
-					const tracks = this.getMusicTracks();
-					if (tracks[index]) {
-						window.MediaPlayerApp.open(tracks[index]);
-						return tracks[index];
-					}
-				}
-			} catch (e) {}
-			return null;
-		},
-
-		getAvailableWallpapers() {
-			try {
-				if (typeof fetchWallpaperRegistry === 'function') {
-					return fetchWallpaperRegistry();
-				}
-			} catch (e) {}
-			return Promise.resolve([]);
+		setScreensaver(saverId, timeoutMinutes = 5) {
+			if (!window.SettingsApp) return false;
+			window.SettingsApp.set('screensaverActive', saverId);
+			window.SettingsApp.set('screensaverEnabled', saverId !== 'none');
+			window.SettingsApp.set('screensaverTimeoutMinutes', timeoutMinutes);
+			return true;
 		},
 
 		getSetting(key) {
@@ -397,20 +588,8 @@
 			return false;
 		},
 
-		restoreAllWindows() {
-			try {
-				if (window.WindowManager && typeof window.WindowManager.restoreAll === 'function') {
-					window.WindowManager.restoreAll();
-					return;
-				}
-				if (typeof openWindows !== 'undefined') {
-					Object.values(openWindows).forEach(win => {
-						if (win && win.classList.contains('minimized') && typeof unminimizeWindow === 'function') {
-							unminimizeWindow(win);
-						}
-					});
-				}
-			} catch (e) {}
+		getAvailableApps() {
+			return window.DeskAppRegistry ? window.DeskAppRegistry.getAll() : [];
 		},
 
 		launchApp(appId, args = {}) {
@@ -425,6 +604,25 @@
 			return false;
 		},
 
+		runCommand(cmdStr) {
+			if (typeof processRunCommand === 'function') {
+				processRunCommand(cmdStr);
+				return true;
+			}
+			return false;
+		},
+
+		getBatteryInfo() {
+			if (typeof batteryState !== 'undefined') {
+				return {
+					supported: batteryState.supported,
+					level: Math.round(batteryState.level * 100),
+					charging: batteryState.charging
+				};
+			}
+			return { supported: false, level: 100, charging: true };
+		},
+
 		getSystemSpecs() {
 			const nav = typeof navigator !== 'undefined' ? navigator : {};
 			const mem = nav.deviceMemory ? `${nav.deviceMemory} GB Unified RAM` : '512 MB SDRAM PC-133 (Simulated)';
@@ -436,8 +634,10 @@
 			const recycleCount = this.getRecycleBinCount();
 			const desktopItems = this.getDesktopItemCount();
 			const moon = this.getMoonPhaseLabel() || 'Unavailable';
+			const bat = this.getBatteryInfo();
+			const batText = bat.supported ? `${bat.level}% (${bat.charging ? 'Charging' : 'Discharging'})` : 'AC Line Connected';
 
-			return `[WORKSTATION DIAGNOSTICS LOG]\n- Host Operating Environment: Windows XP Professional (Win32 API Emulated)\n- Network Link: ${online}\n- Display Subsystem: ${screenRes}\n- Window Manager: ${openWins} active process window(s)\n- Mail Subsystem: ${unread} unread message(s)\n- Shell Storage: ${desktopItems} desktop item(s), ${recycleCount} recycled file(s)\n- Processor Topology: ${cores}\n- Host Memory: ${mem}\n- Platform Architecture: ${nav.platform || 'Win32'}\n- Lunar Phase Metric: ${moon}`;
+			return `[WORKSTATION DIAGNOSTICS LOG]\n- Host Operating Environment: Windows XP Professional (Win32 API Emulated)\n- Network Link: ${online}\n- Display Subsystem: ${screenRes}\n- Window Manager: ${openWins} active process window(s)\n- Mail Subsystem: ${unread} unread message(s)\n- Shell Storage: ${desktopItems} desktop item(s), ${recycleCount} recycled file(s)\n- Processor Topology: ${cores}\n- Host Memory: ${mem}\n- Power Subsystem: ${batText}\n- Platform Architecture: ${nav.platform || 'Win32'}\n- Lunar Phase Metric: ${moon}`;
 		},
 
 		unlockAchievement(id, count = 1) {

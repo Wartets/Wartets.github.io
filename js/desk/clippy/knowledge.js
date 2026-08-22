@@ -419,13 +419,114 @@
 				id: 'pomodoro_node',
 				text: "Focus interval primed! Type `timer [minutes]` (default: 25) or click below to launch a distraction-free countdown session.",
 				options: [
-					{ label: "Start 25-minute focus timer now.", category: 'SERIOUS', actionTrigger: 'timer_25', next: 'user_state_good' }
+					{ label: "Start 25-minute focus timer now.", category: 'SERIOUS', actionTrigger: 'timer_25', next: 'user_state_good' },
+					{ label: "View my To-Do task list.", category: 'SERIOUS', actionTrigger: 'show_todos', next: 'user_state_good' }
+				]
+			},
+
+			todo_overview_node: {
+				id: 'todo_overview_node',
+				text: "Task tracking matrix ready. You can add tasks with `todo add [item]` or inspect the active registers.",
+				actionTrigger: 'show_todos',
+				options: [
+					{ label: "Start 25-minute Pomodoro focus timer.", category: 'SERIOUS', actionTrigger: 'timer_25', next: 'user_state_good' },
+					{ label: "Return to main dialogue.", category: 'AGREE', next: 'greeting_root' }
+				]
+			},
+
+			mail_overview_node: {
+				id: 'mail_overview_node',
+				text: "Scanning Outlook Express message store and active folders...",
+				actionTrigger: 'action_check_mail',
+				options: [
+					{ label: "Compose a new email message.", category: 'SERIOUS', actionTrigger: 'action_compose_mail', next: 'user_state_good' },
+					{ label: "Return to workspace overview.", category: 'AGREE', next: 'user_state_good' }
+				]
+			},
+
+			diagnostics_node: {
+				id: 'diagnostics_node',
+				text: "Executing low-level workstation diagnostic routine...",
+				actionTrigger: 'action_status',
+				options: [
+					{ label: "Inspect active application windows.", category: 'SERIOUS', actionTrigger: 'action_inspect_windows', next: 'user_state_good' },
+					{ label: "Inspect Recycle Bin status.", category: 'SERIOUS', actionTrigger: 'action_inspect_bin', next: 'user_state_good' }
+				]
+			},
+
+			shortcuts_node: {
+				id: 'shortcuts_node',
+				text: "Loaded Windows XP keyboard reference shortcuts into active buffer.",
+				actionTrigger: 'action_shortcuts',
+				options: [
+					{ label: "Inspect running workspace processes.", category: 'SERIOUS', actionTrigger: 'action_inspect_windows', next: 'user_state_good' },
+					{ label: "Return to tools overview.", category: 'SERIOUS', next: 'tools_overview_node' }
+				]
+			},
+
+			password_gen_node: {
+				id: 'password_gen_node',
+				text: "Generating cryptographic random password token...",
+				actionTrigger: 'action_pass',
+				options: [
+					{ label: "Generate another 24-character token.", category: 'SERIOUS', actionTrigger: 'action_pass_24', next: 'user_state_good' },
+					{ label: "Save note to scratchpad buffer.", category: 'SERIOUS', next: 'productivity_tasks' }
+				]
+			},
+
+			game_ttt_node: {
+				id: 'game_ttt_node',
+				text: "Launching Tic-Tac-Toe heuristic challenge grid.",
+				actionTrigger: 'game_ttt',
+				options: [
+					{ label: "Switch to Memory Match.", category: 'SERIOUS', actionTrigger: 'game_memory', next: 'user_state_good' },
+					{ label: "Return to main menu.", category: 'AGREE', next: 'greeting_root' }
+				]
+			},
+
+			game_memory_node: {
+				id: 'game_memory_node',
+				text: "Initializing 12-card system token memory matrix.",
+				actionTrigger: 'game_memory',
+				options: [
+					{ label: "Switch to Hangman.", category: 'SERIOUS', actionTrigger: 'game_hangman', next: 'user_state_good' },
+					{ label: "Return to main menu.", category: 'AGREE', next: 'greeting_root' }
+				]
+			},
+
+			game_hangman_node: {
+				id: 'game_hangman_node',
+				text: "Loading retro computing dictionary into Hangman register.",
+				actionTrigger: 'game_hangman',
+				options: [
+					{ label: "Switch to Tech Quiz.", category: 'SERIOUS', actionTrigger: 'game_quiz', next: 'user_state_good' },
+					{ label: "Return to main menu.", category: 'AGREE', next: 'greeting_root' }
+				]
+			},
+
+			game_guess_node: {
+				id: 'game_guess_node',
+				text: "Initializing random integer generator (1-100).",
+				actionTrigger: 'game_guess',
+				options: [
+					{ label: "Play Rock-Paper-Scissors instead.", category: 'SERIOUS', actionTrigger: 'game_rps', next: 'user_state_good' },
+					{ label: "Return to main menu.", category: 'AGREE', next: 'greeting_root' }
+				]
+			},
+
+			game_rps_node: {
+				id: 'game_rps_node',
+				text: "Select your move for Rock-Paper-Scissors:",
+				actionTrigger: 'game_rps',
+				options: [
+					{ label: "Launch diagnostic Tech Quiz.", category: 'SERIOUS', actionTrigger: 'game_quiz', next: 'user_state_good' },
+					{ label: "Return to main menu.", category: 'AGREE', next: 'greeting_root' }
 				]
 			},
 
 			game_selection_node: {
 				id: 'game_selection_node',
-				text: "Select your challenge matrix:\n- Memory Match: Match 6 paired system tokens (SYS, DLL, EXE...)\n- Hangman: Guess retro computing words\n- Tic-Tac-Toe: Challenge my defensive heuristics\n- Tech Quiz: 20+ retro questions",
+				text: "Select your challenge matrix:\n- Memory Match: Match 6 paired system tokens (SYS, DLL, EXE...)\n- Hangman: Guess retro computing words\n- Tic-Tac-Toe: Challenge my defensive heuristics\n- Tech Quiz: 20+ retro questions\n- Guess the Number (1-100)\n- Rock-Paper-Scissors",
 				options: [
 					{ label: "Play Tic-Tac-Toe.", category: 'SERIOUS', actionTrigger: 'game_ttt', next: 'user_state_good' },
 					{ label: "Play Memory Match Game.", category: 'SERIOUS', actionTrigger: 'game_memory', next: 'user_state_good' },

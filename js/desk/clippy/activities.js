@@ -161,9 +161,10 @@
 		},
 
 		generatePassword(length = 14) {
+			const len = Math.max(6, Math.min(64, parseInt(length, 10) || 14));
 			const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789!@#$%^&*()_+-=';
 			let res = '';
-			for (let i = 0; i < length; i++) {
+			for (let i = 0; i < len; i++) {
 				res += chars.charAt(Math.floor(Math.random() * chars.length));
 			}
 			return res;
