@@ -637,7 +637,22 @@
 			const bat = this.getBatteryInfo();
 			const batText = bat.supported ? `${bat.level}% (${bat.charging ? 'Charging' : 'Discharging'})` : 'AC Line Connected';
 
-			return `[WORKSTATION DIAGNOSTICS LOG]\n- Host Operating Environment: Windows XP Professional (Win32 API Emulated)\n- Network Link: ${online}\n- Display Subsystem: ${screenRes}\n- Window Manager: ${openWins} active process window(s)\n- Mail Subsystem: ${unread} unread message(s)\n- Shell Storage: ${desktopItems} desktop item(s), ${recycleCount} recycled file(s)\n- Processor Topology: ${cores}\n- Host Memory: ${mem}\n- Power Subsystem: ${batText}\n- Platform Architecture: ${nav.platform || 'Win32'}\n- Lunar Phase Metric: ${moon}`;
+			return `<div class="clippy-structured-section">
+				<div class="clippy-section-title">Workstation Diagnostics Log</div>
+				<table class="clippy-xp-table">
+					<tr><th>Subsystem</th><th>Specification & State</th></tr>
+					<tr><td><b>Environment</b></td><td>Windows XP Professional (SP3 Emulated)</td></tr>
+					<tr><td><b>Network Link</b></td><td>${online}</td></tr>
+					<tr><td><b>Display</b></td><td>${screenRes}</td></tr>
+					<tr><td><b>Window Manager</b></td><td>${openWins} active window(s)</td></tr>
+					<tr><td><b>Mail System</b></td><td>${unread} unread message(s)</td></tr>
+					<tr><td><b>File Storage</b></td><td>${desktopItems} desktop items, ${recycleCount} in bin</td></tr>
+					<tr><td><b>CPU Topology</b></td><td>${cores}</td></tr>
+					<tr><td><b>RAM Memory</b></td><td>${mem}</td></tr>
+					<tr><td><b>Power Source</b></td><td>${batText}</td></tr>
+					<tr><td><b>Lunar Metric</b></td><td>${moon}</td></tr>
+				</table>
+			</div>`;
 		},
 
 		unlockAchievement(id, count = 1) {

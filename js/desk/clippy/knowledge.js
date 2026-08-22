@@ -41,7 +41,45 @@
 			"useless": -3.0, "annoying": -2.8, "stupid": -3.0, "ugly": -2.5, "slow": -1.5,
 			"broken": -2.2, "crash": -2.5, "error": -1.8, "worst": -3.5, "garbage": -3.2,
 			"trash": -3.0, "boring": -2.0, "tired": -1.8, "exhausted": -2.2, "sad": -2.0,
-			"depressed": -2.5, "angry": -2.5, "mad": -2.2, "shut": -1.5, "die": -3.5
+			"depressed": -2.5, "angry": -2.5, "mad": -2.2, "shut": -1.5, "die": -3.5,
+			"merci": 2.0, "super": 2.5, "parfait": 3.0, "bien": 1.5, "bravo": 2.2,
+			"nul": -2.5, "inutile": -3.0, "mauvais": -2.0, "horrible": -3.2, "enerve": -2.5
+		},
+
+		EMOTIONAL_INDICATORS: {
+			frustration: ["error", "bug", "fail", "failed", "crash", "stuck", "broken", "annoying", "hate", "slow", "stupid", "useless", "worst", "damn", "bloody", "nul", "inutile", "plante", "bloque"],
+			curiosity: ["why", "how", "what", "where", "when", "explain", "details", "origin", "theory", "meaning", "science", "physics", "math", "explore", "pourquoi", "comment", "explique"],
+			fatigue: ["tired", "exhausted", "sleepy", "burnout", "drained", "sleep", "rest", "break", "fatigue", "epuise", "dodo", "pause"],
+			enthusiasm: ["wow", "cool", "awesome", "let's", "ready", "play", "game", "go", "fun", "super", "genial", "gagnant"],
+			politeness: ["please", "thank", "thanks", "kindly", "appreciate", "hello", "greetings", "hi", "hey", "merci", "bonjour", "salut", "s'il vous plait"]
+		},
+
+		TOPIC_RESPONSES: {
+			space: [
+				"The observable universe is estimated at 93 billion light-years in diameter, containing over 2 trillion galaxies and an estimated 10^24 stars.",
+				"Light from the Sun requires approximately 8 minutes and 20 seconds to traverse the 149.6 million kilometers to reach Earth.",
+				"In the vacuum of space, acoustic waves cannot propagate, yet electromagnetic oscillations span wavelengths from gamma rays to kilometric radio frequencies."
+			],
+			programming: [
+				"This simulated workstation is driven by an asynchronous virtual file system, custom window coordinate managers, and low-level WebAudio oscillators.",
+				"Modular software design enforces encapsulation between hardware interfaces, graphical renderers, and behavioral heuristic dispatchers.",
+				"Compilation processes transform structured source abstractions into deterministic bytecode and machine instructions mapped to thread queues."
+			],
+			quantum_bin: [
+				"Landauer's principle establishes the minimum thermodynamic cost of erasing a single bit of information: dQ = k_B * T * ln(2).",
+				"In solid-state and magnetic media, deleted virtual file pointers mark allocated clusters as writable without immediately clearing magnetic domains.",
+				"Information entropy dictates that structural data remains recoverable until physical high-entropy overwrites occur across the storage sectors."
+			],
+			office_lore: [
+				"Clippit was designed in 1994 by illustrator Kevan J. Atteberry on a Macintosh II machine prior to integration into Office 97.",
+				"During early focus group testing at Microsoft, over 250 conceptual characters were drafted before the metallic paperclip geometry was adopted.",
+				"The interactive agent subsystem was engineered as Microsoft Agent using custom Win32 animation layers and direct COM interfaces."
+			],
+			activity_rematch: {
+				question: "Would you like to play another round of {game}?",
+				positive: "Excellent! Initializing a fresh challenge grid.",
+				negative: "Understood. Standing by for your next instruction."
+			}
 		},
 
 		NAMED_ENTITIES: {

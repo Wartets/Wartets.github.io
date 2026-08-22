@@ -109,25 +109,40 @@
 			this.state.lastInteractionTime = Date.now();
 			this.memory.interactionsTotal++;
 
-			const sentiment = nlpResult.sentiment;
-			if (sentiment.isPositive) {
-				this.state.affinity = Math.min(100, this.state.affinity + 4);
-				this.state.patience = Math.min(100, this.state.patience + 5);
-				this.state.cynicism = Math.max(0, this.state.cynicism - 3);
-			} else if (sentiment.isNegative) {
-				this.state.affinity = Math.max(0, this.state.affinity - 6);
-				this.state.patience = Math.max(0, this.state.patience - 8);
-				this.state.cynicism = Math.min(100, this.state.cynicism + 6);
+			const em = nlpResult.emotions || nlpResult.sentiment || {};
+			if (em.dominant === 'FRUSTRATED' || em.frustration > 0.5) {
+				this.state.patience = Math.max(0, this.state.patience - 12);
+				this.state.cynicism = Math.min(100, this.state.cynicism + 8);
+				this.state.affinity = Math.max(0, this.state.affinity - 5);
+			} else if (em.dominant === 'FATIGUED' || em.fatigue > 0.4) {
+				this.state.patience = Math.min(100, this.state.patience + 10);
+				this.state.affinity = Math.min(100, this.state.affinity + 5);
+			} else if (em.dominant === 'CURIOUS' || em.curiosity > 0.4) {
+				this.state.intellect = Math.min(100, this.state.intellect + 8);
+				this.state.patience = Math.min(100, this.state.patience + 6);
+			} else if (em.isPositive) {
+				this.state.affinity = Math.min(100, this.state.affinity + Math.round(em.valence * 8));
+				this.state.patience = Math.min(100, this.state.patience + 6);
+				this.state.cynicism = Math.max(0, this.state.cynicism - 5);
+			} else if (em.isNegative) {
+				this.state.affinity = Math.max(0, this.state.affinity - Math.round(Math.abs(em.valence) * 10));
+				this.state.patience = Math.max(0, this.state.patience - 10);
+				this.state.cynicism = Math.min(100, this.state.cynicism + 8);
+			}
+
+			if (em.politeness > 0.3) {
+				this.state.affinity = Math.min(100, this.state.affinity + 6);
+				this.state.patience = Math.min(100, this.state.patience + 8);
 			}
 
 			if (nlpResult.entities.physics.length > 0 || nlpResult.entities.math.length > 0) {
-				this.state.intellect = Math.min(100, this.state.intellect + 6);
+				this.state.intellect = Math.min(100, this.state.intellect + 8);
 			}
 			if (nlpResult.entities.philosophy.length > 0) {
-				this.state.existentialism = Math.min(100, this.state.existentialism + 8);
+				this.state.existentialism = Math.min(100, this.state.existentialism + 10);
 			}
 			if (nlpResult.entities.os.length > 0) {
-				this.state.nostalgia = Math.min(100, this.state.nostalgia + 6);
+				this.state.nostalgia = Math.min(100, this.state.nostalgia + 8);
 			}
 
 			this.recalculateMood();

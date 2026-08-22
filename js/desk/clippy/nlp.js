@@ -98,13 +98,14 @@
 			return w;
 		}
 
-		analyzeSentiment(tokens) {
+		analyzeEmotionalState(rawText, tokens) {
 			const lexicon = this.knowledge.SENTIMENT_LEXICON || {};
+			const indicators = this.knowledge.EMOTIONAL_INDICATORS || {};
 			const negations = this.knowledge.NEGATIONS || [];
 			const intensifiers = this.knowledge.INTENSIFIERS || {};
 			const moderators = this.knowledge.MODERATORS || {};
 
-			let score = 0;
+			let sentimentScore = 0;
 			let hitCount = 0;
 
 			for (let i = 0; i < tokens.length; i++) {
@@ -116,32 +117,66 @@
 
 					for (let j = Math.max(0, i - 3); j < i; j++) {
 						const prev = tokens[j];
-						if (negations.includes(prev)) {
-							isNegated = !isNegated;
-						}
-						if (intensifiers[prev]) {
-							multiplier *= intensifiers[prev];
-						}
-						if (moderators[prev]) {
-							multiplier *= moderators[prev];
-						}
+						if (negations.includes(prev)) isNegated = !isNegated;
+						if (intensifiers[prev]) multiplier *= intensifiers[prev];
+						if (moderators[prev]) multiplier *= moderators[prev];
 					}
 
-					if (isNegated) {
-						val = -val * 0.75;
-					}
-					score += val * multiplier;
+					if (isNegated) val = -val * 0.8;
+					sentimentScore += val * multiplier;
 					hitCount++;
 				}
 			}
 
-			const normalizedScore = hitCount > 0 ? score / hitCount : 0;
+			const normalizedValence = hitCount > 0 ? Math.max(-1, Math.min(1, (sentimentScore / hitCount) / 3.0)) : 0;
+
+			let frustrationCount = 0;
+			let curiosityCount = 0;
+			let fatigueCount = 0;
+			let enthusiasmCount = 0;
+			let politenessCount = 0;
+
+			tokens.forEach(tok => {
+				if (indicators.frustration && indicators.frustration.includes(tok)) frustrationCount++;
+				if (indicators.curiosity && indicators.curiosity.includes(tok)) curiosityCount++;
+				if (indicators.fatigue && indicators.fatigue.includes(tok)) fatigueCount++;
+				if (indicators.enthusiasm && indicators.enthusiasm.includes(tok)) enthusiasmCount++;
+				if (indicators.politeness && indicators.politeness.includes(tok)) politenessCount++;
+			});
+
+			const hasExclamation = /!{1,}/.test(rawText);
+			const hasQuestion = /\?{1,}/.test(rawText);
+			const isAllCaps = rawText.length > 4 && rawText === rawText.toUpperCase() && /[A-Z]/.test(rawText);
+
+			let arousal = 0.3;
+			if (hasExclamation) arousal += 0.25;
+			if (isAllCaps) arousal += 0.35;
+			if (enthusiasmCount > 0 || frustrationCount > 0) arousal += 0.2;
+			arousal = Math.min(1.0, arousal);
+
+			const frustrationLevel = Math.min(1.0, (frustrationCount * 0.3) + (isAllCaps ? 0.3 : 0) + (normalizedValence < -0.4 ? 0.3 : 0));
+			const curiosityLevel = Math.min(1.0, (curiosityCount * 0.35) + (hasQuestion ? 0.3 : 0));
+			const fatigueLevel = Math.min(1.0, fatigueCount * 0.45);
+			const politenessLevel = Math.min(1.0, politenessCount * 0.4);
+
+			let dominantEmotion = 'NEUTRAL';
+			if (frustrationLevel >= 0.5) dominantEmotion = 'FRUSTRATED';
+			else if (fatigueLevel >= 0.4) dominantEmotion = 'FATIGUED';
+			else if (curiosityLevel >= 0.45) dominantEmotion = 'CURIOUS';
+			else if (normalizedValence >= 0.35 || enthusiasmCount > 0) dominantEmotion = 'POSITIVE';
+			else if (normalizedValence <= -0.35) dominantEmotion = 'NEGATIVE';
+
 			return {
-				score: normalizedScore,
-				rawSum: score,
-				hitCount: hitCount,
-				isPositive: normalizedScore > 0.4,
-				isNegative: normalizedScore < -0.4
+				valence: normalizedValence,
+				arousal: arousal,
+				frustration: frustrationLevel,
+				curiosity: curiosityLevel,
+				fatigue: fatigueLevel,
+				politeness: politenessLevel,
+				dominant: dominantEmotion,
+				isPositive: normalizedValence > 0.25,
+				isNegative: normalizedValence < -0.25,
+				isUrgent: isAllCaps || frustrationLevel > 0.7
 			};
 		}
 
@@ -296,7 +331,7 @@
 			const tokens = this.tokenize(rawText);
 			const correctedTokens = tokens.map(t => this.correctSpelling(t));
 			const stems = correctedTokens.map(t => this.stem(t));
-			const sentiment = this.analyzeSentiment(correctedTokens);
+			const emotions = this.analyzeEmotionalState(rawText, correctedTokens);
 			const entities = this.extractEntities(rawText, correctedTokens);
 			const intent = this.classifyIntent(rawText, entities);
 			const syntaxType = this.classifySyntax(rawText);
@@ -306,7 +341,8 @@
 				cleaned: correctedTokens.join(' '),
 				tokens: correctedTokens,
 				stems,
-				sentiment,
+				sentiment: emotions,
+				emotions: emotions,
 				entities,
 				intent,
 				syntaxType

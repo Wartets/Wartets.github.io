@@ -6,8 +6,6 @@
 
 	let isThinking = false;
 	let idleTimer = null;
-	let activeGameContext = null;
-	let gameState = {};
 	let chatMarathonTimer = null;
 
 	function pickFrom(list) {
@@ -49,24 +47,27 @@
 
 	function executeActionTrigger(actionId) {
 		if (actionId === 'timer_25') {
-			startPomodoro(25);
+			window.ClippyActivities.pomodoro.mount(25);
 		} else if (actionId === 'show_todos') {
-			renderTodoList();
+			window.ClippyActivities.todo.mount();
 		} else if (actionId === 'game_ttt') {
-			startTicTacToe();
+			window.ClippyActivities.tictactoe.mount();
 		} else if (actionId === 'game_memory') {
-			startMemory();
+			window.ClippyActivities.memory.mount();
 		} else if (actionId === 'game_hangman') {
-			startHangman();
+			window.ClippyActivities.hangman.mount();
 		} else if (actionId === 'game_quiz') {
-			startQuiz();
+			window.ClippyActivities.quiz.mount();
 		} else if (actionId === 'game_guess') {
-			startGuess();
+			window.ClippyActivities.guess.mount();
 		} else if (actionId === 'game_rps') {
-			const rps = startRPS();
-			window.ClippyUI.appendAssistantMessage(rps.text, rps.actions);
+			window.ClippyActivities.rps.mount();
+		} else if (actionId === 'game_mines') {
+			window.ClippyActivities.mines.mount();
 		} else if (actionId === 'action_defrag') {
-			startDefrag();
+			window.ClippyActivities.defrag.mount();
+		} else if (actionId === 'pet_status' || actionId === 'pet_feed' || actionId === 'pet_polish') {
+			window.ClippyActivities.pet.mount();
 		} else if (actionId === 'action_trivia') {
 			window.ClippyUI.appendAssistantMessage(pickFrom(window.ClippyKnowledge.TRIVIA), [
 				{ label: "Another Trivia", onClick: () => executeActionTrigger('action_trivia') }
@@ -121,12 +122,6 @@
 		} else if (actionId === 'action_compose_mail') {
 			window.ClippySystemBridge.launchApp('outlook');
 			window.ClippyUI.appendAssistantMessage("Outlook Express launched for drafting messages.");
-		} else if (actionId === 'pet_status') {
-			handlePetAction('status');
-		} else if (actionId === 'pet_feed') {
-			handlePetAction('feed');
-		} else if (actionId === 'pet_polish') {
-			handlePetAction('pet');
 		} else if (actionId === 'action_inspect_bin') {
 			const count = window.ClippySystemBridge.getRecycleBinCount();
 			window.ClippyUI.appendAssistantMessage(count > 0 ? `The Recycle Bin currently holds ${count} item(s).` : "The Recycle Bin is completely empty.", [
@@ -140,10 +135,8 @@
 		const norm = rawText.toLowerCase().trim();
 
 		if (norm === 'exit' || norm === 'quit' || norm === 'cancel' || norm === 'stop' || norm === 'menu' || norm === 'back' || norm === 'annuler' || norm === 'quitter') {
-			activeGameContext = null;
-			gameState = {};
 			return {
-				text: "Active session stopped. Standing by for instructions.",
+				text: "Standing by for instructions.",
 				actions: [
 					{ label: "What can you do?", onClick: () => handleUserInput("What can you do?") },
 					{ label: "View To-Do List", onClick: () => handleUserInput("View To-Do List") },
@@ -152,25 +145,28 @@
 			};
 		}
 
-		if (activeGameContext === 'guess' && /^\d+$/.test(norm)) {
-			handleGuessInput(parseInt(norm, 10));
-			return null;
-		}
-		if (activeGameContext === 'hangman' && /^[a-zA-Z]$/.test(norm)) {
-			handleHangmanInput(norm.toUpperCase());
-			return null;
-		}
-
 		if (norm === 'what can you do?' || norm === 'what can you do' || norm === 'help' || norm === 'commands' || norm === 'aide' || norm === 'features') {
 			return {
-				text: "Here is what my system integration can execute:\n- Task & Project Management (`todo`, `projects`)\n- Focus & Scratchpad (`timer 25`, `note [text]`)\n- System Settings (`theme [name]`, `wallpaper`, `volume`, `scanlines`, `crt`)\n- Mail & Diagnostics (`mail`, `diagnostics`, `windows`, `files`)\n- Games & Entertainment (`tictactoe`, `memory`, `hangman`, `quiz`, `guess`, `music`, `joke`)\n- Utilities (`calc [math]`, `convert [unit]`, `pass [length]`)",
+				text: `<div class="clippy-structured-section">
+					<div class="clippy-section-title">Workstation Capability Index</div>
+					<table class="clippy-xp-table">
+						<tr><th>Module</th><th>Commands & Description</th></tr>
+						<tr><td><b>Tasks</b></td><td><code>todo</code>, <code>todo add [text]</code>, <code>note [memo]</code>, <code>timer 25</code></td></tr>
+						<tr><td><b>Workstation</b></td><td><code>diagnostics</code>, <code>windows</code>, <code>files</code>, <code>mail</code>, <code>defrag</code></td></tr>
+						<tr><td><b>Customization</b></td><td><code>theme [name]</code>, <code>wallpaper</code>, <code>volume</code>, <code>scanlines on/off</code>, <code>crt on/off</code></td></tr>
+						<tr><td><b>Calculations</b></td><td><code>calc [formula]</code>, <code>convert [from] to [to]</code>, <code>password [len]</code></td></tr>
+						<tr><td><b>Mini-Games</b></td><td><code>tictactoe</code>, <code>memory</code>, <code>hangman</code>, <code>quiz</code>, <code>guess</code>, <code>mines</code>, <code>rps</code></td></tr>
+					</table>
+				</div>`,
 				actions: [
 					{ label: "View To-Do List", onClick: () => handleUserInput("View To-Do List") },
-					{ label: "System Diagnostics", onClick: () => handleUserInput("System diagnostics") },
-					{ label: "Play Tic-Tac-Toe", onClick: () => handleUserInput("Play Tic-Tac-Toe") },
 					{ label: "Inspect active windows", onClick: () => handleUserInput("Inspect active windows") },
 					{ label: "Change Wallpaper", onClick: () => handleUserInput("Change wallpaper") },
-					{ label: "Check unread emails", onClick: () => handleUserInput("Check unread emails") }
+					{ label: "Check unread emails", onClick: () => handleUserInput("Check unread emails") },
+					{ label: "Play Tic-Tac-Toe", onClick: () => handleUserInput("Play Tic-Tac-Toe") },
+					{ label: "Play Memory Game", onClick: () => handleUserInput("Play Memory Game") },
+					{ label: "Play Minesweeper", onClick: () => handleUserInput("Play Minesweeper") },
+					{ label: "System Diagnostics", onClick: () => handleUserInput("System diagnostics") }
 				]
 			};
 		}
@@ -192,8 +188,9 @@
 		}
 
 		if (norm === 'investigate office origin' || norm.includes('office origin') || norm.includes('origine office')) {
+			const lorePool = (window.ClippyKnowledge && window.ClippyKnowledge.TOPIC_RESPONSES && window.ClippyKnowledge.TOPIC_RESPONSES.office_lore) || [];
 			return {
-				text: "Clippit was designed in 1994 by Kevan J. Atteberry on a Mac workstation. Introduced in Office 97, he held documents, letters, and resumes together across millions of PCs.",
+				text: pickFrom(lorePool),
 				actions: [
 					{ label: "Random Retro Trivia", onClick: () => handleUserInput("Random Retro Trivia") },
 					{ label: "Keyboard Shortcuts", onClick: () => handleUserInput("Keyboard Shortcuts") }
@@ -202,8 +199,9 @@
 		}
 
 		if (norm === 'quantum recycle bin theory' || norm.includes('quantum recycle bin') || norm.includes('corbeille quantique')) {
+			const qPool = (window.ClippyKnowledge && window.ClippyKnowledge.TOPIC_RESPONSES && window.ClippyKnowledge.TOPIC_RESPONSES.quantum_bin) || [];
 			return {
-				text: "Landauer's principle indicates that bit erasure has a thermodynamic cost (k_B * T * ln 2). Erased files persist in virtual unallocated clusters until overwritten.",
+				text: pickFrom(qPool),
 				actions: [
 					{ label: "Open Recycle Bin", onClick: () => window.ClippySystemBridge.launchApp('recyclebin') },
 					{ label: "Empty Recycle Bin", onClick: () => { window.ClippySystemBridge.emptyRecycleBin(); window.ClippyUI.appendAssistantMessage("Recycle Bin emptied."); } }
@@ -212,8 +210,9 @@
 		}
 
 		if (norm === 'talk about programming' || norm === 'programming' || norm === 'coding' || norm === 'programmation') {
+			const prgPool = (window.ClippyKnowledge && window.ClippyKnowledge.TOPIC_RESPONSES && window.ClippyKnowledge.TOPIC_RESPONSES.programming) || [];
 			return {
-				text: "This workstation executes modular Win32 simulation architecture, VFS layers, dynamic Window management, and synthesized audio.",
+				text: pickFrom(prgPool),
 				actions: [
 					{ label: "Open Command Prompt", onClick: () => window.ClippySystemBridge.launchApp('cmd') },
 					{ label: "Open Projects", onClick: () => window.ClippySystemBridge.launchApp('projects') }
@@ -222,8 +221,9 @@
 		}
 
 		if (norm === 'talk about space and cosmos' || norm === 'space' || norm === 'cosmos' || norm === 'espace' || norm === 'univers') {
+			const spacePool = (window.ClippyKnowledge && window.ClippyKnowledge.TOPIC_RESPONSES && window.ClippyKnowledge.TOPIC_RESPONSES.space) || [];
 			return {
-				text: "The observable universe is 93 billion light-years in diameter. Space is rich with cosmological phenomena, dark energy, and relativistic speeds.",
+				text: pickFrom(spacePool),
 				actions: [
 					{ label: "Evaluate speed of light c", onClick: () => handleUserInput("Evaluate speed of light c") },
 					{ label: "Evaluate Planck constant h", onClick: () => handleUserInput("Evaluate Planck constant h") }
@@ -247,6 +247,10 @@
 			return { text: "Loading computing dictionary into Hangman...", actionTrigger: 'game_hangman' };
 		}
 
+		if (norm === 'play minesweeper' || norm === 'minesweeper' || norm === 'mines' || norm === 'demineur') {
+			return { text: "Initializing 6x6 tactical minefield...", actionTrigger: 'game_mines' };
+		}
+
 		if (norm === 'tech trivia quiz' || norm === 'trivia quiz' || norm === 'quiz') {
 			return { text: "Initializing diagnostic Tech Quiz...", actionTrigger: 'game_quiz' };
 		}
@@ -256,7 +260,7 @@
 		}
 
 		if (norm === 'rock paper scissors' || norm === 'rps' || norm === 'chifoumi' || norm === 'pierre feuille ciseaux') {
-			return startRPS();
+			return { text: "Initiating Rock-Paper-Scissors module...", actionTrigger: 'game_rps' };
 		}
 
 		if (norm === 'pet clippy status' || norm === 'tamagotchi' || norm === 'etat clippy') {
@@ -270,7 +274,7 @@
 		if (norm === 'start pomodoro timer' || norm.startsWith('timer ') || norm.startsWith('pomodoro')) {
 			const match = norm.match(/\d+/);
 			const mins = match ? parseInt(match[0], 10) : 25;
-			startPomodoro(mins);
+			window.ClippyActivities.pomodoro.mount(mins);
 			return null;
 		}
 
@@ -304,11 +308,33 @@
 		}
 
 		if (norm === 'evaluate planck constant h' || norm === 'planck constant' || norm === 'constant h') {
-			return { text: "Planck constant (h):\n**6.62607015 x 10^-34 J s** (CODATA exact standard)" };
+			return {
+				text: `<div class="clippy-structured-section">
+					<div class="clippy-section-title">Physical Constant: Planck Constant</div>
+					<table class="clippy-xp-table">
+						<tr><th>Property</th><th>Value</th></tr>
+						<tr><td><b>Symbol</b></td><td><code>h</code></td></tr>
+						<tr><td><b>Numerical Value</b></td><td><strong>6.62607015 x 10^-34</strong></td></tr>
+						<tr><td><b>Unit</b></td><td>Joule-second (J s)</td></tr>
+						<tr><td><b>Standard</b></td><td>CODATA Exact Standard</td></tr>
+					</table>
+				</div>`
+			};
 		}
 
 		if (norm === 'evaluate speed of light c' || norm === 'speed of light' || norm === 'constant c') {
-			return { text: "Speed of light in vacuum (c):\n**299,792,458 m/s** (CODATA exact standard)" };
+			return {
+				text: `<div class="clippy-structured-section">
+					<div class="clippy-section-title">Physical Constant: Speed of Light</div>
+					<table class="clippy-xp-table">
+						<tr><th>Property</th><th>Value</th></tr>
+						<tr><td><b>Symbol</b></td><td><code>c</code></td></tr>
+						<tr><td><b>Numerical Value</b></td><td><strong>299,792,458</strong></td></tr>
+						<tr><td><b>Unit</b></td><td>Meters per second (m/s)</td></tr>
+						<tr><td><b>Standard</b></td><td>CODATA Exact Standard</td></tr>
+					</table>
+				</div>`
+			};
 		}
 
 		if (norm === 'achievements' || norm === 'milestones' || norm === 'trophies' || norm === 'succes' || norm === 'trophees') {
@@ -448,13 +474,9 @@
 				const todos = window.ClippyActivities.getStoredTodos();
 				todos.push({ id: Date.now(), text, done: false });
 				window.ClippyActivities.saveStoredTodos(todos);
-				renderTodoList();
+				window.ClippyActivities.todo.mount();
 				return null;
 			}
-		}
-		if (norm === 'todo clear' || norm === 'clear todos') {
-			window.ClippyActivities.saveStoredTodos([]);
-			return { text: "All tasks have been cleared from your list." };
 		}
 
 		if (norm.startsWith('note ') || norm.startsWith('scratchpad write ')) {
@@ -520,7 +542,6 @@
 			actions: [
 				{ label: "What can you do?", onClick: () => handleUserInput("What can you do?") },
 				{ label: "View To-Do List", onClick: () => handleUserInput("View To-Do List") },
-				{ label: "System Diagnostics", onClick: () => handleUserInput("System diagnostics") },
 				{ label: "Play Tic-Tac-Toe", onClick: () => handleUserInput("Play Tic-Tac-Toe") }
 			]
 		};
@@ -998,7 +1019,7 @@
 		slider.style.flex = '1';
 
 		slider.addEventListener('input', () => {
-			const setVol = window.ClippySystemBridge.setVolume(slider.value);
+			window.ClippySystemBridge.setVolume(slider.value);
 			if (window.SettingsApp && window.SettingsApp.playSound) window.SettingsApp.playSound('click');
 		});
 
@@ -1013,7 +1034,7 @@
 		muteBtn.className = 'clippy-action-btn';
 		muteBtn.textContent = isMuted ? 'Unmute Audio' : 'Mute Audio';
 		muteBtn.addEventListener('click', () => {
-			const muted = window.ClippySystemBridge.toggleMute();
+			window.ClippySystemBridge.toggleMute();
 			renderVolumeControllerCard();
 		});
 		btnBar.appendChild(muteBtn);
@@ -1032,631 +1053,15 @@
 		window.ClippyUI.scrollLogToBottom();
 	}
 
-	function renderSystemToolsCard() {
-		if (!window.ClippyUI.logElement) return;
-		const row = document.createElement('div');
-		row.className = 'clippy-message clippy-message-assistant';
-
-		row.innerHTML = `<div>[SYSTEM TOOLS] Quick launch diagnostic and administrative utilities:</div>`;
-
-		const btnBar = document.createElement('div');
-		btnBar.className = 'clippy-actions-bar';
-
-		[
-			{ label: 'Control Panel', appId: 'settings' },
-			{ label: 'Task Manager', appId: 'taskmgr' },
-			{ label: 'Command Prompt', appId: 'cmd' },
-			{ label: 'Display Properties', appId: 'display' },
-			{ label: 'My Computer', appId: 'mycomputer' },
-			{ label: 'Defrag Volume C:', action: () => startDefrag() }
-		].forEach(item => {
-			const b = document.createElement('button');
-			b.type = 'button';
-			b.className = 'clippy-action-btn';
-			b.textContent = item.label;
-			b.addEventListener('click', () => {
-				if (item.appId) window.ClippySystemBridge.launchApp(item.appId);
-				else if (item.action) item.action();
-			});
-			btnBar.appendChild(b);
-		});
-
-		row.appendChild(btnBar);
-		window.ClippyUI.logElement.appendChild(row);
-		window.ClippyUI.scrollLogToBottom();
-	}
-
-	function startTicTacToe() {
-		activeGameContext = 'ttt';
-		gameState = {
-			board: Array(9).fill(null),
-			winner: null
-		};
-		renderTicTacToeView("Select a cell to play (X):");
-	}
-
-	function checkTTTWinner(b) {
-		const lines = [[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
-		for (const [x,y,z] of lines) {
-			if (b[x] && b[x] === b[y] && b[x] === b[z]) return b[x];
-		}
-		if (b.every(c => c !== null)) return 'TIE';
-		return null;
-	}
-
-	function renderTicTacToeView(statusText) {
-		if (!window.ClippyUI.logElement) return;
-		const row = document.createElement('div');
-		row.className = 'clippy-message clippy-message-assistant';
-
-		const lbl = document.createElement('div');
-		lbl.textContent = `[Tic-Tac-Toe] ${statusText}`;
-		row.appendChild(lbl);
-
-		const grid = document.createElement('div');
-		grid.className = 'clippy-ttt-grid';
-
-		for (let i = 0; i < 9; i++) {
-			const btn = document.createElement('button');
-			btn.type = 'button';
-			btn.className = 'clippy-ttt-cell';
-			btn.textContent = gameState.board[i] || '';
-			btn.disabled = !!gameState.board[i] || !!gameState.winner;
-
-			btn.addEventListener('click', () => {
-				if (gameState.board[i] || gameState.winner) return;
-				gameState.board[i] = 'X';
-				let winner = checkTTTWinner(gameState.board);
-				if (winner) {
-					finishTTT(winner);
-					return;
-				}
-
-				const free = gameState.board.map((v, idx) => v === null ? idx : null).filter(v => v !== null);
-				if (free.length > 0) {
-					let move = free.find(idx => {
-						const test = [...gameState.board];
-						test[idx] = 'O';
-						return checkTTTWinner(test) === 'O';
-					});
-					if (move === undefined) {
-						move = free.find(idx => {
-							const test = [...gameState.board];
-							test[idx] = 'X';
-							return checkTTTWinner(test) === 'X';
-						});
-					}
-					if (move === undefined) move = pickFrom(free);
-					gameState.board[move] = 'O';
-				}
-
-				winner = checkTTTWinner(gameState.board);
-				if (winner) finishTTT(winner);
-				else renderTicTacToeView("Your turn (X):");
-			});
-			grid.appendChild(btn);
-		}
-
-		row.appendChild(grid);
-		window.ClippyUI.logElement.appendChild(row);
-		window.ClippyUI.scrollLogToBottom();
-	}
-
-	function finishTTT(winner) {
-		gameState.winner = winner;
-		activeGameContext = null;
-		if (winner === 'X') {
-			if (window.ClippyAudio) window.ClippyAudio.play('win');
-			window.ClippySystemBridge.unlockAchievement('clippy_tictactoe_win', 1);
-			window.ClippyUI.appendAssistantMessage("[VICTORY] You defeated the decision heuristic!", [
-				{ label: "Play Again", onClick: () => startTicTacToe() }
-			]);
-		} else if (winner === 'O') {
-			if (window.ClippyAudio) window.ClippyAudio.play('lose');
-			window.ClippyUI.appendAssistantMessage("[DEFEAT] Clippit wins this round!", [
-				{ label: "Rematch", onClick: () => startTicTacToe() }
-			]);
-		} else {
-			window.ClippyUI.appendAssistantMessage("[DRAW] Stalemate reached.", [
-				{ label: "Play Again", onClick: () => startTicTacToe() }
-			]);
-		}
-	}
-
-	function startMemory() {
-		activeGameContext = 'memory';
-		const tokens = ['SYS', 'DLL', 'EXE', 'INI', 'BAT', 'COM'];
-		const deck = [...tokens, ...tokens].sort(() => Math.random() - 0.5);
-
-		gameState = {
-			deck,
-			revealed: Array(12).fill(false),
-			matched: Array(12).fill(false),
-			flipped: [],
-			lock: false
-		};
-		renderMemoryView("Match the 6 paired system tokens:");
-	}
-
-	function renderMemoryView(statusText) {
-		if (!window.ClippyUI.logElement) return;
-		const row = document.createElement('div');
-		row.className = 'clippy-message clippy-message-assistant';
-
-		const lbl = document.createElement('div');
-		lbl.textContent = `[Memory Match] ${statusText}`;
-		row.appendChild(lbl);
-
-		const grid = document.createElement('div');
-		grid.className = 'clippy-memory-grid';
-
-		gameState.deck.forEach((card, idx) => {
-			const cardBtn = document.createElement('button');
-			cardBtn.type = 'button';
-			cardBtn.className = 'clippy-memory-card';
-
-			if (gameState.matched[idx]) {
-				cardBtn.classList.add('matched');
-				cardBtn.textContent = card;
-			} else if (gameState.revealed[idx]) {
-				cardBtn.classList.add('revealed');
-				cardBtn.textContent = card;
-			} else {
-				cardBtn.textContent = '?';
-			}
-
-			cardBtn.addEventListener('click', () => {
-				if (gameState.lock || gameState.revealed[idx] || gameState.matched[idx]) return;
-				gameState.revealed[idx] = true;
-				gameState.flipped.push(idx);
-
-				if (gameState.flipped.length === 2) {
-					const [f, s] = gameState.flipped;
-					if (gameState.deck[f] === gameState.deck[s]) {
-						gameState.matched[f] = true;
-						gameState.matched[s] = true;
-						gameState.flipped = [];
-						if (window.ClippyAudio) window.ClippyAudio.play('win');
-
-						if (gameState.matched.every(m => m)) {
-							activeGameContext = null;
-							if (window.ClippyAudio) window.ClippyAudio.play('tada');
-							window.ClippyUI.appendAssistantMessage("[SUCCESS] All token pairs matched!", [
-								{ label: "Play Again", onClick: () => startMemory() }
-							]);
-							return;
-						}
-						renderMemoryView("Pair matched! Select next token:");
-					} else {
-						gameState.lock = true;
-						setTimeout(() => {
-							gameState.revealed[f] = false;
-							gameState.revealed[s] = false;
-							gameState.flipped = [];
-							gameState.lock = false;
-							renderMemoryView("Tokens hidden. Select first card:");
-						}, 800);
-					}
-				} else {
-					renderMemoryView("Select second card:");
-				}
-			});
-			grid.appendChild(cardBtn);
-		});
-
-		row.appendChild(grid);
-		window.ClippyUI.logElement.appendChild(row);
-		window.ClippyUI.scrollLogToBottom();
-	}
-
-	function startHangman() {
-		activeGameContext = 'hangman';
-		const words = (window.ClippyKnowledge && window.ClippyKnowledge.HANGMAN_WORDS) || ["WINDOWS"];
-		gameState = {
-			word: pickFrom(words),
-			guessed: new Set(),
-			errors: 0,
-			maxErrors: 6
-		};
-		renderHangmanStatus();
-	}
-
-	function renderHangmanStatus() {
-		const masked = gameState.word.split('').map(c => gameState.guessed.has(c) ? c : '_').join(' ');
-		const tries = gameState.maxErrors - gameState.errors;
-		window.ClippyUI.appendAssistantMessage(`[Hangman]\nWord: ${masked}\nTries left: ${tries}/${gameState.maxErrors}\nEnter a single letter:`);
-	}
-
-	function handleHangmanInput(letter) {
-		if (gameState.guessed.has(letter)) {
-			window.ClippyUI.appendAssistantMessage(`Letter '${letter}' already tested.`);
-			return;
-		}
-		gameState.guessed.add(letter);
-		if (gameState.word.includes(letter)) {
-			if (gameState.word.split('').every(c => gameState.guessed.has(c))) {
-				activeGameContext = null;
-				if (window.ClippyAudio) window.ClippyAudio.play('tada');
-				window.ClippyUI.appendAssistantMessage(`[VICTORY] Target word confirmed: **${gameState.word}**!`, [
-					{ label: "Play Again", onClick: () => startHangman() }
-				]);
-			} else {
-				renderHangmanStatus();
-			}
-		} else {
-			gameState.errors++;
-			if (gameState.errors >= gameState.maxErrors) {
-				activeGameContext = null;
-				if (window.ClippyAudio) window.ClippyAudio.play('lose');
-				window.ClippyUI.appendAssistantMessage(`[DEFEAT] The word was **${gameState.word}**.`, [
-					{ label: "Try Again", onClick: () => startHangman() }
-				]);
-			} else {
-				renderHangmanStatus();
-			}
-		}
-	}
-
-	function startQuiz() {
-		activeGameContext = 'quiz';
-		const pool = (window.ClippyKnowledge && window.ClippyKnowledge.QUIZ_QUESTIONS) || [];
-		gameState = {
-			index: 0,
-			score: 0,
-			questions: [...pool].sort(() => Math.random() - 0.5)
-		};
-		askNextQuiz();
-	}
-
-	function askNextQuiz() {
-		const qData = gameState.questions[gameState.index];
-		const actions = qData.options.map((opt, idx) => ({
-			label: opt,
-			onClick: () => {
-				if (idx === qData.answer) {
-					gameState.score++;
-					if (window.ClippyAudio) window.ClippyAudio.play('win');
-					window.ClippyUI.appendAssistantMessage(`[CORRECT] ${qData.fact}`);
-				} else {
-					if (window.ClippyAudio) window.ClippyAudio.play('lose');
-					window.ClippyUI.appendAssistantMessage(`[INCORRECT] The correct answer was: "${qData.options[qData.answer]}".\n${qData.fact}`);
-				}
-
-				gameState.index++;
-				if (gameState.index < gameState.questions.length) {
-					setTimeout(askNextQuiz, 1000);
-				} else {
-					activeGameContext = null;
-					if (window.ClippyAudio) window.ClippyAudio.play('tada');
-					window.ClippyUI.appendAssistantMessage(`[QUIZ COMPLETE] Final score: **${gameState.score} / ${gameState.questions.length}** points!`, [
-						{ label: "Try Again", onClick: () => startQuiz() }
-					]);
-				}
-			}
-		}));
-
-		window.ClippyUI.appendAssistantMessage(`Question ${gameState.index + 1}/${gameState.questions.length}:\n**${qData.q}**`, actions);
-	}
-
-	function startGuess() {
-		activeGameContext = 'guess';
-		gameState = {
-			target: Math.floor(Math.random() * 100) + 1,
-			attempts: 0
-		};
-		window.ClippyUI.appendAssistantMessage("[Random Value Generator] I have chosen an integer between 1 and 100. Enter your numerical guess:");
-	}
-
-	function handleGuessInput(num) {
-		if (isNaN(num) || num < 1 || num > 100) {
-			window.ClippyUI.appendAssistantMessage("Please enter an integer between 1 and 100.");
-			return;
-		}
-		gameState.attempts++;
-		if (num === gameState.target) {
-			activeGameContext = null;
-			if (window.ClippyAudio) window.ClippyAudio.play('tada');
-			window.ClippyUI.appendAssistantMessage(`[TARGET ACQUIRED] Exact match **${gameState.target}** identified in ${gameState.attempts} attempt(s)!`, [
-				{ label: "Play Again", onClick: () => startGuess() }
-			]);
-		} else if (num < gameState.target) {
-			window.ClippyUI.appendAssistantMessage(`Target is GREATER than ${num}. (Attempt count: ${gameState.attempts})`);
-		} else {
-			window.ClippyUI.appendAssistantMessage(`Target is LESS than ${num}. (Attempt count: ${gameState.attempts})`);
-		}
-	}
-
-	function startRPS() {
-		return {
-			text: "[Rock-Paper-Scissors Challenge] Select your move:",
-			actions: [
-				{ label: "Rock", onClick: () => playRPSMove('rock') },
-				{ label: "Paper", onClick: () => playRPSMove('paper') },
-				{ label: "Scissors", onClick: () => playRPSMove('scissors') }
-			]
-		};
-	}
-
-	function playRPSMove(userMove) {
-		const moves = ['rock', 'paper', 'scissors'];
-		const clippyMove = pickFrom(moves);
-		let res = "";
-
-		if (userMove === clippyMove) {
-			res = `We both chose ${userMove}. It is a draw!`;
-		} else if (
-			(userMove === 'rock' && clippyMove === 'scissors') ||
-			(userMove === 'paper' && clippyMove === 'rock') ||
-			(userMove === 'scissors' && clippyMove === 'paper')
-		) {
-			if (window.ClippyAudio) window.ClippyAudio.play('win');
-			res = `You chose ${userMove} and I chose ${clippyMove}. You win!`;
-		} else {
-			if (window.ClippyAudio) window.ClippyAudio.play('lose');
-			res = `You chose ${userMove} and I chose ${clippyMove}. I win this round!`;
-		}
-
-		window.ClippyUI.appendAssistantMessage(res, [
-			{ label: "Play Again", onClick: () => startRPS() }
-		]);
-	}
-
-	function handlePetAction(act) {
-		const pet = window.ClippyActivities.getPetState();
-		if (act === 'feed') {
-			pet.hunger = Math.max(0, pet.hunger - 40);
-			pet.happiness = Math.min(100, pet.happiness + 15);
-			pet.xp += 15;
-			window.ClippyActivities.savePetState(pet);
-			if (window.ClippyAudio) window.ClippyAudio.play('win');
-			window.ClippyUI.appendAssistantMessage("[MAINTENANCE] Consumed polished paperclip reserves. (+15 XP)", [
-				{ label: "View Status", onClick: () => handlePetAction('status') }
-			]);
-		} else if (act === 'pet') {
-			pet.happiness = Math.min(100, pet.happiness + 25);
-			pet.xp += 10;
-			window.ClippyActivities.savePetState(pet);
-			if (window.ClippyAudio) window.ClippyAudio.play('action');
-			window.ClippyUI.appendAssistantMessage("[AFFIRMATION] Metal wire polished. Morale optimized. (+10 XP)", [
-				{ label: "View Status", onClick: () => handlePetAction('status') }
-			]);
-		} else if (act === 'sleep') {
-			pet.energy = 100;
-			pet.hunger = Math.min(100, pet.hunger + 10);
-			pet.xp += 10;
-			window.ClippyActivities.savePetState(pet);
-			if (window.ClippyAudio) window.ClippyAudio.play('action');
-			window.ClippyUI.appendAssistantMessage("[STANDBY] Entered low-power mode. Energy replenished to 100%.", [
-				{ label: "View Status", onClick: () => handlePetAction('status') }
-			]);
-		} else {
-			if (!window.ClippyUI.logElement) return;
-			const row = document.createElement('div');
-			row.className = 'clippy-message clippy-message-assistant';
-
-			const hdr = document.createElement('div');
-			hdr.innerHTML = `[ASSISTANT METRICS] <b>Clippit Status</b> — Level ${pet.level} (XP: ${pet.xp} / ${pet.level * 50})`;
-			row.appendChild(hdr);
-
-			const meter = document.createElement('div');
-			meter.className = 'clippy-pet-meter';
-			meter.innerHTML = `
-				<div class="clippy-pet-row"><span>Morale:</span><span>${pet.happiness}%</span></div>
-				<div class="clippy-pet-bar"><div class="clippy-pet-bar-fill happiness" style="width:${pet.happiness}%"></div></div>
-				<div class="clippy-pet-row"><span>Energy Reserve:</span><span>${pet.energy}%</span></div>
-				<div class="clippy-pet-bar"><div class="clippy-pet-bar-fill energy" style="width:${pet.energy}%"></div></div>
-				<div class="clippy-pet-row"><span>Depletion / Hunger:</span><span>${pet.hunger}%</span></div>
-				<div class="clippy-pet-bar"><div class="clippy-pet-bar-fill hunger" style="width:${pet.hunger}%"></div></div>
-			`;
-			row.appendChild(meter);
-
-			const btnBar = document.createElement('div');
-			btnBar.className = 'clippy-actions-bar';
-			[
-				{ label: "Supply Paperclips", act: 'feed' },
-				{ label: "Polish Wire", act: 'pet' },
-				{ label: "Standby Mode", act: 'sleep' }
-			].forEach(a => {
-				const b = document.createElement('button');
-				b.type = 'button';
-				b.className = 'clippy-action-btn';
-				b.textContent = a.label;
-				b.addEventListener('click', () => handlePetAction(a.act));
-				btnBar.appendChild(b);
-			});
-
-			row.appendChild(btnBar);
-			window.ClippyUI.logElement.appendChild(row);
-			window.ClippyUI.scrollLogToBottom();
-		}
-	}
-
-	function startDefrag() {
-		if (!window.ClippyUI.logElement) return;
-		const row = document.createElement('div');
-		row.className = 'clippy-message clippy-message-assistant';
-
-		const label = document.createElement('div');
-		label.textContent = "Disk Defragmenter (Volume C: Optimizing clusters...)";
-		row.appendChild(label);
-
-		const map = document.createElement('div');
-		map.className = 'clippy-defrag-map';
-		const blocks = [];
-		for (let i = 0; i < 40; i++) {
-			const b = document.createElement('div');
-			b.className = 'clippy-defrag-block' + (Math.random() > 0.45 ? ' frag' : (Math.random() > 0.3 ? '' : ' free'));
-			map.appendChild(b);
-			blocks.push(b);
-		}
-		row.appendChild(map);
-
-		const bar = document.createElement('div');
-		bar.className = 'clippy-progress-box';
-		const fill = document.createElement('div');
-		fill.className = 'clippy-progress-fill';
-		bar.appendChild(fill);
-		row.appendChild(bar);
-
-		window.ClippyUI.logElement.appendChild(row);
-		window.ClippyUI.scrollLogToBottom();
-
-		let progress = 0;
-		let blockIndex = 0;
-
-		const interval = setInterval(() => {
-			progress += 5;
-			if (blockIndex < blocks.length) {
-				blocks[blockIndex].className = 'clippy-defrag-block';
-				if (blockIndex + 1 < blocks.length) {
-					blocks[blockIndex + 1].className = 'clippy-defrag-block active';
-				}
-				blockIndex++;
-			}
-
-			if (window.ClippyAudio) window.ClippyAudio.play('crunch');
-			fill.style.width = `${Math.min(100, progress)}%`;
-
-			if (progress >= 100) {
-				clearInterval(interval);
-				blocks.forEach(b => b.className = 'clippy-defrag-block');
-				if (window.ClippyAudio) window.ClippyAudio.play('tada');
-				label.textContent = "[STATUS: COMPLETE] Defragmentation finished. 100% contiguous cluster allocation on Volume C:.";
-			}
-		}, 130);
-	}
-
-	function renderTodoList() {
-		const todos = window.ClippyActivities.getStoredTodos();
-		if (todos.length === 0) {
-			window.ClippyUI.appendAssistantMessage("[TASK MANAGER] Task register is empty. You can register an entry by typing 'todo add [Task description]'.", [
-				{ label: "Add Sample Task", onClick: () => handleUserInput("todo add Test Windows XP features") }
-			]);
-			return;
-		}
-
-		if (!window.ClippyUI.logElement) return;
-		const row = document.createElement('div');
-		row.className = 'clippy-message clippy-message-assistant';
-
-		const label = document.createElement('div');
-		label.innerHTML = `[TASK MANAGER] <b>Desktop Task List (${todos.filter(t => !t.done).length} pending):</b>`;
-		row.appendChild(label);
-
-		const container = document.createElement('div');
-		container.className = 'clippy-todo-container';
-
-		todos.forEach((t) => {
-			const item = document.createElement('div');
-			item.className = `clippy-todo-item ${t.done ? 'done' : ''}`;
-
-			const check = document.createElement('input');
-			check.type = 'checkbox';
-			check.className = 'clippy-todo-check';
-			check.checked = t.done;
-			check.addEventListener('change', () => {
-				t.done = check.checked;
-				window.ClippyActivities.saveStoredTodos(todos);
-				item.className = `clippy-todo-item ${t.done ? 'done' : ''}`;
-				if (window.ClippyAudio) window.ClippyAudio.play(t.done ? 'win' : 'action');
-			});
-
-			const span = document.createElement('span');
-			span.style.flexGrow = '1';
-			span.textContent = t.text;
-
-			const del = document.createElement('button');
-			del.type = 'button';
-			del.className = 'clippy-todo-del';
-			del.innerHTML = '&times;';
-			del.title = 'Delete Task';
-			del.addEventListener('click', () => {
-				const updated = window.ClippyActivities.getStoredTodos().filter(x => x.id !== t.id);
-				window.ClippyActivities.saveStoredTodos(updated);
-				renderTodoList();
-			});
-
-			item.appendChild(check);
-			item.appendChild(span);
-			item.appendChild(del);
-			container.appendChild(item);
-		});
-
-		row.appendChild(container);
-
-		const btnBar = document.createElement('div');
-		btnBar.className = 'clippy-actions-bar';
-
-		const clearBtn = document.createElement('button');
-		clearBtn.type = 'button';
-		clearBtn.className = 'clippy-action-btn';
-		clearBtn.textContent = 'Clear All';
-		clearBtn.addEventListener('click', () => handleUserInput('todo clear'));
-		btnBar.appendChild(clearBtn);
-
-		const addBtn = document.createElement('button');
-		addBtn.type = 'button';
-		addBtn.className = 'clippy-action-btn';
-		addBtn.textContent = '+ Add Task';
-		addBtn.addEventListener('click', () => {
-			if (window.ClippyUI.inputElement) {
-				window.ClippyUI.inputElement.value = "todo add ";
-				window.ClippyUI.inputElement.focus();
-			}
-		});
-		btnBar.appendChild(addBtn);
-
-		row.appendChild(btnBar);
-		window.ClippyUI.logElement.appendChild(row);
-		window.ClippyUI.scrollLogToBottom();
-	}
-
-	function startPomodoro(minutes = 25) {
-		if (window.ClippyActivities.activePomodoroTimer) {
-			clearInterval(window.ClippyActivities.activePomodoroTimer);
-			window.ClippyActivities.activePomodoroTimer = null;
-		}
-
-		let secondsLeft = minutes * 60;
-		window.ClippyUI.appendAssistantMessage(`[TIMER INITIALIZED] Focus countdown initiated for ${minutes} minute(s).`);
-
-		window.ClippyActivities.activePomodoroTimer = setInterval(() => {
-			secondsLeft -= 10;
-			if (secondsLeft <= 0) {
-				clearInterval(window.ClippyActivities.activePomodoroTimer);
-				window.ClippyActivities.activePomodoroTimer = null;
-				if (window.ClippyAudio) window.ClippyAudio.play('tada');
-				window.ClippyUI.showIdleBubble("[TIMER ELAPSED] Focus period complete. Recommended break: 5 minutes.");
-				window.ClippyUI.appendAssistantMessage("[TIMER EXPIRED] Work interval complete. Please take a 5-minute rest cycle.");
-			}
-		}, 10000);
-	}
-
-	function generateIdleMessage() {
-		const unread = window.ClippySystemBridge.getUnreadMailCount();
-		const currentMood = window.ClippyBrain ? window.ClippyBrain.getMood() : 'OPTIMISTIC';
-		const candidates = [];
-
-		if (unread > 0) candidates.push(`You have ${unread} unread email(s) waiting in Outlook!`);
-		const recycleCount = window.ClippySystemBridge.getRecycleBinCount();
-		if (recycleCount > 0) candidates.push(`Recycle Bin contains ${recycleCount} deleted item(s).`);
-		const openWins = window.ClippySystemBridge.getOpenWindowCount();
-		if (openWins > 2) candidates.push(`You have ${openWins} open windows active on desktop.`);
-		const moon = window.ClippySystemBridge.getMoonPhaseLabel();
-		if (moon) candidates.push(`The moon phase tonight is ${moon}.`);
-
-		candidates.push("Need a hand with your tasks or want to discuss a new idea? Click me anytime!");
-		candidates.push("Want to play Memory Match, Hangman, or Tic-Tac-Toe?");
-
-		return pickFrom(candidates);
-	}
-
 	function startIdleDaemon() {
 		if (idleTimer) clearInterval(idleTimer);
 		idleTimer = setInterval(() => {
 			if (window.ClippyUI.isOpen) return;
 			if (Math.random() > IDLE_MESSAGE_CHANCE) return;
-			window.ClippyUI.showIdleBubble(generateIdleMessage());
+			const unread = window.ClippySystemBridge.getUnreadMailCount();
+			let msg = "Need a hand with your tasks or want to discuss a new idea? Click me anytime!";
+			if (unread > 0) msg = `You have ${unread} unread email(s) waiting in Outlook!`;
+			window.ClippyUI.showIdleBubble(msg);
 		}, IDLE_MESSAGE_INTERVAL_MS);
 	}
 
@@ -1701,6 +1106,37 @@
 		startIdleDaemon();
 	}
 
+	function notifyGameEnded(gameTitle, resultSummary, restartCallback) {
+		setTimeout(() => {
+			const promptText = `Round completed in **${gameTitle}** (${resultSummary}). Would you like to play another round?`;
+			window.ClippyUI.appendAssistantMessage(promptText, [
+				{
+					label: `Yes, play another ${gameTitle}`,
+					onClick: () => {
+						window.ClippyUI.appendUserMessage(`Yes, let's play ${gameTitle} again.`);
+						setTimeout(() => {
+							if (typeof restartCallback === 'function') restartCallback();
+						}, 200);
+					}
+				},
+				{
+					label: "No, let's do something else",
+					onClick: () => {
+						window.ClippyUI.appendUserMessage("No, let's explore other topics.");
+						setTimeout(() => {
+							window.ClippyUI.appendAssistantMessage("Understood! What would you like to focus on now?", [
+								{ label: "View To-Do List", onClick: () => handleUserInput("View To-Do List") },
+								{ label: "System Diagnostics", onClick: () => handleUserInput("System diagnostics") },
+								{ label: "Tell me a joke", onClick: () => handleUserInput("Tell me a joke") },
+								{ label: "What can you do?", onClick: () => handleUserInput("What can you do?") }
+							]);
+						}, 200);
+					}
+				}
+			]);
+		}, 400);
+	}
+
 	window.ClippyAgent = {
 		init,
 		open: openAssistant,
@@ -1725,6 +1161,7 @@
 			openAssistant();
 			executeActionTrigger(actionId);
 		},
+		notifyGameEnded,
 		notify: (text) => window.ClippyUI.showIdleBubble(text),
 		selectGraphOption: (opt) => {
 			if (!opt || isThinking || (window.ClippyUI && window.ClippyUI.isTyping)) return;

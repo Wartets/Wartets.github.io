@@ -179,6 +179,39 @@
 			this.scrollLogToBottom();
 		}
 
+		createActivityCard(title, badgeText = 'Activity') {
+			if (!this.logElement) return null;
+			const row = document.createElement('div');
+			row.className = 'clippy-message clippy-message-assistant';
+
+			const card = document.createElement('div');
+			card.className = 'clippy-activity-card';
+
+			const header = document.createElement('div');
+			header.className = 'clippy-activity-header';
+			header.innerHTML = `
+				<span>${title}</span>
+				<span class="clippy-activity-badge">${badgeText}</span>
+			`;
+
+			const body = document.createElement('div');
+			body.className = 'clippy-activity-body';
+
+			card.appendChild(header);
+			card.appendChild(body);
+			row.appendChild(card);
+
+			this.logElement.appendChild(row);
+			this.scrollLogToBottom();
+
+			return {
+				messageRow: row,
+				cardContainer: card,
+				headerElement: header,
+				bodyElement: body
+			};
+		}
+
 		appendAssistantMessage(text, actions = null, onComplete = null) {
 			if (!this.logElement) return;
 			if (this.currentTypeInterval) {
