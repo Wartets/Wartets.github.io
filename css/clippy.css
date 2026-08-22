@@ -137,46 +137,6 @@
 	overflow: hidden;
 }
 
-.clippy-mood-indicator {
-	font-size: 10px;
-	font-weight: bold;
-	padding: 1px 7px;
-	border-radius: 9px;
-	background: rgba(0, 0, 0, 0.32);
-	border: 1px solid rgba(255, 255, 255, 0.45);
-	color: #ffffff;
-	letter-spacing: 0.3px;
-	text-transform: uppercase;
-	white-space: nowrap;
-	transition: background-color 0.25s ease, border-color 0.25s ease, color 0.25s ease;
-}
-
-.clippy-mood-indicator[data-mood="OPTIMISTIC"] { background: #15803d; border-color: #86efac; color: #ffffff; }
-.clippy-mood-indicator[data-mood="ANALYTICAL"] { background: #1e40af; border-color: #93c5fd; color: #ffffff; }
-.clippy-mood-indicator[data-mood="CYNICAL"] { background: #713f12; border-color: #fde047; color: #ffffff; }
-.clippy-mood-indicator[data-mood="OFFENDED"] { background: #991b1b; border-color: #fca5a5; color: #ffffff; }
-.clippy-mood-indicator[data-mood="EXISTENTIAL"] { background: #581c87; border-color: #d8b4fe; color: #ffffff; }
-.clippy-mood-indicator[data-mood="NOSTALGIC"] { background: #0f766e; border-color: #5eead4; color: #ffffff; }
-.clippy-mood-indicator[data-mood="PARANOID"] { background: #854d0e; border-color: #fde047; color: #ffffff; }
-.clippy-mood-indicator[data-mood="PEDANTIC"] { background: #374151; border-color: #d1d5db; color: #ffffff; }
-.clippy-mood-indicator[data-mood="EUPHORIC"] { background: #be185d; border-color: #fbcfe8; color: #ffffff; }
-.clippy-mood-indicator[data-mood="MELANCHOLIC"] { background: #334155; border-color: #94a3b8; color: #ffffff; }
-.clippy-mood-indicator[data-mood="SARCASTIC"] { background: #9a3412; border-color: #fdba74; color: #ffffff; }
-.clippy-mood-indicator[data-mood="ENTHUSIASTIC"] { background: #047857; border-color: #a7f3d0; color: #ffffff; }
-.clippy-mood-indicator[data-mood="PHILOSOPHICAL"] { background: #4338ca; border-color: #c7d2fe; color: #ffffff; }
-.clippy-mood-indicator[data-mood="DRAMATIC"] { background: #701a75; border-color: #f5d0fe; color: #ffffff; }
-.clippy-mood-indicator[data-mood="SCHEMING"] { background: #1e293b; border-color: #38bdf8; color: #ffffff; }
-.clippy-mood-indicator[data-mood="DEFENSIVE"] { background: #b45309; border-color: #fed7aa; color: #ffffff; }
-.clippy-mood-indicator[data-mood="POETIC"] { background: #4c1d95; border-color: #e9d5ff; color: #ffffff; }
-.clippy-mood-indicator[data-mood="EVIL"] { background: #450a0a; border-color: #ef4444; color: #fca5a5; }
-.clippy-mood-indicator[data-mood="CHAOTIC"] { background: #7c2d12; border-color: #fb923c; color: #ffedd5; }
-.clippy-mood-indicator[data-mood="CONSPIRATORIAL"] { background: #064e3b; border-color: #34d399; color: #a7f3d0; }
-.clippy-mood-indicator[data-mood="ABSURDIST"] { background: #831843; border-color: #f472b6; color: #fdf2f8; }
-.clippy-mood-indicator[data-mood="ZEN"] { background: #14532d; border-color: #4ade80; color: #f0fdf4; }
-.clippy-mood-indicator[data-mood="IMPATIENT"] { background: #991b1b; border-color: #f87171; color: #fef2f2; }
-.clippy-mood-indicator[data-mood="ENERGETIC"] { background: #ea580c; border-color: #fdba74; color: #fff7ed; }
-.clippy-mood-indicator[data-mood="INQUISITIVE"] { background: #1d4ed8; border-color: #60a5fa; color: #eff6ff; }
-
 .clippy-popup-avatar {
 	width: 22px;
 	height: 22px;

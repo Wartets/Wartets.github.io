@@ -632,6 +632,20 @@
 					}
 				}
 			});
+
+			this.register({
+				id: 'clippy',
+				name: 'Microsoft Clippy',
+				subtitle: 'Office Assistant',
+				icon: '../assets/images/desk/clippy/idle.png',
+				category: 'Accessories',
+				aliases: ['clippit', 'assistant', 'agent', 'helper'],
+				handler: () => {
+					if (window.ClippyAgent && typeof window.ClippyAgent.open === 'function') {
+						window.ClippyAgent.open();
+					}
+				}
+			});
 		}
 	}
 
