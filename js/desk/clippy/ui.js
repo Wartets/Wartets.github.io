@@ -67,7 +67,11 @@
 			const closeBtn = this.popupElement.querySelector('.clippy-popup-close');
 			const soundBtn = this.popupElement.querySelector('.clippy-sound-toggle');
 
-			this.makeDraggable(this.popupElement, headerHandle);
+			if (window.ClippyEnvironment === 'standalone') {
+				headerHandle.style.cursor = 'default';
+			} else {
+				this.makeDraggable(this.popupElement, headerHandle);
+			}
 
 			this.renderSuggestions();
 
@@ -154,9 +158,10 @@
 		}
 
 		scrollLogToBottom() {
-			if (this.logElement) {
-				this.logElement.scrollTop = this.logElement.scrollHeight;
-			}
+			if (!this.logElement) return;
+			requestAnimationFrame(() => {
+				if (this.logElement) this.logElement.scrollTop = this.logElement.scrollHeight;
+			});
 		}
 
 		appendUserMessage(text) {
@@ -297,8 +302,8 @@
 			this.bubbleElement = document.createElement('div');
 			this.bubbleElement.className = 'clippy-idle-bubble hidden';
 
-			const iconContainer = document.getElementById('clippy-taskbar-icon');
-			if (iconContainer) iconContainer.appendChild(this.bubbleElement);
+			const anchorContainer = document.getElementById('clippy-taskbar-icon') || document.querySelector('.clippy-standalone-hero') || document.body;
+			anchorContainer.appendChild(this.bubbleElement);
 			return this.bubbleElement;
 		}
 

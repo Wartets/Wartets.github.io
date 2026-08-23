@@ -582,7 +582,7 @@
 			return {
 				text: transformedText,
 				options: nextOptions,
-				actionTrigger: option.actionTrigger || null
+				actionTrigger: option.actionTrigger || nextNode.actionTrigger || null
 			};
 		}
 
@@ -594,7 +594,7 @@
 			this.saveState();
 
 			const node = window.ClippyGraphEngine ? window.ClippyGraphEngine.getNode(targetNodeId) : null;
-			if (!node) return { text: "Standing by.", options: [] };
+			if (!node) return { text: "Standing by.", options: [], actionTrigger: null };
 
 			const rawNodeText = window.ClippyGraphEngine.getFormattedNodeText(node, this);
 			const transformedText = this.transformResponseText(rawNodeText);
@@ -602,7 +602,8 @@
 
 			return {
 				text: transformedText,
-				options: options
+				options: options,
+				actionTrigger: node.actionTrigger || null
 			};
 		}
 

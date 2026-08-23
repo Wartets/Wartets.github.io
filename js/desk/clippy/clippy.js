@@ -16,7 +16,8 @@
 	const DESK_ONLY_ACTION_TRIGGERS = new Set([
 		'action_inspect_windows', 'action_show_desktop', 'action_cascade_windows', 'action_tile_windows',
 		'action_check_mail', 'action_compose_mail', 'action_inspect_bin', 'action_music_panel',
-		'action_files_panel', 'action_theme_panel', 'action_wallpaper_panel'
+		'action_files_panel', 'action_theme_panel', 'action_wallpaper_panel', 'action_achievements',
+		'action_volume_panel'
 	]);
 
 	const DESK_ONLY_FEATURE_LABELS = {
@@ -30,7 +31,9 @@
 		action_music_panel: 'Audio Player',
 		action_files_panel: 'File System',
 		action_theme_panel: 'Theme Switcher',
-		action_wallpaper_panel: 'Desktop Wallpapers'
+		action_wallpaper_panel: 'Desktop Wallpapers',
+		action_achievements: 'Milestones Window',
+		action_volume_panel: 'Audio Volume Controller'
 	};
 
 	function isDeskEnvironment() {
@@ -264,8 +267,8 @@
 			return {
 				text: pickFrom(qPool),
 				actions: [
-					{ label: "Open Recycle Bin", onClick: () => window.ClippySystemBridge.launchApp('recyclebin') },
-					{ label: "Empty Recycle Bin", onClick: () => { window.ClippySystemBridge.emptyRecycleBin(); window.ClippyUI.appendAssistantMessage("Recycle Bin emptied."); } }
+					{ label: "Open Recycle Bin", onClick: () => { if (isDeskEnvironment()) window.ClippySystemBridge.launchApp('recyclebin'); else respondDeskOnlyFeature('Recycle Bin'); } },
+					{ label: "Empty Recycle Bin", onClick: () => { if (isDeskEnvironment()) { window.ClippySystemBridge.emptyRecycleBin(); window.ClippyUI.appendAssistantMessage("Recycle Bin emptied."); } else { respondDeskOnlyFeature('Recycle Bin'); } } }
 				]
 			};
 		}
@@ -275,8 +278,8 @@
 			return {
 				text: pickFrom(prgPool),
 				actions: [
-					{ label: "Open Command Prompt", onClick: () => window.ClippySystemBridge.launchApp('cmd') },
-					{ label: "Open Projects", onClick: () => window.ClippySystemBridge.launchApp('projects') }
+					{ label: "Open Command Prompt", onClick: () => { if (isDeskEnvironment()) window.ClippySystemBridge.launchApp('cmd'); else respondDeskOnlyFeature('Command Prompt'); } },
+					{ label: "Open Projects", onClick: () => { if (isDeskEnvironment()) window.ClippySystemBridge.launchApp('projects'); else respondDeskOnlyFeature('Projects Folder'); } }
 				]
 			};
 		}
