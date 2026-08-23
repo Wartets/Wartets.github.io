@@ -1,0 +1,226 @@
+:root {
+	--clippy-standalone-header-height: 84px;
+}
+
+body.clippy-standalone {
+	margin: 0;
+	min-height: 100vh;
+	min-height: 100dvh;
+	background: radial-gradient(circle at top, #1c3d84 0%, #050c1c 65%, #01040c 100%);
+	background-attachment: fixed;
+	font-family: 'Tahoma', 'Segoe UI', sans-serif;
+	color: #ece9d8;
+	overflow-x: hidden;
+}
+
+#clippy-standalone-shell {
+	display: flex;
+	flex-direction: column;
+	min-height: 100vh;
+	min-height: 100dvh;
+}
+
+.clippy-standalone-header {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 16px;
+	padding: 14px 22px;
+	min-height: var(--clippy-standalone-header-height);
+	box-sizing: border-box;
+	background: linear-gradient(to bottom, #0a246a 0%, #0c3fae 55%, #0a246a 100%);
+	border-bottom: 2px solid #06132f;
+	box-shadow: 0 4px 18px rgba(0, 0, 0, 0.45);
+	flex-wrap: wrap;
+}
+
+.clippy-standalone-hero {
+	display: flex;
+	align-items: center;
+	gap: 16px;
+	min-width: 0;
+}
+
+.clippy-standalone-avatar {
+	width: 64px;
+	height: 64px;
+	object-fit: contain;
+	filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.5));
+	animation: clippyStandaloneFloat 3.4s ease-in-out infinite;
+	flex-shrink: 0;
+}
+
+@keyframes clippyStandaloneFloat {
+	0%, 100% { transform: translateY(0) rotate(0deg); }
+	50% { transform: translateY(-6px) rotate(-3deg); }
+}
+
+.clippy-standalone-heading {
+	min-width: 0;
+}
+
+.clippy-standalone-heading h1 {
+	margin: 0;
+	font-size: 22px;
+	font-family: 'Trebuchet MS', Tahoma, sans-serif;
+	text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.6);
+	letter-spacing: 0.5px;
+	color: #ffffff;
+}
+
+.clippy-standalone-heading p {
+	margin: 2px 0 0 0;
+	font-size: 12px;
+	color: #cfe0ff;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+.clippy-standalone-desktop-link {
+	flex-shrink: 0;
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	padding: 8px 14px;
+	background: #ece9d8;
+	color: #0a246a;
+	font-weight: bold;
+	font-size: 12px;
+	text-decoration: none;
+	border-radius: 3px;
+	border: 1px solid #06132f;
+	box-shadow: 1px 1px 0 rgba(255, 255, 255, 0.4) inset, 2px 2px 6px rgba(0, 0, 0, 0.35);
+	transition: transform 0.15s ease, background 0.15s ease;
+}
+
+.clippy-standalone-desktop-link:hover {
+	background: #ffffff;
+	transform: translateY(-1px);
+}
+
+.clippy-standalone-stage {
+	flex: 1;
+	display: flex;
+	align-items: stretch;
+	justify-content: center;
+	padding: 18px;
+	box-sizing: border-box;
+	min-height: 0;
+}
+
+.clippy-standalone-footer {
+	text-align: center;
+	font-size: 10px;
+	color: #7f93c8;
+	padding: 8px 12px 14px;
+}
+
+.clippy-standalone-footer a {
+	color: #cfe0ff;
+}
+
+body.clippy-standalone .clippy-popup {
+	position: static;
+	width: 100%;
+	max-width: 980px;
+	height: 100%;
+	max-height: none;
+	margin: 0 auto;
+	border-radius: 10px 10px 8px 8px;
+	box-shadow: 0 18px 45px rgba(0, 0, 0, 0.55), inset 1px 1px 0 rgba(255, 255, 255, 0.6);
+	animation: none;
+}
+
+body.clippy-standalone .clippy-popup.hidden {
+	display: flex;
+}
+
+body.clippy-standalone .clippy-popup-header {
+	cursor: default;
+}
+
+body.clippy-standalone .clippy-popup-close {
+	display: none;
+}
+
+body.clippy-standalone .clippy-popup-avatar {
+	width: 28px;
+	height: 28px;
+}
+
+body.clippy-standalone .clippy-popup-title {
+	font-size: 14px;
+}
+
+body.clippy-standalone .clippy-popup-log {
+	padding: 20px;
+	gap: 16px;
+}
+
+body.clippy-standalone .clippy-message {
+	font-size: 13px;
+}
+
+body.clippy-standalone .clippy-popup-input {
+	font-size: 13px;
+	padding: 8px 10px;
+}
+
+body.clippy-standalone .clippy-popup-send {
+	font-size: 12px;
+	height: 30px;
+	padding: 4px 16px;
+}
+
+@media (max-width: 900px) {
+	.clippy-standalone-heading p {
+		display: none;
+	}
+}
+
+@media (max-width: 720px) {
+	.clippy-standalone-header {
+		padding: 10px 14px;
+	}
+	.clippy-standalone-avatar {
+		width: 48px;
+		height: 48px;
+	}
+	.clippy-standalone-heading h1 {
+		font-size: 18px;
+	}
+	.clippy-standalone-desktop-link {
+		font-size: 11px;
+		padding: 6px 10px;
+	}
+	.clippy-standalone-stage {
+		padding: 8px;
+	}
+	body.clippy-standalone .clippy-popup {
+		border-radius: 6px;
+	}
+}
+
+@media (max-width: 480px) {
+	.clippy-standalone-header {
+		flex-direction: column;
+		align-items: stretch;
+		text-align: center;
+	}
+	.clippy-standalone-hero {
+		justify-content: center;
+	}
+	.clippy-standalone-desktop-link {
+		justify-content: center;
+	}
+	.clippy-standalone-stage {
+		padding: 6px;
+	}
+	body.clippy-standalone .clippy-popup-log {
+		padding: 12px;
+	}
+	body.clippy-standalone .clippy-popup-input-row {
+		padding: 8px;
+	}
+}

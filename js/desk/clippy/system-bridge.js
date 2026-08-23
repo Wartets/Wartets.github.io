@@ -2,6 +2,14 @@
 	'use strict';
 
 	const SystemBridge = {
+		getEnvironment() {
+			return window.ClippyEnvironment === 'standalone' ? 'standalone' : 'desk';
+		},
+
+		isDeskEnvironment() {
+			return this.getEnvironment() === 'desk';
+		},
+
 		recordTelemetryEvent(eventType, metadata = {}) {
 			try {
 				if (window.ClippyBrain && window.ClippyBrain.memory && window.ClippyBrain.memory.telemetryEvents) {

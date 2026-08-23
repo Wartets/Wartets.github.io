@@ -23,6 +23,7 @@ document.addEventListener('DOMContentLoaded', () => {
 		{ name: "Thought's Library", url: '../poetry/' },
 		{ name: 'Music', url: '../music/' },
 		{ name: 'Desk', url: '../desk/' },
+		{ name: 'Clippy', url: '../clippy/' },
 		{ name: '404', url: '../404.html' },
 		{ name: 'Offline', url: '../offline.html' }
 	];

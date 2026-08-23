@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+	<title>Clippy</title>
+	<meta name="description" content="Chat with Clippy, the interactive desktop assistant from Colin Bossu Réaubourg's portfolio.">
+	<meta name="robots" content="index, follow">
+	<meta name="theme-color" content="#0a246a">
+	<link rel="canonical" href="https://wartets.github.io/clippy/">
+	<link rel="icon" href="../assets/images/browser-icon.png">
+	<meta property="og:title" content="Clippy - Wartets Interactive Assistant">
+	<meta property="og:description" content="Chat with Clippy, the interactive desktop assistant from Colin Bossu Réaubourg's portfolio.">
+	<meta property="og:image" content="https://wartets.github.io/assets/images/desk/clippy/idle.png">
+	<meta property="og:type" content="website">
+	<meta property="og:url" content="https://wartets.github.io/clippy/">
+	<link rel="preconnect" href="https://api.iconify.design" crossorigin>
+	<link rel="stylesheet" href="../css/clippy.css">
+	<link rel="stylesheet" href="../css/clippy-standalone.css">
+	<script>window.ClippyEnvironment = 'standalone';</script>
+	<script src="../js/site-commons.js" defer></script>
+</head>
+<body class="clippy-standalone">
+	<noscript>
+		<div style="padding:40px;text-align:center;font-family:Tahoma,sans-serif;color:#ece9d8;">
+			JavaScript is required to chat with Clippy. Please enable JavaScript, or <a href="https://wartets.github.io/" style="color:#cfe0ff;">return to the home page</a>.
+		</div>
+	</noscript>
+
+	<div id="clippy-standalone-shell">
+		<header class="clippy-standalone-header">
+			<div class="clippy-standalone-hero">
+				<img src="../assets/images/desk/clippy/idle.png" alt="Clippy" class="clippy-standalone-avatar" id="clippy-standalone-avatar">
+				<div class="clippy-standalone-heading">
+					<h1>Clippy</h1>
+					<p>Where do you want to go today?</p>
+				</div>
+			</div>
+			<a href="https://wartets.github.io/desk/" class="clippy-standalone-desktop-link">
+				<span>Desktop</span>
+			</a>
+		</header>
+		<main id="screen-frame" class="clippy-standalone-stage"></main>
+		<footer class="clippy-standalone-footer">
+			<span>&copy; <span id="current-year">2026</span> Designed by <a href="https://wartets.github.io/">Wartets</a> •  Check out the source code on <a href="https://github.com/wartets/wartets.github.io" target="_blank" rel="noopener noreferrer">GitHub</a></span>
+		</footer>
+	</div>
+
+	<script src="../js/desk/event-bus.js"></script>
+	<script src="../js/desk/storage-adapter.js"></script>
+	<script src="../js/desk/clippy/knowledge.js"></script>
+	<script src="../js/desk/clippy/audio.js"></script>
+	<script src="../js/desk/clippy/system-bridge.js"></script>
+	<script src="../js/desk/clippy/nlp.js"></script>
+	<script src="../js/desk/clippy/brain.js"></script>
+	<script src="../js/desk/clippy/graph.js"></script>
+	<script src="../js/desk/clippy/activities.js"></script>
+	<script src="../js/desk/clippy/ui.js"></script>
+	<script src="../js/desk/clippy/clippy.js"></script>
+	<script src="standalone.js"></script>
+</body>
+</html>

@@ -13,6 +13,45 @@
 		return list[Math.floor(Math.random() * list.length)];
 	}
 
+	const DESK_ONLY_ACTION_TRIGGERS = new Set([
+		'action_inspect_windows', 'action_show_desktop', 'action_cascade_windows', 'action_tile_windows',
+		'action_check_mail', 'action_compose_mail', 'action_inspect_bin', 'action_music_panel',
+		'action_files_panel', 'action_theme_panel', 'action_wallpaper_panel'
+	]);
+
+	const DESK_ONLY_FEATURE_LABELS = {
+		action_inspect_windows: 'Window Manager',
+		action_show_desktop: 'Window Manager',
+		action_cascade_windows: 'Window Manager',
+		action_tile_windows: 'Window Manager',
+		action_check_mail: 'Outlook Express',
+		action_compose_mail: 'Outlook Express',
+		action_inspect_bin: 'Recycle Bin',
+		action_music_panel: 'Audio Player',
+		action_files_panel: 'File System',
+		action_theme_panel: 'Theme Switcher',
+		action_wallpaper_panel: 'Desktop Wallpapers'
+	};
+
+	function isDeskEnvironment() {
+		return !window.ClippySystemBridge || window.ClippySystemBridge.getEnvironment() !== 'standalone';
+	}
+
+	function buildDeskOnlyResponse(featureLabel) {
+		return {
+			text: `The "${featureLabel}" module requires the full desktop workstation environment and is not available in this standalone Clippy session. Visit the complete desktop experience to unlock every capability.`,
+			actions: [
+				{ label: "Open Desktop Experience", onClick: () => { window.open('https://wartets.github.io/desk/', '_blank'); } },
+				{ label: "What can you do here?", onClick: () => handleUserInput("What can you do?") }
+			]
+		};
+	}
+
+	function respondDeskOnlyFeature(featureLabel) {
+		const response = buildDeskOnlyResponse(featureLabel);
+		window.ClippyUI.appendAssistantMessage(response.text, response.actions);
+	}
+
 	function handleUserInput(rawText) {
 		if (!rawText || isThinking) return;
 		if (window.ClippyUI && window.ClippyUI.isTyping && window.ClippyUI.currentTypeInterval) {
@@ -51,6 +90,10 @@
 	}
 
 	function executeActionTrigger(actionId) {
+		if (DESK_ONLY_ACTION_TRIGGERS.has(actionId) && !isDeskEnvironment()) {
+			respondDeskOnlyFeature(DESK_ONLY_FEATURE_LABELS[actionId] || 'Desktop Workstation');
+			return;
+		}
 		if (actionId === 'timer_25') {
 			window.ClippyActivities.pomodoro.mount(25);
 		} else if (actionId === 'show_todos') {
@@ -375,6 +418,10 @@
 			return { text: "Accessing audio synthesizer controller...", actionTrigger: 'action_volume_panel' };
 		}
 
+		if ((norm === 'minimize all' || norm === 'show desktop' || norm === 'hide windows' || norm === 'restore all' || norm === 'restore windows' || norm === 'cascade windows' || norm === 'cascade' || norm === 'tile windows' || norm === 'tile') && !isDeskEnvironment()) {
+			return buildDeskOnlyResponse('Window Manager');
+		}
+
 		if (norm === 'minimize all' || norm === 'show desktop' || norm === 'hide windows') {
 			window.ClippySystemBridge.minimizeAllWindows();
 			const msg = pickFrom([
@@ -415,6 +462,10 @@
 			return { text: window.ClippyBrain ? window.ClippyBrain.formatWithMood(msg) : msg };
 		}
 
+		if ((norm === 'play music' || norm === 'toggle music' || norm === 'resume music' || norm === 'next music track' || norm === 'next track' || norm === 'next song' || norm === 'previous music track' || norm === 'prev track' || norm === 'prev song' || norm === 'now playing' || norm === 'current song') && !isDeskEnvironment()) {
+			return buildDeskOnlyResponse('Audio Player');
+		}
+
 		if (norm === 'play music' || norm === 'toggle music' || norm === 'resume music') {
 			window.ClippySystemBridge.toggleMusicPlayback();
 			const track = window.ClippySystemBridge.getNowPlaying();
@@ -446,6 +497,9 @@
 		}
 
 		if (norm.startsWith('open ') || norm.startsWith('launch ') || norm.startsWith('start ') || norm.startsWith('lancer ') || norm.startsWith('ouvre ')) {
+			if (!isDeskEnvironment()) {
+				return buildDeskOnlyResponse('Application Launcher');
+			}
 			const appTarget = norm.replace(/^(open|launch|start|lancer|ouvre)\s+/i, '').trim();
 			const appAliases = {
 				'calc': 'calculator', 'calculator': 'calculator', 'calculatrice': 'calculator',
@@ -477,6 +531,9 @@
 		}
 
 		if (norm.startsWith('theme ') || norm.startsWith('set theme ') || norm.startsWith('theme=')) {
+			if (!isDeskEnvironment()) {
+				return buildDeskOnlyResponse('Theme Switcher');
+			}
 			const theme = norm.replace(/^(theme|set theme|theme=)\s*/i, '').trim();
 			const validThemes = ['luna-blue', 'royale', 'silver', 'olive', 'classic', 'zune', 'noir', 'matrix', 'high-contrast'];
 			if (validThemes.includes(theme)) {
@@ -489,19 +546,22 @@
 			};
 		}
 
-		if (norm === 'scanlines on' || norm === 'enable scanlines') {
-			window.ClippySystemBridge.toggleScanlines(true);
-			return { text: "Scanlines overlay enabled." };
-		}
-		if (norm === 'scanlines off' || norm === 'disable scanlines') {
-			window.ClippySystemBridge.toggleScanlines(false);
-			return { text: "Scanlines overlay disabled." };
-		}
-		if (norm === 'crt on' || norm === 'enable crt') {
-			window.ClippySystemBridge.toggleCrt(true);
-			return { text: "CRT glass curvature filter enabled." };
-		}
-		if (norm === 'crt off' || norm === 'disable crt') {
+		if (norm === 'scanlines on' || norm === 'enable scanlines' || norm === 'scanlines off' || norm === 'disable scanlines' || norm === 'crt on' || norm === 'enable crt' || norm === 'crt off' || norm === 'disable crt') {
+			if (!isDeskEnvironment()) {
+				return buildDeskOnlyResponse('CRT & Display Effects');
+			}
+			if (norm === 'scanlines on' || norm === 'enable scanlines') {
+				window.ClippySystemBridge.toggleScanlines(true);
+				return { text: "Scanlines overlay enabled." };
+			}
+			if (norm === 'scanlines off' || norm === 'disable scanlines') {
+				window.ClippySystemBridge.toggleScanlines(false);
+				return { text: "Scanlines overlay disabled." };
+			}
+			if (norm === 'crt on' || norm === 'enable crt') {
+				window.ClippySystemBridge.toggleCrt(true);
+				return { text: "CRT glass curvature filter enabled." };
+			}
 			window.ClippySystemBridge.toggleCrt(false);
 			return { text: "CRT glass curvature filter disabled." };
 		}
@@ -540,6 +600,9 @@
 		}
 
 		if (norm.startsWith('find ') || norm.startsWith('search ')) {
+			if (!isDeskEnvironment()) {
+				return buildDeskOnlyResponse('File System Search');
+			}
 			const q = rawText.replace(/^(find|search)\s+/i, '').trim();
 			if (q) {
 				const hits = window.ClippySystemBridge.searchFiles(q);
@@ -559,6 +622,15 @@
 		if (norm.includes('project') || norm.includes('portfolio') || norm.includes('showcase') || norm.includes('projets')) {
 			const p = window.ClippySystemBridge.getRandomProject();
 			const title = (p && p.title) ? (typeof p.title === 'object' ? (p.title.en || p.title.fr || "Project") : p.title) : "Portfolio";
+			if (!isDeskEnvironment()) {
+				return {
+					text: `Featured project showcase: "${title}". Browse the complete interactive portfolio on the desktop experience.`,
+					actions: [
+						{ label: "Visit Portfolio", onClick: () => { window.open('https://wartets.github.io/', '_blank'); } },
+						{ label: "Open Desktop Experience", onClick: () => { window.open('https://wartets.github.io/desk/', '_blank'); } }
+					]
+				};
+			}
 			return {
 				text: `Featured project showcase: "${title}".`,
 				actions: [
@@ -615,9 +687,9 @@
 		const btnBar = document.createElement('div');
 		btnBar.className = 'clippy-actions-bar';
 		[
-			{ label: "Change User Identity", onClick: () => window.ClippySystemBridge.launchApp('settings', 'system') },
-			{ label: "Open Milestones", onClick: () => window.ClippySystemBridge.launchApp('achievements') },
-			{ label: "Display Settings", onClick: () => window.ClippySystemBridge.launchApp('display') }
+			{ label: "Change User Identity", onClick: () => { if (isDeskEnvironment()) window.ClippySystemBridge.launchApp('settings', 'system'); else respondDeskOnlyFeature('User Identity Settings'); } },
+			{ label: "Open Milestones", onClick: () => { if (isDeskEnvironment()) window.ClippySystemBridge.launchApp('achievements'); else respondDeskOnlyFeature('Milestones Window'); } },
+			{ label: "Display Settings", onClick: () => { if (isDeskEnvironment()) window.ClippySystemBridge.launchApp('display'); else respondDeskOnlyFeature('Display Settings'); } }
 		].forEach(act => {
 			const btn = document.createElement('button');
 			btn.type = 'button';
@@ -664,7 +736,7 @@
 		openBtn.type = 'button';
 		openBtn.className = 'clippy-action-btn';
 		openBtn.textContent = "Open Full Milestones Window";
-		openBtn.addEventListener('click', () => window.ClippySystemBridge.launchApp('achievements'));
+		openBtn.addEventListener('click', () => { if (isDeskEnvironment()) window.ClippySystemBridge.launchApp('achievements'); else respondDeskOnlyFeature('Milestones Window'); });
 		btnBar.appendChild(openBtn);
 
 		row.appendChild(btnBar);
@@ -1101,9 +1173,9 @@
 			if (window.ClippyUI.isOpen) return;
 			if (Math.random() > IDLE_MESSAGE_CHANCE) return;
 
-			const unread = window.ClippySystemBridge.getUnreadMailCount();
-			const openWinsCount = window.ClippySystemBridge.getOpenWindowCount();
-			const recycleCount = window.ClippySystemBridge.getRecycleBinCount();
+			const unread = isDeskEnvironment() ? window.ClippySystemBridge.getUnreadMailCount() : 0;
+			const openWinsCount = isDeskEnvironment() ? window.ClippySystemBridge.getOpenWindowCount() : 0;
+			const recycleCount = isDeskEnvironment() ? window.ClippySystemBridge.getRecycleBinCount() : 0;
 
 			if (unread > 0) {
 				window.ClippyUI.showIdleBubble(`You have ${unread} unread email(s) waiting in Outlook Express!`, () => {
