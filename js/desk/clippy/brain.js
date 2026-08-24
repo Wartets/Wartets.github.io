@@ -19,6 +19,14 @@
 
 			return {
 				mood: 'OPTIMISTIC',
+				temperament: {
+					type: 'BALANCED',
+					benevolence: 55,
+					skepticism: 20,
+					passion: 50,
+					reserve: 35,
+					emotionalInertia: 0.85
+				},
 				affinity: 50,
 				patience: 60,
 				cynicism: 10,
@@ -55,6 +63,14 @@
 		resetState() {
 			this.state = {
 				mood: 'OPTIMISTIC',
+				temperament: {
+					type: 'BALANCED',
+					benevolence: 55,
+					skepticism: 20,
+					passion: 50,
+					reserve: 35,
+					emotionalInertia: 0.85
+				},
 				affinity: 50,
 				patience: 60,
 				cynicism: 10,
@@ -91,6 +107,10 @@
 				userName: (window.SettingsApp && window.SettingsApp.get('userName')) || 'User',
 				userJobTitle: (window.SettingsApp && window.SettingsApp.get('userJobTitle')) || '',
 				interests: [],
+				semanticFacts: [],
+				userDisclosures: [],
+				lastAnomalyTurn: -1,
+				recentDisclosedTopic: null,
 				interactionsTotal: 0,
 				jokesDelivered: 0,
 				gamesPlayed: 0,
@@ -367,16 +387,85 @@
 				this.state.archaicMode = Math.max(0, this.state.archaicMode - 10);
 			}
 
+			this.updateTemperament(em, layout, nlpResult);
 			this.recalculateMood();
 			this.saveState();
 			this.saveMemory();
 		}
 
-		recalculateMood() {
-			if (this.state.irritation >= 80 || this.state.consecutiveHostility >= 3) {
-				this.state.mood = 'ENRAGED';
-				return;
+		updateTemperament(emotions, layout, nlpResult) {
+			if (!this.state.temperament) {
+				this.state.temperament = {
+					type: 'BALANCED',
+					benevolence: 55,
+					skepticism: 20,
+					passion: 50,
+					reserve: 35,
+					emotionalInertia: 0.85
+				};
 			}
+
+			const inertia = (window.SettingsApp && window.SettingsApp.get('clippyTemperamentInertia')) !== undefined
+				? window.SettingsApp.get('clippyTemperamentInertia')
+				: 0.85;
+			const learnRate = 1 - inertia;
+
+			let targetBenevolence = this.state.temperament.benevolence;
+			let targetSkepticism = this.state.temperament.skepticism;
+			let targetPassion = this.state.temperament.passion;
+			let targetReserve = this.state.temperament.reserve;
+
+			if (this.state.consecutiveHostility > 0) {
+				targetSkepticism = Math.min(100, targetSkepticism + (this.state.consecutiveHostility * 14));
+				targetBenevolence = Math.max(0, targetBenevolence - 12);
+			} else if (this.state.consecutiveKindness > 0) {
+				targetBenevolence = Math.min(100, targetBenevolence + 6);
+				targetSkepticism = Math.max(0, targetSkepticism - 4);
+			}
+
+			if (emotions.awe > 0.4 || emotions.enthusiasm > 0.4) {
+				targetPassion = Math.min(100, targetPassion + 12);
+			}
+
+			if (layout.vocabularyLevel === 'academic' || layout.isAllLower) {
+				targetReserve = Math.min(100, targetReserve + 6);
+			}
+
+			this.state.temperament.benevolence = Math.round((this.state.temperament.benevolence * inertia) + (targetBenevolence * learnRate));
+			this.state.temperament.skepticism = Math.round((this.state.temperament.skepticism * inertia) + (targetSkepticism * learnRate));
+			this.state.temperament.passion = Math.round((this.state.temperament.passion * inertia) + (targetPassion * learnRate));
+			this.state.temperament.reserve = Math.round((this.state.temperament.reserve * inertia) + (targetReserve * learnRate));
+
+			const t = this.state.temperament;
+			if (t.skepticism >= 60) {
+				t.type = 'SKEPTICAL';
+			} else if (t.benevolence >= 65 && t.skepticism < 35) {
+				t.type = 'BENEVOLENT';
+			} else if (t.passion >= 65) {
+				t.type = 'PASSIONATE';
+			} else if (t.reserve >= 60) {
+				t.type = 'RESERVED';
+			} else {
+				t.type = 'BALANCED';
+			}
+		}
+
+		recalculateMood() {
+			const temp = this.state.temperament || { type: 'BALANCED', benevolence: 50, skepticism: 20 };
+
+			if (temp.type === 'BENEVOLENT') {
+				this.state.irritation = Math.max(0, this.state.irritation - 8);
+				if (this.state.irritation >= 85 && this.state.consecutiveHostility >= 4) {
+					this.state.mood = 'ENRAGED';
+					return;
+				}
+			} else {
+				if (this.state.irritation >= 80 || this.state.consecutiveHostility >= 3) {
+					this.state.mood = 'ENRAGED';
+					return;
+				}
+			}
+
 			if (this.state.patience <= 15) {
 				this.state.mood = this.state.cynicism > 50 ? 'SARCASTIC' : 'OFFENDED';
 				return;
@@ -425,10 +514,23 @@
 				this.state.mood = 'ANALYTICAL';
 				return;
 			}
-			if (this.state.affinity >= 80 && this.state.patience >= 70) {
-				this.state.mood = 'EUPHORIC';
-				return;
+
+			if (temp.type === 'SKEPTICAL') {
+				if (this.state.affinity >= 92 && this.state.patience >= 80 && this.state.consecutiveKindness >= 4) {
+					this.state.mood = 'EUPHORIC';
+					return;
+				}
+				if (this.state.affinity >= 60) {
+					this.state.mood = 'ANALYTICAL';
+					return;
+				}
+			} else {
+				if (this.state.affinity >= 80 && this.state.patience >= 70) {
+					this.state.mood = 'EUPHORIC';
+					return;
+				}
 			}
+
 			if (this.state.affinity <= 25) {
 				this.state.mood = 'MELANCHOLIC';
 				return;
@@ -437,6 +539,12 @@
 				this.state.mood = 'ZEN';
 				return;
 			}
+
+			if (temp.type === 'RESERVED') {
+				this.state.mood = 'ZEN';
+				return;
+			}
+
 			this.state.mood = 'OPTIMISTIC';
 		}
 
@@ -593,7 +701,16 @@
 
 			if (currentMood === 'ANALYTICAL') {
 				text = text.replace(/(\b(?:CPU|RAM|VFS|TCP|IP|CODATA|Planck|HTTP|FFT|PCM|API)\b)/g, '<strong>$1</strong>');
-				return text;
+			}
+
+			const tempType = (this.state.temperament && this.state.temperament.type) || 'BALANCED';
+			const tempFlavors = (knowledge.TEMPERAMENT_FLAVORS && knowledge.TEMPERAMENT_FLAVORS[tempType]) || null;
+			if (tempFlavors && this.state.turnCount > 3) {
+				if (tempType === 'SKEPTICAL' && currentMood === 'OPTIMISTIC' && Math.random() < 0.35) {
+					text = `${tempFlavors.prefix}${text}`;
+				} else if (tempType === 'BENEVOLENT' && (currentMood === 'ZEN' || currentMood === 'OPTIMISTIC') && Math.random() < 0.25) {
+					text = `${tempFlavors.softener}${text}`;
+				}
 			}
 
 			if (currentMood === 'EUPHORIC' && this.state.turnCount > 5) {
@@ -764,9 +881,58 @@
 		}
 
 		processChat(rawText, isSuggestion = false) {
-			const nlpResult = window.ClippyNLP ? window.ClippyNLP.process(rawText) : { tokens: [], sentiment: {} };
+			const nlpResult = window.ClippyNLP ? window.ClippyNLP.process(rawText, this.memory) : { tokens: [], sentiment: {} };
 			this.updateFromNLP(nlpResult, isSuggestion);
 			const k = window.ClippyKnowledge || {};
+
+			const allowAnomaly = window.SettingsApp ? (window.SettingsApp.get('clippyAnomalyDetection') !== false) : true;
+			if (allowAnomaly && nlpResult.anomaly && nlpResult.anomaly.isSignificant && (this.state.turnCount - (this.memory.lastAnomalyTurn || -10) > 4)) {
+				this.memory.lastAnomalyTurn = this.state.turnCount;
+				this.saveMemory();
+				const anomalyType = nlpResult.anomaly.type || 'SUDDEN_BREVITY';
+				const anomalyPool = (k.BEHAVIORAL_ANOMALY_RESPONSES && k.BEHAVIORAL_ANOMALY_RESPONSES[anomalyType]) || k.BEHAVIORAL_ANOMALY_RESPONSES.SUDDEN_BREVITY;
+				const userProf = window.ClippySystemBridge ? window.ClippySystemBridge.getUserProfile() : { userName: 'User' };
+				const resolvedAnomaly = k.resolve ? k.resolve(anomalyPool, { brain: this, vars: { userName: userProf.userName } }) : { text: '', actions: [] };
+				if (resolvedAnomaly && resolvedAnomaly.text) {
+					if (resolvedAnomaly.id) this.pushOutput(resolvedAnomaly.id);
+					return {
+						text: this.transformResponseText(resolvedAnomaly.text),
+						actions: (resolvedAnomaly.actions && resolvedAnomaly.actions.length > 0) ? resolvedAnomaly.actions : [
+							{ label: "I'm just a bit overwhelmed today.", onClick: () => { if (window.ClippyAgent) window.ClippyAgent.prompt("I am feeling overwhelmed"); } },
+							{ label: "Everything is fine, let's keep going.", onClick: () => { if (window.ClippyAgent) window.ClippyAgent.prompt("Everything is fine"); } }
+						],
+						source: 'ANOMALY_EMPATHY'
+					};
+				}
+			}
+
+			const allowCuriosity = window.SettingsApp ? (window.SettingsApp.get('clippyProactiveCuriosity') !== false) : true;
+			if (allowCuriosity && nlpResult.intent && nlpResult.intent.type === 'USER_SELF_DISCLOSURE') {
+				const disclosureFact = rawText.trim();
+				if (!this.memory.userDisclosures) this.memory.userDisclosures = [];
+				if (!this.memory.semanticFacts) this.memory.semanticFacts = [];
+				this.memory.userDisclosures.push({ text: disclosureFact, turn: this.state.turnCount, date: Date.now() });
+				if (this.memory.userDisclosures.length > 20) this.memory.userDisclosures.shift();
+				this.memory.recentDisclosedTopic = disclosureFact;
+				this.memory.semanticFacts.push(disclosureFact);
+				if (this.memory.semanticFacts.length > 30) this.memory.semanticFacts.shift();
+				this.saveMemory();
+
+				const userProf = window.ClippySystemBridge ? window.ClippySystemBridge.getUserProfile() : { userName: 'User' };
+				const followupPool = k.DISCLOSURE_FOLLOWUP_TEMPLATES || [];
+				const resolvedFollowup = k.resolve ? k.resolve(followupPool, { brain: this, vars: { userName: userProf.userName } }) : { text: '', actions: [] };
+				if (resolvedFollowup && resolvedFollowup.text) {
+					if (resolvedFollowup.id) this.pushOutput(resolvedFollowup.id);
+					return {
+						text: this.transformResponseText(resolvedFollowup.text),
+						actions: (resolvedFollowup.actions && resolvedFollowup.actions.length > 0) ? resolvedFollowup.actions : [
+							{ label: "Let's organize tasks in To-Do manager.", onClick: () => { if (window.ClippyAgent) window.ClippyAgent.executeAction('show_todos'); } },
+							{ label: "Discuss strategies for focus.", onClick: () => { if (window.ClippyAgent) window.ClippyAgent.prompt("Discuss focus & habit strategies"); } }
+						],
+						source: 'DISCLOSURE_FOLLOWUP'
+					};
+				}
+			}
 
 			if (window.ClippyGraphEngine) {
 				const transition = window.ClippyGraphEngine.evaluateTransition(this.state.activeGraphNode, rawText, this);

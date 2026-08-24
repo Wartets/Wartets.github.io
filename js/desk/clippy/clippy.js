@@ -387,51 +387,48 @@
 		}
 
 		if (norm.includes('homogeneity') || norm.includes('dimensional analysis') || norm.includes('analyse dimensionnelle') || (norm.includes('=') && !norm.startsWith('theme=') && (norm.includes('f =') || norm.includes('e =') || norm.includes('v =') || norm.includes('p =') || norm.includes('t =')))) {
-			window.ClippyActivities.dimensionalAnalysis.mount(rawText);
-			return null;
+			const node = window.ClippyBrain ? window.ClippyBrain.navigateGraphNode('activity_dimensional_analysis_node') : null;
+			return node ? { text: node.text, actions: window.ClippyBrain.buildGraphActions(node.options), actionTrigger: 'action_dimensional_analysis' } : { text: "Initializing physical dimensional analysis...", actionTrigger: 'action_dimensional_analysis' };
 		}
 
 		if (norm.includes('euclidean division') || norm.includes('division euclidienne') || norm.includes('polynomial division') || norm.includes('quotient and remainder')) {
-			window.ClippyActivities.euclideanDivision.mount();
-			return null;
+			const node = window.ClippyBrain ? window.ClippyBrain.navigateGraphNode('activity_euclidean_division_node') : null;
+			return node ? { text: node.text, actions: window.ClippyBrain.buildGraphActions(node.options), actionTrigger: 'action_euclidean_division' } : { text: "Loading Euclidean division engine...", actionTrigger: 'action_euclidean_division' };
 		}
 
 		if (norm.includes('factor polynomial') || norm.includes('factor quadratic') || norm.startsWith('factor ') || norm.includes('factorize') || norm.includes('factoriser')) {
-			const expr = rawText.replace(/^(factor polynomial|factor quadratic|factorize|factoriser|factor)\s*/i, '').trim();
-			window.ClippyActivities.polynomialFactorization.mount(expr || 'x^2 - 5x + 6');
-			return null;
+			const node = window.ClippyBrain ? window.ClippyBrain.navigateGraphNode('activity_polynomial_factorization_node') : null;
+			return node ? { text: node.text, actions: window.ClippyBrain.buildGraphActions(node.options), actionTrigger: 'action_polynomial_factorization' } : { text: "Initializing polynomial factorization engine...", actionTrigger: 'action_polynomial_factorization' };
 		}
 
 		if (norm.includes('linear system') || norm.includes('gaussian elimination') || norm.includes('systeme lineaire') || norm.includes('solve matrix')) {
-			window.ClippyActivities.linearSolver.mount();
-			return null;
+			const node = window.ClippyBrain ? window.ClippyBrain.navigateGraphNode('activity_linear_solver_node') : null;
+			return node ? { text: node.text, actions: window.ClippyBrain.buildGraphActions(node.options), actionTrigger: 'action_linear_solver' } : { text: "Initializing Gaussian elimination linear solver...", actionTrigger: 'action_linear_solver' };
 		}
 
 		if (norm.includes('wheel') || norm.includes('decision wheel') || norm.includes('roue de choix') || norm.includes('roue')) {
-			window.ClippyActivities.wheel.mount();
-			return null;
+			const node = window.ClippyBrain ? window.ClippyBrain.navigateGraphNode('activity_wheel_node') : null;
+			return node ? { text: node.text, actions: window.ClippyBrain.buildGraphActions(node.options), actionTrigger: 'action_wheel' } : { text: "Priming decision choice wheel...", actionTrigger: 'action_wheel' };
 		}
 
 		if (norm.includes('cipher') || norm.includes('morse') || norm.includes('caesar') || norm.includes('vigenere') || norm.includes('encoder') || norm.includes('decoder')) {
-			window.ClippyActivities.cipher.mount();
-			return null;
+			const node = window.ClippyBrain ? window.ClippyBrain.navigateGraphNode('activity_cipher_node') : null;
+			return node ? { text: node.text, actions: window.ClippyBrain.buildGraphActions(node.options), actionTrigger: 'action_cipher' } : { text: "Initializing cryptography workbench...", actionTrigger: 'action_cipher' };
 		}
 
 		if (norm.includes('tps') || norm.includes('cps') || norm.includes('click speed') || norm.includes('mouse speed')) {
-			window.ClippyActivities.tps.mount();
-			return null;
+			const node = window.ClippyBrain ? window.ClippyBrain.navigateGraphNode('activity_tps_node') : null;
+			return node ? { text: node.text, actions: window.ClippyBrain.buildGraphActions(node.options), actionTrigger: 'action_tps' } : { text: "Initializing mouse click speed benchmark...", actionTrigger: 'action_tps' };
 		}
 
 		if (norm.includes('date calculator') || norm.includes('days between') || norm.includes('date difference') || norm.includes('calculateur de date')) {
-			window.ClippyActivities.dateCalc.mount();
-			return null;
+			const node = window.ClippyBrain ? window.ClippyBrain.navigateGraphNode('activity_date_calc_node') : null;
+			return node ? { text: node.text, actions: window.ClippyBrain.buildGraphActions(node.options), actionTrigger: 'action_date_calc' } : { text: "Initializing date interval calculator...", actionTrigger: 'action_date_calc' };
 		}
 
 		if (norm === 'start pomodoro timer' || norm.startsWith('timer ') || norm.startsWith('pomodoro')) {
-			const match = norm.match(/\d+/);
-			const mins = match ? parseInt(match[0], 10) : 25;
-			window.ClippyActivities.pomodoro.mount(mins);
-			return null;
+			const node = window.ClippyBrain ? window.ClippyBrain.navigateGraphNode('pomodoro_node') : null;
+			return node ? { text: node.text, actions: window.ClippyBrain.buildGraphActions(node.options), actionTrigger: 'timer_25' } : { text: "Starting 25-minute Pomodoro timer...", actionTrigger: 'timer_25' };
 		}
 
 		if (norm === 'view to-do list' || norm === 'to-do list' || norm === 'todo list' || norm === 'todo' || norm === 'todos' || norm === 'tasks' || norm === 'mes taches') {
@@ -744,36 +741,40 @@
 		};
 	}
 
-	function renderUserProfileCard() {
+	function renderUserProfileCard(targetRow = null) {
 		if (!window.ClippyUI.logElement) return;
 		const prof = window.ClippySystemBridge.getUserProfile();
 		const ach = window.ClippySystemBridge.getAchievementsSummary();
-		const row = document.createElement('div');
-		row.className = 'clippy-message clippy-message-assistant';
+		const row = targetRow || document.createElement('div');
+		if (!targetRow) {
+			row.className = 'clippy-message clippy-message-assistant';
+		}
+		row.innerHTML = '';
 
 		const cTexts = (window.ClippyKnowledge && window.ClippyKnowledge.SYSTEM_TEXTS && window.ClippyKnowledge.SYSTEM_TEXTS.cards && window.ClippyKnowledge.SYSTEM_TEXTS.cards.profile) || {};
 		const themeStr = window.ClippyKnowledge.formatString(cTexts.themeLabel || "Theme: {theme}", { theme: prof.theme });
 		const milesStr = cTexts.milestonesLabel || "Milestones Unlocked:";
 
-		row.innerHTML = `
-			<div class="clippy-profile-card">
-				<div class="clippy-profile-header">
-					<img src="${prof.userAvatar}" class="clippy-profile-avatar ${prof.avatarShape === 'circle' ? 'circle' : (prof.avatarShape === 'round' ? 'round' : '')}" alt="">
-					<div class="clippy-profile-info">
-						<strong>${prof.userName}</strong>
-						<span>${prof.userJobTitle}</span>
-						<span style="font-size: 10px; color: #555;">${themeStr}</span>
-					</div>
-				</div>
-				<div class="clippy-profile-stats">
-					<div class="clippy-profile-stat-row">
-						<span>${milesStr}</span>
-						<strong>${ach.unlockedCount} / ${ach.total} (${ach.percentage}%)</strong>
-					</div>
-					<div class="clippy-ach-progress-bar"><div class="clippy-ach-progress-fill" style="width: ${ach.percentage}%;"></div></div>
+		const card = document.createElement('div');
+		card.className = 'clippy-profile-card';
+		card.innerHTML = `
+			<div class="clippy-profile-header">
+				<img src="${prof.userAvatar}" class="clippy-profile-avatar ${prof.avatarShape === 'circle' ? 'circle' : (prof.avatarShape === 'round' ? 'round' : '')}" alt="">
+				<div class="clippy-profile-info">
+					<strong>${prof.userName}</strong>
+					<span>${prof.userJobTitle}</span>
+					<span style="font-size: 10px; color: #555;">${themeStr}</span>
 				</div>
 			</div>
+			<div class="clippy-profile-stats">
+				<div class="clippy-profile-stat-row">
+					<span>${milesStr}</span>
+					<strong>${ach.unlockedCount} / ${ach.total} (${ach.percentage}%)</strong>
+				</div>
+				<div class="clippy-ach-progress-bar"><div class="clippy-ach-progress-fill" style="width: ${ach.percentage}%;"></div></div>
+			</div>
 		`;
+		row.appendChild(card);
 
 		const btnBar = document.createElement('div');
 		btnBar.className = 'clippy-actions-bar';
@@ -791,15 +792,20 @@
 		});
 
 		row.appendChild(btnBar);
-		window.ClippyUI.logElement.appendChild(row);
+		if (!targetRow) {
+			window.ClippyUI.logElement.appendChild(row);
+		}
 		window.ClippyUI.scrollLogToBottom();
 	}
 
-	function renderAchievementsList() {
+	function renderAchievementsList(targetRow = null) {
 		if (!window.ClippyUI.logElement) return;
 		const ach = window.ClippySystemBridge.getAchievementsSummary();
-		const row = document.createElement('div');
-		row.className = 'clippy-message clippy-message-assistant';
+		const row = targetRow || document.createElement('div');
+		if (!targetRow) {
+			row.className = 'clippy-message clippy-message-assistant';
+		}
+		row.innerHTML = '';
 
 		const cTexts = (window.ClippyKnowledge && window.ClippyKnowledge.SYSTEM_TEXTS && window.ClippyKnowledge.SYSTEM_TEXTS.cards && window.ClippyKnowledge.SYSTEM_TEXTS.cards.achievements) || {};
 		const summaryHdr = window.ClippyKnowledge.formatString(cTexts.summary || "[MILESTONES SUMMARY] <b>Unlocked: {unlocked} / {total} ({percentage}%)</b>", {
@@ -822,11 +828,13 @@
 			`;
 		});
 
-		row.innerHTML = `
+		const container = document.createElement('div');
+		container.innerHTML = `
 			<div>${summaryHdr}</div>
 			<div class="clippy-ach-progress-bar" style="margin: 6px 0;"><div class="clippy-ach-progress-fill" style="width: ${ach.percentage}%;"></div></div>
 			<div class="clippy-ach-list">${itemsHtml || `<div style="font-size:11px; color:#666;">${cTexts.empty || 'No milestones unlocked yet. Explore the workstation!'}</div>`}</div>
 		`;
+		row.appendChild(container);
 
 		const btnBar = document.createElement('div');
 		btnBar.className = 'clippy-actions-bar';
@@ -838,20 +846,28 @@
 		btnBar.appendChild(openBtn);
 
 		row.appendChild(btnBar);
-		window.ClippyUI.logElement.appendChild(row);
+		if (!targetRow) {
+			window.ClippyUI.logElement.appendChild(row);
+		}
 		window.ClippyUI.scrollLogToBottom();
 	}
 
-	function renderThemeSelectorCard() {
+	function renderThemeSelectorCard(targetRow = null) {
 		if (!window.ClippyUI.logElement) return;
-		const row = document.createElement('div');
-		row.className = 'clippy-message clippy-message-assistant';
+		const row = targetRow || document.createElement('div');
+		if (!targetRow) {
+			row.className = 'clippy-message clippy-message-assistant';
+		}
+		row.innerHTML = '';
 		const currentTheme = window.ClippySystemBridge.getSetting('theme') || 'luna-blue';
 		const themes = ['luna-blue', 'royale', 'silver', 'olive', 'classic', 'zune', 'noir', 'matrix', 'high-contrast'];
 		const thTexts = (window.ClippyKnowledge && window.ClippyKnowledge.SYSTEM_TEXTS && window.ClippyKnowledge.SYSTEM_TEXTS.cards && window.ClippyKnowledge.SYSTEM_TEXTS.cards.themes) || {};
 		const thCtrl = (window.ClippyKnowledge && window.ClippyKnowledge.SYSTEM_TEXTS && window.ClippyKnowledge.SYSTEM_TEXTS.themeControls) || {};
 
-		row.innerHTML = `<div>${window.ClippyKnowledge.formatString(thTexts.header || "[THEME SWITCHER] Active Theme: <b>{theme}</b>", { theme: currentTheme })}</div>`;
+		const hdr = document.createElement('div');
+		hdr.innerHTML = window.ClippyKnowledge.formatString(thTexts.header || "[THEME SWITCHER] Active Theme: <b>{theme}</b>", { theme: currentTheme });
+		row.appendChild(hdr);
+
 		const grid = document.createElement('div');
 		grid.className = 'clippy-actions-bar';
 		themes.forEach(t => {
@@ -861,23 +877,30 @@
 			b.textContent = t;
 			b.addEventListener('click', () => {
 				window.ClippySystemBridge.setTheme(t);
-				window.ClippyUI.appendAssistantMessage(window.ClippyKnowledge.formatString(thCtrl.switched || "Workstation theme switched to: **{theme}**.", { theme: t }));
+				renderThemeSelectorCard(row);
 			});
 			grid.appendChild(b);
 		});
 
 		row.appendChild(grid);
-		window.ClippyUI.logElement.appendChild(row);
+		if (!targetRow) {
+			window.ClippyUI.logElement.appendChild(row);
+		}
 		window.ClippyUI.scrollLogToBottom();
 	}
 
-	async function renderWallpaperSelectorCard() {
+	async function renderWallpaperSelectorCard(targetRow = null) {
 		if (!window.ClippyUI.logElement) return;
-		const row = document.createElement('div');
-		row.className = 'clippy-message clippy-message-assistant';
+		const row = targetRow || document.createElement('div');
+		if (!targetRow) {
+			row.className = 'clippy-message clippy-message-assistant';
+		}
+		row.innerHTML = '';
 		const wpTexts = (window.ClippyKnowledge && window.ClippyKnowledge.SYSTEM_TEXTS && window.ClippyKnowledge.SYSTEM_TEXTS.cards && window.ClippyKnowledge.SYSTEM_TEXTS.cards.wallpapers) || {};
 		row.innerHTML = `<div>${wpTexts.loading || "[DESKTOP BACKGROUNDS] Loading wallpaper catalog..."}</div>`;
-		window.ClippyUI.logElement.appendChild(row);
+		if (!targetRow) {
+			window.ClippyUI.logElement.appendChild(row);
+		}
 		window.ClippyUI.scrollLogToBottom();
 
 		const wallpapers = await window.ClippySystemBridge.getAvailableWallpapers();
@@ -892,7 +915,6 @@
 			b.textContent = wp.name;
 			b.addEventListener('click', () => {
 				window.ClippySystemBridge.setWallpaper(wp.path);
-				window.ClippyUI.appendAssistantMessage(window.ClippyKnowledge.formatString(wpTexts.applied || "Desktop wallpaper set to: **{name}**.", { name: wp.name }));
 			});
 			grid.appendChild(b);
 		});
@@ -908,10 +930,13 @@
 		window.ClippyUI.scrollLogToBottom();
 	}
 
-	function renderMusicPlayerController() {
+	function renderMusicPlayerController(targetRow = null) {
 		if (!window.ClippyUI.logElement) return;
-		const row = document.createElement('div');
-		row.className = 'clippy-message clippy-message-assistant';
+		const row = targetRow || document.createElement('div');
+		if (!targetRow) {
+			row.className = 'clippy-message clippy-message-assistant';
+		}
+		row.innerHTML = '';
 		const track = window.ClippySystemBridge.getNowPlaying();
 		const tracks = window.ClippySystemBridge.getMusicTracks();
 		const mCards = (window.ClippyKnowledge && window.ClippyKnowledge.SYSTEM_TEXTS && window.ClippyKnowledge.SYSTEM_TEXTS.cards && window.ClippyKnowledge.SYSTEM_TEXTS.cards.music) || {};
@@ -920,17 +945,18 @@
 		const trackTitle = track ? track.title : (mCards.standbyTitle || 'Audio Player Standby');
 		const artistName = track ? (track.artist || mCards.defaultArtist || 'Windows XP Audio') : (mCards.noTrack || 'No track currently active');
 
-		row.innerHTML = `
-			<div class="clippy-music-card">
-				<div class="clippy-music-header">
-					<img src="../assets/images/desk/icons/Music File.webp" style="width:24px;height:24px;" alt="">
-					<div style="flex:1; overflow:hidden;">
-						<strong>${trackTitle}</strong>
-						<div style="font-size:10px; color:#555;">${artistName}</div>
-					</div>
+		const card = document.createElement('div');
+		card.className = 'clippy-music-card';
+		card.innerHTML = `
+			<div class="clippy-music-header">
+				<img src="../assets/images/desk/icons/Music File.webp" style="width:24px;height:24px;" alt="">
+				<div style="flex:1; overflow:hidden;">
+					<strong>${trackTitle}</strong>
+					<div style="font-size:10px; color:#555;">${artistName}</div>
 				</div>
 			</div>
 		`;
+		row.appendChild(card);
 
 		const btnBar = document.createElement('div');
 		btnBar.className = 'clippy-actions-bar';
@@ -941,9 +967,7 @@
 		playBtn.textContent = mCards.btnPlayPause || "Play / Pause";
 		playBtn.addEventListener('click', () => {
 			window.ClippySystemBridge.toggleMusicPlayback();
-			const now = window.ClippySystemBridge.getNowPlaying();
-			const msg = now ? (window.ClippyKnowledge.formatString ? window.ClippyKnowledge.formatString(mCtrl.toggled || 'Playback toggled: "{title}"', { title: now.title || 'Audio Track' }) : `Playback toggled: "${now.title}"`) : (mCtrl.initiated || "Audio player initiated.");
-			window.ClippyUI.appendAssistantMessage(msg);
+			renderMusicPlayerController(row);
 		});
 		btnBar.appendChild(playBtn);
 
@@ -953,7 +977,7 @@
 		nextBtn.textContent = mCards.btnNext || "Next Track";
 		nextBtn.addEventListener('click', () => {
 			window.ClippySystemBridge.nextMusicTrack();
-			window.ClippyUI.appendAssistantMessage(mCtrl.advancedNext || mCtrl.nextTrack || "Advanced to next track.");
+			renderMusicPlayerController(row);
 		});
 		btnBar.appendChild(nextBtn);
 
@@ -965,10 +989,7 @@
 			rndBtn.addEventListener('click', () => {
 				const rnd = Math.floor(Math.random() * tracks.length);
 				window.ClippySystemBridge.playTrackIndex(rnd);
-				const msg = window.ClippyKnowledge.formatString
-					? window.ClippyKnowledge.formatString(mCtrl.playingTrack || "Playing track: **{title}**.", { title: tracks[rnd].title || 'Track' })
-					: `Playing track: **${tracks[rnd].title || 'Track'}**.`;
-				window.ClippyUI.appendAssistantMessage(msg);
+				renderMusicPlayerController(row);
 			});
 			btnBar.appendChild(rndBtn);
 		}
@@ -988,14 +1009,19 @@
 		btnBar.appendChild(openWinampBtn);
 
 		row.appendChild(btnBar);
-		window.ClippyUI.logElement.appendChild(row);
+		if (!targetRow) {
+			window.ClippyUI.logElement.appendChild(row);
+		}
 		window.ClippyUI.scrollLogToBottom();
 	}
 
-	function renderActiveWindowsList() {
+	function renderActiveWindowsList(targetRow = null) {
 		if (!window.ClippyUI.logElement) return;
-		const row = document.createElement('div');
-		row.className = 'clippy-message clippy-message-assistant';
+		const row = targetRow || document.createElement('div');
+		if (!targetRow) {
+			row.className = 'clippy-message clippy-message-assistant';
+		}
+		row.innerHTML = '';
 
 		const windowsMap = (window.WindowManager && window.WindowManager.windows) ? window.WindowManager.windows : {};
 		const winList = Object.values(windowsMap).filter(w => !w.classList.contains('xp-modal-overlay'));
@@ -1031,6 +1057,7 @@
 				focusBtn.textContent = isMin ? (wTexts.btnRestore || 'Restore') : (wTexts.btnFocus || 'Focus');
 				focusBtn.addEventListener('click', () => {
 					window.ClippySystemBridge.focusWindow(w.id);
+					renderActiveWindowsList(row);
 				});
 				item.appendChild(focusBtn);
 
@@ -1040,7 +1067,7 @@
 				closeBtn.textContent = wTexts.btnClose || 'Close';
 				closeBtn.addEventListener('click', () => {
 					if (window.WindowManager) window.WindowManager.close(w, w.id);
-					renderActiveWindowsList();
+					renderActiveWindowsList(row);
 				});
 				item.appendChild(closeBtn);
 
@@ -1059,8 +1086,7 @@
 		minAllBtn.textContent = wTexts.btnMinAll || 'Minimize All';
 		minAllBtn.addEventListener('click', () => {
 			window.ClippySystemBridge.minimizeAllWindows();
-			const winTexts = (window.ClippyKnowledge && window.ClippyKnowledge.SYSTEM_TEXTS && window.ClippyKnowledge.SYSTEM_TEXTS.windowControls) || {};
-			window.ClippyUI.appendAssistantMessage(pickFrom(winTexts.minimizedAll || ["All open windows have been minimized to the taskbar."]));
+			renderActiveWindowsList(row);
 		});
 		btnBar.appendChild(minAllBtn);
 
@@ -1070,8 +1096,7 @@
 		cascadeBtn.textContent = wTexts.btnCascade || 'Cascade';
 		cascadeBtn.addEventListener('click', () => {
 			window.ClippySystemBridge.cascadeWindows();
-			const winTexts = (window.ClippyKnowledge && window.ClippyKnowledge.SYSTEM_TEXTS && window.ClippyKnowledge.SYSTEM_TEXTS.windowControls) || {};
-			window.ClippyUI.appendAssistantMessage(pickFrom(winTexts.cascaded || ["Windows arranged in cascade layout."]));
+			renderActiveWindowsList(row);
 		});
 		btnBar.appendChild(cascadeBtn);
 
@@ -1081,26 +1106,32 @@
 		tileBtn.textContent = wTexts.btnTile || 'Tile';
 		tileBtn.addEventListener('click', () => {
 			window.ClippySystemBridge.tileWindows(true);
-			const winTexts = (window.ClippyKnowledge && window.ClippyKnowledge.SYSTEM_TEXTS && window.ClippyKnowledge.SYSTEM_TEXTS.windowControls) || {};
-			window.ClippyUI.appendAssistantMessage(pickFrom(winTexts.tiled || ["Windows tiled horizontally across the workspace."]));
+			renderActiveWindowsList(row);
 		});
 		btnBar.appendChild(tileBtn);
 
 		row.appendChild(btnBar);
-		window.ClippyUI.logElement.appendChild(row);
+		if (!targetRow) {
+			window.ClippyUI.logElement.appendChild(row);
+		}
 		window.ClippyUI.scrollLogToBottom();
 	}
 
-	function renderFileListCard(path = '/') {
+	function renderFileListCard(path = '/', targetRow = null) {
 		if (!window.ClippyUI.logElement) return;
-		const row = document.createElement('div');
-		row.className = 'clippy-message clippy-message-assistant';
+		const row = targetRow || document.createElement('div');
+		if (!targetRow) {
+			row.className = 'clippy-message clippy-message-assistant';
+		}
+		row.innerHTML = '';
 
 		const files = window.ClippySystemBridge.listFiles(path);
 		const fCards = (window.ClippyKnowledge && window.ClippyKnowledge.SYSTEM_TEXTS && window.ClippyKnowledge.SYSTEM_TEXTS.cards && window.ClippyKnowledge.SYSTEM_TEXTS.cards.files) || {};
 		const fControls = (window.ClippyKnowledge && window.ClippyKnowledge.SYSTEM_TEXTS && window.ClippyKnowledge.SYSTEM_TEXTS.fileControls) || {};
 
-		row.innerHTML = `<div>${window.ClippyKnowledge.formatString(fCards.header || "[FILE SYSTEM] <b>Directory: {path} ({count} items)</b>", { path, count: files.length })}</div>`;
+		const hdr = document.createElement('div');
+		hdr.innerHTML = window.ClippyKnowledge.formatString(fCards.header || "[FILE SYSTEM] <b>Directory: {path} ({count} items)</b>", { path, count: files.length });
+		row.appendChild(hdr);
 
 		const listContainer = document.createElement('div');
 		listContainer.className = 'clippy-file-list';
@@ -1150,20 +1181,25 @@
 		newFileBtn.addEventListener('click', () => {
 			const newF = window.ClippySystemBridge.createDesktopFile(`Note_${Date.now().toString().slice(-4)}.txt`, 'Created with Clippy');
 			if (newF) {
-				window.ClippyUI.appendAssistantMessage(window.ClippyKnowledge.formatString(fControls.noteCreated || "Created new file on Desktop: **{name}**.", { name: newF.name }));
+				renderFileListCard(path, row);
 			}
 		});
 		btnBar.appendChild(newFileBtn);
 
 		row.appendChild(btnBar);
-		window.ClippyUI.logElement.appendChild(row);
+		if (!targetRow) {
+			window.ClippyUI.logElement.appendChild(row);
+		}
 		window.ClippyUI.scrollLogToBottom();
 	}
 
-	function renderMailListCard() {
+	function renderMailListCard(targetRow = null) {
 		if (!window.ClippyUI.logElement) return;
-		const row = document.createElement('div');
-		row.className = 'clippy-message clippy-message-assistant';
+		const row = targetRow || document.createElement('div');
+		if (!targetRow) {
+			row.className = 'clippy-message clippy-message-assistant';
+		}
+		row.innerHTML = '';
 
 		const unreadCount = window.ClippySystemBridge.getUnreadMailCount();
 		const msgs = window.ClippySystemBridge.getMailMessages('inbox');
@@ -1174,7 +1210,9 @@
 			? window.ClippyKnowledge.formatString(mCtrl.header || "[OUTLOOK EXPRESS] <b>Inbox ({unread} unread / {total} total):</b>", { unread: unreadCount, total: msgs.length })
 			: `[OUTLOOK EXPRESS] <b>Inbox (${unreadCount} unread / ${msgs.length} total):</b>`;
 
-		row.innerHTML = `<div>${headerText}</div>`;
+		const hdr = document.createElement('div');
+		hdr.innerHTML = headerText;
+		row.appendChild(hdr);
 
 		const listContainer = document.createElement('div');
 		listContainer.className = 'clippy-mail-list';
@@ -1192,6 +1230,7 @@
 			item.addEventListener('click', () => {
 				window.ClippySystemBridge.markMailRead(m.id, true);
 				window.ClippySystemBridge.launchApp('outlook');
+				renderMailListCard(row);
 			});
 			listContainer.appendChild(item);
 		});
@@ -1215,22 +1254,26 @@
 		syncBtn.addEventListener('click', () => {
 			if (window.MailStore) {
 				window.MailStore.ensureDailyContent().then(() => {
-					renderMailListCard();
-					window.ClippyUI.appendAssistantMessage(mCtrl.synced || "Mail synchronization complete.");
+					renderMailListCard(row);
 				});
 			}
 		});
 		btnBar.appendChild(syncBtn);
 
 		row.appendChild(btnBar);
-		window.ClippyUI.logElement.appendChild(row);
+		if (!targetRow) {
+			window.ClippyUI.logElement.appendChild(row);
+		}
 		window.ClippyUI.scrollLogToBottom();
 	}
 
-	function renderVolumeControllerCard() {
+	function renderVolumeControllerCard(targetRow = null) {
 		if (!window.ClippyUI.logElement) return;
-		const row = document.createElement('div');
-		row.className = 'clippy-message clippy-message-assistant';
+		const row = targetRow || document.createElement('div');
+		if (!targetRow) {
+			row.className = 'clippy-message clippy-message-assistant';
+		}
+		row.innerHTML = '';
 
 		const currentVol = window.ClippySystemBridge.getVolume();
 		const isMuted = window.ClippySystemBridge.isMuted();
@@ -1241,7 +1284,9 @@
 			? window.ClippyKnowledge.formatString(vCards.header || "[AUDIO SYNTHESIZER] Master Volume: <b>{volume}%</b> {status}", { volume: Math.round(currentVol * 100), status: mutedNotice })
 			: `[AUDIO SYNTHESIZER] Master Volume: <b>${Math.round(currentVol * 100)}%</b> ${mutedNotice}`;
 
-		row.innerHTML = `<div>${headerText}</div>`;
+		const hdr = document.createElement('div');
+		hdr.innerHTML = headerText;
+		row.appendChild(hdr);
 
 		const sliderRow = document.createElement('div');
 		sliderRow.className = 'clippy-slider-control';
@@ -1257,6 +1302,12 @@
 
 		slider.addEventListener('input', () => {
 			window.ClippySystemBridge.setVolume(slider.value);
+			const isMutedNow = window.ClippySystemBridge.isMuted();
+			const mutedNoticeNow = isMutedNow ? (vCards.muted || '(Muted)') : '';
+			const curPct = Math.round(parseFloat(slider.value) * 100);
+			hdr.innerHTML = window.ClippyKnowledge.formatString
+				? window.ClippyKnowledge.formatString(vCards.header || "[AUDIO SYNTHESIZER] Master Volume: <b>{volume}%</b> {status}", { volume: curPct, status: mutedNoticeNow })
+				: `[AUDIO SYNTHESIZER] Master Volume: <b>${curPct}%</b> ${mutedNoticeNow}`;
 			if (window.SettingsApp && window.SettingsApp.playSound) window.SettingsApp.playSound('click');
 		});
 
@@ -1272,7 +1323,7 @@
 		muteBtn.textContent = isMuted ? (vCards.btnUnmute || 'Unmute Audio') : (vCards.btnMute || 'Mute Audio');
 		muteBtn.addEventListener('click', () => {
 			window.ClippySystemBridge.toggleMute();
-			renderVolumeControllerCard();
+			renderVolumeControllerCard(row);
 		});
 		btnBar.appendChild(muteBtn);
 
@@ -1286,14 +1337,19 @@
 		btnBar.appendChild(testSndBtn);
 
 		row.appendChild(btnBar);
-		window.ClippyUI.logElement.appendChild(row);
+		if (!targetRow) {
+			window.ClippyUI.logElement.appendChild(row);
+		}
 		window.ClippyUI.scrollLogToBottom();
 	}
 
-	function renderSystemToolsCard() {
+	function renderSystemToolsCard(targetRow = null) {
 		if (!window.ClippyUI.logElement) return;
-		const row = document.createElement('div');
-		row.className = 'clippy-message clippy-message-assistant';
+		const row = targetRow || document.createElement('div');
+		if (!targetRow) {
+			row.className = 'clippy-message clippy-message-assistant';
+		}
+		row.innerHTML = '';
 		const toolsCfg = (window.ClippyKnowledge && window.ClippyKnowledge.SYSTEM_TEXTS && window.ClippyKnowledge.SYSTEM_TEXTS.systemTools) || {
 			header: "[SYSTEM UTILITIES] <b>Diagnostic and Maintenance Tools:</b>",
 			btnSpecs: "System Specs",
@@ -1323,7 +1379,9 @@
 		});
 
 		row.appendChild(btnBar);
-		window.ClippyUI.logElement.appendChild(row);
+		if (!targetRow) {
+			window.ClippyUI.logElement.appendChild(row);
+		}
 		window.ClippyUI.scrollLogToBottom();
 	}
 

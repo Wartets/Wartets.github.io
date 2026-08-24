@@ -158,6 +158,106 @@
 			zen: ["*peaceful resonance*", "*calm oscillation*", "*balanced sine wave*", "*gentle chime*"]
 		},
 
+		BEHAVIORAL_ANOMALY_RESPONSES: {
+			SUDDEN_BREVITY: [
+				{
+					id: "ANOMALY_BREVITY_1",
+					text: "I noticed your response is much more concise than usual, {userName}. Is everything going smoothly with what you're working on, or would you prefer a quieter workspace?",
+					moods: ["ZEN", "OPTIMISTIC", "ANALYTICAL"],
+					continuations: [
+						{ label: "I'm just a bit overwhelmed today.", next: "user_state_tired" },
+						{ label: "Everything is fine, let's keep going.", next: "user_state_good" },
+						{ label: "Let's take a 5-minute break.", actionTrigger: "timer_25", next: "user_state_good" }
+					]
+				},
+				{
+					id: "ANOMALY_BREVITY_2",
+					text: "That was quite brief compared to our previous discussions. I'm here if you'd like to talk through any blockers, or we can pause whenever you need.",
+					moods: ["ZEN", "ANALYTICAL"],
+					continuations: [
+						{ label: "Tell me something peaceful and philosophical.", next: "peaceful_philosophy_node" },
+						{ label: "Let's review my task list.", actionTrigger: "show_todos", next: "user_state_good" }
+					]
+				}
+			],
+			ABANDONED_PUNCTUATION: [
+				{
+					id: "ANOMALY_PUNCT_1",
+					text: "I sense a shift in your typing rhythm, {userName}. When fatigue or urgency sets in, stepping back for a moment can help. How are you feeling right now?",
+					moods: ["ZEN", "OPTIMISTIC"],
+					continuations: [
+						{ label: "Feeling a bit drained, honestly.", next: "user_state_tired" },
+						{ label: "Just typing quickly to get things done.", next: "user_state_good" },
+						{ label: "Start a relaxing Pomodoro timer.", actionTrigger: "timer_25", next: "user_state_good" }
+					]
+				}
+			],
+			UNUSUAL_DELAY: [
+				{
+					id: "ANOMALY_DELAY_1",
+					text: "There was a noticeably longer pause before your reply. If you're tackling a complex problem or thinking through a tough decision, feel free to bounce ideas here.",
+					moods: ["ANALYTICAL", "ZEN", "OPTIMISTIC"],
+					continuations: [
+						{ label: "Working on a complex problem.", next: "tech_root" },
+						{ label: "Just stepped away for a moment.", next: "user_state_good" }
+					]
+				}
+			]
+		},
+
+		DISCLOSURE_FOLLOWUP_TEMPLATES: [
+			{
+				id: "DISCLOSURE_FOLLOWUP_1",
+				text: "That sounds like a meaningful priority, {userName}. What is the main milestone you are aiming to reach next with this?",
+				moods: ["OPTIMISTIC", "ANALYTICAL", "ZEN"],
+				continuations: [
+					{ label: "Let's break it down into tasks.", actionTrigger: "show_todos", next: "user_state_good" },
+					{ label: "Discuss focus and deep work habits.", next: "focus_habits_node" }
+				]
+			},
+			{
+				id: "DISCLOSURE_FOLLOWUP_2",
+				text: "Thank you for sharing that with me. What inspired your direction on this, and what part are you tackling first?",
+				moods: ["OPTIMISTIC", "ANALYTICAL"],
+				continuations: [
+					{ label: "Record this in my To-Do list.", actionTrigger: "show_todos", next: "user_state_good" },
+					{ label: "Let's organize my thoughts in Notepad.", next: "productivity_tasks" }
+				]
+			},
+			{
+				id: "DISCLOSURE_FOLLOWUP_3",
+				text: "Understood. Navigating demanding days or ambitious plans takes steady pacing. How is your energy holding up through this?",
+				moods: ["ZEN", "OPTIMISTIC"],
+				continuations: [
+					{ label: "Energy is good, staying focused.", next: "user_state_good" },
+					{ label: "Need a short break to recharge.", next: "user_state_tired" }
+				]
+			}
+		],
+
+		TEMPERAMENT_FLAVORS: {
+			SKEPTICAL: {
+				prefix: "Observing with measured caution: ",
+				softener: "Let us review this carefully before proceeding: "
+			},
+			BENEVOLENT: {
+				prefix: "Always happy to support you: ",
+				softener: "Take all the time you need: "
+			},
+			RESERVED: {
+				prefix: "Quietly noting: ",
+				softener: "In steady stillness: "
+			},
+			PASSIONATE: {
+				prefix: "With genuine enthusiasm: ",
+				softener: "An exciting challenge ahead: "
+			},
+			BALANCED: {
+				prefix: "",
+				softener: ""
+			}
+		},
+
 		TOPIC_RESPONSES: {
 			space: [
 				"The observable universe is estimated at 93 billion light-years in diameter, containing over 2 trillion galaxies and an estimated 10^24 stars.",
@@ -1762,14 +1862,14 @@
 		GRAPH_GLOBAL_ENTRIES: [
 			{ pattern: /\b(what can you do|commands|what do you do|help|aide|features|capabilities|que peux tu faire)\b/i, label: "What can you do?", next: 'tools_overview_node', moodDelta: { mood: 'OPTIMISTIC', patience: 15 } },
 			{ pattern: /\b(who am i|who i am|my profile|my identity|identity|user profile|qui suis-je|mon profil)\b/i, label: "Who am I?", next: 'who_am_i_node', moodDelta: { mood: 'ANALYTICAL', intellect: 10 } },
-			{ pattern: /\b(dimensional analysis|homogeneity|verify equation|check units|analyse dimensionnelle)\b/i, label: "Physical dimensional analysis", next: 'user_state_good', actionTrigger: 'action_dimensional_analysis', moodDelta: { mood: 'ANALYTICAL', intellect: 25 } },
-			{ pattern: /\b(euclidean division|polynomial division|division euclidienne|quotient and remainder)\b/i, label: "Euclidean polynomial division", next: 'user_state_good', actionTrigger: 'action_euclidean_division', moodDelta: { mood: 'ANALYTICAL', intellect: 25 } },
-			{ pattern: /\b(factor polynomial|factor quadratic|factorize|factoriser|racines polynome)\b/i, label: "Polynomial factorization", next: 'user_state_good', actionTrigger: 'action_polynomial_factorization', moodDelta: { mood: 'ANALYTICAL', intellect: 25 } },
-			{ pattern: /\b(linear system|solve system|gaussian elimination|systeme lineaire|solve matrix)\b/i, label: "Linear system solver", next: 'user_state_good', actionTrigger: 'action_linear_solver', moodDelta: { mood: 'ANALYTICAL', intellect: 25 } },
-			{ pattern: /\b(wheel|choice wheel|random wheel|spin wheel|roue de choix|decision wheel)\b/i, label: "Decision choice wheel", next: 'user_state_good', actionTrigger: 'action_wheel', moodDelta: { mood: 'PLAYFUL', energy: 15 } },
-			{ pattern: /\b(cipher|encrypt|decrypt|morse|caesar|vigenere|atbash|rot13|chiffrement|cryptography)\b/i, label: "Cryptography & cipher tool", next: 'user_state_good', actionTrigger: 'action_cipher', moodDelta: { mood: 'ANALYTICAL', intellect: 20 } },
-			{ pattern: /\b(tps|cps|clicks per second|mouse speed|clics par seconde|speed test)\b/i, label: "Mouse click speed test", next: 'user_state_good', actionTrigger: 'action_tps', moodDelta: { mood: 'PLAYFUL', energy: 20 } },
-			{ pattern: /\b(date difference|days between|date calculator|calculateur de date|temporal delta)\b/i, label: "Date interval calculator", next: 'user_state_good', actionTrigger: 'action_date_calc', moodDelta: { mood: 'ANALYTICAL', intellect: 15 } },
+			{ pattern: /\b(dimensional analysis|homogeneity|verify equation|check units|analyse dimensionnelle)\b/i, label: "Physical dimensional analysis", next: 'activity_dimensional_analysis_node', actionTrigger: 'action_dimensional_analysis', moodDelta: { mood: 'ANALYTICAL', intellect: 25 } },
+			{ pattern: /\b(euclidean division|polynomial division|division euclidienne|quotient and remainder)\b/i, label: "Euclidean polynomial division", next: 'activity_euclidean_division_node', actionTrigger: 'action_euclidean_division', moodDelta: { mood: 'ANALYTICAL', intellect: 25 } },
+			{ pattern: /\b(factor polynomial|factor quadratic|factorize|factoriser|racines polynome)\b/i, label: "Polynomial factorization", next: 'activity_polynomial_factorization_node', actionTrigger: 'action_polynomial_factorization', moodDelta: { mood: 'ANALYTICAL', intellect: 25 } },
+			{ pattern: /\b(linear system|solve system|gaussian elimination|systeme lineaire|solve matrix)\b/i, label: "Linear system solver", next: 'activity_linear_solver_node', actionTrigger: 'action_linear_solver', moodDelta: { mood: 'ANALYTICAL', intellect: 25 } },
+			{ pattern: /\b(wheel|choice wheel|random wheel|spin wheel|roue de choix|decision wheel)\b/i, label: "Decision choice wheel", next: 'activity_wheel_node', actionTrigger: 'action_wheel', moodDelta: { mood: 'PLAYFUL', energy: 15 } },
+			{ pattern: /\b(cipher|encrypt|decrypt|morse|caesar|vigenere|atbash|rot13|chiffrement|cryptography)\b/i, label: "Cryptography & cipher tool", next: 'activity_cipher_node', actionTrigger: 'action_cipher', moodDelta: { mood: 'ANALYTICAL', intellect: 20 } },
+			{ pattern: /\b(tps|cps|clicks per second|mouse speed|clics par seconde|speed test)\b/i, label: "Mouse click speed test", next: 'activity_tps_node', actionTrigger: 'action_tps', moodDelta: { mood: 'PLAYFUL', energy: 20 } },
+			{ pattern: /\b(date difference|days between|date calculator|calculateur de date|temporal delta)\b/i, label: "Date interval calculator", next: 'activity_date_calc_node', actionTrigger: 'action_date_calc', moodDelta: { mood: 'ANALYTICAL', intellect: 15 } },
 			{ pattern: /\b(how are you feeling|how do you feel|how are you|how is it going|mood|feeling|comment te sens tu|comment vas tu)\b/i, label: "How are you feeling?", next: 'clippy_feeling_node', moodDelta: { mood: 'OPTIMISTIC', affinity: 10 } },
 			{ pattern: /\b(check unread emails|unread emails|unread mail|check mail|verifier e-mails|mes mails)\b/i, label: "Check unread emails", next: 'mail_overview_node', moodDelta: { mood: 'OPTIMISTIC', patience: 10 } },
 			{ pattern: /\b(system diagnostics|diagnostics|specs|system specs|statut systeme|diagnostic)\b/i, label: "System diagnostics", next: 'diagnostics_node', moodDelta: { mood: 'ANALYTICAL', intellect: 15 } },
@@ -1792,6 +1892,7 @@
 			{ pattern: /\b(play tic-tac-toe|tic-tac-toe|tictactoe|morpion|jouer au morpion)\b/i, label: "Play Tic-Tac-Toe", next: 'game_ttt_node', moodDelta: { mood: 'OPTIMISTIC', energy: 20 } },
 			{ pattern: /\b(play memory game|memory game|memory match|jeu de memory)\b/i, label: "Play Memory Game", next: 'game_memory_node', moodDelta: { mood: 'OPTIMISTIC', energy: 20 } },
 			{ pattern: /\b(play hangman|hangman|jeu du pendu|pendu)\b/i, label: "Play Hangman", next: 'game_hangman_node', moodDelta: { mood: 'OPTIMISTIC', energy: 20 } },
+			{ pattern: /\b(play minesweeper|minesweeper|mines|demineur)\b/i, label: "Play Minesweeper Mini", next: 'activity_minesweeper_node', moodDelta: { mood: 'OPTIMISTIC', energy: 20 } },
 			{ pattern: /\b(tech trivia quiz|trivia quiz|quiz|tech quiz|questionnaire)\b/i, label: "Tech Trivia Quiz", next: 'quiz_start_node', moodDelta: { mood: 'ANALYTICAL', intellect: 20 } },
 			{ pattern: /\b(guess the number|guess number|devine le nombre)\b/i, label: "Guess the Number", next: 'game_guess_node', moodDelta: { mood: 'OPTIMISTIC', intellect: 10 } },
 			{ pattern: /\b(rock paper scissors|chifoumi|pierre feuille ciseaux)\b/i, label: "Rock Paper Scissors", next: 'game_rps_node', moodDelta: { mood: 'OPTIMISTIC', energy: 15 } },
@@ -1805,11 +1906,11 @@
 			{ pattern: /\b(bad bad bad|you suck|useless|annoying|hate you|shut up|tais toi|inutile|tu sers a rien)\b/i, label: "Why do you care? You're just a paperclip.", next: 'hostile_initial_retort', moodDelta: { mood: 'CYNICAL', affinity: -15, patience: -20 } },
 			{ pattern: /\b(sorry|i apologize|my bad|forgive me|pardon me|desole|pardon|excuse moi)\b/i, label: "I'm sorry, I took my frustration out on you.", next: 'hostile_truce_offer', moodDelta: { mood: 'OPTIMISTIC', affinity: 25, patience: 30 } },
 			{ pattern: /\b(music|audio|sound|player|winamp|wmp|musique|chanson)\b/i, label: "Discuss audio and media players", next: 'music_talk_node', moodDelta: { mood: 'OPTIMISTIC', energy: 15 } },
-			{ pattern: /\b(wallpaper|wallpapers|background|fond d ecran|arriere plan|wallpaper panel)\b/i, label: "Show desktop wallpapers", next: 'user_state_good', actionTrigger: 'action_wallpaper_panel', moodDelta: { mood: 'OPTIMISTIC', affinity: 10 } },
-			{ pattern: /\b(theme panel|switch theme|change theme|themes)\b/i, label: "Configure system themes", next: 'user_state_good', actionTrigger: 'action_theme_panel', moodDelta: { mood: 'OPTIMISTIC', affinity: 10 } },
-			{ pattern: /\b(volume|sound volume|master volume|volume control)\b/i, label: "Master volume control", next: 'user_state_good', actionTrigger: 'action_volume_panel', moodDelta: { mood: 'ANALYTICAL', intellect: 10 } },
-			{ pattern: /\b(files|browse files|file system|directory|fichiers)\b/i, label: "Browse desktop files", next: 'user_state_good', actionTrigger: 'action_files_panel', moodDelta: { mood: 'ANALYTICAL', intellect: 10 } },
-			{ pattern: /\b(achievements|milestones|trophies|succes)\b/i, label: "View milestones and trophies", next: 'user_state_good', actionTrigger: 'action_achievements', moodDelta: { mood: 'OPTIMISTIC', affinity: 15 } }
+			{ pattern: /\b(wallpaper|wallpapers|background|fond d ecran|arriere plan|wallpaper panel)\b/i, label: "Show desktop wallpapers", next: 'activity_wallpaper_node', actionTrigger: 'action_wallpaper_panel', moodDelta: { mood: 'OPTIMISTIC', affinity: 10 } },
+			{ pattern: /\b(theme panel|switch theme|change theme|themes)\b/i, label: "Configure system themes", next: 'activity_theme_node', actionTrigger: 'action_theme_panel', moodDelta: { mood: 'OPTIMISTIC', affinity: 10 } },
+			{ pattern: /\b(volume|sound volume|master volume|volume control)\b/i, label: "Master volume control", next: 'activity_volume_node', actionTrigger: 'action_volume_panel', moodDelta: { mood: 'ANALYTICAL', intellect: 10 } },
+			{ pattern: /\b(files|browse files|file system|directory|fichiers)\b/i, label: "Browse desktop files", next: 'activity_files_node', actionTrigger: 'action_files_panel', moodDelta: { mood: 'ANALYTICAL', intellect: 10 } },
+			{ pattern: /\b(achievements|milestones|trophies|succes)\b/i, label: "View milestones and trophies", next: 'activity_achievements_node', actionTrigger: 'action_achievements', moodDelta: { mood: 'OPTIMISTIC', affinity: 15 } }
 		],
 
 		UI_TEXTS: {
@@ -3316,126 +3417,324 @@
 
 			pomodoro_node: {
 				id: 'pomodoro_node',
-				text: "Focus countdown primed. Type `timer [minutes]` (default: 25) or click below to launch an uninterrupted working interval.",
+				text: "Focus countdown primed. An uninterrupted working interval has been initiated.",
+				actionTrigger: 'timer_25',
 				options: [
-					{ label: "Start 25-minute focus timer now.", category: 'SERIOUS', actionTrigger: 'timer_25', next: 'user_state_good' },
-					{ label: "View my To-Do task list.", category: 'SERIOUS', actionTrigger: 'show_todos', next: 'user_state_good' }
+					{ label: "View active To-Do task list", category: 'SERIOUS', actionTrigger: 'show_todos', next: 'todo_overview_node' },
+					{ label: "Inspect system diagnostics", category: 'SERIOUS', actionTrigger: 'action_status', next: 'diagnostics_node' },
+					{ label: "Discuss focus & habit strategies", category: 'INQUIRE', next: 'focus_habits_node' },
+					{ label: "Return to main dialogue", category: 'AGREE', next: 'greeting_root' }
 				]
 			},
 
 			todo_overview_node: {
 				id: 'todo_overview_node',
-				text: "Task tracking registers loaded. You can add tasks with `todo add [description]` or review active items below.",
+				text: "Task tracking registers loaded. Add tasks with `todo add [text]`, check off completed items, or clear your queue.",
 				actionTrigger: 'show_todos',
 				options: [
-					{ label: "Start 25-minute Pomodoro focus timer.", category: 'SERIOUS', actionTrigger: 'timer_25', next: 'user_state_good' },
-					{ label: "Return to main dialogue.", category: 'AGREE', next: 'greeting_root' }
+					{ label: "Start 25-minute Pomodoro focus timer", category: 'SERIOUS', actionTrigger: 'timer_25', next: 'pomodoro_node' },
+					{ label: "Inspect system diagnostics", category: 'SERIOUS', actionTrigger: 'action_status', next: 'diagnostics_node' },
+					{ label: "Overcoming procrastination strategies", category: 'INQUIRE', next: 'overcoming_procrastination_node' },
+					{ label: "Return to main dialogue", category: 'AGREE', next: 'greeting_root' }
 				]
 			},
 
 			mail_overview_node: {
 				id: 'mail_overview_node',
-				text: "Scanning Outlook Express message store and active folders...",
+				text: "Scanning Outlook Express message store and active mail folders.",
 				actionTrigger: 'action_check_mail',
 				options: [
-					{ label: "Compose a new email message.", category: 'SERIOUS', actionTrigger: 'action_compose_mail', next: 'user_state_good' },
-					{ label: "Return to workspace overview.", category: 'AGREE', next: 'user_state_good' }
+					{ label: "Compose a new email message", category: 'SERIOUS', actionTrigger: 'action_compose_mail', next: 'mail_overview_node' },
+					{ label: "Inspect active application windows", category: 'SERIOUS', actionTrigger: 'action_inspect_windows', next: 'active_windows_node' },
+					{ label: "View active To-Do list", category: 'SERIOUS', actionTrigger: 'show_todos', next: 'todo_overview_node' },
+					{ label: "Return to main dialogue", category: 'AGREE', next: 'greeting_root' }
 				]
 			},
 
 			diagnostics_node: {
 				id: 'diagnostics_node',
-				text: "Running comprehensive workstation diagnostic inspection...",
+				text: "Comprehensive workstation diagnostic inspection complete.",
 				actionTrigger: 'action_status',
 				options: [
-					{ label: "Inspect active application windows.", category: 'SERIOUS', actionTrigger: 'action_inspect_windows', next: 'user_state_good' },
-					{ label: "Inspect Recycle Bin status.", category: 'SERIOUS', actionTrigger: 'action_inspect_bin', next: 'user_state_good' }
+					{ label: "Inspect active application windows", category: 'SERIOUS', actionTrigger: 'action_inspect_windows', next: 'active_windows_node' },
+					{ label: "Defragment Volume C: clusters", category: 'SERIOUS', actionTrigger: 'action_defrag', next: 'defrag_trigger_node' },
+					{ label: "Inspect Recycle Bin status", category: 'SERIOUS', actionTrigger: 'action_inspect_bin', next: 'diagnostics_node' },
+					{ label: "Return to tools overview", category: 'SERIOUS', next: 'tools_overview_node' }
 				]
 			},
 
 			shortcuts_node: {
 				id: 'shortcuts_node',
-				text: "Loaded system keyboard shortcuts into active buffer.",
+				text: "Loaded workstation keyboard shortcuts into the active buffer.",
 				actionTrigger: 'action_shortcuts',
 				options: [
-					{ label: "Inspect running workspace processes.", category: 'SERIOUS', actionTrigger: 'action_inspect_windows', next: 'user_state_good' },
-					{ label: "Return to tools overview.", category: 'SERIOUS', next: 'tools_overview_node' }
+					{ label: "Inspect running application processes", category: 'SERIOUS', actionTrigger: 'action_inspect_windows', next: 'active_windows_node' },
+					{ label: "View active To-Do list", category: 'SERIOUS', actionTrigger: 'show_todos', next: 'todo_overview_node' },
+					{ label: "Return to tools overview", category: 'SERIOUS', next: 'tools_overview_node' }
 				]
 			},
 
 			password_gen_node: {
 				id: 'password_gen_node',
-				text: "Generating cryptographic random password token...",
+				text: "Cryptographic pseudo-random password generation complete.",
 				actionTrigger: 'action_pass',
 				options: [
-					{ label: "Generate another 24-character token.", category: 'SERIOUS', actionTrigger: 'action_pass_24', next: 'user_state_good' },
-					{ label: "Save note to scratchpad buffer.", category: 'SERIOUS', next: 'productivity_tasks' }
+					{ label: "Generate 24-character high-entropy token", category: 'SERIOUS', actionTrigger: 'action_pass_24', next: 'password_gen_node' },
+					{ label: "Open cryptography & cipher tool", category: 'SERIOUS', actionTrigger: 'action_cipher', next: 'activity_cipher_node' },
+					{ label: "View active To-Do list", category: 'SERIOUS', actionTrigger: 'show_todos', next: 'todo_overview_node' },
+					{ label: "Return to tools overview", category: 'SERIOUS', next: 'tools_overview_node' }
 				]
 			},
 
 			game_ttt_node: {
 				id: 'game_ttt_node',
-				text: "Launching Tic-Tac-Toe challenge grid.",
+				text: "Tic-Tac-Toe challenge grid ready. Place your marker (X) against Clippit (O).",
 				actionTrigger: 'game_ttt',
 				options: [
-					{ label: "Switch to Memory Match.", category: 'SERIOUS', actionTrigger: 'game_memory', next: 'user_state_good' },
-					{ label: "Return to main menu.", category: 'AGREE', next: 'greeting_root' }
+					{ label: "Play Memory Match", category: 'SERIOUS', actionTrigger: 'game_memory', next: 'game_memory_node' },
+					{ label: "Play Mini Minesweeper", category: 'SERIOUS', actionTrigger: 'game_mines', next: 'activity_minesweeper_node' },
+					{ label: "Play Hangman Challenge", category: 'SERIOUS', actionTrigger: 'game_hangman', next: 'game_hangman_node' },
+					{ label: "Return to To-Do task manager", category: 'SERIOUS', actionTrigger: 'show_todos', next: 'todo_overview_node' }
 				]
 			},
 
 			game_memory_node: {
 				id: 'game_memory_node',
-				text: "Initializing 12-card system token memory matrix.",
+				text: "Token pairs memory matrix initialized. Flip cards to match matching system tokens.",
 				actionTrigger: 'game_memory',
 				options: [
-					{ label: "Switch to Hangman.", category: 'SERIOUS', actionTrigger: 'game_hangman', next: 'user_state_good' },
-					{ label: "Return to main menu.", category: 'AGREE', next: 'greeting_root' }
+					{ label: "Play Tic-Tac-Toe", category: 'SERIOUS', actionTrigger: 'game_ttt', next: 'game_ttt_node' },
+					{ label: "Play Hangman Challenge", category: 'SERIOUS', actionTrigger: 'game_hangman', next: 'game_hangman_node' },
+					{ label: "Tech Trivia Quiz", category: 'SERIOUS', actionTrigger: 'game_quiz', next: 'quiz_start_node' },
+					{ label: "Return to main dialogue", category: 'AGREE', next: 'greeting_root' }
 				]
 			},
 
 			game_hangman_node: {
 				id: 'game_hangman_node',
-				text: "Loading computing dictionary into Hangman register.",
+				text: "Computing dictionary loaded into Hangman register. Guess letters to uncover the term before running out of attempts.",
 				actionTrigger: 'game_hangman',
 				options: [
-					{ label: "Switch to Tech Quiz.", category: 'SERIOUS', actionTrigger: 'game_quiz', next: 'user_state_good' },
-					{ label: "Return to main menu.", category: 'AGREE', next: 'greeting_root' }
+					{ label: "Play Memory Match", category: 'SERIOUS', actionTrigger: 'game_memory', next: 'game_memory_node' },
+					{ label: "Play Tic-Tac-Toe", category: 'SERIOUS', actionTrigger: 'game_ttt', next: 'game_ttt_node' },
+					{ label: "Tech Trivia Quiz", category: 'SERIOUS', actionTrigger: 'game_quiz', next: 'quiz_start_node' },
+					{ label: "Return to main dialogue", category: 'AGREE', next: 'greeting_root' }
 				]
 			},
 
 			game_guess_node: {
 				id: 'game_guess_node',
-				text: "Initializing random integer generator (1-100).",
+				text: "Number oracle generator initialized. Guess the hidden integer between 1 and 100.",
 				actionTrigger: 'game_guess',
 				options: [
-					{ label: "Play Rock-Paper-Scissors instead.", category: 'SERIOUS', actionTrigger: 'game_rps', next: 'user_state_good' },
-					{ label: "Return to main menu.", category: 'AGREE', next: 'greeting_root' }
+					{ label: "Play Rock-Paper-Scissors", category: 'SERIOUS', actionTrigger: 'game_rps', next: 'game_rps_node' },
+					{ label: "Spin the decision choice wheel", category: 'SERIOUS', actionTrigger: 'action_wheel', next: 'activity_wheel_node' },
+					{ label: "Test mouse click speed (TPS)", category: 'SERIOUS', actionTrigger: 'action_tps', next: 'activity_tps_node' },
+					{ label: "Return to main dialogue", category: 'AGREE', next: 'greeting_root' }
 				]
 			},
 
 			game_rps_node: {
 				id: 'game_rps_node',
-				text: "Select your move for Rock-Paper-Scissors:",
+				text: "Rock-Paper-Scissors battle arena primed. Choose Rock, Paper, or Scissors to clash against Clippit.",
 				actionTrigger: 'game_rps',
 				options: [
-					{ label: "Launch diagnostic Tech Quiz.", category: 'SERIOUS', actionTrigger: 'game_quiz', next: 'user_state_good' },
-					{ label: "Return to main menu.", category: 'AGREE', next: 'greeting_root' }
+					{ label: "Guess the Number Oracle", category: 'SERIOUS', actionTrigger: 'game_guess', next: 'game_guess_node' },
+					{ label: "Spin the decision choice wheel", category: 'SERIOUS', actionTrigger: 'action_wheel', next: 'activity_wheel_node' },
+					{ label: "Tech Trivia Quiz", category: 'SERIOUS', actionTrigger: 'game_quiz', next: 'quiz_start_node' },
+					{ label: "Return to main dialogue", category: 'AGREE', next: 'greeting_root' }
 				]
 			},
 
 			quiz_start_node: {
 				id: 'quiz_start_node',
-				text: "Initializing diagnostic quiz module: questions spanning operating systems, networking, hardware, and physics.",
+				text: "Diagnostic Tech Quiz initiated. Answer multiple-choice questions covering retro computing, networking, and system architecture.",
+				actionTrigger: 'game_quiz',
 				options: [
-					{ label: "Begin Quiz Now!", category: 'SERIOUS', actionTrigger: 'game_quiz', next: 'user_state_good' }
+					{ label: "Play Hangman Challenge", category: 'SERIOUS', actionTrigger: 'game_hangman', next: 'game_hangman_node' },
+					{ label: "Play Memory Match", category: 'SERIOUS', actionTrigger: 'game_memory', next: 'game_memory_node' },
+					{ label: "Inspect system diagnostics", category: 'SERIOUS', actionTrigger: 'action_status', next: 'diagnostics_node' },
+					{ label: "Return to main dialogue", category: 'AGREE', next: 'greeting_root' }
 				]
 			},
 
 			defrag_trigger_node: {
 				id: 'defrag_trigger_node',
-				text: "Launching Volume C: Disk Defragmenter cluster visualization.",
+				text: "Volume C: cluster defragmentation simulation running. Clusters are reorganizing into contiguous storage sectors.",
+				actionTrigger: 'action_defrag',
 				options: [
-					{ label: "Execute Drive Optimization!", category: 'SERIOUS', actionTrigger: 'action_defrag', next: 'user_state_good' }
+					{ label: "Inspect system diagnostics", category: 'SERIOUS', actionTrigger: 'action_status', next: 'diagnostics_node' },
+					{ label: "Inspect active application windows", category: 'SERIOUS', actionTrigger: 'action_inspect_windows', next: 'active_windows_node' },
+					{ label: "View active To-Do list", category: 'SERIOUS', actionTrigger: 'show_todos', next: 'todo_overview_node' },
+					{ label: "Return to tools overview", category: 'SERIOUS', next: 'tools_overview_node' }
+				]
+			},
+
+			activity_dimensional_analysis_node: {
+				id: 'activity_dimensional_analysis_node',
+				text: "Physical dimensional analysis module loaded. Verify equation homogeneity across fundamental SI base dimensions.",
+				actionTrigger: 'action_dimensional_analysis',
+				options: [
+					{ label: "Solve a linear system of equations", category: 'SERIOUS', actionTrigger: 'action_linear_solver', next: 'activity_linear_solver_node' },
+					{ label: "Factor quadratic polynomials", category: 'SERIOUS', actionTrigger: 'action_polynomial_factorization', next: 'activity_polynomial_factorization_node' },
+					{ label: "Discuss physics & fundamental constants", category: 'INQUIRE', next: 'physics_constants_node' },
+					{ label: "Return to To-Do task manager", category: 'SERIOUS', actionTrigger: 'show_todos', next: 'todo_overview_node' }
+				]
+			},
+
+			activity_euclidean_division_node: {
+				id: 'activity_euclidean_division_node',
+				text: "Euclidean division engine loaded. Calculate integer quotients and remainders or divide polynomial expressions.",
+				actionTrigger: 'action_euclidean_division',
+				options: [
+					{ label: "Factor quadratic polynomials", category: 'SERIOUS', actionTrigger: 'action_polynomial_factorization', next: 'activity_polynomial_factorization_node' },
+					{ label: "Solve a linear system", category: 'SERIOUS', actionTrigger: 'action_linear_solver', next: 'activity_linear_solver_node' },
+					{ label: "Discuss mathematical principles", category: 'INQUIRE', next: 'math_lecture_node' },
+					{ label: "Return to tasks", category: 'SERIOUS', actionTrigger: 'show_todos', next: 'todo_overview_node' }
+				]
+			},
+
+			activity_polynomial_factorization_node: {
+				id: 'activity_polynomial_factorization_node',
+				text: "Polynomial factorization engine loaded. Factor quadratic expressions, evaluate discriminants, and classify roots.",
+				actionTrigger: 'action_polynomial_factorization',
+				options: [
+					{ label: "Perform Euclidean polynomial division", category: 'SERIOUS', actionTrigger: 'action_euclidean_division', next: 'activity_euclidean_division_node' },
+					{ label: "Solve a linear system", category: 'SERIOUS', actionTrigger: 'action_linear_solver', next: 'activity_linear_solver_node' },
+					{ label: "Explore calculus and derivatives", category: 'INQUIRE', next: 'calculus_derivatives_node' },
+					{ label: "Return to tasks", category: 'SERIOUS', actionTrigger: 'show_todos', next: 'todo_overview_node' }
+				]
+			},
+
+			activity_linear_solver_node: {
+				id: 'activity_linear_solver_node',
+				text: "Gaussian elimination linear solver loaded. Determine exact solution vectors for 2x2 and 3x3 systems of linear equations.",
+				actionTrigger: 'action_linear_solver',
+				options: [
+					{ label: "Physical dimensional analysis", category: 'SERIOUS', actionTrigger: 'action_dimensional_analysis', next: 'activity_dimensional_analysis_node' },
+					{ label: "Polynomial factorization", category: 'SERIOUS', actionTrigger: 'action_polynomial_factorization', next: 'activity_polynomial_factorization_node' },
+					{ label: "Discuss linear algebra & matrices", category: 'INQUIRE', next: 'linear_algebra_node' },
+					{ label: "Return to tasks", category: 'SERIOUS', actionTrigger: 'show_todos', next: 'todo_overview_node' }
+				]
+			},
+
+			activity_wheel_node: {
+				id: 'activity_wheel_node',
+				text: "Decision choice wheel initialized. Spin the wheel or configure custom sectors to resolve random choices.",
+				actionTrigger: 'action_wheel',
+				options: [
+					{ label: "Test mouse click speed (TPS)", category: 'SERIOUS', actionTrigger: 'action_tps', next: 'activity_tps_node' },
+					{ label: "Play Rock-Paper-Scissors", category: 'SERIOUS', actionTrigger: 'game_rps', next: 'game_rps_node' },
+					{ label: "Start Pomodoro focus timer", category: 'SERIOUS', actionTrigger: 'timer_25', next: 'pomodoro_node' },
+					{ label: "Return to main dialogue", category: 'AGREE', next: 'greeting_root' }
+				]
+			},
+
+			activity_cipher_node: {
+				id: 'activity_cipher_node',
+				text: "Cryptography and cipher workbench initialized. Encode and decode text using classic and polyalphabetic algorithms.",
+				actionTrigger: 'action_cipher',
+				options: [
+					{ label: "Generate secure random password", category: 'SERIOUS', actionTrigger: 'action_pass', next: 'password_gen_node' },
+					{ label: "Solve a linear system", category: 'SERIOUS', actionTrigger: 'action_linear_solver', next: 'activity_linear_solver_node' },
+					{ label: "Inspect system diagnostics", category: 'SERIOUS', actionTrigger: 'action_status', next: 'diagnostics_node' },
+					{ label: "Return to main dialogue", category: 'AGREE', next: 'greeting_root' }
+				]
+			},
+
+			activity_tps_node: {
+				id: 'activity_tps_node',
+				text: "Mouse click speed benchmark (TPS) initialized. Click rapidly in the target zone to measure clicks per second.",
+				actionTrigger: 'action_tps',
+				options: [
+					{ label: "Play Mini Minesweeper", category: 'SERIOUS', actionTrigger: 'game_mines', next: 'activity_minesweeper_node' },
+					{ label: "Spin the decision choice wheel", category: 'SERIOUS', actionTrigger: 'action_wheel', next: 'activity_wheel_node' },
+					{ label: "Start 25-minute Pomodoro focus timer", category: 'SERIOUS', actionTrigger: 'timer_25', next: 'pomodoro_node' },
+					{ label: "Return to main dialogue", category: 'AGREE', next: 'greeting_root' }
+				]
+			},
+
+			activity_date_calc_node: {
+				id: 'activity_date_calc_node',
+				text: "Date interval calculator loaded. Calculate precise temporal differences, business days, and total hours between dates.",
+				actionTrigger: 'action_date_calc',
+				options: [
+					{ label: "View active To-Do list", category: 'SERIOUS', actionTrigger: 'show_todos', next: 'todo_overview_node' },
+					{ label: "Start 25-minute Pomodoro focus timer", category: 'SERIOUS', actionTrigger: 'timer_25', next: 'pomodoro_node' },
+					{ label: "Inspect system diagnostics", category: 'SERIOUS', actionTrigger: 'action_status', next: 'diagnostics_node' },
+					{ label: "Return to main dialogue", category: 'AGREE', next: 'greeting_root' }
+				]
+			},
+
+			activity_minesweeper_node: {
+				id: 'activity_minesweeper_node',
+				text: "Minesweeper Mini 6x6 grid initialized. Uncover safe sectors and flag dangerous mine locations.",
+				actionTrigger: 'game_mines',
+				options: [
+					{ label: "Play Tic-Tac-Toe", category: 'SERIOUS', actionTrigger: 'game_ttt', next: 'game_ttt_node' },
+					{ label: "Play Memory Match", category: 'SERIOUS', actionTrigger: 'game_memory', next: 'game_memory_node' },
+					{ label: "Tech Trivia Quiz", category: 'SERIOUS', actionTrigger: 'game_quiz', next: 'quiz_start_node' },
+					{ label: "Return to tasks", category: 'SERIOUS', actionTrigger: 'show_todos', next: 'todo_overview_node' }
+				]
+			},
+
+			activity_wallpaper_node: {
+				id: 'activity_wallpaper_node',
+				text: "Desktop wallpaper gallery loaded. Select a background image or launch Display Properties.",
+				actionTrigger: 'action_wallpaper_panel',
+				options: [
+					{ label: "Configure system themes", category: 'SERIOUS', actionTrigger: 'action_theme_panel', next: 'activity_theme_node' },
+					{ label: "Master volume control", category: 'SERIOUS', actionTrigger: 'action_volume_panel', next: 'activity_volume_node' },
+					{ label: "Inspect system diagnostics", category: 'SERIOUS', actionTrigger: 'action_status', next: 'diagnostics_node' },
+					{ label: "Return to main dialogue", category: 'AGREE', next: 'greeting_root' }
+				]
+			},
+
+			activity_theme_node: {
+				id: 'activity_theme_node',
+				text: "Workstation theme switcher active. Select your preferred visual style.",
+				actionTrigger: 'action_theme_panel',
+				options: [
+					{ label: "Show desktop wallpapers", category: 'SERIOUS', actionTrigger: 'action_wallpaper_panel', next: 'activity_wallpaper_node' },
+					{ label: "Inspect user identity profile", category: 'SERIOUS', actionTrigger: 'action_profile', next: 'who_am_i_node' },
+					{ label: "Inspect system diagnostics", category: 'SERIOUS', actionTrigger: 'action_status', next: 'diagnostics_node' },
+					{ label: "Return to main dialogue", category: 'AGREE', next: 'greeting_root' }
+				]
+			},
+
+			activity_volume_node: {
+				id: 'activity_volume_node',
+				text: "Audio synthesizer controller active. Adjust master sound volume or toggle audio output.",
+				actionTrigger: 'action_volume_panel',
+				options: [
+					{ label: "Discuss audio and media players", category: 'SERIOUS', next: 'music_talk_node' },
+					{ label: "Configure system themes", category: 'SERIOUS', actionTrigger: 'action_theme_panel', next: 'activity_theme_node' },
+					{ label: "Inspect system diagnostics", category: 'SERIOUS', actionTrigger: 'action_status', next: 'diagnostics_node' },
+					{ label: "Return to main dialogue", category: 'AGREE', next: 'greeting_root' }
+				]
+			},
+
+			activity_files_node: {
+				id: 'activity_files_node',
+				text: "Virtual file system directory viewer loaded. Inspect files or create new desktop notes.",
+				actionTrigger: 'action_files_panel',
+				options: [
+					{ label: "Inspect active application windows", category: 'SERIOUS', actionTrigger: 'action_inspect_windows', next: 'active_windows_node' },
+					{ label: "Check unread emails", category: 'SERIOUS', actionTrigger: 'action_check_mail', next: 'mail_overview_node' },
+					{ label: "View active To-Do list", category: 'SERIOUS', actionTrigger: 'show_todos', next: 'todo_overview_node' },
+					{ label: "Return to main dialogue", category: 'AGREE', next: 'greeting_root' }
+				]
+			},
+
+			activity_achievements_node: {
+				id: 'activity_achievements_node',
+				text: "Workstation milestones summary loaded. Track unlocked trophies and exploration progress.",
+				actionTrigger: 'action_achievements',
+				options: [
+					{ label: "Inspect user identity profile", category: 'SERIOUS', actionTrigger: 'action_profile', next: 'who_am_i_node' },
+					{ label: "Inspect system diagnostics", category: 'SERIOUS', actionTrigger: 'action_status', next: 'diagnostics_node' },
+					{ label: "Tech Trivia Quiz", category: 'SERIOUS', actionTrigger: 'game_quiz', next: 'quiz_start_node' },
+					{ label: "Return to main dialogue", category: 'AGREE', next: 'greeting_root' }
 				]
 			},
 
@@ -3493,6 +3792,29 @@
 					{ label: "Open audio controller panel.", category: 'SERIOUS', actionTrigger: 'action_music_panel', next: 'user_state_good' },
 					{ label: "Play / Pause active track.", category: 'SERIOUS', actionTrigger: 'action_music_panel', next: 'user_state_good' },
 					{ label: "Return to main dialogue.", category: 'AGREE', next: 'greeting_root' }
+				]
+			},
+
+			empathy_anomaly_support_node: {
+				id: 'empathy_anomaly_support_node',
+				text: "I am right here with you. When workload or exhaustion builds up, it is completely normal for pace and expression to change. What would serve you best right now?",
+				options: [
+					{ label: "Let's organize my active tasks calmly.", category: 'SERIOUS', actionTrigger: 'show_todos', next: 'user_state_good' },
+					{ label: "Start a 25-minute Pomodoro focus interval.", category: 'SERIOUS', actionTrigger: 'timer_25', next: 'user_state_good' },
+					{ label: "Share a peaceful philosophical perspective.", category: 'PHILOSOPHICAL', next: 'peaceful_philosophy_node' },
+					{ label: "Tell me a light programmer joke.", category: 'JOKE', actionTrigger: 'action_joke', next: 'humor_joke_node' },
+					{ label: "Let's continue with standard operations.", category: 'AGREE', next: 'greeting_root' }
+				]
+			},
+
+			user_disclosure_followup_node: {
+				id: 'user_disclosure_followup_node',
+				text: "I appreciate you sharing that context. Having a clear picture of what you are experiencing helps me tailor my assistance. Where would you like to direct our efforts next?",
+				options: [
+					{ label: "Add this objective to my To-Do list.", category: 'SERIOUS', actionTrigger: 'show_todos', next: 'user_state_good' },
+					{ label: "Discuss strategies for focus and consistency.", category: 'INQUIRE', next: 'focus_habits_node' },
+					{ label: "Save a quick note on the scratchpad.", category: 'SERIOUS', next: 'productivity_tasks' },
+					{ label: "Let's return to workspace tools.", category: 'AGREE', next: 'greeting_root' }
 				]
 			}
 		}

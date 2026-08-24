@@ -359,11 +359,67 @@
 			return /(https?:\/\/[^\s]+|www\.[^\s]+|[a-zA-Z0-9.-]+\.(?:com|org|net|io|edu|gov|fr|de|uk)[^\s]*)/i.test(text);
 		}
 
+		detectBehavioralAnomaly(rawText, tokens, layout, userMemory) {
+			if (!userMemory || !userMemory.messageLengthsStats || userMemory.interactionsTotal < 4) {
+				return { isSignificant: false, type: 'NONE', severity: 0 };
+			}
+
+			const stats = userMemory.messageLengthsStats;
+			const punctStats = userMemory.punctuationStats || {};
+			const timeStats = userMemory.userResponseTimeStats || {};
+			const totalMsgs = userMemory.interactionsTotal || 1;
+
+			const currentWordCount = tokens.length;
+			const isHabituallyVerbose = stats.mean >= 6.0 || stats.median >= 5.0;
+			const briefTokens = ['ok', 'k', 'yeah', 'yes', 'fine', 'sure', 'whatever', 'no', 'si tu veux', 'd accord', 'mouais', 'yep', 'ouais'];
+			const isUltraShort = currentWordCount <= 2 && (briefTokens.includes(tokens[0]) || currentWordCount === 1);
+
+			if (isHabituallyVerbose && isUltraShort) {
+				return {
+					isSignificant: true,
+					type: 'SUDDEN_BREVITY',
+					severity: 0.85,
+					detail: 'Abrupt collapse of response length relative to established baseline.'
+				};
+			}
+
+			const habitualPunctRate = (punctStats.capitalizedSentencesCount || 0) / totalMsgs;
+			const habitualDensity = (punctStats.punctuationDensitySum || 0) / totalMsgs;
+			if (habitualPunctRate > 0.65 && habitualDensity > 0.05 && layout.totalPunctuation === 0 && layout.isAllLower && currentWordCount >= 3) {
+				return {
+					isSignificant: true,
+					type: 'ABANDONED_PUNCTUATION',
+					severity: 0.75,
+					detail: 'Sudden omission of punctuation and capitalization from a rigorous typist.'
+				};
+			}
+
+			if (timeStats.count >= 5 && timeStats.mean > 0 && timeStats.stdDev > 0) {
+				const lastTime = userMemory.userResponseTimes && userMemory.userResponseTimes.length > 0
+					? userMemory.userResponseTimes[userMemory.userResponseTimes.length - 1]
+					: 0;
+				if (lastTime > (timeStats.mean + 2.5 * timeStats.stdDev) && lastTime > 15) {
+					return {
+						isSignificant: true,
+						type: 'UNUSUAL_DELAY',
+						severity: 0.65,
+						detail: 'Statistical response latency spike.'
+					};
+				}
+			}
+
+			return { isSignificant: false, type: 'NONE', severity: 0 };
+		}
+
 		classifyIntent(rawText, entities) {
 			const norm = rawText.toLowerCase().trim();
 
 			if (this.containsEmoji(rawText)) {
 				return { type: 'EMOJI_CONFUSION', confidence: 1.0 };
+			}
+
+			if (/\b(i am working on|i'm working on|i am preparing|i'm preparing|i am building|i'm building|i started a new|i have a big project|i have an exam|i am studying for|today was such a|today has been|it was a long day|i feel exhausted|i'm feeling overwhelmed|i have so much work|finally finished my|i managed to solve|i am planning to)\b/i.test(norm)) {
+				return { type: 'USER_SELF_DISCLOSURE', confidence: 0.94 };
 			}
 
 			if (/\bmicroslop\b/i.test(norm)) {
@@ -524,7 +580,7 @@
 			return 'DECLARATIVE';
 		}
 
-		process(rawText) {
+		process(rawText, userMemory = null) {
 			if (!rawText || typeof rawText !== 'string') {
 				return {
 					raw: '',
@@ -534,7 +590,8 @@
 					sentiment: { score: 0, rawSum: 0, hitCount: 0, isPositive: false, isNegative: false },
 					entities: { os: [], hardware: [], physics: [], math: [], philosophy: [], app: null, theme: null, action: null },
 					intent: { type: 'GENERAL_CHAT', confidence: 0.5 },
-					syntaxType: 'DECLARATIVE'
+					syntaxType: 'DECLARATIVE',
+					anomaly: { isSignificant: false, type: 'NONE', severity: 0 }
 				};
 			}
 
@@ -547,6 +604,8 @@
 			const evaluation = this.evaluateStatementComplexity(correctedTokens, entities, emotions, layout);
 			const intent = this.classifyIntent(rawText, entities);
 			const syntaxType = this.classifySyntax(rawText);
+			const effectiveMemory = userMemory || (window.ClippyBrain ? window.ClippyBrain.memory : null);
+			const anomaly = this.detectBehavioralAnomaly(rawText, correctedTokens, layout, effectiveMemory);
 
 			return {
 				raw: rawText,
@@ -559,7 +618,8 @@
 				evaluation: evaluation,
 				entities,
 				intent,
-				syntaxType
+				syntaxType,
+				anomaly
 			};
 		}
 	}
