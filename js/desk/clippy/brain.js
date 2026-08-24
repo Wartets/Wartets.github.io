@@ -25,7 +25,9 @@
 					skepticism: 20,
 					passion: 50,
 					reserve: 35,
-					emotionalInertia: 0.85
+					emotionalInertia: 0.85,
+					interactionHistory: [],
+					lastEvolvedDate: Date.now()
 				},
 				affinity: 50,
 				patience: 60,
@@ -401,14 +403,37 @@
 					skepticism: 20,
 					passion: 50,
 					reserve: 35,
-					emotionalInertia: 0.85
+					emotionalInertia: 0.85,
+					interactionHistory: [],
+					lastEvolvedDate: Date.now()
 				};
 			}
+
+			const allowEvolution = window.SettingsApp ? (window.SettingsApp.get('clippyTemperamentEvolution') !== false) : true;
+			if (!allowEvolution) return;
 
 			const inertia = (window.SettingsApp && window.SettingsApp.get('clippyTemperamentInertia')) !== undefined
 				? window.SettingsApp.get('clippyTemperamentInertia')
 				: 0.85;
-			const learnRate = 1 - inertia;
+			const learnRate = Math.max(0.04, 1.0 - inertia);
+
+			const now = Date.now();
+			const elapsedHours = (now - (this.state.temperament.lastEvolvedDate || now)) / 3600000;
+			if (elapsedHours > 12) {
+				const decayRate = Math.min(0.25, elapsedHours * 0.015);
+				this.state.temperament.skepticism = Math.round(this.state.temperament.skepticism * (1 - decayRate) + 20 * decayRate);
+				this.state.temperament.benevolence = Math.round(this.state.temperament.benevolence * (1 - decayRate) + 55 * decayRate);
+				this.state.temperament.passion = Math.round(this.state.temperament.passion * (1 - decayRate) + 50 * decayRate);
+				this.state.temperament.reserve = Math.round(this.state.temperament.reserve * (1 - decayRate) + 35 * decayRate);
+			}
+
+			if (!this.state.temperament.interactionHistory) {
+				this.state.temperament.interactionHistory = [];
+			}
+			this.state.temperament.interactionHistory.push(emotions.valence || 0);
+			if (this.state.temperament.interactionHistory.length > 30) {
+				this.state.temperament.interactionHistory.shift();
+			}
 
 			let targetBenevolence = this.state.temperament.benevolence;
 			let targetSkepticism = this.state.temperament.skepticism;
@@ -416,34 +441,42 @@
 			let targetReserve = this.state.temperament.reserve;
 
 			if (this.state.consecutiveHostility > 0) {
-				targetSkepticism = Math.min(100, targetSkepticism + (this.state.consecutiveHostility * 14));
-				targetBenevolence = Math.max(0, targetBenevolence - 12);
+				targetSkepticism = Math.min(100, targetSkepticism + (this.state.consecutiveHostility * 18));
+				targetBenevolence = Math.max(0, targetBenevolence - (this.state.consecutiveHostility * 15));
 			} else if (this.state.consecutiveKindness > 0) {
-				targetBenevolence = Math.min(100, targetBenevolence + 6);
-				targetSkepticism = Math.max(0, targetSkepticism - 4);
+				targetBenevolence = Math.min(100, targetBenevolence + Math.min(15, this.state.consecutiveKindness * 3));
+				targetSkepticism = Math.max(0, targetSkepticism - Math.min(10, this.state.consecutiveKindness * 2));
 			}
 
-			if (emotions.awe > 0.4 || emotions.enthusiasm > 0.4) {
+			if (emotions.awe > 0.30 || emotions.enthusiasm > 0.30 || emotions.curiosity > 0.40) {
 				targetPassion = Math.min(100, targetPassion + 12);
 			}
 
-			if (layout.vocabularyLevel === 'academic' || layout.isAllLower) {
-				targetReserve = Math.min(100, targetReserve + 6);
+			if (layout.vocabularyLevel === 'academic' || layout.isAllLower || emotions.fatigue > 0.35) {
+				targetReserve = Math.min(100, targetReserve + 10);
+			}
+
+			const historySum = this.state.temperament.interactionHistory.reduce((a, b) => a + b, 0);
+			if (historySum < -4) {
+				targetSkepticism = Math.min(100, targetSkepticism + 12);
+			} else if (historySum > 5) {
+				targetBenevolence = Math.min(100, targetBenevolence + 12);
 			}
 
 			this.state.temperament.benevolence = Math.round((this.state.temperament.benevolence * inertia) + (targetBenevolence * learnRate));
 			this.state.temperament.skepticism = Math.round((this.state.temperament.skepticism * inertia) + (targetSkepticism * learnRate));
 			this.state.temperament.passion = Math.round((this.state.temperament.passion * inertia) + (targetPassion * learnRate));
 			this.state.temperament.reserve = Math.round((this.state.temperament.reserve * inertia) + (targetReserve * learnRate));
+			this.state.temperament.lastEvolvedDate = now;
 
 			const t = this.state.temperament;
-			if (t.skepticism >= 60) {
+			if (t.skepticism >= 54) {
 				t.type = 'SKEPTICAL';
-			} else if (t.benevolence >= 65 && t.skepticism < 35) {
+			} else if (t.benevolence >= 60 && t.skepticism < 35) {
 				t.type = 'BENEVOLENT';
-			} else if (t.passion >= 65) {
+			} else if (t.passion >= 60 && t.skepticism < 45) {
 				t.type = 'PASSIONATE';
-			} else if (t.reserve >= 60) {
+			} else if (t.reserve >= 56 && t.passion < 50) {
 				t.type = 'RESERVED';
 			} else {
 				t.type = 'BALANCED';
@@ -451,7 +484,7 @@
 		}
 
 		recalculateMood() {
-			const temp = this.state.temperament || { type: 'BALANCED', benevolence: 50, skepticism: 20 };
+			const temp = this.state.temperament || { type: 'BALANCED', benevolence: 55, skepticism: 20 };
 
 			if (temp.type === 'BENEVOLENT') {
 				this.state.irritation = Math.max(0, this.state.irritation - 8);
@@ -460,14 +493,14 @@
 					return;
 				}
 			} else {
-				if (this.state.irritation >= 80 || this.state.consecutiveHostility >= 3) {
+				if (this.state.irritation >= 78 || this.state.consecutiveHostility >= 3) {
 					this.state.mood = 'ENRAGED';
 					return;
 				}
 			}
 
 			if (this.state.patience <= 15) {
-				this.state.mood = this.state.cynicism > 50 ? 'SARCASTIC' : 'OFFENDED';
+				this.state.mood = this.state.cynicism > 45 ? 'SARCASTIC' : 'OFFENDED';
 				return;
 			}
 			if (this.state.glitchLevel >= 60) {
@@ -494,7 +527,7 @@
 				this.state.mood = 'PLAYFUL';
 				return;
 			}
-			if (this.state.cynicism >= 70) {
+			if (this.state.cynicism >= 68) {
 				this.state.mood = 'CYNICAL';
 				return;
 			}
@@ -510,7 +543,7 @@
 				this.state.mood = 'NOSTALGIC';
 				return;
 			}
-			if (this.state.intellect >= 70) {
+			if (this.state.intellect >= 68) {
 				this.state.mood = 'ANALYTICAL';
 				return;
 			}
@@ -520,12 +553,28 @@
 					this.state.mood = 'EUPHORIC';
 					return;
 				}
-				if (this.state.affinity >= 60) {
+				if (this.state.affinity >= 55) {
 					this.state.mood = 'ANALYTICAL';
 					return;
 				}
+			} else if (temp.type === 'PASSIONATE') {
+				if (this.state.affinity >= 70 && this.state.energy >= 60) {
+					this.state.mood = 'EUPHORIC';
+					return;
+				}
+				if (this.state.playfulness >= 45) {
+					this.state.mood = 'PLAYFUL';
+					return;
+				}
+			} else if (temp.type === 'RESERVED') {
+				if (this.state.affinity >= 75) {
+					this.state.mood = 'ZEN';
+					return;
+				}
+				this.state.mood = 'ANALYTICAL';
+				return;
 			} else {
-				if (this.state.affinity >= 80 && this.state.patience >= 70) {
+				if (this.state.affinity >= 78 && this.state.patience >= 68) {
 					this.state.mood = 'EUPHORIC';
 					return;
 				}
@@ -535,12 +584,7 @@
 				this.state.mood = 'MELANCHOLIC';
 				return;
 			}
-			if (this.state.patience >= 80 && this.state.cynicism <= 20) {
-				this.state.mood = 'ZEN';
-				return;
-			}
-
-			if (temp.type === 'RESERVED') {
+			if (this.state.patience >= 75 && this.state.cynicism <= 25) {
 				this.state.mood = 'ZEN';
 				return;
 			}
@@ -550,15 +594,38 @@
 
 		applyMoodDelta(delta) {
 			if (!delta) return;
-			if (delta.affinity !== undefined) this.state.affinity = Math.max(0, Math.min(100, this.state.affinity + delta.affinity));
-			if (delta.patience !== undefined) this.state.patience = Math.max(0, Math.min(100, this.state.patience + delta.patience));
+			const tempType = (this.state.temperament && this.state.temperament.type) || 'BALANCED';
+
+			let affinityMult = 1.0;
+			let patienceMult = 1.0;
+			let intellectMult = 1.0;
+			let energyMult = 1.0;
+
+			if (tempType === 'SKEPTICAL') {
+				affinityMult = delta.affinity > 0 ? 0.65 : 1.30;
+				patienceMult = delta.patience > 0 ? 0.70 : 1.25;
+			} else if (tempType === 'BENEVOLENT') {
+				affinityMult = delta.affinity > 0 ? 1.25 : 0.60;
+				patienceMult = delta.patience > 0 ? 1.25 : 0.55;
+			} else if (tempType === 'PASSIONATE') {
+				affinityMult = delta.affinity > 0 ? 1.20 : 1.15;
+				energyMult = 1.30;
+				intellectMult = 1.20;
+			} else if (tempType === 'RESERVED') {
+				affinityMult = 0.75;
+				patienceMult = 0.80;
+				energyMult = 0.75;
+			}
+
+			if (delta.affinity !== undefined) this.state.affinity = Math.max(0, Math.min(100, this.state.affinity + Math.round(delta.affinity * affinityMult)));
+			if (delta.patience !== undefined) this.state.patience = Math.max(0, Math.min(100, this.state.patience + Math.round(delta.patience * patienceMult)));
 			if (delta.cynicism !== undefined) this.state.cynicism = Math.max(0, Math.min(100, this.state.cynicism + delta.cynicism));
-			if (delta.intellect !== undefined) this.state.intellect = Math.max(0, Math.min(100, this.state.intellect + delta.intellect));
+			if (delta.intellect !== undefined) this.state.intellect = Math.max(0, Math.min(100, this.state.intellect + Math.round(delta.intellect * intellectMult)));
 			if (delta.existentialism !== undefined) this.state.existentialism = Math.max(0, Math.min(100, this.state.existentialism + delta.existentialism));
 			if (delta.nostalgia !== undefined) this.state.nostalgia = Math.max(0, Math.min(100, this.state.nostalgia + delta.nostalgia));
 			if (delta.paranoia !== undefined) this.state.paranoia = Math.max(0, Math.min(100, this.state.paranoia + delta.paranoia));
 			if (delta.drama !== undefined) this.state.drama = Math.max(0, Math.min(100, this.state.drama + delta.drama));
-			if (delta.energy !== undefined) this.state.energy = Math.max(0, Math.min(100, this.state.energy + delta.energy));
+			if (delta.energy !== undefined) this.state.energy = Math.max(0, Math.min(100, this.state.energy + Math.round(delta.energy * energyMult)));
 			if (delta.mood) this.state.mood = delta.mood.toUpperCase();
 			this.saveState();
 		}
@@ -886,7 +953,7 @@
 			const k = window.ClippyKnowledge || {};
 
 			const allowAnomaly = window.SettingsApp ? (window.SettingsApp.get('clippyAnomalyDetection') !== false) : true;
-			if (allowAnomaly && nlpResult.anomaly && nlpResult.anomaly.isSignificant && (this.state.turnCount - (this.memory.lastAnomalyTurn || -10) > 4)) {
+			if (allowAnomaly && nlpResult.anomaly && nlpResult.anomaly.isSignificant && (this.state.turnCount - (this.memory.lastAnomalyTurn || -10) > 3)) {
 				this.memory.lastAnomalyTurn = this.state.turnCount;
 				this.saveMemory();
 				const anomalyType = nlpResult.anomaly.type || 'SUDDEN_BREVITY';
@@ -895,12 +962,14 @@
 				const resolvedAnomaly = k.resolve ? k.resolve(anomalyPool, { brain: this, vars: { userName: userProf.userName } }) : { text: '', actions: [] };
 				if (resolvedAnomaly && resolvedAnomaly.text) {
 					if (resolvedAnomaly.id) this.pushOutput(resolvedAnomaly.id);
+					const defaultActions = [
+						{ label: "I'm feeling a bit overwhelmed today.", onClick: () => { if (window.ClippyAgent) window.ClippyAgent.prompt("I'm feeling overwhelmed today"); } },
+						{ label: "Everything is fine, let's keep going.", onClick: () => { if (window.ClippyAgent) window.ClippyAgent.prompt("Everything is fine, let's keep going."); } },
+						{ label: "Start a 5-minute break timer.", onClick: () => { if (window.ClippyAgent) window.ClippyAgent.executeAction('timer_25'); } }
+					];
 					return {
 						text: this.transformResponseText(resolvedAnomaly.text),
-						actions: (resolvedAnomaly.actions && resolvedAnomaly.actions.length > 0) ? resolvedAnomaly.actions : [
-							{ label: "I'm just a bit overwhelmed today.", onClick: () => { if (window.ClippyAgent) window.ClippyAgent.prompt("I am feeling overwhelmed"); } },
-							{ label: "Everything is fine, let's keep going.", onClick: () => { if (window.ClippyAgent) window.ClippyAgent.prompt("Everything is fine"); } }
-						],
+						actions: (resolvedAnomaly.actions && resolvedAnomaly.actions.length > 0) ? resolvedAnomaly.actions : defaultActions,
 						source: 'ANOMALY_EMPATHY'
 					};
 				}
@@ -909,26 +978,33 @@
 			const allowCuriosity = window.SettingsApp ? (window.SettingsApp.get('clippyProactiveCuriosity') !== false) : true;
 			if (allowCuriosity && nlpResult.intent && nlpResult.intent.type === 'USER_SELF_DISCLOSURE') {
 				const disclosureFact = rawText.trim();
+				const category = nlpResult.intent.disclosureCategory || 'general';
 				if (!this.memory.userDisclosures) this.memory.userDisclosures = [];
 				if (!this.memory.semanticFacts) this.memory.semanticFacts = [];
-				this.memory.userDisclosures.push({ text: disclosureFact, turn: this.state.turnCount, date: Date.now() });
-				if (this.memory.userDisclosures.length > 20) this.memory.userDisclosures.shift();
+				this.memory.userDisclosures.push({ text: disclosureFact, category, turn: this.state.turnCount, date: Date.now() });
+				if (this.memory.userDisclosures.length > 25) this.memory.userDisclosures.shift();
 				this.memory.recentDisclosedTopic = disclosureFact;
-				this.memory.semanticFacts.push(disclosureFact);
-				if (this.memory.semanticFacts.length > 30) this.memory.semanticFacts.shift();
+				if (!this.memory.semanticFacts.includes(disclosureFact)) {
+					this.memory.semanticFacts.push(disclosureFact);
+				}
+				if (this.memory.semanticFacts.length > 35) this.memory.semanticFacts.shift();
 				this.saveMemory();
 
 				const userProf = window.ClippySystemBridge ? window.ClippySystemBridge.getUserProfile() : { userName: 'User' };
-				const followupPool = k.DISCLOSURE_FOLLOWUP_TEMPLATES || [];
-				const resolvedFollowup = k.resolve ? k.resolve(followupPool, { brain: this, vars: { userName: userProf.userName } }) : { text: '', actions: [] };
+				const allTemplates = k.DISCLOSURE_FOLLOWUP_TEMPLATES || [];
+				const matchingCategoryTemplates = allTemplates.filter(tpl => tpl.category === category);
+				const poolToUse = matchingCategoryTemplates.length > 0 ? matchingCategoryTemplates : allTemplates;
+				const resolvedFollowup = k.resolve ? k.resolve(poolToUse, { brain: this, vars: { userName: userProf.userName } }) : { text: '', actions: [] };
 				if (resolvedFollowup && resolvedFollowup.text) {
 					if (resolvedFollowup.id) this.pushOutput(resolvedFollowup.id);
+					const defaultFollowupActions = [
+						{ label: "Record this in my To-Do manager.", onClick: () => { if (window.ClippyAgent) window.ClippyAgent.executeAction('show_todos'); } },
+						{ label: "Discuss strategies for focus.", onClick: () => { if (window.ClippyAgent) window.ClippyAgent.prompt("Discuss focus & habit strategies"); } },
+						{ label: "Share a peaceful philosophical perspective.", onClick: () => { if (window.ClippyAgent) window.ClippyAgent.prompt("Tell me a philosophical thought for today"); } }
+					];
 					return {
 						text: this.transformResponseText(resolvedFollowup.text),
-						actions: (resolvedFollowup.actions && resolvedFollowup.actions.length > 0) ? resolvedFollowup.actions : [
-							{ label: "Let's organize tasks in To-Do manager.", onClick: () => { if (window.ClippyAgent) window.ClippyAgent.executeAction('show_todos'); } },
-							{ label: "Discuss strategies for focus.", onClick: () => { if (window.ClippyAgent) window.ClippyAgent.prompt("Discuss focus & habit strategies"); } }
-						],
+						actions: (resolvedFollowup.actions && resolvedFollowup.actions.length > 0) ? resolvedFollowup.actions : defaultFollowupActions,
 						source: 'DISCLOSURE_FOLLOWUP'
 					};
 				}

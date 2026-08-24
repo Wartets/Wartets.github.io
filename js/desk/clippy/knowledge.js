@@ -201,36 +201,105 @@
 						{ label: "Working on a complex problem.", next: "tech_root" },
 						{ label: "Just stepped away for a moment.", next: "user_state_good" }
 					]
+				},
+				{
+					id: "ANOMALY_DELAY_2",
+					text: "Taking deliberate pauses often brings clarity to difficult decisions. Is there a specific architectural or logical question on your mind?",
+					moods: ["ANALYTICAL", "ZEN"],
+					continuations: [
+						{ label: "Let's analyze this logically.", next: "tech_root" },
+						{ label: "I'm ready to continue.", next: "user_state_good" }
+					]
+				}
+			],
+			EXCESSIVE_HESITATION: [
+				{
+					id: "ANOMALY_HESITATION_1",
+					text: "I sense some hesitation in your thoughts, {userName}. When facing multiple competing choices or uncertainties, organizing thoughts into distinct steps can help.",
+					moods: ["ZEN", "OPTIMISTIC", "ANALYTICAL"],
+					continuations: [
+						{ label: "Help me structure my thoughts.", actionTrigger: "show_todos", next: "user_state_good" },
+						{ label: "Let's discuss focus strategies.", next: "focus_habits_node" },
+						{ label: "Share a peaceful perspective.", next: "peaceful_philosophy_node" }
+					]
+				},
+				{
+					id: "ANOMALY_HESITATION_2",
+					text: "No rush at all. We can break things down into smaller pieces or set aside a quiet moment to evaluate.",
+					moods: ["ZEN", "ANALYTICAL"],
+					continuations: [
+						{ label: "Start a 25-minute Pomodoro timer.", actionTrigger: "timer_25", next: "user_state_good" },
+						{ label: "Let's review my task list.", actionTrigger: "show_todos", next: "user_state_good" }
+					]
 				}
 			]
 		},
 
 		DISCLOSURE_FOLLOWUP_TEMPLATES: [
 			{
-				id: "DISCLOSURE_FOLLOWUP_1",
-				text: "That sounds like a meaningful priority, {userName}. What is the main milestone you are aiming to reach next with this?",
+				id: "DISCLOSURE_FOLLOWUP_PROJECT",
+				category: "project",
+				text: "That sounds like a meaningful priority, {userName}. What is the primary milestone you are aiming to reach next with this?",
 				moods: ["OPTIMISTIC", "ANALYTICAL", "ZEN"],
 				continuations: [
-					{ label: "Let's break it down into tasks.", actionTrigger: "show_todos", next: "user_state_good" },
-					{ label: "Discuss focus and deep work habits.", next: "focus_habits_node" }
+					{ label: "Break this down into tasks.", actionTrigger: "show_todos", next: "user_state_good" },
+					{ label: "Discuss focus and deep work habits.", next: "focus_habits_node" },
+					{ label: "Draft notes in Scratchpad.", next: "productivity_tasks" }
 				]
 			},
 			{
-				id: "DISCLOSURE_FOLLOWUP_2",
-				text: "Thank you for sharing that with me. What inspired your direction on this, and what part are you tackling first?",
-				moods: ["OPTIMISTIC", "ANALYTICAL"],
+				id: "DISCLOSURE_FOLLOWUP_EFFORT",
+				category: "fatigue",
+				text: "Long and demanding days demand steady pacing. How is your cognitive energy holding up, and would a short breather help?",
+				moods: ["ZEN", "OPTIMISTIC", "FATIGUED"],
 				continuations: [
-					{ label: "Record this in my To-Do list.", actionTrigger: "show_todos", next: "user_state_good" },
-					{ label: "Let's organize my thoughts in Notepad.", next: "productivity_tasks" }
+					{ label: "Start a relaxing 5-minute break timer.", actionTrigger: "timer_25", next: "user_state_good" },
+					{ label: "Share a peaceful philosophical thought.", next: "peaceful_philosophy_node" },
+					{ label: "Energy is fine, let's keep going.", next: "user_state_good" }
 				]
 			},
 			{
-				id: "DISCLOSURE_FOLLOWUP_3",
-				text: "Understood. Navigating demanding days or ambitious plans takes steady pacing. How is your energy holding up through this?",
-				moods: ["ZEN", "OPTIMISTIC"],
+				id: "DISCLOSURE_FOLLOWUP_ACCOMPLISHMENT",
+				category: "accomplishment",
+				text: "Congratulations on reaching that stage! Concluding complex milestones creates great momentum. What is your next horizon?",
+				moods: ["OPTIMISTIC", "EUPHORIC", "ANALYTICAL"],
 				continuations: [
-					{ label: "Energy is good, staying focused.", next: "user_state_good" },
-					{ label: "Need a short break to recharge.", next: "user_state_tired" }
+					{ label: "Record the next goal in To-Do list.", actionTrigger: "show_todos", next: "user_state_good" },
+					{ label: "View my milestones and achievements.", actionTrigger: "action_achievements", next: "who_am_i_node" },
+					{ label: "Discuss software architecture ideas.", next: "tech_root" }
+				]
+			},
+			{
+				id: "DISCLOSURE_FOLLOWUP_STUDY",
+				category: "study",
+				text: "Academic preparation and structured review require sustained focus, {userName}. Which subject or concept are you concentrating on today?",
+				moods: ["ANALYTICAL", "ZEN", "OPTIMISTIC"],
+				continuations: [
+					{ label: "Discuss technical reading techniques.", next: "reading_books_node" },
+					{ label: "Start a 25-minute Pomodoro study block.", actionTrigger: "timer_25", next: "user_state_good" },
+					{ label: "Review mathematics and physics.", next: "math_lecture_node" }
+				]
+			},
+			{
+				id: "DISCLOSURE_FOLLOWUP_PLANNING",
+				category: "planning",
+				text: "Setting explicit intentions brings clarity to complex workflows. Would you like to structure these objectives into distinct steps?",
+				moods: ["OPTIMISTIC", "ANALYTICAL", "ZEN"],
+				continuations: [
+					{ label: "Record goals in Task Manager.", actionTrigger: "show_todos", next: "user_state_good" },
+					{ label: "Discuss time-blocking frameworks.", next: "focus_habits_node" },
+					{ label: "Take notes in Scratchpad.", next: "productivity_tasks" }
+				]
+			},
+			{
+				id: "DISCLOSURE_FOLLOWUP_GENERIC",
+				category: "general",
+				text: "Thank you for sharing that context with me, {userName}. What part of it are you planning to tackle first today?",
+				moods: ["OPTIMISTIC", "ANALYTICAL", "ZEN"],
+				continuations: [
+					{ label: "Record this in my To-Do manager.", actionTrigger: "show_todos", next: "user_state_good" },
+					{ label: "Organize my notes and priorities.", next: "productivity_tasks" },
+					{ label: "Explore focus and study habits.", next: "focus_habits_node" }
 				]
 			}
 		],
@@ -238,23 +307,28 @@
 		TEMPERAMENT_FLAVORS: {
 			SKEPTICAL: {
 				prefix: "Observing with measured caution: ",
-				softener: "Let us review this carefully before proceeding: "
+				softener: "Let us review this carefully before proceeding: ",
+				attitude: "guarded"
 			},
 			BENEVOLENT: {
-				prefix: "Always happy to support you: ",
-				softener: "Take all the time you need: "
+				prefix: "Always glad to support you: ",
+				softener: "Take all the time you need: ",
+				attitude: "nurturing"
 			},
 			RESERVED: {
 				prefix: "Quietly noting: ",
-				softener: "In steady stillness: "
+				softener: "In steady stillness: ",
+				attitude: "stoic"
 			},
 			PASSIONATE: {
 				prefix: "With genuine enthusiasm: ",
-				softener: "An exciting challenge ahead: "
+				softener: "An exciting challenge ahead: ",
+				attitude: "dynamic"
 			},
 			BALANCED: {
 				prefix: "",
-				softener: ""
+				softener: "",
+				attitude: "neutral"
 			}
 		},
 

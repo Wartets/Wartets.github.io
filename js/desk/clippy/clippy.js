@@ -164,19 +164,32 @@
 			const tpl = (window.ClippyKnowledge && window.ClippyKnowledge.SYSTEM_TEXTS && window.ClippyKnowledge.SYSTEM_TEXTS.password && window.ClippyKnowledge.SYSTEM_TEXTS.password.generatedEntropy) || "Generated High-Entropy Password ({length} chars):\n**`{password}`**";
 			window.ClippyUI.appendAssistantMessage(window.ClippyKnowledge.formatString(tpl, { length: 24, password: pwd }));
 		} else if (actionId === 'action_inspect_windows') {
-			renderActiveWindowsList();
+			if (isDeskEnvironment()) renderActiveWindowsList();
+			else respondDeskOnlyFeature('Window Manager');
 		} else if (actionId === 'action_show_desktop') {
-			window.ClippySystemBridge.minimizeAllWindows();
-			const winTexts = (window.ClippyKnowledge && window.ClippyKnowledge.SYSTEM_TEXTS && window.ClippyKnowledge.SYSTEM_TEXTS.windowControls) || {};
-			window.ClippyUI.appendAssistantMessage(pickFrom(winTexts.minimizedAll || ["All open windows have been minimized to the taskbar."]));
+			if (isDeskEnvironment()) {
+				window.ClippySystemBridge.minimizeAllWindows();
+				const winTexts = (window.ClippyKnowledge && window.ClippyKnowledge.SYSTEM_TEXTS && window.ClippyKnowledge.SYSTEM_TEXTS.windowControls) || {};
+				window.ClippyUI.appendAssistantMessage(pickFrom(winTexts.minimizedAll || ["All open windows have been minimized to the taskbar."]));
+			} else {
+				respondDeskOnlyFeature('Window Manager');
+			}
 		} else if (actionId === 'action_cascade_windows') {
-			window.ClippySystemBridge.cascadeWindows();
-			const winTexts = (window.ClippyKnowledge && window.ClippyKnowledge.SYSTEM_TEXTS && window.ClippyKnowledge.SYSTEM_TEXTS.windowControls) || {};
-			window.ClippyUI.appendAssistantMessage(pickFrom(winTexts.cascaded || ["Windows arranged in cascade layout."]));
+			if (isDeskEnvironment()) {
+				window.ClippySystemBridge.cascadeWindows();
+				const winTexts = (window.ClippyKnowledge && window.ClippyKnowledge.SYSTEM_TEXTS && window.ClippyKnowledge.SYSTEM_TEXTS.windowControls) || {};
+				window.ClippyUI.appendAssistantMessage(pickFrom(winTexts.cascaded || ["Windows arranged in cascade layout."]));
+			} else {
+				respondDeskOnlyFeature('Window Manager');
+			}
 		} else if (actionId === 'action_tile_windows') {
-			window.ClippySystemBridge.tileWindows(true);
-			const winTexts = (window.ClippyKnowledge && window.ClippyKnowledge.SYSTEM_TEXTS && window.ClippyKnowledge.SYSTEM_TEXTS.windowControls) || {};
-			window.ClippyUI.appendAssistantMessage(pickFrom(winTexts.tiled || ["Windows tiled horizontally across the workspace."]));
+			if (isDeskEnvironment()) {
+				window.ClippySystemBridge.tileWindows(true);
+				const winTexts = (window.ClippyKnowledge && window.ClippyKnowledge.SYSTEM_TEXTS && window.ClippyKnowledge.SYSTEM_TEXTS.windowControls) || {};
+				window.ClippyUI.appendAssistantMessage(pickFrom(winTexts.tiled || ["Windows tiled horizontally across the workspace."]));
+			} else {
+				respondDeskOnlyFeature('Window Manager');
+			}
 		} else if (actionId === 'action_constant_c') {
 			const cVal = (window.ClippyKnowledge && window.ClippyKnowledge.PHYSICAL_CONSTANTS && window.ClippyKnowledge.PHYSICAL_CONSTANTS.c) || { value: 299792458, unit: "m s^-1" };
 			const tpl = (window.ClippyKnowledge && window.ClippyKnowledge.SYSTEM_TEXTS && window.ClippyKnowledge.SYSTEM_TEXTS.constants && window.ClippyKnowledge.SYSTEM_TEXTS.constants.speedOfLightText) || "Speed of light in vacuum (c):\n**{value} {unit}** (exact standard)";
@@ -190,33 +203,48 @@
 		} else if (actionId === 'action_achievements') {
 			renderAchievementsList();
 		} else if (actionId === 'action_theme_panel') {
-			renderThemeSelectorCard();
+			if (isDeskEnvironment()) renderThemeSelectorCard();
+			else respondDeskOnlyFeature('Theme Switcher');
 		} else if (actionId === 'action_wallpaper_panel') {
-			renderWallpaperSelectorCard();
+			if (isDeskEnvironment()) renderWallpaperSelectorCard();
+			else respondDeskOnlyFeature('Desktop Wallpapers');
 		} else if (actionId === 'action_music_panel') {
-			renderMusicPlayerController();
+			if (isDeskEnvironment()) renderMusicPlayerController();
+			else respondDeskOnlyFeature('Audio Player');
 		} else if (actionId === 'action_files_panel') {
-			renderFileListCard('/');
+			if (isDeskEnvironment()) renderFileListCard('/');
+			else respondDeskOnlyFeature('File System');
 		} else if (actionId === 'action_volume_panel') {
-			renderVolumeControllerCard();
+			if (isDeskEnvironment()) renderVolumeControllerCard();
+			else respondDeskOnlyFeature('Audio Volume Controller');
 		} else if (actionId === 'action_system_tools') {
-			renderSystemToolsCard();
+			if (isDeskEnvironment()) renderSystemToolsCard();
+			else respondDeskOnlyFeature('System Diagnostics');
 		} else if (actionId === 'action_check_mail') {
-			renderMailListCard();
+			if (isDeskEnvironment()) renderMailListCard();
+			else respondDeskOnlyFeature('Outlook Express');
 		} else if (actionId === 'action_compose_mail') {
-			window.ClippySystemBridge.launchApp('outlook');
-			const mailTexts = (window.ClippyKnowledge && window.ClippyKnowledge.SYSTEM_TEXTS && window.ClippyKnowledge.SYSTEM_TEXTS.mailControls) || {};
-			window.ClippyUI.appendAssistantMessage(mailTexts.launched || "Outlook Express launched for drafting messages.");
+			if (isDeskEnvironment()) {
+				window.ClippySystemBridge.launchApp('outlook');
+				const mailTexts = (window.ClippyKnowledge && window.ClippyKnowledge.SYSTEM_TEXTS && window.ClippyKnowledge.SYSTEM_TEXTS.mailControls) || {};
+				window.ClippyUI.appendAssistantMessage(mailTexts.launched || "Outlook Express launched for drafting messages.");
+			} else {
+				respondDeskOnlyFeature('Outlook Express');
+			}
 		} else if (actionId === 'action_inspect_bin') {
-			const count = window.ClippySystemBridge.getRecycleBinCount();
-			const rbTexts = (window.ClippyKnowledge && window.ClippyKnowledge.SYSTEM_TEXTS && window.ClippyKnowledge.SYSTEM_TEXTS.recycleBin) || {};
-			const msg = count > 0 
-				? (window.ClippyKnowledge.formatString(rbTexts.countNotice || "The Recycle Bin currently holds {count} item(s).", { count }))
-				: (rbTexts.emptyNotice || "The Recycle Bin is completely empty.");
-			window.ClippyUI.appendAssistantMessage(msg, [
-				{ label: rbTexts.btnOpen || "Open Recycle Bin", onClick: () => window.ClippySystemBridge.launchApp('recyclebin') },
-				{ label: rbTexts.btnEmpty || "Empty Recycle Bin", onClick: () => { window.ClippySystemBridge.emptyRecycleBin(); window.ClippyUI.appendAssistantMessage(rbTexts.emptiedNotice || "Recycle Bin emptied."); } }
-			]);
+			if (isDeskEnvironment()) {
+				const count = window.ClippySystemBridge.getRecycleBinCount();
+				const rbTexts = (window.ClippyKnowledge && window.ClippyKnowledge.SYSTEM_TEXTS && window.ClippyKnowledge.SYSTEM_TEXTS.recycleBin) || {};
+				const msg = count > 0 
+					? (window.ClippyKnowledge.formatString(rbTexts.countNotice || "The Recycle Bin currently holds {count} item(s).", { count }))
+					: (rbTexts.emptyNotice || "The Recycle Bin is completely empty.");
+				window.ClippyUI.appendAssistantMessage(msg, [
+					{ label: rbTexts.btnOpen || "Open Recycle Bin", onClick: () => window.ClippySystemBridge.launchApp('recyclebin') },
+					{ label: rbTexts.btnEmpty || "Empty Recycle Bin", onClick: () => { window.ClippySystemBridge.emptyRecycleBin(); window.ClippyUI.appendAssistantMessage(rbTexts.emptiedNotice || "Recycle Bin emptied."); } }
+				]);
+			} else {
+				respondDeskOnlyFeature('Recycle Bin');
+			}
 		}
 	}
 
@@ -1424,6 +1452,17 @@
 				window.ClippyUI.showIdleBubble(msg, () => {
 					window.ClippyAgent.open();
 					window.ClippyAgent.prompt("Inspect active windows");
+				});
+				return;
+			}
+
+			if (window.ClippyBrain && window.ClippyBrain.memory && window.ClippyBrain.memory.recentDisclosedTopic && Math.random() < 0.4) {
+				const recentTopic = window.ClippyBrain.memory.recentDisclosedTopic;
+				const shortenedTopic = recentTopic.length > 45 ? recentTopic.substring(0, 42) + '...' : recentTopic;
+				const followUpText = `How is progress coming along with "${shortenedTopic}"? Let me know if you would like to structure tasks or take a short breather!`;
+				window.ClippyUI.showIdleBubble(followUpText, () => {
+					window.ClippyAgent.open();
+					window.ClippyAgent.prompt("View To-Do List");
 				});
 				return;
 			}

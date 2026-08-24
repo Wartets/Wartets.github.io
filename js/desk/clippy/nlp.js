@@ -370,9 +370,10 @@
 			const totalMsgs = userMemory.interactionsTotal || 1;
 
 			const currentWordCount = tokens.length;
-			const isHabituallyVerbose = stats.mean >= 6.0 || stats.median >= 5.0;
-			const briefTokens = ['ok', 'k', 'yeah', 'yes', 'fine', 'sure', 'whatever', 'no', 'si tu veux', 'd accord', 'mouais', 'yep', 'ouais'];
-			const isUltraShort = currentWordCount <= 2 && (briefTokens.includes(tokens[0]) || currentWordCount === 1);
+			const isHabituallyVerbose = stats.mean >= 5.5 || stats.median >= 5.0;
+			const briefTokens = ['ok', 'k', 'yeah', 'yes', 'fine', 'sure', 'whatever', 'no', 'yep', 'nope', 'mouais', 'ouais', 'daccord'];
+			const firstToken = tokens.length > 0 ? tokens[0].toLowerCase() : '';
+			const isUltraShort = currentWordCount <= 2 && (briefTokens.includes(firstToken) || currentWordCount === 1);
 
 			if (isHabituallyVerbose && isUltraShort) {
 				return {
@@ -385,27 +386,41 @@
 
 			const habitualPunctRate = (punctStats.capitalizedSentencesCount || 0) / totalMsgs;
 			const habitualDensity = (punctStats.punctuationDensitySum || 0) / totalMsgs;
-			if (habitualPunctRate > 0.65 && habitualDensity > 0.05 && layout.totalPunctuation === 0 && layout.isAllLower && currentWordCount >= 3) {
+			if (habitualPunctRate > 0.60 && habitualDensity > 0.04 && layout.totalPunctuation === 0 && layout.isAllLower && currentWordCount >= 2) {
 				return {
 					isSignificant: true,
 					type: 'ABANDONED_PUNCTUATION',
 					severity: 0.75,
-					detail: 'Sudden omission of punctuation and capitalization from a rigorous typist.'
+					detail: 'Sudden omission of punctuation and capitalization from an otherwise structured typist.'
 				};
 			}
 
-			if (timeStats.count >= 5 && timeStats.mean > 0 && timeStats.stdDev > 0) {
+			if (timeStats.count >= 4 && timeStats.mean > 0 && timeStats.stdDev > 0) {
 				const lastTime = userMemory.userResponseTimes && userMemory.userResponseTimes.length > 0
 					? userMemory.userResponseTimes[userMemory.userResponseTimes.length - 1]
 					: 0;
-				if (lastTime > (timeStats.mean + 2.5 * timeStats.stdDev) && lastTime > 15) {
+				if (lastTime > (timeStats.mean + 2.2 * timeStats.stdDev) && lastTime > 12) {
 					return {
 						isSignificant: true,
 						type: 'UNUSUAL_DELAY',
 						severity: 0.65,
-						detail: 'Statistical response latency spike.'
+						detail: 'Statistical response latency spike indicating deep concentration or distraction.'
 					};
 				}
+			}
+
+			const habitualEllipsisRate = (punctStats.totalTrailingEllipses || 0) / totalMsgs;
+			const suspensionCount = (rawText.match(/\.{3,}/g) || []).length;
+			const hesitationTokens = ['um', 'uh', 'hmm', 'maybe', 'idk', 'dunno', 'i guess', 'perhaps', 'euh'];
+			const hasHesitationWords = tokens.some(t => hesitationTokens.includes(t.toLowerCase()));
+
+			if (habitualEllipsisRate < 0.20 && (layout.hasTrailingEllipsis || suspensionCount > 1 || hasHesitationWords) && currentWordCount <= 8) {
+				return {
+					isSignificant: true,
+					type: 'EXCESSIVE_HESITATION',
+					severity: 0.70,
+					detail: 'Uncharacteristic hesitation or uncertainty in input syntax.'
+				};
 			}
 
 			return { isSignificant: false, type: 'NONE', severity: 0 };
@@ -418,8 +433,18 @@
 				return { type: 'EMOJI_CONFUSION', confidence: 1.0 };
 			}
 
-			if (/\b(i am working on|i'm working on|i am preparing|i'm preparing|i am building|i'm building|i started a new|i have a big project|i have an exam|i am studying for|today was such a|today has been|it was a long day|i feel exhausted|i'm feeling overwhelmed|i have so much work|finally finished my|i managed to solve|i am planning to)\b/i.test(norm)) {
-				return { type: 'USER_SELF_DISCLOSURE', confidence: 0.94 };
+			const disclosurePatterns = [
+				{ pattern: /\b(i am working on|i'm working on|i am building|i'm building|i started a new|i have a big project|working on my|building a new|developing a|coding a|crafting a|je travaille sur|j'ai un projet)\b/i, category: 'project' },
+				{ pattern: /\b(i have an exam|i am studying for|i'm studying for|preparing for my test|reading for my class|studying physics|studying math|reviewing lectures|j'ai un examen|je prepare mes partiels)\b/i, category: 'study' },
+				{ pattern: /\b(today was such a|today has been|it was a long day|i feel exhausted|i'm feeling overwhelmed|i have so much work|long day today|tired from work|running on empty|burnt out|journee epuisante|je suis fatigue)\b/i, category: 'fatigue' },
+				{ pattern: /\b(finally finished my|i managed to solve|completed the project|just deployed|passed my test|shipped the release|achieved my goal|j'ai enfin termine|j'ai reussi a)\b/i, category: 'accomplishment' },
+				{ pattern: /\b(i am planning to|i'm planning to|my goal for today is|i want to accomplish|thinking about starting|aiming to finish|my priority today|je compte faire|mon objectif est)\b/i, category: 'planning' }
+			];
+
+			for (const item of disclosurePatterns) {
+				if (item.pattern.test(norm)) {
+					return { type: 'USER_SELF_DISCLOSURE', disclosureCategory: item.category, confidence: 0.95 };
+				}
 			}
 
 			if (/\bmicroslop\b/i.test(norm)) {
