@@ -78,6 +78,53 @@
 					gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.04);
 					osc.start(now);
 					osc.stop(now + 0.04);
+				} else if (type === 'tick' || type === 'wheel_tick') {
+					const osc = this.ctx.createOscillator();
+					const gain = this.ctx.createGain();
+					osc.connect(gain);
+					gain.connect(this.ctx.destination);
+					osc.type = 'triangle';
+					osc.frequency.setValueAtTime(1100 + Math.random() * 200, now);
+					gain.gain.setValueAtTime(0.04, now);
+					gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.012);
+					osc.start(now);
+					osc.stop(now + 0.012);
+				} else if (type === 'backspace') {
+					const osc = this.ctx.createOscillator();
+					const gain = this.ctx.createGain();
+					osc.connect(gain);
+					gain.connect(this.ctx.destination);
+					osc.type = 'sawtooth';
+					osc.frequency.setValueAtTime(260, now);
+					osc.frequency.exponentialRampToValueAtTime(140, now + 0.035);
+					gain.gain.setValueAtTime(0.03, now);
+					gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.035);
+					osc.start(now);
+					osc.stop(now + 0.035);
+				} else if (type === 'morse_dot') {
+					const osc = this.ctx.createOscillator();
+					const gain = this.ctx.createGain();
+					osc.connect(gain);
+					gain.connect(this.ctx.destination);
+					osc.type = 'sine';
+					osc.frequency.setValueAtTime(700, now);
+					gain.gain.setValueAtTime(0.05, now);
+					gain.gain.setValueAtTime(0.05, now + 0.05);
+					gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.06);
+					osc.start(now);
+					osc.stop(now + 0.06);
+				} else if (type === 'morse_dash') {
+					const osc = this.ctx.createOscillator();
+					const gain = this.ctx.createGain();
+					osc.connect(gain);
+					gain.connect(this.ctx.destination);
+					osc.type = 'sine';
+					osc.frequency.setValueAtTime(700, now);
+					gain.gain.setValueAtTime(0.05, now);
+					gain.gain.setValueAtTime(0.05, now + 0.16);
+					gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.17);
+					osc.start(now);
+					osc.stop(now + 0.17);
 				} else if (type === 'win') {
 					[523.25, 659.25, 783.99, 1046.50, 1318.51].forEach((freq, idx) => {
 						const osc = this.ctx.createOscillator();

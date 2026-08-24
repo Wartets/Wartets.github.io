@@ -4,6 +4,28 @@
 	const IDLE_MESSAGE_INTERVAL_MS = 55000;
 	const IDLE_MESSAGE_CHANCE = 0.7;
 
+	const DESK_ONLY_ACTION_TRIGGERS = new Set([
+		'action_inspect_windows',
+		'action_show_desktop',
+		'action_cascade_windows',
+		'action_tile_windows',
+		'action_check_mail',
+		'action_compose_mail',
+		'action_inspect_bin',
+		'action_music_panel',
+		'action_files_panel',
+		'action_theme_panel',
+		'action_wallpaper_panel',
+		'action_achievements',
+		'action_volume_panel',
+		'action_system_tools'
+	]);
+
+	function getDeskOnlyFeatureLabel(actionId) {
+		const features = (window.ClippyKnowledge && window.ClippyKnowledge.SYSTEM_TEXTS && window.ClippyKnowledge.SYSTEM_TEXTS.features) || {};
+		return features[actionId] || "Desktop Workstation";
+	}
+
 	let isThinking = false;
 	let idleTimer = null;
 	let chatMarathonTimer = null;
@@ -13,39 +35,23 @@
 		return list[Math.floor(Math.random() * list.length)];
 	}
 
-	const DESK_ONLY_ACTION_TRIGGERS = new Set([
-		'action_inspect_windows', 'action_show_desktop', 'action_cascade_windows', 'action_tile_windows',
-		'action_check_mail', 'action_compose_mail', 'action_inspect_bin', 'action_music_panel',
-		'action_files_panel', 'action_theme_panel', 'action_wallpaper_panel', 'action_achievements',
-		'action_volume_panel'
-	]);
-
-	const DESK_ONLY_FEATURE_LABELS = {
-		action_inspect_windows: 'Window Manager',
-		action_show_desktop: 'Window Manager',
-		action_cascade_windows: 'Window Manager',
-		action_tile_windows: 'Window Manager',
-		action_check_mail: 'Outlook Express',
-		action_compose_mail: 'Outlook Express',
-		action_inspect_bin: 'Recycle Bin',
-		action_music_panel: 'Audio Player',
-		action_files_panel: 'File System',
-		action_theme_panel: 'Theme Switcher',
-		action_wallpaper_panel: 'Desktop Wallpapers',
-		action_achievements: 'Milestones Window',
-		action_volume_panel: 'Audio Volume Controller'
-	};
-
 	function isDeskEnvironment() {
 		return !window.ClippySystemBridge || window.ClippySystemBridge.getEnvironment() !== 'standalone';
 	}
 
 	function buildDeskOnlyResponse(featureLabel) {
+		const k = window.ClippyKnowledge || {};
+		const deskOnly = (k.SYSTEM_TEXTS && k.SYSTEM_TEXTS.deskOnly) || {
+			template: "The \"{feature}\" module requires the full desktop workstation environment and is not available in this standalone Clippy session. Visit the complete desktop experience to unlock every capability.",
+			actionDesk: "Open Desktop Experience",
+			actionCapabilities: "What can you do here?"
+		};
+		const text = k.formatString ? k.formatString(deskOnly.template, { feature: featureLabel }) : `The "${featureLabel}" module requires the full desktop environment.`;
 		return {
-			text: `The "${featureLabel}" module requires the full desktop workstation environment and is not available in this standalone Clippy session. Visit the complete desktop experience to unlock every capability.`,
+			text,
 			actions: [
-				{ label: "Open Desktop Experience", onClick: () => { window.open('https://wartets.github.io/desk/', '_blank'); } },
-				{ label: "What can you do here?", onClick: () => handleUserInput("What can you do?") }
+				{ label: deskOnly.actionDesk, onClick: () => { window.open('https://wartets.github.io/desk/', '_blank'); } },
+				{ label: deskOnly.actionCapabilities, onClick: () => handleUserInput("What can you do?") }
 			]
 		};
 	}
@@ -55,7 +61,7 @@
 		window.ClippyUI.appendAssistantMessage(response.text, response.actions);
 	}
 
-	function handleUserInput(rawText) {
+	function handleUserInput(rawText, isSuggestion = false) {
 		if (!rawText || isThinking) return;
 		if (window.ClippyUI && window.ClippyUI.isTyping && window.ClippyUI.currentTypeInterval) {
 			clearInterval(window.ClippyUI.currentTypeInterval);
@@ -70,7 +76,7 @@
 		setTimeout(() => {
 			let response = null;
 			try {
-				response = processDispatch(rawText);
+				response = processDispatch(rawText, isSuggestion);
 			} catch (e) {
 				const fallback = pickFrom(window.ClippyKnowledge ? window.ClippyKnowledge.FALLBACK_RESPONSES : []);
 				response = { text: window.ClippyBrain ? window.ClippyBrain.transformResponseText(fallback) : fallback };
@@ -94,7 +100,7 @@
 
 	function executeActionTrigger(actionId) {
 		if (DESK_ONLY_ACTION_TRIGGERS.has(actionId) && !isDeskEnvironment()) {
-			respondDeskOnlyFeature(DESK_ONLY_FEATURE_LABELS[actionId] || 'Desktop Workstation');
+			respondDeskOnlyFeature(getDeskOnlyFeatureLabel(actionId));
 			return;
 		}
 		if (actionId === 'timer_25') {
@@ -117,14 +123,32 @@
 			window.ClippyActivities.mines.mount();
 		} else if (actionId === 'action_defrag') {
 			window.ClippyActivities.defrag.mount();
+		} else if (actionId === 'action_dimensional_analysis') {
+			window.ClippyActivities.dimensionalAnalysis.mount();
+		} else if (actionId === 'action_euclidean_division') {
+			window.ClippyActivities.euclideanDivision.mount();
+		} else if (actionId === 'action_polynomial_factorization') {
+			window.ClippyActivities.polynomialFactorization.mount();
+		} else if (actionId === 'action_linear_solver') {
+			window.ClippyActivities.linearSolver.mount();
+		} else if (actionId === 'action_wheel') {
+			window.ClippyActivities.wheel.mount();
+		} else if (actionId === 'action_cipher') {
+			window.ClippyActivities.cipher.mount();
+		} else if (actionId === 'action_tps') {
+			window.ClippyActivities.tps.mount();
+		} else if (actionId === 'action_date_calc') {
+			window.ClippyActivities.dateCalc.mount();
 		} else if (actionId === 'pet_status' || actionId === 'pet_feed' || actionId === 'pet_polish') {
 			window.ClippyActivities.pet.mount();
 		} else if (actionId === 'action_trivia') {
-			window.ClippyUI.appendAssistantMessage(pickFrom(window.ClippyKnowledge.TRIVIA), [
+			const res = window.ClippyKnowledge.resolve(window.ClippyKnowledge.TRIVIA, { brain: window.ClippyBrain });
+			window.ClippyUI.appendAssistantMessage(res.text, [
 				{ label: "Another Trivia", onClick: () => executeActionTrigger('action_trivia') }
 			]);
 		} else if (actionId === 'action_joke') {
-			window.ClippyUI.appendAssistantMessage(pickFrom(window.ClippyKnowledge.JOKES), [
+			const res = window.ClippyKnowledge.resolve(window.ClippyKnowledge.JOKES, { brain: window.ClippyBrain });
+			window.ClippyUI.appendAssistantMessage(res.text, [
 				{ label: "Another Joke", onClick: () => executeActionTrigger('action_joke') }
 			]);
 		} else if (actionId === 'action_status') {
@@ -133,25 +157,34 @@
 			window.ClippyUI.appendAssistantMessage((window.ClippyKnowledge ? window.ClippyKnowledge.SHORTCUTS : []).join('\n'));
 		} else if (actionId === 'action_pass') {
 			const pwd = window.ClippyActivities.generatePassword(16);
-			window.ClippyUI.appendAssistantMessage(`Generated Secure Password (16 chars):\n**\`${pwd}\`**`);
+			const tpl = (window.ClippyKnowledge && window.ClippyKnowledge.SYSTEM_TEXTS && window.ClippyKnowledge.SYSTEM_TEXTS.password && window.ClippyKnowledge.SYSTEM_TEXTS.password.generated) || "Generated Secure Password ({length} chars):\n**`{password}`**";
+			window.ClippyUI.appendAssistantMessage(window.ClippyKnowledge.formatString(tpl, { length: 16, password: pwd }));
 		} else if (actionId === 'action_pass_24') {
 			const pwd = window.ClippyActivities.generatePassword(24);
-			window.ClippyUI.appendAssistantMessage(`Generated High-Entropy Password (24 chars):\n**\`${pwd}\`**`);
+			const tpl = (window.ClippyKnowledge && window.ClippyKnowledge.SYSTEM_TEXTS && window.ClippyKnowledge.SYSTEM_TEXTS.password && window.ClippyKnowledge.SYSTEM_TEXTS.password.generatedEntropy) || "Generated High-Entropy Password ({length} chars):\n**`{password}`**";
+			window.ClippyUI.appendAssistantMessage(window.ClippyKnowledge.formatString(tpl, { length: 24, password: pwd }));
 		} else if (actionId === 'action_inspect_windows') {
 			renderActiveWindowsList();
 		} else if (actionId === 'action_show_desktop') {
 			window.ClippySystemBridge.minimizeAllWindows();
-			window.ClippyUI.appendAssistantMessage("All open windows have been minimized to the taskbar.");
+			const winTexts = (window.ClippyKnowledge && window.ClippyKnowledge.SYSTEM_TEXTS && window.ClippyKnowledge.SYSTEM_TEXTS.windowControls) || {};
+			window.ClippyUI.appendAssistantMessage(pickFrom(winTexts.minimizedAll || ["All open windows have been minimized to the taskbar."]));
 		} else if (actionId === 'action_cascade_windows') {
 			window.ClippySystemBridge.cascadeWindows();
-			window.ClippyUI.appendAssistantMessage("Windows arranged in cascade layout.");
+			const winTexts = (window.ClippyKnowledge && window.ClippyKnowledge.SYSTEM_TEXTS && window.ClippyKnowledge.SYSTEM_TEXTS.windowControls) || {};
+			window.ClippyUI.appendAssistantMessage(pickFrom(winTexts.cascaded || ["Windows arranged in cascade layout."]));
 		} else if (actionId === 'action_tile_windows') {
 			window.ClippySystemBridge.tileWindows(true);
-			window.ClippyUI.appendAssistantMessage("Windows tiled horizontally across the workspace.");
+			const winTexts = (window.ClippyKnowledge && window.ClippyKnowledge.SYSTEM_TEXTS && window.ClippyKnowledge.SYSTEM_TEXTS.windowControls) || {};
+			window.ClippyUI.appendAssistantMessage(pickFrom(winTexts.tiled || ["Windows tiled horizontally across the workspace."]));
 		} else if (actionId === 'action_constant_c') {
-			window.ClippyUI.appendAssistantMessage("Speed of light in vacuum (c):\n**299,792,458 m/s** (exact standard)");
+			const cVal = (window.ClippyKnowledge && window.ClippyKnowledge.PHYSICAL_CONSTANTS && window.ClippyKnowledge.PHYSICAL_CONSTANTS.c) || { value: 299792458, unit: "m s^-1" };
+			const tpl = (window.ClippyKnowledge && window.ClippyKnowledge.SYSTEM_TEXTS && window.ClippyKnowledge.SYSTEM_TEXTS.constants && window.ClippyKnowledge.SYSTEM_TEXTS.constants.speedOfLightText) || "Speed of light in vacuum (c):\n**{value} {unit}** (exact standard)";
+			window.ClippyUI.appendAssistantMessage(window.ClippyKnowledge.formatString(tpl, { value: cVal.value.toLocaleString(), unit: cVal.unit }));
 		} else if (actionId === 'action_constant_h') {
-			window.ClippyUI.appendAssistantMessage("Planck constant (h):\n**6.62607015 x 10^-34 J s** (exact standard)");
+			const hVal = (window.ClippyKnowledge && window.ClippyKnowledge.PHYSICAL_CONSTANTS && window.ClippyKnowledge.PHYSICAL_CONSTANTS.h) || { value: 6.62607015e-34, unit: "J s" };
+			const tpl = (window.ClippyKnowledge && window.ClippyKnowledge.SYSTEM_TEXTS && window.ClippyKnowledge.SYSTEM_TEXTS.constants && window.ClippyKnowledge.SYSTEM_TEXTS.constants.planckText) || "Planck constant (h):\n**{value} {unit}** (exact standard)";
+			window.ClippyUI.appendAssistantMessage(window.ClippyKnowledge.formatString(tpl, { value: hVal.value, unit: hVal.unit }));
 		} else if (actionId === 'action_profile') {
 			renderUserProfileCard();
 		} else if (actionId === 'action_achievements') {
@@ -172,30 +205,31 @@
 			renderMailListCard();
 		} else if (actionId === 'action_compose_mail') {
 			window.ClippySystemBridge.launchApp('outlook');
-			window.ClippyUI.appendAssistantMessage("Outlook Express launched for drafting messages.");
+			const mailTexts = (window.ClippyKnowledge && window.ClippyKnowledge.SYSTEM_TEXTS && window.ClippyKnowledge.SYSTEM_TEXTS.mailControls) || {};
+			window.ClippyUI.appendAssistantMessage(mailTexts.launched || "Outlook Express launched for drafting messages.");
 		} else if (actionId === 'action_inspect_bin') {
 			const count = window.ClippySystemBridge.getRecycleBinCount();
-			window.ClippyUI.appendAssistantMessage(count > 0 ? `The Recycle Bin currently holds ${count} item(s).` : "The Recycle Bin is completely empty.", [
-				{ label: "Open Recycle Bin", onClick: () => window.ClippySystemBridge.launchApp('recyclebin') },
-				{ label: "Empty Recycle Bin", onClick: () => { window.ClippySystemBridge.emptyRecycleBin(); window.ClippyUI.appendAssistantMessage("Recycle Bin emptied."); } }
+			const rbTexts = (window.ClippyKnowledge && window.ClippyKnowledge.SYSTEM_TEXTS && window.ClippyKnowledge.SYSTEM_TEXTS.recycleBin) || {};
+			const msg = count > 0 
+				? (window.ClippyKnowledge.formatString(rbTexts.countNotice || "The Recycle Bin currently holds {count} item(s).", { count }))
+				: (rbTexts.emptyNotice || "The Recycle Bin is completely empty.");
+			window.ClippyUI.appendAssistantMessage(msg, [
+				{ label: rbTexts.btnOpen || "Open Recycle Bin", onClick: () => window.ClippySystemBridge.launchApp('recyclebin') },
+				{ label: rbTexts.btnEmpty || "Empty Recycle Bin", onClick: () => { window.ClippySystemBridge.emptyRecycleBin(); window.ClippyUI.appendAssistantMessage(rbTexts.emptiedNotice || "Recycle Bin emptied."); } }
 			]);
 		}
 	}
 
-	function processDispatch(rawText) {
+	function processDispatch(rawText, isSuggestion = false) {
 		const norm = rawText.toLowerCase().trim();
 
 		if (norm === 'exit' || norm === 'quit' || norm === 'cancel' || norm === 'stop' || norm === 'menu' || norm === 'back' || norm === 'annuler' || norm === 'quitter') {
-			const standbyVariants = [
-				"Standing by for instructions.",
-				"All active routines paused. Ready when you are.",
-				"Dialogue reset. Telemetry registers ready for input.",
-				"Awaiting your next command, operator."
-			];
-			const chosenStandby = pickFrom(standbyVariants);
+			const k = window.ClippyKnowledge || {};
+			const userProf = window.ClippySystemBridge ? window.ClippySystemBridge.getUserProfile() : { userName: 'User' };
+			const resolved = k.resolve ? k.resolve(k.STANDBY_PHRASES, { brain: window.ClippyBrain, vars: { userName: userProf.userName } }) : { text: "Standing by for instructions.", actions: [] };
 			return {
-				text: window.ClippyBrain ? window.ClippyBrain.formatWithMood(chosenStandby) : chosenStandby,
-				actions: [
+				text: window.ClippyBrain ? window.ClippyBrain.transformResponseText(resolved.text) : resolved.text,
+				actions: resolved.actions && resolved.actions.length > 0 ? resolved.actions : [
 					{ label: "What can you do?", onClick: () => handleUserInput("What can you do?") },
 					{ label: "View To-Do List", onClick: () => handleUserInput("View To-Do List") },
 					{ label: "System Diagnostics", onClick: () => handleUserInput("System diagnostics") }
@@ -204,16 +238,30 @@
 		}
 
 		if (norm === 'what can you do?' || norm === 'what can you do' || norm === 'help' || norm === 'commands' || norm === 'aide' || norm === 'features') {
+			const node = window.ClippyBrain ? window.ClippyBrain.navigateGraphNode('tools_overview_node') : null;
+			if (node) {
+				return { text: node.text, actions: window.ClippyBrain.buildGraphActions(node.options) };
+			}
+			const cap = (window.ClippyKnowledge && window.ClippyKnowledge.SYSTEM_TEXTS && window.ClippyKnowledge.SYSTEM_TEXTS.capabilities) || {
+				title: "Workstation Capability Index",
+				thModule: "Module",
+				thCommands: "Commands & Description",
+				tasksDesc: "<code>todo</code>, <code>todo add [text]</code>, <code>note [memo]</code>, <code>timer 25</code>",
+				workstationDesc: "<code>diagnostics</code>, <code>windows</code>, <code>files</code>, <code>mail</code>, <code>defrag</code>",
+				customizationDesc: "<code>theme [name]</code>, <code>wallpaper</code>, <code>volume</code>, <code>scanlines on/off</code>, <code>crt on/off</code>",
+				calculationsDesc: "<code>calc [formula]</code>, <code>convert [from] to [to]</code>, <code>password [len]</code>",
+				miniGamesDesc: "<code>tictactoe</code>, <code>memory</code>, <code>hangman</code>, <code>quiz</code>, <code>guess</code>, <code>mines</code>, <code>rps</code>"
+			};
 			return {
 				text: `<div class="clippy-structured-section">
-					<div class="clippy-section-title">Workstation Capability Index</div>
+					<div class="clippy-section-title">${cap.title}</div>
 					<table class="clippy-xp-table">
-						<tr><th>Module</th><th>Commands & Description</th></tr>
-						<tr><td><b>Tasks</b></td><td><code>todo</code>, <code>todo add [text]</code>, <code>note [memo]</code>, <code>timer 25</code></td></tr>
-						<tr><td><b>Workstation</b></td><td><code>diagnostics</code>, <code>windows</code>, <code>files</code>, <code>mail</code>, <code>defrag</code></td></tr>
-						<tr><td><b>Customization</b></td><td><code>theme [name]</code>, <code>wallpaper</code>, <code>volume</code>, <code>scanlines on/off</code>, <code>crt on/off</code></td></tr>
-						<tr><td><b>Calculations</b></td><td><code>calc [formula]</code>, <code>convert [from] to [to]</code>, <code>password [len]</code></td></tr>
-						<tr><td><b>Mini-Games</b></td><td><code>tictactoe</code>, <code>memory</code>, <code>hangman</code>, <code>quiz</code>, <code>guess</code>, <code>mines</code>, <code>rps</code></td></tr>
+						<tr><th>${cap.thModule}</th><th>${cap.thCommands}</th></tr>
+						<tr><td><b>Tasks</b></td><td>${cap.tasksDesc}</td></tr>
+						<tr><td><b>Workstation</b></td><td>${cap.workstationDesc}</td></tr>
+						<tr><td><b>Customization</b></td><td>${cap.customizationDesc}</td></tr>
+						<tr><td><b>Calculations</b></td><td>${cap.calculationsDesc}</td></tr>
+						<tr><td><b>Mini-Games</b></td><td>${cap.miniGamesDesc}</td></tr>
 					</table>
 				</div>`,
 				actions: [
@@ -264,9 +312,10 @@
 
 		if (norm === 'quantum recycle bin theory' || norm.includes('quantum recycle bin') || norm.includes('corbeille quantique')) {
 			const qPool = (window.ClippyKnowledge && window.ClippyKnowledge.TOPIC_RESPONSES && window.ClippyKnowledge.TOPIC_RESPONSES.quantum_bin) || [];
+			const res = window.ClippyKnowledge.resolve(qPool, { brain: window.ClippyBrain });
 			return {
-				text: pickFrom(qPool),
-				actions: [
+				text: res.text,
+				actions: res.actions && res.actions.length > 0 ? res.actions : [
 					{ label: "Open Recycle Bin", onClick: () => { if (isDeskEnvironment()) window.ClippySystemBridge.launchApp('recyclebin'); else respondDeskOnlyFeature('Recycle Bin'); } },
 					{ label: "Empty Recycle Bin", onClick: () => { if (isDeskEnvironment()) { window.ClippySystemBridge.emptyRecycleBin(); window.ClippyUI.appendAssistantMessage("Recycle Bin emptied."); } else { respondDeskOnlyFeature('Recycle Bin'); } } }
 				]
@@ -275,9 +324,10 @@
 
 		if (norm === 'talk about programming' || norm === 'programming' || norm === 'coding' || norm === 'programmation') {
 			const prgPool = (window.ClippyKnowledge && window.ClippyKnowledge.TOPIC_RESPONSES && window.ClippyKnowledge.TOPIC_RESPONSES.programming) || [];
+			const res = window.ClippyKnowledge.resolve(prgPool, { brain: window.ClippyBrain });
 			return {
-				text: pickFrom(prgPool),
-				actions: [
+				text: res.text,
+				actions: res.actions && res.actions.length > 0 ? res.actions : [
 					{ label: "Open Command Prompt", onClick: () => { if (isDeskEnvironment()) window.ClippySystemBridge.launchApp('cmd'); else respondDeskOnlyFeature('Command Prompt'); } },
 					{ label: "Open Projects", onClick: () => { if (isDeskEnvironment()) window.ClippySystemBridge.launchApp('projects'); else respondDeskOnlyFeature('Projects Folder'); } }
 				]
@@ -286,9 +336,10 @@
 
 		if (norm === 'talk about space and cosmos' || norm === 'space' || norm === 'cosmos' || norm === 'espace' || norm === 'univers') {
 			const spacePool = (window.ClippyKnowledge && window.ClippyKnowledge.TOPIC_RESPONSES && window.ClippyKnowledge.TOPIC_RESPONSES.space) || [];
+			const res = window.ClippyKnowledge.resolve(spacePool, { brain: window.ClippyBrain });
 			return {
-				text: pickFrom(spacePool),
-				actions: [
+				text: res.text,
+				actions: res.actions && res.actions.length > 0 ? res.actions : [
 					{ label: "Evaluate speed of light c", onClick: () => handleUserInput("Evaluate speed of light c") },
 					{ label: "Evaluate Planck constant h", onClick: () => handleUserInput("Evaluate Planck constant h") }
 				]
@@ -335,6 +386,47 @@
 			return { text: "Starting Drive C: cluster optimization...", actionTrigger: 'action_defrag' };
 		}
 
+		if (norm.includes('homogeneity') || norm.includes('dimensional analysis') || norm.includes('analyse dimensionnelle') || (norm.includes('=') && !norm.startsWith('theme=') && (norm.includes('f =') || norm.includes('e =') || norm.includes('v =') || norm.includes('p =') || norm.includes('t =')))) {
+			window.ClippyActivities.dimensionalAnalysis.mount(rawText);
+			return null;
+		}
+
+		if (norm.includes('euclidean division') || norm.includes('division euclidienne') || norm.includes('polynomial division') || norm.includes('quotient and remainder')) {
+			window.ClippyActivities.euclideanDivision.mount();
+			return null;
+		}
+
+		if (norm.includes('factor polynomial') || norm.includes('factor quadratic') || norm.startsWith('factor ') || norm.includes('factorize') || norm.includes('factoriser')) {
+			const expr = rawText.replace(/^(factor polynomial|factor quadratic|factorize|factoriser|factor)\s*/i, '').trim();
+			window.ClippyActivities.polynomialFactorization.mount(expr || 'x^2 - 5x + 6');
+			return null;
+		}
+
+		if (norm.includes('linear system') || norm.includes('gaussian elimination') || norm.includes('systeme lineaire') || norm.includes('solve matrix')) {
+			window.ClippyActivities.linearSolver.mount();
+			return null;
+		}
+
+		if (norm.includes('wheel') || norm.includes('decision wheel') || norm.includes('roue de choix') || norm.includes('roue')) {
+			window.ClippyActivities.wheel.mount();
+			return null;
+		}
+
+		if (norm.includes('cipher') || norm.includes('morse') || norm.includes('caesar') || norm.includes('vigenere') || norm.includes('encoder') || norm.includes('decoder')) {
+			window.ClippyActivities.cipher.mount();
+			return null;
+		}
+
+		if (norm.includes('tps') || norm.includes('cps') || norm.includes('click speed') || norm.includes('mouse speed')) {
+			window.ClippyActivities.tps.mount();
+			return null;
+		}
+
+		if (norm.includes('date calculator') || norm.includes('days between') || norm.includes('date difference') || norm.includes('calculateur de date')) {
+			window.ClippyActivities.dateCalc.mount();
+			return null;
+		}
+
 		if (norm === 'start pomodoro timer' || norm.startsWith('timer ') || norm.startsWith('pomodoro')) {
 			const match = norm.match(/\d+/);
 			const mins = match ? parseInt(match[0], 10) : 25;
@@ -347,16 +439,18 @@
 		}
 
 		if (norm === 'tell me a joke' || norm.includes('joke') || norm.includes('blague')) {
+			const res = window.ClippyKnowledge.resolve(window.ClippyKnowledge.JOKES, { brain: window.ClippyBrain });
 			return {
-				text: pickFrom(window.ClippyKnowledge ? window.ClippyKnowledge.JOKES : []),
-				actions: [{ label: "Another Joke", onClick: () => handleUserInput("Tell me a joke") }]
+				text: res.text,
+				actions: res.actions && res.actions.length > 0 ? res.actions : [{ label: "Another Joke", onClick: () => handleUserInput("Tell me a joke") }]
 			};
 		}
 
 		if (norm === 'random retro trivia' || norm === 'trivia' || norm === 'retro trivia' || norm.includes('trivia') || norm.includes('anecdote')) {
+			const res = window.ClippyKnowledge.resolve(window.ClippyKnowledge.TRIVIA, { brain: window.ClippyBrain });
 			return {
-				text: pickFrom(window.ClippyKnowledge ? window.ClippyKnowledge.TRIVIA : []),
-				actions: [{ label: "More Trivia", onClick: () => handleUserInput("Random Retro Trivia") }]
+				text: res.text,
+				actions: res.actions && res.actions.length > 0 ? res.actions : [{ label: "More Trivia", onClick: () => handleUserInput("Random Retro Trivia") }]
 			};
 		}
 
@@ -427,53 +521,43 @@
 
 		if (norm === 'minimize all' || norm === 'show desktop' || norm === 'hide windows') {
 			window.ClippySystemBridge.minimizeAllWindows();
-			const msg = pickFrom([
-				"All windows have been minimized to the taskbar.",
-				"Workspace cleared: all active windows minimized.",
-				"Desktop exposed; all running processes parked on taskbar."
-			]);
+			const winTexts = (window.ClippyKnowledge && window.ClippyKnowledge.SYSTEM_TEXTS && window.ClippyKnowledge.SYSTEM_TEXTS.windowControls) || {};
+			const msg = pickFrom(winTexts.minimizedAll || ["All open windows have been minimized to the taskbar."]);
 			return { text: window.ClippyBrain ? window.ClippyBrain.formatWithMood(msg) : msg };
 		}
 
 		if (norm === 'restore all' || norm === 'restore windows') {
 			window.ClippySystemBridge.restoreAllWindows();
-			const msg = pickFrom([
-				"All windows restored to workspace.",
-				"Restored previous window layout across the desktop.",
-				"Application surfaces brought back to active view."
-			]);
+			const winTexts = (window.ClippyKnowledge && window.ClippyKnowledge.SYSTEM_TEXTS && window.ClippyKnowledge.SYSTEM_TEXTS.windowControls) || {};
+			const msg = pickFrom(winTexts.restoredAll || ["All windows restored to workspace."]);
 			return { text: window.ClippyBrain ? window.ClippyBrain.formatWithMood(msg) : msg };
 		}
 
 		if (norm === 'cascade windows' || norm === 'cascade') {
 			window.ClippySystemBridge.cascadeWindows();
-			const msg = pickFrom([
-				"Windows have been cascaded across the workspace.",
-				"Diagonal cascade arrangement applied to active windows.",
-				"Tidy cascade layout established across the display."
-			]);
+			const winTexts = (window.ClippyKnowledge && window.ClippyKnowledge.SYSTEM_TEXTS && window.ClippyKnowledge.SYSTEM_TEXTS.windowControls) || {};
+			const msg = pickFrom(winTexts.cascaded || ["Windows have been cascaded across the workspace."]);
 			return { text: window.ClippyBrain ? window.ClippyBrain.formatWithMood(msg) : msg };
 		}
 
 		if (norm === 'tile windows' || norm === 'tile') {
 			window.ClippySystemBridge.tileWindows(true);
-			const msg = pickFrom([
-				"Windows have been tiled horizontally.",
-				"Workspace partitioned into horizontal tiles.",
-				"Evenly distributed window tiles across the desktop."
-			]);
+			const winTexts = (window.ClippyKnowledge && window.ClippyKnowledge.SYSTEM_TEXTS && window.ClippyKnowledge.SYSTEM_TEXTS.windowControls) || {};
+			const msg = pickFrom(winTexts.tiled || ["Windows have been tiled horizontally."]);
 			return { text: window.ClippyBrain ? window.ClippyBrain.formatWithMood(msg) : msg };
 		}
 
 		if ((norm === 'play music' || norm === 'toggle music' || norm === 'resume music' || norm === 'next music track' || norm === 'next track' || norm === 'next song' || norm === 'previous music track' || norm === 'prev track' || norm === 'prev song' || norm === 'now playing' || norm === 'current song') && !isDeskEnvironment()) {
-			return buildDeskOnlyResponse('Audio Player');
+			return buildDeskOnlyResponse(getDeskOnlyFeatureLabel('action_music_panel'));
 		}
 
 		if (norm === 'play music' || norm === 'toggle music' || norm === 'resume music') {
 			window.ClippySystemBridge.toggleMusicPlayback();
 			const track = window.ClippySystemBridge.getNowPlaying();
+			const mTexts = (window.ClippyKnowledge && window.ClippyKnowledge.SYSTEM_TEXTS && window.ClippyKnowledge.SYSTEM_TEXTS.musicControls) || {};
+			const msg = track ? window.ClippyKnowledge.formatString(mTexts.toggled || 'Playback toggled: "{title}"', { title: track.title || 'Audio Track' }) : (mTexts.initiated || "Audio player initiated.");
 			return {
-				text: track ? `Playback toggled: "${track.title || 'Audio Track'}"` : "Audio player initiated.",
+				text: msg,
 				actions: [
 					{ label: "Next Track", onClick: () => { window.ClippySystemBridge.nextMusicTrack(); } },
 					{ label: "Open Media Player", onClick: () => window.ClippySystemBridge.launchApp('mediaplayer') }
@@ -483,18 +567,22 @@
 
 		if (norm === 'next music track' || norm === 'next track' || norm === 'next song') {
 			window.ClippySystemBridge.nextMusicTrack();
-			return { text: "Advanced to next audio track." };
+			const mTexts = (window.ClippyKnowledge && window.ClippyKnowledge.SYSTEM_TEXTS && window.ClippyKnowledge.SYSTEM_TEXTS.musicControls) || {};
+			return { text: mTexts.nextTrack || "Advanced to next audio track." };
 		}
 
 		if (norm === 'previous music track' || norm === 'prev track' || norm === 'prev song') {
 			window.ClippySystemBridge.prevMusicTrack();
-			return { text: "Returned to previous audio track." };
+			const mTexts = (window.ClippyKnowledge && window.ClippyKnowledge.SYSTEM_TEXTS && window.ClippyKnowledge.SYSTEM_TEXTS.musicControls) || {};
+			return { text: mTexts.prevTrack || "Returned to previous audio track." };
 		}
 
 		if (norm === 'now playing' || norm === 'current song') {
 			const track = window.ClippySystemBridge.getNowPlaying();
+			const mTexts = (window.ClippyKnowledge && window.ClippyKnowledge.SYSTEM_TEXTS && window.ClippyKnowledge.SYSTEM_TEXTS.musicControls) || {};
+			const text = track ? window.ClippyKnowledge.formatString(mTexts.nowPlaying || "Now Playing: **{title}** by **{artist}**", { title: track.title || 'Audio Track', artist: track.artist || 'Artist' }) : (mTexts.noTrack || "No media track is currently active.");
 			return {
-				text: track ? `Now Playing: **${track.title || 'Audio Track'}** by **${track.artist || 'Artist'}**` : "No media track is currently active.",
+				text,
 				actions: [{ label: "Open Media Player", onClick: () => window.ClippySystemBridge.launchApp('mediaplayer') }]
 			};
 		}
@@ -505,31 +593,19 @@
 			}
 			const appTarget = norm.replace(/^(open|launch|start|lancer|ouvre)\s+/i, '').trim();
 			const appAliases = {
-				'calc': 'calculator', 'calculator': 'calculator', 'calculatrice': 'calculator',
-				'paint': 'paint', 'mspaint': 'paint', 'dessin': 'paint',
-				'notepad': 'notepad', 'text editor': 'notepad', 'bloc-notes': 'notepad',
-				'cmd': 'cmd', 'command prompt': 'cmd', 'terminal': 'cmd', 'invite de commandes': 'cmd',
-				'ie': 'ie', 'internet explorer': 'ie', 'browser': 'ie', 'navigateur': 'ie',
-				'outlook': 'outlook', 'outlook express': 'outlook', 'mail': 'outlook', 'email': 'outlook', 'courrier': 'outlook',
-				'winamp': 'winamp',
-				'media player': 'mediaplayer', 'windows media player': 'mediaplayer', 'wmp': 'mediaplayer',
-				'minesweeper': 'minesweeper', 'demineur': 'minesweeper', 'mine': 'minesweeper',
-				'solitaire': 'solitaire', 'sol': 'solitaire', 'cartes': 'solitaire',
-				'control panel': 'settings', 'settings': 'settings', 'panneau de configuration': 'settings',
-				'display': 'display', 'wallpapers': 'display', 'affichage': 'display',
-				'my computer': 'mycomputer', 'computer': 'mycomputer', 'poste de travail': 'mycomputer',
-				'recycle bin': 'recyclebin', 'trash': 'recyclebin', 'corbeille': 'recyclebin',
-				'achievements': 'achievements', 'trophies': 'achievements', 'milestones': 'achievements', 'succes': 'achievements',
-				'projects': 'projects', 'portfolio': 'projects', 'projets': 'projects',
-				'sound recorder': 'soundrecorder', 'enregistreur audio': 'soundrecorder',
-				'character map': 'charmap', 'charmap': 'charmap', 'table des caracteres': 'charmap',
-				'encarta': 'encarta', 'globe': 'encarta', 'world globe': 'encarta',
-				'task manager': 'taskmgr', 'taskmgr': 'taskmgr', 'gestionnaire des taches': 'taskmgr'
+				'calc': 'calculator', 'calculator': 'calculator', 'calculatrice': 'calculator', 'paint': 'paint', 'mspaint': 'paint', 'dessin': 'paint', 'notepad': 'notepad', 'text editor': 'notepad', 'bloc-notes': 'notepad', 'cmd': 'cmd', 'command prompt': 'cmd',
+				'terminal': 'cmd', 'invite de commandes': 'cmd', 'ie': 'ie', 'internet explorer': 'ie', 'browser': 'ie', 'navigateur': 'ie', 'outlook': 'outlook', 'outlook express': 'outlook', 'mail': 'outlook', 'email': 'outlook', 'courrier': 'outlook', 'winamp': 'winamp',
+				'media player': 'mediaplayer', 'windows media player': 'mediaplayer', 'wmp': 'mediaplayer', 'minesweeper': 'minesweeper', 'demineur': 'minesweeper', 'mine': 'minesweeper', 'solitaire': 'solitaire', 'sol': 'solitaire', 'cartes': 'solitaire',
+				'control panel': 'settings', 'settings': 'settings', 'panneau de configuration': 'settings', 'display': 'display', 'wallpapers': 'display', 'affichage': 'display', 'my computer': 'mycomputer', 'computer': 'mycomputer', 'poste de travail': 'mycomputer',
+				'recycle bin': 'recyclebin', 'trash': 'recyclebin', 'corbeille': 'recyclebin', 'achievements': 'achievements', 'trophies': 'achievements', 'milestones': 'achievements', 'succes': 'achievements', 'projects': 'projects', 'portfolio': 'projects', 'projets': 'projects',
+				'sound recorder': 'soundrecorder', 'enregistreur audio': 'soundrecorder', 'character map': 'charmap', 'charmap': 'charmap', 'table des caracteres': 'charmap', 'encarta': 'encarta', 'globe': 'encarta', 'world globe': 'encarta', 'task manager': 'taskmgr',
+				'taskmgr': 'taskmgr', 'gestionnaire des taches': 'taskmgr'
 			};
 			const targetId = appAliases[appTarget] || appTarget;
 			if (window.DeskAppRegistry && window.DeskAppRegistry.get(targetId)) {
 				window.DeskAppRegistry.launch(targetId);
-				return { text: `Launched application: **${window.DeskAppRegistry.get(targetId).name}**.` };
+				const appTpl = (window.ClippyKnowledge && window.ClippyKnowledge.SYSTEM_TEXTS && window.ClippyKnowledge.SYSTEM_TEXTS.appControls && window.ClippyKnowledge.SYSTEM_TEXTS.appControls.launched) || "Launched application: **{name}**.";
+				return { text: window.ClippyKnowledge.formatString(appTpl, { name: window.DeskAppRegistry.get(targetId).name }) };
 			}
 		}
 
@@ -539,13 +615,14 @@
 			}
 			const theme = norm.replace(/^(theme|set theme|theme=)\s*/i, '').trim();
 			const validThemes = ['luna-blue', 'royale', 'silver', 'olive', 'classic', 'zune', 'noir', 'matrix', 'high-contrast'];
+			const thTexts = (window.ClippyKnowledge && window.ClippyKnowledge.SYSTEM_TEXTS && window.ClippyKnowledge.SYSTEM_TEXTS.themeControls) || {};
 			if (validThemes.includes(theme)) {
 				window.ClippySystemBridge.setTheme(theme);
-				return { text: `Theme updated to: **${theme}**.` };
+				return { text: window.ClippyKnowledge.formatString(thTexts.switched || "Workstation theme switched to: **{theme}**.", { theme }) };
 			}
 			return {
-				text: `Available themes: ${validThemes.join(', ')}.`,
-				actions: validThemes.slice(0, 4).map(t => ({ label: t, onClick: () => { window.ClippySystemBridge.setTheme(t); window.ClippyUI.appendAssistantMessage(`Theme set to ${t}.`); } }))
+				text: window.ClippyKnowledge.formatString(thTexts.available || "Available themes: {themes}.", { themes: validThemes.join(', ') }),
+				actions: validThemes.slice(0, 4).map(t => ({ label: t, onClick: () => { window.ClippySystemBridge.setTheme(t); window.ClippyUI.appendAssistantMessage(window.ClippyKnowledge.formatString(thTexts.switched || "Workstation theme switched to: **{theme}**.", { theme: t })); } }))
 			};
 		}
 
@@ -553,20 +630,21 @@
 			if (!isDeskEnvironment()) {
 				return buildDeskOnlyResponse('CRT & Display Effects');
 			}
+			const dTexts = (window.ClippyKnowledge && window.ClippyKnowledge.SYSTEM_TEXTS && window.ClippyKnowledge.SYSTEM_TEXTS.displayControls) || {};
 			if (norm === 'scanlines on' || norm === 'enable scanlines') {
 				window.ClippySystemBridge.toggleScanlines(true);
-				return { text: "Scanlines overlay enabled." };
+				return { text: dTexts.scanlinesOn || "Scanlines overlay enabled." };
 			}
 			if (norm === 'scanlines off' || norm === 'disable scanlines') {
 				window.ClippySystemBridge.toggleScanlines(false);
-				return { text: "Scanlines overlay disabled." };
+				return { text: dTexts.scanlinesOff || "Scanlines overlay disabled." };
 			}
 			if (norm === 'crt on' || norm === 'enable crt') {
 				window.ClippySystemBridge.toggleCrt(true);
-				return { text: "CRT glass curvature filter enabled." };
+				return { text: dTexts.crtOn || "CRT glass curvature filter enabled." };
 			}
 			window.ClippySystemBridge.toggleCrt(false);
-			return { text: "CRT glass curvature filter disabled." };
+			return { text: dTexts.crtOff || "CRT glass curvature filter disabled." };
 		}
 
 		if (norm.startsWith('todo add ') || norm.startsWith('task add ')) {
@@ -580,25 +658,29 @@
 			}
 		}
 
+		const fTexts = (window.ClippyKnowledge && window.ClippyKnowledge.SYSTEM_TEXTS && window.ClippyKnowledge.SYSTEM_TEXTS.fileControls) || {};
+
 		if (norm.startsWith('note ') || norm.startsWith('scratchpad write ')) {
 			const memo = rawText.replace(/^(note|scratchpad write)\s+/i, '').trim();
 			window.ClippyActivities.saveScratchpadNote(memo);
-			return { text: `[SCRATCHPAD COMMITTED] Memo saved to local storage:\n"${memo}"` };
+			return { text: window.ClippyKnowledge.formatString(fTexts.noteCommitted || "[SCRATCHPAD COMMITTED] Memo saved to local storage:\n\"{memo}\"", { memo }) };
 		}
 		if (norm === 'note' || norm === 'scratchpad' || norm === 'open scratchpad note') {
-			const memo = window.ClippyActivities.getScratchpadNote() || "(Scratchpad buffer is currently empty. Type 'note [text]' to save a memo.)";
-			return { text: `[SCRATCHPAD BUFFER]\n${memo}` };
+			const memo = window.ClippyActivities.getScratchpadNote() || (fTexts.scratchpadEmpty || "(Scratchpad buffer is currently empty. Type 'note [text]' to save a memo.)");
+			return { text: window.ClippyKnowledge.formatString(fTexts.scratchpadBuffer || "[SCRATCHPAD BUFFER]\n{memo}", { memo }) };
 		}
 
 		const conv = window.ClippyActivities.parseUnitConversion(rawText);
 		if (conv) {
-			return { text: `Unit Conversion Result: **${conv}**` };
+			const cTexts = (window.ClippyKnowledge && window.ClippyKnowledge.SYSTEM_TEXTS && window.ClippyKnowledge.SYSTEM_TEXTS.conversions) || {};
+			return { text: window.ClippyKnowledge.formatString(cTexts.result || "Unit Conversion Result: **{result}**", { result: conv }) };
 		}
 
 		if (norm.startsWith('calc ') || norm.startsWith('calculate ') || norm.startsWith('evaluate ') || /^[\d\s\+\-\*\/\(\)\.\^\%]+$/.test(norm)) {
 			const mathRes = window.ClippyActivities.evaluateMathExpression(norm);
 			if (mathRes !== null) {
-				return { text: `Calculation Result: **${mathRes}**` };
+				const calcTexts = (window.ClippyKnowledge && window.ClippyKnowledge.SYSTEM_TEXTS && window.ClippyKnowledge.SYSTEM_TEXTS.calculations) || {};
+				return { text: window.ClippyKnowledge.formatString(calcTexts.result || "Calculation Result: **{result}**", { result: mathRes }) };
 			}
 		}
 
@@ -611,48 +693,50 @@
 				const hits = window.ClippySystemBridge.searchFiles(q);
 				if (hits.length > 0) {
 					return {
-						text: `Found ${hits.length} matching item(s) in VFS:`,
+						text: window.ClippyKnowledge.formatString(fTexts.searchFound || "Found {count} matching item(s) in VFS:", { count: hits.length }),
 						actions: hits.slice(0, 4).map(h => ({
 							label: h.name,
 							onClick: () => { if (window.ShellAssociations) window.ShellAssociations.open(h); }
 						}))
 					};
 				}
-				return { text: `No filesystem entries found for query: "${q}".` };
+				return { text: window.ClippyKnowledge.formatString(fTexts.searchNotFound || "No filesystem entries found for query: \"{query}\".", { query: q }) };
 			}
 		}
 
 		if (norm.includes('project') || norm.includes('portfolio') || norm.includes('showcase') || norm.includes('projets')) {
 			const p = window.ClippySystemBridge.getRandomProject();
 			const title = (p && p.title) ? (typeof p.title === 'object' ? (p.title.en || p.title.fr || "Project") : p.title) : "Portfolio";
+			const prjTexts = (window.ClippyKnowledge && window.ClippyKnowledge.SYSTEM_TEXTS && window.ClippyKnowledge.SYSTEM_TEXTS.projects) || {};
 			if (!isDeskEnvironment()) {
 				return {
-					text: `Featured project showcase: "${title}". Browse the complete interactive portfolio on the desktop experience.`,
+					text: window.ClippyKnowledge.formatString(prjTexts.showcaseStandalone || "Featured project showcase: \"{title}\". Browse the complete interactive portfolio on the desktop experience.", { title }),
 					actions: [
-						{ label: "Visit Portfolio", onClick: () => { window.open('https://wartets.github.io/', '_blank'); } },
-						{ label: "Open Desktop Experience", onClick: () => { window.open('https://wartets.github.io/desk/', '_blank'); } }
+						{ label: prjTexts.btnVisit || "Visit Portfolio", onClick: () => { window.open('https://wartets.github.io/', '_blank'); } },
+						{ label: prjTexts.btnDesk || "Open Desktop Experience", onClick: () => { window.open('https://wartets.github.io/desk/', '_blank'); } }
 					]
 				};
 			}
 			return {
-				text: `Featured project showcase: "${title}".`,
+				text: window.ClippyKnowledge.formatString(prjTexts.showcaseDesk || "Featured project showcase: \"{title}\".", { title }),
 				actions: [
-					{ label: "Open Projects Folder", onClick: () => window.ClippySystemBridge.launchApp('projects') },
-					{ label: "View Project", onClick: () => { if (typeof openProjectWindow === 'function') openProjectWindow(p); } }
+					{ label: prjTexts.btnOpenFolder || "Open Projects Folder", onClick: () => window.ClippySystemBridge.launchApp('projects') },
+					{ label: prjTexts.btnView || "View Project", onClick: () => { if (typeof openProjectWindow === 'function') openProjectWindow(p); } }
 				]
 			};
 		}
 
 		if (window.ClippyBrain) {
-			const brainReply = window.ClippyBrain.processChat(rawText);
+			const brainReply = window.ClippyBrain.processChat(rawText, isSuggestion);
 			if (brainReply && brainReply.text) {
 				return brainReply;
 			}
 		}
 
+		const fallbackRes = window.ClippyKnowledge.resolve(window.ClippyKnowledge.FALLBACK_RESPONSES, { brain: window.ClippyBrain });
 		return {
-			text: pickFrom(window.ClippyKnowledge ? window.ClippyKnowledge.FALLBACK_RESPONSES : []),
-			actions: [
+			text: fallbackRes.text,
+			actions: fallbackRes.actions && fallbackRes.actions.length > 0 ? fallbackRes.actions : [
 				{ label: "What can you do?", onClick: () => handleUserInput("What can you do?") },
 				{ label: "View To-Do List", onClick: () => handleUserInput("View To-Do List") },
 				{ label: "Play Tic-Tac-Toe", onClick: () => handleUserInput("Play Tic-Tac-Toe") }
@@ -667,6 +751,10 @@
 		const row = document.createElement('div');
 		row.className = 'clippy-message clippy-message-assistant';
 
+		const cTexts = (window.ClippyKnowledge && window.ClippyKnowledge.SYSTEM_TEXTS && window.ClippyKnowledge.SYSTEM_TEXTS.cards && window.ClippyKnowledge.SYSTEM_TEXTS.cards.profile) || {};
+		const themeStr = window.ClippyKnowledge.formatString(cTexts.themeLabel || "Theme: {theme}", { theme: prof.theme });
+		const milesStr = cTexts.milestonesLabel || "Milestones Unlocked:";
+
 		row.innerHTML = `
 			<div class="clippy-profile-card">
 				<div class="clippy-profile-header">
@@ -674,12 +762,12 @@
 					<div class="clippy-profile-info">
 						<strong>${prof.userName}</strong>
 						<span>${prof.userJobTitle}</span>
-						<span style="font-size: 10px; color: #555;">Theme: ${prof.theme}</span>
+						<span style="font-size: 10px; color: #555;">${themeStr}</span>
 					</div>
 				</div>
 				<div class="clippy-profile-stats">
 					<div class="clippy-profile-stat-row">
-						<span>Milestones Unlocked:</span>
+						<span>${milesStr}</span>
 						<strong>${ach.unlockedCount} / ${ach.total} (${ach.percentage}%)</strong>
 					</div>
 					<div class="clippy-ach-progress-bar"><div class="clippy-ach-progress-fill" style="width: ${ach.percentage}%;"></div></div>
@@ -690,9 +778,9 @@
 		const btnBar = document.createElement('div');
 		btnBar.className = 'clippy-actions-bar';
 		[
-			{ label: "Change User Identity", onClick: () => { if (isDeskEnvironment()) window.ClippySystemBridge.launchApp('settings', 'system'); else respondDeskOnlyFeature('User Identity Settings'); } },
-			{ label: "Open Milestones", onClick: () => { if (isDeskEnvironment()) window.ClippySystemBridge.launchApp('achievements'); else respondDeskOnlyFeature('Milestones Window'); } },
-			{ label: "Display Settings", onClick: () => { if (isDeskEnvironment()) window.ClippySystemBridge.launchApp('display'); else respondDeskOnlyFeature('Display Settings'); } }
+			{ label: cTexts.btnIdentity || "Change User Identity", onClick: () => { if (isDeskEnvironment()) window.ClippySystemBridge.launchApp('settings', 'system'); else respondDeskOnlyFeature('User Identity Settings'); } },
+			{ label: cTexts.btnMilestones || "Open Milestones", onClick: () => { if (isDeskEnvironment()) window.ClippySystemBridge.launchApp('achievements'); else respondDeskOnlyFeature('Milestones Window'); } },
+			{ label: cTexts.btnDisplay || "Display Settings", onClick: () => { if (isDeskEnvironment()) window.ClippySystemBridge.launchApp('display'); else respondDeskOnlyFeature('Display Settings'); } }
 		].forEach(act => {
 			const btn = document.createElement('button');
 			btn.type = 'button';
@@ -713,6 +801,13 @@
 		const row = document.createElement('div');
 		row.className = 'clippy-message clippy-message-assistant';
 
+		const cTexts = (window.ClippyKnowledge && window.ClippyKnowledge.SYSTEM_TEXTS && window.ClippyKnowledge.SYSTEM_TEXTS.cards && window.ClippyKnowledge.SYSTEM_TEXTS.cards.achievements) || {};
+		const summaryHdr = window.ClippyKnowledge.formatString(cTexts.summary || "[MILESTONES SUMMARY] <b>Unlocked: {unlocked} / {total} ({percentage}%)</b>", {
+			unlocked: ach.unlockedCount,
+			total: ach.total,
+			percentage: ach.percentage
+		});
+
 		let itemsHtml = '';
 		const sampleList = ach.unlocked.slice(0, 4);
 		sampleList.forEach(a => {
@@ -728,9 +823,9 @@
 		});
 
 		row.innerHTML = `
-			<div>[MILESTONES SUMMARY] <b>Unlocked: ${ach.unlockedCount} / ${ach.total} (${ach.percentage}%)</b></div>
+			<div>${summaryHdr}</div>
 			<div class="clippy-ach-progress-bar" style="margin: 6px 0;"><div class="clippy-ach-progress-fill" style="width: ${ach.percentage}%;"></div></div>
-			<div class="clippy-ach-list">${itemsHtml || '<div style="font-size:11px; color:#666;">No milestones unlocked yet. Explore the workstation!</div>'}</div>
+			<div class="clippy-ach-list">${itemsHtml || `<div style="font-size:11px; color:#666;">${cTexts.empty || 'No milestones unlocked yet. Explore the workstation!'}</div>`}</div>
 		`;
 
 		const btnBar = document.createElement('div');
@@ -738,7 +833,7 @@
 		const openBtn = document.createElement('button');
 		openBtn.type = 'button';
 		openBtn.className = 'clippy-action-btn';
-		openBtn.textContent = "Open Full Milestones Window";
+		openBtn.textContent = cTexts.btnOpen || "Open Full Milestones Window";
 		openBtn.addEventListener('click', () => { if (isDeskEnvironment()) window.ClippySystemBridge.launchApp('achievements'); else respondDeskOnlyFeature('Milestones Window'); });
 		btnBar.appendChild(openBtn);
 
@@ -753,8 +848,10 @@
 		row.className = 'clippy-message clippy-message-assistant';
 		const currentTheme = window.ClippySystemBridge.getSetting('theme') || 'luna-blue';
 		const themes = ['luna-blue', 'royale', 'silver', 'olive', 'classic', 'zune', 'noir', 'matrix', 'high-contrast'];
+		const thTexts = (window.ClippyKnowledge && window.ClippyKnowledge.SYSTEM_TEXTS && window.ClippyKnowledge.SYSTEM_TEXTS.cards && window.ClippyKnowledge.SYSTEM_TEXTS.cards.themes) || {};
+		const thCtrl = (window.ClippyKnowledge && window.ClippyKnowledge.SYSTEM_TEXTS && window.ClippyKnowledge.SYSTEM_TEXTS.themeControls) || {};
 
-		row.innerHTML = `<div>[THEME SWITCHER] Active Theme: <b>${currentTheme}</b></div>`;
+		row.innerHTML = `<div>${window.ClippyKnowledge.formatString(thTexts.header || "[THEME SWITCHER] Active Theme: <b>{theme}</b>", { theme: currentTheme })}</div>`;
 		const grid = document.createElement('div');
 		grid.className = 'clippy-actions-bar';
 		themes.forEach(t => {
@@ -764,7 +861,7 @@
 			b.textContent = t;
 			b.addEventListener('click', () => {
 				window.ClippySystemBridge.setTheme(t);
-				window.ClippyUI.appendAssistantMessage(`Workstation theme switched to: **${t}**.`);
+				window.ClippyUI.appendAssistantMessage(window.ClippyKnowledge.formatString(thCtrl.switched || "Workstation theme switched to: **{theme}**.", { theme: t }));
 			});
 			grid.appendChild(b);
 		});
@@ -778,12 +875,13 @@
 		if (!window.ClippyUI.logElement) return;
 		const row = document.createElement('div');
 		row.className = 'clippy-message clippy-message-assistant';
-		row.innerHTML = `<div>[DESKTOP BACKGROUNDS] Loading wallpaper catalog...</div>`;
+		const wpTexts = (window.ClippyKnowledge && window.ClippyKnowledge.SYSTEM_TEXTS && window.ClippyKnowledge.SYSTEM_TEXTS.cards && window.ClippyKnowledge.SYSTEM_TEXTS.cards.wallpapers) || {};
+		row.innerHTML = `<div>${wpTexts.loading || "[DESKTOP BACKGROUNDS] Loading wallpaper catalog..."}</div>`;
 		window.ClippyUI.logElement.appendChild(row);
 		window.ClippyUI.scrollLogToBottom();
 
 		const wallpapers = await window.ClippySystemBridge.getAvailableWallpapers();
-		row.innerHTML = `<div>[DESKTOP BACKGROUNDS] Select a background image:</div>`;
+		row.innerHTML = `<div>${wpTexts.select || "[DESKTOP BACKGROUNDS] Select a background image:"}</div>`;
 
 		const grid = document.createElement('div');
 		grid.className = 'clippy-actions-bar';
@@ -794,7 +892,7 @@
 			b.textContent = wp.name;
 			b.addEventListener('click', () => {
 				window.ClippySystemBridge.setWallpaper(wp.path);
-				window.ClippyUI.appendAssistantMessage(`Desktop wallpaper set to: **${wp.name}**.`);
+				window.ClippyUI.appendAssistantMessage(window.ClippyKnowledge.formatString(wpTexts.applied || "Desktop wallpaper set to: **{name}**.", { name: wp.name }));
 			});
 			grid.appendChild(b);
 		});
@@ -802,7 +900,7 @@
 		const dispBtn = document.createElement('button');
 		dispBtn.type = 'button';
 		dispBtn.className = 'clippy-action-btn';
-		dispBtn.textContent = "Open Display Properties...";
+		dispBtn.textContent = wpTexts.btnDisplay || "Open Display Properties...";
 		dispBtn.addEventListener('click', () => window.ClippySystemBridge.launchApp('display'));
 		grid.appendChild(dispBtn);
 
@@ -816,14 +914,19 @@
 		row.className = 'clippy-message clippy-message-assistant';
 		const track = window.ClippySystemBridge.getNowPlaying();
 		const tracks = window.ClippySystemBridge.getMusicTracks();
+		const mCards = (window.ClippyKnowledge && window.ClippyKnowledge.SYSTEM_TEXTS && window.ClippyKnowledge.SYSTEM_TEXTS.cards && window.ClippyKnowledge.SYSTEM_TEXTS.cards.music) || {};
+		const mCtrl = (window.ClippyKnowledge && window.ClippyKnowledge.SYSTEM_TEXTS && window.ClippyKnowledge.SYSTEM_TEXTS.musicControls) || {};
+
+		const trackTitle = track ? track.title : (mCards.standbyTitle || 'Audio Player Standby');
+		const artistName = track ? (track.artist || mCards.defaultArtist || 'Windows XP Audio') : (mCards.noTrack || 'No track currently active');
 
 		row.innerHTML = `
 			<div class="clippy-music-card">
 				<div class="clippy-music-header">
 					<img src="../assets/images/desk/icons/Music File.webp" style="width:24px;height:24px;" alt="">
 					<div style="flex:1; overflow:hidden;">
-						<strong>${track ? track.title : 'Audio Player Standby'}</strong>
-						<div style="font-size:10px; color:#555;">${track ? (track.artist || 'Windows XP Audio') : 'No track currently active'}</div>
+						<strong>${trackTitle}</strong>
+						<div style="font-size:10px; color:#555;">${artistName}</div>
 					</div>
 				</div>
 			</div>
@@ -835,21 +938,22 @@
 		const playBtn = document.createElement('button');
 		playBtn.type = 'button';
 		playBtn.className = 'clippy-action-btn';
-		playBtn.textContent = "Play / Pause";
+		playBtn.textContent = mCards.btnPlayPause || "Play / Pause";
 		playBtn.addEventListener('click', () => {
 			window.ClippySystemBridge.toggleMusicPlayback();
 			const now = window.ClippySystemBridge.getNowPlaying();
-			window.ClippyUI.appendAssistantMessage(now ? `Playback toggled: "${now.title}"` : "Audio player initiated.");
+			const msg = now ? (window.ClippyKnowledge.formatString ? window.ClippyKnowledge.formatString(mCtrl.toggled || 'Playback toggled: "{title}"', { title: now.title || 'Audio Track' }) : `Playback toggled: "${now.title}"`) : (mCtrl.initiated || "Audio player initiated.");
+			window.ClippyUI.appendAssistantMessage(msg);
 		});
 		btnBar.appendChild(playBtn);
 
 		const nextBtn = document.createElement('button');
 		nextBtn.type = 'button';
 		nextBtn.className = 'clippy-action-btn';
-		nextBtn.textContent = "Next Track";
+		nextBtn.textContent = mCards.btnNext || "Next Track";
 		nextBtn.addEventListener('click', () => {
 			window.ClippySystemBridge.nextMusicTrack();
-			window.ClippyUI.appendAssistantMessage("Advanced to next track.");
+			window.ClippyUI.appendAssistantMessage(mCtrl.advancedNext || mCtrl.nextTrack || "Advanced to next track.");
 		});
 		btnBar.appendChild(nextBtn);
 
@@ -857,11 +961,14 @@
 			const rndBtn = document.createElement('button');
 			rndBtn.type = 'button';
 			rndBtn.className = 'clippy-action-btn';
-			rndBtn.textContent = "Play Random Track";
+			rndBtn.textContent = mCards.btnRandom || "Play Random Track";
 			rndBtn.addEventListener('click', () => {
 				const rnd = Math.floor(Math.random() * tracks.length);
 				window.ClippySystemBridge.playTrackIndex(rnd);
-				window.ClippyUI.appendAssistantMessage(`Playing track: **${tracks[rnd].title || 'Track'}**.`);
+				const msg = window.ClippyKnowledge.formatString
+					? window.ClippyKnowledge.formatString(mCtrl.playingTrack || "Playing track: **{title}**.", { title: tracks[rnd].title || 'Track' })
+					: `Playing track: **${tracks[rnd].title || 'Track'}**.`;
+				window.ClippyUI.appendAssistantMessage(msg);
 			});
 			btnBar.appendChild(rndBtn);
 		}
@@ -869,14 +976,14 @@
 		const openWmpBtn = document.createElement('button');
 		openWmpBtn.type = 'button';
 		openWmpBtn.className = 'clippy-action-btn';
-		openWmpBtn.textContent = "Open Media Player";
+		openWmpBtn.textContent = mCards.btnWmp || "Open Media Player";
 		openWmpBtn.addEventListener('click', () => window.ClippySystemBridge.launchApp('mediaplayer'));
 		btnBar.appendChild(openWmpBtn);
 
 		const openWinampBtn = document.createElement('button');
 		openWinampBtn.type = 'button';
 		openWinampBtn.className = 'clippy-action-btn';
-		openWinampBtn.textContent = "Open Winamp";
+		openWinampBtn.textContent = mCards.btnWinamp || "Open Winamp";
 		openWinampBtn.addEventListener('click', () => window.ClippySystemBridge.launchApp('winamp'));
 		btnBar.appendChild(openWinampBtn);
 
@@ -892,14 +999,15 @@
 
 		const windowsMap = (window.WindowManager && window.WindowManager.windows) ? window.WindowManager.windows : {};
 		const winList = Object.values(windowsMap).filter(w => !w.classList.contains('xp-modal-overlay'));
+		const wTexts = (window.ClippyKnowledge && window.ClippyKnowledge.SYSTEM_TEXTS && window.ClippyKnowledge.SYSTEM_TEXTS.cards && window.ClippyKnowledge.SYSTEM_TEXTS.cards.activeWindows) || {};
 
 		const hdr = document.createElement('div');
-		hdr.innerHTML = `[PROCESS INSPECTOR] <b>Active Windows (${winList.length}):</b>`;
+		hdr.innerHTML = window.ClippyKnowledge.formatString(wTexts.header || "[PROCESS INSPECTOR] <b>Active Windows ({count}):</b>", { count: winList.length });
 		row.appendChild(hdr);
 
 		if (winList.length === 0) {
 			const emptyMsg = document.createElement('div');
-			emptyMsg.textContent = "No active application windows on the desktop.";
+			emptyMsg.textContent = wTexts.empty || "No active application windows on the desktop.";
 			row.appendChild(emptyMsg);
 		} else {
 			const listContainer = document.createElement('div');
@@ -920,7 +1028,7 @@
 				const focusBtn = document.createElement('button');
 				focusBtn.type = 'button';
 				focusBtn.className = 'clippy-action-btn';
-				focusBtn.textContent = isMin ? 'Restore' : 'Focus';
+				focusBtn.textContent = isMin ? (wTexts.btnRestore || 'Restore') : (wTexts.btnFocus || 'Focus');
 				focusBtn.addEventListener('click', () => {
 					window.ClippySystemBridge.focusWindow(w.id);
 				});
@@ -929,7 +1037,7 @@
 				const closeBtn = document.createElement('button');
 				closeBtn.type = 'button';
 				closeBtn.className = 'clippy-action-btn';
-				closeBtn.textContent = 'Close';
+				closeBtn.textContent = wTexts.btnClose || 'Close';
 				closeBtn.addEventListener('click', () => {
 					if (window.WindowManager) window.WindowManager.close(w, w.id);
 					renderActiveWindowsList();
@@ -948,30 +1056,33 @@
 		const minAllBtn = document.createElement('button');
 		minAllBtn.type = 'button';
 		minAllBtn.className = 'clippy-action-btn';
-		minAllBtn.textContent = 'Minimize All';
+		minAllBtn.textContent = wTexts.btnMinAll || 'Minimize All';
 		minAllBtn.addEventListener('click', () => {
 			window.ClippySystemBridge.minimizeAllWindows();
-			window.ClippyUI.appendAssistantMessage("All windows minimized.");
+			const winTexts = (window.ClippyKnowledge && window.ClippyKnowledge.SYSTEM_TEXTS && window.ClippyKnowledge.SYSTEM_TEXTS.windowControls) || {};
+			window.ClippyUI.appendAssistantMessage(pickFrom(winTexts.minimizedAll || ["All open windows have been minimized to the taskbar."]));
 		});
 		btnBar.appendChild(minAllBtn);
 
 		const cascadeBtn = document.createElement('button');
 		cascadeBtn.type = 'button';
 		cascadeBtn.className = 'clippy-action-btn';
-		cascadeBtn.textContent = 'Cascade';
+		cascadeBtn.textContent = wTexts.btnCascade || 'Cascade';
 		cascadeBtn.addEventListener('click', () => {
 			window.ClippySystemBridge.cascadeWindows();
-			window.ClippyUI.appendAssistantMessage("Windows cascaded.");
+			const winTexts = (window.ClippyKnowledge && window.ClippyKnowledge.SYSTEM_TEXTS && window.ClippyKnowledge.SYSTEM_TEXTS.windowControls) || {};
+			window.ClippyUI.appendAssistantMessage(pickFrom(winTexts.cascaded || ["Windows arranged in cascade layout."]));
 		});
 		btnBar.appendChild(cascadeBtn);
 
 		const tileBtn = document.createElement('button');
 		tileBtn.type = 'button';
 		tileBtn.className = 'clippy-action-btn';
-		tileBtn.textContent = 'Tile';
+		tileBtn.textContent = wTexts.btnTile || 'Tile';
 		tileBtn.addEventListener('click', () => {
 			window.ClippySystemBridge.tileWindows(true);
-			window.ClippyUI.appendAssistantMessage("Windows tiled horizontally.");
+			const winTexts = (window.ClippyKnowledge && window.ClippyKnowledge.SYSTEM_TEXTS && window.ClippyKnowledge.SYSTEM_TEXTS.windowControls) || {};
+			window.ClippyUI.appendAssistantMessage(pickFrom(winTexts.tiled || ["Windows tiled horizontally across the workspace."]));
 		});
 		btnBar.appendChild(tileBtn);
 
@@ -986,7 +1097,10 @@
 		row.className = 'clippy-message clippy-message-assistant';
 
 		const files = window.ClippySystemBridge.listFiles(path);
-		row.innerHTML = `<div>[FILE SYSTEM] <b>Directory: ${path} (${files.length} items)</b></div>`;
+		const fCards = (window.ClippyKnowledge && window.ClippyKnowledge.SYSTEM_TEXTS && window.ClippyKnowledge.SYSTEM_TEXTS.cards && window.ClippyKnowledge.SYSTEM_TEXTS.cards.files) || {};
+		const fControls = (window.ClippyKnowledge && window.ClippyKnowledge.SYSTEM_TEXTS && window.ClippyKnowledge.SYSTEM_TEXTS.fileControls) || {};
+
+		row.innerHTML = `<div>${window.ClippyKnowledge.formatString(fCards.header || "[FILE SYSTEM] <b>Directory: {path} ({count} items)</b>", { path, count: files.length })}</div>`;
 
 		const listContainer = document.createElement('div');
 		listContainer.className = 'clippy-file-list';
@@ -1001,7 +1115,7 @@
 			const openBtn = document.createElement('button');
 			openBtn.type = 'button';
 			openBtn.className = 'clippy-action-btn';
-			openBtn.textContent = 'Open';
+			openBtn.textContent = fCards.btnOpen || 'Open';
 			openBtn.addEventListener('click', () => {
 				if (typeof fs !== 'undefined' && fs) {
 					const el = fs.findByPath(f.path);
@@ -1020,7 +1134,7 @@
 		const openExplorerBtn = document.createElement('button');
 		openExplorerBtn.type = 'button';
 		openExplorerBtn.className = 'clippy-action-btn';
-		openExplorerBtn.textContent = 'Open in File Explorer';
+		openExplorerBtn.textContent = fCards.btnExplorer || 'Open in File Explorer';
 		openExplorerBtn.addEventListener('click', () => {
 			if (window.FileExplorer && typeof fs !== 'undefined') {
 				const folder = fs.findByPath(path) || fs.root;
@@ -1032,10 +1146,12 @@
 		const newFileBtn = document.createElement('button');
 		newFileBtn.type = 'button';
 		newFileBtn.className = 'clippy-action-btn';
-		newFileBtn.textContent = 'Create Text Note';
+		newFileBtn.textContent = fCards.btnNewNote || 'Create Text Note';
 		newFileBtn.addEventListener('click', () => {
 			const newF = window.ClippySystemBridge.createDesktopFile(`Note_${Date.now().toString().slice(-4)}.txt`, 'Created with Clippy');
-			if (newF) window.ClippyUI.appendAssistantMessage(`Created new file on Desktop: **${newF.name}**.`);
+			if (newF) {
+				window.ClippyUI.appendAssistantMessage(window.ClippyKnowledge.formatString(fControls.noteCreated || "Created new file on Desktop: **{name}**.", { name: newF.name }));
+			}
 		});
 		btnBar.appendChild(newFileBtn);
 
@@ -1051,10 +1167,14 @@
 
 		const unreadCount = window.ClippySystemBridge.getUnreadMailCount();
 		const msgs = window.ClippySystemBridge.getMailMessages('inbox');
+		const mCards = (window.ClippyKnowledge && window.ClippyKnowledge.SYSTEM_TEXTS && window.ClippyKnowledge.SYSTEM_TEXTS.cards && window.ClippyKnowledge.SYSTEM_TEXTS.cards.mail) || {};
+		const mCtrl = (window.ClippyKnowledge && window.ClippyKnowledge.SYSTEM_TEXTS && window.ClippyKnowledge.SYSTEM_TEXTS.mailControls) || {};
 
-		row.innerHTML = `
-			<div>[OUTLOOK EXPRESS] <b>Inbox (${unreadCount} unread / ${msgs.length} total):</b></div>
-		`;
+		const headerText = window.ClippyKnowledge.formatString
+			? window.ClippyKnowledge.formatString(mCtrl.header || "[OUTLOOK EXPRESS] <b>Inbox ({unread} unread / {total} total):</b>", { unread: unreadCount, total: msgs.length })
+			: `[OUTLOOK EXPRESS] <b>Inbox (${unreadCount} unread / ${msgs.length} total):</b>`;
+
+		row.innerHTML = `<div>${headerText}</div>`;
 
 		const listContainer = document.createElement('div');
 		listContainer.className = 'clippy-mail-list';
@@ -1084,19 +1204,19 @@
 		const openOeBtn = document.createElement('button');
 		openOeBtn.type = 'button';
 		openOeBtn.className = 'clippy-action-btn';
-		openOeBtn.textContent = 'Open Outlook Express';
+		openOeBtn.textContent = mCards.btnOpen || 'Open Outlook Express';
 		openOeBtn.addEventListener('click', () => window.ClippySystemBridge.launchApp('outlook'));
 		btnBar.appendChild(openOeBtn);
 
 		const syncBtn = document.createElement('button');
 		syncBtn.type = 'button';
 		syncBtn.className = 'clippy-action-btn';
-		syncBtn.textContent = 'Send / Receive';
+		syncBtn.textContent = mCards.btnSync || 'Send / Receive';
 		syncBtn.addEventListener('click', () => {
 			if (window.MailStore) {
 				window.MailStore.ensureDailyContent().then(() => {
 					renderMailListCard();
-					window.ClippyUI.appendAssistantMessage("Mail synchronization complete.");
+					window.ClippyUI.appendAssistantMessage(mCtrl.synced || "Mail synchronization complete.");
 				});
 			}
 		});
@@ -1114,10 +1234,14 @@
 
 		const currentVol = window.ClippySystemBridge.getVolume();
 		const isMuted = window.ClippySystemBridge.isMuted();
+		const vCards = (window.ClippyKnowledge && window.ClippyKnowledge.SYSTEM_TEXTS && window.ClippyKnowledge.SYSTEM_TEXTS.cards && window.ClippyKnowledge.SYSTEM_TEXTS.cards.volume) || {};
 
-		row.innerHTML = `
-			<div>[AUDIO SYNTHESIZER] Master Volume: <b>${Math.round(currentVol * 100)}%</b> ${isMuted ? '(Muted)' : ''}</div>
-		`;
+		const mutedNotice = isMuted ? (vCards.muted || '(Muted)') : '';
+		const headerText = window.ClippyKnowledge.formatString
+			? window.ClippyKnowledge.formatString(vCards.header || "[AUDIO SYNTHESIZER] Master Volume: <b>{volume}%</b> {status}", { volume: Math.round(currentVol * 100), status: mutedNotice })
+			: `[AUDIO SYNTHESIZER] Master Volume: <b>${Math.round(currentVol * 100)}%</b> ${mutedNotice}`;
+
+		row.innerHTML = `<div>${headerText}</div>`;
 
 		const sliderRow = document.createElement('div');
 		sliderRow.className = 'clippy-slider-control';
@@ -1145,7 +1269,7 @@
 		const muteBtn = document.createElement('button');
 		muteBtn.type = 'button';
 		muteBtn.className = 'clippy-action-btn';
-		muteBtn.textContent = isMuted ? 'Unmute Audio' : 'Mute Audio';
+		muteBtn.textContent = isMuted ? (vCards.btnUnmute || 'Unmute Audio') : (vCards.btnMute || 'Mute Audio');
 		muteBtn.addEventListener('click', () => {
 			window.ClippySystemBridge.toggleMute();
 			renderVolumeControllerCard();
@@ -1155,11 +1279,48 @@
 		const testSndBtn = document.createElement('button');
 		testSndBtn.type = 'button';
 		testSndBtn.className = 'clippy-action-btn';
-		testSndBtn.textContent = 'Test Chime';
+		testSndBtn.textContent = vCards.btnTest || 'Test Chime';
 		testSndBtn.addEventListener('click', () => {
 			if (window.SettingsApp && window.SettingsApp.playSound) window.SettingsApp.playSound('startup');
 		});
 		btnBar.appendChild(testSndBtn);
+
+		row.appendChild(btnBar);
+		window.ClippyUI.logElement.appendChild(row);
+		window.ClippyUI.scrollLogToBottom();
+	}
+
+	function renderSystemToolsCard() {
+		if (!window.ClippyUI.logElement) return;
+		const row = document.createElement('div');
+		row.className = 'clippy-message clippy-message-assistant';
+		const toolsCfg = (window.ClippyKnowledge && window.ClippyKnowledge.SYSTEM_TEXTS && window.ClippyKnowledge.SYSTEM_TEXTS.systemTools) || {
+			header: "[SYSTEM UTILITIES] <b>Diagnostic and Maintenance Tools:</b>",
+			btnSpecs: "System Specs",
+			btnDefrag: "Defragment Drive C:",
+			btnWindows: "Inspect Windows",
+			btnBin: "Recycle Bin",
+			btnShortcuts: "Keyboard Shortcuts"
+		};
+
+		row.innerHTML = `<div>${toolsCfg.header}</div>`;
+
+		const btnBar = document.createElement('div');
+		btnBar.className = 'clippy-actions-bar';
+		[
+			{ label: toolsCfg.btnSpecs, onClick: () => executeActionTrigger('action_status') },
+			{ label: toolsCfg.btnDefrag, onClick: () => executeActionTrigger('action_defrag') },
+			{ label: toolsCfg.btnWindows, onClick: () => executeActionTrigger('action_inspect_windows') },
+			{ label: toolsCfg.btnBin, onClick: () => executeActionTrigger('action_inspect_bin') },
+			{ label: toolsCfg.btnShortcuts, onClick: () => executeActionTrigger('action_shortcuts') }
+		].forEach(act => {
+			const b = document.createElement('button');
+			b.type = 'button';
+			b.className = 'clippy-action-btn';
+			b.textContent = act.label;
+			b.addEventListener('click', act.onClick);
+			btnBar.appendChild(b);
+		});
 
 		row.appendChild(btnBar);
 		window.ClippyUI.logElement.appendChild(row);
@@ -1180,8 +1341,11 @@
 			const openWinsCount = isDeskEnvironment() ? window.ClippySystemBridge.getOpenWindowCount() : 0;
 			const recycleCount = isDeskEnvironment() ? window.ClippySystemBridge.getRecycleBinCount() : 0;
 
+			const idleTexts = (window.ClippyKnowledge && window.ClippyKnowledge.SYSTEM_TEXTS && window.ClippyKnowledge.SYSTEM_TEXTS.idle) || {};
+
 			if (unread > 0) {
-				window.ClippyUI.showIdleBubble(`You have ${unread} unread email(s) waiting in Outlook Express!`, () => {
+				const msg = window.ClippyKnowledge.formatString(idleTexts.unreadMail || "You have {count} unread email(s) waiting in Outlook Express!", { count: unread });
+				window.ClippyUI.showIdleBubble(msg, () => {
 					window.ClippyAgent.open();
 					window.ClippyAgent.prompt("Check unread emails");
 				});
@@ -1189,7 +1353,8 @@
 			}
 
 			if (recycleCount >= 4 && Math.random() < 0.4) {
-				window.ClippyUI.showIdleBubble(`The Recycle Bin has ${recycleCount} items. Would you like me to empty it or explain quantum information loss?`, () => {
+				const msg = window.ClippyKnowledge.formatString(idleTexts.recycleBin || "The Recycle Bin has {count} items. Would you like me to empty it or explain quantum information loss?", { count: recycleCount });
+				window.ClippyUI.showIdleBubble(msg, () => {
 					window.ClippyAgent.open();
 					window.ClippyAgent.prompt("Quantum Recycle Bin theory");
 				});
@@ -1197,7 +1362,8 @@
 			}
 
 			if (openWinsCount >= 3 && Math.random() < 0.4) {
-				window.ClippyUI.showIdleBubble(`You have ${openWinsCount} active windows. Would you like me to tile or cascade them?`, () => {
+				const msg = window.ClippyKnowledge.formatString(idleTexts.activeWindows || "You have {count} active windows. Would you like me to tile or cascade them?", { count: openWinsCount });
+				window.ClippyUI.showIdleBubble(msg, () => {
 					window.ClippyAgent.open();
 					window.ClippyAgent.prompt("Inspect active windows");
 				});
@@ -1215,7 +1381,7 @@
 				return;
 			}
 
-			const idlePool = [
+			const idlePool = idleTexts.pool || [
 				"Need a hand with your tasks or want to discuss a new idea? Click me anytime!",
 				"It looks like you're exploring the desktop. Let me know if you need assistance!",
 				"Your 32-bit companion is standing by on the taskbar. Click to chat or play a game!",
@@ -1229,7 +1395,7 @@
 	function openAssistant() {
 		const isFirstBuild = !window.ClippyUI.popupElement;
 		window.ClippyUI.buildPopup(
-			(text) => handleUserInput(text),
+			(text, isSug) => handleUserInput(text, isSug),
 			(action) => executeActionTrigger(action)
 		);
 		window.ClippyUI.open();
@@ -1265,27 +1431,87 @@
 
 	function init() {
 		startIdleDaemon();
+
+		window.addEventListener('offline', () => {
+			const k = window.ClippyKnowledge || {};
+			const res = k.resolve(k.OFFLINE_ALERTS, { brain: window.ClippyBrain });
+			if (window.ClippyUI && res && res.text) {
+				window.ClippyUI.showIdleBubble(res.text, () => {
+					window.ClippyAgent.open();
+					if (res.actionTrigger) executeActionTrigger(res.actionTrigger);
+				});
+			}
+		});
+
+		window.addEventListener('online', () => {
+			const k = window.ClippyKnowledge || {};
+			const res = k.resolve(k.ONLINE_ALERTS, { brain: window.ClippyBrain });
+			if (window.ClippyUI && res && res.text) {
+				window.ClippyUI.showIdleBubble(res.text);
+			}
+		});
+	}
+
+	function startCountSequence(targetNumber) {
+		const target = Math.max(1, Math.min(12, parseInt(targetNumber, 10) || 5));
+		let current = 1;
+		const k = window.ClippyKnowledge || {};
+
+		const deliverCount = () => {
+			if (current > target) {
+				const doneRes = k.resolve(k.COUNT_COMPLETION_PHRASES, { brain: window.ClippyBrain, vars: { target } });
+				window.ClippyUI.appendAssistantMessage(doneRes.text, [
+					{ label: "View To-Do List", onClick: () => handleUserInput("View To-Do List") },
+					{ label: "What can you do?", onClick: () => handleUserInput("What can you do?") }
+				]);
+				return;
+			}
+
+			let suffix = '';
+			let pauseDelay = 400 + (current * 180);
+			const progressSuffs = k.COUNT_PROGRESS_PHRASES || {};
+			if (current > 9 && progressSuffs.late) suffix = progressSuffs.late;
+			else if (current > 6 && progressSuffs.mid) suffix = progressSuffs.mid;
+
+			window.ClippyUI.appendAssistantMessage(`**${current}**...${suffix}`);
+			current++;
+			setTimeout(deliverCount, pauseDelay);
+		};
+
+		deliverCount();
 	}
 
 	function notifyGameEnded(gameTitle, resultSummary, restartCallback) {
 		setTimeout(() => {
-			const promptText = `Round completed in **${gameTitle}** (${resultSummary}). Would you like to play another round?`;
+			const k = window.ClippyKnowledge || {};
+			const cfg = (k.SYSTEM_TEXTS && k.SYSTEM_TEXTS.gameEnded) || {
+				prompt: "Round completed in **{game}** ({result}). Would you like to play another round?",
+				btnYes: "Yes, play another {game}",
+				btnNo: "No, let's do something else",
+				userYes: "Yes, let's play {game} again.",
+				userNo: "No, let's explore other topics.",
+				whatNext: "Understood! What would you like to focus on now?"
+			};
+			const promptText = k.formatString ? k.formatString(cfg.prompt, { game: gameTitle, result: resultSummary }) : `Round completed in **${gameTitle}**.`;
+			const btnYesText = k.formatString ? k.formatString(cfg.btnYes, { game: gameTitle }) : "Play again";
+			const userYesText = k.formatString ? k.formatString(cfg.userYes, { game: gameTitle }) : "Play again";
+
 			window.ClippyUI.appendAssistantMessage(promptText, [
 				{
-					label: `Yes, play another ${gameTitle}`,
+					label: btnYesText,
 					onClick: () => {
-						window.ClippyUI.appendUserMessage(`Yes, let's play ${gameTitle} again.`);
+						window.ClippyUI.appendUserMessage(userYesText);
 						setTimeout(() => {
 							if (typeof restartCallback === 'function') restartCallback();
 						}, 200);
 					}
 				},
 				{
-					label: "No, let's do something else",
+					label: cfg.btnNo,
 					onClick: () => {
-						window.ClippyUI.appendUserMessage("No, let's explore other topics.");
+						window.ClippyUI.appendUserMessage(cfg.userNo);
 						setTimeout(() => {
-							window.ClippyUI.appendAssistantMessage("Understood! What would you like to focus on now?", [
+							window.ClippyUI.appendAssistantMessage(cfg.whatNext, [
 								{ label: "View To-Do List", onClick: () => handleUserInput("View To-Do List") },
 								{ label: "System Diagnostics", onClick: () => handleUserInput("System diagnostics") },
 								{ label: "Tell me a joke", onClick: () => handleUserInput("Tell me a joke") },
@@ -1302,6 +1528,7 @@
 		init,
 		open: openAssistant,
 		close: closeAssistant,
+		startCountSequence,
 		toggle: () => {
 			if (window.ClippyUI.isOpen) closeAssistant();
 			else openAssistant();

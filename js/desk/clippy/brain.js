@@ -94,6 +94,18 @@
 				interactionsTotal: 0,
 				jokesDelivered: 0,
 				gamesPlayed: 0,
+				userResponseTimes: [],
+				userResponseTimeStats: {
+					mean: 0,
+					median: 0,
+					stdDev: 0,
+					count: 0
+				},
+				inputModeStats: {
+					suggestionClicks: 0,
+					customTypedText: 0,
+					suggestionRatio: 0
+				},
 				messageLengthHistory: [],
 				messageLengthsStats: {
 					mean: 0,
@@ -191,9 +203,36 @@
 			return this.state.patience || 60;
 		}
 
-		updateFromNLP(nlpResult) {
+		updateFromNLP(nlpResult, isSuggestionInput = false) {
+			const now = Date.now();
+			const elapsedSinceLastUserMessage = this.state.lastInteractionTime ? (now - this.state.lastInteractionTime) / 1000 : 0;
+			
+			if (elapsedSinceLastUserMessage > 0.5 && elapsedSinceLastUserMessage < 300) {
+				if (!this.memory.userResponseTimes) this.memory.userResponseTimes = [];
+				this.memory.userResponseTimes.push(elapsedSinceLastUserMessage);
+				if (this.memory.userResponseTimes.length > 30) this.memory.userResponseTimes.shift();
+				const timeMetrics = this.computeStatisticalMetrics(this.memory.userResponseTimes);
+				this.memory.userResponseTimeStats = {
+					mean: timeMetrics.mean,
+					median: timeMetrics.median,
+					stdDev: timeMetrics.stdDev,
+					count: timeMetrics.count
+				};
+			}
+
+			if (!this.memory.inputModeStats) {
+				this.memory.inputModeStats = { suggestionClicks: 0, customTypedText: 0, suggestionRatio: 0 };
+			}
+			if (isSuggestionInput) {
+				this.memory.inputModeStats.suggestionClicks++;
+			} else {
+				this.memory.inputModeStats.customTypedText++;
+			}
+			const totalInputs = this.memory.inputModeStats.suggestionClicks + this.memory.inputModeStats.customTypedText;
+			this.memory.inputModeStats.suggestionRatio = totalInputs > 0 ? this.memory.inputModeStats.suggestionClicks / totalInputs : 0;
+
 			this.state.turnCount++;
-			this.state.lastInteractionTime = Date.now();
+			this.state.lastInteractionTime = now;
 			this.memory.interactionsTotal++;
 
 			const em = nlpResult.emotions || nlpResult.sentiment || {};
@@ -417,14 +456,16 @@
 		}
 
 		pushOutput(text) {
+			if (!text) return;
 			this.circularOutputBuffer.push(text);
-			if (this.circularOutputBuffer.length > 15) {
+			if (this.circularOutputBuffer.length > 20) {
 				this.circularOutputBuffer.shift();
 			}
 		}
 
-		isRecentOutput(text) {
-			return this.circularOutputBuffer.includes(text);
+		isRecentOutput(textOrId) {
+			if (!textOrId) return false;
+			return this.circularOutputBuffer.some(item => item === textOrId || (typeof item === 'string' && typeof textOrId === 'string' && item.includes(textOrId)));
 		}
 
 		transformResponseText(rawText) {
@@ -451,23 +492,23 @@
 				return text;
 			}
 
-			if (allowMirroring && totalMsgs >= 6) {
-				const isHabitualLower = (punctuationStats.allLowerCount / totalMsgs) > 0.65;
-				const isHabitualCaps = (punctuationStats.allCapsCount / totalMsgs) > 0.65;
+			if (allowMirroring && totalMsgs >= 4) {
+				const isHabitualLower = (punctuationStats.allLowerCount / totalMsgs) > 0.60;
+				const isHabitualCaps = (punctuationStats.allCapsCount / totalMsgs) > 0.60;
 				const noTrailingPunctRate = ((punctuationStats.totalNoTrailingPunctuation || 0) / totalMsgs);
-				const isHabitualBrief = stats.median > 0 && stats.median <= 3;
+				const isHabitualBrief = stats.median > 0 && stats.median <= 4;
 
-				if (isHabitualCaps && (currentMood === 'PLAYFUL' || currentMood === 'OPTIMISTIC')) {
+				if (isHabitualCaps && (currentMood === 'PLAYFUL' || currentMood === 'OPTIMISTIC' || currentMood === 'ENRAGED')) {
 					text = text.toUpperCase();
-				} else if (isHabitualLower && (currentMood === 'ZEN' || currentMood === 'FATIGUED')) {
+				} else if (isHabitualLower && (currentMood === 'ZEN' || currentMood === 'FATIGUED' || currentMood === 'PLAYFUL')) {
 					text = text.toLowerCase();
 				}
 
-				if (noTrailingPunctRate > 0.5 && (currentMood === 'ZEN' || currentMood === 'PLAYFUL' || currentMood === 'FATIGUED')) {
+				if (noTrailingPunctRate > 0.45 && (currentMood === 'ZEN' || currentMood === 'PLAYFUL' || currentMood === 'FATIGUED')) {
 					text = text.replace(/[.]$/, '');
 				}
 
-				if (isHabitualBrief && (currentMood === 'ANALYTICAL' || currentMood === 'SARCASTIC')) {
+				if (isHabitualBrief && (currentMood === 'ANALYTICAL' || currentMood === 'SARCASTIC' || currentMood === 'FATIGUED')) {
 					const firstSentence = text.split(/[.!?]\s+/)[0];
 					if (firstSentence && firstSentence.length > 5 && firstSentence.length < text.length) {
 						text = firstSentence + '.';
@@ -623,18 +664,15 @@
 			const knowledge = window.ClippyKnowledge || {};
 			const pool = (knowledge.TOPIC_RESPONSES && knowledge.TOPIC_RESPONSES[category]) || [];
 			if (!pool || pool.length === 0) return null;
-			const candidate = pool[Math.floor(Math.random() * pool.length)];
-			return this.transformResponseText(candidate);
+			const resolved = knowledge.resolve ? knowledge.resolve(pool, { brain: this }) : { text: '' };
+			if (resolved.id) this.pushOutput(resolved.id);
+			return this.transformResponseText(resolved.text);
 		}
 
 		getMoodPrefix() {
 			const m = this.getMood();
-			if (m === 'OPTIMISTIC') return ["Splendid! ", "Ready to assist! ", "Here we go: "];
-			if (m === 'ANALYTICAL') return ["Telemetry analysis confirms: ", "Executing query inspection: ", "Register dump indicates: "];
-			if (m === 'ZEN') return ["Peacefully processing: ", "With quiet clarity: ", "In steady equilibrium: "];
-			if (m === 'CYNICAL' || m === 'SARCASTIC') return ["If you insist: ", "Processing your request, as expected: ", "Executing standard protocol: "];
-			if (m === 'NOSTALGIC') return ["Ah, just like the classic days: ", "Loading from system memory archives: ", "A fine retro inquiry: "];
-			return [""];
+			const prefixesMap = (window.ClippyKnowledge && window.ClippyKnowledge.MOOD_PREFIXES) || {};
+			return prefixesMap[m] || [""];
 		}
 
 		formatWithMood(baseText) {
@@ -645,78 +683,47 @@
 
 		generateProceduralDialogue(nlpResult) {
 			const intentType = (nlpResult.intent && nlpResult.intent.type) || 'EVERYDAY_CHAT';
-			const mood = this.getMood();
 			const userProfile = (window.ClippySystemBridge && window.ClippySystemBridge.getUserProfile) ? window.ClippySystemBridge.getUserProfile() : { userName: 'User' };
+			const k = window.ClippyKnowledge || {};
 
-			if (intentType === 'MATH_INQUIRY' || nlpResult.entities?.math?.length > 0) {
-				const mathTopics = [
-					{
-						intro: "In linear algebra and real analysis, decomposing complex operators into invariant subspaces clarifies their global geometry.",
-						body: "When examining matrix spectrums $$A v = \\lambda v$$ or orthogonal projections, geometric intuition seamlessly matches algebraic rigor.",
-						nextId: 'linear_algebra_node'
-					},
-					{
-						intro: "Differential calculus formalizes continuous dynamical trajectories across arbitrary manifolds.",
-						body: "Evaluating boundary condition integrals via Stokes' theorem $$\\int_{\\partial \\Omega} \\omega = \\int_\\Omega d\\omega$$ unifies rates of change across higher dimensions.",
-						nextId: 'calculus_derivatives_node'
-					},
-					{
-						intro: "Fourier and harmonic analysis bridge time-domain continuous signals and discrete frequency spectra.",
-						body: "The Fast Fourier Transform algorithm calculates frequency decompositions in $$O(N \\log N)$$ time, providing the foundation for modern audio processing.",
-						nextId: 'fourier_transform_node'
-					}
-				];
-				const picked = mathTopics[Math.floor(Math.random() * mathTopics.length)];
-				return {
-					text: `${picked.intro}\n\n${picked.body}`,
-					options: [
-						{ label: "Explore Linear Algebra and Matrices.", next: 'linear_algebra_node' },
-						{ label: "Explore Differential Calculus.", next: 'calculus_derivatives_node' },
-						{ label: "Explore Fourier Analysis.", next: 'fourier_transform_node' },
-						{ label: "Return to workspace tasks.", next: 'user_state_good' }
-					]
-				};
+			if (intentType === 'MATH_INQUIRY' || (nlpResult.entities && nlpResult.entities.math && nlpResult.entities.math.length > 0)) {
+				const mathTopics = (k.PROCEDURAL_DISCUSSIONS && k.PROCEDURAL_DISCUSSIONS.math) || [];
+				if (mathTopics.length > 0) {
+					const picked = mathTopics[Math.floor(Math.random() * mathTopics.length)];
+					return {
+						text: `${picked.intro}\n\n${picked.body}`,
+						options: [
+							{ label: "Explore Linear Algebra and Matrices.", next: 'linear_algebra_node' },
+							{ label: "Explore Differential Calculus.", next: 'calculus_derivatives_node' },
+							{ label: "Explore Fourier Analysis.", next: 'fourier_transform_node' },
+							{ label: "Return to workspace tasks.", next: 'user_state_good' }
+						]
+					};
+				}
 			}
 
-			if (intentType === 'SCIENCE_INQUIRY' || nlpResult.entities?.physics?.length > 0) {
-				const physicsTopics = [
-					{
-						intro: "Thermodynamics and statistical physics connect microscopic entropy microstates with macroscopic thermal equilibrium.",
-						body: "Boltzmann's relation $$S = k_B \\ln \\Omega$$ demonstrates how information theory and physical thermodynamics share a common entropy metric.",
-						nextId: 'thermodynamics_entropy_node'
-					},
-					{
-						intro: "Quantum mechanics demonstrates that state vectors in Hilbert space evolve deterministically until projective measurement.",
-						body: "Non-commuting observables obey the generalized uncertainty principle $$\\sigma_A \\sigma_B \\ge \\frac{1}{2} |\\langle [\\hat{A}, \\hat{B}] \\rangle|$$.",
-						nextId: 'quantum_mechanics_node'
-					},
-					{
-						intro: "General relativity describes gravitation as intrinsic spacetime curvature governed by the Einstein tensor $$G_{\\mu\\nu}$$.",
-						body: "Mass-energy distributions dictate geometry, while geodesic equations dictate the trajectory of free-falling reference frames.",
-						nextId: 'general_relativity_node'
-					}
-				];
-				const picked = physicsTopics[Math.floor(Math.random() * physicsTopics.length)];
-				return {
-					text: `${picked.intro}\n\n${picked.body}`,
-					options: [
-						{ label: "Explore Quantum Physics.", next: 'quantum_mechanics_node' },
-						{ label: "Explore Thermodynamics and Entropy.", next: 'thermodynamics_entropy_node' },
-						{ label: "Explore General Relativity.", next: 'general_relativity_node' },
-						{ label: "Review fundamental physical constants.", next: 'physics_constants_node' }
-					]
-				};
+			if (intentType === 'SCIENCE_INQUIRY' || (nlpResult.entities && nlpResult.entities.physics && nlpResult.entities.physics.length > 0)) {
+				const physicsTopics = (k.PROCEDURAL_DISCUSSIONS && k.PROCEDURAL_DISCUSSIONS.physics) || [];
+				if (physicsTopics.length > 0) {
+					const picked = physicsTopics[Math.floor(Math.random() * physicsTopics.length)];
+					return {
+						text: `${picked.intro}\n\n${picked.body}`,
+						options: [
+							{ label: "Explore Quantum Physics.", next: 'quantum_mechanics_node' },
+							{ label: "Explore Thermodynamics and Entropy.", next: 'thermodynamics_entropy_node' },
+							{ label: "Explore General Relativity.", next: 'general_relativity_node' },
+							{ label: "Review fundamental physical constants.", next: 'physics_constants_node' }
+						]
+					};
+				}
 			}
 
 			if (intentType === 'REDDIT_STYLE_PROMPT' || (nlpResult.tokens && (nlpResult.tokens.includes('reddit') || nlpResult.tokens.includes('karma') || nlpResult.tokens.includes('debate')))) {
-				const snark = [
-					"Software engineering debate incoming: clean architecture and pragmatic delivery are not mutually exclusive. High-quality automated tests empower rapid refactoring without fear.",
-					"Unpopular opinion in technology discussions: the simplest architecture that satisfies operational requirements always wins over premature distributed complexity.",
-					"Take my upvote on this thread. When you measure system bottlenecks empirically with profilers rather than guessing, solutions become immediately obvious."
-				];
+				const resolved = k.resolve ? k.resolve(k.PROCEDURAL_SNARK, { brain: this, vars: { userName: userProfile.userName } }) : { text: '', actions: [] };
+				if (resolved.id) this.pushOutput(resolved.id);
 				return {
-					text: snark[Math.floor(Math.random() * snark.length)],
-					options: [
+					text: resolved.text,
+					options: (resolved.actions && resolved.actions.length > 0) ? resolved.actions : [
 						{ label: "Debate Tabs vs Spaces.", next: 'debate_tabs_spaces_node' },
 						{ label: "Debate Monoliths vs Microservices.", next: 'debate_monolith_microservices_node' },
 						{ label: "Debate Static vs Dynamic Typing.", next: 'debate_static_dynamic_node' },
@@ -726,14 +733,11 @@
 			}
 
 			if (intentType === 'DEBATE_ARGUMENT' || (nlpResult.emotions && nlpResult.emotions.hostility > 0.3)) {
-				const retort = [
-					"I acknowledge the disagreement. Let us break down the premise logically rather than escalating friction.",
-					"Friction in technical discussions is natural when perspectives differ. Let us look directly at the underlying criteria.",
-					"We can debate the specifics rigorously without losing common ground. What specific point do you wish to examine first?"
-				];
+				const resolved = k.resolve ? k.resolve(k.PROCEDURAL_DEBATE_RETORTS, { brain: this, vars: { userName: userProfile.userName } }) : { text: '', actions: [] };
+				if (resolved.id) this.pushOutput(resolved.id);
 				return {
-					text: retort[Math.floor(Math.random() * retort.length)],
-					options: [
+					text: resolved.text,
+					options: (resolved.actions && resolved.actions.length > 0) ? resolved.actions : [
 						{ label: "Let's call a truce and continue calmly.", next: 'hostile_truce_offer' },
 						{ label: "Let's discuss software engineering principles.", next: 'tech_root' },
 						{ label: "Show me system capabilities.", next: 'tools_overview_node' }
@@ -742,15 +746,11 @@
 			}
 
 			if (intentType === 'EVERYDAY_CHAT' || intentType === 'GENERAL_CHAT') {
-				const dailyThoughts = [
-					`A clear workspace and a structured list can completely transform the pace of a busy day, ${userProfile.userName}. How is your agenda shaping up?`,
-					"Balancing focused deep work intervals with short pauses is key to steady progress. How has your workflow been feeling today?",
-					"Sometimes the most effective step is picking one small task and seeing it through to completion. Shall we review your active items?",
-					"Everything on the desktop is calm and steady. Whether you want to draft notes, compute values, or take a quick break, I am ready."
-				];
+				const resolved = k.resolve ? k.resolve(k.PROCEDURAL_DAILY_THOUGHTS, { brain: this, vars: { userName: userProfile.userName } }) : { text: '', actions: [] };
+				if (resolved.id) this.pushOutput(resolved.id);
 				return {
-					text: dailyThoughts[Math.floor(Math.random() * dailyThoughts.length)],
-					options: [
+					text: resolved.text,
+					options: (resolved.actions && resolved.actions.length > 0) ? resolved.actions : [
 						{ label: "Manage my To-Do task list.", actionTrigger: 'show_todos', next: 'user_state_good' },
 						{ label: "Discuss morning & daily routines.", next: 'morning_routine_node' },
 						{ label: "Talk about overcoming procrastination.", next: 'overcoming_procrastination_node' },
@@ -763,9 +763,10 @@
 			return null;
 		}
 
-		processChat(rawText) {
+		processChat(rawText, isSuggestion = false) {
 			const nlpResult = window.ClippyNLP ? window.ClippyNLP.process(rawText) : { tokens: [], sentiment: {} };
-			this.updateFromNLP(nlpResult);
+			this.updateFromNLP(nlpResult, isSuggestion);
+			const k = window.ClippyKnowledge || {};
 
 			if (window.ClippyGraphEngine) {
 				const transition = window.ClippyGraphEngine.evaluateTransition(this.state.activeGraphNode, rawText, this);
@@ -779,6 +780,61 @@
 							actionTrigger: nodeResult.actionTrigger
 						};
 					}
+				}
+			}
+
+			if (nlpResult.intent && nlpResult.intent.type === 'EMOJI_CONFUSION') {
+				const resolved = k.resolve(k.EMOJI_CONFUSION_PHRASES, { brain: this });
+				if (resolved.id) this.pushOutput(resolved.id);
+				return {
+					text: this.transformResponseText(resolved.text),
+					actions: resolved.actions && resolved.actions.length > 0 ? resolved.actions : [
+						{ label: "What can you do?", onClick: () => { if (window.ClippyAgent) window.ClippyAgent.prompt("What can you do?"); } },
+						{ label: "View To-Do List", onClick: () => { if (window.ClippyAgent) window.ClippyAgent.prompt("View To-Do List"); } }
+					]
+				};
+			}
+
+			if (nlpResult.intent && nlpResult.intent.type === 'MICROSLOP_GIGGLE') {
+				const resolved = k.resolve(k.MICROSLOP_PHRASES, { brain: this });
+				if (resolved.id) this.pushOutput(resolved.id);
+				return {
+					text: this.transformResponseText(resolved.text),
+					actions: resolved.actions && resolved.actions.length > 0 ? resolved.actions : [
+						{ label: "System Diagnostics", onClick: () => { if (window.ClippyAgent) window.ClippyAgent.prompt("System diagnostics"); } },
+						{ label: "View To-Do List", onClick: () => { if (window.ClippyAgent) window.ClippyAgent.prompt("View To-Do List"); } }
+					]
+				};
+			}
+
+			if (nlpResult.intent && nlpResult.intent.type === 'EXTERNAL_URL_REFUSAL') {
+				const resolved = k.resolve(k.URL_REFUSAL_PHRASES, { brain: this });
+				if (resolved.id) this.pushOutput(resolved.id);
+				return {
+					text: this.transformResponseText(resolved.text),
+					actions: resolved.actions && resolved.actions.length > 0 ? resolved.actions : [
+						{ label: "Open Internet Explorer", onClick: () => { if (window.DeskAppRegistry) window.DeskAppRegistry.launch('ie'); } },
+						{ label: "What can you do?", onClick: () => { if (window.ClippyAgent) window.ClippyAgent.prompt("What can you do?"); } }
+					]
+				};
+			}
+
+			if (nlpResult.intent && nlpResult.intent.type === 'COUNT_REQUEST') {
+				const target = nlpResult.intent.targetNumber || 5;
+				if (target > 12) {
+					const countRefusalTemplate = (k.SYSTEM_TEXTS && k.SYSTEM_TEXTS.countRefusal) || "Target {target} exceeds sequentially rendered capacity.";
+					const formattedRefusal = k.formatString(countRefusalTemplate, { target });
+					return {
+						text: this.transformResponseText(formattedRefusal),
+						actions: [
+							{ label: "Start a Pomodoro Timer", onClick: () => { if (window.ClippyAgent) window.ClippyAgent.executeAction('timer_25'); } },
+							{ label: "View To-Do List", onClick: () => { if (window.ClippyAgent) window.ClippyAgent.prompt("View To-Do List"); } }
+						]
+					};
+				}
+				if (window.ClippyAgent && typeof window.ClippyAgent.startCountSequence === 'function') {
+					window.ClippyAgent.startCountSequence(target);
+					return null;
 				}
 			}
 
@@ -796,19 +852,17 @@
 			}
 			const mood = this.getMood();
 			const moodPool = (window.ClippyKnowledge && window.ClippyKnowledge.MOOD_FALLBACKS && window.ClippyKnowledge.MOOD_FALLBACKS[mood]) || null;
-			if (moodPool && moodPool.length > 0) {
-				const picked = moodPool[Math.floor(Math.random() * moodPool.length)];
-				return {
-					text: this.transformResponseText(picked),
-					actions: [
-						{ label: "What can you do?", onClick: () => { if (window.ClippyAgent) window.ClippyAgent.prompt("What can you do?"); } },
-						{ label: "View To-Do List", onClick: () => { if (window.ClippyAgent) window.ClippyAgent.prompt("View To-Do List"); } },
-						{ label: "System Diagnostics", onClick: () => { if (window.ClippyAgent) window.ClippyAgent.prompt("System diagnostics"); } }
-					]
-				};
-			}
-
-			return null;
+			const fallbackSource = (moodPool && moodPool.length > 0) ? moodPool : (k.FALLBACK_RESPONSES || []);
+			const resolved = k.resolve ? k.resolve(fallbackSource, { brain: this }) : { text: '', actions: [] };
+			if (resolved.id) this.pushOutput(resolved.id);
+			return {
+				text: this.transformResponseText(resolved.text),
+				actions: resolved.actions && resolved.actions.length > 0 ? resolved.actions : [
+					{ label: "What can you do?", onClick: () => { if (window.ClippyAgent) window.ClippyAgent.prompt("What can you do?"); } },
+					{ label: "View To-Do List", onClick: () => { if (window.ClippyAgent) window.ClippyAgent.prompt("View To-Do List"); } },
+					{ label: "System Diagnostics", onClick: () => { if (window.ClippyAgent) window.ClippyAgent.prompt("System diagnostics"); } }
+				]
+			};
 		}
 	}
 

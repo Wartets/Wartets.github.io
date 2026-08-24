@@ -722,22 +722,50 @@
 			const bat = this.getBatteryInfo();
 			const batText = bat.supported ? `${bat.level}% (${bat.charging ? 'Charging' : 'Discharging'})` : 'AC Line Connected';
 			const stats = this.getStatisticalTelemetrySummary();
-			const statsRow = stats ? `<tr><td><b>Linguistic Telemetry</b></td><td>Mean: ${stats.meanWordCount} words, Med: ${stats.medianWordCount}, StdDev: ${stats.stdDevWordCount} (${stats.interactionsTotal} inputs)</td></tr>` : '';
+			const diag = (window.ClippyKnowledge && window.ClippyKnowledge.SYSTEM_TEXTS && window.ClippyKnowledge.SYSTEM_TEXTS.diagnostics) || {
+				title: "Workstation Diagnostics Log",
+				thSubsystem: "Subsystem",
+				thSpec: "Specification & State",
+				envLabel: "Environment",
+				envValue: "Windows XP Professional (SP3 Emulated)",
+				netLabel: "Network Link",
+				displayLabel: "Display",
+				wmLabel: "Window Manager",
+				mailLabel: "Mail System",
+				storageLabel: "File Storage",
+				cpuLabel: "CPU Topology",
+				ramLabel: "RAM Memory",
+				powerLabel: "Power Source",
+				lunarLabel: "Lunar Metric",
+				telemetryLabel: "Linguistic Telemetry",
+				telemetryFormat: "Mean: {mean} words, Med: {median}, StdDev: {stdDev} ({total} inputs)"
+			};
+
+			let statsRow = '';
+			if (stats && window.ClippyKnowledge && window.ClippyKnowledge.formatString) {
+				const txt = window.ClippyKnowledge.formatString(diag.telemetryFormat, {
+					mean: stats.meanWordCount,
+					median: stats.medianWordCount,
+					stdDev: stats.stdDevWordCount,
+					total: stats.interactionsTotal
+				});
+				statsRow = `<tr><td><b>${diag.telemetryLabel}</b></td><td>${txt}</td></tr>`;
+			}
 
 			return `<div class="clippy-structured-section">
-				<div class="clippy-section-title">Workstation Diagnostics Log</div>
+				<div class="clippy-section-title">${diag.title}</div>
 				<table class="clippy-xp-table">
-					<tr><th>Subsystem</th><th>Specification & State</th></tr>
-					<tr><td><b>Environment</b></td><td>Windows XP Professional (SP3 Emulated)</td></tr>
-					<tr><td><b>Network Link</b></td><td>${online}</td></tr>
-					<tr><td><b>Display</b></td><td>${screenRes}</td></tr>
-					<tr><td><b>Window Manager</b></td><td>${openWins} active window(s)</td></tr>
-					<tr><td><b>Mail System</b></td><td>${unread} unread message(s)</td></tr>
-					<tr><td><b>File Storage</b></td><td>${desktopItems} desktop items, ${recycleCount} in bin</td></tr>
-					<tr><td><b>CPU Topology</b></td><td>${cores}</td></tr>
-					<tr><td><b>RAM Memory</b></td><td>${mem}</td></tr>
-					<tr><td><b>Power Source</b></td><td>${batText}</td></tr>
-					<tr><td><b>Lunar Metric</b></td><td>${moon}</td></tr>
+					<tr><th>${diag.thSubsystem}</th><th>${diag.thSpec}</th></tr>
+					<tr><td><b>${diag.envLabel}</b></td><td>${diag.envValue}</td></tr>
+					<tr><td><b>${diag.netLabel}</b></td><td>${online}</td></tr>
+					<tr><td><b>${diag.displayLabel}</b></td><td>${screenRes}</td></tr>
+					<tr><td><b>${diag.wmLabel}</b></td><td>${openWins} active window(s)</td></tr>
+					<tr><td><b>${diag.mailLabel}</b></td><td>${unread} unread message(s)</td></tr>
+					<tr><td><b>${diag.storageLabel}</b></td><td>${desktopItems} desktop items, ${recycleCount} in bin</td></tr>
+					<tr><td><b>${diag.cpuLabel}</b></td><td>${cores}</td></tr>
+					<tr><td><b>${diag.ramLabel}</b></td><td>${mem}</td></tr>
+					<tr><td><b>${diag.powerLabel}</b></td><td>${batText}</td></tr>
+					<tr><td><b>${diag.lunarLabel}</b></td><td>${moon}</td></tr>
 					${statsRow}
 				</table>
 			</div>`;

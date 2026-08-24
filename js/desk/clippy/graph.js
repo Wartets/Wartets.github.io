@@ -16,50 +16,14 @@
 
 		getFormattedNodeText(node, brain) {
 			if (!node) return "Standing by for user instructions.";
-			const currentMood = brain ? brain.getMood() : 'OPTIMISTIC';
-			const affinity = brain ? brain.getAffinity() : 50;
-			const patience = brain ? brain.getPatience() : 50;
-
-			let pool = [];
-			if (node.responses && Array.isArray(node.responses) && node.responses.length > 0) {
-				pool = node.responses.slice();
+			if (window.ClippyKnowledge && typeof window.ClippyKnowledge.resolve === 'function') {
+				const source = (node.responses && Array.isArray(node.responses) && node.responses.length > 0)
+					? node.responses
+					: (node.text !== undefined ? node.text : node);
+				const resolved = window.ClippyKnowledge.resolve(source, brain);
+				if (resolved && resolved.text) return resolved.text;
 			}
-
-			if (pool.length === 0) {
-				return typeof node.text === 'string' ? node.text : "Standing by for user instructions.";
-			}
-
-			const eligible = pool.filter(c => {
-				if (!c || !c.conditions) return true;
-				if (c.conditions.minAffinity !== undefined && affinity < c.conditions.minAffinity) return false;
-				if (c.conditions.maxAffinity !== undefined && affinity > c.conditions.maxAffinity) return false;
-				if (c.conditions.minPatience !== undefined && patience < c.conditions.minPatience) return false;
-				if (c.conditions.maxPatience !== undefined && patience > c.conditions.maxPatience) return false;
-				return true;
-			});
-
-			const workingPool = eligible.length > 0 ? eligible : pool;
-			const moodMatched = workingPool.filter(c => c && c.conditions && Array.isArray(c.conditions.moods) && c.conditions.moods.includes(currentMood));
-			const finalPool = moodMatched.length > 0 ? moodMatched : workingPool;
-
-			const totalWeight = finalPool.reduce((sum, c) => sum + Math.max(1, (c && c.weight) || 10), 0);
-			let roll = Math.random() * totalWeight;
-			let selected = finalPool[0];
-
-			for (const cand of finalPool) {
-				const w = Math.max(1, (cand && cand.weight) || 10);
-				if (roll < w) {
-					selected = cand;
-					break;
-				}
-				roll -= w;
-			}
-
-			if (selected && selected.moodDelta && brain) {
-				brain.applyMoodDelta(selected.moodDelta);
-			}
-
-			return (selected && selected.text) || node.text || "Standing by.";
+			return typeof node.text === 'string' ? node.text : "Standing by for user instructions.";
 		}
 
 		getOptionsForNode(node, currentMood, affinity, patience = 50) {
@@ -112,21 +76,48 @@
 
 		evaluateTransition(currentNodeId, rawText, brain) {
 			const node = this.getNode(currentNodeId);
-			const norm = (rawText || '').toLowerCase().trim();
+			const norm = (rawText || '').toLowerCase().replace(/^[*\s]+/, '').trim();
 			const options = (node && Array.isArray(node.options)) ? node.options : [];
 
 			for (const opt of options) {
-				if (opt.label && opt.label.toLowerCase().trim() === norm) {
+				const optNorm = (opt.label || '').toLowerCase().replace(/^[*\s]+/, '').trim();
+				if (optNorm === norm) {
 					return { option: opt, matchType: 'EXACT_LABEL' };
 				}
 			}
 
 			for (const opt of options) {
-				if (opt.patterns) {
+				if (opt.patterns && Array.isArray(opt.patterns)) {
 					for (const pat of opt.patterns) {
 						if (pat instanceof RegExp && pat.test(norm)) {
 							return { option: opt, matchType: 'PATTERN' };
 						}
+					}
+				}
+			}
+
+			for (const opt of options) {
+				const optClean = (opt.label || '').toLowerCase().replace(/[^a-z0-9\s]/g, ' ').trim();
+				const optTokens = optClean.split(/\s+/).filter(w => w.length > 2);
+				const normClean = norm.replace(/[^a-z0-9\s]/g, ' ').trim();
+				const normTokens = normClean.split(/\s+/).filter(w => w.length > 2);
+
+				if (optTokens.length > 0 && normTokens.length > 0) {
+					const matchCount = optTokens.filter(t => normTokens.some(nt => nt.includes(t) || t.includes(nt))).length;
+					const overlapRatio = matchCount / Math.min(optTokens.length, normTokens.length);
+					if (overlapRatio >= 0.5 || (optTokens.length <= 2 && matchCount >= 1)) {
+						return { option: opt, matchType: 'SEMANTIC_KEYWORD' };
+					}
+				}
+			}
+
+			for (const opt of options) {
+				const optClean = (opt.label || '').toLowerCase().replace(/^[*\s]+/, '').trim();
+				if (window.ClippyNLP && typeof window.ClippyNLP.levenshteinDistance === 'function') {
+					const dist = window.ClippyNLP.levenshteinDistance(norm, optClean);
+					const maxLen = Math.max(norm.length, optClean.length);
+					if (maxLen > 4 && (dist / maxLen) <= 0.25) {
+						return { option: opt, matchType: 'FUZZY_LEVENSHTEIN' };
 					}
 				}
 			}
@@ -140,116 +131,16 @@
 		}
 
 		findGlobalGraphEntry(norm) {
-			if (/\b(what can you do|commands|what do you do|help|aide|features|capabilities|que peux tu faire)\b/i.test(norm)) {
-				return { label: "What can you do?", next: 'tools_overview_node', moodDelta: { mood: 'OPTIMISTIC', patience: 15 } };
-			}
-			if (/\b(who am i|who i am|my profile|my identity|identity|user profile|qui suis-je|mon profil)\b/i.test(norm)) {
-				return { label: "Who am I?", next: 'who_am_i_node', moodDelta: { mood: 'ANALYTICAL', intellect: 10 } };
-			}
-			if (/\b(how are you feeling|how do you feel|how are you|how is it going|mood|feeling|comment te sens tu|comment vas tu)\b/i.test(norm)) {
-				return { label: "How are you feeling?", next: 'clippy_feeling_node', moodDelta: { mood: 'OPTIMISTIC', affinity: 10 } };
-			}
-			if (/\b(check unread emails|unread emails|unread mail|check mail|verifier e-mails|mes mails)\b/i.test(norm)) {
-				return { label: "Check unread emails", next: 'mail_overview_node', moodDelta: { mood: 'OPTIMISTIC', patience: 10 } };
-			}
-			if (/\b(system diagnostics|diagnostics|specs|system specs|statut systeme|diagnostic)\b/i.test(norm)) {
-				return { label: "System diagnostics", next: 'diagnostics_node', moodDelta: { mood: 'ANALYTICAL', intellect: 15 } };
-			}
-			if (/\b(math|mathematics|mathematiques|analyse|geometrie)\b/i.test(norm)) {
-				return { label: "Discuss mathematical principles", next: 'math_lecture_node', moodDelta: { mood: 'ANALYTICAL', intellect: 25 } };
-			}
-			if (/\b(calculus|derivatives|integrals|integration|derivee|integrale|taylor)\b/i.test(norm)) {
-				return { label: "Differential and Integral Calculus", next: 'calculus_derivatives_node', moodDelta: { mood: 'ANALYTICAL', intellect: 25 } };
-			}
-			if (/\b(linear algebra|eigenvalue|eigenvalues|matrix|matrices|algebre lineaire|vecteur)\b/i.test(norm)) {
-				return { label: "Linear Algebra and Matrices", next: 'linear_algebra_node', moodDelta: { mood: 'ANALYTICAL', intellect: 25 } };
-			}
-			if (/\b(fractal|fractals|mandelbrot|chaos theory|strange attractor|attracteur)\b/i.test(norm)) {
-				return { label: "Fractals and Chaos Theory", next: 'fractals_chaos_node', moodDelta: { mood: 'ANALYTICAL', intellect: 25 } };
-			}
-			if (/\b(topology|manifold|manifolds|euler characteristic|topologie|variete)\b/i.test(norm)) {
-				return { label: "Topology and Geometry", next: 'topology_geometry_node', moodDelta: { mood: 'ANALYTICAL', intellect: 25 } };
-			}
-			if (/\b(physics|quantum|relativity|thermodynamics|physique|quantique)\b/i.test(norm)) {
-				return { label: "Discuss physics & cosmology", next: 'physics_constants_node', moodDelta: { mood: 'ANALYTICAL', intellect: 25 } };
-			}
-			if (/\b(routine|morning routine|matin|planning|habits|habitudes)\b/i.test(norm)) {
-				return { label: "Morning and Daily Routines", next: 'morning_routine_node', moodDelta: { mood: 'OPTIMISTIC', affinity: 15 } };
-			}
-			if (/\b(procrastination|procrastiner|motivation|discipline|perfectionism)\b/i.test(norm)) {
-				return { label: "Overcoming Procrastination", next: 'overcoming_procrastination_node', moodDelta: { mood: 'OPTIMISTIC', patience: 20 } };
-			}
-			if (/\b(reading|books|livres|lecture|notes|note taking)\b/i.test(norm)) {
-				return { label: "Reading Habits & Notes", next: 'reading_books_node', moodDelta: { mood: 'ANALYTICAL', intellect: 20 } };
-			}
-			if (/\b(everyday|routine|coffee|tea|weather|daily life|conversation|discuter|parler de tout|cafe|journee)\b/i.test(norm)) {
-				return { label: "Everyday conversation", next: 'everyday_chat_node', moodDelta: { mood: 'OPTIMISTIC', affinity: 15 } };
-			}
-			if (/\b(deltarune|mysterious|dark world|rpg flavor|ombre|mystere|determinisme)\b/i.test(norm)) {
-				return { label: "A mysterious thought...", next: 'deltarune_flavor_node', moodDelta: { mood: 'DELTARUNE', existentialism: 25 } };
-			}
-			if (/\b(reddit|reddit mode|karma|sub|forum|thread|tabs vs spaces|tabs or spaces|debat internet)\b/i.test(norm)) {
-				return { label: "Technology Debate", next: 'reddit_banter_node', moodDelta: { mood: 'SARCASTIC', intellect: 15 } };
-			}
-			if (/\b(quantum recycle bin theory|recycle bin theory|landauer|theorie corbeille quantique)\b/i.test(norm)) {
-				return { label: "Quantum Recycle Bin theory", next: 'quantum_recycle_bin_node', moodDelta: { mood: 'ANALYTICAL', intellect: 20 } };
-			}
-			if (/\b(talk about programming|programming|coding|software engineering|programmation|coder)\b/i.test(norm)) {
-				return { label: "Talk about programming", next: 'tech_root', moodDelta: { mood: 'ANALYTICAL', intellect: 20 } };
-			}
-			if (/\b(talk about space and cosmos|space and cosmos|cosmos|universe|astronomy|espace|univers)\b/i.test(norm)) {
-				return { label: "Talk about space and cosmos", next: 'cosmos_space_node', moodDelta: { mood: 'PHILOSOPHICAL', intellect: 20 } };
-			}
-			if (/\b(inspect active windows|list windows|running windows|open windows|fenetres actives|processus)\b/i.test(norm)) {
-				return { label: "Inspect active windows", next: 'active_windows_node', moodDelta: { mood: 'ANALYTICAL', patience: 10 } };
-			}
-			if (/\b(play tic-tac-toe|tic-tac-toe|tictactoe|morpion|jouer au morpion)\b/i.test(norm)) {
-				return { label: "Play Tic-Tac-Toe", next: 'game_ttt_node', moodDelta: { mood: 'OPTIMISTIC', energy: 20 } };
-			}
-			if (/\b(play memory game|memory game|memory match|jeu de memory)\b/i.test(norm)) {
-				return { label: "Play Memory Game", next: 'game_memory_node', moodDelta: { mood: 'OPTIMISTIC', energy: 20 } };
-			}
-			if (/\b(play hangman|hangman|jeu du pendu|pendu)\b/i.test(norm)) {
-				return { label: "Play Hangman", next: 'game_hangman_node', moodDelta: { mood: 'OPTIMISTIC', energy: 20 } };
-			}
-			if (/\b(tech trivia quiz|trivia quiz|quiz|tech quiz|questionnaire)\b/i.test(norm)) {
-				return { label: "Tech Trivia Quiz", next: 'quiz_start_node', moodDelta: { mood: 'ANALYTICAL', intellect: 20 } };
-			}
-			if (/\b(guess the number|guess number|devine le nombre)\b/i.test(norm)) {
-				return { label: "Guess the Number", next: 'game_guess_node', moodDelta: { mood: 'OPTIMISTIC', intellect: 10 } };
-			}
-			if (/\b(rock paper scissors|chifoumi|pierre feuille ciseaux)\b/i.test(norm)) {
-				return { label: "Rock Paper Scissors", next: 'game_rps_node', moodDelta: { mood: 'OPTIMISTIC', energy: 15 } };
-			}
-			if (/\b(pet clippy status|tamagotchi|nourrir clippy|etat clippy)\b/i.test(norm)) {
-				return { label: "Pet Clippy status", next: 'clippy_feeling_node', moodDelta: { mood: 'OPTIMISTIC', affinity: 15 } };
-			}
-			if (/\b(defrag drive c:|defrag|defragment|defragmentation)\b/i.test(norm)) {
-				return { label: "Defrag Drive C:", next: 'defrag_trigger_node', moodDelta: { mood: 'ANALYTICAL', intellect: 15 } };
-			}
-			if (/\b(start pomodoro timer|pomodoro timer|pomodoro|focus timer|minuteur)\b/i.test(norm)) {
-				return { label: "Start Pomodoro Timer", next: 'pomodoro_node', moodDelta: { mood: 'ZEN', patience: 20 } };
-			}
-			if (/\b(view to-do list|to-do list|todo list|mes taches|todo)\b/i.test(norm)) {
-				return { label: "View To-Do List", next: 'todo_overview_node', moodDelta: { mood: 'OPTIMISTIC', patience: 15 } };
-			}
-			if (/\b(tell me a joke|joke|blague|raconte une blague)\b/i.test(norm)) {
-				return { label: "Tell me a joke", next: 'humor_joke_node', moodDelta: { mood: 'OPTIMISTIC', affinity: 10 } };
-			}
-			if (/\b(keyboard shortcuts|shortcuts|raccourcis claviers|raccourcis)\b/i.test(norm)) {
-				return { label: "Keyboard Shortcuts", next: 'shortcuts_node', moodDelta: { mood: 'ANALYTICAL', intellect: 10 } };
-			}
-			if (/\b(generate secure password|secure password|generer mot de passe|password generator)\b/i.test(norm)) {
-				return { label: "Generate Secure Password", next: 'password_gen_node', moodDelta: { mood: 'ANALYTICAL', intellect: 15 } };
-			}
-			if (/\b(bad bad bad|you suck|useless|annoying|hate you|shut up|tais toi|inutile|tu sers a rien)\b/i.test(norm)) {
-				return { label: "Why do you care? You're just a paperclip.", next: 'hostile_initial_retort', moodDelta: { mood: 'CYNICAL', affinity: -15, patience: -20 } };
-			}
-			if (/\b(sorry|i apologize|my bad|forgive me|pardon me|desole|pardon|excuse moi)\b/i.test(norm)) {
-				return { label: "I'm sorry, I took my frustration out on you.", next: 'hostile_truce_offer', moodDelta: { mood: 'OPTIMISTIC', affinity: 25, patience: 30 } };
-			}
-			if (/\b(music|audio|sound|player|winamp|wmp|musique|chanson)\b/i.test(norm)) {
-				return { label: "Discuss audio and media players", next: 'music_talk_node', moodDelta: { mood: 'OPTIMISTIC', energy: 15 } };
+			const entries = (window.ClippyKnowledge && window.ClippyKnowledge.GRAPH_GLOBAL_ENTRIES) || [];
+			for (const entry of entries) {
+				if (entry.pattern && entry.pattern.test(norm)) {
+					return {
+						label: entry.label,
+						next: entry.next,
+						actionTrigger: entry.actionTrigger,
+						moodDelta: entry.moodDelta
+					};
+				}
 			}
 			return null;
 		}

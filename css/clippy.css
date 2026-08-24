@@ -1361,6 +1361,251 @@
 	border-radius: 3px;
 }
 
+.clippy-message blockquote {
+	margin: 6px 0;
+	padding: 4px 8px;
+	border-left: 3px solid #316ac5;
+	background: rgba(0, 0, 0, 0.04);
+	color: #333333;
+}
+
+.katex-display-box {
+	margin: 6px 0;
+	padding: 6px 8px;
+	background: #ffffff;
+	border: 1px solid #d4cd75;
+	border-radius: 3px;
+	overflow-x: auto;
+	text-align: center;
+}
+
+.katex-inline-box {
+	background: rgba(0, 0, 0, 0.05);
+	padding: 1px 3px;
+	border-radius: 2px;
+	font-family: 'Times New Roman', serif;
+}
+
+.clippy-message sup {
+	font-size: 80%;
+	vertical-align: super;
+	line-height: 0;
+}
+
+.clippy-message sub {
+	font-size: 80%;
+	vertical-align: sub;
+	line-height: 0;
+}
+
+.clippy-message h1,
+.clippy-message h2,
+.clippy-message h3,
+.clippy-message h4 {
+	margin: 4px 0 2px 0;
+	font-family: 'Trebuchet MS', Tahoma, sans-serif;
+	color: #0c2d6b;
+}
+
+.clippy-message h1 { font-size: 14px; }
+.clippy-message h2 { font-size: 13px; }
+.clippy-message h3 { font-size: 12px; }
+.clippy-message h4 { font-size: 11px; }
+
+.clippy-message hr {
+	border: none;
+	border-top: 1px solid #d4cd75;
+	margin: 6px 0;
+}
+
+.clippy-message a {
+	color: #0055ea;
+	text-decoration: underline;
+}
+
+.clippy-wheel-container {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 8px;
+	padding: 6px;
+}
+
+.clippy-wheel-canvas-box {
+	position: relative;
+	width: 220px;
+	height: 220px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.clippy-wheel-pointer {
+	position: absolute;
+	top: -6px;
+	left: 50%;
+	transform: translateX(-50%);
+	width: 0;
+	height: 0;
+	border-left: 9px solid transparent;
+	border-right: 9px solid transparent;
+	border-top: 16px solid #cc0000;
+	z-index: 10;
+	filter: drop-shadow(0 2px 2px rgba(0,0,0,0.4));
+}
+
+.clippy-wheel-canvas {
+	border-radius: 50%;
+	box-shadow: 0 4px 10px rgba(0,0,0,0.35), inset 0 0 0 2px #ffffff;
+}
+
+.clippy-wheel-config {
+	display: flex;
+	flex-direction: column;
+	gap: 6px;
+	width: 100%;
+	background: #ffffff;
+	border: 1px solid #d4cd75;
+	padding: 6px;
+	border-radius: 3px;
+	box-sizing: border-box;
+}
+
+.clippy-wheel-slices-list {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 4px;
+	max-height: 80px;
+	overflow-y: auto;
+}
+
+.clippy-wheel-slice-tag {
+	display: flex;
+	align-items: center;
+	gap: 4px;
+	background: #ece9d8;
+	border: 1px solid #7f9db9;
+	padding: 2px 6px;
+	font-size: 10px;
+	border-radius: 2px;
+}
+
+.clippy-wheel-slice-tag button {
+	background: none;
+	border: none;
+	color: #cc0000;
+	font-weight: bold;
+	cursor: pointer;
+	padding: 0;
+	line-height: 1;
+}
+
+.clippy-linear-container {
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+}
+
+.clippy-matrix-grid {
+	display: grid;
+	gap: 4px;
+	background: #ffffff;
+	border: 2px inset #d4d0c8;
+	padding: 6px;
+	border-radius: 2px;
+}
+
+.clippy-matrix-row {
+	display: flex;
+	align-items: center;
+	gap: 4px;
+}
+
+.clippy-matrix-input {
+	width: 42px;
+	padding: 3px;
+	font-family: 'Lucida Console', monospace;
+	font-size: 11px;
+	border: 1px solid #7f9db9;
+	text-align: center;
+}
+
+.clippy-cipher-container {
+	display: flex;
+	flex-direction: column;
+	gap: 6px;
+}
+
+.clippy-cipher-textarea {
+	width: 100%;
+	height: 60px;
+	font-family: 'Lucida Console', monospace;
+	font-size: 11px;
+	padding: 4px;
+	border: 1px solid #7f9db9;
+	resize: none;
+	box-sizing: border-box;
+}
+
+.clippy-tps-container {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 8px;
+}
+
+.clippy-tps-click-area {
+	width: 100%;
+	height: 90px;
+	background: linear-gradient(to bottom, #ffffff, #ece9d8);
+	border: 2px outset #ffffff;
+	border-color: #ffffff #808080 #808080 #ffffff;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	cursor: pointer;
+	user-select: none;
+	border-radius: 3px;
+}
+
+.clippy-tps-click-area:active {
+	border-color: #808080 #ffffff #ffffff #808080;
+	background: #e0ded0;
+}
+
+.clippy-tps-huge-number {
+	font-family: 'Lucida Console', monospace;
+	font-size: 32px;
+	font-weight: bold;
+	color: #0c2d6b;
+}
+
+.clippy-date-calc-container {
+	display: flex;
+	flex-direction: column;
+	gap: 6px;
+}
+
+.clippy-date-calc-row {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	font-size: 11px;
+}
+
+.clippy-step-box {
+	background: #ffffff;
+	border: 1px solid #d4cd75;
+	padding: 6px;
+	margin: 4px 0;
+	font-family: 'Lucida Console', monospace;
+	font-size: 11px;
+	border-radius: 3px;
+	line-height: 1.4;
+	overflow-x: auto;
+}
+
 .clippy-font-tahoma { font-family: 'Tahoma', sans-serif; }
 .clippy-font-courier { font-family: 'Courier New', 'Lucida Console', monospace; }
 .clippy-font-comic { font-family: 'Comic Sans MS', cursive, sans-serif; }

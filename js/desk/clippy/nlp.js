@@ -4,28 +4,7 @@
 	class NaturalLanguageProcessor {
 		constructor() {
 			this.knowledge = window.ClippyKnowledge || {};
-			this.appAliases = {
-				'calculator': ['calc', 'calculator', 'calculatrice', 'calc.exe'],
-				'paint': ['paint', 'mspaint', 'mspaint.exe', 'drawing', 'dessin', 'pbrush'],
-				'notepad': ['notepad', 'text editor', 'notes', 'editeur', 'notepad.exe'],
-				'cmd': ['cmd', 'command prompt', 'terminal', 'console', 'invite de commandes', 'cmd.exe'],
-				'ie': ['ie', 'internet explorer', 'browser', 'web', 'navigateur', 'iexplore'],
-				'outlook': ['outlook', 'outlook express', 'mail', 'email', 'e-mail', 'courrier', 'inbox', 'boite de reception'],
-				'winamp': ['winamp', 'winamp player', 'retro player'],
-				'mediaplayer': ['mediaplayer', 'media player', 'windows media player', 'wmp', 'lecteur media'],
-				'minesweeper': ['minesweeper', 'demineur', 'mine', 'mines', 'winmine'],
-				'solitaire': ['solitaire', 'cards', 'cartes', 'klondike', 'patience'],
-				'settings': ['settings', 'control panel', 'panneau de configuration', 'preferences', 'configuration', 'config'],
-				'display': ['display', 'display properties', 'affichage', 'wallpapers', 'fonds d ecran', 'wallpaper', 'screensaver'],
-				'mycomputer': ['mycomputer', 'my computer', 'poste de travail', 'ordinateur', 'drives'],
-				'recyclebin': ['recyclebin', 'recycle bin', 'corbeille', 'trash', 'poubelle'],
-				'achievements': ['achievements', 'trophies', 'milestones', 'succes', 'trophees', 'exploits'],
-				'projects': ['projects', 'portfolio', 'showcase', 'mes projets', 'projets'],
-				'soundrecorder': ['soundrecorder', 'sound recorder', 'enregistreur audio', 'dictaphone'],
-				'charmap': ['charmap', 'character map', 'table des caracteres', 'symboles', 'symbols'],
-				'encarta': ['encarta', 'encarta globe', 'globe', 'atlas', 'world map', 'mappemonde'],
-				'taskmgr': ['taskmgr', 'task manager', 'gestionnaire des taches', 'processes', 'processus']
-			};
+			this.appAliases = (this.knowledge.NLP_DATA && this.knowledge.NLP_DATA.appAliases) || {};
 		}
 
 		expandContractions(text) {
@@ -371,8 +350,66 @@
 			return found;
 		}
 
+		containsEmoji(text) {
+			const emojiRegex = /(?:[\u2700-\u27bf]|(?:\ud83c[\udde6-\uddff]){2}|[\ud800-\udbff][\udc00-\udfff]|[\u0023-\u0039]\ufe0f?\u20e3|\u3299|\u3297|\u303d|\u3030|\u24c2|[\ud83c-\ud83e][\ud000-\udfff])/u;
+			return emojiRegex.test(text);
+		}
+
+		containsUrl(text) {
+			return /(https?:\/\/[^\s]+|www\.[^\s]+|[a-zA-Z0-9.-]+\.(?:com|org|net|io|edu|gov|fr|de|uk)[^\s]*)/i.test(text);
+		}
+
 		classifyIntent(rawText, entities) {
 			const norm = rawText.toLowerCase().trim();
+
+			if (this.containsEmoji(rawText)) {
+				return { type: 'EMOJI_CONFUSION', confidence: 1.0 };
+			}
+
+			if (/\bmicroslop\b/i.test(norm)) {
+				return { type: 'MICROSLOP_GIGGLE', confidence: 1.0 };
+			}
+
+			if (this.containsUrl(rawText) && !/^(open|launch|start)\b/i.test(norm)) {
+				return { type: 'EXTERNAL_URL_REFUSAL', confidence: 1.0 };
+			}
+
+			if (/\b(count to|count up to|count until|compte jusqu'a|compte jusqu|compter jusqu)\s+(\d+)/i.test(norm)) {
+				const m = norm.match(/\b(count to|count up to|count until|compte jusqu'a|compte jusqu|compter jusqu)\s+(\d+)/i);
+				return { type: 'COUNT_REQUEST', targetNumber: parseInt(m[2], 10), confidence: 1.0 };
+			}
+
+			if (/\b(dimensional analysis|homogeneity|homogeneous|verify equation|check units|analyse dimensionnelle|equation physique|is homogeneous|dimensionally)\b/i.test(norm) || (norm.includes('=') && /[a-zA-Z]/.test(norm) && !norm.startsWith('theme=') && !norm.startsWith('calc') && !norm.includes('=='))) {
+				return { type: 'PHYSICS_HOMOGENEITY', confidence: 0.95 };
+			}
+
+			if (/\b(euclidean division|polynomial division|division euclidienne|quotient and remainder|divide polynomials|divide polynomial|division de polynome)\b/i.test(norm)) {
+				return { type: 'EUCLIDEAN_DIVISION', confidence: 0.95 };
+			}
+
+			if (/\b(factor polynomial|factor quadratic|factorize|factoriser|racines polynome|discriminant|factor\s+[a-zA-Z0-9\^\+\-\s]+)\b/i.test(norm)) {
+				return { type: 'POLYNOMIAL_FACTORIZATION', confidence: 0.95 };
+			}
+
+			if (/\b(linear system|solve system|gaussian elimination|systeme lineaire|cramer|solve matrix|solve linear|system solver)\b/i.test(norm)) {
+				return { type: 'LINEAR_SYSTEM_SOLVER', confidence: 0.95 };
+			}
+
+			if (/\b(wheel|choice wheel|random wheel|spin wheel|roue|roue de choix|decision wheel)\b/i.test(norm)) {
+				return { type: 'CHOICE_WHEEL', confidence: 0.95 };
+			}
+
+			if (/\b(cipher|encrypt|decrypt|morse|caesar|vigenere|atbash|rot13|chiffrement|encoder|decoder|decodage)\b/i.test(norm)) {
+				return { type: 'CIPHER_TOOL', confidence: 0.95 };
+			}
+
+			if (/\b(tps|cps|clicks per second|mouse speed|clics par seconde|test tps)\b/i.test(norm)) {
+				return { type: 'MOUSE_TPS', confidence: 0.95 };
+			}
+
+			if (/\b(date difference|days between|date calculator|calculateur de date|nombre de jours)\b/i.test(norm)) {
+				return { type: 'DATE_CALCULATOR', confidence: 0.95 };
+			}
 
 			if (/^(exit|quit|cancel|stop|menu|back|annuler|quitter)\b/i.test(norm)) {
 				return { type: 'CANCEL', confidence: 1.0 };

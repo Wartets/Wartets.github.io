@@ -2,12 +2,122 @@
 	'use strict';
 
 	const IMAGE_BASE = '../assets/images/desk/clippy/';
-	const TYPEWRITER_SPEED_MS = 14;
+	const CHAT_STORAGE_KEY = 'clippy_chat_history_v3';
 
 	const FACES = {
 		IDLE: 'idle.png',
 		THINK: 'think.png'
 	};
+
+	function escapeHtml(str) {
+		return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+	}
+
+	function parseMarkdown(text) {
+		if (!text || typeof text !== 'string') return '';
+		if (text.startsWith('<div class="clippy-structured-section">') || text.startsWith('<table class="clippy-xp-table">') || text.startsWith('<div class="clippy-activity-card">')) {
+			return text;
+		}
+
+		let html = text;
+
+		const preservedBlocks = [];
+		html = html.replace(/```([a-zA-Z0-9_-]*)\n([\s\S]*?)```/g, (match, lang, code) => {
+			const placeholder = `__PRESERVED_BLOCK_${preservedBlocks.length}__`;
+			preservedBlocks.push(`<pre><code class="language-${lang}">${escapeHtml(code.trim())}</code></pre>`);
+			return placeholder;
+		});
+
+		html = html.replace(/\$\$([\s\S]*?)\$\$/g, (match, math) => {
+			const placeholder = `__PRESERVED_BLOCK_${preservedBlocks.length}__`;
+			let rendered = '';
+			if (window.katex) {
+				try {
+					rendered = window.katex.renderToString(math.trim(), { displayMode: true, throwOnError: false });
+				} catch (e) {
+					rendered = `<div class="katex-display-box"><code>$$${escapeHtml(math.trim())}$$</code></div>`;
+				}
+			} else {
+				rendered = `<div class="katex-display-box"><code>$$${escapeHtml(math.trim())}$$</code></div>`;
+			}
+			preservedBlocks.push(rendered);
+			return placeholder;
+		});
+
+		html = html.replace(/\$([^\$\n]+?)\$/g, (match, math) => {
+			const placeholder = `__PRESERVED_BLOCK_${preservedBlocks.length}__`;
+			let rendered = '';
+			if (window.katex) {
+				try {
+					rendered = window.katex.renderToString(math.trim(), { displayMode: false, throwOnError: false });
+				} catch (e) {
+					rendered = `<code class="katex-inline-box">$${escapeHtml(math.trim())}$</code>`;
+				}
+			} else {
+				rendered = `<code class="katex-inline-box">$${escapeHtml(math.trim())}$</code>`;
+			}
+			preservedBlocks.push(rendered);
+			return placeholder;
+		});
+
+		html = html.replace(/`([^`\n]+)`/g, (match, code) => {
+			const placeholder = `__PRESERVED_BLOCK_${preservedBlocks.length}__`;
+			preservedBlocks.push(`<code>${escapeHtml(code)}</code>`);
+			return placeholder;
+		});
+
+		html = html.replace(/<span\s+class="([^"]+)">([\s\S]*?)<\/span>/gi, (match, cls, inner) => {
+			const placeholder = `__PRESERVED_BLOCK_${preservedBlocks.length}__`;
+			preservedBlocks.push(`<span class="${cls}">${inner}</span>`);
+			return placeholder;
+		});
+
+		html = html.replace(/<div\s+class="([^"]+)">([\s\S]*?)<\/div>/gi, (match, cls, inner) => {
+			const placeholder = `__PRESERVED_BLOCK_${preservedBlocks.length}__`;
+			preservedBlocks.push(`<div class="${cls}">${inner}</div>`);
+			return placeholder;
+		});
+
+		html = html.replace(/\b([a-zA-Z0-9_\(\)]+)\^(\d+|[a-zA-Z]|\{[^}]+\})/g, (match, base, exp) => {
+			const cleanExp = exp.startsWith('{') && exp.endsWith('}') ? exp.slice(1, -1) : exp;
+			return `${base}<sup>${cleanExp}</sup>`;
+		});
+
+		html = html.replace(/\b([a-zA-Z0-9_]+)_(\d+|[a-zA-Z]|\{[^}]+\})/g, (match, base, sub) => {
+			const cleanSub = sub.startsWith('{') && sub.endsWith('}') ? sub.slice(1, -1) : sub;
+			return `${base}<sub>${cleanSub}</sub>`;
+		});
+
+		html = html.replace(/\*\*\*([^*]+)\*\*\*/g, '<strong><em>$1</em></strong>');
+		html = html.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+		html = html.replace(/__([^_]+)__/g, '<strong>$1</strong>');
+		html = html.replace(/\*([^*]+)\*/g, '<em>$1</em>');
+		html = html.replace(/_([^_]+)_/g, '<em>$1</em>');
+		html = html.replace(/~~([^~]+)~~/g, '<del>$1</del>');
+
+		html = html.replace(/^### (.*$)/gim, '<h3>$1</h3>');
+		html = html.replace(/^## (.*$)/gim, '<h2>$1</h2>');
+		html = html.replace(/^# (.*$)/gim, '<h1>$1</h1>');
+
+		html = html.replace(/^> (.*$)/gim, '<blockquote>$1</blockquote>');
+		html = html.replace(/^(-{3,}|\*{3,}|_{3,})$/gim, '<hr>');
+
+		html = html.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener">$1</a>');
+
+		html = html.replace(/^(?:[\t ]*[-*] (.*(?:\n[\t ]+.*)*))+/gim, (match) => {
+			const items = match.trim().split(/\n[\t ]*[-*] /).map(s => s.replace(/^[-*] /, '').trim());
+			return `<ul>${items.map(i => `<li>${i}</li>`).join('')}</ul>`;
+		});
+
+		html = html.replace(/\n\n/g, '<br><br>');
+		html = html.replace(/\n/g, '<br>');
+
+		preservedBlocks.forEach((blockHtml, idx) => {
+			html = html.replace(`__PRESERVED_BLOCK_${idx}__`, blockHtml);
+		});
+
+		return html;
+	}
 
 	class ClippyViewController {
 		constructor() {
@@ -30,28 +140,42 @@
 
 			if (this.popupElement) return this.popupElement;
 
+			const uiTexts = (window.ClippyKnowledge && window.ClippyKnowledge.UI_TEXTS) || {
+				ariaAssistant: "Clippy Assistant",
+				headerTitle: "Clippy",
+				clearChatTitle: "Clear Chat History",
+				soundToggleTitle: "Toggle Sound",
+				closeTitle: "Close",
+				inputPlaceholder: "Chat with Clippy or enter a command...",
+				btnSend: "Send",
+				btnSnd: "[SND]",
+				btnMute: "[MUTE]",
+				btnClr: "[CLR]"
+			};
+
 			this.popupElement = document.createElement('div');
 			this.popupElement.id = 'clippy-popup';
 			this.popupElement.className = 'clippy-popup hidden';
 			this.popupElement.setAttribute('role', 'dialog');
-			this.popupElement.setAttribute('aria-label', 'Clippy Assistant');
+			this.popupElement.setAttribute('aria-label', uiTexts.ariaAssistant);
 
 			this.popupElement.innerHTML = `
 				<div class="clippy-popup-header">
 					<div class="clippy-header-left">
-						<img src="${IMAGE_BASE}${FACES.IDLE}" alt="Clippy" class="clippy-popup-avatar">
-						<span class="clippy-popup-title">Clippy</span>
+						<img src="${IMAGE_BASE}${FACES.IDLE}" alt="${uiTexts.headerTitle}" class="clippy-popup-avatar">
+						<span class="clippy-popup-title">${uiTexts.headerTitle}</span>
 					</div>
 					<div class="clippy-header-controls">
-						<button type="button" class="clippy-header-btn clippy-sound-toggle" title="Toggle Sound">[SND]</button>
-						<button type="button" class="clippy-popup-close" title="Close">&times;</button>
+						<button type="button" class="clippy-header-btn clippy-clear-chat" title="${uiTexts.clearChatTitle}">${uiTexts.btnClr}</button>
+						<button type="button" class="clippy-header-btn clippy-sound-toggle" title="${uiTexts.soundToggleTitle}">${uiTexts.btnSnd}</button>
+						<button type="button" class="clippy-popup-close" title="${uiTexts.closeTitle}">&times;</button>
 					</div>
 				</div>
 				<div class="clippy-popup-log"></div>
 				<div class="clippy-suggestions-bar"></div>
 				<div class="clippy-popup-input-row">
-					<input type="text" class="clippy-popup-input" placeholder="Chat with Clippy or enter a command...">
-					<button type="button" class="clippy-popup-send">Send</button>
+					<input type="text" class="clippy-popup-input" placeholder="${uiTexts.inputPlaceholder}">
+					<button type="button" class="clippy-popup-send">${uiTexts.btnSend}</button>
 				</div>
 			`;
 
@@ -66,6 +190,15 @@
 			const sendBtn = this.popupElement.querySelector('.clippy-popup-send');
 			const closeBtn = this.popupElement.querySelector('.clippy-popup-close');
 			const soundBtn = this.popupElement.querySelector('.clippy-sound-toggle');
+			const clearBtn = this.popupElement.querySelector('.clippy-clear-chat');
+
+			if (clearBtn) {
+				clearBtn.addEventListener('click', () => {
+					this.clearHistory();
+				});
+			}
+
+			this.loadChatHistory();
 
 			if (window.ClippyEnvironment === 'standalone') {
 				headerHandle.style.cursor = 'default';
@@ -164,14 +297,65 @@
 			});
 		}
 
+		saveChatHistory() {
+			if (!this.logElement) return;
+			try {
+				const messages = [];
+				const rows = this.logElement.querySelectorAll('.clippy-message');
+				rows.forEach(r => {
+					if (r.classList.contains('clippy-message-user')) {
+						messages.push({ role: 'user', html: r.innerHTML });
+					} else if (r.classList.contains('clippy-message-assistant')) {
+						messages.push({ role: 'assistant', html: r.innerHTML });
+					}
+				});
+				const payload = JSON.stringify(messages.slice(-30));
+				if (window.DeskStorage) window.DeskStorage.setItem(CHAT_STORAGE_KEY, payload);
+				else localStorage.setItem(CHAT_STORAGE_KEY, payload);
+			} catch (e) {}
+		}
+
+		loadChatHistory() {
+			if (!this.logElement) return;
+			try {
+				const raw = window.DeskStorage ? window.DeskStorage.getItem(CHAT_STORAGE_KEY) : localStorage.getItem(CHAT_STORAGE_KEY);
+				if (!raw) return;
+				const messages = JSON.parse(raw);
+				if (Array.isArray(messages) && messages.length > 0) {
+					this.logElement.innerHTML = '';
+					messages.forEach(m => {
+						const row = document.createElement('div');
+						row.className = `clippy-message clippy-message-${m.role}`;
+						row.innerHTML = m.html;
+						this.logElement.appendChild(row);
+					});
+					this.scrollLogToBottom();
+				}
+			} catch (e) {}
+		}
+
+		clearHistory() {
+			if (this.logElement) {
+				this.logElement.innerHTML = '';
+			}
+			if (window.DeskStorage) window.DeskStorage.removeItem(CHAT_STORAGE_KEY);
+			else localStorage.removeItem(CHAT_STORAGE_KEY);
+			if (window.ClippyBrain && typeof window.ClippyBrain.navigateGraphNode === 'function') {
+				const entry = window.ClippyBrain.navigateGraphNode('greeting_root');
+				const actions = window.ClippyBrain.buildGraphActions(entry.options);
+				this.appendAssistantMessage(entry.text, actions);
+			}
+		}
+
 		appendUserMessage(text) {
 			if (!this.logElement) return;
 			const row = document.createElement('div');
 			row.className = 'clippy-message clippy-message-user';
-			row.textContent = text;
+			row.innerHTML = parseMarkdown(text);
 			this.logElement.appendChild(row);
 			if (this.inputElement) this.inputElement.value = '';
 			this.scrollLogToBottom();
+			this.saveChatHistory();
 		}
 
 		createActivityCard(title, badgeText = 'Activity') {
@@ -210,27 +394,28 @@
 		appendAssistantMessage(text, actions = null, onComplete = null) {
 			if (!this.logElement) return;
 			if (this.currentTypeInterval) {
-				clearInterval(this.currentTypeInterval);
+				clearTimeout(this.currentTypeInterval);
 				this.currentTypeInterval = null;
+				if (this.activeMessageFinalizer) {
+					this.activeMessageFinalizer();
+					this.activeMessageFinalizer = null;
+				}
 			}
+
+			const messageContainer = document.createElement('div');
+			messageContainer.className = 'clippy-assistant-wrapper';
 
 			const row = document.createElement('div');
 			row.className = 'clippy-message clippy-message-assistant';
-			this.logElement.appendChild(row);
+			messageContainer.appendChild(row);
+			this.logElement.appendChild(messageContainer);
 
 			this.isTyping = true;
 			this.setVisualState('talk');
 			const targetText = String(text || '');
+			const parsedTarget = parseMarkdown(targetText);
 
-			const finalizeMessage = () => {
-				if (this.currentTypeInterval) {
-					clearInterval(this.currentTypeInterval);
-					this.currentTypeInterval = null;
-				}
-				row.innerHTML = targetText;
-				this.isTyping = false;
-				this.setVisualState('idle');
-
+			const attachActions = () => {
 				if (actions && Array.isArray(actions) && actions.length > 0) {
 					const btnBar = document.createElement('div');
 					btnBar.className = 'clippy-actions-bar';
@@ -245,56 +430,237 @@
 						});
 						btnBar.appendChild(actBtn);
 					});
-					this.logElement.appendChild(btnBar);
+					messageContainer.appendChild(btnBar);
 					this.scrollLogToBottom();
 				}
+			};
 
+			let isFinalized = false;
+			const finalizeMessage = (renderedContent) => {
+				if (isFinalized) return;
+				isFinalized = true;
+				if (this.currentTypeInterval) {
+					clearTimeout(this.currentTypeInterval);
+					this.currentTypeInterval = null;
+				}
+				this.activeMessageFinalizer = null;
+				row.innerHTML = renderedContent;
+				this.isTyping = false;
+				this.setVisualState('idle');
+				attachActions();
+				this.saveChatHistory();
+				this.scrollLogToBottom();
 				if (onComplete) onComplete();
 			};
 
-			if (targetText.length > 350 || targetText.includes('<table') || targetText.includes('<div class="clippy-profile-card">')) {
-				finalizeMessage();
+			this.activeMessageFinalizer = () => finalizeMessage(parsedTarget);
+
+			if (parsedTarget.length > 400 || parsedTarget.includes('<table') || parsedTarget.includes('clippy-activity-card') || parsedTarget.includes('clippy-profile-card')) {
+				finalizeMessage(parsedTarget);
 				return;
 			}
 
 			const tokens = [];
-			let i = 0;
-			while (i < targetText.length) {
-				if (targetText[i] === '<') {
-					const closeIdx = targetText.indexOf('>', i);
+			let cursor = 0;
+			while (cursor < parsedTarget.length) {
+				if (parsedTarget.substring(cursor).startsWith('<span class="katex') || parsedTarget.substring(cursor).startsWith('<div class="katex') || parsedTarget.substring(cursor).startsWith('<pre><code')) {
+					const endToken = parsedTarget.substring(cursor).startsWith('<pre><code') ? '</code></pre>' : (parsedTarget.substring(cursor).startsWith('<div') ? '</div>' : '</span>');
+					const closeIdx = parsedTarget.indexOf(endToken, cursor);
 					if (closeIdx !== -1) {
-						tokens.push({ type: 'tag', value: targetText.substring(i, closeIdx + 1) });
-						i = closeIdx + 1;
+						const fullBlock = parsedTarget.substring(cursor, closeIdx + endToken.length);
+						tokens.push({ type: 'atomic', value: fullBlock });
+						cursor = closeIdx + endToken.length;
 						continue;
 					}
 				}
-				tokens.push({ type: 'char', value: targetText[i] });
-				i++;
+				if (parsedTarget[cursor] === '<') {
+					const closeIdx = parsedTarget.indexOf('>', cursor);
+					if (closeIdx !== -1) {
+						tokens.push({ type: 'tag', value: parsedTarget.substring(cursor, closeIdx + 1) });
+						cursor = closeIdx + 1;
+						continue;
+					}
+				}
+				if (parsedTarget[cursor] === '&') {
+					const closeIdx = parsedTarget.indexOf(';', cursor);
+					if (closeIdx !== -1 && closeIdx - cursor <= 10) {
+						tokens.push({ type: 'entity', value: parsedTarget.substring(cursor, closeIdx + 1) });
+						cursor = closeIdx + 1;
+						continue;
+					}
+				}
+				tokens.push({ type: 'char', value: parsedTarget[cursor] });
+				cursor++;
 			}
+
+			const mood = window.ClippyBrain ? window.ClippyBrain.getMood() : 'OPTIMISTIC';
+			const profiles = (window.ClippyKnowledge && window.ClippyKnowledge.TYPING_PROFILES) || {};
+			const profile = profiles[mood] || profiles.OPTIMISTIC || {
+				baseSpeed: 16, variance: 6, typoRate: 0.008, uncorrectedRate: 0.05, maxLag: 2, correctionErrorRate: 0.03, pauseMult: 1.0
+			};
+
+			const memory = window.ClippyBrain ? window.ClippyBrain.memory : null;
+			const brainState = window.ClippyBrain ? window.ClippyBrain.state : null;
+			const now = Date.now();
+			const timeElapsedSinceLast = brainState && brainState.lastInteractionTime ? Math.max(0, (now - brainState.lastInteractionTime) / 1000) : 0;
+			const totalDiscussionTurns = brainState ? (brainState.turnCount || 0) : 0;
+			const userAvgResponseTime = (memory && memory.userResponseTimeStats && memory.userResponseTimeStats.median) || 4.0;
+			const suggestionPreference = (memory && memory.inputModeStats && memory.inputModeStats.suggestionRatio) || 0.5;
+
+			const charTokens = tokens.filter(t => t.type === 'char');
+			const charCount = charTokens.length;
+			const wordCount = charTokens.filter(t => t.value === ' ').length + 1;
+			const sentenceMatches = targetText.match(/[^.!?]+[.!?]+(\s|$)/g) || [targetText];
+			const sentenceCount = Math.max(1, sentenceMatches.length);
+
+			let dynamicBaseSpeed = profile.baseSpeed;
+			if (charCount > 180) dynamicBaseSpeed *= 0.82;
+			else if (charCount < 35) dynamicBaseSpeed *= 1.18;
+
+			if (wordCount > 30) dynamicBaseSpeed *= 0.88;
+			else if (wordCount < 8) dynamicBaseSpeed *= 1.10;
+
+			if (sentenceCount > 3) dynamicBaseSpeed *= 0.90;
+			if (totalDiscussionTurns > 12) dynamicBaseSpeed *= 0.94;
+			if (timeElapsedSinceLast > 90) dynamicBaseSpeed *= 1.12;
+
+			if (userAvgResponseTime < 2.5) dynamicBaseSpeed *= 0.85;
+			else if (userAvgResponseTime > 15) dynamicBaseSpeed *= 1.15;
+
+			if (suggestionPreference > 0.7) dynamicBaseSpeed *= 0.92;
+			else if (suggestionPreference < 0.3) dynamicBaseSpeed *= 1.05;
+
+			const keyboardNeighbors = (window.ClippyKnowledge && window.ClippyKnowledge.KEYBOARD_NEIGHBORS) || {};
 
 			let currentTokenIndex = 0;
 			let accumulatedHtml = '';
+			let pendingCorrectionQueue = null;
 
-			this.currentTypeInterval = setInterval(() => {
-				if (currentTokenIndex < tokens.length) {
-					const token = tokens[currentTokenIndex];
+			const typeNext = () => {
+				if (pendingCorrectionQueue) {
+					const step = pendingCorrectionQueue.shift();
+					if (step) {
+						accumulatedHtml = step.html;
+						row.innerHTML = accumulatedHtml;
+						if (step.sound && window.ClippyAudio) window.ClippyAudio.play(step.sound);
+						this.scrollLogToBottom();
+						this.currentTypeInterval = setTimeout(typeNext, step.delay);
+						return;
+					}
+					pendingCorrectionQueue = null;
+				}
+
+				if (currentTokenIndex >= tokens.length) {
+					finalizeMessage(parsedTarget);
+					return;
+				}
+
+				const token = tokens[currentTokenIndex];
+
+				if (token.type === 'tag' || token.type === 'atomic' || token.type === 'entity') {
 					accumulatedHtml += token.value;
 					currentTokenIndex++;
-
-					while (currentTokenIndex < tokens.length && tokens[currentTokenIndex].type === 'tag') {
-						accumulatedHtml += tokens[currentTokenIndex].value;
-						currentTokenIndex++;
-					}
-
 					row.innerHTML = accumulatedHtml;
-					if (currentTokenIndex % 4 === 0 && window.ClippyAudio) {
-						window.ClippyAudio.play('type');
-					}
 					this.scrollLogToBottom();
-				} else {
-					finalizeMessage();
+					this.currentTypeInterval = setTimeout(typeNext, 4);
+					return;
 				}
-			}, TYPEWRITER_SPEED_MS);
+
+				const char = token.value;
+				const lower = char.toLowerCase();
+
+				const shouldTriggerTypo = Math.random() < profile.typoRate && keyboardNeighbors[lower] && currentTokenIndex > 4 && currentTokenIndex < tokens.length - 6;
+
+				if (shouldTriggerTypo) {
+					const neighbors = keyboardNeighbors[lower];
+					const wrongChar = neighbors.charAt(Math.floor(Math.random() * neighbors.length));
+					const typedWrong = (char === char.toUpperCase()) ? wrongChar.toUpperCase() : wrongChar;
+
+					const isUncorrected = Math.random() < profile.uncorrectedRate;
+					if (isUncorrected) {
+						accumulatedHtml += typedWrong;
+						currentTokenIndex++;
+						row.innerHTML = accumulatedHtml;
+						if (window.ClippyAudio) window.ClippyAudio.play('type');
+						this.scrollLogToBottom();
+						this.currentTypeInterval = setTimeout(typeNext, dynamicBaseSpeed);
+						return;
+					}
+
+					const isTargetedCorrection = Math.random() < (profile.targetedCorrectionRate || 0.20);
+					const lag = isTargetedCorrection ? 0 : Math.min(profile.maxLag || 3, Math.floor(Math.random() * (profile.maxLag || 3)) + 1);
+					const futureChars = [];
+					for (let f = 1; f <= lag && (currentTokenIndex + f) < tokens.length; f++) {
+						if (tokens[currentTokenIndex + f].type === 'char') {
+							futureChars.push(tokens[currentTokenIndex + f].value);
+						}
+					}
+
+					const queue = [];
+					let tempHtml = accumulatedHtml + typedWrong;
+					queue.push({ html: tempHtml, delay: dynamicBaseSpeed, sound: 'type' });
+
+					futureChars.forEach(fc => {
+						tempHtml += fc;
+						queue.push({ html: tempHtml, delay: dynamicBaseSpeed * 0.95, sound: 'type' });
+					});
+
+					const hesitationDelay = 140 + Math.random() * 180;
+					queue.push({ html: tempHtml, delay: hesitationDelay, sound: null });
+
+					if (isTargetedCorrection && futureChars.length === 0) {
+						tempHtml = accumulatedHtml;
+						queue.push({ html: tempHtml, delay: 60, sound: 'backspace' });
+					} else {
+						for (let b = 0; b < futureChars.length + 1; b++) {
+							tempHtml = tempHtml.slice(0, -1);
+							queue.push({ html: tempHtml, delay: 45 + Math.random() * 30, sound: 'backspace' });
+						}
+					}
+
+					const makeCorrectionTypo = Math.random() < (profile.correctionErrorRate || 0.04);
+					if (makeCorrectionTypo) {
+						const secondWrong = neighbors.charAt(Math.floor(Math.random() * neighbors.length));
+						tempHtml += secondWrong;
+						queue.push({ html: tempHtml, delay: dynamicBaseSpeed + 20, sound: 'type' });
+						tempHtml = tempHtml.slice(0, -1);
+						queue.push({ html: tempHtml, delay: 55, sound: 'backspace' });
+					}
+
+					tempHtml += char;
+					queue.push({ html: tempHtml, delay: dynamicBaseSpeed + 35, sound: 'type' });
+
+					pendingCorrectionQueue = queue;
+					currentTokenIndex++;
+					typeNext();
+					return;
+				}
+
+				accumulatedHtml += char;
+				currentTokenIndex++;
+				row.innerHTML = accumulatedHtml;
+
+				let delay = dynamicBaseSpeed + (Math.random() * (profile.variance * 2) - profile.variance);
+
+				const sentPause = profile.sentencePauseMult || 1.3;
+				const qPause = profile.interrogativePauseMult || 1.2;
+				const exPause = profile.exclamativePauseMult || 0.85;
+
+				if (char === '.' || char === '…') delay += 170 * profile.pauseMult * sentPause;
+				else if (char === '?') delay += 160 * profile.pauseMult * qPause;
+				else if (char === '!') delay += 130 * profile.pauseMult * exPause;
+				else if (char === ',' || char === ';' || char === ':') delay += 85 * profile.pauseMult;
+				else if (char === ' ') delay += 22 * profile.pauseMult;
+
+				if (currentTokenIndex % 2 === 0 && window.ClippyAudio) {
+					window.ClippyAudio.play('type');
+				}
+				this.scrollLogToBottom();
+
+				this.currentTypeInterval = setTimeout(typeNext, Math.max(3, delay));
+			};
+
+			typeNext();
 		}
 
 		ensureBubble() {
@@ -370,14 +736,26 @@
 		renderSuggestions(customSuggestions = null) {
 			if (!this.suggestionsContainer) return;
 			this.suggestionsContainer.innerHTML = '';
-			const pool = customSuggestions || (window.ClippyKnowledge && window.ClippyKnowledge.QUICK_SUGGESTIONS) || [];
-			pool.slice(0, 10).forEach(sug => {
+			const maxCount = (window.SettingsApp && window.SettingsApp.get('clippyMaxSuggestions')) || 8;
+			const shouldRandomize = (window.SettingsApp && window.SettingsApp.get('clippySuggestionsRandomize') !== false);
+			const fullPool = customSuggestions || (window.ClippyKnowledge && window.ClippyKnowledge.QUICK_SUGGESTIONS) || [];
+			
+			let selectedPool = [];
+			if (customSuggestions) {
+				selectedPool = customSuggestions.slice(0, maxCount);
+			} else if (shouldRandomize) {
+				selectedPool = [...fullPool].sort(() => Math.random() - 0.5).slice(0, maxCount);
+			} else {
+				selectedPool = fullPool.slice(0, maxCount);
+			}
+
+			selectedPool.forEach(sug => {
 				const chip = document.createElement('button');
 				chip.type = 'button';
 				chip.className = 'clippy-suggestion-chip';
 				chip.textContent = sug;
 				chip.addEventListener('click', () => {
-					if (this.onSendHandler) this.onSendHandler(sug);
+					if (this.onSendHandler) this.onSendHandler(sug, true);
 				});
 				this.suggestionsContainer.appendChild(chip);
 			});
