@@ -1589,6 +1589,9 @@
 			const entry = window.ClippyBrain.navigateGraphNode('greeting_root');
 			const actions = window.ClippyBrain.buildGraphActions(entry.options);
 			window.ClippyUI.appendAssistantMessage(entry.text, actions);
+			if (entry.options && Array.isArray(entry.options) && entry.options.length > 0) {
+				window.ClippyUI.updateSuggestions(entry.options.map(o => o.label));
+			}
 		}
 	}
 
@@ -1715,7 +1718,17 @@
 		notifyGameEnded,
 		notify: (text) => window.ClippyUI.showIdleBubble(text),
 		selectGraphOption: (opt) => {
-			if (!opt || isThinking || (window.ClippyUI && window.ClippyUI.isTyping)) return;
+			if (!opt || isThinking) return;
+			if (window.ClippyUI && window.ClippyUI.isTyping && window.ClippyUI.currentTypeInterval) {
+				clearTimeout(window.ClippyUI.currentTypeInterval);
+				window.ClippyUI.currentTypeInterval = null;
+				if (window.ClippyUI.activeMessageFinalizer) {
+					window.ClippyUI.activeMessageFinalizer();
+					window.ClippyUI.activeMessageFinalizer = null;
+				}
+				window.ClippyUI.isTyping = false;
+			}
+
 			const userLabel = opt.label || "Continue...";
 			window.ClippyUI.appendUserMessage(userLabel);
 			isThinking = true;

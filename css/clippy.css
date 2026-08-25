@@ -1033,20 +1033,28 @@
 }
 
 .clippy-mines-face {
-	width: 24px;
+	min-width: 32px;
 	height: 24px;
 	background: #ece9d8;
 	border: 2px outset #ffffff;
 	border-color: #ffffff #808080 #808080 #ffffff;
 	cursor: pointer;
-	font-size: 14px;
+	font-size: 12px;
+	font-family: 'Lucida Console', 'Trebuchet MS', sans-serif;
+	font-weight: bold;
 	display: flex;
 	align-items: center;
 	justify-content: center;
+	white-space: nowrap;
+	line-height: 1;
+	padding: 0 4px;
+	flex-shrink: 0;
+	user-select: none;
 }
 
 .clippy-mines-face:active {
 	border-color: #808080 #ffffff #ffffff #808080;
+	background: #e0ded0;
 }
 
 .clippy-mines-grid {
@@ -1211,6 +1219,9 @@
 	border: 1px solid #cbd5e1;
 	border-radius: 4px;
 	padding: 8px;
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
 }
 
 .clippy-pet-row {
@@ -1218,16 +1229,16 @@
 	align-items: center;
 	justify-content: space-between;
 	font-size: 11px;
-	margin-bottom: 3px;
+	margin-bottom: 2px;
 }
 
 .clippy-pet-bar {
-	height: 8px;
+	height: 9px;
 	background: #f1f5f9;
 	border: 1px inset #cbd5e1;
-	border-radius: 3px;
+	border-radius: 2px;
 	overflow: hidden;
-	margin-bottom: 5px;
+	margin-bottom: 4px;
 }
 
 .clippy-pet-bar-fill {
@@ -1245,6 +1256,34 @@
 
 .clippy-pet-bar-fill.happiness {
 	background: linear-gradient(to right, #06b6d4, #3b82f6);
+}
+
+.clippy-pet-bar-fill.integrity {
+	background: linear-gradient(to right, #6366f1, #10b981);
+}
+
+.clippy-pet-badges-grid {
+	display: grid;
+	grid-template-columns: repeat(2, 1fr);
+	gap: 4px;
+	margin-top: 4px;
+	padding-top: 4px;
+	border-top: 1px dotted #cbd5e1;
+}
+
+.clippy-pet-stat-badge {
+	display: flex;
+	justify-content: space-between;
+	font-size: 10px;
+	color: #475569;
+	background: #f8fafc;
+	padding: 2px 4px;
+	border: 1px solid #e2e8f0;
+	border-radius: 2px;
+}
+
+.clippy-actions-bar.clippy-actions-stale {
+	display: none !important;
 }
 
 .clippy-win-list,

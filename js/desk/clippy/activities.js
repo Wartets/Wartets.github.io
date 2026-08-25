@@ -1195,9 +1195,10 @@
 			const flagsUsed = this.flagged.filter(Boolean).length;
 			const header = document.createElement('div');
 			header.className = 'clippy-mines-header';
+			const faceLabel = this.isWon ? 'B-)' : (this.isGameOver ? 'X-X' : ':-)');
 			header.innerHTML = `
 				<div class="clippy-mines-lcd">${String(Math.max(0, this.mineCount - flagsUsed)).padStart(3, '0')}</div>
-				<button type="button" class="clippy-mines-face">${this.isWon ? 'B-)' : (this.isGameOver ? 'X(' : ':-)')}</button>
+				<button type="button" class="clippy-mines-face">${faceLabel}</button>
 				<div class="clippy-mines-lcd">036</div>
 			`;
 			header.querySelector('.clippy-mines-face').addEventListener('click', () => {
@@ -1650,77 +1651,189 @@
 		constructor() {
 			this.pet = null;
 			this.card = null;
+			this.cooldowns = {
+				feed: 0,
+				polish: 0,
+				sleep: 0
+			};
 		}
 
 		mount() {
 			this.pet = ActivitiesManager.getPetState();
 			const txt = (window.ClippyKnowledge && typeof window.ClippyKnowledge.getActivityConfig === 'function')
 				? window.ClippyKnowledge.getActivityConfig('pet')
-				: ((window.ClippyKnowledge && window.ClippyKnowledge.ACTIVITIES_TEXTS && window.ClippyKnowledge.ACTIVITIES_TEXTS.pet) || { title: 'Assistant Metrics', badge: 'Clippit Tamagotchi' });
-			this.card = window.ClippyUI.createActivityCard(txt.title || 'Assistant Metrics', txt.badge || 'Clippit Tamagotchi');
+				: ((window.ClippyKnowledge && window.ClippyKnowledge.ACTIVITIES_TEXTS && window.ClippyKnowledge.ACTIVITIES_TEXTS.pet) || { title: 'Assistant Metrics & Vitals', badge: 'Assistant Tamagotchi' });
+			this.card = window.ClippyUI.createActivityCard(txt.title || 'Assistant Metrics & Vitals', txt.badge || 'Assistant Tamagotchi');
 			this.render();
 		}
 
+		getRemainingCooldown(actionKey) {
+			const now = Date.now();
+			const target = this.cooldowns[actionKey] || 0;
+			return Math.max(0, Math.ceil((target - now) / 1000));
+		}
+
+		setCooldown(actionKey, seconds) {
+			this.cooldowns[actionKey] = Date.now() + (seconds * 1000);
+		}
+
 		feed() {
-			this.pet.hunger = Math.max(0, this.pet.hunger - 40);
-			this.pet.happiness = Math.min(100, this.pet.happiness + 15);
-			this.pet.xp += 15;
-			ActivitiesManager.savePetState(this.pet);
-			if (window.ClippyAudio) window.ClippyAudio.play('win');
+			const cd = this.getRemainingCooldown('feed');
 			const txt = (window.ClippyKnowledge && typeof window.ClippyKnowledge.getActivityConfig === 'function')
 				? window.ClippyKnowledge.getActivityConfig('pet')
 				: ((window.ClippyKnowledge && window.ClippyKnowledge.ACTIVITIES_TEXTS && window.ClippyKnowledge.ACTIVITIES_TEXTS.pet) || {});
-			this.render(txt.noticeFeed || 'Paperclips supplied! Reserves replenished (+15 XP).');
+
+			if (cd > 0) {
+				const cdNotice = window.ClippyKnowledge && window.ClippyKnowledge.formatString
+					? window.ClippyKnowledge.formatString(txt.noticeCooldown || "Please wait {seconds}s before feeding again.", { seconds: cd })
+					: `Please wait ${cd}s before feeding again.`;
+				this.render(cdNotice, 'loss');
+				return;
+			}
+
+			if (this.pet.hunger <= 0) {
+				this.pet.xp += 2;
+				this.setCooldown('feed', 6);
+				ActivitiesManager.savePetState(this.pet);
+				this.render(txt.noticeFeedFull || "Reserves are already full! Clippit does not need more paperclips right now (+2 XP).", 'info');
+				return;
+			}
+
+			const hungerRelief = Math.min(35, this.pet.hunger);
+			this.pet.hunger = Math.max(0, this.pet.hunger - hungerRelief);
+			this.pet.happiness = Math.min(100, this.pet.happiness + 12);
+			this.pet.xp += 15;
+			this.pet.totalFeeds = (this.pet.totalFeeds || 0) + 1;
+			this.setCooldown('feed', 8);
+
+			if (window.ClippyBrain) {
+				window.ClippyBrain.applyMoodDelta({ energy: 8, affinity: 4, irritation: -6 });
+			}
+
+			ActivitiesManager.savePetState(this.pet);
+			if (window.ClippyAudio) window.ClippyAudio.play('win');
+			this.render(txt.noticeFeed || "Paperclips supplied! Metal reserves replenished (+15 XP).", 'win');
 		}
 
 		polish() {
-			this.pet.happiness = Math.min(100, this.pet.happiness + 25);
-			this.pet.xp += 10;
-			ActivitiesManager.savePetState(this.pet);
-			if (window.ClippyAudio) window.ClippyAudio.play('action');
+			const cd = this.getRemainingCooldown('polish');
 			const txt = (window.ClippyKnowledge && typeof window.ClippyKnowledge.getActivityConfig === 'function')
 				? window.ClippyKnowledge.getActivityConfig('pet')
 				: ((window.ClippyKnowledge && window.ClippyKnowledge.ACTIVITIES_TEXTS && window.ClippyKnowledge.ACTIVITIES_TEXTS.pet) || {});
-			this.render(txt.noticePolish || 'Wire polished! Morale increased (+10 XP).');
+
+			if (cd > 0) {
+				const cdNotice = window.ClippyKnowledge && window.ClippyKnowledge.formatString
+					? window.ClippyKnowledge.formatString(txt.noticeCooldown || "Please wait {seconds}s before polishing again.", { seconds: cd })
+					: `Please wait ${cd}s before polishing again.`;
+				this.render(cdNotice, 'loss');
+				return;
+			}
+
+			if (this.pet.luster >= 100) {
+				this.pet.xp += 2;
+				this.setCooldown('polish', 6);
+				ActivitiesManager.savePetState(this.pet);
+				this.render(txt.noticePolishClean || "Wire is already completely spotless and shining (+2 XP)!", 'info');
+				return;
+			}
+
+			this.pet.luster = Math.min(100, (this.pet.luster || 70) + 25);
+			this.pet.happiness = Math.min(100, this.pet.happiness + 15);
+			this.pet.xp += 12;
+			this.pet.totalPolishes = (this.pet.totalPolishes || 0) + 1;
+			this.setCooldown('polish', 10);
+
+			if (window.ClippyBrain) {
+				window.ClippyBrain.applyMoodDelta({ affinity: 8, patience: 8, irritation: -8 });
+			}
+
+			ActivitiesManager.savePetState(this.pet);
+			if (window.ClippyAudio) window.ClippyAudio.play('action');
+			this.render(txt.noticePolish || "Wire polished with jeweler's cloth! Luster maximized (+12 XP).", 'win');
 		}
 
 		sleep() {
-			this.pet.energy = 100;
-			this.pet.hunger = Math.min(100, this.pet.hunger + 10);
-			this.pet.xp += 10;
-			ActivitiesManager.savePetState(this.pet);
-			if (window.ClippyAudio) window.ClippyAudio.play('action');
+			const cd = this.getRemainingCooldown('sleep');
 			const txt = (window.ClippyKnowledge && typeof window.ClippyKnowledge.getActivityConfig === 'function')
 				? window.ClippyKnowledge.getActivityConfig('pet')
 				: ((window.ClippyKnowledge && window.ClippyKnowledge.ACTIVITIES_TEXTS && window.ClippyKnowledge.ACTIVITIES_TEXTS.pet) || {});
-			this.render(txt.noticeSleep || 'Low-power standby complete. Battery restored to 100%.');
+
+			if (cd > 0) {
+				const cdNotice = window.ClippyKnowledge && window.ClippyKnowledge.formatString
+					? window.ClippyKnowledge.formatString(txt.noticeCooldown || "Please wait {seconds}s before entering standby again.", { seconds: cd })
+					: `Please wait ${cd}s before entering standby again.`;
+				this.render(cdNotice, 'loss');
+				return;
+			}
+
+			if (this.pet.energy >= 95) {
+				this.pet.xp += 2;
+				this.setCooldown('sleep', 8);
+				ActivitiesManager.savePetState(this.pet);
+				this.render(txt.noticeSleepFull || "Capacitance is already at maximum! Clippy is fully energized (+2 XP).", 'info');
+				return;
+			}
+
+			this.pet.energy = 100;
+			this.pet.hunger = Math.min(100, this.pet.hunger + 8);
+			this.pet.xp += 15;
+			this.pet.totalSleeps = (this.pet.totalSleeps || 0) + 1;
+			this.setCooldown('sleep', 15);
+
+			if (window.ClippyBrain) {
+				window.ClippyBrain.applyMoodDelta({ fatigue: -35, energy: 35, patience: 15 });
+			}
+
+			ActivitiesManager.savePetState(this.pet);
+			if (window.ClippyAudio) window.ClippyAudio.play('action');
+			this.render(txt.noticeSleep || "Deep C3 low-power standby completed! Capacitors recharged to 100% (+15 XP).", 'win');
 		}
 
-		render(notice = '') {
+		getTitleForLevel(level) {
+			const txt = (window.ClippyKnowledge && window.ClippyKnowledge.ACTIVITIES_TEXTS && window.ClippyKnowledge.ACTIVITIES_TEXTS.pet) || {};
+			const titles = txt.levelTitles || [
+				"Wire Novice", "Polished Assistant", "Silicon Specialist", "Vector Companion",
+				"System Optimist", "Heuristic Navigator", "Logic Guardian", "Master of Fasteners",
+				"High-Performance Agent", "Grand Desktop Architect"
+			];
+			const idx = Math.max(0, Math.min(titles.length - 1, (level || 1) - 1));
+			return titles[idx];
+		}
+
+		render(notice = '', bannerType = 'win') {
 			if (!this.card) return;
 			const body = this.card.bodyElement;
 			body.innerHTML = '';
+
+			const currentMood = (window.ClippyBrain && typeof window.ClippyBrain.getMood === 'function') ? window.ClippyBrain.getMood() : 'OPTIMISTIC';
+			const currentPatience = (window.ClippyBrain && typeof window.ClippyBrain.getPatience === 'function') ? window.ClippyBrain.getPatience() : 60;
+			const currentAffinity = (window.ClippyBrain && typeof window.ClippyBrain.getAffinity === 'function') ? window.ClippyBrain.getAffinity() : 50;
 
 			const txt = (window.ClippyKnowledge && typeof window.ClippyKnowledge.getActivityConfig === 'function')
 				? window.ClippyKnowledge.getActivityConfig('pet')
 				: ((window.ClippyKnowledge && window.ClippyKnowledge.ACTIVITIES_TEXTS && window.ClippyKnowledge.ACTIVITIES_TEXTS.pet) || {
 					scoreLevel: "Level", scoreXp: "XP", scoreHealth: "Health", healthNominal: "Nominal",
-					moraleLabel: "Morale:", energyLabel: "Energy:", depletionLabel: "Depletion:",
+					moraleLabel: "Morale:", energyLabel: "Capacitance:", depletionLabel: "Depletion:",
+					oxidationLabel: "Wire Luster:", statusTitleLabel: "Classification:",
 					btnFeed: "Supply Paperclips", btnPolish: "Polish Metal Wire", btnSleep: "Standby Mode"
 				});
+
+			const xpRequired = this.pet.level * 60;
+			const xpPercent = Math.min(100, Math.round((this.pet.xp / xpRequired) * 100));
+			const currentTitle = this.getTitleForLevel(this.pet.level);
 
 			const scoreboard = document.createElement('div');
 			scoreboard.className = 'clippy-scoreboard';
 			scoreboard.innerHTML = `
-				<div class="clippy-score-item"><span>${txt.scoreLevel}</span><strong>${this.pet.level}</strong></div>
-				<div class="clippy-score-item"><span>${txt.scoreXp}</span><strong>${this.pet.xp} / ${this.pet.level * 50}</strong></div>
+				<div class="clippy-score-item"><span>${txt.scoreLevel}</span><strong>Lv.${this.pet.level}</strong></div>
+				<div class="clippy-score-item"><span>${txt.scoreXp}</span><strong>${this.pet.xp} / ${xpRequired}</strong></div>
 				<div class="clippy-score-item"><span>${txt.scoreHealth}</span><strong>${txt.healthNominal}</strong></div>
 			`;
 			body.appendChild(scoreboard);
 
 			if (notice) {
 				const banner = document.createElement('div');
-				banner.className = 'clippy-activity-banner win';
+				banner.className = `clippy-activity-banner ${bannerType}`;
 				banner.textContent = notice;
 				body.appendChild(banner);
 			}
@@ -1728,12 +1841,22 @@
 			const meter = document.createElement('div');
 			meter.className = 'clippy-pet-meter';
 			meter.innerHTML = `
+				<div class="clippy-pet-row"><span>${txt.statusTitleLabel || 'Classification:'}</span><strong>${currentTitle}</strong></div>
+				<div class="clippy-pet-bar"><div class="clippy-pet-bar-fill xp" style="width:${xpPercent}%; background: linear-gradient(to right, #8b5cf6, #3b82f6);"></div></div>
 				<div class="clippy-pet-row"><span>${txt.moraleLabel}</span><strong>${this.pet.happiness}%</strong></div>
 				<div class="clippy-pet-bar"><div class="clippy-pet-bar-fill happiness" style="width:${this.pet.happiness}%"></div></div>
 				<div class="clippy-pet-row"><span>${txt.energyLabel}</span><strong>${this.pet.energy}%</strong></div>
 				<div class="clippy-pet-bar"><div class="clippy-pet-bar-fill energy" style="width:${this.pet.energy}%"></div></div>
 				<div class="clippy-pet-row"><span>${txt.depletionLabel}</span><strong>${this.pet.hunger}%</strong></div>
 				<div class="clippy-pet-bar"><div class="clippy-pet-bar-fill hunger" style="width:${this.pet.hunger}%"></div></div>
+				<div class="clippy-pet-row"><span>${txt.oxidationLabel || 'Wire Luster:'}</span><strong>${this.pet.luster || 75}%</strong></div>
+				<div class="clippy-pet-bar"><div class="clippy-pet-bar-fill luster" style="width:${this.pet.luster || 75}%; background: linear-gradient(to right, #fbbf24, #10b981);"></div></div>
+				<div class="clippy-pet-badges-grid">
+					<div class="clippy-pet-stat-badge"><span>Mood:</span><strong>${currentMood}</strong></div>
+					<div class="clippy-pet-stat-badge"><span>Affinity:</span><strong>${currentAffinity}%</strong></div>
+					<div class="clippy-pet-stat-badge"><span>Patience:</span><strong>${currentPatience}%</strong></div>
+					<div class="clippy-pet-stat-badge"><span>Care Streak:</span><strong>${(this.pet.totalFeeds || 0) + (this.pet.totalPolishes || 0)} actions</strong></div>
+				</div>
 			`;
 			body.appendChild(meter);
 
@@ -1743,21 +1866,27 @@
 			const feedBtn = document.createElement('button');
 			feedBtn.type = 'button';
 			feedBtn.className = 'clippy-action-btn';
-			feedBtn.textContent = txt.btnFeed;
+			const feedCd = this.getRemainingCooldown('feed');
+			feedBtn.textContent = feedCd > 0 ? `${txt.btnFeed} (${feedCd}s)` : txt.btnFeed;
+			feedBtn.disabled = feedCd > 0;
 			feedBtn.addEventListener('click', () => this.feed());
 			actions.appendChild(feedBtn);
 
 			const polishBtn = document.createElement('button');
 			polishBtn.type = 'button';
 			polishBtn.className = 'clippy-action-btn';
-			polishBtn.textContent = txt.btnPolish;
+			const polishCd = this.getRemainingCooldown('polish');
+			polishBtn.textContent = polishCd > 0 ? `${txt.btnPolish} (${polishCd}s)` : txt.btnPolish;
+			polishBtn.disabled = polishCd > 0;
 			polishBtn.addEventListener('click', () => this.polish());
 			actions.appendChild(polishBtn);
 
 			const sleepBtn = document.createElement('button');
 			sleepBtn.type = 'button';
 			sleepBtn.className = 'clippy-action-btn';
-			sleepBtn.textContent = txt.btnSleep;
+			const sleepCd = this.getRemainingCooldown('sleep');
+			sleepBtn.textContent = sleepCd > 0 ? `${txt.btnSleep} (${sleepCd}s)` : txt.btnSleep;
+			sleepBtn.disabled = sleepCd > 0;
 			sleepBtn.addEventListener('click', () => this.sleep());
 			actions.appendChild(sleepBtn);
 
@@ -3489,29 +3618,35 @@
 		getPetState() {
 			try {
 				const now = Date.now();
-				const defaultPet = { hunger: 30, energy: 85, happiness: 85, level: 1, xp: 15, lastUpdate: now };
+				const defaultPet = { hunger: 25, energy: 90, happiness: 85, luster: 80, level: 1, xp: 15, totalFeeds: 0, totalPolishes: 0, totalSleeps: 0, lastUpdate: now };
 				const raw = window.DeskStorage ? window.DeskStorage.getItem(STORAGE_KEY_PET) : localStorage.getItem(STORAGE_KEY_PET);
 				let pet = raw ? JSON.parse(raw) : defaultPet;
 
-				const elapsedMinutes = Math.min(180, Math.floor((now - (pet.lastUpdate || now)) / 60000));
+				if (pet.luster === undefined) pet.luster = 80;
+				if (pet.totalFeeds === undefined) pet.totalFeeds = 0;
+				if (pet.totalPolishes === undefined) pet.totalPolishes = 0;
+				if (pet.totalSleeps === undefined) pet.totalSleeps = 0;
+
+				const elapsedMinutes = Math.min(240, Math.floor((now - (pet.lastUpdate || now)) / 60000));
 				if (elapsedMinutes > 0) {
-					pet.hunger = Math.min(100, pet.hunger + Math.floor(elapsedMinutes * 0.3));
-					pet.energy = Math.max(0, pet.energy - Math.floor(elapsedMinutes * 0.2));
-					pet.happiness = Math.max(0, pet.happiness - Math.floor(elapsedMinutes * 0.25));
+					pet.hunger = Math.min(100, pet.hunger + Math.floor(elapsedMinutes * 0.15));
+					pet.energy = Math.max(10, pet.energy - Math.floor(elapsedMinutes * 0.12));
+					pet.happiness = Math.max(15, pet.happiness - Math.floor(elapsedMinutes * 0.15));
+					pet.luster = Math.max(10, (pet.luster || 80) - Math.floor(elapsedMinutes * 0.10));
 					pet.lastUpdate = now;
 					this.savePetState(pet);
 				}
 				return pet;
 			} catch (e) {
-				return { hunger: 30, energy: 85, happiness: 85, level: 1, xp: 15, lastUpdate: Date.now() };
+				return { hunger: 25, energy: 90, happiness: 85, luster: 80, level: 1, xp: 15, totalFeeds: 0, totalPolishes: 0, totalSleeps: 0, lastUpdate: Date.now() };
 			}
 		},
 
 		savePetState(pet) {
 			try {
 				pet.lastUpdate = Date.now();
-				while (pet.xp >= pet.level * 50) {
-					pet.xp -= pet.level * 50;
+				while (pet.xp >= pet.level * 60) {
+					pet.xp -= pet.level * 60;
 					pet.level++;
 				}
 				const payload = JSON.stringify(pet);

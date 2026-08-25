@@ -82,12 +82,47 @@
 			});
 
 			const candidates = eligible.length > 0 ? eligible : workingNode.options.slice();
-			let results = candidates.slice(0, 6);
-
 			const isStrictDarkNode = workingNode.strictOptions || (workingNode.id && typeof workingNode.id === 'string' && workingNode.id.startsWith('D'));
+
+			let results = [];
+			if (isStrictDarkNode || candidates.length <= 4) {
+				results = candidates.slice(0, 6);
+			} else {
+				const categories = {};
+				candidates.forEach(opt => {
+					const cat = opt.category || 'GENERAL';
+					if (!categories[cat]) categories[cat] = [];
+					categories[cat].push(opt);
+				});
+
+				const chosenSet = new Set();
+				const catKeys = Object.keys(categories).sort(() => Math.random() - 0.5);
+
+				catKeys.forEach(k => {
+					if (results.length < 5) {
+						const pool = categories[k].sort(() => Math.random() - 0.5);
+						const picked = pool[0];
+						if (picked && !chosenSet.has(picked.label)) {
+							results.push(picked);
+							chosenSet.add(picked.label);
+						}
+					}
+				});
+
+				if (results.length < 5) {
+					const remaining = candidates.filter(c => !chosenSet.has(c.label)).sort(() => Math.random() - 0.5);
+					for (const rem of remaining) {
+						if (results.length >= 5) break;
+						results.push(rem);
+						chosenSet.add(rem.label);
+					}
+				}
+			}
+
 			if (results.length < 4 && !isStrictDarkNode) {
 				const existingLabels = new Set(results.map(o => o.label));
-				for (const u of universal) {
+				const shuffledUniversal = [...universal].sort(() => Math.random() - 0.5);
+				for (const u of shuffledUniversal) {
 					if (results.length >= 4) break;
 					if (!existingLabels.has(u.label)) {
 						results.push(u);

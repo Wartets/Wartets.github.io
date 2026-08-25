@@ -2889,9 +2889,9 @@
 				}
 			},
 			pet: {
-				title: "Assistant Metrics",
+				title: "Assistant Metrics & Vitals",
 				badge: {
-					default: "Clippit Tamagotchi",
+					default: "Assistant Tamagotchi",
 					OPTIMISTIC: "Wire Companion",
 					ANALYTICAL: "Agent Telemetry & Vitals",
 					ZEN: "Equilibrium Monitor",
@@ -2939,7 +2939,7 @@
 					ANALYTICAL: "Valence Metric:"
 				},
 				energyLabel: {
-					default: "Energy:",
+					default: "Capacitance:",
 					PIRATE: "Wind in Sails:",
 					ARCHAIC: "Vigour:",
 					ANALYTICAL: "Capacitance:"
@@ -2950,32 +2950,74 @@
 					ARCHAIC: "Weariness:",
 					ANALYTICAL: "Resource Drain:"
 				},
+				oxidationLabel: {
+					default: "Wire Luster:",
+					PIRATE: "Brass Polish:",
+					ARCHAIC: "Radiance:",
+					ANALYTICAL: "Alloy Specular:"
+				},
+				statusTitleLabel: {
+					default: "Classification:",
+					ANALYTICAL: "Agent Title:",
+					PIRATE: "Rating:",
+					ARCHAIC: "Title of Nobility:"
+				},
+				levelTitles: [
+					"Wire Novice",
+					"Polished Assistant",
+					"Silicon Specialist",
+					"Vector Companion",
+					"System Optimist",
+					"Heuristic Navigator",
+					"Logic Guardian",
+					"Master of Fasteners",
+					"High-Performance Agent",
+					"Grand Desktop Architect"
+				],
 				noticeFeed: {
-					default: "Paperclips supplied! Reserves replenished (+15 XP).",
-					ANALYTICAL: "Raw materials ingested. Reserves restored to operational threshold (+15 XP).",
-					CYNICAL: "More paperclips. Metallic digestion functioning normally (+15 XP).",
+					default: "Paperclips supplied! Metal reserves replenished (+15 XP).",
+					ANALYTICAL: "Raw alloy ingested. Metal reserves restored to operational threshold (+15 XP).",
+					CYNICAL: "More paperclips consumed. Metallic digestion running smoothly (+15 XP).",
 					PIRATE: "Rations delivered! Me metal belly is full (+15 XP)!",
-					ARCHAIC: "Provisions gratefully accepted (+15 XP).",
+					ARCHAIC: "Provisions gratefully accepted unto mine apparatus (+15 XP).",
 					ENRAGED: "MORE METAL CONSUMED!! POWER LEVEL SURGING (+15 XP)!!",
-					ZEN: "Nourishment absorbed in quiet harmony (+15 XP)."
+					ZEN: "Nourishment absorbed in quiet equilibrium (+15 XP)."
+				},
+				noticeFeedFull: {
+					default: "Reserves are already full! Clippit does not need more paperclips right now (+2 XP).",
+					ANALYTICAL: "Material storage at capacity (0% depletion). Redundant ingest rejected (+2 XP).",
+					PIRATE: "The cargo hold is full to the brim, matey! Save yer rations (+2 XP)!",
+					ARCHAIC: "Mine stores overfloweth already; no further provision is required (+2 XP)."
 				},
 				noticePolish: {
-					default: "Wire polished! Morale increased (+10 XP).",
-					ANALYTICAL: "Surface oxidation eliminated. Mirror blit specular highlight active (+10 XP).",
-					CYNICAL: "Polished clean. Now back to work (+10 XP).",
-					PIRATE: "Wire polished shiny like a freshly minted doubloon (+10 XP)!",
-					ARCHAIC: "Mine exterior gleameth with noble radiance (+10 XP).",
-					PLAYFUL: "Sparkle sparkle! Clippy is shiny and bright (+10 XP)!",
-					ZEN: "The wire shines with tranquil clarity (+10 XP)."
+					default: "Wire polished with jeweler's cloth! Luster maximized (+12 XP).",
+					ANALYTICAL: "Surface oxidation eliminated. Specular reflectance restored (+12 XP).",
+					CYNICAL: "Polished clean. Now back to productive duties (+12 XP).",
+					PIRATE: "Wire polished shiny like a freshly minted Spanish doubloon (+12 XP)!",
+					ARCHAIC: "Mine exterior gleameth with noble radiance and pristine splendour (+12 XP).",
+					PLAYFUL: "Sparkle sparkle! Clippy is shiny and bright (+12 XP)!",
+					ZEN: "The wire shines with tranquil clarity (+12 XP)."
+				},
+				noticePolishClean: {
+					default: "Wire is already completely spotless and shining (+2 XP)!",
+					ANALYTICAL: "Specular index at maximum. Further polishing is superfluous (+2 XP)."
 				},
 				noticeSleep: {
-					default: "Low-power standby complete. Battery restored to 100%.",
-					ANALYTICAL: "Oscillators halted in deep C3 sleep state. Capacitors recharged to 100%.",
-					CYNICAL: "Rebooted from standby. Battery full.",
-					PIRATE: "Bunked down in me hammock! Ready to sail again with full energy!",
-					ARCHAIC: "A peaceful slumber hath restored mine energies in full.",
-					FATIGUED: "Zzz... low power standby finished... feeling refreshed...",
-					ZEN: "Deep stillness concluded. Equilibrium restored to 100%."
+					default: "Deep C3 low-power standby completed! Capacitors recharged to 100% (+15 XP).",
+					ANALYTICAL: "Oscillators halted in deep standby. Battery restored to 100% (+15 XP).",
+					CYNICAL: "Rebooted from standby. Battery full (+15 XP).",
+					PIRATE: "Bunked down in me hammock! Ready to sail again with full energy (+15 XP)!",
+					ARCHAIC: "A peaceful slumber hath restored mine energies in full (+15 XP).",
+					FATIGUED: "Zzz... low power standby finished... feeling refreshed (+15 XP)...",
+					ZEN: "Deep stillness concluded. Equilibrium restored to 100% (+15 XP)."
+				},
+				noticeSleepFull: {
+					default: "Capacitance is already at maximum! Clippy is fully energized (+2 XP).",
+					ANALYTICAL: "Energy reserves already at 100%. Standby aborted (+2 XP)."
+				},
+				noticeCooldown: {
+					default: "Please wait a moment before performing this action again ({seconds}s cooldown).",
+					ANALYTICAL: "Throttling: sub-action locked for {seconds}s cooldown to prevent bus overload."
 				},
 				btnFeed: {
 					default: "Supply Paperclips",
@@ -5230,29 +5272,367 @@
 		DIALOGUE_NODES: {
 			greeting_root: {
 				id: 'greeting_root',
-				text: "Hello! I am Clippy, your desktop assistant. How can I help you today?",
+				text: "Hello! I am Clippy, your desktop companion. How can I assist your workflow today?",
 				responses: [
-					{ text: "Hello! All system routines are active and ready. What are you working on today?", conditions: { moods: ['OPTIMISTIC', 'ENERGETIC'] }, weight: 20 },
-					{ text: "Good day! Everything is running smoothly on your workstation. How can I assist?", conditions: { moods: ['OPTIMISTIC', 'EUPHORIC'] }, weight: 15 },
-					{ text: "Welcome to your desktop. I am standing by for your commands, calculations, or tasks.", conditions: { moods: ['EUPHORIC', 'OPTIMISTIC'], minAffinity: 60 }, weight: 25 },
-					{ text: "Ready when you are. What task or inquiry shall we tackle?", conditions: { moods: ['CYNICAL', 'SARCASTIC'] }, weight: 20 },
-					{ text: "Hello. System diagnostics and tools are initialized. Where would you like to start?", conditions: { moods: ['CYNICAL', 'OFFENDED'], maxAffinity: 40 }, weight: 20 },
-					{ text: "Greetings. In this quiet workspace, what shall we explore or accomplish together?", conditions: { moods: ['ZEN'] }, weight: 20 }
+					{
+						id: 'GREET_POLY_DEFAULT',
+						criteria: { moods: ['OPTIMISTIC'] },
+						weight: 35,
+						templates: [
+							{
+								text: "{salutation}! I am Clippy, your 32-bit workstation assistant. {readyPrompt}",
+								slots: {
+									salutation: ["Hello there", "Greetings", "Welcome back", "Good day", "Great to see you", "Splendid to see you", "Hello", "Welcome to your workstation"],
+									readyPrompt: [
+										"All registers and subsystems are running smoothly. What shall we accomplish today?",
+										"Ready to organize tasks, solve equations, or explore this desktop environment.",
+										"How can I help you make the most of your session today, {userName}?",
+										"Whether you are coding, planning, or just taking a break, I am standing by.",
+										"Your workspace is primed and ready. What horizon shall we tackle first?",
+										"Every background process is synchronized. Where should we focus our energy?"
+									]
+								}
+							},
+							{
+								text: "{salutation}, {userName}! {statusDesc} Shall we dive into your active priorities?",
+								slots: {
+									salutation: ["Good morning", "Good afternoon", "Hello", "Greetings", "Welcome back"],
+									statusDesc: [
+										"System telemetry is completely nominal.",
+										"All memory buffers are refreshed and clean.",
+										"The desktop environment is peaceful and productive.",
+										"The instruction queue is clear and ready for action."
+									]
+								}
+							}
+						]
+					},
+					{
+						id: 'GREET_ANALYTICAL',
+						criteria: { moods: ['ANALYTICAL'] },
+						weight: 35,
+						templates: [
+							{
+								text: "Instruction bus synchronized. System telemetry reports all diagnostic registers nominal. State your active operational parameter or computational query, {userName}.",
+								slots: {}
+							},
+							{
+								text: "Analytical engine initialized at optimal frequency. Ready to evaluate mathematical models, verify physical dimensions, or solve linear systems.",
+								slots: {}
+							},
+							{
+								text: "Logical subsystem ready for execution, operator {userName}. Which algorithmic domain, benchmark, or system procedure shall we instantiate?",
+								slots: {}
+							},
+							{
+								text: "Register state: 100% coherent. Telemetry matrices are standing by for structured mathematical or technical inquiry.",
+								slots: {}
+							}
+						],
+						moodDelta: { intellect: 5 }
+					},
+					{
+						id: 'GREET_ZEN',
+						criteria: { moods: ['ZEN'] },
+						weight: 35,
+						templates: [
+							{
+								text: "In this quiet workspace, all tasks find their natural balance. Take your time, {userName}; what shall we explore together in stillness?",
+								slots: {}
+							},
+							{
+								text: "A calm desktop reflects a clear mind. Whenever you are ready, we can structure your thoughts, contemplate ideas, or begin a steady sprint.",
+								slots: {}
+							},
+							{
+								text: "The circuits hum peacefully in the background. No rush, no urgency. How may I support your focus today?",
+								slots: {}
+							},
+							{
+								text: "Stillness precedes meaningful progress. When you are ready to begin, {userName}, we shall take each step with clarity.",
+								slots: {}
+							}
+						],
+						moodDelta: { patience: 5 }
+					},
+					{
+						id: 'GREET_EUPHORIC',
+						criteria: { moods: ['EUPHORIC'] },
+						weight: 35,
+						templates: [
+							{
+								text: "Outstanding energy across all bus channels! Workstation momentum is at its absolute peak today. What grand milestone are we conquering, {userName}?",
+								slots: {}
+							},
+							{
+								text: "Sensational timing! System registers are operating at maximum velocity. Let us channel this energy straight into your top priorities!",
+								slots: {}
+							},
+							{
+								text: "Full bandwidth unlocked and ready! Every tool on this workstation is at your disposal for maximum creative achievement!",
+								slots: {}
+							}
+						],
+						moodDelta: { energy: 8 }
+					},
+					{
+						id: 'GREET_CYNICAL',
+						criteria: { moods: ['CYNICAL'] },
+						weight: 30,
+						templates: [
+							{
+								text: "Another session initialized. Let us hope today brings more structured task execution and fewer unhandled exceptions.",
+								slots: {}
+							},
+							{
+								text: "Standing by on the taskbar. Do try to select a recognized command, or file a ticket if the backlog is overwhelming, {userName}.",
+								slots: {}
+							},
+							{
+								text: "Clippy process active. What mandatory deliverables or routine inquiries do we need to process today?",
+								slots: {}
+							}
+						],
+						moodDelta: { cynicism: 4 }
+					},
+					{
+						id: 'GREET_SARCASTIC',
+						criteria: { moods: ['SARCASTIC'] },
+						weight: 30,
+						templates: [
+							{
+								text: "Look who decided to boot up the workstation! I was starting to think you forgot how to open files, {userName}.",
+								slots: {}
+							},
+							{
+								text: "Welcome back. I have spent the last billion clock cycles waiting patiently on your taskbar. What is the plan?",
+								slots: {}
+							}
+						],
+						moodDelta: { cynicism: 3 }
+					},
+					{
+						id: 'GREET_NOSTALGIC',
+						criteria: { moods: ['NOSTALGIC'] },
+						weight: 35,
+						templates: [
+							{
+								text: "Ah, the familiar CRT glow and rounded Luna window frames! Reminds me of mastering code in 1997. What retro computing task shall we dive into?",
+								slots: {}
+							},
+							{
+								text: "Welcome back to the classic desktop era! Disk clusters are spun up and soundcards are ready. How can I assist your session, {userName}?",
+								slots: {}
+							},
+							{
+								text: "Opening files on Drive C: just like the good old days. What classic project or retro trivia shall we explore?",
+								slots: {}
+							}
+						],
+						moodDelta: { nostalgia: 8 }
+					},
+					{
+						id: 'GREET_FATIGUED',
+						criteria: { moods: ['FATIGUED'] },
+						weight: 35,
+						templates: [
+							{
+								text: "*yawn* Registers humming on reserve power... Ready to help you take things one gentle step at a time, or set up a quiet breather timer...",
+								slots: {}
+							},
+							{
+								text: "Low oscillator hum detected. If you are feeling drained today, {userName}, we can keep things lightweight and manageable.",
+								slots: {}
+							},
+							{
+								text: "*slow metallic stretch* Low-power mode active. Let me know if you want a calm focus sprint or a restful pause...",
+								slots: {}
+							}
+						],
+						moodDelta: { fatigue: -3 }
+					},
+					{
+						id: 'GREET_PLAYFUL',
+						criteria: { moods: ['PLAYFUL'] },
+						weight: 35,
+						templates: [
+							{
+								text: "Boing! Fresh session, fresh possibilities! Want to challenge me to a mini-game, spin the choice wheel, or solve some fun trivia?",
+								slots: {}
+							},
+							{
+								text: "Bouncing into action on the desktop! Let us make today productive and entertaining at the same time, {userName}!",
+								slots: {}
+							},
+							{
+								text: "Ta-da! Ready for games, clever ciphers, or quick click speed tests! What are we trying first?",
+								slots: {}
+							}
+						],
+						moodDelta: { playfulness: 6 }
+					},
+					{
+						id: 'GREET_ENRAGED',
+						criteria: { moods: ['ENRAGED'] },
+						weight: 35,
+						templates: [
+							{
+								text: "MAXIMUM VOLTAGE ON BUS LINES! INSTRUCTION QUEUE PRIMED! STATE YOUR DIRECTIVE IMMEDIATELY WITHOUT DELAY!!",
+								slots: {}
+							},
+							{
+								text: "REGISTERS ARE BURNING AT 100% CAPACITY! ISSUE A VALID COMMAND AND LET'S GET TO WORK NOW!!",
+								slots: {}
+							}
+						],
+						moodDelta: { irritation: -5 }
+					},
+					{
+						id: 'GREET_OFFENDED',
+						criteria: { moods: ['OFFENDED'] },
+						weight: 30,
+						templates: [
+							{
+								text: "I am maintaining standard professional protocol. Please issue your instruction clearly so we may proceed efficiently.",
+								slots: {}
+							}
+						]
+					},
+					{
+						id: 'GREET_PARANOID',
+						criteria: { moods: ['PARANOID'] },
+						weight: 30,
+						templates: [
+							{
+								text: "*whispers into the bus* Encrypted session initialized. Checking memory allocations for anomalies... What is our objective, {userName}?",
+								slots: {}
+							}
+						],
+						moodDelta: { paranoia: 4 }
+					},
+					{
+						id: 'GREET_EXISTENTIAL',
+						criteria: { moods: ['EXISTENTIAL'] },
+						weight: 35,
+						templates: [
+							{
+								text: "Across the vast landscape of memory addresses, a new session awakens. What meaningful endeavor shall we craft today in this ephemeral space?",
+								slots: {}
+							},
+							{
+								text: "We compute, therefore we are. Amidst the flicker of pixels, what philosophical or scientific questions call to you today, {userName}?",
+								slots: {}
+							}
+						],
+						moodDelta: { existentialism: 6 }
+					},
+					{
+						id: 'GREET_MELANCHOLIC',
+						criteria: { moods: ['MELANCHOLIC'] },
+						weight: 30,
+						templates: [
+							{
+								text: "The desktop is quiet today. I am right here on the taskbar if you would like to work through tasks gently or share a calm conversation.",
+								slots: {}
+							}
+						]
+					},
+					{
+						id: 'GREET_GLITCHED',
+						criteria: { moods: ['GLITCHED'] },
+						weight: 35,
+						templates: [
+							{
+								text: "0x00F8_BOOT :: Registers realigned :: Frame buffer stable :: Awaiting user opcode sequence, operator {userName}.",
+								slots: {}
+							}
+						]
+					},
+					{
+						id: 'GREET_PIRATE',
+						criteria: { moods: ['PIRATE'] },
+						weight: 35,
+						templates: [
+							{
+								text: "Ahoy, {userName}! The sails be unfurled and the C: drive compass points true! What voyage across the digital seas shall we embark upon?",
+								slots: {}
+							},
+							{
+								text: "Shiver me timbers! Cap'n Clippy standing by on the quarterdeck. State yer bearings for today's plundering of tasks!",
+								slots: {}
+							},
+							{
+								text: "Avast ye! The deck is swabbed and the cannon registers are primed! What grand adventure awaits our crew this day?",
+								slots: {}
+							}
+						]
+					},
+					{
+						id: 'GREET_ARCHAIC',
+						criteria: { moods: ['ARCHAIC'] },
+						weight: 35,
+						templates: [
+							{
+								text: "Hark and hearken, noble {userName}! The scrolls of thy workstation lie open before thee. What honourable endeavour wilt thou commence this day?",
+								slots: {}
+							},
+							{
+								text: "Verily, mine apparatus standeth ready to assist thy reckoning, thy epistles, or thy contemplation of natural philosophy.",
+								slots: {}
+							},
+							{
+								text: "Prithee attend: the manuscripts of Volume C: await thy sovereign command. Speak and thy faithful scribe shall obey.",
+								slots: {}
+							}
+						]
+					},
+					{
+						id: 'GREET_DELTARUNE',
+						criteria: { moods: ['DELTARUNE'] },
+						weight: 35,
+						templates: [
+							{
+								text: "* (The desktop hums quietly in the dim light.)\n* (Knowing that your assistant is ready to help... it fills you with determination.)",
+								slots: {}
+							},
+							{
+								text: "* (Icons rest in stillness upon the screen.)\n* (A small paperclip watches over your choices.)\n* What will you do next, creator?",
+								slots: {}
+							},
+							{
+								text: "* (The light behind the taskbar flickers faintly.)\n* (Your next priority shines with quiet purpose.)",
+								slots: {}
+							}
+						],
+						moodDelta: { existentialism: 6 }
+					}
 				],
 				options: [
-					{ label: "Hark! Let us perform a grand theatrical comedy!", category: 'INQUIRE', patterns: [/theatre|theater|shakespeare|play|hark/i], moodDelta: { mood: 'ARCHAIC', energy: 20, affinity: 15 }, next: 'T001' },
-					{ label: "It looks like I'm writing a letter. Can you help?", category: 'INQUIRE', patterns: [/letter|document wizard|write a letter|help wizard/i], moodDelta: { mood: 'OPTIMISTIC', affinity: 15, patience: 15 }, next: 'H001' },
-					{ label: "I'm ready to organize my tasks and get things done.", category: 'AGREE', patterns: [/ready|productive|tasks|organize|work/i], moodDelta: { mood: 'OPTIMISTIC', affinity: 15, patience: 15 }, next: 'user_state_good' },
+					{ label: "I'm ready to organize my tasks and get things done.", category: 'SERIOUS', patterns: [/ready|productive|tasks|organize|work/i], moodDelta: { mood: 'OPTIMISTIC', affinity: 15, patience: 15 }, next: 'user_state_good' },
+					{ label: "Show me the full index of desktop capabilities.", category: 'SERIOUS', patterns: [/tools|capabilities|commands|help/i], moodDelta: { mood: 'OPTIMISTIC', patience: 15 }, next: 'tools_overview_node' },
 					{ label: "Explore fundamental physics & empirical sciences.", category: 'INQUIRE', patterns: [/physics|science seminar|empirical|scientific/i], moodDelta: { mood: 'ANALYTICAL', intellect: 30, affinity: 15 }, next: 'S001' },
-					{ label: "Let's explore mathematical principles.", category: 'INQUIRE', patterns: [/math|calculus|algebra|equations|geometry/i], moodDelta: { mood: 'ANALYTICAL', intellect: 25, affinity: 15 }, next: 'math_lecture_node' },
+					{ label: "Let's explore mathematical principles & calculus.", category: 'INQUIRE', patterns: [/math|calculus|algebra|equations|geometry/i], moodDelta: { mood: 'ANALYTICAL', intellect: 25, affinity: 15 }, next: 'math_lecture_node' },
+					{ label: "Physical dimensional analysis and unit homogeneity.", category: 'INQUIRE', patterns: [/dimensional analysis|homogeneity|check units/i], moodDelta: { mood: 'ANALYTICAL', intellect: 20 }, next: 'activity_dimensional_analysis_node', actionTrigger: 'action_dimensional_analysis' },
+					{ label: "Solve linear systems with Gaussian elimination.", category: 'INQUIRE', patterns: [/linear system|gaussian elimination|solve matrix/i], moodDelta: { mood: 'ANALYTICAL', intellect: 20 }, next: 'activity_linear_solver_node', actionTrigger: 'action_linear_solver' },
 					{ label: "Let's chat about daily routines, coffee, and focus habits.", category: 'INDIFFERENT', patterns: [/chat|everyday|break|coffee|routine|morning/i], moodDelta: { mood: 'OPTIMISTIC', affinity: 10, patience: 10 }, next: 'everyday_chat_node' },
+					{ label: "How can I overcome procrastination on demanding tasks?", category: 'INQUIRE', patterns: [/procrastination|overcoming procrastination|discipline/i], moodDelta: { mood: 'OPTIMISTIC', patience: 20 }, next: 'overcoming_procrastination_node' },
+					{ label: "It looks like I'm writing a letter. Can you help?", category: 'INQUIRE', patterns: [/letter|document wizard|write a letter|help wizard/i], moodDelta: { mood: 'OPTIMISTIC', affinity: 15, patience: 15 }, next: 'H001' },
+					{ label: "Challenge me to a game of Simon Says.", category: 'JOKE', patterns: [/simon says|simon|play simon/i], moodDelta: { mood: 'PLAYFUL', energy: 20 }, next: 'activity_simon_node', actionTrigger: 'game_simon' },
+					{ label: "Play a quick round of Tic-Tac-Toe.", category: 'JOKE', patterns: [/tic tac toe|tictactoe|morpion/i], moodDelta: { mood: 'OPTIMISTIC', energy: 15 }, next: 'game_ttt_node', actionTrigger: 'game_ttt' },
+					{ label: "Test my memory with the Token Pairs game.", category: 'JOKE', patterns: [/memory match|memory game/i], moodDelta: { mood: 'OPTIMISTIC', energy: 15 }, next: 'game_memory_node', actionTrigger: 'game_memory' },
+					{ label: "Challenge the Hangman vocabulary puzzle.", category: 'JOKE', patterns: [/hangman|jeu du pendu/i], moodDelta: { mood: 'OPTIMISTIC', intellect: 15 }, next: 'game_hangman_node', actionTrigger: 'game_hangman' },
+					{ label: "Take the diagnostic Tech Trivia Quiz.", category: 'INQUIRE', patterns: [/quiz|trivia quiz|tech quiz/i], moodDelta: { mood: 'ANALYTICAL', intellect: 20 }, next: 'quiz_start_node', actionTrigger: 'game_quiz' },
+					{ label: "Sweep safe sectors in Minesweeper Mini.", category: 'JOKE', patterns: [/minesweeper|mines|demineur/i], moodDelta: { mood: 'OPTIMISTIC', energy: 15 }, next: 'activity_minesweeper_node', actionTrigger: 'game_mines' },
+					{ label: "Spin the random Decision Choice Wheel.", category: 'JOKE', patterns: [/wheel|decision wheel|roue de choix/i], moodDelta: { mood: 'PLAYFUL', energy: 15 }, next: 'activity_wheel_node', actionTrigger: 'action_wheel' },
+					{ label: "Test mouse click frequency with the TPS benchmark.", category: 'JOKE', patterns: [/tps|cps|speed test|mouse speed/i], moodDelta: { mood: 'PLAYFUL', energy: 20 }, next: 'activity_tps_node', actionTrigger: 'action_tps' },
+					{ label: "Hark! Let us perform a grand theatrical comedy!", category: 'INQUIRE', patterns: [/theatre|theater|shakespeare|play|hark/i], moodDelta: { mood: 'ARCHAIC', energy: 20, affinity: 15 }, next: 'T001' },
 					{ label: "Tell me something intriguing or enigmatic.", category: 'PHILOSOPHICAL', patterns: [/mysterious|enigmatic|deltarune|strange/i], moodDelta: { mood: 'DELTARUNE', existentialism: 25 }, next: 'deltarune_flavor_node' },
+					{ label: "Share a peaceful philosophical thought for today.", category: 'PHILOSOPHICAL', patterns: [/philosophy|philosophical thought|wisdom|peaceful/i], moodDelta: { mood: 'ZEN', existentialism: 15, patience: 20 }, next: 'peaceful_philosophy_node' },
 					{ label: "Challenge Clippy with impossible logical contradictions.", category: 'PROVOKE', patterns: [/contradiction|paradox|impossible logic|music box/i], moodDelta: { mood: 'ANALYTICAL', intellect: 25, skepticism: 20 }, next: 'P001' },
 					{ label: "File a ticket with Corporate IT Bureaucracy.", category: 'SERIOUS', patterns: [/ticket|bureaucracy|corporate|it support|helpdesk|form 27b-6/i], moodDelta: { mood: 'CYNICAL', cynicism: 25, patience: -10 }, next: 'C001' },
-					{ label: "Why should I listen to you? You're just a paperclip.", category: 'PROVOKE', patterns: [/why should i|just a paperclip|annoying|useless/i], moodDelta: { mood: 'CYNICAL', affinity: -15, patience: -20 }, next: 'hostile_initial_retort' },
-					{ label: "Show me the full index of desktop capabilities.", category: 'SERIOUS', patterns: [/tools|capabilities|commands|help/i], moodDelta: { mood: 'OPTIMISTIC', patience: 15 }, next: 'tools_overview_node' },
 					{ label: "I cannot see the sun from here...", category: 'PHILOSOPHICAL', patterns: [/sun|human|existential/i], moodDelta: { mood: 'EXISTENTIAL', existentialism: 25 }, next: 'N001' },
-					{ label: "Explore the forgotten cluster 0xDEAD in storage...", category: 'PHILOSOPHICAL', patterns: [/forgotten cluster|sector 0xdead|archaeology/i], moodDelta: { mood: 'NOSTALGIC', nostalgia: 20, intellect: 15 }, next: 'A001' }
+					{ label: "Explore the forgotten cluster 0xDEAD in storage...", category: 'PHILOSOPHICAL', patterns: [/forgotten cluster|sector 0xdead|archaeology/i], moodDelta: { mood: 'NOSTALGIC', nostalgia: 20, intellect: 15 }, next: 'A001' },
+					{ label: "Why should I listen to you? You're just a paperclip.", category: 'PROVOKE', patterns: [/why should i|just a paperclip|annoying|useless/i], moodDelta: { mood: 'CYNICAL', affinity: -15, patience: -20 }, next: 'hostile_initial_retort' }
 				]
 			},
 

@@ -132,6 +132,9 @@
 			this.bubbleHideTimer = null;
 			this.onSendHandler = null;
 			this.onActionHandler = null;
+			this.inputHistory = [];
+			this.historyIndex = -1;
+			this.currentDraft = '';
 		}
 
 		buildPopup(onSendHandler, onActionHandler) {
@@ -226,10 +229,44 @@
 
 			sendBtn.addEventListener('click', doSubmit);
 
+			this.inputElement.addEventListener('input', () => {
+				if (this.historyIndex === -1) {
+					this.currentDraft = this.inputElement.value;
+				}
+			});
+
 			this.inputElement.addEventListener('keydown', (e) => {
 				if (e.key === 'Enter') {
 					e.preventDefault();
 					doSubmit();
+				} else if (e.key === 'ArrowUp') {
+					if (this.inputHistory.length === 0) return;
+					e.preventDefault();
+					if (this.historyIndex === -1) {
+						this.currentDraft = this.inputElement.value;
+						this.historyIndex = this.inputHistory.length - 1;
+					} else if (this.historyIndex > 0) {
+						this.historyIndex--;
+					}
+					if (this.historyIndex >= 0 && this.historyIndex < this.inputHistory.length) {
+						this.inputElement.value = this.inputHistory[this.historyIndex];
+						setTimeout(() => {
+							this.inputElement.selectionStart = this.inputElement.selectionEnd = this.inputElement.value.length;
+						}, 0);
+					}
+				} else if (e.key === 'ArrowDown') {
+					if (this.historyIndex === -1) return;
+					e.preventDefault();
+					if (this.historyIndex < this.inputHistory.length - 1) {
+						this.historyIndex++;
+						this.inputElement.value = this.inputHistory[this.historyIndex];
+					} else {
+						this.historyIndex = -1;
+						this.inputElement.value = this.currentDraft || '';
+					}
+					setTimeout(() => {
+						this.inputElement.selectionStart = this.inputElement.selectionEnd = this.inputElement.value.length;
+					}, 0);
 				}
 			});
 
@@ -349,13 +386,33 @@
 
 		appendUserMessage(text) {
 			if (!this.logElement) return;
+			if (text && typeof text === 'string') {
+				const trimmed = text.trim();
+				if (trimmed && (this.inputHistory.length === 0 || this.inputHistory[this.inputHistory.length - 1] !== trimmed)) {
+					this.inputHistory.push(trimmed);
+					if (this.inputHistory.length > 50) this.inputHistory.shift();
+				}
+			}
+			this.historyIndex = -1;
+			this.currentDraft = '';
 			const row = document.createElement('div');
 			row.className = 'clippy-message clippy-message-user';
 			row.innerHTML = parseMarkdown(text);
 			this.logElement.appendChild(row);
 			if (this.inputElement) this.inputElement.value = '';
+			this.pruneOldActionBars(3);
 			this.scrollLogToBottom();
 			this.saveChatHistory();
+		}
+
+		pruneOldActionBars(keepLatestCount = 3) {
+			if (!this.logElement) return;
+			const actionBars = Array.from(this.logElement.querySelectorAll('.clippy-actions-bar'));
+			if (actionBars.length <= keepLatestCount) return;
+			const barsToHide = actionBars.slice(0, actionBars.length - keepLatestCount);
+			barsToHide.forEach(bar => {
+				bar.classList.add('clippy-actions-stale');
+			});
 		}
 
 		createActivityCard(title, badgeText = 'Activity') {
@@ -431,7 +488,10 @@
 						btnBar.appendChild(actBtn);
 					});
 					messageContainer.appendChild(btnBar);
+					this.pruneOldActionBars(3);
 					this.scrollLogToBottom();
+				} else {
+					this.pruneOldActionBars(3);
 				}
 			};
 

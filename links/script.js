@@ -25,6 +25,7 @@ document.addEventListener('DOMContentLoaded', () => {
 		{ name: 'Desk', url: '../desk/' },
 		{ name: 'Clippy', url: '../clippy/' },
 		{ name: 'Clippy Tree', url: '../clippy/tree/' },
+		{ name: 'Ouverture', url: '../Ouverture/' },
 		{ name: '404', url: '../404.html' },
 		{ name: 'Offline', url: '../offline.html' }
 	];
