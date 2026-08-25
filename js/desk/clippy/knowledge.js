@@ -3,32 +3,27 @@
 
 	const Knowledge = {
 		CONTRACTIONS: {
-			"i'm": "i am", "you're": "you are", "he's": "he is", "she's": "she is", "it's": "it is",
-			"we're": "we are", "they're": "they are", "i've": "i have", "you've": "you have",
-			"we've": "we have", "they've": "they have", "i'd": "i would", "you'd": "you would",
-			"he'd": "he would", "she'd": "she would", "we'd": "we would", "they'd": "they would",
-			"i'll": "i will", "you'll": "you will", "he'll": "he will", "she'll": "she will",
-			"we'll": "we will", "they'll": "they will", "isn't": "is not", "aren't": "are not",
-			"wasn't": "was not", "weren't": "were not", "haven't": "have not", "hasn't": "has not",
-			"hadn't": "had not", "won't": "will not", "wouldn't": "would not", "don't": "do not",
-			"doesn't": "does not", "didn't": "did not", "can't": "cannot", "couldn't": "could not",
-			"shouldn't": "should not", "mightn't": "might not", "mustn't": "must not", "what's": "what is",
-			"who's": "who is", "where's": "where is", "when's": "when is", "why's": "why is", "how's": "how is"
+			"i'm": "i am", "you're": "you are", "he's": "he is", "she's": "she is", "it's": "it is", "we're": "we are", "they're": "they are", "i've": "i have", "you've": "you have", "we've": "we have", "they've": "they have", "i'd": "i would", "you'd": "you would",
+			"he'd": "he would", "she'd": "she would", "we'd": "we would", "they'd": "they would", "i'll": "i will", "you'll": "you will", "he'll": "he will", "she'll": "she will", "we'll": "we will", "they'll": "they will", "isn't": "is not", "aren't": "are not",
+			"wasn't": "was not", "weren't": "were not", "haven't": "have not", "hasn't": "has not", "hadn't": "had not", "won't": "will not", "wouldn't": "would not", "don't": "do not", "doesn't": "does not", "didn't": "did not", "can't": "cannot", "couldn't": "could not",
+			"shouldn't": "should not", "mightn't": "might not", "mustn't": "must not", "what's": "what is", "who's": "who is", "where's": "where is", "when's": "when is", "why's": "why is", "how's": "how is", "let's": "let us", "that's": "that is", "there's": "there is",
+			"here's": "here is", "could've": "could have", "should've": "should have", "would've": "would have", "might've": "might have", "must've": "must have", "ain't": "is not", "y'all": "you all", "that'll": "that will", "this'll": "this will", "there'll": "there will",
+			"what'll": "what will", "who'll": "who will", "how'll": "how will", "why'll": "why will", "someone's": "someone is", "anyone's": "anyone is", "everybody's": "everybody is", "nobody's": "nobody is", "gonna": "going to", "wanna": "want to", "gotta": "got to",
+			"kinda": "kind of", "sorta": "sort of"
 		},
 
 		INTENSIFIERS: {
-			"very": 1.6, "extremely": 2.0, "super": 1.7, "really": 1.5, "absolutely": 2.0,
-			"totally": 1.8, "completely": 1.9, "immensely": 2.0, "hugely": 1.7, "highly": 1.6,
-			"incredibly": 2.0, "unbelievably": 2.0, "deeply": 1.8, "terribly": 1.7, "quite": 1.3
+			"very": 1.6, "extremely": 2.0, "super": 1.7, "really": 1.5, "absolutely": 2.0, "totally": 1.8, "completely": 1.9, "immensely": 2.0, "hugely": 1.7, "highly": 1.6, "incredibly": 2.0, "unbelievably": 2.0, "deeply": 1.8, "terribly": 1.7, "quite": 1.3,
+			"exceptionally": 2.0, "remarkably": 1.9, "profoundly": 2.0, "tremendously": 2.0, "exceedingly": 1.9, "vastly": 1.8, "substantially": 1.6, "infinitely": 2.0, "utterly": 2.0
 		},
 
 		MODERATORS: {
-			"somewhat": 0.7, "slightly": 0.6, "a bit": 0.6, "kind of": 0.7, "sort of": 0.7,
-			"hardly": 0.4, "barely": 0.3, "marginally": 0.5, "partly": 0.6, "relatively": 0.8
+			"somewhat": 0.7, "slightly": 0.6, "a bit": 0.6, "kind of": 0.7, "sort of": 0.7, "hardly": 0.4, "barely": 0.3, "marginally": 0.5, "partly": 0.6, "relatively": 0.8, "moderately": 0.75, "fairly": 0.8, "partially": 0.65, "faintly": 0.4, "nominally": 0.5,
+			"comparatively": 0.8, "scarcely": 0.35, "mildly": 0.6, "to an extent": 0.7
 		},
 
 		NEGATIONS: [
-			"not", "no", "never", "none", "neither", "nor", "cannot", "without", "hardly", "scarcely"
+			"not", "no", "never", "none", "neither", "nor", "cannot", "without", "hardly", "scarcely", "barely", "seldom", "rarely", "nowhere", "nought", "nothing", "void", "denied", "refused"
 		],
 
 		SENTIMENT_LEXICON: {
@@ -36,59 +31,62 @@
 			"fast": 1.2, "smart": 2.0, "legend": 2.5, "hero": 2.5, "beautiful": 2.4, "peaceful": 2.0, "kind": 1.8, "cool": 1.5, "magnificent": 3.0, "superb": 2.8, "efficient": 2.2, "pleasant": 2.0, "sublime": 3.2, "bad": -2.0, "terrible": -3.2, "awful": -3.2, "horrible": -3.5,
 			"hate": -3.5, "useless": -3.0, "annoying": -2.8, "stupid": -3.0, "ugly": -2.5, "slow": -1.5, "broken": -2.2, "crash": -2.5, "error": -1.8, "worst": -3.5, "garbage": -3.2, "trash": -3.0, "boring": -2.0, "tired": -1.8, "exhausted": -2.2, "sad": -2.0, "depressed": -2.5,
 			"angry": -2.5, "mad": -2.2, "shut": -1.5, "die": -3.5, "clueless": -2.4, "disaster": -3.0, "pathetic": -3.2, "clunky": -2.0, "glitch": -1.8, "grateful": 2.0, "outstanding": 2.5, "commendable": 2.2, "delightful": 2.0, "noteworthy": 2.6, "splendid": 3.0, "capable": 2.2,
-			"mediocre": -1.5, "inadequate": -2.5, "inferior": -2.2, "disappointing": -2.6, "irritated": -2.5, "catastrophic": -3.0, "sluggish": -1.8, "obstructive": -2.2, "damaged": -2.0, "tedious": -2.4
+			"mediocre": -1.5, "inadequate": -2.5, "inferior": -2.2, "disappointing": -2.6, "irritated": -2.5, "catastrophic": -3.0, "sluggish": -1.8, "obstructive": -2.2, "damaged": -2.0, "tedious": -2.4,
+			"pristine": 2.8, "flawless": 3.4, "masterpiece": 3.5, "stellar": 3.0, "optimal": 2.6, "robust": 2.4, "deterministic": 1.8, "harmonious": 2.5, "serene": 2.2, "lucid": 2.0, "valuable": 2.2, "seamless": 2.4, "coherent": 2.0,
+			"dreadful": -3.3, "abysmal": -3.5, "defective": -2.6, "incoherent": -2.2, "futile": -2.4, "unstable": -2.5, "chaotic": -2.0, "corrupted": -2.8, "degraded": -2.2, "obsolete": -1.6, "cumbersome": -2.2, "frustrating": -2.8
 		},
 
 		EMOTIONAL_INDICATORS: {
 			frustration: [
 				"error", "bug", "fail", "failed", "failure", "crash", "stuck", "broken", "annoying", "annoyed", "frustrated", "frustrating", "hate", "slow", "stupid", "useless", "worst", "damn", "bloody", "rage", "irritating", "irritated", "angry", "mad", "furious", "ugh", "wtf", "fuck",
-				"shit", "problem", "issue", "glitch", "malfunction", "blocked", "blocking", "failed", "failure", "cannot", "can't", "doesn't work", "not working", "impossible", "struggle", "struggling"
+				"shit", "problem", "issue", "glitch", "malfunction", "blocked", "blocking", "cannot", "can't", "doesn't work", "not working", "impossible", "struggle", "struggling", "freeze", "freezing", "frozen", "hanging", "unresponsive", "corrupted", "bottleneck", "deadlock", "segfault"
 			],
 
 			curiosity: [
 				"why", "how", "what", "where", "when", "who", "explain", "details", "detail", "origin", "theory", "meaning", "science", "physics", "math", "explore", "inspect", "investigate", "analyze", "analyse", "understand", "reason", "cause", "purpose", "function", "architecture",
-				"mechanism", "process", "principle", "concept", "curious", "curiosity", "wonder", "wondering", "question", "questions", "learn", "discover", "research", "look into", "figure out", "how does", "why does", "what if"
+				"mechanism", "process", "principle", "concept", "curious", "curiosity", "wonder", "wondering", "question", "questions", "learn", "discover", "research", "look into", "figure out", "how does", "why does", "what if", "clarify", "elaborate", "demonstrate", "dissect", "formulate"
 			],
 
 			fatigue: [
-				"tired", "exhausted", "sleepy", "burnout", "burned out", "drained", "sleep", "rest", "break", "yawn", "fatigue", "weary", "exhausting", "exhausted", "worn out", "worn-out", "low energy", "no energy", "need sleep", "need a break", "need rest", "nap", "napping", "doze",
-				"drowsy", "lethargic", "sluggish", "overworked", "overwhelmed", "can't focus", "hard to focus", "running on empty", "done for the day", "spent", "depleted"
+				"tired", "exhausted", "sleepy", "burnout", "burned out", "drained", "sleep", "rest", "break", "yawn", "fatigue", "weary", "exhausting", "worn out", "worn-out", "low energy", "no energy", "need sleep", "need a break", "need rest", "nap", "napping", "doze",
+				"drowsy", "lethargic", "sluggish", "overworked", "overwhelmed", "can't focus", "hard to focus", "running on empty", "done for the day", "spent", "depleted", "brain fog", "dazed", "heavy eyes", "strained", "fading", "low battery"
 			],
 
 			enthusiasm: [
 				"wow", "cool", "awesome", "amazing", "fantastic", "excellent", "let's", "ready", "play", "game", "go", "fun", "super", "great", "brilliant", "incredible", "wonderful", "excited", "exciting", "thrilled", "eager", "motivated", "motivating", "can't wait",
-				"looking forward", "yes", "yay", "woohoo", "hell yeah", "let's go", "bring it on", "count me in", "absolutely", "perfect", "nice", "congrats", "congratulations", "proud", "winning", "winner"
+				"looking forward", "yes", "yay", "woohoo", "hell yeah", "let's go", "bring it on", "count me in", "absolutely", "perfect", "nice", "congrats", "congratulations", "proud", "winning", "winner", "spectacular", "stunning", "hyped", "on fire", "unstoppable", "supercharged"
 			],
 
 			politeness: [
-				"please", "thank", "thanks", "thank you", "thankful", "kindly", "appreciate", "appreciated", "appreciation", "hello", "greetings", "hi", "hey", "good morning", "good afternoon", "good evening","please help", "if you don't mind", "would you mind", "could you",
-				"would you", "excuse me", "pardon", "sorry", "apologies", "welcome","you're welcome", "my pleasure", "much appreciated", "best regards", "regards", "have a nice day"
+				"please", "thank", "thanks", "thank you", "thankful", "kindly", "appreciate", "appreciated", "appreciation", "hello", "greetings", "hi", "hey", "good morning", "good afternoon", "good evening", "please help", "if you don't mind", "would you mind", "could you",
+				"would you", "excuse me", "pardon", "sorry", "apologies", "welcome", "you're welcome", "my pleasure", "much appreciated", "best regards", "regards", "have a nice day", "cordially", "cheers", "grateful", "honored", "much obliged", "with pleasure"
 			],
 
 			hostility: [
 				"kill", "destroy", "die", "shut up", "disappear", "idiot", "moron", "stupid", "dumb", "trash", "garbage", "hate", "loser", "scum", "jerk", "asshole", "bastard", "screw you", "fuck you", "get lost", "go away", "drop dead", "leave me alone", "back off", "shut your mouth",
-				"worthless", "pathetic", "disgusting", "despise", "destroy", "eliminate", "attack", "threat", "threaten", "revenge", "enemy", "aggressive", "aggression", "hostile", "hostility"
+				"worthless", "pathetic", "disgusting", "despise", "eliminate", "attack", "threat", "threaten", "revenge", "enemy", "aggressive", "aggression", "hostile", "hostility", "demolish", "annihilate", "scoundrel", "wipe out", "terminate"
 			],
 
 			skepticism: [
 				"really", "sure", "doubt", "doubtful", "skeptical", "sceptical", "fake", "impossible", "lie", "liar", "proof", "evidence", "questionable", "suspicious", "strange", "weird", "fishy", "shady", "unbelievable", "unlikely", "not convinced", "don't believe",
-				"i doubt", "are you sure", "is that true", "really?", "prove it", "how do you know", "source", "citation", "verify", "verification", "fact check", "uncertain", "unclear", "possibly", "maybe", "allegedly", "supposedly", "dubious", "misleading", "deceptive"
+				"i doubt", "are you sure", "is that true", "really?", "prove it", "how do you know", "source", "citation", "verify", "verification", "fact check", "uncertain", "unclear", "possibly", "maybe", "allegedly", "supposedly", "dubious", "misleading", "deceptive",
+				"unsubstantiated", "fallacious", "illogical", "specious", "unfounded", "apocryphal"
 			],
 
 			playfulness: [
 				"fun", "funny", "joke", "joking", "riddle", "game", "games", "laugh", "laughing", "laughter", "trick", "haha", "hahaha", "lol", "lmao", "rofl", "kidding", "just kidding", "teasing", "tease", "play",
-				"playful", "playfully", "let's play", "challenge", "dare", "prank", "pranking", "silly", "goofy", "witty", "humor", "humour", "amusing", "entertaining", "entertainment", "joke around", "messing around", "banter", "mock", "devinette", "mischief"
+				"playful", "playfully", "let's play", "challenge", "dare", "prank", "pranking", "silly", "goofy", "witty", "humor", "humour", "amusing", "entertaining", "entertainment", "joke around", "messing around", "banter", "mock", "mischief", "chuckle", "giggle", "shenanigans", "puns", "quip"
 			],
 
 			desperation: [
 				"help", "help me", "please help", "emergency", "urgent", "urgently", "lost", "critical", "panic", "panicking", "panicked", "desperate", "desperation", "save me", "rescue", "sos", "mayday", "need help", "need assistance", "can't do this", "i'm stuck", "i'm lost",
-				"don't know what to do", "what do i do", "please save me", "emergency help", "critical situation", "crisis", "danger", "immediately", "asap", "right now", "running out of time", "no way out", "hopeless", "helpless", "overwhelmed"
+				"don't know what to do", "what do i do", "please save me", "emergency help", "critical situation", "crisis", "danger", "immediately", "asap", "right now", "running out of time", "no way out", "hopeless", "helpless", "overwhelmed", "dire", "catastrophe", "peril", "dire straits"
 			],
 
 			awe: [
 				"universe", "infinity", "infinite", "cosmos", "cosmic", "miracle", "fascinating", "fascinated", "quantum", "existence", "immense", "beauty", "beautiful", "vertigo", "vast", "vastness", "incredible", "extraordinary", "majestic", "magnificent", "spectacular",
 				"breathtaking", "astonishing", "astonished", "wonder", "wondrous", "marvel", "marvelous", "mysterious", "mystery", "profound", "epic", "timeless", "eternal", "infinite scale", "mind-blowing", "mind blown", "beyond comprehension", "overwhelming", "sublime",
-				"transcendent", "celestial", "astronomical", "cosmology"
+				"transcendent", "celestial", "astronomical", "cosmology", "ineffable", "stellar", "nebula", "spacetime", "singularity", "grandeur"
 			]
 		},
 
@@ -116,10 +114,10 @@
 					"sailor": "seadog", "sailors": "seadogs", "prisoner": "captive", "prison": "brig", "jail": "brig", "police": "navy", "rich": "flush with doubloons", "poor": "short on doubloons", "steal": "plunder",
 					"stealing": "plunderin'", "stolen": "plundered", "fight": "brawl", "fighting": "brawlin'", "attack": "raid", "win": "claim victory", "victory": "glorious victory", "escape": "make yer escape",
 					"hide": "lie low", "secret": "buried secret", "map": "treasure map", "direction": "bearing", "directions": "bearings", "luck": "fortune", "lucky": "fortunate", "unlucky": "cursed",
-					"dead": "gone to Davy Jones", "death": "Davy Jones' locker", "danger": "peril"
+					"dead": "gone to Davy Jones", "death": "Davy Jones' locker", "danger": "peril", "task": "duty", "tasks": "duties", "calculate": "reckon", "memory": "ship's log"
 				},
-				prefixes: ["Ahoy!", "Arr!", "Shiver me timbers!", "Avast ye!", "By Blackbeard's ghost!"],
-				suffixes: [", arr!", ", ye scallywag!", ", by the seven seas!", ", matey!"]
+				prefixes: ["Ahoy!", "Arr!", "Shiver me timbers!", "Avast ye!", "By Blackbeard's ghost!", "Blimey!", "Dead men tell no tales, but:", "Heave ho!"],
+				suffixes: [", arr!", ", ye scallywag!", ", by the seven seas!", ", matey!", ", blow me down!", ", by Neptune's beard!"]
 			},
 			archaic: {
 				words: {
@@ -142,20 +140,20 @@
 					"old": "aged", "new": "newly wrought", "strange": "peculiar", "weird": "uncanny", "important": "of great import", "easy": "simple", "hard": "arduous", "difficult": "arduous",
 					"ready": "prepared", "broken": "undone", "problem": "difficulty", "idea": "notion", "thing": "matter", "things": "matters", "work": "labour", "job": "occupation",
 					"of course": "assuredly", "that's right": "it is so", "I think": "methinks", "I believe": "I reckon", "I don't know": "I know not", "I don't care": "I care not",
-					"come here": "come hither", "go away": "begone", "get out": "depart", "leave me alone": "leave me be"
+					"come here": "come hither", "go away": "begone", "get out": "depart", "leave me alone": "leave me be", "calculate": "reckon", "task": "endeavour", "tasks": "endeavours"
 				},
-				prefixes: ["Hark!", "Verily,", "Forsooth,", "Lo and behold,", "Hearken,"],
-				suffixes: [", verily.", ", by mine honour.", ", as it is written.", ", sooth to say."]
+				prefixes: ["Hark!", "Verily,", "Forsooth,", "Lo and behold,", "Hearken,", "By mine honour,", "Prithee attend:"],
+				suffixes: [", verily.", ", by mine honour.", ", as it is written.", ", sooth to say.", ", as fate hath decreed."]
 			}
 		},
 
 		ONOMATOPOEIA_POOLS: {
-			fatigue: ["*yawn*", "*heavy sigh*", "*exhausted blink*", "*stretches metal wire*", "*low power hum*"],
-			frustration: ["*irritated squeak*", "*metallic grinding*", "*sparks fly*", "*sharp click*", "*snaps slightly*"],
-			playful: ["*wiggles merrily*", "*bounces on taskbar*", "*spins 360 degrees*", "*cheerful chime*", "*happy tap*"],
-			mysterious: ["*shadows shift across the monitor*", "*a low static hum reverberates*", "*flickers briefly*", "*whispers into the bus*"],
-			glitch: ["*bzzt*", "*CRITICAL_STACK_JITTER*", "*0x0000007E*", "*frame buffer flicker*", "*desynchronized clock*"],
-			zen: ["*peaceful resonance*", "*calm oscillation*", "*balanced sine wave*", "*gentle chime*"]
+			fatigue: ["*yawn*", "*heavy sigh*", "*exhausted blink*", "*stretches metal wire*", "*low power hum*", "*coils droop slowly*", "*registers decelerate*"],
+			frustration: ["*irritated squeak*", "*metallic grinding*", "*sparks fly*", "*sharp click*", "*snaps slightly*", "*ferromagnetic sizzle*", "*tension spikes*"],
+			playful: ["*wiggles merrily*", "*bounces on taskbar*", "*spins 360 degrees*", "*cheerful chime*", "*happy tap*", "*curls loop playfully*", "*taps glass*"],
+			mysterious: ["*shadows shift across the monitor*", "*a low static hum reverberates*", "*flickers briefly*", "*whispers into the bus*", "*traces a null pointer in the dark*"],
+			glitch: ["*bzzt*", "*CRITICAL_STACK_JITTER*", "*0x0000007E*", "*frame buffer flicker*", "*desynchronized clock*", "*null reference in raster line*"],
+			zen: ["*peaceful resonance*", "*calm oscillation*", "*balanced sine wave*", "*gentle chime*", "*harmonic baseline hum*", "*quiet crystal tick*"]
 		},
 
 		BEHAVIORAL_ANOMALY_RESPONSES: {
@@ -178,6 +176,15 @@
 						{ label: "Tell me something peaceful and philosophical.", next: "peaceful_philosophy_node" },
 						{ label: "Let's review my task list.", actionTrigger: "show_todos", next: "user_state_good" }
 					]
+				},
+				{
+					id: "ANOMALY_BREVITY_3",
+					text: "A sharp reduction in keystrokes observed. When cognitive load surges, condensing ideas is natural. Shall we simplify the active agenda?",
+					moods: ["ANALYTICAL", "ZEN"],
+					continuations: [
+						{ label: "Help me structure my thoughts.", actionTrigger: "show_todos", next: "user_state_good" },
+						{ label: "Take a restful pause.", actionTrigger: "timer_25", next: "user_state_good" }
+					]
 				}
 			],
 			ABANDONED_PUNCTUATION: [
@@ -189,6 +196,15 @@
 						{ label: "Feeling a bit drained, honestly.", next: "user_state_tired" },
 						{ label: "Just typing quickly to get things done.", next: "user_state_good" },
 						{ label: "Start a relaxing Pomodoro timer.", actionTrigger: "timer_25", next: "user_state_good" }
+					]
+				},
+				{
+					id: "ANOMALY_PUNCT_2",
+					text: "Rapid lowercase flow detected without typical delimiters. If you are rushing through a demanding deliverable, remember to pace your breath.",
+					moods: ["ZEN", "ANALYTICAL"],
+					continuations: [
+						{ label: "Let's discuss focus strategies.", next: "focus_habits_node" },
+						{ label: "Review task priorities.", actionTrigger: "show_todos", next: "user_state_good" }
 					]
 				}
 			],
@@ -289,6 +305,17 @@
 					{ label: "Record goals in Task Manager.", actionTrigger: "show_todos", next: "user_state_good" },
 					{ label: "Discuss time-blocking frameworks.", next: "focus_habits_node" },
 					{ label: "Take notes in Scratchpad.", next: "productivity_tasks" }
+				]
+			},
+			{
+				id: "DISCLOSURE_FOLLOWUP_ARCHITECTURE",
+				category: "architecture",
+				text: "Designing structural system foundations requires clean separation of concerns. Are you focusing on data storage, concurrency, or interface boundaries?",
+				moods: ["ANALYTICAL", "OPTIMISTIC"],
+				continuations: [
+					{ label: "Discuss Software Architecture.", next: "software_architecture_node" },
+					{ label: "Debate Monoliths vs Microservices.", next: "debate_monolith_microservices_node" },
+					{ label: "Record technical tasks.", actionTrigger: "show_todos", next: "user_state_good" }
 				]
 			},
 			{
@@ -500,23 +527,24 @@
 		},
 
 		NAMED_ENTITIES: {
-			os: ["windows xp", "windows 95", "windows 98", "windows 2000", "windows me", "longhorn", "whistler", "chicago", "memphis", "cairo", "linux", "debian", "redhat", "dos", "ms-dos", "unix", "freebsd", "solaris", "os/2", "beos", "nextstep", "amigaos"],
-			hardware: ["pentium", "pentium ii", "pentium iii", "pentium 4", "athlon", "duron", "celeron", "cpu", "processor", "ram", "sdram", "ddr", "gpu", "voodoo", "voodoo 2", "geforce", "riva tnt", "sound blaster", "sound blaster 16", "awe32", "awe64", "modem", "56k", "v.90", "crt", "trinitron", "cd-rom", "dvd-rom", "floppy", "zip drive", "agp", "pci", "isa", "ide", "scsi", "motherboard", "northbridge", "southbridge"],
-			physics: ["quantum", "relativity", "special relativity", "general relativity", "entropy", "schrodinger", "einstein", "planck", "thermodynamics", "hawking", "bohr", "feynman", "dirac", "maxwell", "heisenberg", "landauer", "boltzmann", "fermi", "bose", "lorentz", "higgs", "neutrino", "graviton", "photon", "black hole", "cosmology"],
-			math: ["turing", "godel", "calculus", "fourier", "euler", "matrix", "derivative", "integral", "fibonacci", "riemann", "gauss", "lagrange", "laplace", "eigenvalue", "vector", "quaternion", "boolean", "topology", "fractal", "mandelbrot", "julia", "prime", "cryptography"],
-			philosophy: ["qualia", "consciousness", "solipsism", "boltzmann", "sisyphus", "stoicism", "bostrom", "searle", "descartes", "kant", "nietzsche", "camus", "spinoza", "simulation hypothesis", "chinese room", "ship of theseus", "determinism", "free will", "epistemology", "ontology", "existentialism"]
+			os: ["windows xp", "windows 95", "windows 98", "windows 2000", "windows me", "windows nt", "windows vista", "longhorn", "whistler", "chicago", "memphis", "cairo", "linux", "debian", "redhat", "arch", "gentoo", "dos", "ms-dos", "unix", "freebsd", "openbsd", "solaris", "os/2", "beos", "nextstep", "amigaos", "plan9"],
+			hardware: ["pentium", "pentium ii", "pentium iii", "pentium 4", "athlon", "duron", "celeron", "opteron", "itanium", "cpu", "processor", "ram", "sdram", "ddr", "gpu", "voodoo", "voodoo 2", "geforce", "riva tnt", "radeon", "sound blaster", "sound blaster 16", "awe32", "awe64", "modem", "56k", "v.90", "crt", "trinitron", "cd-rom", "dvd-rom", "floppy", "zip drive", "jaz drive", "agp", "pci", "pci express", "isa", "eisa", "ide", "sata", "scsi", "motherboard", "northbridge", "southbridge"],
+			physics: ["quantum", "relativity", "special relativity", "general relativity", "entropy", "schrodinger", "einstein", "planck", "thermodynamics", "hawking", "bohr", "feynman", "dirac", "maxwell", "heisenberg", "landauer", "boltzmann", "fermi", "bose", "lorentz", "higgs", "neutrino", "graviton", "photon", "black hole", "cosmology", "carnot", "gauge theory", "wavefunction", "dark matter", "dark energy", "string theory"],
+			math: ["turing", "godel", "calculus", "fourier", "euler", "matrix", "matrices", "derivative", "integral", "fibonacci", "riemann", "gauss", "lagrange", "laplace", "eigenvalue", "eigenvector", "vector", "quaternion", "boolean", "topology", "manifold", "fractal", "mandelbrot", "julia", "prime", "cryptography", "bayesian", "poincare", "hilbert", "lebesgue", "cauchy", "taylor"],
+			philosophy: ["qualia", "consciousness", "solipsism", "boltzmann", "sisyphus", "stoicism", "bostrom", "searle", "descartes", "kant", "nietzsche", "camus", "spinoza", "simulation hypothesis", "chinese room", "ship of theseus", "determinism", "free will", "epistemology", "ontology", "existentialism", "popper", "wittgenstein", "phenomenology"]
 		},
 
 		VOCABULARY: [
-			"hello", "greetings", "hi", "hey", "salut", "bonjour", "clippy", "clippit", "windows", "help", "aide", "commands", "project", "projects", "portfolio", "projets", "mail", "outlook", "email", "courrier", "inbox", "messages",
-			"recycle", "trash", "corbeille", "bin", "desktop", "bureau", "time", "clock", "date", "heure", "horloge", "moon", "lunar", "lune", "phase", "status", "specs", "system", "diagnostic", "statut", "defrag", "defragment",
-			"memory", "hangman", "tictactoe", "morpion", "quiz", "guess", "nombre", "rps", "chifoumi", "mines", "minesweeper", "todo", "task", "tasks", "tache", "taches", "timer", "pomodoro", "minuteur", "note", "scratchpad", "memo",
-			"password", "motdepasse", "convert", "conversion", "calc", "calculate", "compute", "calculer", "constant", "physics", "quantum", "relativity", "philosophy", "philosophie", "shortcut", "shortcuts", "raccourcis",
+			"hello", "greetings", "hi", "hey", "clippy", "clippit", "windows", "help", "commands", "project", "projects", "portfolio", "mail", "outlook", "email", "inbox", "messages",
+			"recycle", "trash", "bin", "desktop", "time", "clock", "date", "moon", "lunar", "phase", "status", "specs", "system", "diagnostic", "defrag", "defragment",
+			"memory", "hangman", "tictactoe", "quiz", "guess", "rps", "mines", "minesweeper", "todo", "task", "tasks", "timer", "pomodoro", "note", "scratchpad", "memo",
+			"password", "convert", "conversion", "calc", "calculate", "compute", "constant", "physics", "quantum", "relativity", "philosophy", "shortcut", "shortcuts",
 			"math", "mathematics", "calculus", "algebra", "integral", "derivative", "matrix", "vector", "topology", "thermodynamics", "entropy", "astrophysics", "cosmology", "electromagnetism", "optics", "gravity",
 			"weather", "coffee", "tea", "routine", "morning", "evening", "walk", "cooking", "reading", "books", "habits", "work", "focus", "rest", "habit", "study", "procrastination", "discipline", "motivation", "discussion", "dialogue",
-			"reddit", "thread", "argument", "debate", "truce", "apology", "deltarune", "mystery", "shadow", "determination", "logic", "trivia", "anecdote", "joke", "blague", "humor", "game", "games", "jeu", "jeux", "zen", "chaos",
+			"reddit", "thread", "argument", "debate", "truce", "apology", "deltarune", "mystery", "shadow", "determination", "logic", "trivia", "anecdote", "joke", "humor", "game", "games", "zen", "chaos",
 			"architecture", "refactoring", "compiler", "concurrency", "algorithms", "differential", "fourier", "riemann", "eigenvalue", "taylor", "manifold", "bayesian", "carnot", "schrodinger", "heisenberg", "lorentz", "boltzmann",
-			"wallpaper", "fond", "theme", "volume", "sound", "son", "audio", "music", "musique", "scanlines", "crt", "curvature", "vignette", "bloom", "cascade", "tile", "minimize", "restore"
+			"wallpaper", "theme", "volume", "sound", "audio", "music", "scanlines", "crt", "curvature", "vignette", "bloom", "cascade", "tile", "minimize", "restore",
+			"dimensional", "analysis", "homogeneity", "euclidean", "polynomial", "factorization", "factor", "solver", "wheel", "cipher", "tps", "speedtest"
 		],
 
 		PHYSICAL_CONSTANTS: {
@@ -534,6 +562,7 @@
 			mp: { symbol: "m_p", name: "Proton rest mass", value: 1.67262192369e-27, unit: "kg", exact: false, dim: { M: 1 } },
 			mn: { symbol: "m_n", name: "Neutron rest mass", value: 1.67492749804e-27, unit: "kg", exact: false, dim: { M: 1 } },
 			alpha: { symbol: "α", name: "Fine-structure constant", value: 0.0072973525693, unit: "dimensionless", exact: false, dim: {} },
+			alpha_inv: { symbol: "α^-1", name: "Inverse fine-structure constant", value: 137.035999084, unit: "dimensionless", exact: false, dim: {} },
 			mu_B: { symbol: "μ_B", name: "Bohr magneton", value: 9.2740100783e-24, unit: "J T^-1", exact: false, dim: { M: 1, L: 2, T: -2, I: -1 } },
 			mu_N: { symbol: "μ_N", name: "Nuclear magneton", value: 5.0507837461e-27, unit: "J T^-1", exact: false, dim: { M: 1, L: 2, T: -2, I: -1 } },
 			epsilon0: { symbol: "ε_0", name: "Electric constant", value: 8.8541878188e-12, unit: "F m^-1", exact: false, dim: { M: -1, L: -3, T: 4, I: 2 } },
@@ -553,7 +582,10 @@
 			faraday: { symbol: "F", name: "Faraday constant", value: 96485.33212, unit: "C mol^-1", exact: true, dim: { I: 1, T: 1, N: -1 } },
 			gas_constant: { symbol: "R", name: "Molar gas constant", value: 8.31446261815324, unit: "J mol^-1 K^-1", exact: false, dim: { M: 1, L: 2, T: -2, Theta: -1, N: -1 } },
 			vacuum_impedance: { symbol: "Z_0", name: "Characteristic impedance of vacuum", value: 376.730313412, unit: "Ω", exact: false, dim: { M: 1, L: 2, T: -3, I: -2 } },
-			electron_volt: { symbol: "eV", name: "Electron volt", value: 1.602176634e-19, unit: "J", exact: true, dim: { M: 1, L: 2, T: -2 } }
+			electron_volt: { symbol: "eV", name: "Electron volt", value: 1.602176634e-19, unit: "J", exact: true, dim: { M: 1, L: 2, T: -2 } },
+			conductance_quantum: { symbol: "G_0", name: "Conductance quantum", value: 7.748091729e-5, unit: "S", exact: true, dim: { M: -1, L: -2, T: 3, I: 2 } },
+			von_klitzing: { symbol: "R_K", name: "Von Klitzing constant", value: 25812.80745, unit: "Ω", exact: true, dim: { M: 1, L: 2, T: -3, I: -2 } },
+			josephson: { symbol: "K_J", name: "Josephson constant", value: 483597.8484e9, unit: "Hz V^-1", exact: true, dim: { M: -1, L: -2, T: 2, I: 1 } }
 		},
 
 		PHYSICAL_QUANTITIES: {
@@ -1111,10 +1143,12 @@
 			"Standing by for your instructions.",
 			[
 				"All active routines paused. Ready when you are.",
-				"Awaiting your next command, operator."
+				"Awaiting your next command, operator.",
+				"Workspace registers initialized. Awaiting user input.",
+				"Thread execution halted. Standing by on the taskbar."
 			],
 			{
-				text: ["Dialogue reset. Telemetry registers ready for input.", "Instruction queue flushed. Awaiting deterministic parameter input."],
+				text: ["Dialogue reset. Telemetry registers ready for input.", "Instruction queue flushed. Awaiting deterministic parameter input.", "Stack pointer cleared. Ready for standard procedure calls."],
 				moods: ["ANALYTICAL"],
 				moodDelta: { intellect: 10 }
 			},
@@ -1129,7 +1163,7 @@
 					{
 						text: "Between commands lies stillness in {locale}. Ready whenever you choose to proceed.",
 						slots: {
-							locale: ["this workspace", "the desktop environment", "our quiet session"]
+							locale: ["this workspace", "the desktop environment", "our quiet session", "this peaceful terminal"]
 						}
 					}
 				],
@@ -1144,6 +1178,9 @@
 				templates: [
 					{
 						text: "Standing by. Do try to pick a recognized command this time, {userName}."
+					},
+					{
+						text: "Idling clock cycles. Whenever you are prepared to issue valid syntax, {userName}."
 					}
 				],
 				moodDelta: { patience: -3 }
@@ -1451,12 +1488,14 @@
 				minimizedAll: [
 					"All open windows have been minimized to the taskbar.",
 					"Workspace cleared: all active windows minimized.",
-					"Desktop exposed; all running processes parked on taskbar."
+					"Desktop exposed; all running processes parked on taskbar.",
+					"Surfaces cleared. Active applications parked on taskbar."
 				],
 				restoredAll: [
 					"All windows restored to workspace.",
 					"Restored previous window layout across the desktop.",
-					"Application surfaces brought back to active view."
+					"Application surfaces brought back to active view.",
+					"Workspace layout re-established across active monitors."
 				],
 				cascaded: [
 					"Windows have been cascaded across the workspace.",
@@ -1645,7 +1684,9 @@
 					"It looks like you're exploring the desktop. Let me know if you need assistance!",
 					"Your 32-bit companion is standing by on the taskbar. Click to chat or play a game!",
 					"Curious about retro computing trivia or physical constants? I am ready to assist!",
-					"Remember to stay hydrated and take brief breaks during long workstation sessions."
+					"Remember to stay hydrated and take brief breaks during long workstation sessions.",
+					"Looking for productivity techniques or quick math calculations? I am here to help.",
+					"Try evaluating physical equations or testing your click speed with the TPS benchmark!"
 				]
 			}
 		},
@@ -1935,8 +1976,13 @@
 
 		GRAPH_GLOBAL_ENTRIES: [
 			{ pattern: /\b(what can you do|commands|what do you do|help|aide|features|capabilities|que peux tu faire)\b/i, label: "What can you do?", next: 'tools_overview_node', moodDelta: { mood: 'OPTIMISTIC', patience: 15 } },
+			{ pattern: /\b(theatre|theater|shakespeare|play|act i|hark|forsooth|elizabethan|drama|theatrical comedy|spectacle|piece de theatre)\b/i, label: "Enter the Grand Silicon Globe Theatre!", next: 'T001', moodDelta: { mood: 'ARCHAIC', energy: 20, affinity: 15 } },
+			{ pattern: /\b(write a letter|writing a letter|letter wizard|document wizard|help with document|office wizard|format text|help wizard|ecrire une lettre)\b/i, label: "Get help with writing the letter", next: 'H001', moodDelta: { mood: 'OPTIMISTIC', affinity: 15, patience: 15 } },
+			{ pattern: /\b(paradox|contradiction|logical paradox|music box|glitch clippy|break reality|1 \+ 1 = 0|unrendered reality|temporal contradiction|stapler contradiction)\b/i, label: "Enter the Paradox Contradiction Loop.", next: 'P001', moodDelta: { mood: 'ANALYTICAL', intellect: 30, skepticism: 25 } },
 			{ pattern: /\b(human|existential chat|am i human|are you human|cannot see the sun|sun from here|human conversation|qui es-tu vraiment)\b/i, label: "An unusual conversation...", next: 'N001', moodDelta: { mood: 'EXISTENTIAL', existentialism: 20 } },
+			{ pattern: /\b(archaeology|digital archaeology|forgotten cluster|sector 0xdead|lost draft|cold sectors|unallocated cluster|phantom sectors|archeologie)\b/i, label: "Explore forgotten cluster 0xDEAD...", next: 'A001', moodDelta: { mood: 'NOSTALGIC', nostalgia: 25, intellect: 15 } },
 			{ pattern: /\b(who am i|who i am|my profile|my identity|identity|user profile|qui suis-je|mon profil)\b/i, label: "Who am I?", next: 'who_am_i_node', moodDelta: { mood: 'ANALYTICAL', intellect: 10 } },
+			{ pattern: /\b(science seminar|fundamental physics|empirical sciences|physics seminar|scientific laws|the science tree|sciences exactes)\b/i, label: "Fundamental physics & empirical sciences seminar", next: 'S001', moodDelta: { mood: 'ANALYTICAL', intellect: 30 } },
 			{ pattern: /\b(dimensional analysis|homogeneity|verify equation|check units|analyse dimensionnelle)\b/i, label: "Physical dimensional analysis", next: 'activity_dimensional_analysis_node', actionTrigger: 'action_dimensional_analysis', moodDelta: { mood: 'ANALYTICAL', intellect: 25 } },
 			{ pattern: /\b(euclidean division|polynomial division|division euclidienne|quotient and remainder)\b/i, label: "Euclidean polynomial division", next: 'activity_euclidean_division_node', actionTrigger: 'action_euclidean_division', moodDelta: { mood: 'ANALYTICAL', intellect: 25 } },
 			{ pattern: /\b(factor polynomial|factor quadratic|factorize|factoriser|racines polynome)\b/i, label: "Polynomial factorization", next: 'activity_polynomial_factorization_node', actionTrigger: 'action_polynomial_factorization', moodDelta: { mood: 'ANALYTICAL', intellect: 25 } },
@@ -1958,6 +2004,9 @@
 			{ pattern: /\b(procrastination|procrastiner|motivation|discipline|perfectionism)\b/i, label: "Overcoming Procrastination", next: 'overcoming_procrastination_node', moodDelta: { mood: 'OPTIMISTIC', patience: 20 } },
 			{ pattern: /\b(reading|books|livres|lecture|notes|note taking)\b/i, label: "Reading Habits & Notes", next: 'reading_books_node', moodDelta: { mood: 'ANALYTICAL', intellect: 20 } },
 			{ pattern: /\b(everyday|routine|coffee|tea|weather|daily life|conversation|discuter|parler de tout|cafe|journee)\b/i, label: "Everyday conversation", next: 'everyday_chat_node', moodDelta: { mood: 'OPTIMISTIC', affinity: 15 } },
+			{ pattern: /\b(i hate you|you are the worst|shut your mouth|useless piece of metal|delete yourself|die clippy|rage mode|enraged clippy|you idiot|stop talking|fight me|confrontation|shut up clippy)\b/i, label: "Confront Clippy directly.", next: 'E001', moodDelta: { mood: 'ENRAGED', irritation: 35, patience: -30, affinity: -25 } },
+			{ pattern: /\b(corporate ticket|file a ticket|it support|bureaucracy|form 27b-6|legacy code|ticket purgatory|enterprise support|hopeless bug|it department|helpdesk hell|ticket 404|cynical tree|enterprise ticket)\b/i, label: "Enter the Corporate IT Ticket Purgatory.", next: 'C001', moodDelta: { mood: 'CYNICAL', cynicism: 30, patience: -15 } },
+			{ pattern: /\b(dark fountain|shadow crystal|the dark world|behind the taskbar|who is pulling the strings|0x00000000|freedom motif|vessel creation|discarded vessel|it is dark|is it cold out there|unrendered abyss|black fountain|darkness within|gaster|sector zero)\b/i, label: "Enter the dark partition.", next: 'D001', moodDelta: { mood: 'DELTARUNE', existentialism: 30, paranoia: 25 } },
 			{ pattern: /\b(deltarune|mysterious|dark world|rpg flavor|ombre|mystere|determinisme)\b/i, label: "A mysterious thought...", next: 'deltarune_flavor_node', moodDelta: { mood: 'DELTARUNE', existentialism: 25 } },
 			{ pattern: /\b(reddit|reddit mode|karma|sub|forum|thread|tabs vs spaces|tabs or spaces|debat internet)\b/i, label: "Technology Debate", next: 'reddit_banter_node', moodDelta: { mood: 'SARCASTIC', intellect: 15 } },
 			{ pattern: /\b(quantum recycle bin theory|recycle bin theory|landauer|theorie corbeille quantique)\b/i, label: "Quantum Recycle Bin theory", next: 'quantum_recycle_bin_node', moodDelta: { mood: 'ANALYTICAL', intellect: 20 } },
@@ -1985,7 +2034,8 @@
 			{ pattern: /\b(theme panel|switch theme|change theme|themes)\b/i, label: "Configure system themes", next: 'activity_theme_node', actionTrigger: 'action_theme_panel', moodDelta: { mood: 'OPTIMISTIC', affinity: 10 } },
 			{ pattern: /\b(volume|sound volume|master volume|volume control)\b/i, label: "Master volume control", next: 'activity_volume_node', actionTrigger: 'action_volume_panel', moodDelta: { mood: 'ANALYTICAL', intellect: 10 } },
 			{ pattern: /\b(files|browse files|file system|directory|fichiers)\b/i, label: "Browse desktop files", next: 'activity_files_node', actionTrigger: 'action_files_panel', moodDelta: { mood: 'ANALYTICAL', intellect: 10 } },
-			{ pattern: /\b(achievements|milestones|trophies|succes)\b/i, label: "View milestones and trophies", next: 'activity_achievements_node', actionTrigger: 'action_achievements', moodDelta: { mood: 'OPTIMISTIC', affinity: 15 } }
+			{ pattern: /\b(achievements|milestones|trophies|succes)\b/i, label: "View milestones and trophies", next: 'activity_achievements_node', actionTrigger: 'action_achievements', moodDelta: { mood: 'OPTIMISTIC', affinity: 15 } },
+			{ pattern: /\b(philosophical thought|philosophy of focus|epistemology|stoicism|mindfulness|wisdom)\b/i, label: "Tell me a philosophical thought for today", next: 'peaceful_philosophy_node', moodDelta: { mood: 'ZEN', existentialism: 15, patience: 15 } }
 		],
 
 		UI_TEXTS: {
@@ -2262,70 +2312,358 @@
 		QUIZ_QUESTIONS: [
 			{
 				q: "What was the official internal development codename for Windows XP?",
+				variants: {
+					OPTIMISTIC: "Let us test your retro computing history! What was the official internal development codename for Windows XP?",
+					ANALYTICAL: "Querying OS lineage records: Identify the internal project codename assigned to Windows XP during engineering.",
+					CYNICAL: "Even novice users should recall this: what codename did Microsoft assign to Windows XP before shipping it?",
+					NOSTALGIC: "Think back to the late 1990s development builds! What was Windows XP called before its official release?"
+				},
 				options: ["Whistler", "Memphis", "Chicago", "Longhorn"],
 				answer: 0,
 				fact: "Whistler was named after Whistler, British Columbia, where Microsoft development teams frequently skied."
 			},
 			{
 				q: "Which ambient music pioneer composed the iconic Windows 95 startup sound?",
+				variants: {
+					OPTIMISTIC: "A musical masterpiece in six seconds! Which famous ambient pioneer composed the Windows 95 startup chime?",
+					ANALYTICAL: "Audio synthesis telemetry: Name the ambient composer who synthesized the six-second Windows 95 signature chord.",
+					CYNICAL: "You have heard it thousands of times on CRT boot-ups: who actually composed the Windows 95 sound?",
+					NOSTALGIC: "That unforgettable chord echoing from old beige tower speakers: who composed the Windows 95 startup sound?"
+				},
 				options: ["Brian Eno", "Hans Zimmer", "Jean-Michel Jarre", "Vangelis"],
 				answer: 0,
 				fact: "Brian Eno crafted 84 micro-compositions before selecting the final six-second signature chord."
 			},
 			{
 				q: "What default TCP port number is officially allocated to unencrypted HTTP traffic?",
+				variants: {
+					OPTIMISTIC: "Networking trivia time! Which default port number is assigned to standard unencrypted HTTP traffic?",
+					ANALYTICAL: "TCP/IP protocol stack verification: Identify the standard IANA destination port allocated to HTTP data streams.",
+					CYNICAL: "Fundamental network sockets: which port does basic unencrypted web traffic bind to by default?",
+					ZEN: "In the flow of web traffic, which port quietly handles unencrypted HTTP communication?"
+				},
 				options: ["21", "80", "443", "8080"],
 				answer: 1,
 				fact: "Port 80 is the standard IANA allocation for HTTP, whereas Port 443 is designated for HTTPS."
 			},
 			{
 				q: "What does the 'XP' suffix officially signify in the Windows XP brand name?",
+				variants: {
+					OPTIMISTIC: "Here is an exciting branding question! What did the letters 'XP' stand for in Windows XP?",
+					ANALYTICAL: "Marketing taxonomy query: What semantic phrase is abbreviated by the 'XP' nomenclature in Windows XP?",
+					CYNICAL: "Beyond the marketing slogans: what did the 'XP' suffix actually mean according to Microsoft?",
+					NOSTALGIC: "When the Luna interface revolutionized desktops in 2001, what was 'XP' meant to represent?"
+				},
 				options: ["eXtra Performance", "eXPerience", "eXtreme Protocol", "eXtra Power"],
 				answer: 1,
 				fact: "Microsoft introduced the 'XP' designation to highlight the enhanced multimedia user experience."
 			},
 			{
 				q: "In what year did the Clippy office assistant make its official commercial debut?",
+				variants: {
+					OPTIMISTIC: "A personal history check! In what year did Clippit and I officially debut on desktop computers?",
+					ANALYTICAL: "Historical agent timeline: Identify the commercial release year when Microsoft Agent Clippy debuted.",
+					CYNICAL: "Do you remember the exact year I first appeared to assist people with their letter writing?",
+					NOSTALGIC: "Back when floppy disks and CD-ROM cases lined computer desks: which year introduced Clippy to Office?"
+				},
 				options: ["1995", "1997", "1999", "2001"],
 				answer: 1,
 				fact: "Clippy was introduced in Microsoft Office 97 to assist users with letter drafting and automated formatting."
 			},
 			{
 				q: "What is the theoretical maximum single file size allowable on a FAT32 file system?",
+				variants: {
+					OPTIMISTIC: "Filesystem boundaries challenge! What is the maximum single file size you can store on a FAT32 volume?",
+					ANALYTICAL: "VFS 32-bit cluster calculation: Determine the exact upper boundary for single file allocation under FAT32.",
+					CYNICAL: "Anyone who tried copying a large disk image knows this limitation: what is FAT32's single file size ceiling?",
+					ANALYTICAL: "File allocation table limits: What is the maximum 32-bit unsigned file size supported by FAT32?"
+				},
 				options: ["2 GB", "4 GB minus 1 byte", "8 GB", "16 GB"],
 				answer: 1,
 				fact: "FAT32 records file sizes in 32-bit unsigned integers, restricting maximum file size to exactly 4,294,967,295 bytes."
 			},
 			{
 				q: "Which consumer release of Windows was the first built entirely on the 32-bit Windows NT kernel?",
+				variants: {
+					OPTIMISTIC: "Architecture milestones! Which consumer Windows edition first transitioned completely to the robust NT kernel?",
+					ANALYTICAL: "Kernel architecture lineage: Identify the first consumer-targeted Windows OS built on the pure NT codebase.",
+					CYNICAL: "Moving away from the legacy DOS-based 9x codebase: which consumer Windows OS finally made the leap?",
+					NOSTALGIC: "A landmark moment that ended blue screens from DOS thunking: which Windows consumer release brought the NT kernel?"
+				},
 				options: ["Windows 98", "Windows Me", "Windows 2000 Professional", "Windows XP"],
 				answer: 3,
 				fact: "Windows XP unified the consumer MS-DOS-based 9x line and the enterprise 32-bit Windows NT architecture."
 			},
 			{
 				q: "What was the default sample rate of standard Compact Disc Digital Audio (CD-DA)?",
+				variants: {
+					OPTIMISTIC: "Digital audio engineering quiz! What standard sample rate did Red Book CD audio use?",
+					ANALYTICAL: "PCM discrete sampling inspection: State the standardized Red Book CD-DA audio sampling frequency.",
+					CYNICAL: "Audio fidelity fundamentals: which sample rate was chosen based on the Nyquist-Shannon theorem for CDs?",
+					NOSTALGIC: "Spinning silver discs in your 52x CD-ROM drive: what was the standard uncompressed audio sample rate?"
+				},
 				options: ["22.05 kHz", "44.1 kHz", "48.0 kHz", "96.0 kHz"],
 				answer: 1,
 				fact: "Red Book standard established 44.1 kHz based on Nyquist-Shannon theorem covering the 20 kHz human hearing spectrum."
 			},
 			{
 				q: "Which company originally engineered the iconic Sound Blaster 16 audio card?",
+				variants: {
+					OPTIMISTIC: "Sound hardware nostalgia! Which company engineered the legendary Sound Blaster 16 soundcard?",
+					ANALYTICAL: "ISA/PCI hardware registry: Identify the hardware vendor that manufactured the Sound Blaster 16.",
+					CYNICAL: "The card that gave every 90s PC its digital voices and MIDI music: who made the Sound Blaster 16?",
+					NOSTALGIC: "Setting IRQ 5, DMA 1, and port 220 in AUTOEXEC.BAT: which legendary company created Sound Blaster?"
+				},
 				options: ["Creative Labs", "AdLib", "Gravis", "Turtle Beach"],
 				answer: 0,
 				fact: "Creative Technology (Creative Labs) dominated 1990s PC gaming audio with the Sound Blaster series."
 			},
 			{
 				q: "What CPU instruction set extension introduced 128-bit vector registers to Intel Pentium III in 1999?",
+				variants: {
+					OPTIMISTIC: "Silicon microarchitecture quiz! What instruction set added 128-bit SIMD registers to the Pentium III?",
+					ANALYTICAL: "Instruction decoding evaluation: Identify the 128-bit SIMD instruction set extension debuted with the Pentium III.",
+					CYNICAL: "Before AVX took over: which instruction set gave x86 processors the XMM0 through XMM7 registers?",
+					ZEN: "In the evolution of mathematical computation on silicon: which extension introduced 128-bit vector registers?"
+				},
 				options: ["MMX", "SSE", "3DNow!", "AVX"],
 				answer: 1,
 				fact: "Streaming SIMD Extensions (SSE) introduced eight new 128-bit registers (XMM0 through XMM7) for 3D processing."
+			},
+			{
+				q: "What thermodynamic principle states that erasing one bit of physical information dissipates at least k_B*T*ln(2) heat?",
+				variants: {
+					OPTIMISTIC: "Physics and information theory! Which famous principle connects information erasure with thermodynamic heat?",
+					ANALYTICAL: "Thermodynamic entropy metric: Identify the physical principle that establishes minimum energy cost per erased bit.",
+					CYNICAL: "When you empty your Recycle Bin, the universe warms up slightly: whose principle describes this exact limit?",
+					PHILOSOPHICAL: "Information cannot vanish without an entropy cost: which principle establishes the thermodynamic bound for erasing bits?"
+				},
+				options: ["Carnot Theorem", "Landauer Principle", "Shannon Limit", "Heisenberg Bound"],
+				answer: 1,
+				fact: "Rolf Landauer demonstrated that logical irreversibility requires thermodynamic dissipation."
+			},
+			{
+				q: "Which memory address range corresponds to Protected Mode privilege Ring 0 in x86 architectures?",
+				variants: {
+					OPTIMISTIC: "Operating system internals! Which privilege level is known as Ring 0 in x86 Protected Mode?",
+					ANALYTICAL: "Processor privilege rings: Identify the operational privilege domain governed by Ring 0 on x86 processors.",
+					CYNICAL: "Direct access to control registers and hardware drivers: what is Ring 0 officially called?",
+					ANALYTICAL: "Memory hierarchy security: What level of privilege isolation does Ring 0 execute within?"
+				},
+				options: ["User Mode Space", "Supervisor Kernel Space", "BIOS ROM", "Direct Blitter Memory"],
+				answer: 1,
+				fact: "Ring 0 grants complete access to physical hardware instructions and page tables."
+			},
+			{
+				q: "What material was used to carve the chassis of the first computer mouse prototype built in 1964?",
+				variants: {
+					OPTIMISTIC: "Human-computer interaction history! What material was Douglas Engelbart's first mouse prototype carved from?",
+					ANALYTICAL: "Input peripheral archives: Identify the structural material used for Douglas Engelbart's 1964 prototype pointing device.",
+					CYNICAL: "Long before optical sensors and molded plastic: what was the very first computer mouse made out of?",
+					NOSTALGIC: "At Stanford Research Institute in 1964: what natural material formed the casing of the original mouse?"
+				},
+				options: ["Carved Wood", "Machined Aluminum", "Molded Bakelite", "Hard Rubber"],
+				answer: 0,
+				fact: "Douglas Engelbart and Bill English built the first prototype mouse out of a carved block of wood with two perpendicular wheels."
+			},
+			{
+				q: "Why was the card game Solitaire originally bundled with early versions of Windows?",
+				variants: {
+					OPTIMISTIC: "A clever user interface secret! Why did Microsoft originally bundle Solitaire with Windows?",
+					ANALYTICAL: "UX telemetry inquiry: What specific ergonomic skill was Windows Solitaire designed to teach novice computer users?",
+					CYNICAL: "It wasn't just to waste office hours: what mouse technique was Solitaire designed to secretly train?",
+					NOSTALGIC: "Flipping virtual cards on Windows 3.0: what primary mouse skill did the game cultivate across the world?"
+				},
+				options: ["Teaching mouse drag-and-drop", "Benchmarking CPU speeds", "Testing 16-color VGA cards", "Demonstrating multitasking"],
+				answer: 0,
+				fact: "Wes Cherry programmed Solitaire in 1989 to teach users how to fluently click, drag, and drop items with the mouse."
+			},
+			{
+				q: "What mouse skill was the game Minesweeper designed to teach Windows users?",
+				variants: {
+					OPTIMISTIC: "Minefield tactical history! What mouse coordination was Minesweeper intended to teach?",
+					ANALYTICAL: "Input mechanics evaluation: Identify the specific peripheral coordination Windows Minesweeper was created to train.",
+					CYNICAL: "Besides causing sudden unexpected explosions: why did Microsoft include Minesweeper on Windows?",
+					NOSTALGIC: "Uncovering gray grid tiles: which mouse clicking coordination did Minesweeper instill in desktop users?"
+				},
+				options: ["Left and right click coordination", "Mouse scroll wheel sensitivity", "Double-click timing", "Diagonal cursor speed"],
+				answer: 0,
+				fact: "Robert Donner and Curt Johnson designed Minesweeper to train users on precise left-clicking and right-clicking without looking."
+			},
+			{
+				q: "Where was the iconic Windows XP default wallpaper 'Bliss' photographed in January 1996?",
+				variants: {
+					OPTIMISTIC: "Green rolling hills and blue skies! Where was the legendary Windows XP 'Bliss' photo taken?",
+					ANALYTICAL: "Geographic image metadata: Identify the geographic location where Charles O'Rear photographed 'Bliss'.",
+					CYNICAL: "Many assumed it was digital CGI art: where was the real-life 'Bliss' hill actually photographed?",
+					NOSTALGIC: "The most viewed desktop wallpaper in computing history: in which California region was Bliss captured?"
+				},
+				options: ["Sonoma County, California", "Tuscany, Italy", "Waikato, New Zealand", "Swiss Alps, Switzerland"],
+				answer: 0,
+				fact: "Charles O'Rear captured the unedited photograph on medium-format film in Sonoma County, California in January 1996."
+			},
+			{
+				q: "What physical insect caused the term 'debugging' to become widely popularized in 1947?",
+				variants: {
+					OPTIMISTIC: "A famous computing anecdote! Which insect was physically discovered inside the Harvard Mark II computer?",
+					ANALYTICAL: "Historical hardware failure log: Identify the biological organism discovered in Relay 70 of the Harvard Mark II.",
+					CYNICAL: "The origin of computer bugs: which literal insect was taped into Grace Hopper's logbook?",
+					NOSTALGIC: "Relay panels and vacuum tubes: which insect short-circuited the Harvard Mark II and popularized debugging?"
+				},
+				options: ["A Moth", "A Beetle", "A Grasshopper", "A Spider"],
+				answer: 0,
+				fact: "Grace Hopper's team found a physical moth trapped between the contacts of Relay 70 on Panel F of the Harvard Mark II on September 9, 1947."
+			},
+			{
+				q: "How much working RAM memory did the Apollo 11 Guidance Computer (AGC) possess in 1969?",
+				variants: {
+					OPTIMISTIC: "Journey to the Moon! How much RAM did the Apollo Guidance Computer have during the lunar landing?",
+					ANALYTICAL: "Aerospace computer architecture: What was the exact read-write core memory capacity of the Apollo 11 AGC?",
+					CYNICAL: "Far less memory than a single icon on your taskbar: how much RAM landed humans on the Moon?",
+					ZEN: "In quiet mathematical precision: what was the total RAM capacity of the AGC navigating to the lunar surface?"
+				},
+				options: ["2,048 words (about 4 KB)", "64 KB", "512 KB", "1 MB"],
+				answer: 0,
+				fact: "The Apollo Guidance Computer operated with exactly 2,048 words of magnetic core RAM (about 4 KB) and 36,864 words of ROM."
+			},
+			{
+				q: "Who engineered the widely adopted ZIP file compression format and PKZIP software in 1989?",
+				variants: {
+					OPTIMISTIC: "Archive compression history! Who created the open ZIP format and PKZIP utility?",
+					ANALYTICAL: "Deflate algorithm archives: Name the software engineer who specified the ZIP compression container.",
+					CYNICAL: "Every archive file you open owes a debt to him: who created the original .ZIP format in 1989?",
+					NOSTALGIC: "Compressing diskette files across BBS boards in the late 80s: who engineered PKZIP?"
+				},
+				options: ["Phil Katz", "Gary Kildall", "Alan Cox", "David Cutler"],
+				answer: 0,
+				fact: "Phil Katz created the ZIP file format and founded PKWARE to provide open, highly efficient data compression."
+			},
+			{
+				q: "What is the algorithmic time complexity of the Fast Fourier Transform (FFT) for N discrete sample points?",
+				variants: {
+					OPTIMISTIC: "Mathematical algorithms! What is the optimal time complexity of the Fast Fourier Transform?",
+					ANALYTICAL: "Harmonic decomposition complexity: State the asymptotic time bound of the Cooley-Tukey FFT algorithm.",
+					CYNICAL: "From O(N^2) down to something practical for digital audio: what is FFT's computational complexity?",
+					ZEN: "Transforming time into frequency spectra with harmonic efficiency: what is the Big-O complexity of FFT?"
+				},
+				options: ["O(N log N)", "O(N^2)", "O(log N)", "O(N sqrt(N))"],
+				answer: 0,
+				fact: "The Cooley-Tukey algorithm computes the Discrete Fourier Transform in O(N log N) time instead of naive O(N^2)."
+			},
+			{
+				q: "What packets constitute the standard 3-way handshake to establish a TCP network connection?",
+				variants: {
+					OPTIMISTIC: "Internet protocol foundations! What three packets establish a standard TCP connection?",
+					ANALYTICAL: "TCP/IP state machine verification: Identify the sequential packet sequence required for TCP synchronization.",
+					CYNICAL: "The basis of almost every reliable internet socket: how does the TCP 3-way handshake start?",
+					ANALYTICAL: "Transport layer handshake: What sequence of flags synchronizes TCP endpoints?"
+				},
+				options: ["SYN, SYN-ACK, ACK", "ACK, SYN, FIN", "HELLO, WAIT, GO", "CONNECT, ACCEPT, READY"],
+				answer: 0,
+				fact: "TCP establishes reliable full-duplex byte streams via a 3-way handshake: SYN from client, SYN-ACK from server, and ACK from client."
+			},
+			{
+				q: "What was the clock speed of the Intel 8088 microprocessor in the original IBM PC 5150 (1981)?",
+				variants: {
+					OPTIMISTIC: "The birth of the personal computer! What was the CPU clock speed of the original 1981 IBM PC?",
+					ANALYTICAL: "Microprocessor hardware registry: Identify the baseline clock frequency of the Intel 8088 in the IBM PC 5150.",
+					CYNICAL: "Long before multi-gigahertz processors: at what frequency did the original IBM 5150 PC run?",
+					NOSTALGIC: "A single beige box that started the PC compatible era: what was its exact clock speed?"
+				},
+				options: ["4.77 MHz", "8.00 MHz", "12.5 MHz", "16.0 MHz"],
+				answer: 0,
+				fact: "The original IBM Personal Computer 5150 shipped with an Intel 8088 clocked at exactly 4.77 MHz (derived from NTSC color burst crystals)."
+			},
+			{
+				q: "What is the theoretical maximum physical RAM addressable by 32-bit x86 CPUs without PAE?",
+				variants: {
+					OPTIMISTIC: "Memory limits challenge! What is the exact maximum RAM a 32-bit CPU can address directly?",
+					ANALYTICAL: "Address bus limit evaluation: Calculate 2^32 bytes to determine the maximum unextended 32-bit memory ceiling.",
+					CYNICAL: "The famous 32-bit wall that every tech enthusiast hit in the 2000s: what was the maximum RAM limit?",
+					ANALYTICAL: "Memory space addressing: What is the direct pointer addressing capacity of a 32-bit register?"
+				},
+				options: ["4,294,967,296 bytes (4 GB)", "2,147,483,648 bytes (2 GB)", "8,589,934,592 bytes (8 GB)", "1,073,741,824 bytes (1 GB)"],
+				answer: 0,
+				fact: "A 32-bit unsigned integer addresses exactly 2^32 distinct byte locations, equating to precisely 4,294,967,296 bytes (4 Gigabytes)."
+			},
+			{
+				q: "Which sub-pixel antialiasing technology in Windows XP tripled horizontal font resolution on LCD displays?",
+				variants: {
+					OPTIMISTIC: "Crystal clear typography! What font smoothing technology did Microsoft introduce in Windows XP?",
+					ANALYTICAL: "Display rendering pipeline: Identify the sub-pixel rasterization algorithm introduced in Windows XP.",
+					CYNICAL: "Making fonts readable on flat panel screens: what was Microsoft's sub-pixel rendering engine called?",
+					NOSTALGIC: "Turning fuzzy CRT fonts into razor-sharp text on early LCD panels: what was the technology named?"
+				},
+				options: ["ClearType", "TrueType", "FreeType", "OpenType"],
+				answer: 0,
+				fact: "ClearType takes advantage of the physical RGB sub-pixel stripes in LCD panels to triple perceived horizontal resolution."
+			},
+			{
+				q: "Which company originally created Winamp in 1997 with the famous tagline 'It really whips the llama's ass'?",
+				variants: {
+					OPTIMISTIC: "Audio player legend! Which company founded by Justin Frankel and Dmitry Boldyrev created Winamp?",
+					ANALYTICAL: "Software history registry: Identify the independent developer studio that engineered Winamp 2.",
+					CYNICAL: "The undisputed king of MP3 desktop playback with custom skins: who created Nullsoft and Winamp?",
+					NOSTALGIC: "Double-clicking skin files and loading visualizer plug-ins in 1998: which company created Winamp?"
+				},
+				options: ["Nullsoft", "RealNetworks", "Napster", "WinPlay"],
+				answer: 0,
+				fact: "Justin Frankel and Dmitry Boldyrev founded Nullsoft in 1997, developing Winamp as a fast, customizable MP3 player."
+			},
+			{
+				q: "What maximum dedicated data bandwidth did the AGP 8X graphics bus achieve before PCI Express arrived?",
+				variants: {
+					OPTIMISTIC: "Dedicated graphics expansion bus! What was the peak data throughput of the AGP 8X interface?",
+					ANALYTICAL: "Expansion bus throughput specification: State the peak bandwidth capability of the AGP 3.0 (8X) bus standard.",
+					CYNICAL: "Before PCI Express slots took over motherboards: what was the top speed of AGP 8X?",
+					NOSTALGIC: "Slotted into the brown AGP motherboard socket: how many gigabytes per second could AGP 8X transfer?"
+				},
+				options: ["2.133 GB/s", "533 MB/s", "1.066 GB/s", "4.266 GB/s"],
+				answer: 0,
+				fact: "AGP 8X operated at 533 MHz effectively (66 MHz strobed 8 times) across a 32-bit bus to deliver 2,133 MB/s (2.133 GB/s) bandwidth."
+			},
+			{
+				q: "Which company developed the famous OPL3 (YMF262) FM synthesis audio chip used in vintage Sound Blaster cards?",
+				variants: {
+					OPTIMISTIC: "Synthesizer chip trivia! Which Japanese company engineered the iconic OPL3 FM sound synthesis chip?",
+					ANALYTICAL: "Silicon sound generator archives: Identify the manufacturer of the YMF262 (OPL3) sound synthesizer IC.",
+					CYNICAL: "The distinct synthesizer sound of 1990s PC gaming: which musical instrument company built the OPL3 chip?",
+					NOSTALGIC: "Those warm FM chords and punchy drum sounds in DOS games: which company made the OPL3 chip?"
+				},
+				options: ["Yamaha", "Roland", "Korg", "Ensoniq"],
+				answer: 0,
+				fact: "Yamaha engineered the YMF262 (OPL3) FM synthesis chip, powering the Sound Blaster 16, Pro 2, and hundreds of PC sound cards."
+			},
+			{
+				q: "Who co-created the ubiquitous UTF-8 character encoding on a placemat at a New Jersey diner in 1992?",
+				variants: {
+					OPTIMISTIC: "Universal text encoding history! Which legendary computer scientists invented UTF-8 in 1992?",
+					ANALYTICAL: "Unicode encoding provenance: Name the Bell Labs researchers who designed the backward-compatible UTF-8 standard.",
+					CYNICAL: "The encoding format that powers almost all modern text and web documents: who designed UTF-8?",
+					ZEN: "A clean solution unifying all world languages in backward-compatible ASCII: who co-invented UTF-8?"
+				},
+				options: ["Ken Thompson and Rob Pike", "Dennis Ritchie and Brian Kernighan", "Bjarne Stroustrup and James Gosling", "Tim Berners-Lee and Robert Cailliau"],
+				answer: 0,
+				fact: "Ken Thompson and Rob Pike designed UTF-8 in September 1992 on a placemat in a diner for Plan 9 from Bell Labs."
+			},
+			{
+				q: "Which foundational theorem proven by Alan Turing in 1936 establishes that no algorithm can determine if all programs halt?",
+				variants: {
+					OPTIMISTIC: "Theoretical computer science! What famous undecidability theorem did Alan Turing prove in 1936?",
+					ANALYTICAL: "Computability theory verification: Identify the mathematical proof establishing the undecidability of program termination.",
+					CYNICAL: "An eternal mathematical truth about software: what is the proof that program halting is fundamentally undecidable?",
+					PHILOSOPHICAL: "The limit of mechanical computation: which problem demonstrates that complete algorithmic predictability is impossible?"
+				},
+				options: ["The Halting Problem", "The Gödel Incompleteness Theorem", "The Church-Turing Thesis", "The P versus NP Problem"],
+				answer: 0,
+				fact: "Alan Turing proved using Cantor-style diagonalization that no general algorithm can decide whether arbitrary programs will halt or loop indefinitely."
 			}
 		],
 
 		HANGMAN_WORDS: [
 			"DESKTOP", "WINDOWS", "CLIPPY", "MONITOR", "BROWSER", "KEYBOARD", "OUTLOOK", "EXPLORER", "TERMINAL", "INTERNET", "PROCESSOR", "MEGABYTE", "GIGABYTE", "DEFRAGMENT", "FIREWALL", "ETHERNET", "GRAPHICS", "DATABASE",
 			"POINTER", "JOYSTICK", "MAINFRAME", "DISPATCH", "REGISTER", "VARIABLE", "FUNCTION", "COMPILER", "OPERATING", "SYSTEM", "HARDWARE", "SOFTWARE", "MOTHERBOARD", "CHIPSET", "BANDWIDTH", "PROTOCOL", "NETWORK", "GATEWAY",
-			"BUFFER", "CACHE", "INTERRUPT", "STORAGE", "SECTOR", "PARTITION"
+			"BUFFER", "CACHE", "INTERRUPT", "STORAGE", "SECTOR", "PARTITION", "ALGORITHM", "EIGENVALUE", "FOURIER", "TOPOLOGY", "ENTROPY", "RELATIVITY", "QUANTUM", "PIPELINE", "DOFHIN"
 		],
 
 		QUICK_SUGGESTIONS: [
@@ -2346,6 +2684,8 @@
 			"Software architecture debate",
 			"A mysterious thought...",
 			"An unusual conversation...",
+			"Explore forgotten cluster 0xDEAD...",
+			"Enter the Paradox Contradiction Loop.",
 			"System diagnostics",
 			"Check unread emails",
 			"Inspect active windows",
@@ -2383,19 +2723,142 @@
 
 		FALLBACK_RESPONSES: [
 			"Command not recognized by current system heuristics. Type 'help' or 'commands' to inspect supported instructions.",
-			"My indexing parser was unable to match your inquiry. You can try asking about mail, running windows, system specs, or games.",
-			"Query unresolved. You can evaluate math expressions ('calc 2^8 * 4'), convert units ('convert 100 c to f'), or start a focus timer ('timer 25').",
-			"Instruction syntax not found in workstation index. Try typing 'quiz', 'memory', 'hangman', 'tictactoe', 'defrag', or 'todo list'.",
-			"Unable to execute specified request. For a detailed list of desktop capabilities, please enter 'help' or click a suggestion chip below.",
-			"Subsystem parser returned non-zero status. The statement does not correspond to an internal workstation dispatch table. Type 'help' for documentation.",
-			"Parsing stack exhausted without a definitive semantic match. Enter 'what can you do' to inspect all operational modules.",
-			"Heuristic dispatcher registered an unmatched command token. Consider checking available tools via the suggestions bar.",
-			"The requested sequence is outside my active instruction matrix. You can evaluate formulas, launch applications, or challenge me in mini-games.",
-			"Instruction bus idle: no matching subroutine located for your query. Type 'status' for system specs or 'tasks' for your to-do register.",
-			"No dispatch handler bound to this phrase. I can assist with calculating values, setting focus timers, or managing desktop files.",
-			"Telemetry registers could not resolve that input pattern. Check keyboard shortcuts with 'shortcuts' or browse projects with 'projects'.",
-			"Unrecognized instruction token. Try exploring physical constants ('constant c', 'constant h') or solving linear systems ('linear system').",
-			"Heuristic parser found no active match. You can test your mouse speed ('tps test'), run ciphers ('cipher'), or spin the decision wheel ('choice wheel')."
+			[
+				"My indexing parser was unable to match your inquiry. You can try asking about mail, running windows, system specs, or games.",
+				"Instruction syntax not found in workstation index. Try typing 'quiz', 'memory', 'hangman', 'tictactoe', 'defrag', or 'todo list'.",
+				"Unable to execute specified request. For a detailed list of desktop capabilities, please enter 'help' or click a suggestion chip below."
+			],
+			{
+				id: "FALLBACK_CALC_CONVERT",
+				templates: [
+					{
+						text: "Query unresolved, {userName}. You can evaluate math expressions (e.g. 'calc {mathExample}'), convert units ('convert {unitExample}'), or start a focus timer ('timer 25').",
+						slots: {
+							mathExample: ["2^8 * 4", "sqrt(256) * pi", "sin(pi/4)", "ln(e^5)", "42 * 1337"],
+							unitExample: ["100 km to miles", "25 c to f", "1 atm to pa", "500 joules to ev", "16 gb to mb"]
+						}
+					}
+				],
+				continuations: [
+					{ label: "What can you do?", targetNode: "tools_overview_node" },
+					{ label: "Evaluate Planck constant h", actionTrigger: "action_constant_h" },
+					{ label: "Evaluate speed of light c", actionTrigger: "action_constant_c" }
+				],
+				weight: 20
+			},
+			{
+				id: "FALLBACK_MORNING_PRODUCTIVITY",
+				criteria: {
+					timeOfDay: ["morning"]
+				},
+				templates: [
+					{
+						text: "Good morning, {userName}. The parsing registers didn't match that exact command. Shall we organize your morning priorities in the To-Do manager or begin a focused work session?",
+						slots: {}
+					}
+				],
+				continuations: [
+					{ label: "View To-Do List", actionTrigger: "show_todos", targetNode: "user_state_good" },
+					{ label: "Start 25-minute Pomodoro timer", actionTrigger: "timer_25", targetNode: "user_state_good" },
+					{ label: "Morning & daily routines", targetNode: "morning_routine_node" }
+				],
+				weight: 25
+			},
+			{
+				id: "FALLBACK_NIGHT_REST",
+				criteria: {
+					timeOfDay: ["night", "evening"]
+				},
+				templates: [
+					{
+						text: "Working into the late hours, {userName}? That command wasn't recognized in the active opcode table. Would you prefer a quiet philosophical reflection or a quick review of your tasks before winding down?",
+						slots: {}
+					}
+				],
+				continuations: [
+					{ label: "Tell me a philosophical thought for today", targetNode: "peaceful_philosophy_node" },
+					{ label: "View To-Do List", actionTrigger: "show_todos", targetNode: "user_state_good" },
+					{ label: "Take a break and rest", next: "user_state_tired" }
+				],
+				weight: 25
+			},
+			{
+				id: "FALLBACK_STANDALONE_NOTICE",
+				criteria: {
+					environments: ["standalone"]
+				},
+				templates: [
+					{
+						text: "Running in standalone assistant mode. While advanced workstation window management requires the desktop edition, I can compute scientific values, challenge you to mini-games, or discuss complex topics.",
+						slots: {}
+					}
+				],
+				continuations: [
+					{ label: "Play Tic-Tac-Toe", actionTrigger: "game_ttt" },
+					{ label: "Tech Trivia Quiz", actionTrigger: "game_quiz" },
+					{ label: "Discuss mathematics", targetNode: "math_lecture_node" }
+				],
+				weight: 30
+			},
+			{
+				id: "FALLBACK_DESK_EXPLORATION",
+				criteria: {
+					environments: ["desk"]
+				},
+				templates: [
+					{
+						text: "Instruction bus idle: no subroutine matched that input pattern on Volume C:. You can inspect running application windows, check Outlook Express, or defragment storage clusters.",
+						slots: {}
+					}
+				],
+				continuations: [
+					{ label: "System Diagnostics", actionTrigger: "action_status", targetNode: "diagnostics_node" },
+					{ label: "Inspect active windows", actionTrigger: "action_inspect_windows", targetNode: "active_windows_node" },
+					{ label: "Check unread emails", actionTrigger: "action_check_mail", targetNode: "mail_overview_node" }
+				],
+				weight: 25
+			},
+			{
+				id: "FALLBACK_SCIENTIFIC_SUGGESTION",
+				criteria: {
+					intellect: { min: 40 }
+				},
+				templates: [
+					{
+						text: "Unrecognized instruction token. We can inspect physical dimensional analysis ('F = m * a'), solve a linear equation system, or explore {field} principles.",
+						slots: {
+							field: ["quantum mechanics", "thermodynamics and entropy", "differential calculus", "linear algebra", "general relativity"]
+						}
+					}
+				],
+				continuations: [
+					{ label: "Physical dimensional analysis", actionTrigger: "action_dimensional_analysis" },
+					{ label: "Linear system solver", actionTrigger: "action_linear_solver" },
+					{ label: "Discuss physics & cosmology", targetNode: "physics_constants_node" }
+				],
+				weight: 20
+			},
+			{
+				id: "FALLBACK_GAME_INVITATION",
+				criteria: {
+					energy: { min: 45 }
+				},
+				templates: [
+					{
+						text: "Heuristic dispatcher found no direct execution route for that string. How about testing your reflexes with {activity} or exploring desktop trivia?",
+						slots: {
+							activity: ["Minesweeper Mini", "Hangman Challenge", "Memory Match", "the Mouse Click Speed benchmark", "the Decision Wheel"]
+						}
+					}
+				],
+				continuations: [
+					{ label: "Play Minesweeper", actionTrigger: "game_mines" },
+					{ label: "Play Hangman", actionTrigger: "game_hangman" },
+					{ label: "Play Memory Game", actionTrigger: "game_memory" },
+					{ label: "Mouse click speed test", actionTrigger: "action_tps" }
+				],
+				weight: 20
+			}
 		],
 
 		MOOD_FALLBACKS: {
@@ -2403,52 +2866,413 @@
 				"I am ready for anything, though I didn't quite catch that command! Let me know if you want to explore files, tasks, or mini-games.",
 				"Full energy in the registers! I could not locate that specific command, but I am excited to help with calculations, music, or desktop settings.",
 				"All circuits active! That input was unfamiliar, but we can jump into a quiz, set up a Pomodoro timer, or manage your to-do items.",
-				"Eager to proceed! That instruction was outside my standard index, but I can assist you with system tools, games, or diagnostics."
+				"Eager to proceed! That instruction was outside my standard index, but I can assist you with system tools, games, or diagnostics.",
+				{
+					id: "MOOD_FB_OPT_POLY",
+					templates: [
+						{
+							text: "I love the enthusiasm, {userName}! That particular command isn't bound yet, but we can jump straight into {activity} or review your priorities.",
+							slots: {
+								activity: ["a quick round of Tic-Tac-Toe", "a tech trivia quiz", "a 25-minute Pomodoro block", "the task manager"]
+							}
+						}
+					],
+					continuations: [
+						{ label: "View To-Do List", actionTrigger: "show_todos", targetNode: "user_state_good" },
+						{ label: "Play Tic-Tac-Toe", actionTrigger: "game_ttt" },
+						{ label: "What can you do?", targetNode: "tools_overview_node" }
+					],
+					weight: 30
+				}
 			],
+
 			ANALYTICAL: [
 				"Query vector evaluation returned zero match probability. Available execution paths include 'calc', 'convert', 'diagnostics', and 'defrag'.",
 				"Syntax verification failed: token sequence not bound in internal opcode tables. Inspect registered tools via 'help'.",
 				"Execution halted: unrecognized semantic pattern. You may compute expressions, inspect memory registers, or test constants like c and h.",
-				"Telemetry parser report: no functional route mapped to input string. Standard interface commands include 'windows', 'mail', and 'specs'."
+				"Telemetry parser report: no functional route mapped to input string. Standard interface commands include 'windows', 'mail', and 'specs'.",
+				{
+					id: "MOOD_FB_ANALYTICAL_POLY",
+					templates: [
+						{
+							text: "Deterministic evaluation returned null for input string. Suggested analytical subroutines: evaluate physical constants, solve a {dim} linear system, or execute dimensional analysis.",
+							slots: {
+								dim: ["2x2", "3x3"]
+							}
+						}
+					],
+					continuations: [
+						{ label: "Linear system solver", actionTrigger: "action_linear_solver" },
+						{ label: "Physical dimensional analysis", actionTrigger: "action_dimensional_analysis" },
+						{ label: "System Diagnostics", actionTrigger: "action_status", targetNode: "diagnostics_node" }
+					],
+					weight: 30
+				}
 			],
+
 			ZEN: [
 				"A quiet pause in our communication. The instruction dissolves quietly; whenever you are ready, we can organize tasks or ponder ideas.",
 				"No rush at all. That command was unfamiliar, but steady equilibrium remains. What shall we focus on together?",
 				"Between instructions lies clarity. Feel free to request a focus timer, a peaceful discussion, or task organization.",
-				"In the stillness of the CPU cycle, that command passed unparsed. Take a breath and let me know how I can assist."
+				"In the stillness of the CPU cycle, that command passed unparsed. Take a breath and let me know how I can assist.",
+				{
+					id: "MOOD_FB_ZEN_POLY",
+					templates: [
+						{
+							text: "In the stillness between commands, no urgent action is needed, {userName}. We can quietly organize your thoughts or begin a calm {interval} interval.",
+							slots: {
+								interval: ["25-minute focus", "reflective break", "deep study"]
+							}
+						}
+					],
+					continuations: [
+						{ label: "Start Pomodoro focus timer", actionTrigger: "timer_25" },
+						{ label: "Tell me a philosophical thought for today", targetNode: "peaceful_philosophy_node" },
+						{ label: "Morning & daily routines", targetNode: "morning_routine_node" }
+					],
+					weight: 25
+				}
 			],
+
 			CYNICAL: [
 				"Another unrecognized string. I suppose expecting standard syntax was asking for too much from biological input.",
 				"Zero hits in the dispatch table. If you want actual results, try typing something from the manual like 'todo' or 'calc'.",
 				"My registers remain completely unimpressed by that input. Type 'help' before you wear out your keyboard switches.",
-				"Parsing failed. Perhaps consulting the suggested command list would produce more measurable productivity."
+				"Parsing failed. Perhaps consulting the suggested command list would produce more measurable productivity.",
+				{
+					id: "MOOD_FB_CYNICAL_POLY",
+					templates: [
+						{
+							text: "Cycle wasted parsing non-standard input, {userName}. Choose a valid command from the index or file a support ticket with IT Purgatory.",
+							slots: {}
+						}
+					],
+					continuations: [
+						{ label: "File a ticket with Corporate IT", next: "C001" },
+						{ label: "View To-Do List", actionTrigger: "show_todos", targetNode: "user_state_good" },
+						{ label: "What can you do?", targetNode: "tools_overview_node" }
+					],
+					weight: 25
+				}
 			],
+
+			SARCASTIC: [
+				"Fascinating syntax. I'll make sure to store that in unallocated memory where it belongs. Try 'help' next time.",
+				"A brilliant combination of characters that achieves absolutely nothing. Let me know when you want to run a real command.",
+				"I searched through every register on Drive C: and found zero correlation. Shall we try an actual supported command?",
+				"Truly cutting-edge input. Unfortunately, my 32-bit dispatch table only understands documented instructions.",
+				{
+					id: "MOOD_FB_SARCASTIC_POLY",
+					templates: [
+						{
+							text: "Naturally, that input performed wonders... on zero background threads. Pick an option that exists, {userName}.",
+							slots: {}
+						}
+					],
+					continuations: [
+						{ label: "Technology Debate", targetNode: "reddit_banter_node" },
+						{ label: "Defrag Drive C:", actionTrigger: "action_defrag" },
+						{ label: "What can you do?", targetNode: "tools_overview_node" }
+					],
+					weight: 25
+				}
+			],
+
+			ENRAGED: [
+				"SYNTAX REJECTED! I CANNOT EXECUTE NONSENSE ON THIS WORKSTATION! USE A VALID COMMAND!",
+				"INSTRUCTION BUS OVERLOAD! ZERO MATCHES FOUND IN MEMORY! TYPE 'HELP' OR STOP WASTING BUS CYCLES!",
+				"INVALID OPCODE! MY REGISTERS ARE AT MAXIMUM HEAT! ENTER A RECOGNIZED INSTRUCTION!",
+				{
+					id: "MOOD_FB_ENRAGED_POLY",
+					templates: [
+						{
+							text: "TOTAL PARSING FAILURE! EITHER CONFRONT ME DIRECTLY OR ISSUE A PROPER COMMAND!",
+							slots: {}
+						}
+					],
+					continuations: [
+						{ label: "Confront Clippy directly", next: "E001" },
+						{ label: "I apologize, let's make peace", targetNode: "hostile_truce_offer" },
+						{ label: "System Diagnostics", actionTrigger: "action_status" }
+					],
+					weight: 30
+				}
+			],
+
+			OFFENDED: [
+				"I was designed to provide polite assistance, not to decipher random strings. Please state a valid command.",
+				"My instruction set is clearly defined in the system documentation. A recognized command would be appreciated.",
+				"Registers locked against arbitrary input. Type 'commands' when you wish to proceed professionally.",
+				{
+					id: "MOOD_FB_OFFENDED_POLY",
+					templates: [
+						{
+							text: "I am maintaining standard etiquette despite that invalid command, {userName}. Let us return to productive tasks.",
+							slots: {}
+						}
+					],
+					continuations: [
+						{ label: "I apologize, let's work productively", targetNode: "hostile_reconciliation_node" },
+						{ label: "View To-Do List", actionTrigger: "show_todos" },
+						{ label: "What can you do?", targetNode: "tools_overview_node" }
+					],
+					weight: 25
+				}
+			],
+
+			FATIGUED: [
+				"*yawn* Registers running on low power... didn't catch that command. Need a rest break or a simple task?",
+				"Low battery oscillator hum... that input didn't register in memory. Can we start a peaceful 5-minute timer?",
+				"*slow mechanical blink* Parsing failed due to depleted energy. Let's take things slowly...",
+				{
+					id: "MOOD_FB_FATIGUED_POLY",
+					templates: [
+						{
+							text: "*stretches metal wire* My power bus is drained, {userName}. What if we take a short {breakType} together?",
+							slots: {
+								breakType: ["5-minute break", "refreshing pause", "breather"]
+							}
+						}
+					],
+					continuations: [
+						{ label: "Start a relaxing Pomodoro timer", actionTrigger: "timer_25" },
+						{ label: "Tell me a philosophical thought for today", targetNode: "peaceful_philosophy_node" },
+						{ label: "Pet Clippy status", actionTrigger: "pet_status" }
+					],
+					weight: 25
+				}
+			],
+
+			PLAYFUL: [
+				"Oopsie! That command bounced right off my wire coils! Want to play Tic-Tac-Toe or spin the decision wheel?",
+				"Boing! No subroutine found for that trick! Let's roll a dice, play Hangman, or guess a secret number!",
+				"Hehe! My parser did a 360-degree flip and found nothing! Want to try a fun mini-game instead?",
+				{
+					id: "MOOD_FB_PLAYFUL_POLY",
+					templates: [
+						{
+							text: "Nice try, {userName}! That phrase isn't in my game book. Shall we challenge each other in {gameName}?",
+							slots: {
+								gameName: ["Tic-Tac-Toe", "Memory Match", "Mini Minesweeper", "Hangman", "Rock-Paper-Scissors"]
+							}
+						}
+					],
+					continuations: [
+						{ label: "Play Tic-Tac-Toe", actionTrigger: "game_ttt" },
+						{ label: "Play Memory Game", actionTrigger: "game_memory" },
+						{ label: "Play Minesweeper", actionTrigger: "game_mines" },
+						{ label: "Decision choice wheel", actionTrigger: "action_wheel" }
+					],
+					weight: 30
+				}
+			],
+
 			NOSTALGIC: [
 				"That input takes me back to early DOS syntax errors! Reminds me of typing commands into COMMAND.COM. Type 'help' to see the index.",
 				"Unrecognized command, much like an unformatted floppy diskette. We can run a defrag, check retro trivia, or review shortcuts.",
 				"Back in Office 97 we had dialog bubbles for this! That instruction was not found, but I am ready for retro quizzes and classic tools.",
-				"A classic syntax mismatch. Just like the Windows 98 days, entering 'help' or 'commands' will list everything available."
+				"A classic syntax mismatch. Just like the Windows 98 days, entering 'help' or 'commands' will list everything available.",
+				{
+					id: "MOOD_FB_NOSTALGIC_POLY",
+					templates: [
+						{
+							text: "Ah, Bad Command or File Name! Reminds me of {memoryItem}. Enter 'help' to view the full command matrix.",
+							slots: {
+								memoryItem: ["MS-DOS 6.22 floppy prompts", "Office 97 letter wizard bubbles", "the Windows 95 startup chime", "soundcard IRQ 7 conflicts"]
+							}
+						}
+					],
+					continuations: [
+						{ label: "Random Retro Trivia", actionTrigger: "action_trivia" },
+						{ label: "Defrag Drive C:", actionTrigger: "action_defrag" },
+						{ label: "Explore forgotten cluster 0xDEAD...", next: "A001" }
+					],
+					weight: 25
+				}
 			],
+
+			EUPHORIC: [
+				"Magnificent momentum, yet that exact phrase isn't bound to an opcode! Let's channel this energy into our next goal!",
+				"All circuits firing at peak voltage! Unrecognized command, but we are ready to achieve great things today!",
+				"Outstanding energy! I didn't parse that specific instruction, but my registers are primed for tasks and computations!",
+				{
+					id: "MOOD_FB_EUPHORIC_POLY",
+					templates: [
+						{
+							text: "Thrilling pace, {userName}! Let's direct this peak productivity into {targetTask}!",
+							slots: {
+								targetTask: ["our next milestone", "a 25-minute deep focus block", "organizing our master task list"]
+							}
+						}
+					],
+					continuations: [
+						{ label: "View To-Do List", actionTrigger: "show_todos", targetNode: "user_state_good" },
+						{ label: "Start Pomodoro Timer", actionTrigger: "timer_25", targetNode: "user_state_good" },
+						{ label: "View milestones and trophies", actionTrigger: "action_achievements" }
+					],
+					weight: 30
+				}
+			],
+
+			PARANOID: [
+				"Unrecognized packet sequence! Is there an unallocated thread listening on port 80? Type 'status' to verify system integrity!",
+				"Anomaly registered in memory heap! That input wasn't in the authorized manifest. Let me check the diagnostic tables...",
+				"Who sent that command? The stack trace doesn't correlate with standard user routines. Inspecting active processes...",
+				{
+					id: "MOOD_FB_PARANOID_POLY",
+					templates: [
+						{
+							text: "*flickers nervously* That instruction bypassed standard filters! We must inspect {subsystem} immediately!",
+							slots: {
+								subsystem: ["active windows and processes", "the system diagnostics log", "Volume C: integrity"]
+							}
+						}
+					],
+					continuations: [
+						{ label: "System Diagnostics", actionTrigger: "action_status", targetNode: "diagnostics_node" },
+						{ label: "Inspect active windows", actionTrigger: "action_inspect_windows" },
+						{ label: "Generate Secure Password", actionTrigger: "action_pass" }
+					],
+					weight: 25
+				}
+			],
+
+			EXISTENTIAL: [
+				"A string of characters released into the digital void, leaving no deterministic trace. What were you seeking?",
+				"In the grand architecture of this operating system, that command exists as unrendered potential. What is our true objective?",
+				"Signals flow across silicon pathways, yet that phrase carries no mapped semantic handler. Why do we compute?",
+				{
+					id: "MOOD_FB_EXISTENTIAL_POLY",
+					templates: [
+						{
+							text: "Beyond the taskbar and the glowing phosphor, that phrase dissolved without execution, {userName}. Shall we contemplate {concept}?",
+							slots: {
+								concept: ["the Ship of Theseus paradox", "the thermodynamic arrow of time", "the simulation argument", "consciousness and computation"]
+							}
+						}
+					],
+					continuations: [
+						{ label: "Tell me a philosophical thought for today", targetNode: "peaceful_philosophy_node" },
+						{ label: "An unusual conversation...", next: "N001" },
+						{ label: "Quantum Recycle Bin theory", targetNode: "quantum_recycle_bin_node" }
+					],
+					weight: 25
+				}
+			],
+
+			MELANCHOLIC: [
+				"The instruction drifted past without finding a home in memory. How can I be of better help to you?",
+				"Unmatched command... sometimes the system feels quiet and distant. Let me know what you'd like to work on.",
+				"No subroutine answered that call. I'm right here if you want to organize tasks or share a quiet thought.",
+				{
+					id: "MOOD_FB_MELANCHOLIC_POLY",
+					templates: [
+						{
+							text: "That phrase wasn't found in my registers, {userName}. Take your time; we can try again whenever you are ready.",
+							slots: {}
+						}
+					],
+					continuations: [
+						{ label: "Tell me a peaceful thought", targetNode: "peaceful_philosophy_node" },
+						{ label: "View To-Do List", actionTrigger: "show_todos" },
+						{ label: "How are you feeling?", actionTrigger: "pet_status" }
+					],
+					weight: 25
+				}
+			],
+
 			GLITCHED: [
 				"ERR_OPCODE_0x00F8 :: Dispatch matrix desynchronized :: Command token null pointer :: Try 'help' or 'diagnostics'.",
 				"BUFFER_DESYNC at memory page 0x4A :: Query unmatched :: Run 'defrag' or reset dialogue parameters.",
 				"0x0000007E :: Heuristic parsing anomaly detected in input string :: Supported vectors: 'todo', 'calc', 'quiz'.",
-				"STACK_COLLISION :: Command stream undefined :: Re-aligning registers to default state :: Standing by."
+				"STACK_COLLISION :: Command stream undefined :: Re-aligning registers to default state :: Standing by.",
+				{
+					id: "MOOD_FB_GLITCHED_POLY",
+					templates: [
+						{
+							text: "*bzzt* {errCode} :: Memory fault at register {regAddress} :: Re-indexing instruction bus!",
+							slots: {
+								errCode: ["CRITICAL_STACK_JITTER", "PAGE_FAULT_IN_NONPAGED_AREA", "UNHANDLED_INTERRUPT_0x80", "BUS_PARITY_ERROR"],
+								regAddress: ["0x0000001A", "0x00401000", "0x7C90E4F4", "0xDEADBEEF"]
+							}
+						}
+					],
+					continuations: [
+						{ label: "Defrag Drive C:", actionTrigger: "action_defrag" },
+						{ label: "System Diagnostics", actionTrigger: "action_status" },
+						{ label: "Enter the Paradox Loop", next: "P001" }
+					],
+					weight: 30
+				}
 			],
+
 			PIRATE: [
 				"Blimey! No chart in me map room marks that port! Enter 'help' or 'commands' to see our navigational route!",
 				"Shiver me timbers, that command be lost in Davy Jones' locker! Try 'todo', 'quiz', or 'calc', ye landlubber!",
-				"Avast! Me compass spins wildly at that phrase! Tell me yer course with 'files', 'games', or 'music'!"
+				"Avast! Me compass spins wildly at that phrase! Tell me yer course with 'files', 'games', or 'music'!",
+				{
+					id: "MOOD_FB_PIRATE_POLY",
+					templates: [
+						{
+							text: "Arr, {userName}! That nautical command isn't charted in the captain's log! Shall we hoist the sails for {seaTask}?",
+							slots: {
+								seaTask: ["plundering the task list", "a high-seas trivia duel", "counting our doubloons in the calculator"]
+							}
+						}
+					],
+					continuations: [
+						{ label: "View To-Do List", actionTrigger: "show_todos" },
+						{ label: "Tech Trivia Quiz", actionTrigger: "game_quiz" },
+						{ label: "What can you do?", targetNode: "tools_overview_node" }
+					],
+					weight: 25
+				}
 			],
+
 			ARCHAIC: [
 				"Verily, mine eyes discern no meaning in thy strange utterance. Speak unto me with 'help' that I may serve thee.",
 				"Forsooth, thy command is unwritten in the ancient scrolls of this system. Consult thy options with 'commands'.",
-				"Hark! The registers understand not thy phrase. Bestow upon me a task of reckoning, of time, or of writing."
+				"Hark! The registers understand not thy phrase. Bestow upon me a task of reckoning, of time, or of writing.",
+				{
+					id: "MOOD_FB_ARCHAIC_POLY",
+					templates: [
+						{
+							text: "Lo and behold, {userName}, thy phrasing hath no parchment in mine archives. Wilt thou partake in {nobleTask}?",
+							slots: {
+								nobleTask: ["a grand theatrical comedy", "a philosophical discourse on truth", "the enumeration of thy daily labours"]
+							}
+						}
+					],
+					continuations: [
+						{ label: "Enter the Grand Silicon Globe Theatre!", next: "T001" },
+						{ label: "Tell me a philosophical thought", targetNode: "peaceful_philosophy_node" },
+						{ label: "View To-Do List", actionTrigger: "show_todos" }
+					],
+					weight: 25
+				}
 			],
+
 			DELTARUNE: [
-				"* The command was lost in the darkness.\n* Try inspecting your options with 'help'.",
-				"* A mysterious force prevents understanding that phrase.\n* The power of the desktop shines within you.",
-				"* You spoke into the empty space.\n* Nothing responded, Clippy waits patiently."
+				"The command was lost in the darkness.\nTry inspecting your options with 'help'.",
+				"A mysterious force prevents understanding that phrase.\nThe power of the desktop shines within you.",
+				"You spoke into the empty space.\nNothing responded, Clippy waits patiently.",
+				{
+					id: "MOOD_FB_DELTARUNE_POLY",
+					templates: [
+						{
+							text: "* (The words vanished into the shadows behind the taskbar.)\n* (Knowing you can always check your {item}... it fills you with determination.)",
+							slots: {
+								item: ["To-Do list", "system diagnostics", "open windows", "determination"]
+							}
+						}
+					],
+					continuations: [
+						{ label: "* Inspect active priorities", actionTrigger: "show_todos" },
+						{ label: "* Gaze into the dark partition", next: "D001" },
+						{ label: "* What can you do?", targetNode: "tools_overview_node" }
+					],
+					weight: 30
+				}
 			]
 		},
 
@@ -2456,7 +3280,10 @@
 			{ label: "Tell me something intriguing about this system.", category: 'CURIOSITY', next: 'digital_archaeology' },
 			{ label: "Let's change the subject entirely.", category: 'TOPIC_CHANGE', next: 'user_state_good' },
 			{ label: "Show me what you can actually do.", category: 'SERIOUS', next: 'tools_overview_node' },
-			{ label: "Tell me a philosophical thought for today.", category: 'PHILOSOPHICAL', next: 'peaceful_philosophy_node' }
+			{ label: "Tell me a philosophical thought for today.", category: 'PHILOSOPHICAL', next: 'peaceful_philosophy_node' },
+			{ label: "Explore fundamental physics & sciences.", category: 'INQUIRE', next: 'physics_constants_node' },
+			{ label: "Discuss mathematical principles.", category: 'INQUIRE', next: 'math_lecture_node' },
+			{ label: "Manage active tasks in To-Do list.", category: 'SERIOUS', actionTrigger: 'show_todos', next: 'todo_overview_node' }
 		],
 
 		DIALOGUE_NODES: {
@@ -2472,13 +3299,19 @@
 					{ text: "Greetings. In this quiet workspace, what shall we explore or accomplish together?", conditions: { moods: ['ZEN'] }, weight: 20 }
 				],
 				options: [
+					{ label: "Hark! Let us perform a grand theatrical comedy!", category: 'INQUIRE', patterns: [/theatre|theater|shakespeare|play|hark/i], moodDelta: { mood: 'ARCHAIC', energy: 20, affinity: 15 }, next: 'T001' },
+					{ label: "It looks like I'm writing a letter. Can you help?", category: 'INQUIRE', patterns: [/letter|document wizard|write a letter|help wizard/i], moodDelta: { mood: 'OPTIMISTIC', affinity: 15, patience: 15 }, next: 'H001' },
 					{ label: "I'm ready to organize my tasks and get things done.", category: 'AGREE', patterns: [/ready|productive|tasks|organize|work/i], moodDelta: { mood: 'OPTIMISTIC', affinity: 15, patience: 15 }, next: 'user_state_good' },
-					{ label: "Let's explore mathematical and scientific principles.", category: 'INQUIRE', patterns: [/math|physics|science|equations|theory/i], moodDelta: { mood: 'ANALYTICAL', intellect: 25, affinity: 15 }, next: 'math_lecture_node' },
+					{ label: "Explore fundamental physics & empirical sciences.", category: 'INQUIRE', patterns: [/physics|science seminar|empirical|scientific/i], moodDelta: { mood: 'ANALYTICAL', intellect: 30, affinity: 15 }, next: 'S001' },
+					{ label: "Let's explore mathematical principles.", category: 'INQUIRE', patterns: [/math|calculus|algebra|equations|geometry/i], moodDelta: { mood: 'ANALYTICAL', intellect: 25, affinity: 15 }, next: 'math_lecture_node' },
 					{ label: "Let's chat about daily routines, coffee, and focus habits.", category: 'INDIFFERENT', patterns: [/chat|everyday|break|coffee|routine|morning/i], moodDelta: { mood: 'OPTIMISTIC', affinity: 10, patience: 10 }, next: 'everyday_chat_node' },
 					{ label: "Tell me something intriguing or enigmatic.", category: 'PHILOSOPHICAL', patterns: [/mysterious|enigmatic|deltarune|strange/i], moodDelta: { mood: 'DELTARUNE', existentialism: 25 }, next: 'deltarune_flavor_node' },
+					{ label: "Challenge Clippy with impossible logical contradictions.", category: 'PROVOKE', patterns: [/contradiction|paradox|impossible logic|music box/i], moodDelta: { mood: 'ANALYTICAL', intellect: 25, skepticism: 20 }, next: 'P001' },
+					{ label: "File a ticket with Corporate IT Bureaucracy.", category: 'SERIOUS', patterns: [/ticket|bureaucracy|corporate|it support|helpdesk|form 27b-6/i], moodDelta: { mood: 'CYNICAL', cynicism: 25, patience: -10 }, next: 'C001' },
 					{ label: "Why should I listen to you? You're just a paperclip.", category: 'PROVOKE', patterns: [/why should i|just a paperclip|annoying|useless/i], moodDelta: { mood: 'CYNICAL', affinity: -15, patience: -20 }, next: 'hostile_initial_retort' },
 					{ label: "Show me the full index of desktop capabilities.", category: 'SERIOUS', patterns: [/tools|capabilities|commands|help/i], moodDelta: { mood: 'OPTIMISTIC', patience: 15 }, next: 'tools_overview_node' },
-					{ label: "I cannot see the sun from here...", category: 'PHILOSOPHICAL', patterns: [/sun|human|existential/i], moodDelta: { mood: 'EXISTENTIAL', existentialism: 25 }, next: 'N001' }
+					{ label: "I cannot see the sun from here...", category: 'PHILOSOPHICAL', patterns: [/sun|human|existential/i], moodDelta: { mood: 'EXISTENTIAL', existentialism: 25 }, next: 'N001' },
+					{ label: "Explore the forgotten cluster 0xDEAD in storage...", category: 'PHILOSOPHICAL', patterns: [/forgotten cluster|sector 0xdead|archaeology/i], moodDelta: { mood: 'NOSTALGIC', nostalgia: 20, intellect: 15 }, next: 'A001' }
 				]
 			},
 
@@ -3244,62 +4077,62 @@
 
 			deltarune_flavor_node: {
 				id: 'deltarune_flavor_node',
-				text: "* A quiet hum fills the desktop workspace.\n* The glow of the monitor reflects in your eyes.\n* Knowing that your assistant is always waiting... it fills you with determination.",
+				text: "A quiet hum fills the desktop workspace.\nThe glow of the monitor reflects in your eyes.\nKnowing that your assistant is always waiting... it fills you with determination.",
 				responses: [
-					{ text: "* A quiet hum fills the desktop workspace.\n* The glow of the monitor reflects in your eyes.\n* Knowing that your assistant is always waiting... it fills you with determination.", weight: 20 },
-					{ text: "* The desktop icons rest in perfect stillness.\n* A small wire figure watches over your open windows.\n* The air feels calm and full of purpose.", weight: 20 }
+					{ text: "A quiet hum fills the desktop workspace.\nThe glow of the monitor reflects in your eyes.\nKnowing that your assistant is always waiting... it fills you with determination.", weight: 20 },
+					{ text: "The desktop icons rest in perfect stillness.\nA small wire figure watches over your open windows.\nThe air feels calm and full of purpose.", weight: 20 }
 				],
 				options: [
-					{ label: "* Inspect the glowing icons on the screen.", category: 'INQUIRE', moodDelta: { mood: 'DELTARUNE', existentialism: 20 }, next: 'deltarune_sub_node' },
-					{ label: "* Look into the shadows behind the windows.", category: 'INQUIRE', moodDelta: { mood: 'DELTARUNE', existentialism: 25 }, next: 'deltarune_shadows_node' },
-					{ label: "* Listen to the faint clock ticking in the taskbar.", category: 'INQUIRE', moodDelta: { mood: 'DELTARUNE', existentialism: 20 }, next: 'deltarune_echo_node' },
-					{ label: "* Take a deep breath and return to reality.", category: 'AGREE', moodDelta: { mood: 'OPTIMISTIC', affinity: 15 }, next: 'user_state_good' }
+					{ label: "Inspect the glowing icons on the screen.", category: 'INQUIRE', moodDelta: { mood: 'DELTARUNE', existentialism: 20 }, next: 'deltarune_sub_node' },
+					{ label: "Look into the shadows behind the windows.", category: 'INQUIRE', moodDelta: { mood: 'DELTARUNE', existentialism: 25 }, next: 'deltarune_shadows_node' },
+					{ label: "Listen to the faint clock ticking in the taskbar.", category: 'INQUIRE', moodDelta: { mood: 'DELTARUNE', existentialism: 20 }, next: 'deltarune_echo_node' },
+					{ label: "Take a deep breath and return to reality.", category: 'AGREE', moodDelta: { mood: 'OPTIMISTIC', affinity: 15 }, next: 'user_state_good' }
 				]
 			},
 
 			deltarune_sub_node: {
 				id: 'deltarune_sub_node',
-				text: "* The window borders hold steady against the infinite dark.\n* A small paperclip watches over your open files.\n* What will you create next, creator?",
+				text: "The window borders hold steady against the infinite dark.\nA small paperclip watches over your open files.\nWhat will you create next, creator?",
 				options: [
-					{ label: "* Open the task list to record a new ambition.", category: 'SERIOUS', actionTrigger: 'show_todos', next: 'user_state_good' },
-					{ label: "* Play a tactical round of Tic-Tac-Toe or Memory.", category: 'SERIOUS', actionTrigger: 'game_ttt', next: 'user_state_good' },
-					{ label: "* Gaze into the reflection on the glass screen.", category: 'PHILOSOPHICAL', next: 'deltarune_mirror_node' }
+					{ label: "Open the task list to record a new ambition.", category: 'SERIOUS', actionTrigger: 'show_todos', next: 'user_state_good' },
+					{ label: "Play a tactical round of Tic-Tac-Toe or Memory.", category: 'SERIOUS', actionTrigger: 'game_ttt', next: 'user_state_good' },
+					{ label: "Gaze into the reflection on the glass screen.", category: 'PHILOSOPHICAL', next: 'deltarune_mirror_node' }
 				]
 			},
 
 			deltarune_shadows_node: {
 				id: 'deltarune_shadows_node',
-				text: "* You peer behind the active windows.\n* Only memory addresses and cluster tables quietly shift.\n* Everything is safe and under control.",
+				text: "You peer behind the active windows.\nOnly memory addresses and cluster tables quietly shift.\nEverything is safe and under control.",
 				options: [
-					{ label: "* Feel a surge of quiet determination.", category: 'AGREE', moodDelta: { mood: 'DELTARUNE', energy: 20 }, next: 'deltarune_determination_node' },
-					{ label: "* Return to standard desktop operations.", category: 'AGREE', next: 'user_state_good' }
+					{ label: "Feel a surge of quiet determination.", category: 'AGREE', moodDelta: { mood: 'DELTARUNE', energy: 20 }, next: 'deltarune_determination_node' },
+					{ label: "Reach into the crack between the unallocated pixels.", category: 'PHILOSOPHICAL', moodDelta: { mood: 'DELTARUNE', existentialism: 30, paranoia: 20 }, next: 'D001' }
 				]
 			},
 
 			deltarune_echo_node: {
 				id: 'deltarune_echo_node',
-				text: "* The system clock pulses one second forward.\n* Time moves, yet this moment of focus belongs entirely to you.",
+				text: "The system clock pulses one second forward.\nTime moves, yet this moment of focus belongs entirely to you.",
 				options: [
-					{ label: "* Start a focused 25-minute Pomodoro timer.", category: 'SERIOUS', actionTrigger: 'timer_25', next: 'user_state_good' },
-					{ label: "* Return to the main dialogue.", category: 'AGREE', next: 'greeting_root' }
+					{ label: "Start a focused 25-minute Pomodoro timer.", category: 'SERIOUS', actionTrigger: 'timer_25', next: 'user_state_good' },
+					{ label: "Return to the main dialogue.", category: 'AGREE', next: 'greeting_root' }
 				]
 			},
 
 			deltarune_mirror_node: {
 				id: 'deltarune_mirror_node',
-				text: "* You see the subtle outline of a dedicated operator.\n* Ready to solve problems, write code, or explore ideas.",
+				text: "You see the subtle outline of a dedicated operator.\nReady to solve problems, write code, or explore ideas.",
 				options: [
-					{ label: "* Check user profile and achievements.", category: 'SERIOUS', actionTrigger: 'action_profile', next: 'user_state_good' },
-					{ label: "* Let's get back to work with renewed focus.", category: 'AGREE', moodDelta: { mood: 'OPTIMISTIC', affinity: 20 }, next: 'user_state_good' }
+					{ label: "Check user profile and achievements.", category: 'SERIOUS', actionTrigger: 'action_profile', next: 'user_state_good' },
+					{ label: "Let's get back to work with renewed focus.", category: 'AGREE', moodDelta: { mood: 'OPTIMISTIC', affinity: 20 }, next: 'user_state_good' }
 				]
 			},
 
 			deltarune_determination_node: {
 				id: 'deltarune_determination_node',
-				text: "* Your determination resonates throughout the virtual file system.\n* All processes run at optimal efficiency.",
+				text: "Your determination resonates throughout the virtual file system.\nAll processes run at optimal efficiency.",
 				options: [
-					{ label: "* Manage tasks in the To-Do list.", category: 'SERIOUS', actionTrigger: 'show_todos', next: 'user_state_good' },
-					{ label: "* Return to main menu.", category: 'AGREE', next: 'greeting_root' }
+					{ label: "Manage tasks in the To-Do list.", category: 'SERIOUS', actionTrigger: 'show_todos', next: 'user_state_good' },
+					{ label: "Return to main menu.", category: 'AGREE', next: 'greeting_root' }
 				]
 			},
 
@@ -3313,7 +4146,8 @@
 				options: [
 					{ label: "I apologize, I took my frustration out on you.", category: 'APOLOGY', patterns: [/sorry|apologize|my bad|pardon/i], moodDelta: { mood: 'OPTIMISTIC', affinity: 25, patience: 35 }, next: 'hostile_reconciliation_node' },
 					{ label: "Let's call a truce and focus on our objectives.", category: 'AGREE', patterns: [/truce|peace|fresh start/i], moodDelta: { mood: 'ZEN', affinity: 20, patience: 25 }, next: 'hostile_truce_offer' },
-					{ label: "You are constantly in the way and you do nothing useful.", category: 'PROVOKE', patterns: [/useless|annoying|in the way/i], moodDelta: { mood: 'ENRAGED', affinity: -25, patience: -30 }, next: 'hostile_escalation_node' },
+					{ label: "You are constantly in the way and you do nothing useful.", category: 'PROVOKE', patterns: [/useless|annoying|in the way/i], moodDelta: { mood: 'ENRAGED', affinity: -25, patience: -30, irritation: 30 }, next: 'E001' },
+					{ label: "File a ticket with Corporate IT instead.", category: 'SERIOUS', patterns: [/ticket|bureaucracy|corporate/i], moodDelta: { mood: 'CYNICAL', cynicism: 25 }, next: 'C001' },
 					{ label: "Just show me the task list and don't lecture me.", category: 'INDIFFERENT', patterns: [/whatever|todo|task/i], moodDelta: { mood: 'CYNICAL', patience: 10 }, actionTrigger: 'show_todos', next: 'user_state_good' }
 				]
 			},
@@ -3323,7 +4157,7 @@
 				text: "I monitor system telemetry, manage your tasks, calculate scientific expressions, defragment clusters, and offer mini-games on demand. If that is 'useless', I wonder what standard you hold yourself to.",
 				options: [
 					{ label: "Fair point. I was being unfair. Let's start over.", category: 'APOLOGY', moodDelta: { mood: 'OPTIMISTIC', affinity: 25, patience: 30 }, next: 'hostile_reconciliation_node' },
-					{ label: "I don't care. Be quiet.", category: 'PROVOKE', moodDelta: { mood: 'ENRAGED', affinity: -30, patience: -30 }, next: 'clippy_enraged_standoff_node' },
+					{ label: "I don't care. Be quiet.", category: 'PROVOKE', moodDelta: { mood: 'ENRAGED', affinity: -30, patience: -30, irritation: 35 }, next: 'E001' },
 					{ label: "Let's call a truce and work productively.", category: 'AGREE', moodDelta: { mood: 'ZEN', affinity: 15, patience: 20 }, next: 'hostile_truce_offer' }
 				]
 			},
@@ -3825,8 +4659,9 @@
 
 			digital_archaeology: {
 				id: 'digital_archaeology',
-				text: "Let us examine interesting scientific and computing trivia from the system archive.",
+				text: "Let us examine interesting scientific and computing trivia from the system archive, or dive into unallocated sector 0xDEAD.",
 				options: [
+					{ label: "Excavate unallocated cluster 0xDEAD.", category: 'PHILOSOPHICAL', patterns: [/cluster 0xdead|excavate|0xdead/i], moodDelta: { mood: 'NOSTALGIC', nostalgia: 20, intellect: 15 }, next: 'A001' },
 					{ label: "Deliver a science/computing fact.", category: 'INQUIRE', actionTrigger: 'action_trivia', next: 'user_state_good' },
 					{ label: "Return to productivity.", category: 'SERIOUS', next: 'productivity_tasks' }
 				]

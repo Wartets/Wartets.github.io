@@ -1093,13 +1093,14 @@
 				this.memory.unrecognizedCommandsCount++;
 			}
 			const mood = this.getMood();
+			const userProf = window.ClippySystemBridge ? window.ClippySystemBridge.getUserProfile() : { userName: 'User' };
 			const moodPool = (window.ClippyKnowledge && window.ClippyKnowledge.MOOD_FALLBACKS && window.ClippyKnowledge.MOOD_FALLBACKS[mood]) || null;
 			const fallbackSource = (moodPool && moodPool.length > 0) ? moodPool : (k.FALLBACK_RESPONSES || []);
-			const resolved = k.resolve ? k.resolve(fallbackSource, { brain: this }) : { text: '', actions: [] };
+			const resolved = k.resolve ? k.resolve(fallbackSource, { brain: this, vars: { userName: userProf.userName } }) : { text: '', actions: [] };
 			if (resolved.id) this.pushOutput(resolved.id);
 			return {
 				text: this.transformResponseText(resolved.text),
-				actions: resolved.actions && resolved.actions.length > 0 ? resolved.actions : [
+				actions: (resolved.actions && resolved.actions.length > 0) ? resolved.actions : [
 					{ label: "What can you do?", onClick: () => { if (window.ClippyAgent) window.ClippyAgent.prompt("What can you do?"); } },
 					{ label: "View To-Do List", onClick: () => { if (window.ClippyAgent) window.ClippyAgent.prompt("View To-Do List"); } },
 					{ label: "System Diagnostics", onClick: () => { if (window.ClippyAgent) window.ClippyAgent.prompt("System diagnostics"); } }

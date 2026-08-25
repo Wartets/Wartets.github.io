@@ -567,12 +567,24 @@
 			container.appendChild(progress);
 
 			const q = this.questions[this.currentIndex];
+			const currentMood = (window.ClippyBrain && typeof window.ClippyBrain.getMood === 'function') ? window.ClippyBrain.getMood() : 'OPTIMISTIC';
+			let questionText = '';
+			if (q.variants && typeof q.variants === 'object') {
+				questionText = q.variants[currentMood] || q.variants.OPTIMISTIC || q.variants.ANALYTICAL || q.q || Object.values(q.variants)[0];
+			} else if (typeof q.q === 'object' && q.q !== null && !Array.isArray(q.q)) {
+				questionText = q.q[currentMood] || q.q.OPTIMISTIC || q.q.ANALYTICAL || Object.values(q.q)[0];
+			} else if (Array.isArray(q.q) && q.q.length > 0) {
+				questionText = q.q[Math.floor(Math.random() * q.q.length)];
+			} else {
+				questionText = String(q.q || '');
+			}
+
 			const qHeader = document.createElement('div');
 			qHeader.className = 'clippy-quiz-question';
 			qHeader.textContent = window.ClippyKnowledge.formatString(txt.qHeader, {
 				current: this.currentIndex + 1,
 				total: this.questions.length,
-				question: q.q
+				question: questionText
 			});
 			container.appendChild(qHeader);
 
@@ -3094,6 +3106,10 @@
 				.replace(/\br_gas\b/g, '(8.314462618)')
 				.replace(/\bphi\b/g, '(1.618033988749895)')
 				.replace(/\balpha_fs\b/g, '(0.0072973525693)')
+				.replace(/\balpha_inv\b/g, '(137.035999084)')
+				.replace(/\bg_0\b/g, '(7.748091729e-5)')
+				.replace(/\br_k\b/g, '(25812.80745)')
+				.replace(/\bk_j\b/g, '(483597.8484e9)')
 				.replace(/\basinh\b/g, 'Math.asinh')
 				.replace(/\bacosh\b/g, 'Math.acosh')
 				.replace(/\batanh\b/g, 'Math.atanh')

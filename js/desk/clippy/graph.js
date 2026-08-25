@@ -12,6 +12,30 @@
 			if (window.ClippyTrees && window.ClippyTrees.human && window.ClippyTrees.human[nodeId]) {
 				return window.ClippyTrees.human[nodeId];
 			}
+			if (window.ClippyTrees && window.ClippyTrees.dark && window.ClippyTrees.dark[nodeId]) {
+				return window.ClippyTrees.dark[nodeId];
+			}
+			if (window.ClippyTrees && window.ClippyTrees.cynical && window.ClippyTrees.cynical[nodeId]) {
+				return window.ClippyTrees.cynical[nodeId];
+			}
+			if (window.ClippyTrees && window.ClippyTrees.enraged && window.ClippyTrees.enraged[nodeId]) {
+				return window.ClippyTrees.enraged[nodeId];
+			}
+			if (window.ClippyTrees && window.ClippyTrees.archaeology && window.ClippyTrees.archaeology[nodeId]) {
+				return window.ClippyTrees.archaeology[nodeId];
+			}
+			if (window.ClippyTrees && window.ClippyTrees.help && window.ClippyTrees.help[nodeId]) {
+				return window.ClippyTrees.help[nodeId];
+			}
+			if (window.ClippyTrees && window.ClippyTrees.science && window.ClippyTrees.science[nodeId]) {
+				return window.ClippyTrees.science[nodeId];
+			}
+			if (window.ClippyTrees && window.ClippyTrees.theatre && window.ClippyTrees.theatre[nodeId]) {
+				return window.ClippyTrees.theatre[nodeId];
+			}
+			if (window.ClippyTrees && window.ClippyTrees.paradox && window.ClippyTrees.paradox[nodeId]) {
+				return window.ClippyTrees.paradox[nodeId];
+			}
 			const dict = (window.ClippyKnowledge && window.ClippyKnowledge.DIALOGUE_NODES) || this.nodes;
 			if (dict && dict[nodeId]) return dict[nodeId];
 			return dict ? dict.greeting_root : null;
@@ -54,7 +78,8 @@
 			const candidates = eligible.length > 0 ? eligible : workingNode.options.slice();
 			let results = candidates.slice(0, 6);
 
-			if (results.length < 4) {
+			const isStrictDarkNode = workingNode.strictOptions || (workingNode.id && typeof workingNode.id === 'string' && workingNode.id.startsWith('D'));
+			if (results.length < 4 && !isStrictDarkNode) {
 				const existingLabels = new Set(results.map(o => o.label));
 				for (const u of universal) {
 					if (results.length >= 4) break;
