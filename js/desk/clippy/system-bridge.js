@@ -40,12 +40,40 @@
 
 			if (!candidateList || candidateList.length === 0) return;
 
-			const item = candidateList[Math.floor(Math.random() * candidateList.length)];
-			if (!item || !item.text) return;
+			const currentEnv = this.getEnvironment();
+			const currentMood = (window.ClippyBrain && typeof window.ClippyBrain.getMood === 'function') ? window.ClippyBrain.getMood() : 'OPTIMISTIC';
+
+			const filtered = candidateList.filter(item => {
+				if (!item) return false;
+				if (item.criteria) {
+					if (item.criteria.environments && item.criteria.environments.length > 0 && !item.criteria.environments.includes(currentEnv)) return false;
+					if (item.criteria.moods && item.criteria.moods.length > 0 && !item.criteria.moods.includes(currentMood)) return false;
+				}
+				if (item.environment && item.environment !== currentEnv) return false;
+				if (item.environments && !item.environments.includes(currentEnv)) return false;
+				return true;
+			});
+
+			const pool = filtered.length > 0 ? filtered : candidateList;
+			const item = pool[Math.floor(Math.random() * pool.length)];
+			if (!item) return;
+
+			let text = '';
+			if (typeof item === 'string') {
+				text = item;
+			} else if (typeof item.text === 'object' && item.text !== null) {
+				text = (window.ClippyKnowledge && typeof window.ClippyKnowledge.resolveTextVariant === 'function')
+					? window.ClippyKnowledge.resolveTextVariant(item.text, { brain: window.ClippyBrain, mood: currentMood, environment: currentEnv })
+					: (item.text.default || Object.values(item.text)[0] || '');
+			} else {
+				text = String(item.text || '');
+			}
+
+			if (!text) return;
 
 			setTimeout(() => {
 				if (window.ClippyUI && !window.ClippyUI.isOpen) {
-					window.ClippyUI.showIdleBubble(item.text, () => {
+					window.ClippyUI.showIdleBubble(text, () => {
 						if (window.ClippyAgent) {
 							window.ClippyAgent.open();
 							if (item.prompt) {

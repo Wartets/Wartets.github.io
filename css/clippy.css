@@ -1630,6 +1630,9 @@
 .clippy-onomatopoeia { display: inline-block; font-style: italic; color: #64748b; margin: 0 4px; }
 .clippy-pirate-flair { color: #854d0e; font-weight: bold; font-family: 'Georgia', serif; }
 .clippy-archaic-flair { font-family: 'Times New Roman', serif; font-style: italic; color: #334155; }
+.clippy-corporate-flair { color: #0f172a; font-family: 'Segoe UI', Tahoma, sans-serif; font-weight: 500; }
+.clippy-cyber-flair { color: #0284c7; font-family: 'Lucida Console', monospace; letter-spacing: 0.5px; }
+.clippy-academic-flair { color: #1e1b4b; font-family: 'Times New Roman', serif; }
 
 @keyframes clippyTextGlitch {
 	0% { transform: translate(0); }

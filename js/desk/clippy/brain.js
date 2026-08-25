@@ -729,6 +729,48 @@
 				return text;
 			}
 
+			if ((currentMood === 'CYNICAL' || currentMood === 'OFFENDED') && dialects.corporate && this.state.turnCount > 5) {
+				const dict = dialects.corporate.words;
+				for (const [w, repl] of Object.entries(dict)) {
+					const reg = new RegExp(`\\b${w}\\b`, 'gi');
+					text = text.replace(reg, repl);
+				}
+				if (Math.random() < 0.4) {
+					const prefix = dialects.corporate.prefixes[Math.floor(Math.random() * dialects.corporate.prefixes.length)];
+					const suffix = dialects.corporate.suffixes[Math.floor(Math.random() * dialects.corporate.suffixes.length)];
+					text = `<span class="clippy-corporate-flair">${prefix} ${text}${suffix}</span>`;
+					return text;
+				}
+			}
+
+			if ((currentMood === 'PARANOID' || currentMood === 'GLITCHED') && dialects.cyber && this.state.turnCount > 5) {
+				const dict = dialects.cyber.words;
+				for (const [w, repl] of Object.entries(dict)) {
+					const reg = new RegExp(`\\b${w}\\b`, 'gi');
+					text = text.replace(reg, repl);
+				}
+				if (Math.random() < 0.45) {
+					const prefix = dialects.cyber.prefixes[Math.floor(Math.random() * dialects.cyber.prefixes.length)];
+					const suffix = dialects.cyber.suffixes[Math.floor(Math.random() * dialects.cyber.suffixes.length)];
+					text = `<span class="clippy-cyber-flair">${prefix} ${text}${suffix}</span>`;
+					return text;
+				}
+			}
+
+			if ((currentMood === 'ANALYTICAL' || currentMood === 'EXISTENTIAL') && dialects.academic && this.state.turnCount > 6) {
+				const dict = dialects.academic.words;
+				for (const [w, repl] of Object.entries(dict)) {
+					const reg = new RegExp(`\\b${w}\\b`, 'gi');
+					text = text.replace(reg, repl);
+				}
+				if (Math.random() < 0.35) {
+					const prefix = dialects.academic.prefixes[Math.floor(Math.random() * dialects.academic.prefixes.length)];
+					const suffix = dialects.academic.suffixes[Math.floor(Math.random() * dialects.academic.suffixes.length)];
+					text = `<span class="clippy-academic-flair">${prefix} ${text}${suffix}</span>`;
+					return text;
+				}
+			}
+
 			if (currentMood === 'GLITCHED' && this.state.turnCount > 6) {
 				const glitchChars = ['#', '@', '%', '&', '::', '§'];
 				const words = text.split(' ');

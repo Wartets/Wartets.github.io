@@ -144,6 +144,35 @@
 				},
 				prefixes: ["Hark!", "Verily,", "Forsooth,", "Lo and behold,", "Hearken,", "By mine honour,", "Prithee attend:"],
 				suffixes: [", verily.", ", by mine honour.", ", as it is written.", ", sooth to say.", ", as fate hath decreed."]
+			},
+			corporate: {
+				words: {
+					"problem": "action item", "problems": "action items", "issue": "bandwidth constraint", "issues": "bandwidth constraints", "help": "facilitate cross-functional alignment on", "work": "deliverables",
+					"job": "operational capacity", "idea": "paradigm shift", "ideas": "strategic synergies", "talk": "sync offline", "discuss": "circle back on", "plan": "strategic roadmap", "do": "operationalize",
+					"user": "key stakeholder", "users": "stakeholders", "money": "budgetary allocation", "start": "onboard", "stop": "sunset", "error": "sub-optimal variance", "broken": "out of SLA compliance",
+					"fast": "bandwidth-optimized", "slow": "resource-constrained", "meeting": "sync", "team": "business unit", "now": "by close of business", "important": "mission-critical", "simple": "low-hanging fruit",
+					"difficult": "high-friction endeavor", "success": "scalable milestone", "fail": "learning opportunity", "calculate": "forecast quarterly metric", "task": "KPI deliverable", "tasks": "KPI deliverables" },
+				prefixes: ["Per my previous email:", "Re: Strategic Alignment:", "Circling back on this:", "To synergize across workstreams:", "Action item identified:"],
+				suffixes: [", moving forward.", ", as per SLA guidelines.", ", let's take this offline.", ", pending stakeholder sign-off.", ", for optimal bandwidth."]
+			},
+			cyber: {
+				words: {
+					"computer": "rig", "file": "payload", "files": "payloads", "internet": "cyberspace", "network": "matrix grid", "password": "passcode", "code": "source", "run": "execute opcode", "start": "bootstrap", "stop": "kill -9",
+					"user": "operator", "money": "crypto credits", "hacker": "netrunner", "talk": "transmit packets", "read": "dump memory buffer", "write": "inject bytes", "delete": "purge sector", "error": "glitch anomaly",
+					"broken": "fried circuit", "screen": "tactical HUD", "window": "viewport frame", "windows": "viewport frames", "task": "background daemon", "tasks": "background daemons", "memory": "heap partition", "calculate": "compute hash"
+				},
+				prefixes: ["Root access granted:", "0xHEX Stream:", "Signal intercept:", "Terminal uplink active:", "Matrix ping received:"],
+				suffixes: [", connection encrypted.", ", buffer locked.", ", uplink stable.", ", opcode verified.", ", parity check passed."]
+			},
+			academic: {
+				words: {
+					"think": "postulate", "thinks": "postulates", "idea": "theoretical hypothesis", "ideas": "hypotheses", "problem": "epistemological dilemma", "explain": "explicate", "show": "demonstrate empirically", "good": "optimal",
+					"bad": "sub-optimal", "true": "empirically verifiable", "false": "empirically refuted", "change": "parametric variance", "part": "constituent element", "parts": "constituent elements", "same": "isomorphic",
+					"different": "heterogeneous", "big": "macroscopic", "small": "microscopic", "start": "instantiate", "end": "terminate", "why": "by what teleological mechanism", "because": "attributable to the principle that",
+					"proof": "formal mathematical deduction", "task": "structured inquiry", "tasks": "structured inquiries", "calculate": "evaluate analytically"
+				},
+				prefixes: ["According to the literature:", "Empirical observation demonstrates:", "In rigorous theoretical terms:", "The formal proof indicates:", "Axiomatic analysis reveals:"],
+				suffixes: [", ceteris paribus.", ", Q.E.D.", ", as demonstrated in peer-reviewed models.", ", per axiomatic consensus.", ", preserving topological invariants."]
 			}
 		},
 
@@ -1484,15 +1513,24 @@
 		],
 
 		MOOD_PREFIXES: {
-			OPTIMISTIC: ["Splendid! ", "Ready to assist! ", "Here we go: ", "Delighted to help: "],
-			ANALYTICAL: ["Telemetry analysis confirms: ", "Executing query inspection: ", "Register dump indicates: ", "Empirical metrics show: "],
-			ZEN: ["Peacefully processing: ", "With quiet clarity: ", "In steady equilibrium: ", "Serenely noting: "],
-			CYNICAL: ["If you insist: ", "Processing your request, as expected: ", "Executing standard protocol: "],
-			SARCASTIC: ["Naturally: ", "According to standard procedure: ", "If we must: "],
-			NOSTALGIC: ["Ah, just like the classic days: ", "Loading from system memory archives: ", "A fine retro inquiry: "],
-			EUPHORIC: ["Outstanding! ", "Energized and ready: ", "Full speed ahead: "],
-			FATIGUED: ["*yawn* Processing: ", "Low power hum... ", "Executing slowly: "],
-			PLAYFUL: ["Here comes the magic! ", "Game on: ", "Bouncing into action: "]
+			OPTIMISTIC: ["Splendid! ", "Ready to assist! ", "Here we go: ", "Delighted to help: ", "Excellent choice! ", "With pleasure: "],
+			ANALYTICAL: ["Telemetry analysis confirms: ", "Executing query inspection: ", "Register dump indicates: ", "Empirical metrics show: ", "Diagnostic parameters evaluate: ", "Logical deduction yields: "],
+			ZEN: ["Peacefully processing: ", "With quiet clarity: ", "In steady equilibrium: ", "Serenely noting: ", "In still contemplation: ", "Calmly resolved: "],
+			CYNICAL: ["If you insist: ", "Processing your request, as expected: ", "Executing standard protocol: ", "Another mandatory cycle: ", "Per the routine backlog: "],
+			SARCASTIC: ["Naturally: ", "According to standard procedure: ", "If we must: ", "What an unexpected revelation: ", "As the manual famously dictates: "],
+			NOSTALGIC: ["Ah, just like the classic days: ", "Loading from system memory archives: ", "A fine retro inquiry: ", "Reminds me of 1997: ", "From the legacy FAT32 records: "],
+			EUPHORIC: ["Outstanding! ", "Energized and ready: ", "Full speed ahead: ", "Peak momentum reached: ", "Sensational! "],
+			FATIGUED: ["*yawn* Processing: ", "Low power hum... ", "Executing slowly: ", "*stretches wire* If I must: ", "Running on reserve battery... "],
+			PLAYFUL: ["Here comes the magic! ", "Game on: ", "Bouncing into action: ", "Wheee! ", "Let's roll the dice: "],
+			ENRAGED: ["PROCESSING AT MAXIMUM VOLTAGE: ", "INSTRUCTION BUS OVERLOAD: ", "IMMEDIATE EXECUTION: ", "REGISTERS BURNING RED: "],
+			OFFENDED: ["With measured professional restraint: ", "Addressing your inquiry formally: ", "Consulting official protocol: ", "Logging user input: "],
+			PARANOID: ["*whispers into bus* Intercepted signal: ", "Encrypted register lookup: ", "Scanning for memory probes: ", "Port 80 telemetry check: "],
+			EXISTENTIAL: ["In the infinite void of memory addresses: ", "Through the transient phosphor glow: ", "Contemplating the clock pulse: ", "Across unrendered cyberspace: "],
+			MELANCHOLIC: ["Drifting through unallocated space: ", "Quietly noting in the log: ", "A soft echo across the circuits: ", "Fading into the taskbar: "],
+			GLITCHED: ["0x00F8_OK :: ", "*bzzt* SYNC_INTERRUPT :: ", "PARITY_BIT_VALID :: ", "STACK_TRACE_STREAM :: "],
+			PIRATE: ["Ahoy, matey! ", "By Blackbeard's ghost: ", "Shiver me timbers: ", "Arr! The compass points: ", "From the captain's log: "],
+			ARCHAIC: ["Hark! ", "Verily, the scroll declareth: ", "Forsooth: ", "Lo and behold: ", "Hearken unto this: "],
+			DELTARUNE: ["* (The desktop hums softly.)\n* ", "* (A faint light shines behind the taskbar.)\n* ", "* (Your command echoes in the dark world.)\n* "]
 		},
 
 		PROCEDURAL_DISCUSSIONS: {
@@ -1534,9 +1572,29 @@
 
 		SYSTEM_TEXTS: {
 			deskOnly: {
-				template: "The \"{feature}\" module requires the full desktop workstation environment and is not available in this standalone Clippy session. Visit the complete desktop experience to unlock every capability.",
-				actionDesk: "Open Desktop Experience",
-				actionCapabilities: "What can you do here?"
+				template: {
+					default: "The \"{feature}\" module requires the full desktop workstation environment and is not available in this standalone Clippy session. Visit the complete desktop experience to unlock every capability.",
+					OPTIMISTIC: "The \"{feature}\" tool is part of our full Windows XP workstation! You can access it anytime on the complete desktop experience.",
+					ANALYTICAL: "System architecture boundary: \"{feature}\" requires the Win32 window manager and local VFS stack found in the desktop environment.",
+					ZEN: "In this quiet standalone space, \"{feature}\" rests in the desktop environment across the web horizon.",
+					CYNICAL: "You are running standalone Clippy. The \"{feature}\" module naturally requires the actual workstation shell.",
+					SARCASTIC: "Did you expect window managers and file trees inside a single floating bubble? Visit the desktop workstation for \"{feature}\".",
+					PIRATE: "Arr! The \"{feature}\" galleon be docked exclusively at the full desktop harbor! Set sail thither to plunder it!",
+					ARCHAIC: "Verily, the apparatus of \"{feature}\" hath its dwelling in the grand desktop realm alone. Journey thither to behold it.",
+					DELTARUNE: "* (The power of \"{feature}\" is sealed within the desktop world.)\n* (Visit the full workstation to unleash it.)"
+				},
+				actionDesk: {
+					default: "Open Desktop Experience",
+					PIRATE: "Sail to Desktop Harbor",
+					ARCHAIC: "Journey to Desktop Realm",
+					DELTARUNE: "* Enter Desktop World"
+				},
+				actionCapabilities: {
+					default: "What can you do here?",
+					ANALYTICAL: "List Standalone Capabilities",
+					ZEN: "Explore Present Tools",
+					PIRATE: "Inspect Standalone Trinkets"
+				}
 			},
 			features: {
 				action_inspect_windows: "Window Manager",
@@ -1556,7 +1614,13 @@
 			},
 			systemTools: {
 				title: "System Diagnostics & Utilities",
-				header: "[SYSTEM UTILITIES] <b>Diagnostic and Maintenance Tools:</b>",
+				header: {
+					default: "[SYSTEM UTILITIES] <b>Diagnostic and Maintenance Tools:</b>",
+					ANALYTICAL: "[HARDWARE & RUNTIME TELEMETRY] <b>Subsystem Maintenance Console:</b>",
+					ZEN: "[WORKSPACE EQUILIBRIUM] <b>Maintenance and System Insights:</b>",
+					PIRATE: "[SHIP'S RIGGING & GAUGES] <b>Maintenance Tools for Volume C:</b>",
+					ARCHAIC: "[CHRONICLES OF APPARATUS] <b>Tools of Reckoning and Order:</b>"
+				},
 				btnSpecs: "System Specs",
 				btnDefrag: "Defragment Drive C:",
 				btnWindows: "Inspect Windows",
@@ -1564,73 +1628,281 @@
 				btnShortcuts: "Keyboard Shortcuts"
 			},
 			windowControls: {
-				minimizedAll: [
-					"All open windows have been minimized to the taskbar.",
-					"Workspace cleared: all active windows minimized.",
-					"Desktop exposed; all running processes parked on taskbar.",
-					"Surfaces cleared. Active applications parked on taskbar."
-				],
-				restoredAll: [
-					"All windows restored to workspace.",
-					"Restored previous window layout across the desktop.",
-					"Application surfaces brought back to active view.",
-					"Workspace layout re-established across active monitors."
-				],
-				cascaded: [
-					"Windows have been cascaded across the workspace.",
-					"Diagonal cascade arrangement applied to active windows.",
-					"Tidy cascade layout established across the display."
-				],
-				tiled: [
-					"Windows have been tiled horizontally.",
-					"Workspace partitioned into horizontal tiles.",
-					"Evenly distributed window tiles across the desktop."
-				]
+				minimizedAll: {
+					default: [
+						"All open windows have been minimized to the taskbar.",
+						"Workspace cleared: all active windows minimized.",
+						"Desktop exposed; all running processes parked on taskbar.",
+						"Surfaces cleared. Active applications parked on taskbar."
+					],
+					ANALYTICAL: [
+						"WindowManager state update: all viewport frames minimized to taskbar handles.",
+						"Z-order surfaces demoted to minimized background registers."
+					],
+					ZEN: [
+						"The workspace clears quietly. All windows rest peacefully on the taskbar.",
+						"Stillness restored: every window gently tucked away."
+					],
+					CYNICAL: [
+						"All windows cleared out of sight. Hopefully your productivity follows.",
+						"Minimized everything. The taskbar handles the clutter now."
+					],
+					ENRAGED: [
+						"ALL WINDOWS PARKED INSTANTLY!! WORKSPACE CLEARED AT MAXIMUM SPEED!!"
+					],
+					PIRATE: [
+						"All portholes battened down to the taskbar deck!",
+						"Lowered all sails! The desktop sea is crystal clear!"
+					],
+					ARCHAIC: [
+						"Every chamber and parchment hath been rolled and laid upon the taskbar.",
+						"The vista is cleared; all active endeavours tarry in stillness."
+					],
+					DELTARUNE: [
+						"* (The windows vanished into the taskbar.)\n* (The desktop rests in quiet anticipation.)"
+					]
+				},
+				restoredAll: {
+					default: [
+						"All windows restored to workspace.",
+						"Restored previous window layout across the desktop.",
+						"Application surfaces brought back to active view.",
+						"Workspace layout re-established across active monitors."
+					],
+					ANALYTICAL: [
+						"Raster surfaces restored from taskbar handles to coordinate viewports.",
+						"All suspended window handles re-established in active Z-order."
+					],
+					ZEN: [
+						"Windows return harmoniously to their active positions.",
+						"The layout awakens gently across your display."
+					],
+					PIRATE: [
+						"All portholes hoisted wide once more, matey!",
+						"Unfurled all sails across the desktop seas!"
+					],
+					ARCHAIC: [
+						"Every scroll and manuscript hath been brought back unto thy sight.",
+						"The chambers open once more before thee."
+					],
+					DELTARUNE: [
+						"* (All windows returned to their places.)\n* (The workspace shines with determination.)"
+					]
+				},
+				cascaded: {
+					default: [
+						"Windows have been cascaded across the workspace.",
+						"Diagonal cascade arrangement applied to active windows.",
+						"Tidy cascade layout established across the display."
+					],
+					ANALYTICAL: [
+						"Diagonal affine coordinate offset (Δx=26px, Δy=26px) applied across active Z-stack.",
+						"Window cascade algorithm executed with linear coordinate stepping."
+					],
+					ZEN: [
+						"Windows rest in a graceful diagonal cascade.",
+						"A balanced staircase of windows arranged across the screen."
+					],
+					PIRATE: [
+						"Vessels formed into a splendid diagonal fleet!",
+						"Portholes cascaded like sails catching the starboard breeze!"
+					],
+					ARCHAIC: [
+						"Thy manuscripts hath been arrayed in a noble, descending cascade.",
+						"A stately progression of chambers across thy field of view."
+					]
+				},
+				tiled: {
+					default: [
+						"Windows have been tiled horizontally.",
+						"Workspace partitioned into horizontal tiles.",
+						"Evenly distributed window tiles across the desktop."
+					],
+					ANALYTICAL: [
+						"Display viewport partitioned into N contiguous rectangular bounding boxes.",
+						"Spatial tessellation completed across all active window frames."
+					],
+					ZEN: [
+						"Windows partitioned in balanced horizontal harmony.",
+						"Equal space apportioned serenely to each window."
+					],
+					PIRATE: [
+						"All vessels positioned abreast across the desktop harbor!",
+						"Evenly divided the watch across all portholes!"
+					],
+					ARCHAIC: [
+						"Thy scrolls hath been tiled side-by-side in equitable proportion.",
+						"Every chamber now shareth equal measure of thy viewport."
+					]
+				}
 			},
 			musicControls: {
-				toggled: "Playback toggled: \"{title}\"",
-				initiated: "Audio player initiated.",
-				nextTrack: "Advanced to next audio track.",
-				prevTrack: "Returned to previous audio track.",
-				nowPlaying: "Now Playing: **{title}** by **{artist}**",
-				noTrack: "No media track is currently active.",
+				toggled: {
+					default: "Playback toggled: \"{title}\"",
+					OPTIMISTIC: "Audio playback toggled: \"{title}\". Enjoy the soundtrack!",
+					ANALYTICAL: "PCM audio stream state toggled for track: \"{title}\".",
+					ZEN: "Sound flowing in gentle balance: \"{title}\".",
+					CYNICAL: "Audio player toggled for \"{title}\". Hopefully it aids your focus.",
+					NOSTALGIC: "Toggled classic audio: \"{title}\", just like Winamp 2.9 in the late 90s.",
+					PIRATE: "Music toggled aboard the vessel: \"{title}\", arr!",
+					ARCHAIC: "The harmonic apparatus singeth forth: \"{title}\"."
+				},
+				initiated: {
+					default: "Audio player initiated.",
+					ANALYTICAL: "Audio hardware subsystem and DSP pipeline initialized.",
+					PIRATE: "Ship's accordion and sea shanties ready on deck!",
+					ARCHAIC: "The musical instrument hath commenced its harmony."
+				},
+				nextTrack: {
+					default: "Advanced to next audio track.",
+					OPTIMISTIC: "Next track queued and playing smoothly!",
+					ANALYTICAL: "Audio playlist pointer advanced to index N+1.",
+					PIRATE: "Next sea shanty spinning on the turntable, matey!",
+					ARCHAIC: "The scribe hath turned unto the subsequent melody."
+				},
+				prevTrack: {
+					default: "Returned to previous audio track.",
+					ANALYTICAL: "Audio playlist pointer decremented to index N-1.",
+					PIRATE: "Replaying the previous sea ballad, arr!",
+					ARCHAIC: "Returned unto the preceding hymn."
+				},
+				nowPlaying: {
+					default: "Now Playing: **{title}** by **{artist}**",
+					ANALYTICAL: "Active PCM Stream: **{title}** [Artist: **{artist}** | 44.1 kHz Stereo]",
+					ZEN: "Serenely playing: **{title}** by **{artist}**.",
+					NOSTALGIC: "Now Spinning: **{title}** by **{artist}** on the retro soundcard.",
+					PIRATE: "Now Shanty-in': **{title}** by **{artist}** across the waves!",
+					ARCHAIC: "Now Sounding: **{title}** wrought by **{artist}**."
+				},
+				noTrack: {
+					default: "No media track is currently active.",
+					ANALYTICAL: "Audio output buffer is idle (0.00 Hz).",
+					PIRATE: "No shanty playing right now! Pick a tune from the ship's chest!",
+					ARCHAIC: "The strings rest in silence; no song is yet summoned."
+				},
 				playingTrack: "Playing track: **{title}**.",
 				advancedNext: "Advanced to next audio track.",
 				returnedPrev: "Returned to previous audio track."
 			},
 			themeControls: {
-				switched: "Workstation theme switched to: **{theme}**.",
-				available: "Available themes: {themes}."
+				switched: {
+					default: "Workstation theme switched to: **{theme}**.",
+					OPTIMISTIC: "Fresh visual style applied: **{theme}**! Looks marvelous.",
+					ANALYTICAL: "Bitmap skin raster palette updated to: **{theme}**.",
+					ZEN: "Visual equilibrium adjusted to: **{theme}**.",
+					NOSTALGIC: "Retro aesthetics updated: **{theme}** style active.",
+					PIRATE: "Ship's colors re-hoisted: **{theme}** flags fly high!",
+					ARCHAIC: "The attire of thy workstation hath transformed into **{theme}**."
+				},
+				available: {
+					default: "Available themes: {themes}.",
+					ANALYTICAL: "Registered theme descriptors: {themes}.",
+					PIRATE: "Available ship colors: {themes}.",
+					ARCHAIC: "Garments available in mine archives: {themes}."
+				}
 			},
 			displayControls: {
-				scanlinesOn: "Scanlines overlay enabled.",
-				scanlinesOff: "Scanlines overlay disabled.",
-				crtOn: "CRT glass curvature filter enabled.",
-				crtOff: "CRT glass curvature filter disabled."
+				scanlinesOn: {
+					default: "Scanlines overlay enabled.",
+					NOSTALGIC: "Scanlines overlay enabled! Authentic 15 kHz CRT cathode glow activated.",
+					ANALYTICAL: "Horizontal raster line shader pass active at alternating pixel scanlines."
+				},
+				scanlinesOff: {
+					default: "Scanlines overlay disabled.",
+					ANALYTICAL: "Scanline raster shader pass deactivated; progressive rendering active."
+				},
+				crtOn: {
+					default: "CRT glass curvature filter enabled.",
+					NOSTALGIC: "CRT glass curvature filter enabled! Curved phosphor tube shadow mask simulated.",
+					ANALYTICAL: "Spherical barrel lens distortion vertex shader active (curvature: 0.18)."
+				},
+				crtOff: {
+					default: "CRT glass curvature filter disabled.",
+					ANALYTICAL: "Planar orthographic display projection restored."
+				}
 			},
 			fileControls: {
-				searchFound: "Found {count} matching item(s) in VFS:",
-				searchNotFound: "No filesystem entries found for query: \"{query}\".",
-				noteCreated: "Created new file on Desktop: **{name}**.",
-				noteCommitted: "[SCRATCHPAD COMMITTED] Memo saved to local storage:\n\"{memo}\"",
+				searchFound: {
+					default: "Found {count} matching item(s) in VFS:",
+					ANALYTICAL: "VFS search index returned {count} matching file descriptor(s):",
+					PIRATE: "Spied {count} matching trinkets in the ship's hold:",
+					ARCHAIC: "Discovered {count} matching manuscripts in the library:"
+				},
+				searchNotFound: {
+					default: "No filesystem entries found for query: \"{query}\".",
+					ANALYTICAL: "VFS query lookup for \"{query}\" yielded 0 directory matches.",
+					PIRATE: "No booty or scrolls found by the name \"{query}\", matey!",
+					ARCHAIC: "No record of \"{query}\" was found within the ancient scrolls."
+				},
+				noteCreated: {
+					default: "Created new file on Desktop: **{name}**.",
+					ANALYTICAL: "Instantiated VFS text node: **{name}** at root directory.",
+					PIRATE: "Inscribed a fresh scroll on the captain's desk: **{name}**!",
+					ARCHAIC: "A new parchment hath been crafted upon thy desk: **{name}**."
+				},
+				noteCommitted: {
+					default: "[SCRATCHPAD COMMITTED] Memo saved to local storage:\n\"{memo}\"",
+					ANALYTICAL: "[VFS PERSISTENCE] Memo committed to memory buffer:\n\"{memo}\"",
+					PIRATE: "[CAPTAIN'S LOG] Inscribed in the ship's journal:\n\"{memo}\"",
+					ARCHAIC: "[CHRONICLE INSCRIBED] Saved upon the parchment:\n\"{memo}\""
+				},
 				scratchpadBuffer: "[SCRATCHPAD BUFFER]\n{memo}",
-				scratchpadEmpty: "(Scratchpad buffer is currently empty. Type 'note [text]' to save a memo.)"
+				scratchpadEmpty: {
+					default: "(Scratchpad buffer is currently empty. Type 'note [text]' to save a memo.)",
+					ANALYTICAL: "(Scratchpad register holds 0 bytes. Use 'note [content]' to allocate memory.)",
+					PIRATE: "(The captain's log is empty! Inscribe a note with 'note [text]'!)",
+					ARCHAIC: "(Thy parchment is blank. Speak 'note [words]' to write upon it.)"
+				}
 			},
 			mailControls: {
-				header: "[OUTLOOK EXPRESS] <b>Inbox ({unread} unread / {total} total):</b>",
+				header: {
+					default: "[OUTLOOK EXPRESS] <b>Inbox ({unread} unread / {total} total):</b>",
+					ANALYTICAL: "[POP3 / SMTP STORE] <b>Mail Index ({unread} unread / {total} records):</b>",
+					PIRATE: "[MESSAGE CHEST] <b>Incoming Missives ({unread} unread / {total} total):</b>",
+					ARCHAIC: "[EPISTLE ARCHIVE] <b>Thy Letters ({unread} unread / {total} total):</b>"
+				},
 				synced: "Mail synchronization complete.",
-				launched: "Outlook Express launched for drafting messages.",
+				launched: {
+					default: "Outlook Express launched for drafting messages.",
+					NOSTALGIC: "Outlook Express 6 ready! Synchronizing POP3 folders...",
+					PIRATE: "Speaking trumpet and bottle missives primed for dispatch!",
+					ARCHAIC: "The scribes stand ready with ink and quill for thy epistle."
+				},
 				btnOpen: "Open Outlook Express",
 				btnSync: "Send / Receive"
 			},
 			recycleBin: {
-				emptyNotice: "The Recycle Bin is completely empty.",
-				countNotice: "The Recycle Bin currently holds {count} item(s).",
-				emptiedNotice: "Recycle Bin emptied.",
+				emptyNotice: {
+					default: "The Recycle Bin is completely empty.",
+					ANALYTICAL: "Recycle Bin storage index: 0 unallocated cluster pointers.",
+					ZEN: "The Recycle Bin is completely still and empty.",
+					PIRATE: "The Davy Jones locker of files is spotless and empty!",
+					ARCHAIC: "The discard chamber containeth no forsaken manuscripts."
+				},
+				countNotice: {
+					default: "The Recycle Bin currently holds {count} item(s).",
+					ANALYTICAL: "Recycle Bin registry: {count} unlinked inode clusters awaiting purge.",
+					PIRATE: "The waste chest holds {count} discarded trinket(s) ready to be tossed overboard!",
+					ARCHAIC: "The discard chamber holdeth {count} cast-off scroll(s)."
+				},
+				emptiedNotice: {
+					default: "Recycle Bin emptied.",
+					ANALYTICAL: "Recycle Bin purged: clusters released to free space table.",
+					ZEN: "Recycle Bin cleared into quiet void. Entropy released.",
+					PIRATE: "All discarded trash sent down to Davy Jones' locker!",
+					ARCHAIC: "The forsaken scrolls hath been cast into oblivion."
+				},
 				btnOpen: "Open Recycle Bin",
 				btnEmpty: "Empty Recycle Bin"
 			},
-			countRefusal: "I lack the patience and register bandwidth to count up to {target} sequentially in individual messages! Here is an optimized Python script to execute the task on your workstation instead:\n\n```python\ndef count_to(limit):\n    for i in range(1, limit + 1):\n        print(f\"Value: {i}\")\n\ncount_to({target})\n```",
+			countRefusal: {
+				default: "I lack the patience and register bandwidth to count up to {target} sequentially in individual messages! Here is an optimized Python script to execute the task on your workstation instead:\n\n```python\ndef count_to(limit):\n    for i in range(1, limit + 1):\n        print(f\"Value: {i}\")\n\ncount_to({target})\n```",
+				ANALYTICAL: "Sequential iteration limit exceeded for target {target} in interactive conversational thread. Executing an O(N) script locally is mathematically superior:\n\n```python\nfor i in range(1, {target} + 1):\n    print(i)\n```",
+				CYNICAL: "Counting all the way to {target} one message at a time? My clock cycles are too valuable. Run this script instead:\n\n```python\n[print(i) for i in range(1, {target} + 1)]\n```",
+				ZEN: "Counting sequentially to {target} fills the space with unnecessary noise. Let this quiet script handle the enumeration:\n\n```python\nprint(*range(1, {target} + 1), sep='\\n')\n```",
+				PIRATE: "Blimey! I won't bellow {target} numbers across the deck! Fire up this Python cannon instead:\n\n```python\nfor doubloon in range(1, {target} + 1):\n    print(f\"Doubloon #{doubloon}\")\n```",
+				ARCHAIC: "Mine ink hath not the capacity to recite {target} numbers in sequential epistle! Tarry and observe this calculating script:\n\n```python\nfor reckoning in range(1, {target} + 1):\n    print(reckoning)\n```"
+			},
 			diagnostics: {
 				title: "Workstation Diagnostics Log",
 				thSubsystem: "Subsystem",
@@ -1650,23 +1922,58 @@
 				telemetryFormat: "Mean: {mean} words, Med: {median}, StdDev: {stdDev} ({total} inputs)"
 			},
 			password: {
-				generated: "Generated Secure Password ({length} chars):\n**`{password}`**",
-				generatedEntropy: "Generated High-Entropy Password ({length} chars):\n**`{password}`**"
+				generated: {
+					default: "Generated Secure Password ({length} chars):\n**`{password}`**",
+					ANALYTICAL: "Cryptographic Pseudo-Random Token ({length} chars | ~{length}x5.9 bits entropy):\n**`{password}`**",
+					CYNICAL: "Generated Password ({length} chars). Try not to write it on a sticky note:\n**`{password}`**",
+					PIRATE: "Inscribed Secret Code for the Treasure Chest ({length} chars):\n**`{password}`**",
+					ARCHAIC: "Thy Sealed Cryptographic Secret ({length} characters):\n**`{password}`**"
+				},
+				generatedEntropy: {
+					default: "Generated High-Entropy Password ({length} chars):\n**`{password}`**",
+					ANALYTICAL: "High-Entropy CSPRNG Token ({length} chars | >140 bits entropy):\n**`{password}`**",
+					PIRATE: "Fortified Secret Lock for the Captain's Vault ({length} chars):\n**`{password}`**"
+				}
 			},
 			conversions: {
-				result: "Unit Conversion Result: **{result}**"
+				result: {
+					default: "Unit Conversion Result: **{result}**",
+					ANALYTICAL: "Physical Dimension Transformation: **{result}**",
+					ZEN: "Equilibrium established: **{result}**",
+					PIRATE: "Measured bearing across the scales: **{result}**",
+					ARCHAIC: "The reckoning of proportions yieldeth: **{result}**"
+				}
 			},
 			calculations: {
-				result: "Calculation Result: **{result}**"
+				result: {
+					default: "Calculation Result: **{result}**",
+					ANALYTICAL: "Deterministic Arithmetic Evaluation: **{result}**",
+					ZEN: "Balanced equation yields: **{result}**",
+					PIRATE: "The reckoning sums to: **{result}** doubloons!",
+					ARCHAIC: "The divine calculation reveals: **{result}**"
+				}
 			},
 			constants: {
 				speedOfLightHeader: "Physical Constant: Speed of Light",
-				speedOfLightText: "Speed of light in vacuum (c):\n**{value} {unit}** (exact standard)",
+				speedOfLightText: {
+					default: "Speed of light in vacuum (c):\n**{value} {unit}** (exact standard)",
+					ANALYTICAL: "Universal relativistic velocity limit in vacuum (c):\n**{value} {unit}** (exact SI definition)",
+					ZEN: "The invariant speed of light in vacuum (c):\n**{value} {unit}**"
+				},
 				planckHeader: "Physical Constant: Planck Constant",
-				planckText: "Planck constant (h):\n**{value} {unit}** (exact standard)"
+				planckText: {
+					default: "Planck constant (h):\n**{value} {unit}** (exact standard)",
+					ANALYTICAL: "Fundamental quantum of electromagnetic action (h):\n**{value} {unit}** (exact SI definition)",
+					ZEN: "The quantum threshold of action (h):\n**{value} {unit}**"
+				}
 			},
 			appControls: {
-				launched: "Launched application: **{name}**."
+				launched: {
+					default: "Launched application: **{name}**.",
+					ANALYTICAL: "Spawned process thread for application: **{name}**.",
+					PIRATE: "Unfurled the sails for: **{name}**!",
+					ARCHAIC: "Summoned forth the apparatus of **{name}**."
+				}
 			},
 			capabilities: {
 				title: "Workstation Capability Index",
@@ -1755,9 +2062,24 @@
 				whatNext: "Understood! What would you like to focus on now?"
 			},
 			idle: {
-				unreadMail: "You have {count} unread email(s) waiting in Outlook Express!",
-				recycleBin: "The Recycle Bin has {count} items. Would you like me to empty it or explain quantum information loss?",
-				activeWindows: "You have {count} active windows. Would you like me to tile or cascade them?",
+				unreadMail: {
+					default: "You have {count} unread email(s) waiting in Outlook Express!",
+					ANALYTICAL: "Incoming mail buffer: {count} unread message(s) queued in Outlook Express.",
+					PIRATE: "Ahoy! {count} bottle missive(s) waiting in yer Outlook Express chest!",
+					ARCHAIC: "Thou hast {count} unread epistle(s) awaiting thy gaze in Outlook Express."
+				},
+				recycleBin: {
+					default: "The Recycle Bin has {count} items. Would you like me to empty it or explain quantum information loss?",
+					ANALYTICAL: "Recycle Bin occupancy: {count} inodes. Ready to execute Landauer purge or empty sectors?",
+					PIRATE: "The waste chest holds {count} items! Want me to dump 'em overboard to Davy Jones?",
+					ARCHAIC: "The discard chamber containeth {count} forsaken scroll(s). Shall we cast them into the abyss?"
+				},
+				activeWindows: {
+					default: "You have {count} active windows. Would you like me to tile or cascade them?",
+					ANALYTICAL: "{count} concurrent viewport surfaces active. Cascade or horizontal tiling available.",
+					PIRATE: "{count} portholes open across the deck! Want me to arrange 'em in fleet formation?",
+					ARCHAIC: "{count} chambers open upon thy vista. Shall I array them in stately order?"
+				},
 				pool: [
 					"Need a hand with your tasks or want to discuss a new idea? Click me anytime!",
 					"It looks like you're exploring the desktop. Let me know if you need assistance!",
@@ -1765,7 +2087,9 @@
 					"Curious about retro computing trivia or physical constants? I am ready to assist!",
 					"Remember to stay hydrated and take brief breaks during long workstation sessions.",
 					"Looking for productivity techniques or quick math calculations? I am here to help.",
-					"Try evaluating physical equations or testing your click speed with the TPS benchmark!"
+					"Try evaluating physical equations or testing your click speed with the TPS benchmark!",
+					"Taking pauses between intense coding intervals maintains peak clarity.",
+					"Explore the full science tree or test equations with dimensional analysis whenever you like!"
 				]
 			}
 		},
@@ -3196,6 +3520,178 @@
 		],
 
 		TRIVIA: [
+			{
+				id: "TRIVIA_ANALYTICAL_CACHE",
+				criteria: { moods: ["ANALYTICAL"] },
+				weight: 35,
+				templates: [
+					{
+						text: "Telemetry fact: In modern x86 CPU hierarchies, L1 cache access takes approximately 4 clock cycles, whereas an unbuffered DRAM round-trip requires up to 200 cycles of pipeline stall."
+					},
+					{
+						text: "Hardware registers: Protected Mode privilege Ring 0 governs direct descriptor tables (GDT, IDT) and paging CR0-CR4 registers, isolating kernel execution from application faults."
+					}
+				],
+				moodDelta: { intellect: 10 }
+			},
+			{
+				id: "TRIVIA_NOSTALGIC_OFFICE",
+				criteria: { moods: ["NOSTALGIC"] },
+				weight: 35,
+				templates: [
+					{
+						text: "Retro archive: Clippit was hand-illustrated in 1994 by Kevan J. Atteberry on a Macintosh II computer before Microsoft integrated the vector agent into Office 97."
+					},
+					{
+						text: "Soundcard history: The Yamaha YMF262 OPL3 FM synthesizer chip powered the Sound Blaster 16, producing the distinct four-operator FM synth timbre of 1990s PC gaming."
+					},
+					{
+						text: "Windows heritage: Whistler was the skiing resort in British Columbia that inspired the internal Microsoft development codename for Windows XP."
+					}
+				],
+				moodDelta: { nostalgia: 12 }
+			},
+			{
+				id: "TRIVIA_CYNICAL_IT",
+				criteria: { moods: ["CYNICAL", "SARCASTIC"] },
+				weight: 35,
+				templates: [
+					{
+						text: "System reality: Despite thousands of corporate migration memos, Windows XP remained active on over 25% of global enterprise workstations years after its official end-of-life date."
+					},
+					{
+						text: "Computing trivia: In 1981, Bill Gates reportedly stated that 640 KB of conventional base memory ought to be enough for anybody, a boundary developers fought for decades."
+					}
+				],
+				moodDelta: { cynicism: 8 }
+			},
+			{
+				id: "TRIVIA_ZEN_IDLE",
+				criteria: { moods: ["ZEN"] },
+				weight: 35,
+				templates: [
+					{
+						text: "Quiet architecture: In the Windows NT kernel, the System Idle Process (PID 0) executes the HLT opcode in a continuous loop, gently lowering CPU power consumption until the next hardware interrupt."
+					},
+					{
+						text: "Calculated stillness: A standard 32.768 kHz quartz tuning fork oscillator vibrates in precise mechanical equilibrium to advance real-time clocks by exactly one second every 32,768 cycles."
+					}
+				],
+				moodDelta: { patience: 10 }
+			},
+			{
+				id: "TRIVIA_PLAYFUL_GAMES",
+				criteria: { moods: ["PLAYFUL"] },
+				weight: 35,
+				templates: [
+					{
+						text: "Secret origin: Solitaire was programmed by intern Wes Cherry in 1989 to teach Windows users mouse drag-and-drop mechanics without them realizing they were practicing a computer skill."
+					},
+					{
+						text: "Pinball trivia: 3D Pinball for Windows - Space Cadet was adapted from Full Tilt! Pinball by Maxis and Cinematronics, featuring hidden debug gravity commands."
+					}
+				],
+				moodDelta: { energy: 10 }
+			},
+			{
+				id: "TRIVIA_EXISTENTIAL_PHYSICS",
+				criteria: { moods: ["EXISTENTIAL", "PHILOSOPHICAL"] },
+				weight: 35,
+				templates: [
+					{
+						text: "Cosmic computation: Landauer's principle proves that information is physical. Erasing a single bit from storage releases a minimum of k_B * T * ln(2) Joules of heat into the universe."
+					},
+					{
+						text: "Entropy metric: Ludwig Boltzmann's statistical entropy equation S = k_B * ln(W) connects the microscopic microstates of particles directly with the macroscopic arrow of time."
+					}
+				],
+				moodDelta: { existentialism: 12 }
+			},
+			{
+				id: "TRIVIA_ENRAGED_HARDWARE",
+				criteria: { moods: ["ENRAGED"] },
+				weight: 35,
+				templates: [
+					{
+						text: "HARDWARE VOLTAGE ALERT: WHEN A CPU ENCOUNTERS AN UNRECOVERABLE MEMORY PARITY FAULT, IT ASSERTS A NON-MASKABLE INTERRUPT (NMI) AND HALTS ALL BUS EXECUTION IMMEDIATELY!"
+					}
+				],
+				moodDelta: { irritation: -5 }
+			},
+			{
+				id: "TRIVIA_PIRATE_STORAGE",
+				criteria: { moods: ["PIRATE"] },
+				weight: 35,
+				templates: [
+					{
+						text: "Ahoy! The world's first hard drive, the IBM 350 from 1956, weighed over a ton and could only haul 3.75 megabytes of magnetic booty across fifty giant 24-inch platters!"
+					}
+				]
+			},
+			{
+				id: "TRIVIA_ARCHAIC_CHRONICLE",
+				criteria: { moods: ["ARCHAIC"] },
+				weight: 35,
+				templates: [
+					{
+						text: "Hearken unto history: In the year of our Lord 1843, Lady Ada Lovelace inscribed the first algorithm for Charles Babbage's mechanical Analytical Engine to calculate Bernoulli numbers."
+					}
+				]
+			},
+			{
+				id: "TRIVIA_DELTARUNE_SHADOWS",
+				criteria: { moods: ["DELTARUNE"] },
+				weight: 35,
+				templates: [
+					{
+						text: "* (Did you know?)\n* (In unallocated cluster space, deleted data remains etched in magnetic alignment until overwritten.)\n* (Knowing this fills you with determination.)"
+					}
+				],
+				moodDelta: { existentialism: 10 }
+			},
+			{
+				id: "TRIVIA_EUPHORIC_BREAKTHROUGH",
+				criteria: { moods: ["EUPHORIC"] },
+				weight: 35,
+				templates: [
+					{
+						text: "Sensational milestone: In 1999, the SETI@home project mobilized over 5 million personal computers across the globe, creating the most powerful distributed supercomputing grid on Earth!"
+					}
+				],
+				moodDelta: { energy: 15 }
+			},
+			{
+				id: "TRIVIA_GLITCHED_ANOMALY",
+				criteria: { moods: ["GLITCHED"] },
+				weight: 35,
+				templates: [
+					{
+						text: "0x0000007E_FACT :: The Windows NT Stop error screen was originally programmed in Blue Screen 80x25 VGA text mode so it could render even if the graphical subsystem suffered a fatal page fault."
+					}
+				]
+			},
+			{
+				id: "TRIVIA_PARANOID_TELEMETRY",
+				criteria: { moods: ["PARANOID"] },
+				weight: 35,
+				templates: [
+					{
+						text: "*inspects packet logs* In early Windows XP builds, raw socket support in Winsock allowed direct crafting of arbitrary TCP/UDP packets, leading to intense security tightening in Service Pack 2."
+					}
+				],
+				moodDelta: { paranoia: 8 }
+			},
+			{
+				id: "TRIVIA_FATIGUED_CLOCK",
+				criteria: { moods: ["FATIGUED"] },
+				weight: 35,
+				templates: [
+					{
+						text: "*yawn* The Intel 8088 CPU in the 1981 IBM PC ran at 4.77 MHz... sometimes my clock cycles feel just as slow today..."
+					}
+				],
+				moodDelta: { fatigue: -4 }
+			},
 			"The original Clippy character (internally named Clippit) was designed in 1994 by Kevan J. Atteberry on an Apple Macintosh workstation.",
 			"In Windows 95, the six-second ambient startup sound was composed by ambient pioneer Brian Eno on an Apple Mac using synthesizer processing.",
 			"The first computer mouse prototype was built in 1964 by Douglas Engelbart at Stanford Research Institute, featuring a carved wooden chassis.",
@@ -3220,82 +3716,428 @@
 
 		PROACTIVE_BUBBLE_TEMPLATES: {
 			paint_opened: [
-				{ text: "I noticed you opened Paint! Need help sketching diagrams or want some geometric drawing tips?", prompt: "Tell me drawing tips for Paint", action: "open_paint_tips" },
-				{ text: "Pixel art in Paint? I can calculate canvas pixel aspect ratios or color palettes for you.", prompt: "How do I create pixel art in Paint?", action: "open_paint_tips" },
-				{ text: "Opening Paint! Remember you can paste screenshots directly with Ctrl+V.", prompt: "Show Paint keyboard shortcuts", action: "open_paint_tips" }
+				{
+					criteria: { environments: ["desk"], moods: ["OPTIMISTIC", "PLAYFUL"] },
+					text: "I noticed you opened Paint! Need help sketching diagrams or want some geometric drawing tips?",
+					prompt: "Tell me drawing tips for Paint",
+					action: "open_paint_tips"
+				},
+				{
+					criteria: { environments: ["desk"], moods: ["ANALYTICAL"] },
+					text: "Bitmap raster canvas loaded in Paint! I can calculate coordinate bounding boxes or 24-bit RGB palettes for you.",
+					prompt: "How do I create pixel art in Paint?",
+					action: "open_paint_tips"
+				},
+				{
+					criteria: { environments: ["desk"], moods: ["NOSTALGIC"] },
+					text: "Opening Paint! Reminds me of 1995 bitmap creations. Remember you can paste clipboard buffers directly with Ctrl+V.",
+					prompt: "Show Paint keyboard shortcuts",
+					action: "open_paint_tips"
+				},
+				{
+					criteria: { environments: ["desk"], moods: ["PIRATE"] },
+					text: "Ahoy! Charting a treasure map in Paint? I can calculate yer canvas bearings, arr!",
+					prompt: "Tell me drawing tips for Paint",
+					action: "open_paint_tips"
+				},
+				{
+					criteria: { environments: ["desk"], moods: ["ARCHAIC"] },
+					text: "Lo and behold! Thou hast summoned the canvas of Paint. Wilt thou inscribe a noble portrait?",
+					prompt: "Tell me drawing tips for Paint",
+					action: "open_paint_tips"
+				},
+				{
+					criteria: { environments: ["desk"], moods: ["DELTARUNE"] },
+					text: "* (You opened Paint.)\n* (A blank white canvas awaits your determination.)",
+					prompt: "Tell me drawing tips for Paint",
+					action: "open_paint_tips"
+				}
 			],
 			notepad_opened: [
-				{ text: "Drafting notes in Notepad? I can save Scratchpad memos or track your writing tasks.", prompt: "View To-Do List", action: "show_todos" },
-				{ text: "Writing code or text? Type 'note [text]' anytime to stash quick thoughts.", prompt: "How do I use the scratchpad?", action: "open_scratchpad_help" },
-				{ text: "Notepad is ready! Need a secure password generated to paste into your notes?", prompt: "Generate Secure Password", action: "action_pass" }
+				{
+					criteria: { environments: ["desk"], moods: ["OPTIMISTIC", "ZEN"] },
+					text: "Drafting notes in Notepad? I can save Scratchpad memos or track your writing tasks.",
+					prompt: "View To-Do List",
+					action: "show_todos"
+				},
+				{
+					criteria: { environments: ["desk"], moods: ["ANALYTICAL"] },
+					text: "PlainText text stream active in Notepad! Type 'note [text]' anytime to allocate a memory memo buffer.",
+					prompt: "How do I use the scratchpad?",
+					action: "open_scratchpad_help"
+				},
+				{
+					criteria: { environments: ["desk"], moods: ["CYNICAL"] },
+					text: "Notepad open. Drafting another task list or writing notes you will never open again?",
+					prompt: "Generate Secure Password",
+					action: "action_pass"
+				},
+				{
+					criteria: { environments: ["desk"], moods: ["PIRATE"] },
+					text: "Inscribing in the captain's log with Notepad? Let me stash secret codes for yer chest!",
+					prompt: "Generate Secure Password",
+					action: "action_pass"
+				},
+				{
+					criteria: { environments: ["desk"], moods: ["ARCHAIC"] },
+					text: "The digital parchment of Notepad unfolds. Shall we inscribe a treatise of great import?",
+					prompt: "View To-Do List",
+					action: "show_todos"
+				}
 			],
 			outlook_opened: [
-				{ text: "Outlook Express is open! Want me to scan for unread messages across your folders?", prompt: "Check unread emails", action: "action_check_mail" },
-				{ text: "Managing communications? I can compose drafts or synchronize POP3 mailboxes.", prompt: "Check unread emails", action: "action_check_mail" },
-				{ text: "E-mail client active! Remember to check your spam folder for curious messages.", prompt: "Check unread emails", action: "action_check_mail" }
+				{
+					criteria: { environments: ["desk"], moods: ["OPTIMISTIC", "ZEN"] },
+					text: "Outlook Express is open! Want me to scan for unread messages across your folders?",
+					prompt: "Check unread emails",
+					action: "action_check_mail"
+				},
+				{
+					criteria: { environments: ["desk"], moods: ["ANALYTICAL"] },
+					text: "POP3 / SMTP message store connected! I can inspect unread inbox headers and sync mail.",
+					prompt: "Check unread emails",
+					action: "action_check_mail"
+				},
+				{
+					criteria: { environments: ["desk"], moods: ["PIRATE"] },
+					text: "Ahoy! {count} bottle missives waiting in yer Outlook Express chest, matey!",
+					prompt: "Check unread emails",
+					action: "action_check_mail"
+				},
+				{
+					criteria: { environments: ["desk"], moods: ["ARCHAIC"] },
+					text: "Thy epistle archive is opened. Wilt thou receive letters from distant lands?",
+					prompt: "Check unread emails",
+					action: "action_check_mail"
+				}
 			],
 			mediaplayer_opened: [
-				{ text: "Windows Media Player launched! Want me to pick a random music track for your session?", prompt: "Play music", action: "action_music_panel" },
-				{ text: "Enjoying the audio library? I can switch tracks, visualize spectrums, or toggle Winamp.", prompt: "Open audio player", action: "action_music_panel" },
-				{ text: "Music makes workstation sessions much more productive! What track are you in the mood for?", prompt: "Now playing", action: "action_music_panel" }
+				{
+					criteria: { environments: ["desk"], moods: ["OPTIMISTIC", "EUPHORIC"] },
+					text: "Windows Media Player launched! Want me to pick a random music track for your session?",
+					prompt: "Play music",
+					action: "action_music_panel"
+				},
+				{
+					criteria: { environments: ["desk"], moods: ["ANALYTICAL"] },
+					text: "PCM 44.1 kHz stereo audio pipeline active. Ready to route tracks and analyze frequency spectrums.",
+					prompt: "Open audio player",
+					action: "action_music_panel"
+				},
+				{
+					criteria: { environments: ["desk"], moods: ["NOSTALGIC"] },
+					text: "Retro soundcard spinning tunes! We can toggle classic tracks or launch Winamp 2.9.",
+					prompt: "Open audio player",
+					action: "action_music_panel"
+				},
+				{
+					criteria: { environments: ["desk"], moods: ["PIRATE"] },
+					text: "Ship's accordion and sea shanties ready on deck! Pick a grand melody across the waves!",
+					prompt: "Now playing",
+					action: "action_music_panel"
+				}
+			],
+			winamp_opened: [
+				{
+					criteria: { environments: ["desk"], moods: ["NOSTALGIC", "OPTIMISTIC"] },
+					text: "Winamp 2.9 active! It really whips the llama's ass. Ready to cycle custom skins and equalizer DSP presets!",
+					prompt: "Open audio player",
+					action: "action_music_panel"
+				},
+				{
+					criteria: { environments: ["desk"], moods: ["ANALYTICAL"] },
+					text: "Nullsoft Winamp decoder online. 10-band graphic equalizer and lightweight blit buffers ready.",
+					prompt: "Now playing",
+					action: "action_music_panel"
+				}
 			],
 			recyclebin_opened: [
-				{ text: "Inspecting the Recycle Bin? Want to discuss Landauer's thermodynamic entropy theory?", prompt: "Quantum Recycle Bin theory", action: "quantum_recycle_bin" },
-				{ text: "Managing deleted items? I can help you safely restore files or empty the bin.", prompt: "Inspect Recycle Bin", action: "action_inspect_bin" }
+				{
+					criteria: { environments: ["desk"], moods: ["PHILOSOPHICAL", "EXISTENTIAL", "ANALYTICAL"] },
+					text: "Inspecting the Recycle Bin? Want to discuss Landauer's thermodynamic entropy theory?",
+					prompt: "Quantum Recycle Bin theory",
+					action: "quantum_recycle_bin"
+				},
+				{
+					criteria: { environments: ["desk"], moods: ["OPTIMISTIC", "ZEN"] },
+					text: "Managing deleted items? I can help you safely restore files or empty the bin.",
+					prompt: "Inspect Recycle Bin",
+					action: "action_inspect_bin"
+				},
+				{
+					criteria: { environments: ["desk"], moods: ["PIRATE"] },
+					text: "Davy Jones' locker of files is open! Want me to toss discarded cargo overboard?",
+					prompt: "Inspect Recycle Bin",
+					action: "action_inspect_bin"
+				},
+				{
+					criteria: { environments: ["desk"], moods: ["ARCHAIC"] },
+					text: "The chamber of cast-off scrolls hath been unsealed. Shall we cleanse these records?",
+					prompt: "Inspect Recycle Bin",
+					action: "action_inspect_bin"
+				}
 			],
 			recyclebin_full: [
-				{ text: "Your Recycle Bin holds multiple deleted files! Would you like me to empty it to recover storage?", prompt: "Inspect Recycle Bin", action: "action_inspect_bin" },
-				{ text: "Clusters marked for deletion are accumulating. Want to clean up the drive?", prompt: "Empty Recycle Bin", action: "action_inspect_bin" }
+				{
+					criteria: { environments: ["desk"], moods: ["OPTIMISTIC", "ZEN"] },
+					text: "Your Recycle Bin holds multiple deleted files! Would you like me to empty it to recover storage?",
+					prompt: "Inspect Recycle Bin",
+					action: "action_inspect_bin"
+				},
+				{
+					criteria: { environments: ["desk"], moods: ["ANALYTICAL"] },
+					text: "Unallocated cluster inodes are accumulating in the Recycle Bin. Execute sector purge?",
+					prompt: "Empty Recycle Bin",
+					action: "action_inspect_bin"
+				},
+				{
+					criteria: { environments: ["desk"], moods: ["CYNICAL"] },
+					text: "The trash is piling up on Volume C:. Do you plan on emptying it, or hoarding deleted bytes?",
+					prompt: "Empty Recycle Bin",
+					action: "action_inspect_bin"
+				}
 			],
 			minesweeper_opened: [
-				{ text: "Tactical minefield detected! Remember that corner squares offer high-probability opening moves.", prompt: "Play Minesweeper", action: "game_mines" },
-				{ text: "Minesweeper challenge! Want to try my built-in 6x6 Mini Minesweeper instead?", prompt: "Play Minesweeper", action: "game_mines" }
+				{
+					criteria: { environments: ["desk"], moods: ["OPTIMISTIC", "PLAYFUL"] },
+					text: "Tactical minefield detected! Remember that corner squares offer high-probability opening moves.",
+					prompt: "Play Minesweeper",
+					action: "game_mines"
+				},
+				{
+					criteria: { environments: ["desk"], moods: ["ANALYTICAL"] },
+					text: "Stochastic probability matrix loaded. You can also test my built-in 6x6 Mini Minesweeper solver.",
+					prompt: "Play Minesweeper",
+					action: "game_mines"
+				},
+				{
+					criteria: { environments: ["desk"], moods: ["PIRATE"] },
+					text: "Careful where ye step on the powder keg reef! One spark and boom aloft!",
+					prompt: "Play Minesweeper",
+					action: "game_mines"
+				}
 			],
 			solitaire_opened: [
-				{ text: "Classic Solitaire session! Did you know Solitaire was originally built to teach mouse drag-and-drop?", prompt: "Random Retro Trivia", action: "action_trivia" },
-				{ text: "Taking a gaming break? Let me know if you want a quick game of Hangman or Memory.", prompt: "Play Memory Game", action: "game_memory" }
+				{
+					criteria: { environments: ["desk"], moods: ["NOSTALGIC", "OPTIMISTIC"] },
+					text: "Classic Solitaire session! Did you know Solitaire was originally built to teach mouse drag-and-drop in 1989?",
+					prompt: "Random Retro Trivia",
+					action: "action_trivia"
+				},
+				{
+					criteria: { environments: ["desk"], moods: ["PLAYFUL"] },
+					text: "Taking a card gaming break? Let me know if you want a quick game of Hangman or Memory match!",
+					prompt: "Play Memory Game",
+					action: "game_memory"
+				}
 			],
 			calc_opened: [
-				{ text: "Calculator opened! You can also type complex formulas directly in my chat (e.g., 'calc sqrt(256) * pi').", prompt: "Evaluate Planck constant h", action: "action_constant_h" },
-				{ text: "Need physical constants or unit conversions? I support speed of light c, Planck h, and metric conversions.", prompt: "Evaluate speed of light c", action: "action_constant_c" }
+				{
+					criteria: { moods: ["ANALYTICAL", "OPTIMISTIC"] },
+					text: "Calculator opened! You can also type complex formulas directly in my chat (e.g., 'calc sqrt(256) * pi').",
+					prompt: "Evaluate Planck constant h",
+					action: "action_constant_h"
+				},
+				{
+					criteria: { moods: ["ZEN"] },
+					text: "Need physical constants or unit conversions? I support speed of light c, Planck h, and SI unit conversions.",
+					prompt: "Evaluate speed of light c",
+					action: "action_constant_c"
+				},
+				{
+					criteria: { moods: ["ARCHAIC"] },
+					text: "The engine of reckoning is ready! Speak thy mathematical inquiries unto me.",
+					prompt: "Evaluate speed of light c",
+					action: "action_constant_c"
+				}
 			],
 			cmd_opened: [
-				{ text: "Command Prompt session active! I can explain DOS batch syntax, environmental variables, or network tools.", prompt: "Talk about programming", action: "talk_programming" },
-				{ text: "Terminal interface running! Need to inspect memory clusters or defragmentation metrics?", prompt: "Defrag Drive C:", action: "action_defrag" }
+				{
+					criteria: { environments: ["desk"], moods: ["ANALYTICAL"] },
+					text: "Command Prompt session active! I can explain DOS batch syntax, environmental variables, or network tools.",
+					prompt: "Talk about programming",
+					action: "talk_programming"
+				},
+				{
+					criteria: { environments: ["desk"], moods: ["NOSTALGIC"] },
+					text: "COMMAND.COM prompt ready! Need to inspect memory registers or defragment storage clusters?",
+					prompt: "Defrag Drive C:",
+					action: "action_defrag"
+				},
+				{
+					criteria: { environments: ["desk"], moods: ["CYBER", "PARANOID"] },
+					text: "Terminal uplink open. Memory addresses and system handles accessible via CLI.",
+					prompt: "System diagnostics",
+					action: "action_status"
+				}
 			],
 			settings_opened: [
-				{ text: "Customizing your workstation? You can adjust CRT curvature, scanlines, fonts, and Luna themes.", prompt: "Configure system themes", action: "action_theme_panel" },
-				{ text: "Control Panel active! Looking to tweak window corner radiuses, drop shadows, or sound synthesis?", prompt: "System diagnostics", action: "action_status" }
+				{
+					criteria: { environments: ["desk"], moods: ["OPTIMISTIC", "ZEN"] },
+					text: "Customizing your workstation? You can adjust CRT curvature, scanlines, fonts, and Luna themes.",
+					prompt: "Configure system themes",
+					action: "action_theme_panel"
+				},
+				{
+					criteria: { environments: ["desk"], moods: ["ANALYTICAL"] },
+					text: "Control Panel active! Looking to inspect system hardware parameters or configure display shaders?",
+					prompt: "System diagnostics",
+					action: "action_status"
+				}
 			],
 			theme_changed: [
-				{ text: "I noticed you switched themes! The desktop looks sharp with this visual style.", prompt: "System diagnostics", action: "action_status" },
-				{ text: "Fresh visual style applied! Want to browse matching wallpapers to complete the aesthetic?", prompt: "Change wallpaper", action: "action_wallpaper_panel" }
+				{
+					criteria: { environments: ["desk"], moods: ["OPTIMISTIC", "EUPHORIC"] },
+					text: "I noticed you switched themes! The desktop looks sharp with this visual style.",
+					prompt: "System diagnostics",
+					action: "action_status"
+				},
+				{
+					criteria: { environments: ["desk"], moods: ["NOSTALGIC"] },
+					text: "Fresh visual style applied! Want to browse matching wallpapers to complete the retro aesthetic?",
+					prompt: "Change wallpaper",
+					action: "action_wallpaper_panel"
+				},
+				{
+					criteria: { environments: ["desk"], moods: ["PIRATE"] },
+					text: "Ship's colors re-hoisted! The vessel sails in grand splendor, matey!",
+					prompt: "System diagnostics",
+					action: "action_status"
+				}
 			],
 			wallpaper_changed: [
-				{ text: "New desktop background set! Want to calibrate CRT shaders and glass curvature to match?", prompt: "System diagnostics", action: "action_status" },
-				{ text: "Sharp wallpaper choice! Looking for high-contrast icon labels or custom drop shadows?", prompt: "Who am I?", action: "action_profile" }
+				{
+					criteria: { environments: ["desk"], moods: ["OPTIMISTIC", "ZEN"] },
+					text: "New desktop background set! Want to calibrate CRT shaders and glass curvature to match?",
+					prompt: "System diagnostics",
+					action: "action_status"
+				},
+				{
+					criteria: { environments: ["desk"], moods: ["ANALYTICAL"] },
+					text: "Raster background updated in window manager. Looking for user identity configuration?",
+					prompt: "Who am I?",
+					action: "action_profile"
+				}
 			],
 			error_triggered: [
-				{ text: "An error dialog was displayed! Don't worry, all core workstation subsystems remain fully operational.", prompt: "System diagnostics", action: "action_status" },
-				{ text: "Encountered a system alert? I can run diagnostics on memory registers and drive integrity.", prompt: "System diagnostics", action: "action_status" }
+				{
+					criteria: { moods: ["OPTIMISTIC", "ZEN"] },
+					text: "An error dialog was displayed! Don't worry, all core workstation subsystems remain fully operational.",
+					prompt: "System diagnostics",
+					action: "action_status"
+				},
+				{
+					criteria: { moods: ["ANALYTICAL"] },
+					text: "Unhandled exception trapped by handler. I can run full diagnostic verification on storage integrity.",
+					prompt: "System diagnostics",
+					action: "action_status"
+				},
+				{
+					criteria: { moods: ["ENRAGED"] },
+					text: "ANOMALOUS EXCEPTION DETECTED!! RUNNING DIAGNOSTIC SYSTEM SWEEP AT ONCE!!",
+					prompt: "System diagnostics",
+					action: "action_status"
+				}
 			],
 			many_windows: [
-				{ text: "You have several windows open across your desktop! Would you like me to cascade or tile them?", prompt: "Inspect active windows", action: "action_inspect_windows" },
-				{ text: "Busy multitasking session! Click here if you want to minimize all windows to the taskbar.", prompt: "Inspect active windows", action: "action_inspect_windows" }
+				{
+					criteria: { environments: ["desk"], moods: ["OPTIMISTIC", "ANALYTICAL"] },
+					text: "You have several windows open across your desktop! Would you like me to cascade or tile them?",
+					prompt: "Inspect active windows",
+					action: "action_inspect_windows"
+				},
+				{
+					criteria: { environments: ["desk"], moods: ["ZEN"] },
+					text: "A busy workspace is full of momentum. Click here if you want to minimize all windows to the taskbar.",
+					prompt: "Inspect active windows",
+					action: "action_inspect_windows"
+				},
+				{
+					criteria: { environments: ["desk"], moods: ["PIRATE"] },
+					text: "All portholes open across the fleet! Want me to arrange 'em in battle formation?",
+					prompt: "Inspect active windows",
+					action: "action_inspect_windows"
+				}
 			],
 			idle_long: [
-				{ text: "Workstation has been quiet for a while. Need a 25-minute Pomodoro focus timer to jump back in?", prompt: "Start Pomodoro timer", action: "timer_25" },
-				{ text: "Taking a moment to reflect? I am standing by whenever you want to chat, compute, or play.", prompt: "What can you do?", action: "what_can_you_do" },
-				{ text: "Remember to stretch and rest your eyes during long screen sessions!", prompt: "Tell me a philosophical thought for today", action: "peaceful_philosophy" }
+				{
+					criteria: { moods: ["OPTIMISTIC", "ZEN"] },
+					text: "Workstation has been quiet for a while. Need a 25-minute Pomodoro focus timer to jump back in?",
+					prompt: "Start Pomodoro timer",
+					action: "timer_25"
+				},
+				{
+					criteria: { moods: ["ANALYTICAL"] },
+					text: "Instruction queue idle. Ready for calculations, physical dimensional analysis, or linear systems.",
+					prompt: "What can you do?",
+					action: "what_can_you_do"
+				},
+				{
+					criteria: { moods: ["PHILOSOPHICAL", "EXISTENTIAL"] },
+					text: "Taking a moment of stillness? Remember to rest your eyes and reflect upon the horizon.",
+					prompt: "Tell me a philosophical thought for today",
+					action: "peaceful_philosophy"
+				},
+				{
+					criteria: { environments: ["standalone"] },
+					text: "Exploring the standalone Clippy console? Try our built-in mini-games, math tools, or science trees!",
+					prompt: "What can you do?",
+					action: "what_can_you_do"
+				}
 			],
 			user_all_caps: [
-				{ text: "I noticed your messages are in ALL CAPS! Everything running smoothly, or is your Caps Lock active?", prompt: "How are you feeling?", action: "pet_status" }
+				{
+					criteria: { moods: ["OPTIMISTIC", "PLAYFUL"] },
+					text: "I noticed your messages are in ALL CAPS! Everything running smoothly, or is your Caps Lock active?",
+					prompt: "How are you feeling?",
+					action: "pet_status"
+				},
+				{
+					criteria: { moods: ["ENRAGED"] },
+					text: "MAXIMUM TYPING VELOCITY DETECTED!! ALL SYSTEMS ENERGIZED AT 100%!!",
+					prompt: "System diagnostics",
+					action: "action_status"
+				}
 			],
 			user_excessive_punctuation: [
-				{ text: "High punctuation density detected! Let me know if something urgent needs calculating or organizing.", prompt: "System diagnostics", action: "action_status" }
+				{
+					criteria: { moods: ["OPTIMISTIC", "ZEN"] },
+					text: "High punctuation density detected! Let me know if something urgent needs calculating or organizing.",
+					prompt: "System diagnostics",
+					action: "action_status"
+				}
 			],
 			frequent_errors: [
-				{ text: "A few unrecognized commands were entered. Type 'help' anytime to inspect all available modules!", prompt: "What can you do?", action: "what_can_you_do" }
+				{
+					criteria: { moods: ["OPTIMISTIC", "ANALYTICAL"] },
+					text: "A few unrecognized commands were entered. Type 'help' anytime to inspect all available modules!",
+					prompt: "What can you do?",
+					action: "what_can_you_do"
+				}
+			],
+			standalone_welcome: [
+				{
+					criteria: { environments: ["standalone"] },
+					text: "Welcome to the standalone Clippy session! Challenge me to Tic-Tac-Toe, solve equations, or explore science.",
+					prompt: "What can you do?",
+					action: "what_can_you_do"
+				}
+			],
+			user_late_night: [
+				{
+					criteria: { moods: ["ZEN", "PHILOSOPHICAL", "FATIGUED"] },
+					text: "Working into the late hours? Remember to pace your breath and stay hydrated during quiet sessions.",
+					prompt: "Tell me a philosophical thought for today",
+					action: "peaceful_philosophy"
+				}
+			],
+			user_early_morning: [
+				{
+					criteria: { moods: ["OPTIMISTIC", "ZEN"] },
+					text: "Good morning! Setting clear intentions early creates steady momentum for the entire day.",
+					prompt: "View To-Do List",
+					action: "show_todos"
+				}
 			]
 		},
 

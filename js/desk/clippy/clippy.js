@@ -46,12 +46,15 @@
 			actionDesk: "Open Desktop Experience",
 			actionCapabilities: "What can you do here?"
 		};
-		const text = k.formatString ? k.formatString(deskOnly.template, { feature: featureLabel }) : `The "${featureLabel}" module requires the full desktop environment.`;
+		const rawTemplate = k.resolveTextVariant ? k.resolveTextVariant(deskOnly.template, { brain: window.ClippyBrain }) : (deskOnly.template.default || deskOnly.template);
+		const text = k.formatString ? k.formatString(rawTemplate, { feature: featureLabel }) : `The "${featureLabel}" module requires the full desktop environment.`;
+		const deskLabel = k.resolveTextVariant ? k.resolveTextVariant(deskOnly.actionDesk, { brain: window.ClippyBrain }) : (deskOnly.actionDesk.default || deskOnly.actionDesk);
+		const capLabel = k.resolveTextVariant ? k.resolveTextVariant(deskOnly.actionCapabilities, { brain: window.ClippyBrain }) : (deskOnly.actionCapabilities.default || deskOnly.actionCapabilities);
 		return {
 			text,
 			actions: [
-				{ label: deskOnly.actionDesk, onClick: () => { window.open('https://wartets.github.io/desk/', '_blank'); } },
-				{ label: deskOnly.actionCapabilities, onClick: () => handleUserInput("What can you do?") }
+				{ label: deskLabel, onClick: () => { window.open('https://wartets.github.io/desk/', '_blank'); } },
+				{ label: capLabel, onClick: () => handleUserInput("What can you do?") }
 			]
 		};
 	}
@@ -157,11 +160,13 @@
 			window.ClippyUI.appendAssistantMessage((window.ClippyKnowledge ? window.ClippyKnowledge.SHORTCUTS : []).join('\n'));
 		} else if (actionId === 'action_pass') {
 			const pwd = window.ClippyActivities.generatePassword(16);
-			const tpl = (window.ClippyKnowledge && window.ClippyKnowledge.SYSTEM_TEXTS && window.ClippyKnowledge.SYSTEM_TEXTS.password && window.ClippyKnowledge.SYSTEM_TEXTS.password.generated) || "Generated Secure Password ({length} chars):\n**`{password}`**";
+			const rawTpl = (window.ClippyKnowledge && window.ClippyKnowledge.SYSTEM_TEXTS && window.ClippyKnowledge.SYSTEM_TEXTS.password && window.ClippyKnowledge.SYSTEM_TEXTS.password.generated) || "Generated Secure Password ({length} chars):\n**`{password}`**";
+			const tpl = window.ClippyKnowledge.resolveTextVariant ? window.ClippyKnowledge.resolveTextVariant(rawTpl, { brain: window.ClippyBrain, vars: { length: 16, password: pwd } }) : rawTpl;
 			window.ClippyUI.appendAssistantMessage(window.ClippyKnowledge.formatString(tpl, { length: 16, password: pwd }));
 		} else if (actionId === 'action_pass_24') {
 			const pwd = window.ClippyActivities.generatePassword(24);
-			const tpl = (window.ClippyKnowledge && window.ClippyKnowledge.SYSTEM_TEXTS && window.ClippyKnowledge.SYSTEM_TEXTS.password && window.ClippyKnowledge.SYSTEM_TEXTS.password.generatedEntropy) || "Generated High-Entropy Password ({length} chars):\n**`{password}`**";
+			const rawTpl = (window.ClippyKnowledge && window.ClippyKnowledge.SYSTEM_TEXTS && window.ClippyKnowledge.SYSTEM_TEXTS.password && window.ClippyKnowledge.SYSTEM_TEXTS.password.generatedEntropy) || "Generated High-Entropy Password ({length} chars):\n**`{password}`**";
+			const tpl = window.ClippyKnowledge.resolveTextVariant ? window.ClippyKnowledge.resolveTextVariant(rawTpl, { brain: window.ClippyBrain, vars: { length: 24, password: pwd } }) : rawTpl;
 			window.ClippyUI.appendAssistantMessage(window.ClippyKnowledge.formatString(tpl, { length: 24, password: pwd }));
 		} else if (actionId === 'action_inspect_windows') {
 			if (isDeskEnvironment()) renderActiveWindowsList();
@@ -170,7 +175,8 @@
 			if (isDeskEnvironment()) {
 				window.ClippySystemBridge.minimizeAllWindows();
 				const winTexts = (window.ClippyKnowledge && window.ClippyKnowledge.SYSTEM_TEXTS && window.ClippyKnowledge.SYSTEM_TEXTS.windowControls) || {};
-				window.ClippyUI.appendAssistantMessage(pickFrom(winTexts.minimizedAll || ["All open windows have been minimized to the taskbar."]));
+				const msg = window.ClippyKnowledge.resolveTextVariant ? window.ClippyKnowledge.resolveTextVariant(winTexts.minimizedAll, { brain: window.ClippyBrain }) : pickFrom(winTexts.minimizedAll || ["All open windows have been minimized to the taskbar."]);
+				window.ClippyUI.appendAssistantMessage(msg);
 			} else {
 				respondDeskOnlyFeature('Window Manager');
 			}
@@ -178,7 +184,8 @@
 			if (isDeskEnvironment()) {
 				window.ClippySystemBridge.cascadeWindows();
 				const winTexts = (window.ClippyKnowledge && window.ClippyKnowledge.SYSTEM_TEXTS && window.ClippyKnowledge.SYSTEM_TEXTS.windowControls) || {};
-				window.ClippyUI.appendAssistantMessage(pickFrom(winTexts.cascaded || ["Windows arranged in cascade layout."]));
+				const msg = window.ClippyKnowledge.resolveTextVariant ? window.ClippyKnowledge.resolveTextVariant(winTexts.cascaded, { brain: window.ClippyBrain }) : pickFrom(winTexts.cascaded || ["Windows arranged in cascade layout."]);
+				window.ClippyUI.appendAssistantMessage(msg);
 			} else {
 				respondDeskOnlyFeature('Window Manager');
 			}
@@ -186,17 +193,20 @@
 			if (isDeskEnvironment()) {
 				window.ClippySystemBridge.tileWindows(true);
 				const winTexts = (window.ClippyKnowledge && window.ClippyKnowledge.SYSTEM_TEXTS && window.ClippyKnowledge.SYSTEM_TEXTS.windowControls) || {};
-				window.ClippyUI.appendAssistantMessage(pickFrom(winTexts.tiled || ["Windows tiled horizontally across the workspace."]));
+				const msg = window.ClippyKnowledge.resolveTextVariant ? window.ClippyKnowledge.resolveTextVariant(winTexts.tiled, { brain: window.ClippyBrain }) : pickFrom(winTexts.tiled || ["Windows tiled horizontally across the workspace."]);
+				window.ClippyUI.appendAssistantMessage(msg);
 			} else {
 				respondDeskOnlyFeature('Window Manager');
 			}
 		} else if (actionId === 'action_constant_c') {
 			const cVal = (window.ClippyKnowledge && window.ClippyKnowledge.PHYSICAL_CONSTANTS && window.ClippyKnowledge.PHYSICAL_CONSTANTS.c) || { value: 299792458, unit: "m s^-1" };
-			const tpl = (window.ClippyKnowledge && window.ClippyKnowledge.SYSTEM_TEXTS && window.ClippyKnowledge.SYSTEM_TEXTS.constants && window.ClippyKnowledge.SYSTEM_TEXTS.constants.speedOfLightText) || "Speed of light in vacuum (c):\n**{value} {unit}** (exact standard)";
+			const rawTpl = (window.ClippyKnowledge && window.ClippyKnowledge.SYSTEM_TEXTS && window.ClippyKnowledge.SYSTEM_TEXTS.constants && window.ClippyKnowledge.SYSTEM_TEXTS.constants.speedOfLightText) || "Speed of light in vacuum (c):\n**{value} {unit}** (exact standard)";
+			const tpl = window.ClippyKnowledge.resolveTextVariant ? window.ClippyKnowledge.resolveTextVariant(rawTpl, { brain: window.ClippyBrain, vars: { value: cVal.value.toLocaleString(), unit: cVal.unit } }) : rawTpl;
 			window.ClippyUI.appendAssistantMessage(window.ClippyKnowledge.formatString(tpl, { value: cVal.value.toLocaleString(), unit: cVal.unit }));
 		} else if (actionId === 'action_constant_h') {
 			const hVal = (window.ClippyKnowledge && window.ClippyKnowledge.PHYSICAL_CONSTANTS && window.ClippyKnowledge.PHYSICAL_CONSTANTS.h) || { value: 6.62607015e-34, unit: "J s" };
-			const tpl = (window.ClippyKnowledge && window.ClippyKnowledge.SYSTEM_TEXTS && window.ClippyKnowledge.SYSTEM_TEXTS.constants && window.ClippyKnowledge.SYSTEM_TEXTS.constants.planckText) || "Planck constant (h):\n**{value} {unit}** (exact standard)";
+			const rawTpl = (window.ClippyKnowledge && window.ClippyKnowledge.SYSTEM_TEXTS && window.ClippyKnowledge.SYSTEM_TEXTS.constants && window.ClippyKnowledge.SYSTEM_TEXTS.constants.planckText) || "Planck constant (h):\n**{value} {unit}** (exact standard)";
+			const tpl = window.ClippyKnowledge.resolveTextVariant ? window.ClippyKnowledge.resolveTextVariant(rawTpl, { brain: window.ClippyBrain, vars: { value: hVal.value, unit: hVal.unit } }) : rawTpl;
 			window.ClippyUI.appendAssistantMessage(window.ClippyKnowledge.formatString(tpl, { value: hVal.value, unit: hVal.unit }));
 		} else if (actionId === 'action_profile') {
 			renderUserProfileCard();
@@ -703,14 +713,16 @@
 		const conv = window.ClippyActivities.parseUnitConversion(rawText);
 		if (conv) {
 			const cTexts = (window.ClippyKnowledge && window.ClippyKnowledge.SYSTEM_TEXTS && window.ClippyKnowledge.SYSTEM_TEXTS.conversions) || {};
-			return { text: window.ClippyKnowledge.formatString(cTexts.result || "Unit Conversion Result: **{result}**", { result: conv }) };
+			const rawTpl = window.ClippyKnowledge.resolveTextVariant ? window.ClippyKnowledge.resolveTextVariant(cTexts.result, { brain: window.ClippyBrain, vars: { result: conv } }) : (cTexts.result || "Unit Conversion Result: **{result}**");
+			return { text: window.ClippyKnowledge.formatString(rawTpl, { result: conv }) };
 		}
 
 		if (norm.startsWith('calc ') || norm.startsWith('calculate ') || norm.startsWith('evaluate ') || /^[\d\s\+\-\*\/\(\)\.\^\%]+$/.test(norm)) {
 			const mathRes = window.ClippyActivities.evaluateMathExpression(norm);
 			if (mathRes !== null) {
 				const calcTexts = (window.ClippyKnowledge && window.ClippyKnowledge.SYSTEM_TEXTS && window.ClippyKnowledge.SYSTEM_TEXTS.calculations) || {};
-				return { text: window.ClippyKnowledge.formatString(calcTexts.result || "Calculation Result: **{result}**", { result: mathRes }) };
+				const rawTpl = window.ClippyKnowledge.resolveTextVariant ? window.ClippyKnowledge.resolveTextVariant(calcTexts.result, { brain: window.ClippyBrain, vars: { result: mathRes } }) : (calcTexts.result || "Calculation Result: **{result}**");
+				return { text: window.ClippyKnowledge.formatString(rawTpl, { result: mathRes }) };
 			}
 		}
 
@@ -1472,15 +1484,62 @@
 				return;
 			}
 
+			const hour = new Date().getHours();
+			const currentEnv = isDeskEnvironment() ? 'desk' : 'standalone';
+			const currentMood = (window.ClippyBrain && typeof window.ClippyBrain.getMood === 'function') ? window.ClippyBrain.getMood() : 'OPTIMISTIC';
+
+			if ((hour >= 22 || hour < 5) && window.ClippyKnowledge && window.ClippyKnowledge.PROACTIVE_BUBBLE_TEMPLATES && window.ClippyKnowledge.PROACTIVE_BUBBLE_TEMPLATES.user_late_night && Math.random() < 0.5) {
+				const lateTemplates = window.ClippyKnowledge.PROACTIVE_BUBBLE_TEMPLATES.user_late_night;
+				const chosenLate = pickFrom(lateTemplates);
+				if (chosenLate && chosenLate.text) {
+					window.ClippyUI.showIdleBubble(chosenLate.text, () => {
+						window.ClippyAgent.open();
+						if (chosenLate.prompt) window.ClippyAgent.prompt(chosenLate.prompt);
+						else if (chosenLate.action) window.ClippyAgent.executeAction(chosenLate.action);
+					});
+					return;
+				}
+			}
+
+			if (hour >= 5 && hour < 11 && window.ClippyKnowledge && window.ClippyKnowledge.PROACTIVE_BUBBLE_TEMPLATES && window.ClippyKnowledge.PROACTIVE_BUBBLE_TEMPLATES.user_early_morning && Math.random() < 0.4) {
+				const morningTemplates = window.ClippyKnowledge.PROACTIVE_BUBBLE_TEMPLATES.user_early_morning;
+				const chosenMorning = pickFrom(morningTemplates);
+				if (chosenMorning && chosenMorning.text) {
+					window.ClippyUI.showIdleBubble(chosenMorning.text, () => {
+						window.ClippyAgent.open();
+						if (chosenMorning.prompt) window.ClippyAgent.prompt(chosenMorning.prompt);
+						else if (chosenMorning.action) window.ClippyAgent.executeAction(chosenMorning.action);
+					});
+					return;
+				}
+			}
+
 			const idleTemplates = (window.ClippyKnowledge && window.ClippyKnowledge.PROACTIVE_BUBBLE_TEMPLATES && window.ClippyKnowledge.PROACTIVE_BUBBLE_TEMPLATES.idle_long) || [];
 			if (idleTemplates.length > 0) {
-				const chosen = pickFrom(idleTemplates);
-				window.ClippyUI.showIdleBubble(chosen.text, () => {
-					window.ClippyAgent.open();
-					if (chosen.prompt) window.ClippyAgent.prompt(chosen.prompt);
-					else if (chosen.action) window.ClippyAgent.executeAction(chosen.action);
+				const eligible = idleTemplates.filter(t => {
+					if (!t) return false;
+					if (t.criteria) {
+						if (t.criteria.environments && !t.criteria.environments.includes(currentEnv)) return false;
+						if (t.criteria.moods && !t.criteria.moods.includes(currentMood)) return false;
+					}
+					if (t.environment && t.environment !== currentEnv) return false;
+					if (t.environments && !t.environments.includes(currentEnv)) return false;
+					return true;
 				});
-				return;
+				const chosenList = eligible.length > 0 ? eligible : idleTemplates;
+				const chosen = pickFrom(chosenList);
+				const bubbleText = typeof chosen.text === 'object' && chosen.text !== null
+					? ((window.ClippyKnowledge && window.ClippyKnowledge.resolveTextVariant) ? window.ClippyKnowledge.resolveTextVariant(chosen.text, { brain: window.ClippyBrain, mood: currentMood, environment: currentEnv }) : (chosen.text.default || ''))
+					: String(chosen.text || '');
+
+				if (bubbleText) {
+					window.ClippyUI.showIdleBubble(bubbleText, () => {
+						window.ClippyAgent.open();
+						if (chosen.prompt) window.ClippyAgent.prompt(chosen.prompt);
+						else if (chosen.action) window.ClippyAgent.executeAction(chosen.action);
+					});
+					return;
+				}
 			}
 
 			const idlePool = idleTexts.pool || [
