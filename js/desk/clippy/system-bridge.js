@@ -685,7 +685,9 @@
 			const userAvatar = (window.SettingsApp && window.SettingsApp.get('userAvatar')) || '../assets/images/desk/icons/User 1.webp';
 			const avatarShape = (window.SettingsApp && window.SettingsApp.get('userAvatarShape')) || 'square';
 			const theme = (window.SettingsApp && window.SettingsApp.get('theme')) || 'luna-blue';
-			return { userName, userJobTitle, userAvatar, avatarShape, theme };
+			const activeNickname = (window.ClippyBrain && window.ClippyBrain.memory && window.ClippyBrain.memory.activeNickname) || '';
+			const activeArchetype = (window.ClippyBrain && window.ClippyBrain.memory && window.ClippyBrain.memory.activeArchetypeName) || '';
+			return { userName, userJobTitle, userAvatar, avatarShape, theme, activeNickname, activeArchetype };
 		},
 
 		setUserProfile(data = {}) {

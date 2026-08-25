@@ -4,6 +4,7 @@
 	const STORAGE_KEY_TODOS = 'clippy_user_todos_v3';
 	const STORAGE_KEY_PET = 'clippy_pet_state_v3';
 	const STORAGE_KEY_NOTES = 'clippy_user_scratchpad_v3';
+	const STORAGE_KEY_PERSONALITY = 'clippy_personality_history_v3';
 
 	function gammaLanczos(z) {
 		if (z < 0.5) return Math.PI / (Math.sin(Math.PI * z) * gammaLanczos(1 - z));
@@ -4164,8 +4165,343 @@
 		}
 	}
 
+	class PersonalityQuizActivity {
+		constructor() {
+			this.currentTestId = null;
+			this.currentQuestionIndex = 0;
+			this.scores = {};
+			this.card = null;
+			this.isComplete = false;
+			this.computedResult = null;
+		}
+
+		getAvailableTests() {
+			const reg = (window.ClippyPersonalityRegistry && window.ClippyPersonalityRegistry.tests) || {};
+			return Object.values(reg);
+		}
+
+		getTest(testId) {
+			const reg = (window.ClippyPersonalityRegistry && window.ClippyPersonalityRegistry.tests) || {};
+			return reg[testId] || null;
+		}
+
+		mount(testId = null) {
+			this.scores = {};
+			this.currentQuestionIndex = 0;
+			this.isComplete = false;
+			this.computedResult = null;
+
+			const txt = (window.ClippyKnowledge && typeof window.ClippyKnowledge.getActivityConfig === 'function')
+				? window.ClippyKnowledge.getActivityConfig('personalityQuiz')
+				: ((window.ClippyKnowledge && window.ClippyKnowledge.ACTIVITIES_TEXTS && window.ClippyKnowledge.ACTIVITIES_TEXTS.personalityQuiz) || { title: 'Personality Matrix Evaluation', badge: 'Diagnostic Psychological Test' });
+
+			if (testId && this.getTest(testId)) {
+				this.currentTestId = testId;
+				const testData = this.getTest(testId);
+				this.card = window.ClippyUI.createActivityCard(testData.title || txt.title, testData.badge || txt.badge);
+				this.renderQuestion();
+			} else {
+				this.currentTestId = null;
+				this.card = window.ClippyUI.createActivityCard(txt.title || 'Personality Matrix Evaluation', txt.badge || 'Diagnostic Psychological Test');
+				this.renderPicker();
+			}
+		}
+
+		startTest(testId) {
+			const testData = this.getTest(testId);
+			if (!testData) return;
+			this.currentTestId = testId;
+			this.currentQuestionIndex = 0;
+			this.scores = {};
+			this.isComplete = false;
+			this.computedResult = null;
+
+			if (this.card && this.card.headerElement) {
+				const titleSpan = this.card.headerElement.querySelector('span:first-child');
+				const badgeSpan = this.card.headerElement.querySelector('.clippy-activity-badge');
+				if (titleSpan) titleSpan.textContent = testData.title;
+				if (badgeSpan) badgeSpan.textContent = testData.badge;
+			}
+			if (window.ClippyAudio) window.ClippyAudio.play('popup');
+			this.renderQuestion();
+		}
+
+		answerQuestion(option) {
+			if (!option || !option.scores) return;
+
+			for (const [archetypeKey, weight] of Object.entries(option.scores)) {
+				this.scores[archetypeKey] = (this.scores[archetypeKey] || 0) + weight;
+			}
+
+			if (window.ClippyAudio) window.ClippyAudio.play('type');
+
+			const testData = this.getTest(this.currentTestId);
+			if (!testData || !Array.isArray(testData.questions)) return;
+
+			this.currentQuestionIndex++;
+			if (this.currentQuestionIndex >= testData.questions.length) {
+				this.computeResult();
+			} else {
+				this.renderQuestion();
+			}
+		}
+
+		computeResult() {
+			const testData = this.getTest(this.currentTestId);
+			if (!testData || !testData.archetypes) return;
+
+			let bestArchetypeKey = Object.keys(testData.archetypes)[0];
+			let highestScore = -1;
+
+			for (const [key, score] of Object.entries(this.scores)) {
+				if (score > highestScore && testData.archetypes[key]) {
+					highestScore = score;
+					bestArchetypeKey = key;
+				}
+			}
+
+			const resultArchetype = testData.archetypes[bestArchetypeKey];
+			this.computedResult = {
+				archetype: resultArchetype,
+				scores: { ...this.scores },
+				testTitle: testData.title,
+				testId: this.currentTestId,
+				date: Date.now()
+			};
+			this.isComplete = true;
+
+			this.saveResultHistory(this.computedResult);
+
+			if (window.ClippyAudio) window.ClippyAudio.play('tada');
+			if (window.ClippySystemBridge) window.ClippySystemBridge.unlockAchievement('clippy_personality_master', 1);
+
+			if (window.ClippyBrain && typeof window.ClippyBrain.applyPersonalityResult === 'function') {
+				window.ClippyBrain.applyPersonalityResult(this.computedResult);
+			} else if (window.ClippyBrain) {
+				window.ClippyBrain.applyMoodDelta({
+					intellect: 15,
+					existentialism: 12,
+					affinity: 10,
+					patience: 10
+				});
+			}
+
+			this.renderResult();
+		}
+
+		saveResultHistory(result) {
+			try {
+				const raw = window.DeskStorage ? window.DeskStorage.getItem(STORAGE_KEY_PERSONALITY) : localStorage.getItem(STORAGE_KEY_PERSONALITY);
+				const history = raw ? JSON.parse(raw) : [];
+				history.push(result);
+				if (history.length > 20) history.shift();
+				const payload = JSON.stringify(history);
+				if (window.DeskStorage) window.DeskStorage.setItem(STORAGE_KEY_PERSONALITY, payload);
+				else localStorage.setItem(STORAGE_KEY_PERSONALITY, payload);
+			} catch (e) {}
+		}
+
+		renderPicker() {
+			if (!this.card) return;
+			const body = this.card.bodyElement;
+			body.innerHTML = '';
+
+			const txt = (window.ClippyKnowledge && typeof window.ClippyKnowledge.getActivityConfig === 'function')
+				? window.ClippyKnowledge.getActivityConfig('personalityQuiz')
+				: ((window.ClippyKnowledge && window.ClippyKnowledge.ACTIVITIES_TEXTS && window.ClippyKnowledge.ACTIVITIES_TEXTS.personalityQuiz) || {
+					selectPrompt: "Select a Personality Evaluation Module:",
+					btnStart: "Begin Test"
+				});
+
+			const container = document.createElement('div');
+			container.className = 'clippy-personality-container';
+
+			const prompt = document.createElement('div');
+			prompt.style.fontSize = '11px';
+			prompt.style.fontWeight = 'bold';
+			prompt.style.color = '#0c2d6b';
+			prompt.textContent = txt.selectPrompt || "Select a Personality Evaluation Module:";
+			container.appendChild(prompt);
+
+			const list = document.createElement('div');
+			list.className = 'clippy-personality-picker';
+
+			const tests = this.getAvailableTests();
+			tests.forEach(test => {
+				const item = document.createElement('div');
+				item.className = 'clippy-personality-test-card';
+				item.innerHTML = `
+					<strong>${test.title}</strong>
+					<span>${test.subtitle}</span>
+					<small>${test.description}</small>
+				`;
+				item.addEventListener('click', () => this.startTest(test.id));
+				list.appendChild(item);
+			});
+
+			container.appendChild(list);
+			body.appendChild(container);
+			window.ClippyUI.scrollLogToBottom();
+		}
+
+		renderQuestion() {
+			if (!this.card) return;
+			const body = this.card.bodyElement;
+			body.innerHTML = '';
+
+			const testData = this.getTest(this.currentTestId);
+			if (!testData || !Array.isArray(testData.questions)) return;
+
+			const q = testData.questions[this.currentQuestionIndex];
+			if (!q) return;
+
+			const currentMood = (window.ClippyBrain && typeof window.ClippyBrain.getMood === 'function') ? window.ClippyBrain.getMood() : 'OPTIMISTIC';
+			let questionText = q.text;
+			if (q.variants && typeof q.variants === 'object') {
+				questionText = q.variants[currentMood] || q.variants.OPTIMISTIC || q.variants.ANALYTICAL || q.text;
+			}
+
+			const container = document.createElement('div');
+			container.className = 'clippy-personality-container';
+
+			const progressBox = document.createElement('div');
+			progressBox.className = 'clippy-quiz-progress';
+			const fill = document.createElement('div');
+			fill.className = 'clippy-quiz-progress-fill';
+			const pct = ((this.currentQuestionIndex) / testData.questions.length) * 100;
+			fill.style.width = `${pct}%`;
+			progressBox.appendChild(fill);
+			container.appendChild(progressBox);
+
+			const qHeader = document.createElement('div');
+			qHeader.className = 'clippy-personality-question-title';
+			qHeader.innerHTML = `<strong>[Q${this.currentQuestionIndex + 1}/${testData.questions.length}]</strong> ${questionText}`;
+			container.appendChild(qHeader);
+
+			const optionsGrid = document.createElement('div');
+			optionsGrid.className = 'clippy-personality-options-grid';
+
+			const optionsList = Array.isArray(q.options) ? [...q.options] : [];
+			const shouldRandomize = window.SettingsApp ? (window.SettingsApp.get('clippyPersonalityRandomizeOptions') !== false) : true;
+			if (shouldRandomize) {
+				optionsList.sort(() => Math.random() - 0.5);
+			}
+
+			optionsList.forEach(opt => {
+				const btn = document.createElement('button');
+				btn.type = 'button';
+				btn.className = 'clippy-personality-option-btn';
+				btn.textContent = opt.label;
+				btn.addEventListener('click', () => this.answerQuestion(opt));
+				optionsGrid.appendChild(btn);
+			});
+
+			container.appendChild(optionsGrid);
+			body.appendChild(container);
+			window.ClippyUI.scrollLogToBottom();
+		}
+
+		renderResult() {
+			if (!this.card || !this.computedResult) return;
+			const body = this.card.bodyElement;
+			body.innerHTML = '';
+
+			const res = this.computedResult.archetype;
+			const txt = (window.ClippyKnowledge && typeof window.ClippyKnowledge.getActivityConfig === 'function')
+				? window.ClippyKnowledge.getActivityConfig('personalityQuiz')
+				: ((window.ClippyKnowledge && window.ClippyKnowledge.ACTIVITIES_TEXTS && window.ClippyKnowledge.ACTIVITIES_TEXTS.personalityQuiz) || {
+					resultBanner: "Diagnostic Evaluation Complete: Match Identified!",
+					btnRestart: "Retake This Test",
+					btnOther: "Explore Other Personality Tests",
+					lblTraits: "Psychological Trait Metrics:",
+					lblCompatibility: "Optimal System Compatibility:",
+					lblIncompatibility: "Critical Incompatibility:"
+				});
+
+			const container = document.createElement('div');
+			container.className = 'clippy-personality-container';
+
+			const banner = document.createElement('div');
+			banner.className = 'clippy-activity-banner win';
+			banner.textContent = txt.resultBanner || "Diagnostic Evaluation Complete: Match Identified!";
+			container.appendChild(banner);
+
+			const card = document.createElement('div');
+			card.className = 'clippy-personality-result-card';
+
+			let traitsHtml = '';
+			if (res.traits && typeof res.traits === 'object') {
+				traitsHtml += `<div class="clippy-personality-traits-box"><div style="font-size:10px; font-weight:bold; color:#0c2d6b;">${txt.lblTraits || 'Psychological Trait Metrics:'}</div>`;
+				for (const [tName, tVal] of Object.entries(res.traits)) {
+					traitsHtml += `
+						<div class="clippy-personality-trait-row">
+							<span>${tName}</span>
+							<strong>${tVal}%</strong>
+						</div>
+						<div class="clippy-personality-trait-bar">
+							<div class="clippy-personality-trait-fill" style="width:${tVal}%;"></div>
+						</div>
+					`;
+				}
+				traitsHtml += `</div>`;
+			}
+
+			let metaHtml = '';
+			if (res.compatibility || res.incompatibility) {
+				metaHtml = `
+					<table class="clippy-personality-meta-table">
+						${res.compatibility ? `<tr><td>${txt.lblCompatibility || 'Optimal Compatibility:'}</td><td>${res.compatibility}</td></tr>` : ''}
+						${res.incompatibility ? `<tr><td>${txt.lblIncompatibility || 'Incompatibility:'}</td><td>${res.incompatibility}</td></tr>` : ''}
+					</table>
+				`;
+			}
+
+			card.innerHTML = `
+				<div class="clippy-personality-result-header">
+					<div class="clippy-personality-result-title">${res.name}</div>
+					<div class="clippy-personality-result-tagline">${res.tagline}</div>
+				</div>
+				<div class="clippy-personality-result-desc">${res.description}</div>
+				${res.quote ? `<div class="clippy-personality-result-quote">"${res.quote}"</div>` : ''}
+				${traitsHtml}
+				${metaHtml}
+			`;
+
+			container.appendChild(card);
+
+			const actions = document.createElement('div');
+			actions.className = 'clippy-actions-bar';
+
+			const retakeBtn = document.createElement('button');
+			retakeBtn.type = 'button';
+			retakeBtn.className = 'clippy-action-btn';
+			retakeBtn.textContent = txt.btnRestart || "Retake This Test";
+			retakeBtn.addEventListener('click', () => this.startTest(this.currentTestId));
+			actions.appendChild(retakeBtn);
+
+			const otherBtn = document.createElement('button');
+			otherBtn.type = 'button';
+			otherBtn.className = 'clippy-action-btn';
+			otherBtn.textContent = txt.btnOther || "Explore Other Personality Tests";
+			otherBtn.addEventListener('click', () => this.mount());
+			actions.appendChild(otherBtn);
+
+			container.appendChild(actions);
+			body.appendChild(container);
+			window.ClippyUI.scrollLogToBottom();
+
+			if (window.ClippyAgent && typeof window.ClippyAgent.notifyGameEnded === 'function') {
+				window.ClippyAgent.notifyGameEnded('Personality Test', res.name, () => {
+					this.startTest(this.currentTestId);
+				});
+			}
+		}
+	}
+
 	const ActivitiesManager = {
 		activePomodoroTimer: null,
+
+		personalityQuiz: new PersonalityQuizActivity(),
 
 		pong: new WebGLPongActivity(),
 		simon: new SimonSaysActivity(),

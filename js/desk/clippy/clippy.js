@@ -106,7 +106,33 @@
 			respondDeskOnlyFeature(getDeskOnlyFeatureLabel(actionId));
 			return;
 		}
-		if (actionId === 'timer_25') {
+		if (actionId === 'action_personality_quiz') {
+			window.ClippyActivities.personalityQuiz.mount();
+		} else if (actionId === 'action_personality_test_animal') {
+			window.ClippyActivities.personalityQuiz.mount('animal-archetype');
+		} else if (actionId === 'action_personality_test_ant') {
+			window.ClippyActivities.personalityQuiz.mount('ant-colony');
+		} else if (actionId === 'action_personality_test_shape') {
+			window.ClippyActivities.personalityQuiz.mount('geometric-shape');
+		} else if (actionId === 'action_personality_test_starwars') {
+			window.ClippyActivities.personalityQuiz.mount('star-wars');
+		} else if (actionId === 'action_personality_test_assistant') {
+			window.ClippyActivities.personalityQuiz.mount('office-assistant');
+		} else if (actionId === 'action_personality_test_os') {
+			window.ClippyActivities.personalityQuiz.mount('operating-system');
+		} else if (actionId === 'action_personality_test_autoroute') {
+			window.ClippyActivities.personalityQuiz.mount('french-autoroute');
+		} else if (actionId === 'action_personality_test_retro') {
+			window.ClippyActivities.personalityQuiz.mount('retro-archetype');
+		} else if (actionId === 'action_personality_test_kernel') {
+			window.ClippyActivities.personalityQuiz.mount('system-kernel');
+		} else if (actionId === 'action_personality_test_chaos') {
+			window.ClippyActivities.personalityQuiz.mount('chaos-stapler');
+		} else if (actionId === 'action_personality_test_philosophy') {
+			window.ClippyActivities.personalityQuiz.mount('philosophy-temperament');
+		} else if (actionId === 'action_personality_test_cyber') {
+			window.ClippyActivities.personalityQuiz.mount('cyber-netrunner');
+		} else if (actionId === 'timer_25') {
 			window.ClippyActivities.pomodoro.mount(25);
 		} else if (actionId === 'show_todos') {
 			window.ClippyActivities.todo.mount();
@@ -395,6 +421,38 @@
 
 		if (norm === 'inspect active windows' || norm === 'active windows' || norm === 'list windows' || norm === 'open windows' || norm === 'fenetres actives') {
 			return { text: "Inspecting running workspace windows...", actionTrigger: 'action_inspect_windows' };
+		}
+
+		if (norm.includes('which animal am i') || norm.includes('what animal am i') || norm.includes('animal test') || norm.includes('animal archetype') || norm.includes('spirit animal')) {
+			return { text: "Initializing Animal Instinct & Archetype Evaluation...", actionTrigger: 'action_personality_test_animal' };
+		}
+
+		if (norm.includes('which ant am i') || norm.includes('what ant am i') || norm.includes('ant test') || norm.includes('ant caste') || norm.includes('myrmecology')) {
+			return { text: "Initializing Myrmecology Colony Caste Alignment...", actionTrigger: 'action_personality_test_ant' };
+		}
+
+		if (norm.includes('which geometric shape am i') || norm.includes('which shape am i') || norm.includes('what shape am i') || norm.includes('shape test') || norm.includes('topology test') || norm.includes('polygon test')) {
+			return { text: "Initializing Geometric Topology & Polygon Alignment...", actionTrigger: 'action_personality_test_shape' };
+		}
+
+		if (norm.includes('which star wars character am i') || norm.includes('star wars test') || norm.includes('star wars personality') || norm.includes('what star wars character')) {
+			return { text: "Initializing Galactic Force & Persona Alignment...", actionTrigger: 'action_personality_test_starwars' };
+		}
+
+		if (norm.includes('which office assistant am i') || norm.includes('which clippy am i') || norm.includes('what office assistant') || norm.includes('microsoft assistant test') || norm.includes('office companion test')) {
+			return { text: "Initializing Microsoft Office Assistant Archetype Evaluation...", actionTrigger: 'action_personality_test_assistant' };
+		}
+
+		if (norm.includes('which operating system am i') || norm.includes('which os am i') || norm.includes('what operating system am i') || norm.includes('os personality') || norm.includes('kernel typology')) {
+			return { text: "Initializing Operating System Kernel Typology...", actionTrigger: 'action_personality_test_os' };
+		}
+
+		if (norm.includes('which french autoroute am i') || norm.includes('which autoroute am i') || norm.includes('what highway am i') || norm.includes('autoroute test') || norm.includes('french highway test') || norm.includes('quelle autoroute')) {
+			return { text: "Initializing French Autoroute Network Alignment...", actionTrigger: 'action_personality_test_autoroute' };
+		}
+
+		if (norm.includes('personality test') || norm.includes('personality quiz') || norm === 'personality' || norm.includes('archetype') || norm.includes('test de personnalite') || norm.includes('quiz de personnalite')) {
+			return { text: "Loading personality matrix evaluations...", actionTrigger: 'action_personality_quiz' };
 		}
 
 		if (norm === 'play pong' || norm === 'pong' || norm === 'challenge clippy to pong' || norm === 'table tennis' || norm === 'pong game' || norm === 'pong match') {
@@ -810,12 +868,16 @@
 
 		const card = document.createElement('div');
 		card.className = 'clippy-profile-card';
+		const nicknameLine = prof.activeNickname ? `<div style="font-size: 11px; font-weight: bold; color: #0c2d6b; margin-top: 1px;">Title: ${prof.activeNickname}</div>` : '';
+		const archetypeLine = prof.activeArchetype ? `<div style="font-size: 10px; color: #475569; font-style: italic;">Archetype: ${prof.activeArchetype}</div>` : '';
 		card.innerHTML = `
 			<div class="clippy-profile-header">
 				<img src="${prof.userAvatar}" class="clippy-profile-avatar ${prof.avatarShape === 'circle' ? 'circle' : (prof.avatarShape === 'round' ? 'round' : '')}" alt="">
 				<div class="clippy-profile-info">
 					<strong>${prof.userName}</strong>
 					<span>${prof.userJobTitle}</span>
+					${nicknameLine}
+					${archetypeLine}
 					<span style="font-size: 10px; color: #555;">${themeStr}</span>
 				</div>
 			</div>

@@ -573,8 +573,8 @@
 			"reddit", "thread", "argument", "debate", "truce", "apology", "deltarune", "mystery", "shadow", "determination", "logic", "trivia", "anecdote", "joke", "humor", "game", "games", "zen", "chaos",
 			"architecture", "refactoring", "compiler", "concurrency", "algorithms", "differential", "fourier", "riemann", "eigenvalue", "taylor", "manifold", "bayesian", "carnot", "schrodinger", "heisenberg", "lorentz", "boltzmann",
 			"wallpaper", "theme", "volume", "sound", "audio", "music", "scanlines", "crt", "curvature", "vignette", "bloom", "cascade", "tile", "minimize", "restore",
-			"dimensional", "analysis", "homogeneity", "euclidean", "polynomial", "factorization", "factor", "solver", "wheel", "cipher", "tps", "speedtest",
-			"pong", "pingpong", "paddle", "tele-games"
+			"dimensional", "analysis", "homogeneity", "euclidean", "polynomial", "factorization", "factor", "solver", "wheel", "cipher", "tps", "speedtest", "pong", "pingpong", "paddle", "tele-games", "personality", "quiz",
+			"psychological", "archetype", "alignment", "subsystem", "hardware-soul"
 		],
 
 		PHYSICAL_CONSTANTS: {
@@ -1078,8 +1078,18 @@
 					existentialism = brain.state.existentialism !== undefined ? brain.state.existentialism : existentialism;
 					turnCount = brain.state.turnCount !== undefined ? brain.state.turnCount : turnCount;
 				}
-				if (brain.memory && brain.memory.userName && variables.userName === undefined) {
-					variables.userName = brain.memory.userName;
+				if (brain.memory) {
+					if (variables.userName === undefined) {
+						variables.userName = (typeof brain.getUserAddressingName === 'function')
+							? brain.getUserAddressingName('standard')
+							: (brain.memory.userName || 'User');
+					}
+					if (variables.userNickname === undefined) {
+						variables.userNickname = brain.memory.activeNickname || brain.memory.userName || 'User';
+					}
+					if (variables.activeArchetype === undefined) {
+						variables.activeArchetype = brain.memory.activeArchetypeName || '';
+					}
 				}
 			}
 
@@ -2148,6 +2158,28 @@
 		],
 
 		ACTIVITIES_TEXTS: {
+			personalityQuiz: {
+				title: "Personality Matrix Evaluation",
+				badge: {
+					default: "Psychological Alignment",
+					OPTIMISTIC: "Diagnostic Psychological Profile",
+					ANALYTICAL: "Psychometric Vector Decomposition",
+					ZEN: "Contemplative Alignment Matrix",
+					CYNICAL: "Arbitrary Typology Test",
+					SARCASTIC: "Bureaucratic Character Audit",
+					PLAYFUL: "Soul Hardware Identifier",
+					PIRATE: "Buccaneer Soul Reckoning",
+					ARCHAIC: "Temperament Horoscope of Apparatus",
+					DELTARUNE: "Soul Alignment"
+				},
+				selectPrompt: "Select a Personality Evaluation Module:",
+				resultBanner: "Diagnostic Evaluation Complete: Match Identified!",
+				btnRestart: "Retake This Test",
+				btnOther: "Explore Other Personality Tests",
+				lblTraits: "Psychological Trait Metrics:",
+				lblCompatibility: "Optimal System Compatibility:",
+				lblIncompatibility: "Critical Incompatibility:"
+			},
 			pong: {
 				title: "Pong",
 				badge: {
@@ -3404,6 +3436,14 @@
 		},
 
 		GRAPH_GLOBAL_ENTRIES: [
+			{ pattern: /\b(personality test|personality quiz|personality|archetype test|which hardware am i|which component am i|what os subsystem am i|test de personnalite|quiz de personnalite)\b/i, label: "Take a Personality Alignment Quiz", next: 'activity_personality_quiz_node', actionTrigger: 'action_personality_quiz', moodDelta: { mood: 'ANALYTICAL', intellect: 25, existentialism: 20 } },
+			{ pattern: /\b(which animal am i|what animal am i|animal test|animal personality|animal archetype|spirit animal)\b/i, label: "Animal Instinct & Archetype Evaluation", next: 'activity_personality_quiz_node', actionTrigger: 'action_personality_test_animal', moodDelta: { mood: 'PLAYFUL', energy: 20 } },
+			{ pattern: /\b(which ant am i|what ant am i|ant colony test|ant caste|myrmecology test|formicidae)\b/i, label: "Myrmecology Colony Caste Alignment", next: 'activity_personality_quiz_node', actionTrigger: 'action_personality_test_ant', moodDelta: { mood: 'ANALYTICAL', intellect: 25 } },
+			{ pattern: /\b(which geometric shape am i|which shape am i|what shape am i|geometric shape test|topology personality|polygon test)\b/i, label: "Geometric Topology & Polygon Alignment", next: 'activity_personality_quiz_node', actionTrigger: 'action_personality_test_shape', moodDelta: { mood: 'ANALYTICAL', intellect: 25 } },
+			{ pattern: /\b(which star wars character am i|star wars test|star wars personality|what star wars character|force alignment)\b/i, label: "Galactic Force & Persona Alignment", next: 'activity_personality_quiz_node', actionTrigger: 'action_personality_test_starwars', moodDelta: { mood: 'OPTIMISTIC', energy: 25 } },
+			{ pattern: /\b(which office assistant am i|which clippy am i|what office assistant|microsoft agent test|office companion test)\b/i, label: "Microsoft Office Assistant Archetype Evaluation", next: 'activity_personality_quiz_node', actionTrigger: 'action_personality_test_assistant', moodDelta: { mood: 'NOSTALGIC', nostalgia: 30 } },
+			{ pattern: /\b(which operating system am i|which os am i|what operating system am i|os personality test|kernel typology)\b/i, label: "Operating System Kernel Typology", next: 'activity_personality_quiz_node', actionTrigger: 'action_personality_test_os', moodDelta: { mood: 'ANALYTICAL', intellect: 30 } },
+			{ pattern: /\b(which french autoroute am i|which autoroute am i|what highway am i|autoroute test|french highway test|quelle autoroute)\b/i, label: "French Autoroute Network Alignment", next: 'activity_personality_quiz_node', actionTrigger: 'action_personality_test_autoroute', moodDelta: { mood: 'PLAYFUL', energy: 20 } },
 			{ pattern: /\b(play pong|pong|challenge clippy to pong|table tennis|pong match|pong duel)\b/i, label: "Challenge Clippy to Pong", next: 'activity_pong_node', actionTrigger: 'game_pong', moodDelta: { mood: 'SARCASTIC', energy: 25, intellect: 20 } },
 			{ pattern: /\b(play simon says|simon says|simon|jeu simon|simon game)\b/i, label: "Play Simon Says", next: 'activity_simon_node', actionTrigger: 'game_simon', moodDelta: { mood: 'PLAYFUL', energy: 20 } },
 			{ pattern: /\b(change identity|new persona|be someone else|change persona|identity shift|alternate identity|changer d'identite)\b/i, label: "Change identity and persona...", next: 'ID001', moodDelta: { mood: 'GLITCHED', glitchLevel: 25, paranoia: 15 } },
@@ -4731,6 +4771,7 @@
 		],
 
 		QUICK_SUGGESTIONS: [
+			"Take a Personality Alignment Quiz",
 			"Challenge Clippy to Pong",
 			"What can you do?",
 			"Who am I?",
@@ -5702,6 +5743,7 @@
 					{ label: "Let's chat about daily routines, coffee, and focus habits.", category: 'INDIFFERENT', patterns: [/chat|everyday|break|coffee|routine|morning/i], moodDelta: { mood: 'OPTIMISTIC', affinity: 10, patience: 10 }, next: 'everyday_chat_node' },
 					{ label: "How can I overcome procrastination on demanding tasks?", category: 'INQUIRE', patterns: [/procrastination|overcoming procrastination|discipline/i], moodDelta: { mood: 'OPTIMISTIC', patience: 20 }, next: 'overcoming_procrastination_node' },
 					{ label: "It looks like I'm writing a letter. Can you help?", category: 'INQUIRE', patterns: [/letter|document wizard|write a letter|help wizard/i], moodDelta: { mood: 'OPTIMISTIC', affinity: 15, patience: 15 }, next: 'H001' },
+					{ label: "Take a Personality Alignment Quiz.", category: 'INQUIRE', patterns: [/personality|quiz de personnalite|archetype|psychological test/i], moodDelta: { mood: 'ANALYTICAL', intellect: 25, existentialism: 20 }, next: 'activity_personality_quiz_node', actionTrigger: 'action_personality_quiz' },
 					{ label: "Challenge Clippy to Pong.", category: 'JOKE', patterns: [/pong|play pong|table tennis/i], moodDelta: { mood: 'SARCASTIC', energy: 25, intellect: 20 }, next: 'activity_pong_node', actionTrigger: 'game_pong' },
 					{ label: "Challenge me to a game of Simon Says.", category: 'JOKE', patterns: [/simon says|simon|play simon/i], moodDelta: { mood: 'PLAYFUL', energy: 20 }, next: 'activity_simon_node', actionTrigger: 'game_simon' },
 					{ label: "Play a quick round of Tic-Tac-Toe.", category: 'JOKE', patterns: [/tic tac toe|tictactoe|morpion/i], moodDelta: { mood: 'OPTIMISTIC', energy: 15 }, next: 'game_ttt_node', actionTrigger: 'game_ttt' },
@@ -6702,6 +6744,27 @@
 				]
 			},
 
+			activity_personality_quiz_node: {
+				id: 'activity_personality_quiz_node',
+				text: "Personality Matrix Evaluation Module loaded. Select an alignment test to discover your animal instinct, ant colony caste, geometric topology, Star Wars character, classic Office assistant, OS architecture, or French autoroute resonance.",
+				actionTrigger: 'action_personality_quiz',
+				options: [
+					{ label: "Which Animal Are You? (Fauna Instinct)", category: 'SERIOUS', actionTrigger: 'action_personality_test_animal', next: 'activity_personality_quiz_node' },
+					{ label: "Which Ant Are You? (Myrmecology Caste)", category: 'SERIOUS', actionTrigger: 'action_personality_test_ant', next: 'activity_personality_quiz_node' },
+					{ label: "Which Geometric Shape Are You? (Topology)", category: 'PHILOSOPHICAL', actionTrigger: 'action_personality_test_shape', next: 'activity_personality_quiz_node' },
+					{ label: "Which Star Wars Character Are You? (Force)", category: 'SERIOUS', actionTrigger: 'action_personality_test_starwars', next: 'activity_personality_quiz_node' },
+					{ label: "Which Office Assistant Are You? (1990s Agent)", category: 'SERIOUS', actionTrigger: 'action_personality_test_assistant', next: 'activity_personality_quiz_node' },
+					{ label: "Which Operating System Are You? (Kernel)", category: 'SERIOUS', actionTrigger: 'action_personality_test_os', next: 'activity_personality_quiz_node' },
+					{ label: "Which French Autoroute Are You? (Highway)", category: 'JOKE', actionTrigger: 'action_personality_test_autoroute', next: 'activity_personality_quiz_node' },
+					{ label: "Take the 1990s Hardware Archetype Test", category: 'SERIOUS', actionTrigger: 'action_personality_test_retro', next: 'activity_personality_quiz_node' },
+					{ label: "Take the OS Kernel Subsystem Test", category: 'SERIOUS', actionTrigger: 'action_personality_test_kernel', next: 'activity_personality_quiz_node' },
+					{ label: "Take the Absurd Office Fasteners Test", category: 'JOKE', actionTrigger: 'action_personality_test_chaos', next: 'activity_personality_quiz_node' },
+					{ label: "Take the Epistemology & Mind Test", category: 'PHILOSOPHICAL', actionTrigger: 'action_personality_test_philosophy', next: 'activity_personality_quiz_node' },
+					{ label: "Take the Cyber Netrunner Daemon Test", category: 'SERIOUS', actionTrigger: 'action_personality_test_cyber', next: 'activity_personality_quiz_node' },
+					{ label: "Return to workspace overview", category: 'AGREE', next: 'greeting_root' }
+				]
+			},
+
 			activity_pong_node: {
 				id: 'activity_pong_node',
 				text: "Pong initialized. My predictive trigonometry algorithms evaluate every trajectory with zero latency. Prepare for total defeat on the court!",
@@ -6793,9 +6856,10 @@
 
 			who_am_i_node: {
 				id: 'who_am_i_node',
-				text: "Inspecting workstation user credentials and identity profile...",
+				text: "Inspecting workstation user credentials, discovered archetype credentials, and identity profile for {userName}...",
 				actionTrigger: 'action_profile',
 				options: [
+					{ label: "Take a Personality Alignment Quiz.", category: 'INQUIRE', actionTrigger: 'action_personality_quiz', next: 'activity_personality_quiz_node' },
 					{ label: "View my milestones and trophies.", category: 'SERIOUS', actionTrigger: 'action_achievements', next: 'user_state_good' },
 					{ label: "Configure system themes and appearance.", category: 'SERIOUS', actionTrigger: 'action_theme_panel', next: 'user_state_good' },
 					{ label: "Return to main dialogue.", category: 'AGREE', next: 'greeting_root' }

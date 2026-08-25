@@ -1752,6 +1752,193 @@
 	font-size: 11px;
 }
 
+.clippy-personality-container {
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+	width: 100%;
+}
+
+.clippy-personality-picker {
+	display: flex;
+	flex-direction: column;
+	gap: 6px;
+}
+
+.clippy-personality-test-card {
+	background: #ffffff;
+	border: 1px solid #7f9db9;
+	padding: 8px;
+	border-radius: 3px;
+	cursor: pointer;
+	transition: background-color 0.15s ease, border-color 0.15s ease, transform 0.1s ease;
+	display: flex;
+	flex-direction: column;
+	gap: 3px;
+	text-align: left;
+}
+
+.clippy-personality-test-card:hover {
+	background: #eaf2ff;
+	border-color: #316ac5;
+	transform: translateY(-1px);
+}
+
+.clippy-personality-test-card strong {
+	font-size: 12px;
+	color: #0c2d6b;
+}
+
+.clippy-personality-test-card span {
+	font-size: 11px;
+	color: #475569;
+}
+
+.clippy-personality-test-card small {
+	font-size: 10px;
+	color: #64748b;
+	font-style: italic;
+}
+
+.clippy-personality-question-box {
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+}
+
+.clippy-personality-question-title {
+	font-size: 12px;
+	font-weight: bold;
+	color: #0c2d6b;
+	line-height: 1.4;
+	background: #ffffff;
+	border: 1px solid #d4cd75;
+	padding: 8px;
+	border-radius: 3px;
+}
+
+.clippy-personality-options-grid {
+	display: flex;
+	flex-direction: column;
+	gap: 5px;
+}
+
+.clippy-personality-option-btn {
+	padding: 7px 10px;
+	background: #ffffff;
+	border: 1px solid #7f9db9;
+	border-radius: 3px;
+	font-size: 11px;
+	font-family: 'Tahoma', sans-serif;
+	cursor: pointer;
+	text-align: left;
+	line-height: 1.35;
+	transition: background-color 0.12s ease, border-color 0.12s ease;
+	color: #111827;
+}
+
+.clippy-personality-option-btn:hover {
+	background: #eaf2ff;
+	border-color: #316ac5;
+	color: #0055ea;
+}
+
+.clippy-personality-result-card {
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+	background: #ffffff;
+	border: 2px inset #d4d0c8;
+	padding: 10px;
+	border-radius: 3px;
+}
+
+.clippy-personality-result-header {
+	display: flex;
+	flex-direction: column;
+	gap: 3px;
+	border-bottom: 2px solid #0055ea;
+	padding-bottom: 6px;
+}
+
+.clippy-personality-result-title {
+	font-size: 14px;
+	font-weight: bold;
+	color: #0c2d6b;
+	font-family: 'Trebuchet MS', Tahoma, sans-serif;
+}
+
+.clippy-personality-result-tagline {
+	font-size: 11px;
+	font-style: italic;
+	color: #475569;
+}
+
+.clippy-personality-result-desc {
+	font-size: 11px;
+	line-height: 1.5;
+	color: #1e293b;
+}
+
+.clippy-personality-result-quote {
+	background: #f8fafc;
+	border-left: 3px solid #0055ea;
+	padding: 6px 8px;
+	font-size: 11px;
+	font-style: italic;
+	color: #334155;
+}
+
+.clippy-personality-traits-box {
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+	margin-top: 4px;
+	padding-top: 6px;
+	border-top: 1px dotted #cbd5e1;
+}
+
+.clippy-personality-trait-row {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	font-size: 10px;
+	margin-bottom: 1px;
+}
+
+.clippy-personality-trait-bar {
+	height: 8px;
+	background: #f1f5f9;
+	border: 1px inset #cbd5e1;
+	border-radius: 2px;
+	overflow: hidden;
+	margin-bottom: 3px;
+}
+
+.clippy-personality-trait-fill {
+	height: 100%;
+	background: linear-gradient(to right, #3b82f6, #10b981);
+	transition: width 0.3s ease;
+}
+
+.clippy-personality-meta-table {
+	width: 100%;
+	border-collapse: collapse;
+	font-size: 10px;
+	margin-top: 4px;
+}
+
+.clippy-personality-meta-table td {
+	padding: 3px 4px;
+	border-bottom: 1px dotted #e2e8f0;
+}
+
+.clippy-personality-meta-table td:first-child {
+	font-weight: bold;
+	color: #0c2d6b;
+	width: 32%;
+}
+
 .clippy-step-box {
 	background: #ffffff;
 	border: 1px solid #d4cd75;

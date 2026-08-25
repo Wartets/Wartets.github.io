@@ -477,6 +477,38 @@
 				return { type: 'EXTERNAL_URL_REFUSAL', confidence: 1.0 };
 			}
 
+			if (/\b(which animal am i|what animal am i|animal test|animal personality|animal archetype|spirit animal)\b/i.test(norm)) {
+				return { type: 'PERSONALITY_TEST_ANIMAL', confidence: 0.99 };
+			}
+
+			if (/\b(which ant am i|what ant am i|ant test|ant colony test|ant caste|myrmecology)\b/i.test(norm)) {
+				return { type: 'PERSONALITY_TEST_ANT', confidence: 0.99 };
+			}
+
+			if (/\b(which geometric shape am i|which shape am i|what shape am i|geometric shape test|shape personality|topology test)\b/i.test(norm)) {
+				return { type: 'PERSONALITY_TEST_SHAPE', confidence: 0.99 };
+			}
+
+			if (/\b(which star wars character am i|star wars test|star wars personality|what star wars character|which star wars persona)\b/i.test(norm)) {
+				return { type: 'PERSONALITY_TEST_STARWARS', confidence: 0.99 };
+			}
+
+			if (/\b(which office assistant am i|which clippy am i|what office assistant am i|microsoft assistant test|office companion test)\b/i.test(norm)) {
+				return { type: 'PERSONALITY_TEST_ASSISTANT', confidence: 0.99 };
+			}
+
+			if (/\b(which operating system am i|which os am i|what operating system am i|os test|operating system personality)\b/i.test(norm)) {
+				return { type: 'PERSONALITY_TEST_OS', confidence: 0.99 };
+			}
+
+			if (/\b(which french autoroute am i|which autoroute am i|what highway am i|autoroute test|french highway test|french autoroute personality|quelle autoroute)\b/i.test(norm)) {
+				return { type: 'PERSONALITY_TEST_AUTOROUTE', confidence: 0.99 };
+			}
+
+			if (/\b(personality test|personality quiz|personality matrix|which hardware am i|what component am i|what os subsystem am i|test de personnalite|quiz de personnalite|which 90s|psych test|psychological test|archetype test)\b/i.test(norm)) {
+				return { type: 'PERSONALITY_QUIZ', confidence: 0.98 };
+			}
+
 			if (/\b(count to|count up to|count until|compte jusqu'a|compte jusqu|compter jusqu)\s+(\d+)/i.test(norm)) {
 				const m = norm.match(/\b(count to|count up to|count until|compte jusqu'a|compte jusqu|compter jusqu)\s+(\d+)/i);
 				return { type: 'COUNT_REQUEST', targetNumber: parseInt(m[2], 10), confidence: 1.0 };

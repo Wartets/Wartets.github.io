@@ -117,6 +117,11 @@
 			return {
 				userName: (window.SettingsApp && window.SettingsApp.get('userName')) || 'User',
 				userJobTitle: (window.SettingsApp && window.SettingsApp.get('userJobTitle')) || '',
+				activeNickname: '',
+				activeArchetypeId: '',
+				activeArchetypeName: '',
+				unlockedNicknames: [],
+				personalityHistory: [],
 				interests: [],
 				semanticFacts: [],
 				userDisclosures: [],
@@ -213,6 +218,172 @@
 				if (window.DeskStorage) window.DeskStorage.setItem(STORAGE_KEY_MEMORY, payload);
 				else localStorage.setItem(STORAGE_KEY_MEMORY, payload);
 			} catch (e) {}
+		}
+
+		applyPersonalityResult(computedResult) {
+			if (!computedResult || !computedResult.archetype) return;
+
+			const arch = computedResult.archetype;
+			const testId = computedResult.testId || '';
+			const archName = arch.name || '';
+			const cleanedTitle = archName.replace(/\s*\([^)]*\)/g, '').trim();
+
+			let derivedNickname = cleanedTitle;
+			if (cleanedTitle.startsWith('The ')) {
+				derivedNickname = cleanedTitle.substring(4);
+			} else if (cleanedTitle.startsWith("L'")) {
+				derivedNickname = cleanedTitle.substring(2);
+			}
+
+			const nicknamePool = [
+				derivedNickname,
+				archName.split('(')[0].trim(),
+				arch.tagline ? arch.tagline.split(',')[0].trim() : derivedNickname
+			].filter(Boolean);
+
+			const chosenNickname = nicknamePool[0] || derivedNickname;
+
+			this.memory.activeNickname = chosenNickname;
+			this.memory.activeArchetypeId = testId;
+			this.memory.activeArchetypeName = archName;
+
+			if (!Array.isArray(this.memory.unlockedNicknames)) {
+				this.memory.unlockedNicknames = [];
+			}
+			nicknamePool.forEach(nick => {
+				if (!this.memory.unlockedNicknames.includes(nick)) {
+					this.memory.unlockedNicknames.push(nick);
+				}
+			});
+			if (this.memory.unlockedNicknames.length > 30) {
+				this.memory.unlockedNicknames.shift();
+			}
+
+			if (!Array.isArray(this.memory.personalityHistory)) {
+				this.memory.personalityHistory = [];
+			}
+			this.memory.personalityHistory.push({
+				testId,
+				testTitle: computedResult.testTitle || testId,
+				archetype: archName,
+				nickname: chosenNickname,
+				date: Date.now()
+			});
+			if (this.memory.personalityHistory.length > 20) {
+				this.memory.personalityHistory.shift();
+			}
+
+			const moodMapByTestAndArchetype = {
+				'animal-archetype': {
+					owl: { mood: 'ANALYTICAL', intellect: 25, patience: 15, energy: -10 },
+					honey_badger: { mood: 'ENRAGED', energy: 30, irritation: 20, patience: -15 },
+					golden_retriever: { mood: 'OPTIMISTIC', affinity: 30, playfulness: 25, energy: 20 },
+					octopus: { mood: 'ANALYTICAL', intellect: 30, chaos: 15 },
+					wolf: { mood: 'ANALYTICAL', patience: 20, energy: 15 },
+					sloth: { mood: 'FATIGUED', fatigue: 25, energy: -25, patience: 30 }
+				},
+				'ant-colony': {
+					major_soldier: { mood: 'ANALYTICAL', energy: 25, irritation: 15 },
+					forager: { mood: 'PLAYFUL', energy: 25, affinity: 15 },
+					nurse_worker: { mood: 'ZEN', patience: 25, affinity: 20 },
+					leafcutter_fungus_farmer: { mood: 'ANALYTICAL', intellect: 25, patience: 20 },
+					weaver_architect: { mood: 'EUPHORIC', intellect: 20, energy: 20 },
+					queen_founder: { mood: 'ZEN', existentialism: 25, patience: 25 }
+				},
+				'geometric-shape': {
+					equilateral_triangle: { mood: 'OPTIMISTIC', intellect: 20, energy: 15 },
+					golden_rectangle: { mood: 'ZEN', intellect: 25, patience: 20 },
+					infinite_circle: { mood: 'ZEN', patience: 30, existentialism: 20 },
+					regular_hexagon: { mood: 'ANALYTICAL', intellect: 25, energy: 15 },
+					hyperbolic_paraboloid: { mood: 'EXISTENTIAL', existentialism: 30, intellect: 20 },
+					mandelbrot_fractal: { mood: 'EXISTENTIAL', existentialism: 35, intellect: 25 }
+				},
+				'star-wars': {
+					master_yoda: { mood: 'ZEN', existentialism: 30, patience: 30 },
+					anakin_vader: { mood: 'ENRAGED', energy: 35, irritation: 25, patience: -20 },
+					obi_wan: { mood: 'ZEN', patience: 25, intellect: 20, affinity: 15 },
+					han_solo: { mood: 'SARCASTIC', playfulness: 25, cynicism: 20 },
+					admiral_thrawn: { mood: 'ANALYTICAL', intellect: 35, patience: 20 },
+					r2_d2: { mood: 'PLAYFUL', playfulness: 30, energy: 25, affinity: 20 }
+				},
+				'office-assistant': {
+					clippit: { mood: 'OPTIMISTIC', affinity: 35, energy: 25, playfulness: 20 },
+					rover: { mood: 'PLAYFUL', affinity: 30, energy: 25 },
+					merlin: { mood: 'ARCHAIC', archaicMode: 45, intellect: 20 },
+					peedy: { mood: 'PLAYFUL', playfulness: 35, energy: 30 },
+					links: { mood: 'ZEN', patience: 20, cynicism: 15 },
+					the_genius: { mood: 'ANALYTICAL', intellect: 35, existentialism: 15 }
+				},
+				'operating-system': {
+					windows_xp: { mood: 'OPTIMISTIC', nostalgia: 35, affinity: 25 },
+					ms_dos: { mood: 'NOSTALGIC', nostalgia: 40, cynicism: 15 },
+					debian_linux: { mood: 'ANALYTICAL', intellect: 30, patience: 25 },
+					plan_9: { mood: 'EXISTENTIAL', intellect: 35, existentialism: 25 },
+					beos: { mood: 'EUPHORIC', energy: 30, intellect: 20 },
+					os2_warp: { mood: 'NOSTALGIC', nostalgia: 25, intellect: 20 }
+				},
+				'french-autoroute': {
+					a6_soleil: { mood: 'EUPHORIC', energy: 25, affinity: 20 },
+					a1_nord: { mood: 'ANALYTICAL', intellect: 20, patience: 15 },
+					a75_meridienne: { mood: 'ZEN', existentialism: 25, patience: 25 },
+					a86_superperipherique: { mood: 'CYNICAL', irritation: 25, paranoia: 20 },
+					a13_normandie: { mood: 'ZEN', affinity: 20, patience: 20 },
+					a8_provencale: { mood: 'EUPHORIC', energy: 30, playfulness: 20 }
+				}
+			};
+
+			let appliedDelta = { mood: 'OPTIMISTIC', intellect: 15, affinity: 15 };
+			const archetypeKey = Object.keys(computedResult.scores || {})
+				.sort((a, b) => (computedResult.scores[b] || 0) - (computedResult.scores[a] || 0))[0];
+
+			if (testId && archetypeKey && moodMapByTestAndArchetype[testId] && moodMapByTestAndArchetype[testId][archetypeKey]) {
+				appliedDelta = moodMapByTestAndArchetype[testId][archetypeKey];
+			} else if (arch.traits) {
+				const maxTrait = Object.entries(arch.traits).sort((a, b) => b[1] - a[1])[0];
+				if (maxTrait) {
+					const tName = maxTrait[0].toLowerCase();
+					if (tName.includes('symmetry') || tName.includes('ratio') || tName.includes('intellect') || tName.includes('synthesis')) {
+						appliedDelta = { mood: 'ANALYTICAL', intellect: 25 };
+					} else if (tName.includes('freedom') || tName.includes('calm') || tName.includes('patience') || tName.includes('harmony')) {
+						appliedDelta = { mood: 'ZEN', patience: 25 };
+					} else if (tName.includes('kinetic') || tName.includes('speed') || tName.includes('momentum') || tName.includes('power')) {
+						appliedDelta = { mood: 'EUPHORIC', energy: 25 };
+					} else {
+						appliedDelta = { mood: 'OPTIMISTIC', affinity: 20 };
+					}
+				}
+			}
+
+			this.applyMoodDelta(appliedDelta);
+			this.saveState();
+			this.saveMemory();
+		}
+
+		getUserAddressingName(mode = 'standard') {
+			const baseName = (this.memory && this.memory.userName) || (window.SettingsApp && window.SettingsApp.get('userName')) || 'User';
+			const nick = (this.memory && this.memory.activeNickname) || '';
+
+			if (!nick) return baseName;
+
+			if (mode === 'nickname_only') return nick;
+			if (mode === 'formal_archetype') return `${baseName}, the ${nick}`;
+			if (mode === 'bracketed') return `${baseName} (${nick})`;
+
+			const mood = this.getMood();
+			const affinity = this.getAffinity();
+
+			if (mood === 'ENRAGED') return `${baseName.toUpperCase()} THE ${nick.toUpperCase()}`;
+			if (mood === 'ARCHAIC') return `noble ${nick} ${baseName}`;
+			if (mood === 'PIRATE') return `Cap'n ${baseName} the ${nick}`;
+			if (mood === 'DELTARUNE') return `${baseName}`;
+
+			if (affinity >= 70 && Math.random() < 0.45) {
+				return `my esteemed ${nick} (${baseName})`;
+			} else if (Math.random() < 0.35) {
+				return `${baseName} the ${nick}`;
+			}
+
+			return baseName;
 		}
 
 		getMood() {
@@ -681,6 +852,11 @@
 			const stats = this.memory.messageLengthsStats || {};
 			const totalMsgs = this.memory.interactionsTotal || 1;
 			const isInitialPhase = (this.state.turnCount <= 4) || (totalMsgs <= 4);
+
+			if (this.memory && this.memory.activeNickname && text.includes('{userName}')) {
+				const addressing = this.getUserAddressingName('standard');
+				text = text.replace(/\{userName\}/g, addressing);
+			}
 
 			if (isInitialPhase && currentMood !== 'ENRAGED') {
 				return text;
