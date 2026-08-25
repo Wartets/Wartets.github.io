@@ -595,6 +595,53 @@
 	font-style: italic;
 }
 
+.clippy-pong-container {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 6px;
+	background: #000000;
+	border: 2px inset #ffffff;
+	padding: 6px;
+	border-radius: 3px;
+	user-select: none;
+}
+
+.clippy-pong-canvas {
+	width: 100%;
+	height: 190px;
+	background: #000000;
+	border: 1px solid #ffffff;
+	display: block;
+	image-rendering: pixelated;
+	cursor: ns-resize;
+	touch-action: none;
+	box-shadow: 0 0 8px rgba(255, 255, 255, 0.15);
+}
+
+.clippy-pong-canvas:active {
+	cursor: grabbing;
+}
+
+.clippy-pong-hud {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	width: 100%;
+	font-family: 'Lucida Console', monospace;
+	font-size: 11px;
+	color: #ffffff;
+	padding: 0 4px;
+	box-sizing: border-box;
+}
+
+.clippy-pong-controls-hint {
+	font-family: 'Tahoma', sans-serif;
+	font-size: 10px;
+	color: #a0a0a0;
+	text-align: center;
+}
+
 .clippy-simon-container {
 	display: flex;
 	flex-direction: column;

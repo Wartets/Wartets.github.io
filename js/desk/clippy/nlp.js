@@ -598,6 +598,10 @@
 				return { type: 'TRIVIA_REQUEST', confidence: 0.9 };
 			}
 
+			if (/\b(pong|pingpong|ping pong|table tennis|play pong|jouer au pong)\b/i.test(norm)) {
+				return { type: 'PONG_GAME', confidence: 0.98 };
+			}
+
 			if (/\b(game|play|jeu|jouer|tictactoe|morpion|memory|hangman|pendu|quiz)\b/i.test(norm)) {
 				return { type: 'GAME_CONTROL', confidence: 0.9 };
 			}

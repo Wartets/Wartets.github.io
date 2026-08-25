@@ -471,6 +471,7 @@
 	"clippyCrossTabAwareness": true,
 	"clippyIdentityInstability": 0,
 	"clippyMaxSimonRounds": 50,
+	"clippyPongDifficulty": "champion",
 	"clippyGraphColorMode": "MOOD",
 	"clippyGraphPhysics": true,
 	"clippyGraphScope": "FULL",

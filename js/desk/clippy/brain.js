@@ -57,6 +57,7 @@
 				turnCount: 0,
 				consecutiveHostility: 0,
 				consecutiveKindness: 0,
+				pongLossStreak: 0,
 				lastInteractionTime: Date.now()
 			};
 		}
@@ -101,6 +102,7 @@
 				turnCount: 0,
 				consecutiveHostility: 0,
 				consecutiveKindness: 0,
+				pongLossStreak: 0,
 				lastInteractionTime: Date.now()
 			};
 			this.saveState();

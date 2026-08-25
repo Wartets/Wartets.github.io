@@ -110,6 +110,8 @@
 			window.ClippyActivities.pomodoro.mount(25);
 		} else if (actionId === 'show_todos') {
 			window.ClippyActivities.todo.mount();
+		} else if (actionId === 'game_pong') {
+			window.ClippyActivities.pong.mount();
 		} else if (actionId === 'game_simon') {
 			window.ClippyActivities.simon.mount();
 		} else if (actionId === 'game_ttt') {
@@ -290,7 +292,7 @@
 				workstationDesc: "<code>diagnostics</code>, <code>windows</code>, <code>files</code>, <code>mail</code>, <code>defrag</code>",
 				customizationDesc: "<code>theme [name]</code>, <code>wallpaper</code>, <code>volume</code>, <code>scanlines on/off</code>, <code>crt on/off</code>",
 				calculationsDesc: "<code>calc [formula]</code>, <code>convert [from] to [to]</code>, <code>password [len]</code>",
-				miniGamesDesc: "<code>tictactoe</code>, <code>memory</code>, <code>hangman</code>, <code>quiz</code>, <code>guess</code>, <code>mines</code>, <code>rps</code>"
+				miniGamesDesc: "<code>pong</code>, <code>tictactoe</code>, <code>memory</code>, <code>hangman</code>, <code>quiz</code>, <code>guess</code>, <code>mines</code>, <code>rps</code>"
 			};
 			return {
 				text: `<div class="clippy-structured-section">
@@ -393,6 +395,10 @@
 
 		if (norm === 'inspect active windows' || norm === 'active windows' || norm === 'list windows' || norm === 'open windows' || norm === 'fenetres actives') {
 			return { text: "Inspecting running workspace windows...", actionTrigger: 'action_inspect_windows' };
+		}
+
+		if (norm === 'play pong' || norm === 'pong' || norm === 'challenge clippy to pong' || norm === 'table tennis' || norm === 'pong game' || norm === 'pong match') {
+			return { text: "Initializing Pong court against Clippy...", actionTrigger: 'game_pong' };
 		}
 
 		if (norm === 'play tic-tac-toe' || norm === 'tic-tac-toe' || norm === 'tictactoe' || norm === 'morpion') {

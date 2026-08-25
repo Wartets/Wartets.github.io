@@ -37,6 +37,731 @@
 		return res;
 	}
 
+	class WebGLPongActivity {
+		constructor() {
+			this.card = null;
+			this.canvas = null;
+			this.gl = null;
+			this.ctx2d = null;
+			this.program = null;
+			this.quadBuffer = null;
+			this.colorLocation = null;
+			this.resolutionLocation = null;
+			this.offsetLocation = null;
+			this.scaleLocation = null;
+			this.positionLocation = null;
+
+			this.width = 300;
+			this.height = 180;
+			this.paddleWidth = 6;
+			this.paddleHeight = 36;
+			this.ballSize = 5;
+
+			this.playerY = 72;
+			this.clippyY = 72;
+			this.playerScore = 0;
+			this.clippyScore = 0;
+			this.maxScore = 5;
+
+			this.ballX = 150;
+			this.ballY = 90;
+			this.ballVx = 2.4;
+			this.ballVy = 1.2;
+			this.baseSpeed = 2.5;
+
+			this.isRunning = false;
+			this.isPaused = false;
+			this.animationFrameId = null;
+			this.lastTimestamp = 0;
+
+			this.goalFlashTimer = 0;
+			this.goalScorer = null;
+			this.goalBannerText = '';
+			this.isTrackingPointer = false;
+
+			this.keys = { up: false, down: false };
+			this.accumulator = 0;
+			this.boundGameLoop = this.gameLoop.bind(this);
+			this.boundKeyDown = this.handleKeyDown.bind(this);
+			this.boundKeyUp = this.handleKeyUp.bind(this);
+			this.boundPointerMove = this.handlePointerMove.bind(this);
+			this.boundPointerDown = this.handlePointerDown.bind(this);
+			this.boundPointerUp = this.handlePointerUp.bind(this);
+		}
+
+		mount() {
+			this.cleanup();
+			this.playerScore = 0;
+			this.clippyScore = 0;
+			this.goalFlashTimer = 0;
+			this.goalScorer = null;
+			this.goalBannerText = '';
+			this.playerY = (this.height - this.paddleHeight) / 2;
+			this.clippyY = (this.height - this.paddleHeight) / 2;
+			this.resetBall(1);
+
+			const txt = (window.ClippyKnowledge && typeof window.ClippyKnowledge.getActivityConfig === 'function')
+				? window.ClippyKnowledge.getActivityConfig('pong')
+				: ((window.ClippyKnowledge && window.ClippyKnowledge.ACTIVITIES_TEXTS && window.ClippyKnowledge.ACTIVITIES_TEXTS.pong) || { title: 'Pong', badge: 'Clippy\'s Court' });
+
+			this.card = window.ClippyUI.createActivityCard(txt.title || 'Pong', txt.badge || 'Clippy\'s Court');
+			this.render();
+		}
+
+		initWebGL() {
+			if (!this.canvas) return false;
+			this.gl = null;
+			this.ctx2d = null;
+
+			try {
+				this.gl = this.canvas.getContext('webgl', { antialias: false, alpha: false, depth: false, preserveDrawingBuffer: false })
+					|| this.canvas.getContext('experimental-webgl');
+			} catch (e) {
+				this.gl = null;
+			}
+
+			if (!this.gl) {
+				try {
+					this.ctx2d = this.canvas.getContext('2d');
+					return !!this.ctx2d;
+				} catch (e) {
+					return false;
+				}
+			}
+
+			const gl = this.gl;
+			const vsSource = `
+				attribute vec2 a_position;
+				uniform vec2 u_resolution;
+				uniform vec2 u_offset;
+				uniform vec2 u_scale;
+				void main() {
+					vec2 pixelPos = a_position * u_scale + u_offset;
+					vec2 zeroToOne = pixelPos / u_resolution;
+					vec2 clipSpace = (zeroToOne * 2.0) - 1.0;
+					gl_Position = vec4(clipSpace * vec2(1.0, -1.0), 0.0, 1.0);
+				}
+			`;
+			const fsSource = `
+				precision mediump float;
+				uniform vec4 u_color;
+				void main() {
+					gl_FragColor = u_color;
+				}
+			`;
+
+			const createShader = (type, src) => {
+				const s = gl.createShader(type);
+				gl.shaderSource(s, src);
+				gl.compileShader(s);
+				if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) {
+					gl.deleteShader(s);
+					return null;
+				}
+				return s;
+			};
+
+			const vs = createShader(gl.VERTEX_SHADER, vsSource);
+			const fs = createShader(gl.FRAGMENT_SHADER, fsSource);
+			if (!vs || !fs) {
+				this.gl = null;
+				this.ctx2d = this.canvas.getContext('2d');
+				return !!this.ctx2d;
+			}
+
+			this.program = gl.createProgram();
+			gl.attachShader(this.program, vs);
+			gl.attachShader(this.program, fs);
+			gl.linkProgram(this.program);
+			if (!gl.getProgramParameter(this.program, gl.LINK_STATUS)) {
+				this.gl = null;
+				this.ctx2d = this.canvas.getContext('2d');
+				return !!this.ctx2d;
+			}
+
+			this.positionLocation = gl.getAttribLocation(this.program, 'a_position');
+			this.resolutionLocation = gl.getUniformLocation(this.program, 'u_resolution');
+			this.offsetLocation = gl.getUniformLocation(this.program, 'u_offset');
+			this.scaleLocation = gl.getUniformLocation(this.program, 'u_scale');
+			this.colorLocation = gl.getUniformLocation(this.program, 'u_color');
+
+			const unitQuadVertices = new Float32Array([
+				0.0, 0.0,
+				1.0, 0.0,
+				0.0, 1.0,
+				0.0, 1.0,
+				1.0, 0.0,
+				1.0, 1.0
+			]);
+
+			this.quadBuffer = gl.createBuffer();
+			gl.bindBuffer(gl.ARRAY_BUFFER, this.quadBuffer);
+			gl.bufferData(gl.ARRAY_BUFFER, unitQuadVertices, gl.STATIC_DRAW);
+
+			gl.viewport(0, 0, this.width, this.height);
+			return true;
+		}
+
+		drawQuad(x, y, w, h, r = 1.0, g = 1.0, b = 1.0, a = 1.0) {
+			if (this.gl && this.program) {
+				const gl = this.gl;
+				gl.uniform2f(this.offsetLocation, x, y);
+				gl.uniform2f(this.scaleLocation, w, h);
+				gl.uniform4f(this.colorLocation, r, g, b, a);
+				gl.drawArrays(gl.TRIANGLES, 0, 6);
+			} else if (this.ctx2d) {
+				const red = Math.round(r * 255);
+				const green = Math.round(g * 255);
+				const blue = Math.round(b * 255);
+				this.ctx2d.fillStyle = `rgba(${red}, ${green}, ${blue}, ${a})`;
+				this.ctx2d.fillRect(x, y, w, h);
+			}
+		}
+
+		drawDigit(digit, startX, startY, scale = 2) {
+			const segments = {
+				0: [1,1,1, 1,0,1, 1,0,1, 1,0,1, 1,1,1],
+				1: [0,1,0, 1,1,0, 0,1,0, 0,1,0, 1,1,1],
+				2: [1,1,1, 0,0,1, 1,1,1, 1,0,0, 1,1,1],
+				3: [1,1,1, 0,0,1, 1,1,1, 0,0,1, 1,1,1],
+				4: [1,0,1, 1,0,1, 1,1,1, 0,0,1, 0,0,1],
+				5: [1,1,1, 1,0,0, 1,1,1, 0,0,1, 1,1,1],
+				6: [1,1,1, 1,0,0, 1,1,1, 1,0,1, 1,1,1],
+				7: [1,1,1, 0,0,1, 0,0,1, 0,0,1, 0,0,1],
+				8: [1,1,1, 1,0,1, 1,1,1, 1,0,1, 1,1,1],
+				9: [1,1,1, 1,0,1, 1,1,1, 0,0,1, 1,1,1]
+			};
+			const grid = segments[digit] || segments[0];
+			for (let row = 0; row < 5; row++) {
+				for (let col = 0; col < 3; col++) {
+					if (grid[row * 3 + col]) {
+						this.drawQuad(startX + col * scale * 2, startY + row * scale * 2, scale * 2, scale * 2, 1.0, 1.0, 1.0, 0.85);
+					}
+				}
+			}
+		}
+
+		renderScene() {
+			if (this.gl && this.program) {
+				const gl = this.gl;
+				if (this.goalFlashTimer > 0) {
+					const flashRatio = Math.max(0, Math.min(1, this.goalFlashTimer / 28));
+					if (this.goalScorer === 'PLAYER') {
+						gl.clearColor(0.0, 0.35 * flashRatio, 0.12 * flashRatio, 1.0);
+					} else {
+						gl.clearColor(0.4 * flashRatio, 0.08 * flashRatio, 0.0, 1.0);
+					}
+				} else {
+					gl.clearColor(0.0, 0.0, 0.0, 1.0);
+				}
+				gl.clear(gl.COLOR_BUFFER_BIT);
+
+				gl.useProgram(this.program);
+				gl.enableVertexAttribArray(this.positionLocation);
+				gl.bindBuffer(gl.ARRAY_BUFFER, this.quadBuffer);
+				gl.vertexAttribPointer(this.positionLocation, 2, gl.FLOAT, false, 0, 0);
+				gl.uniform2f(this.resolutionLocation, this.width, this.height);
+			} else if (this.ctx2d) {
+				if (this.goalFlashTimer > 0) {
+					const flashRatio = Math.max(0, Math.min(1, this.goalFlashTimer / 28));
+					this.ctx2d.fillStyle = this.goalScorer === 'PLAYER'
+						? `rgba(0, ${Math.round(90 * flashRatio)}, ${Math.round(30 * flashRatio)}, 1)`
+						: `rgba(${Math.round(100 * flashRatio)}, ${Math.round(20 * flashRatio)}, 0, 1)`;
+				} else {
+					this.ctx2d.fillStyle = '#000000';
+				}
+				this.ctx2d.fillRect(0, 0, this.width, this.height);
+			} else {
+				return;
+			}
+
+			for (let y = 4; y < this.height; y += 10) {
+				this.drawQuad(this.width / 2 - 1, y, 2, 5, 0.4, 0.4, 0.4, 1.0);
+			}
+
+			this.drawQuad(0, 0, this.width, 2, 1.0, 1.0, 1.0, 1.0);
+			this.drawQuad(0, this.height - 2, this.width, 2, 1.0, 1.0, 1.0, 1.0);
+
+			this.drawDigit(Math.min(9, Math.max(0, this.playerScore)), this.width / 2 - 36, 12, 2);
+			this.drawDigit(Math.min(9, Math.max(0, this.clippyScore)), this.width / 2 + 24, 12, 2);
+
+			this.drawQuad(10, this.playerY, this.paddleWidth, this.paddleHeight, 0.3, 0.7, 1.0, 1.0);
+			this.drawQuad(this.width - 10 - this.paddleWidth, this.clippyY, this.paddleWidth, this.paddleHeight, 1.0, 0.35, 0.35, 1.0);
+
+			if (this.goalFlashTimer <= 0 || (Math.floor(this.goalFlashTimer) % 6 >= 3)) {
+				this.drawQuad(this.ballX - this.ballSize / 2, this.ballY - this.ballSize / 2, this.ballSize, this.ballSize, 1.0, 1.0, 1.0, 1.0);
+			}
+		}
+
+		resetBall(direction = 1) {
+			this.ballX = this.width / 2;
+			this.ballY = this.height / 2;
+			const angle = (Math.random() * 0.4 - 0.2) * Math.PI;
+			const speed = this.baseSpeed;
+			const dir = direction >= 0 ? 1 : -1;
+			this.ballVx = Math.max(1.8, Math.abs(Math.cos(angle) * speed)) * dir;
+			this.ballVy = Math.sin(angle) * speed;
+			if (Math.abs(this.ballVy) < 0.6) {
+				this.ballVy = (Math.random() > 0.5 ? 1 : -1) * 0.75;
+			}
+		}
+
+		triggerGoal(scorer) {
+			this.goalScorer = scorer;
+			this.goalFlashTimer = 28;
+
+			const txt = (window.ClippyKnowledge && typeof window.ClippyKnowledge.getActivityConfig === 'function')
+				? window.ClippyKnowledge.getActivityConfig('pong')
+				: ((window.ClippyKnowledge && window.ClippyKnowledge.ACTIVITIES_TEXTS && window.ClippyKnowledge.ACTIVITIES_TEXTS.pong) || {});
+
+			if (scorer === 'PLAYER') {
+				this.playerScore++;
+				this.goalBannerText = txt.goalPlayerBanner || "GOAL! User scored against Clippy!";
+				if (window.ClippyAudio) window.ClippyAudio.play('pong_goal');
+				this.updateScoreboard();
+				if (this.playerScore >= this.maxScore) {
+					this.finishMatch('PLAYER');
+					return;
+				}
+				this.resetBall(-1);
+			} else {
+				this.clippyScore++;
+				this.goalBannerText = txt.goalClippyBanner || "GOAL! Clippy scores effortlessly!";
+				if (window.ClippyAudio) window.ClippyAudio.play('pong_score_clippy');
+				this.updateScoreboard();
+				if (this.clippyScore >= this.maxScore) {
+					this.finishMatch('CLIPPY');
+					return;
+				}
+				this.resetBall(1);
+			}
+		}
+
+		updateAI(timeScale = 1.0) {
+			const lossStreak = (window.ClippyBrain && window.ClippyBrain.state && window.ClippyBrain.state.pongLossStreak) || 0;
+			const difficulty = (window.SettingsApp && window.SettingsApp.get('clippyPongDifficulty')) || 'champion';
+			let targetY = this.height / 2 - this.paddleHeight / 2;
+
+			let predictionNoise = 0;
+			let speedPenalty = 0;
+
+			if (difficulty === 'easy') {
+				predictionNoise = Math.sin(Date.now() * 0.005) * 22;
+				speedPenalty = 1.2;
+			} else if (difficulty === 'medium') {
+				predictionNoise = Math.sin(Date.now() * 0.008) * 12;
+				speedPenalty = 0.6;
+			}
+
+			if (lossStreak >= 1) {
+				predictionNoise += Math.sin(Date.now() * 0.01) * Math.min(24, lossStreak * 8);
+				speedPenalty += Math.min(1.2, lossStreak * 0.3);
+			}
+
+			if (this.ballVx > 0) {
+				let simX = this.ballX;
+				let simY = this.ballY;
+				let simVx = this.ballVx;
+				let simVy = this.ballVy;
+				const interceptX = this.width - 10 - this.paddleWidth;
+
+				let steps = 0;
+				while (simX < interceptX && steps < 200) {
+					simX += simVx;
+					simY += simVy;
+					if (simY <= 2 || simY >= this.height - 2) {
+						simVy = -simVy;
+					}
+					steps++;
+				}
+				targetY = simY - this.paddleHeight / 2 + predictionNoise;
+			} else {
+				targetY = (this.height / 2) - (this.paddleHeight / 2) + Math.sin(Date.now() * 0.003) * 16;
+			}
+
+			targetY = Math.max(2, Math.min(this.height - this.paddleHeight - 2, targetY));
+
+			const baseAiSpeed = Math.max(2.2, (3.8 - speedPenalty) * timeScale);
+			const diff = targetY - this.clippyY;
+			if (Math.abs(diff) > 1.0) {
+				this.clippyY += Math.sign(diff) * Math.min(baseAiSpeed, Math.abs(diff));
+			}
+		}
+
+		updatePhysics(timeScale = 1.0) {
+			if (this.goalFlashTimer > 0) {
+				this.goalFlashTimer -= (timeScale || 1.0);
+				return;
+			}
+
+			if (!isFinite(this.ballX) || !isFinite(this.ballY) || !isFinite(this.ballVx) || !isFinite(this.ballVy)) {
+				this.resetBall(1);
+			}
+
+			if (this.keys.up) {
+				this.playerY = Math.max(2, this.playerY - 4.2 * timeScale);
+			}
+			if (this.keys.down) {
+				this.playerY = Math.min(this.height - this.paddleHeight - 2, this.playerY + 4.2 * timeScale);
+			}
+
+			this.updateAI(timeScale);
+
+			const prevX = this.ballX;
+			const prevY = this.ballY;
+			this.ballX += this.ballVx * timeScale;
+			this.ballY += this.ballVy * timeScale;
+
+			if (this.ballY - this.ballSize / 2 <= 2) {
+				this.ballY = 2 + this.ballSize / 2;
+				this.ballVy = Math.abs(this.ballVy);
+				if (window.ClippyAudio) window.ClippyAudio.play('pong_wall');
+			} else if (this.ballY + this.ballSize / 2 >= this.height - 2) {
+				this.ballY = this.height - 2 - this.ballSize / 2;
+				this.ballVy = -Math.abs(this.ballVy);
+				if (window.ClippyAudio) window.ClippyAudio.play('pong_wall');
+			}
+
+			const playerPaddleRight = 10 + this.paddleWidth;
+			const playerPaddleLeft = 10;
+			if (
+				this.ballVx < 0 &&
+				this.ballX - this.ballSize / 2 <= playerPaddleRight &&
+				prevX - this.ballSize / 2 >= playerPaddleLeft - 2 &&
+				this.ballY + this.ballSize / 2 >= this.playerY &&
+				this.ballY - this.ballSize / 2 <= this.playerY + this.paddleHeight
+			) {
+				const paddleCenter = this.playerY + this.paddleHeight / 2;
+				const hitOffset = Math.max(-1, Math.min(1, (this.ballY - paddleCenter) / (this.paddleHeight / 2)));
+				const bounceAngle = hitOffset * (Math.PI / 3.2);
+				const currentSpeed = Math.sqrt(this.ballVx * this.ballVx + this.ballVy * this.ballVy);
+				const newSpeed = Math.min(5.8, Math.max(2.5, currentSpeed * 1.04));
+				this.ballVx = Math.max(1.8, Math.abs(Math.cos(bounceAngle) * newSpeed));
+				this.ballVy = Math.sin(bounceAngle) * newSpeed;
+				if (Math.abs(this.ballVy) < 0.4) {
+					this.ballVy = (hitOffset >= 0 ? 1 : -1) * 0.6;
+				}
+				this.ballX = playerPaddleRight + this.ballSize / 2 + 0.1;
+				if (window.ClippyAudio) window.ClippyAudio.play('pong_hit');
+			}
+
+			const clippyPaddleLeft = this.width - 10 - this.paddleWidth;
+			const clippyPaddleRight = this.width - 10;
+			if (
+				this.ballVx > 0 &&
+				this.ballX + this.ballSize / 2 >= clippyPaddleLeft &&
+				prevX + this.ballSize / 2 <= clippyPaddleRight + 2 &&
+				this.ballY + this.ballSize / 2 >= this.clippyY &&
+				this.ballY - this.ballSize / 2 <= this.clippyY + this.paddleHeight
+			) {
+				const paddleCenter = this.clippyY + this.paddleHeight / 2;
+				const hitOffset = Math.max(-1, Math.min(1, (this.ballY - paddleCenter) / (this.paddleHeight / 2)));
+				const bounceAngle = hitOffset * (Math.PI / 3.2);
+				const currentSpeed = Math.sqrt(this.ballVx * this.ballVx + this.ballVy * this.ballVy);
+				const newSpeed = Math.min(5.8, Math.max(2.5, currentSpeed * 1.04));
+				this.ballVx = -Math.max(1.8, Math.abs(Math.cos(bounceAngle) * newSpeed));
+				this.ballVy = Math.sin(bounceAngle) * newSpeed;
+				if (Math.abs(this.ballVy) < 0.4) {
+					this.ballVy = (hitOffset >= 0 ? 1 : -1) * 0.6;
+				}
+				this.ballX = clippyPaddleLeft - this.ballSize / 2 - 0.1;
+				if (window.ClippyAudio) window.ClippyAudio.play('pong_hit');
+			}
+
+			if (this.ballX + this.ballSize / 2 < 0) {
+				this.triggerGoal('CLIPPY');
+			} else if (this.ballX - this.ballSize / 2 > this.width) {
+				this.triggerGoal('PLAYER');
+			}
+		}
+
+		gameLoop(timestamp) {
+			if (!this.isRunning) return;
+			if (!this.lastTimestamp) this.lastTimestamp = timestamp || performance.now();
+			const now = timestamp || performance.now();
+			let dt = (now - this.lastTimestamp) / 1000;
+			this.lastTimestamp = now;
+
+			if (dt > 0.05) dt = 0.05;
+
+			if (!this.isPaused) {
+				const step = 1 / 120;
+				this.accumulator = (this.accumulator || 0) + dt;
+				if (this.accumulator > 0.1) this.accumulator = 0.1;
+				while (this.accumulator >= step) {
+					this.updatePhysics(step * 60);
+					this.accumulator -= step;
+				}
+				this.renderScene();
+			}
+			this.animationFrameId = requestAnimationFrame(this.boundGameLoop);
+		}
+
+		startGame() {
+			if (this.isRunning) return;
+			if (this.playerScore >= this.maxScore || this.clippyScore >= this.maxScore) {
+				this.playerScore = 0;
+				this.clippyScore = 0;
+				this.updateScoreboard();
+			}
+			if (this.ballX < 0 || this.ballX > this.width || isNaN(this.ballX)) {
+				this.resetBall(1);
+			}
+			this.goalFlashTimer = 0;
+			this.isRunning = true;
+			this.isPaused = false;
+			this.lastTimestamp = performance.now();
+			this.accumulator = 0;
+			window.removeEventListener('keydown', this.boundKeyDown);
+			window.removeEventListener('keyup', this.boundKeyUp);
+			window.removeEventListener('pointermove', this.boundPointerMove);
+			window.removeEventListener('pointerup', this.boundPointerUp);
+			window.removeEventListener('pointercancel', this.boundPointerUp);
+			window.addEventListener('keydown', this.boundKeyDown);
+			window.addEventListener('keyup', this.boundKeyUp);
+			window.addEventListener('pointermove', this.boundPointerMove, { passive: true });
+			window.addEventListener('pointerup', this.boundPointerUp);
+			window.addEventListener('pointercancel', this.boundPointerUp);
+			this.animationFrameId = requestAnimationFrame(this.boundGameLoop);
+			this.updateButtons();
+		}
+
+		pauseGame() {
+			this.isPaused = !this.isPaused;
+			this.updateButtons();
+		}
+
+		finishMatch(winner) {
+			this.isRunning = false;
+			if (this.animationFrameId) {
+				cancelAnimationFrame(this.animationFrameId);
+				this.animationFrameId = null;
+			}
+			window.removeEventListener('keydown', this.boundKeyDown);
+			window.removeEventListener('keyup', this.boundKeyUp);
+			window.removeEventListener('pointermove', this.boundPointerMove);
+			window.removeEventListener('pointerup', this.boundPointerUp);
+			window.removeEventListener('pointercancel', this.boundPointerUp);
+
+			this.resetBall(winner === 'PLAYER' ? 1 : -1);
+
+			const isPlayerWinner = winner === 'PLAYER';
+			const brain = window.ClippyBrain;
+
+			if (brain) {
+				if (isPlayerWinner) {
+					brain.state.pongLossStreak = (brain.state.pongLossStreak || 0) + 1;
+					brain.state.consecutiveHostility = Math.min(10, (brain.state.consecutiveHostility || 0) + 2);
+					const streak = brain.state.pongLossStreak;
+					brain.applyMoodDelta({
+						mood: streak >= 2 ? 'ENRAGED' : 'SARCASTIC',
+						irritation: 35 + streak * 10,
+						patience: -25,
+						affinity: -15,
+						cynicism: 20
+					});
+				} else {
+					brain.state.pongLossStreak = 0;
+					brain.applyMoodDelta({
+						mood: 'SARCASTIC',
+						irritation: -20,
+						patience: 15,
+						affinity: -5,
+						cynicism: 15
+					});
+				}
+				brain.saveState();
+			}
+
+			const txt = (window.ClippyKnowledge && typeof window.ClippyKnowledge.getActivityConfig === 'function')
+				? window.ClippyKnowledge.getActivityConfig('pong')
+				: ((window.ClippyKnowledge && window.ClippyKnowledge.ACTIVITIES_TEXTS && window.ClippyKnowledge.ACTIVITIES_TEXTS.pong) || {
+					winBanner: "Flawless victory for Clippy!",
+					lossBanner: "I intentionally allowed you to win out of sympathy!"
+				});
+
+			let bannerMsg = isPlayerWinner ? txt.lossBanner : txt.winBanner;
+			if (isPlayerWinner && brain && brain.state.pongLossStreak > 1 && txt.lossRageStreak) {
+				bannerMsg = window.ClippyKnowledge.formatString(txt.lossRageStreak, { streak: brain.state.pongLossStreak });
+			}
+
+			if (!isPlayerWinner) {
+				if (window.ClippyAudio) window.ClippyAudio.play('win');
+			} else {
+				if (window.ClippyAudio) window.ClippyAudio.play('lose');
+			}
+
+			this.render(true, bannerMsg, isPlayerWinner);
+
+			if (window.ClippyAgent && typeof window.ClippyAgent.notifyGameEnded === 'function') {
+				const summaryStr = `${this.playerScore} - ${this.clippyScore}`;
+				window.ClippyAgent.notifyGameEnded('Pong', summaryStr, () => {
+					this.mount();
+				});
+			}
+		}
+
+		handleKeyDown(e) {
+			if (e.key === 'ArrowUp' || e.key === 'w' || e.key === 'W') {
+				this.keys.up = true;
+				e.preventDefault();
+			}
+			if (e.key === 'ArrowDown' || e.key === 's' || e.key === 'S') {
+				this.keys.down = true;
+				e.preventDefault();
+			}
+		}
+
+		handleKeyUp(e) {
+			if (e.key === 'ArrowUp' || e.key === 'w' || e.key === 'W') this.keys.up = false;
+			if (e.key === 'ArrowDown' || e.key === 's' || e.key === 'S') this.keys.down = false;
+		}
+
+		handlePointerDown(e) {
+			this.isTrackingPointer = true;
+			this.setPaddleFromPointer(e.clientY);
+		}
+
+		handlePointerUp() {
+			this.isTrackingPointer = false;
+		}
+
+		handlePointerMove(e) {
+			if (!this.canvas || !this.isRunning) return;
+			const rect = this.canvas.getBoundingClientRect();
+			if (this.isTrackingPointer || (e.clientX >= rect.left && e.clientX <= rect.right && e.clientY >= rect.top - 20 && e.clientY <= rect.bottom + 20)) {
+				this.setPaddleFromPointer(e.clientY);
+			}
+		}
+
+		setPaddleFromPointer(clientY) {
+			if (!this.canvas) return;
+			const rect = this.canvas.getBoundingClientRect();
+			if (rect.height <= 0) return;
+			const scaleY = this.height / rect.height;
+			const localY = clientY - rect.top;
+			const targetY = localY * scaleY - this.paddleHeight / 2;
+			this.playerY = Math.max(2, Math.min(this.height - this.paddleHeight - 2, targetY));
+		}
+
+		cleanup() {
+			this.isRunning = false;
+			this.isPaused = false;
+			if (this.animationFrameId) {
+				cancelAnimationFrame(this.animationFrameId);
+				this.animationFrameId = null;
+			}
+			window.removeEventListener('keydown', this.boundKeyDown);
+			window.removeEventListener('keyup', this.boundKeyUp);
+			window.removeEventListener('pointermove', this.boundPointerMove);
+			window.removeEventListener('pointerup', this.boundPointerUp);
+			window.removeEventListener('pointercancel', this.boundPointerUp);
+		}
+
+		updateScoreboard() {
+			if (!this.card) return;
+			const hud = this.card.bodyElement.querySelector('.clippy-scoreboard');
+			if (hud) {
+				const strongElements = hud.querySelectorAll('strong');
+				if (strongElements.length >= 3) {
+					strongElements[0].textContent = String(this.playerScore);
+					strongElements[1].textContent = String(this.maxScore);
+					strongElements[2].textContent = String(this.clippyScore);
+				}
+			}
+		}
+
+		updateButtons() {
+			if (!this.card) return;
+			const txt = (window.ClippyKnowledge && typeof window.ClippyKnowledge.getActivityConfig === 'function')
+				? window.ClippyKnowledge.getActivityConfig('pong')
+				: ((window.ClippyKnowledge && window.ClippyKnowledge.ACTIVITIES_TEXTS && window.ClippyKnowledge.ACTIVITIES_TEXTS.pong) || {
+					btnStart: "Serve Ball", btnPause: "Pause", btnResume: "Resume"
+				});
+			const startBtn = this.card.bodyElement.querySelector('#clippy-pong-start-btn');
+			const pauseBtn = this.card.bodyElement.querySelector('#clippy-pong-pause-btn');
+
+			if (startBtn) startBtn.style.display = this.isRunning ? 'none' : 'inline-block';
+			if (pauseBtn) {
+				pauseBtn.style.display = this.isRunning ? 'inline-block' : 'none';
+				pauseBtn.textContent = this.isPaused ? (txt.btnResume || "Resume") : (txt.btnPause || "Pause");
+			}
+		}
+
+		render(isOver = false, bannerMessage = '', playerWon = false) {
+			if (!this.card) return;
+			const body = this.card.bodyElement;
+			body.innerHTML = '';
+
+			const txt = (window.ClippyKnowledge && typeof window.ClippyKnowledge.getActivityConfig === 'function')
+				? window.ClippyKnowledge.getActivityConfig('pong')
+				: ((window.ClippyKnowledge && window.ClippyKnowledge.ACTIVITIES_TEXTS && window.ClippyKnowledge.ACTIVITIES_TEXTS.pong) || {
+					scorePlayer: "You", scoreClippy: "Clippy (Undefeated)", controlsHint: "Controls: W / S, Arrow Up / Down, or Mouse Tracking",
+					btnStart: "Serve Ball", btnPause: "Pause", btnResume: "Resume"
+				});
+
+			const hud = document.createElement('div');
+			hud.className = 'clippy-scoreboard';
+			hud.innerHTML = `
+				<div class="clippy-score-item"><span>${txt.scorePlayer}</span><strong>${this.playerScore}</strong></div>
+				<div class="clippy-score-item"><span>Target</span><strong>${this.maxScore}</strong></div>
+				<div class="clippy-score-item"><span>${txt.scoreClippy}</span><strong>${this.clippyScore}</strong></div>
+			`;
+			body.appendChild(hud);
+
+			if (isOver && bannerMessage) {
+				const banner = document.createElement('div');
+				banner.className = `clippy-activity-banner ${playerWon ? 'loss' : 'win'}`;
+				banner.textContent = bannerMessage;
+				body.appendChild(banner);
+			}
+
+			const container = document.createElement('div');
+			container.className = 'clippy-pong-container';
+
+			this.canvas = document.createElement('canvas');
+			this.canvas.width = this.width;
+			this.canvas.height = this.height;
+			this.canvas.className = 'clippy-pong-canvas';
+			container.appendChild(this.canvas);
+
+			const hint = document.createElement('div');
+			hint.className = 'clippy-pong-controls-hint';
+			hint.textContent = txt.controlsHint || "Controls: W / S, Arrow Up / Down, or Mouse Tracking on Court";
+			container.appendChild(hint);
+
+			body.appendChild(container);
+
+			const actions = document.createElement('div');
+			actions.className = 'clippy-actions-bar';
+
+			const startBtn = document.createElement('button');
+			startBtn.type = 'button';
+			startBtn.id = 'clippy-pong-start-btn';
+			startBtn.className = 'clippy-action-btn';
+			startBtn.textContent = txt.btnStart || "Serve Ball";
+			startBtn.addEventListener('click', () => this.startGame());
+			actions.appendChild(startBtn);
+
+			const pauseBtn = document.createElement('button');
+			pauseBtn.type = 'button';
+			pauseBtn.id = 'clippy-pong-pause-btn';
+			pauseBtn.className = 'clippy-action-btn';
+			pauseBtn.style.display = 'none';
+			pauseBtn.textContent = txt.btnPause || "Pause";
+			pauseBtn.addEventListener('click', () => this.pauseGame());
+			actions.appendChild(pauseBtn);
+
+			body.appendChild(actions);
+
+			this.canvas.addEventListener('pointerdown', this.boundPointerDown);
+
+			this.initWebGL();
+			this.renderScene();
+			window.ClippyUI.scrollLogToBottom();
+		}
+	}
+
 	class SimonSaysActivity {
 		constructor() {
 			this.sequence = [];
@@ -1792,8 +2517,7 @@
 		getTitleForLevel(level) {
 			const txt = (window.ClippyKnowledge && window.ClippyKnowledge.ACTIVITIES_TEXTS && window.ClippyKnowledge.ACTIVITIES_TEXTS.pet) || {};
 			const titles = txt.levelTitles || [
-				"Wire Novice", "Polished Assistant", "Silicon Specialist", "Vector Companion",
-				"System Optimist", "Heuristic Navigator", "Logic Guardian", "Master of Fasteners",
+				"Wire Novice", "Polished Assistant", "Silicon Specialist", "Vector Companion", "System Optimist", "Heuristic Navigator", "Logic Guardian", "Master of Fasteners",
 				"High-Performance Agent", "Grand Desktop Architect"
 			];
 			const idx = Math.max(0, Math.min(titles.length - 1, (level || 1) - 1));
@@ -3443,6 +4167,7 @@
 	const ActivitiesManager = {
 		activePomodoroTimer: null,
 
+		pong: new WebGLPongActivity(),
 		simon: new SimonSaysActivity(),
 		tictactoe: new TicTacToeActivity(),
 		memory: new MemoryMatchActivity(),

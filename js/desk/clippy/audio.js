@@ -89,6 +89,64 @@
 					gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.012);
 					osc.start(now);
 					osc.stop(now + 0.012);
+				} else if (type === 'pong_hit') {
+					const osc = this.ctx.createOscillator();
+					const gain = this.ctx.createGain();
+					osc.connect(gain);
+					gain.connect(this.ctx.destination);
+					osc.type = 'square';
+					osc.frequency.setValueAtTime(440, now);
+					gain.gain.setValueAtTime(0.04, now);
+					gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.035);
+					osc.start(now);
+					osc.stop(now + 0.035);
+				} else if (type === 'pong_wall') {
+					const osc = this.ctx.createOscillator();
+					const gain = this.ctx.createGain();
+					osc.connect(gain);
+					gain.connect(this.ctx.destination);
+					osc.type = 'square';
+					osc.frequency.setValueAtTime(220, now);
+					gain.gain.setValueAtTime(0.035, now);
+					gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.03);
+					osc.start(now);
+					osc.stop(now + 0.03);
+				} else if (type === 'pong_goal') {
+					const osc = this.ctx.createOscillator();
+					const gain = this.ctx.createGain();
+					osc.connect(gain);
+					gain.connect(this.ctx.destination);
+					osc.type = 'sawtooth';
+					osc.frequency.setValueAtTime(659.25, now);
+					osc.frequency.setValueAtTime(987.77, now + 0.06);
+					gain.gain.setValueAtTime(0.055, now);
+					gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.18);
+					osc.start(now);
+					osc.stop(now + 0.18);
+				} else if (type === 'pong_score_clippy') {
+					const osc = this.ctx.createOscillator();
+					const gain = this.ctx.createGain();
+					osc.connect(gain);
+					gain.connect(this.ctx.destination);
+					osc.type = 'sawtooth';
+					osc.frequency.setValueAtTime(587.33, now);
+					osc.frequency.setValueAtTime(880.00, now + 0.08);
+					gain.gain.setValueAtTime(0.05, now);
+					gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.2);
+					osc.start(now);
+					osc.stop(now + 0.2);
+				} else if (type === 'pong_score_player') {
+					const osc = this.ctx.createOscillator();
+					const gain = this.ctx.createGain();
+					osc.connect(gain);
+					gain.connect(this.ctx.destination);
+					osc.type = 'triangle';
+					osc.frequency.setValueAtTime(196.00, now);
+					osc.frequency.setValueAtTime(146.83, now + 0.1);
+					gain.gain.setValueAtTime(0.045, now);
+					gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.22);
+					osc.start(now);
+					osc.stop(now + 0.22);
 				} else if (type === 'backspace') {
 					const osc = this.ctx.createOscillator();
 					const gain = this.ctx.createGain();

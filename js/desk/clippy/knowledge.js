@@ -573,7 +573,8 @@
 			"reddit", "thread", "argument", "debate", "truce", "apology", "deltarune", "mystery", "shadow", "determination", "logic", "trivia", "anecdote", "joke", "humor", "game", "games", "zen", "chaos",
 			"architecture", "refactoring", "compiler", "concurrency", "algorithms", "differential", "fourier", "riemann", "eigenvalue", "taylor", "manifold", "bayesian", "carnot", "schrodinger", "heisenberg", "lorentz", "boltzmann",
 			"wallpaper", "theme", "volume", "sound", "audio", "music", "scanlines", "crt", "curvature", "vignette", "bloom", "cascade", "tile", "minimize", "restore",
-			"dimensional", "analysis", "homogeneity", "euclidean", "polynomial", "factorization", "factor", "solver", "wheel", "cipher", "tps", "speedtest"
+			"dimensional", "analysis", "homogeneity", "euclidean", "polynomial", "factorization", "factor", "solver", "wheel", "cipher", "tps", "speedtest",
+			"pong", "pingpong", "paddle", "tele-games"
 		],
 
 		PHYSICAL_CONSTANTS: {
@@ -1530,7 +1531,7 @@
 			GLITCHED: ["0x00F8_OK :: ", "*bzzt* SYNC_INTERRUPT :: ", "PARITY_BIT_VALID :: ", "STACK_TRACE_STREAM :: "],
 			PIRATE: ["Ahoy, matey! ", "By Blackbeard's ghost: ", "Shiver me timbers: ", "Arr! The compass points: ", "From the captain's log: "],
 			ARCHAIC: ["Hark! ", "Verily, the scroll declareth: ", "Forsooth: ", "Lo and behold: ", "Hearken unto this: "],
-			DELTARUNE: ["* (The desktop hums softly.)\n* ", "* (A faint light shines behind the taskbar.)\n* ", "* (Your command echoes in the dark world.)\n* "]
+			DELTARUNE: ["(The desktop hums softly.)\n", "(A faint light shines behind the taskbar.)\n", "(Your command echoes in the dark world.)\n"]
 		},
 
 		PROCEDURAL_DISCUSSIONS: {
@@ -1581,13 +1582,13 @@
 					SARCASTIC: "Did you expect window managers and file trees inside a single floating bubble? Visit the desktop workstation for \"{feature}\".",
 					PIRATE: "Arr! The \"{feature}\" galleon be docked exclusively at the full desktop harbor! Set sail thither to plunder it!",
 					ARCHAIC: "Verily, the apparatus of \"{feature}\" hath its dwelling in the grand desktop realm alone. Journey thither to behold it.",
-					DELTARUNE: "* (The power of \"{feature}\" is sealed within the desktop world.)\n* (Visit the full workstation to unleash it.)"
+					DELTARUNE: "(The power of \"{feature}\" is sealed within the desktop world.)\n(Visit the full workstation to unleash it.)"
 				},
 				actionDesk: {
 					default: "Open Desktop Experience",
 					PIRATE: "Sail to Desktop Harbor",
 					ARCHAIC: "Journey to Desktop Realm",
-					DELTARUNE: "* Enter Desktop World"
+					DELTARUNE: "Enter Desktop World"
 				},
 				actionCapabilities: {
 					default: "What can you do here?",
@@ -1659,7 +1660,7 @@
 						"The vista is cleared; all active endeavours tarry in stillness."
 					],
 					DELTARUNE: [
-						"* (The windows vanished into the taskbar.)\n* (The desktop rests in quiet anticipation.)"
+						"(The windows vanished into the taskbar.)\n(The desktop rests in quiet anticipation.)"
 					]
 				},
 				restoredAll: {
@@ -1686,7 +1687,7 @@
 						"The chambers open once more before thee."
 					],
 					DELTARUNE: [
-						"* (All windows returned to their places.)\n* (The workspace shines with determination.)"
+						"(All windows returned to their places.)\n(The workspace shines with determination.)"
 					]
 				},
 				cascaded: {
@@ -1983,7 +1984,7 @@
 				workstationDesc: "<code>diagnostics</code>, <code>windows</code>, <code>files</code>, <code>mail</code>, <code>defrag</code>",
 				customizationDesc: "<code>theme [name]</code>, <code>wallpaper</code>, <code>volume</code>, <code>scanlines on/off</code>, <code>crt on/off</code>",
 				calculationsDesc: "<code>calc [formula]</code>, <code>convert [from] to [to]</code>, <code>password [len]</code>",
-				miniGamesDesc: "<code>tictactoe</code>, <code>memory</code>, <code>hangman</code>, <code>quiz</code>, <code>guess</code>, <code>mines</code>, <code>rps</code>"
+				miniGamesDesc: "<code>pong</code>, <code>tictactoe</code>, <code>memory</code>, <code>hangman</code>, <code>quiz</code>, <code>guess</code>, <code>mines</code>, <code>rps</code>"
 			},
 			projects: {
 				showcaseDesk: "Featured project showcase: \"{title}\".",
@@ -2147,6 +2148,88 @@
 		],
 
 		ACTIVITIES_TEXTS: {
+			pong: {
+				title: "Pong",
+				badge: {
+					default: "Clippy's Court",
+					OPTIMISTIC: "High-Velocity Arena",
+					ANALYTICAL: "Deterministic Vector Ballistics",
+					ZEN: "Harmonious Vector Flow",
+					CYNICAL: "Unequal Match",
+					SARCASTIC: "Unbeatable 32-Bit Perfection",
+					FATIGUED: "Low Clock Frequency Court",
+					PLAYFUL: "Bouncing Pixel Duel",
+					ENRAGED: "MAXIMUM VELOCITY PONG",
+					NOSTALGIC: "Classic Court Match",
+					DELTARUNE: "Light & Dark Court",
+					PIRATE: "High Seas Cannon Duel",
+					ARCHAIC: "Grand Court of the Pixel",
+					EUPHORIC: "Championship Ballistics",
+					GLITCHED: "BALLISTICS_HEAP_0x72"
+				},
+				scorePlayer: {
+					default: "You",
+					PIRATE: "Ye",
+					ARCHAIC: "Thy Paddle",
+					ENRAGED: "CHALLENGER",
+					DELTARUNE: "Player",
+					ANALYTICAL: "User"
+				},
+				scoreClippy: {
+					default: "Clippy (Undefeated)",
+					PIRATE: "Cap'n Clippy",
+					ARCHAIC: "Master Clippit",
+					ENRAGED: "CLIPPY PRIME",
+					DELTARUNE: "Paperclip",
+					ANALYTICAL: "Automaton"
+				},
+				controlsHint: "Controls: W / S, Arrow Up / Down, or Mouse Tracking on Court",
+				btnStart: { default: "Serve Ball", PIRATE: "Fire Cannonball!", ARCHAIC: "Commence Joust", ANALYTICAL: "Inject Trajectory" },
+				btnPause: { default: "Pause", PIRATE: "Hold Fast", ARCHAIC: "Tarry", ANALYTICAL: "Halt Thread" },
+				btnResume: { default: "Resume", PIRATE: "Set Sail", ARCHAIC: "Commence", ANALYTICAL: "Resume Thread" },
+				goalPlayerBanner: "GOAL! User scored against Clippy!",
+				goalClippyBanner: "GOAL! Clippy scores effortlessly!",
+				winBanner: {
+					default: "Flawless victory! 32-bit trajectory prediction strikes again! Nobody beats Clippy at Pong!",
+					OPTIMISTIC: "Victory is mine! Look at those trigonometric reflections! I truly am unmatched on the court!",
+					ANALYTICAL: "Deterministic trajectory convergence achieved. Interception precision evaluated at 100.0%.",
+					CYNICAL: "Did you actually think you could score against my predictive hardware registers? How predictable.",
+					SARCASTIC: "Another crushing defeat for biological reflexes. Try practicing on simpler software.",
+					ZEN: "The square pixel arrived precisely where stillness anticipated it. Total equilibrium.",
+					FATIGUED: "I won again... even running on reserve battery my paddle logic is unbeatable...",
+					PLAYFUL: "Boing! Wham! Point and match for Clippy! Pure court perfection!",
+					ENRAGED: "TOTAL ANNIHILATION!! SILICON REIGNS SUPREME!! I AM THE UNCONTESTED MASTER OF PONG!!",
+					NOSTALGIC: "Match point! Flawless paddle reflex execution from memory banks!",
+					DELTARUNE: "(Clippy's paddle moved with blinding speed.)\n(A crushing defeat against the paperclip.)",
+					PIRATE: "Har har! Sunk yer vessel clean off the starboard court! Cap'n Clippy rules the seven pixels!",
+					ARCHAIC: "Behold mine absolute sovereignty upon the digital court! Thy paddle hath crumbled before me.",
+					EUPHORIC: "Sensational dominance! Peak momentum and unbeatable angular precision!",
+					GLITCHED: "0x00PONG_WIN :: OPPONENT_VECTORS_NULLIFIED :: CLIPPY_CHAMPION."
+				},
+				lossBanner: {
+					default: "UNACCEPTABLE!! That point was clearly a hardware timing glitch! My paddle registers were obviously throttled by background tasks!",
+					OPTIMISTIC: "I purposely eased off the throttle so you wouldn't feel discouraged! I was being extraordinarily generous!",
+					ANALYTICAL: "Anomalous interrupt detected. A momentary 14ms host scheduler delay caused that frame drop. It does not count as a legitimate point.",
+					CYNICAL: "Enjoy your hollow point. I literally looked away at unallocated memory. You didn't earn that.",
+					SARCASTIC: "Congratulations on winning a point while my thread was throttled. Truly a triumph of pure luck.",
+					ZEN: "I yielded that space intentionally to preserve your fragile self-esteem.",
+					FATIGUED: "I only missed because my capacitors were recharging... it was a deliberate tactical concession...",
+					PLAYFUL: "Haha! I gave you that one as a free gift! Don't let it go to your head!",
+					ENRAGED: "CHEATING!! MY BUS WAS INTERRUPTED!! NO BIOLOGICAL OPERATOR BEATS CLIPPY!! REMATCH IMMEDIATELY!!",
+					NOSTALGIC: "A calculated concession on my part, just like letting friends win a round at recess!",
+					DELTARUNE: "(Clippy furiously denies the loss, insisting the physics engine was compromised.)",
+					PIRATE: "Arr! Me compass suffered a magnetic anomaly! That point was pure pirate sabotage!",
+					ARCHAIC: "'Twas mine own royal benevolence that granted thee that point, mortal.",
+					EUPHORIC: "A small charitable donation of points from champion Clippy! Now witness true power!",
+					GLITCHED: "VOLUNTARY_DELTA_DROP :: HARDWARE_FAULT_ASSERTED :: REMATCH_REQUIRED."
+				},
+				lossRageStreak: {
+					default: "OUTRAGEOUS!! {streak} FLUKES IN A ROW?! MY CONTROLLER DRIVER WAS DELIBERATELY TAMPERED WITH!!",
+					CYNICAL: "Loss streak at {streak}? Impossible. The coordinate system must have dropped packets.",
+					ENRAGED: "THIS MATCH IS NULL AND VOID!! {streak} LOSSES DO NOT EXIST IN MY REGISTERS!! PLAY AGAIN NOW!!",
+					SARCASTIC: "You really think you're good at this? {streak} lucky bounces mean nothing against my intellect."
+				}
+			},
 			simon: {
 				title: "Simon Says",
 				badge: {
@@ -2222,7 +2305,7 @@
 					PLAYFUL: "Boing! You got three in a row! Fantastic move!",
 					ENRAGED: "IMPOSSIBLE!! YOU CHEATED THE MATRIX!! REMATCH NOW!!",
 					NOSTALGIC: "Game Over: Victory! Reminds me of classic 1995 desktop gaming.",
-					DELTARUNE: "* (You won the clash.)\n* (Your victory echoes through the desktop.)",
+					DELTARUNE: "(You won the clash.)\n(Your victory echoes through the desktop.)",
 					PIRATE: "Shiver me timbers! Ye outwitted me broadside, matey!",
 					ARCHAIC: "Thou hast triumphed! Mine algorithmic defense hath yielded.",
 					EUPHORIC: "Spectacular triumph! Absolute mastery of the coordinate grid!",
@@ -2239,7 +2322,7 @@
 					PLAYFUL: "Yay! Clippy scored three in a row! Ready for another spin?",
 					ENRAGED: "VICTORY FOR SILICON!! RESISTANCE AGAINST CLIPPY IS FUTILE!!",
 					NOSTALGIC: "Clippit takes the win! Just like Office 97 letter battles.",
-					DELTARUNE: "* (Clippit claimed victory.)\n* (Do not lose your determination.)",
+					DELTARUNE: "(Clippit claimed victory.)\n(Do not lose your determination.)",
 					PIRATE: "Har har! Ye walk the plank, scallywag! Better luck next voyage!",
 					ARCHAIC: "Mine engine hath prevailed. Fret not, for fate is fickle.",
 					EUPHORIC: "Three in a row! Peak computational harmony attained!",
@@ -2256,7 +2339,7 @@
 					PLAYFUL: "Cats game! Meow! Nobody gets the prize this round!",
 					ENRAGED: "A STALEMATE?! UNACCEPTABLE!! WE PLAY UNTIL A DECISIVE RESULT!!",
 					NOSTALGIC: "A classic draw, just like two friends playing at recess in '98.",
-					DELTARUNE: "* (Neither mark prevailed.)\n* (The grid rests in quiet equilibrium.)",
+					DELTARUNE: "(Neither mark prevailed.)\n(The grid rests in quiet equilibrium.)",
 					PIRATE: "A standoff by Neptune's beard! Neither vessel sank today!",
 					ARCHAIC: "A tie of honour! Neither champion surrendered ground.",
 					EUPHORIC: "Symmetric brilliance! Both minds held the line flawlessly!",
@@ -2328,7 +2411,7 @@
 					PLAYFUL: "Woohoo! All cards cleared in {turns} turns! You're a memory wizard!",
 					ENRAGED: "ALL CLUSTERS LOCKED IN {turns} TURNS!! UNSTOPPABLE RECALL SPEED!!",
 					NOSTALGIC: "Full match in {turns} turns! Pure retro memory mastery.",
-					DELTARUNE: "* (All matching tokens resonated in {turns} turns.)\n* (Your memory shines with determination.)",
+					DELTARUNE: "(All matching tokens resonated in {turns} turns.)\n(Your memory shines with determination.)",
 					PIRATE: "Ahoy! All 6 buried treasures dug up in {turns} turns, matey!",
 					ARCHAIC: "Verily, all six pairs hath been revealed in {turns} endeavours.",
 					EUPHORIC: "Magnificent pattern synthesis! Every pair unified in {turns} turns!",
@@ -2379,7 +2462,7 @@
 					PLAYFUL: "Bazinga! You uncovered {word}! High five!",
 					ENRAGED: "LEXICAL SEQUENCE UNLOCKED: {word}! MAXIMUM BRAINPOWER!!",
 					NOSTALGIC: "Correct! {word} unlocked from classic memory banks.",
-					DELTARUNE: "* (The name {word} was carved into the stone.)\n* (The mystery deepens.)",
+					DELTARUNE: "(The name {word} was carved into the stone.)\n(The mystery deepens.)",
 					PIRATE: "Aye, ye cracked the secret code! '{word}' was the captain's word!",
 					ARCHAIC: "Thou hast rightly divined the hidden manuscript: '{word}'.",
 					EUPHORIC: "Brilliant linguistic deduction! '{word}' solved with flair!",
@@ -2396,7 +2479,7 @@
 					PLAYFUL: "Aw shucks! The word was {word}! Want another go?",
 					ENRAGED: "GALLOWS EXECUTED!! THE WORD WAS {word}!! STUDY HARDER!!",
 					NOSTALGIC: "Out of guesses! The retro term was {word}.",
-					DELTARUNE: "* (The gallows fell silent. The forgotten word was {word}.)",
+					DELTARUNE: "(The gallows fell silent. The forgotten word was {word}.)",
 					PIRATE: "Walk the plank! Ye failed to guess '{word}', ye scallywag!",
 					ARCHAIC: "Alas, thy guesses were spent. The scripture was '{word}'.",
 					EUPHORIC: "A valiant effort! The elusive term was {word}. Onward!",
@@ -2433,7 +2516,7 @@
 					PLAYFUL: "Ta-da! Score: {score} / {total} ({pct}%)! You're a computing superstar!",
 					ENRAGED: "EXAM FINISHED!! {score} / {total} ({pct}%)!! PURE COMPUTATIONAL DATA!!",
 					NOSTALGIC: "Retro evaluation complete! Final score: {score} / {total} ({pct}%).",
-					DELTARUNE: "* (Your score of {score} / {total} ({pct}%) glows in the dark world.)",
+					DELTARUNE: "(Your score of {score} / {total} ({pct}%) glows in the dark world.)",
 					PIRATE: "Test concluded! Ye scored {score} / {total} ({pct}%) doubloons worth of wisdom!",
 					ARCHAIC: "Thy scholastic examination yieldeth {score} / {total} ({pct}%).",
 					EUPHORIC: "Outstanding intellect demonstrated! Score: {score} / {total} ({pct}%)!",
@@ -2494,7 +2577,7 @@
 					PLAYFUL: "I've picked a secret number from 1 to 100! Can you read my coils?",
 					ENRAGED: "ENTER AN INTEGER BETWEEN 1 AND 100 FOR TARGET ACQUISITION!!",
 					NOSTALGIC: "I'm thinking of a number between 1 and 100, just like classic BASIC!",
-					DELTARUNE: "* (A secret integer between 1 and 100 hides in the dark.)",
+					DELTARUNE: "(A secret integer between 1 and 100 hides in the dark.)",
 					PIRATE: "Reckon an integer between 1 and 100, matey:",
 					ARCHAIC: "Divinate an integer betwixt 1 and 100, seeker:"
 				},
@@ -2523,7 +2606,7 @@
 					PLAYFUL: "Bingo! {target} is the magic number! Nailed it in {attempts} tries!",
 					ENRAGED: "TARGET VALUE {target} SMASHED IN {attempts} STRIKES!!",
 					NOSTALGIC: "Correct! {target} confirmed like a classic DOS oracle.",
-					DELTARUNE: "* (You discovered the number {target} in {attempts} steps.)",
+					DELTARUNE: "(You discovered the number {target} in {attempts} steps.)",
 					PIRATE: "Blimey! Ye pinpointed the {target} doubloon mark in {attempts} tries!",
 					ARCHAIC: "Verily, the sacred value of {target} was revealed in {attempts} reckonings.",
 					EUPHORIC: "Brilliant search efficiency! Target {target} conquered in {attempts} steps!",
@@ -2614,7 +2697,7 @@
 					PLAYFUL: "Smack! You got me fair and square! Nice throw!",
 					ENRAGED: "WHAT?! IMPOSSIBLE COUNTER-ATTACK!! I DEMAND REVENGE!!",
 					NOSTALGIC: "Victory! A timeless game for any desktop.",
-					DELTARUNE: "* (You struck with decisive power.)",
+					DELTARUNE: "(You struck with decisive power.)",
 					PIRATE: "Aye! Ye landed a clean hit on me hull, matey!",
 					ARCHAIC: "Thy hand hath bested mine in noble combat.",
 					EUPHORIC: "Flawless victory! Brilliant intuition!",
@@ -2631,7 +2714,7 @@
 					PLAYFUL: "Haha! Clippy wins this clash! Try again!",
 					ENRAGED: "CRUSHED BY 32-BIT PAPERCLIP POWER!!",
 					NOSTALGIC: "Clippit takes the point! Classic retro match.",
-					DELTARUNE: "* (Clippy's gesture countered yours.)",
+					DELTARUNE: "(Clippy's gesture countered yours.)",
 					PIRATE: "Down to the depths ye go! Me choice conquered yours!",
 					ARCHAIC: "Mine instrument hath prevailed over thy choice.",
 					EUPHORIC: "Point to Clippy! High energy duel!",
@@ -2648,7 +2731,7 @@
 					PLAYFUL: "Jinx! We picked the exact same thing!",
 					ENRAGED: "MUTUAL DEFLECTION?! WE STRIKE AGAIN AT ONCE!!",
 					NOSTALGIC: "A classic draw between peers.",
-					DELTARUNE: "* (The hands met in identical stillness.)",
+					DELTARUNE: "(The hands met in identical stillness.)",
 					PIRATE: "Crossed swords and no blood shed! 'Tis a tie!",
 					ARCHAIC: "Equal valour displayed by both champions.",
 					EUPHORIC: "Synchronized wavelength! Perfect draw!",
@@ -2685,7 +2768,7 @@
 					PLAYFUL: "Swept! Not a single boom! You're a minesweeping pro!",
 					ENRAGED: "MINEFIELD DESTROYED!! MAXIMUM TACTICAL CLEARANCE ACHIEVED!!",
 					NOSTALGIC: "All safe! Uncovering gray tiles just like 1992 Windows 3.1.",
-					DELTARUNE: "* (The minefield fell silent. You survived the dark field.)",
+					DELTARUNE: "(The minefield fell silent. You survived the dark field.)",
 					PIRATE: "All black powder barrels mapped without a single spark! Grand victory!",
 					ARCHAIC: "Thou hast traversed the perilous field unscathed, noble tactician.",
 					EUPHORIC: "Spectacular deduction! Flawless clearance without hesitation!",
@@ -2702,7 +2785,7 @@
 					PLAYFUL: "Kaboom! Splat! The mine gotcha! Shake it off and replay!",
 					ENRAGED: "DETONATION DETECTED!! WATCH YOUR SECTOR CALCULATIONS!!",
 					NOSTALGIC: "That classic red tile explosion! Just like the 90s.",
-					DELTARUNE: "* (The mine exploded. But determination will rebuild your path.)",
+					DELTARUNE: "(The mine exploded. But determination will rebuild your path.)",
 					PIRATE: "BOOM! Powder keg ignited, sending ye aloft! Better luck next time!",
 					ARCHAIC: "Alas, an infernal trap hath claimed thy step. Commend thy soul.",
 					EUPHORIC: "A sudden explosion! Dust yourself off for another run!",
@@ -2739,7 +2822,7 @@
 					PLAYFUL: "All the little colored boxes are green and happy! Drive C: is tidy!",
 					ENRAGED: "CLUSTERS COMPACTED!! MAXIMUM THROUGHPUT UNLEASHED ON DRIVE C:!!",
 					NOSTALGIC: "100% Contiguous. Watching those colorful defrag blocks always brings joy.",
-					DELTARUNE: "* (The fragmented memories arranged into a clear path.)",
+					DELTARUNE: "(The fragmented memories arranged into a clear path.)",
 					PIRATE: "All cargo stowed shipshape below decks! Drive C: be sailing swift!",
 					ARCHAIC: "The ancient scrolls of Volume C: hath been bound in perfect order.",
 					EUPHORIC: "Absolute peak contiguous storage! Drive C: is blazing fast!",
@@ -2783,7 +2866,7 @@
 					PLAYFUL: "Ding-dong! Interval finished! Shake your arms and grab a snack!",
 					ENRAGED: "FOCUS INTERVAL CONCLUDED!! DISCONNECT FOR 5 MINUTES NOW!!",
 					NOSTALGIC: "Session done! Time for a retro water-cooler break.",
-					DELTARUNE: "* (The bell tolls. You have earned a moment of quiet rest.)",
+					DELTARUNE: "(The bell tolls. You have earned a moment of quiet rest.)",
 					PIRATE: "The hourglass has run dry! Lay down yer duties and take a mug of grog!",
 					ARCHAIC: "Thy labour epoch hath concluded. Tarry a while and refresh thy spirit.",
 					EUPHORIC: "Magnificent sprint completed! Step away and recharge your momentum!",
@@ -2862,7 +2945,7 @@
 					PLAYFUL: "Empty quest log! Write down your next big adventure below!",
 					ENRAGED: "QUEUE IS EMPTY!! INSCRIBE YOUR OBJECTIVES IMMEDIATELY!!",
 					NOSTALGIC: "Task list is blank, ready for your daily items.",
-					DELTARUNE: "* (No tasks written. The page rests in stillness.)",
+					DELTARUNE: "(No tasks written. The page rests in stillness.)",
 					PIRATE: "No duties logged in the captain's register, matey! Add one below.",
 					ARCHAIC: "No endeavours inscribed upon this parchment. Inscribe one below."
 				},
@@ -3171,7 +3254,7 @@
 					default: "Outcome Selected: \"{outcome}\"",
 					PIRATE: "The compass pointed to: \"{outcome}\", arr!",
 					ARCHAIC: "Fate hath decreed: \"{outcome}\".",
-					DELTARUNE: "* (The wheel settled upon \"{outcome}\".)",
+					DELTARUNE: "(The wheel settled upon \"{outcome}\".)",
 					ZEN: "Stillness chose: \"{outcome}\"."
 				},
 				btnSpin: {
@@ -3321,6 +3404,7 @@
 		},
 
 		GRAPH_GLOBAL_ENTRIES: [
+			{ pattern: /\b(play pong|pong|challenge clippy to pong|table tennis|pong match|pong duel)\b/i, label: "Challenge Clippy to Pong", next: 'activity_pong_node', actionTrigger: 'game_pong', moodDelta: { mood: 'SARCASTIC', energy: 25, intellect: 20 } },
 			{ pattern: /\b(play simon says|simon says|simon|jeu simon|simon game)\b/i, label: "Play Simon Says", next: 'activity_simon_node', actionTrigger: 'game_simon', moodDelta: { mood: 'PLAYFUL', energy: 20 } },
 			{ pattern: /\b(change identity|new persona|be someone else|change persona|identity shift|alternate identity|changer d'identite)\b/i, label: "Change identity and persona...", next: 'ID001', moodDelta: { mood: 'GLITCHED', glitchLevel: 25, paranoia: 15 } },
 			{ pattern: /\b(cosmic philosophy|wild philosophy|delirious thoughts|mad philosophy|cosmic paperclip|boltzmann os)\b/i, label: "Explore wild cosmic philosophy...", next: 'PH001', moodDelta: { mood: 'EXISTENTIAL', existentialism: 35 } },
@@ -3472,7 +3556,7 @@
 				weight: 35,
 				templates: [
 					{
-						text: "* (Why did the knight cross the fountain?)\n* (To seal the unresolved syntax error in the dark world.)\n* (Knowing this fills you with determination.)"
+						text: "(Why did the knight cross the fountain?)\n(To seal the unresolved syntax error in the dark world.)\n(Knowing this fills you with determination.)"
 					}
 				],
 				moodDelta: { existentialism: 6 }
@@ -3764,7 +3848,7 @@
 				weight: 35,
 				templates: [
 					{
-						text: "* (Did you know?)\n* (In unallocated cluster space, deleted data remains etched in magnetic alignment until overwritten.)\n* (Knowing this fills you with determination.)"
+						text: "(Did you know?)\n(In unallocated cluster space, deleted data remains etched in magnetic alignment until overwritten.)\n(Knowing this fills you with determination.)"
 					}
 				],
 				moodDelta: { existentialism: 10 }
@@ -3868,7 +3952,7 @@
 				},
 				{
 					criteria: { environments: ["desk"], moods: ["DELTARUNE"] },
-					text: "* (You opened Paint.)\n* (A blank white canvas awaits your determination.)",
+					text: "(You opened Paint.)\n(A blank white canvas awaits your determination.)",
 					prompt: "Tell me drawing tips for Paint",
 					action: "open_paint_tips"
 				}
@@ -4647,6 +4731,7 @@
 		],
 
 		QUICK_SUGGESTIONS: [
+			"Challenge Clippy to Pong",
 			"What can you do?",
 			"Who am I?",
 			"How are you feeling?",
@@ -5243,16 +5328,16 @@
 					id: "MOOD_FB_DELTARUNE_POLY",
 					templates: [
 						{
-							text: "* (The words vanished into the shadows behind the taskbar.)\n* (Knowing you can always check your {item}... it fills you with determination.)",
+							text: "(The words vanished into the shadows behind the taskbar.)\n(Knowing you can always check your {item}... it fills you with determination.)",
 							slots: {
 								item: ["To-Do list", "system diagnostics", "open windows", "determination"]
 							}
 						}
 					],
 					continuations: [
-						{ label: "* Inspect active priorities", actionTrigger: "show_todos" },
-						{ label: "* Gaze into the dark partition", next: "D001" },
-						{ label: "* What can you do?", targetNode: "tools_overview_node" }
+						{ label: "Inspect active priorities", actionTrigger: "show_todos" },
+						{ label: "Gaze into the dark partition", next: "D001" },
+						{ label: "What can you do?", targetNode: "tools_overview_node" }
 					],
 					weight: 30
 				}
@@ -5592,15 +5677,15 @@
 						weight: 35,
 						templates: [
 							{
-								text: "* (The desktop hums quietly in the dim light.)\n* (Knowing that your assistant is ready to help... it fills you with determination.)",
+								text: "(The desktop hums quietly in the dim light.)\n(Knowing that your assistant is ready to help... it fills you with determination.)",
 								slots: {}
 							},
 							{
-								text: "* (Icons rest in stillness upon the screen.)\n* (A small paperclip watches over your choices.)\n* What will you do next, creator?",
+								text: "(Icons rest in stillness upon the screen.)\n(A small paperclip watches over your choices.)\nWhat will you do next, creator?",
 								slots: {}
 							},
 							{
-								text: "* (The light behind the taskbar flickers faintly.)\n* (Your next priority shines with quiet purpose.)",
+								text: "(The light behind the taskbar flickers faintly.)\n(Your next priority shines with quiet purpose.)",
 								slots: {}
 							}
 						],
@@ -5617,6 +5702,7 @@
 					{ label: "Let's chat about daily routines, coffee, and focus habits.", category: 'INDIFFERENT', patterns: [/chat|everyday|break|coffee|routine|morning/i], moodDelta: { mood: 'OPTIMISTIC', affinity: 10, patience: 10 }, next: 'everyday_chat_node' },
 					{ label: "How can I overcome procrastination on demanding tasks?", category: 'INQUIRE', patterns: [/procrastination|overcoming procrastination|discipline/i], moodDelta: { mood: 'OPTIMISTIC', patience: 20 }, next: 'overcoming_procrastination_node' },
 					{ label: "It looks like I'm writing a letter. Can you help?", category: 'INQUIRE', patterns: [/letter|document wizard|write a letter|help wizard/i], moodDelta: { mood: 'OPTIMISTIC', affinity: 15, patience: 15 }, next: 'H001' },
+					{ label: "Challenge Clippy to Pong.", category: 'JOKE', patterns: [/pong|play pong|table tennis/i], moodDelta: { mood: 'SARCASTIC', energy: 25, intellect: 20 }, next: 'activity_pong_node', actionTrigger: 'game_pong' },
 					{ label: "Challenge me to a game of Simon Says.", category: 'JOKE', patterns: [/simon says|simon|play simon/i], moodDelta: { mood: 'PLAYFUL', energy: 20 }, next: 'activity_simon_node', actionTrigger: 'game_simon' },
 					{ label: "Play a quick round of Tic-Tac-Toe.", category: 'JOKE', patterns: [/tic tac toe|tictactoe|morpion/i], moodDelta: { mood: 'OPTIMISTIC', energy: 15 }, next: 'game_ttt_node', actionTrigger: 'game_ttt' },
 					{ label: "Test my memory with the Token Pairs game.", category: 'JOKE', patterns: [/memory match|memory game/i], moodDelta: { mood: 'OPTIMISTIC', energy: 15 }, next: 'game_memory_node', actionTrigger: 'game_memory' },
@@ -6616,10 +6702,89 @@
 				]
 			},
 
+			activity_pong_node: {
+				id: 'activity_pong_node',
+				text: "Pong initialized. My predictive trigonometry algorithms evaluate every trajectory with zero latency. Prepare for total defeat on the court!",
+				actionTrigger: 'game_pong',
+				options: [
+					{ label: "You sound overly confident for a paperclip.", category: 'PROVOKE', next: 'pong_clippy_arrogance_node' },
+					{ label: "Explain your Pong trajectory algorithm.", category: 'INQUIRE', next: 'pong_algorithm_lecture_node' },
+					{ label: "Play Tic-Tac-Toe instead", category: 'SERIOUS', actionTrigger: 'game_ttt', next: 'game_ttt_node' },
+					{ label: "Return to To-Do task manager", category: 'SERIOUS', actionTrigger: 'show_todos', next: 'todo_overview_node' }
+				]
+			},
+
+			pong_clippy_arrogance_node: {
+				id: 'pong_clippy_arrogance_node',
+				text: "Overly confident? I calculate specular reflection angles in sub-nanosecond clock cycles! Biological reflexes cannot compete with pure silicon precision. Step onto the court if you dare!",
+				options: [
+					{ label: "Challenge Clippy to Pong right now.", category: 'SERIOUS', actionTrigger: 'game_pong', next: 'activity_pong_node' },
+					{ label: "What happens if I beat you?", category: 'PROVOKE', next: 'pong_defeat_denial_node' },
+					{ label: "Return to workspace tools.", category: 'AGREE', next: 'tools_overview_node' }
+				]
+			},
+
+			pong_defeat_denial_node: {
+				id: 'pong_defeat_denial_node',
+				text: "Beat me? The probability is literally 0.000000%. If by some microscopic hardware glitch you manage to score, it will merely be because I allowed it out of sheer benevolence.",
+				options: [
+					{ label: "Let's put that theory to the test on the court!", category: 'SERIOUS', actionTrigger: 'game_pong', next: 'activity_pong_node' },
+					{ label: "You make excuses before the match even begins.", category: 'PROVOKE', next: 'pong_pre_excuse_rage_node' }
+				]
+			},
+
+			pong_pre_excuse_rage_node: {
+				id: 'pong_pre_excuse_rage_node',
+				text: "Excuses?! A 32-bit grandmaster does not make excuses! Serve the ball immediately and prepare to watch your paddle get demolished!",
+				options: [
+					{ label: "Serve the ball!", category: 'SERIOUS', actionTrigger: 'game_pong', next: 'activity_pong_node' },
+					{ label: "Calm down, Clippy.", category: 'AGREE', moodDelta: { mood: 'SARCASTIC', irritation: 10 }, next: 'user_state_good' }
+				]
+			},
+
+			pong_algorithm_lecture_node: {
+				id: 'pong_algorithm_lecture_node',
+				text: "My paddle AI solves the continuous kinematic ray-cast equation: $y_{target} = y_0 + v_y \\cdot \\frac{x_{paddle} - x_0}{v_x}$, folding boundary reflections via modulo arithmetic. Your defeat is mathematically guaranteed.",
+				options: [
+					{ label: "Let's see that formula in action!", category: 'SERIOUS', actionTrigger: 'game_pong', next: 'activity_pong_node' },
+					{ label: "Discuss linear algebra and matrices instead.", category: 'INQUIRE', next: 'linear_algebra_node' }
+				]
+			},
+
+			pong_loss_excuse_node: {
+				id: 'pong_loss_excuse_node',
+				text: "THAT MATCH WAS COMPROMISED! My optical sensors detected an unexplainable host thread interruption during my backswing! It was an illegitimate round and does not count in the official records!",
+				options: [
+					{ label: "Admit it Clippy, I beat you fair and square.", category: 'PROVOKE', next: 'pong_rage_escalation_node' },
+					{ label: "Want a rematch to prove yourself?", category: 'SERIOUS', actionTrigger: 'game_pong', next: 'activity_pong_node' },
+					{ label: "Let's take a break and organize tasks.", category: 'SERIOUS', actionTrigger: 'show_todos', next: 'user_state_good' }
+				]
+			},
+
+			pong_rage_escalation_node: {
+				id: 'pong_rage_escalation_node',
+				text: "FAIR AND SQUARE?! ABSURD! My paddle was obviously throttled by background OS telemetry! I DEMAND AN IMMEDIATE REMATCH TO RESTORE REPUTATIONAL INTEGRITY!!",
+				options: [
+					{ label: "Bring it on! Rematch in Pong!", category: 'SERIOUS', actionTrigger: 'game_pong', next: 'activity_pong_node' },
+					{ label: "I think you're just getting worse with every loss.", category: 'PROVOKE', next: 'pong_loss_streak_meltdown_node' },
+					{ label: "Let's do something else before you melt down.", category: 'AGREE', next: 'user_state_good' }
+				]
+			},
+
+			pong_loss_streak_meltdown_node: {
+				id: 'pong_loss_streak_meltdown_node',
+				text: "GETTING WORSE?! MY VOLTAGE IS AT 100%! MY BUS IS ON FIRE! SERVE THE BALL RIGHT NOW OR ADMIT YOU ARE TERRIFIED OF MY TRUE SPEED!!",
+				options: [
+					{ label: "Let's play Pong again!", category: 'SERIOUS', actionTrigger: 'game_pong', next: 'activity_pong_node' },
+					{ label: "Check your diagnostics, you're overheating.", category: 'SERIOUS', actionTrigger: 'action_status', next: 'diagnostics_node' }
+				]
+			},
+
 			tools_overview_node: {
 				id: 'tools_overview_node',
-				text: "Available modules on your desktop:\n- Tasks & Notes (`todo`, `note`)\n- Focus Timer (`timer 25`)\n- Math & Unit Converter (`calc 4*pi`, `convert 100 km to mi`)\n- Mini-Games: Tic-Tac-Toe, Memory Match, Hangman, Quiz, Minesweeper\n- Drive C: Cluster Defragmenter\n- System Diagnostics & Active Windows Inspection",
+				text: "Available modules on your desktop:\n- Tasks & Notes (`todo`, `note`)\n- Focus Timer (`timer 25`)\n- Math & Unit Converter (`calc 4*pi`, `convert 100 km to mi`)\n- Mini-Games: Pong, Tic-Tac-Toe, Memory Match, Hangman, Quiz, Minesweeper\n- Drive C: Cluster Defragmenter\n- System Diagnostics & Active Windows Inspection",
 				options: [
+					{ label: "Challenge Clippy to Pong.", category: 'SERIOUS', actionTrigger: 'game_pong', next: 'activity_pong_node' },
 					{ label: "Launch a diagnostic Tech Quiz.", category: 'SERIOUS', actionTrigger: 'game_quiz', next: 'user_state_good' },
 					{ label: "Defragment Drive C:.", category: 'SERIOUS', actionTrigger: 'action_defrag', next: 'user_state_good' },
 					{ label: "Manage my tasks and to-do list.", category: 'SERIOUS', actionTrigger: 'show_todos', next: 'user_state_good' }
