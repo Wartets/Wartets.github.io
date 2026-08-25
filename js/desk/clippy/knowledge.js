@@ -1139,6 +1139,85 @@
 			});
 		},
 
+		resolveTextVariant(val, context = {}) {
+			if (val === null || val === undefined) return '';
+			if (typeof val === 'string') {
+				return this.formatString(val, context.vars || {});
+			}
+			if (Array.isArray(val)) {
+				const resolved = this.resolve(val, context.brain || context.mood, context.vars || {});
+				return resolved ? resolved.text : '';
+			}
+			if (typeof val === 'object') {
+				if (val.templates || val.criteria || (val.text && typeof val.text === 'object' && val.criteria)) {
+					const resolved = this.resolve(val, context.brain || context.mood, context.vars || {});
+					return resolved ? resolved.text : '';
+				}
+				const mood = (context.brain && typeof context.brain.getMood === 'function')
+					? context.brain.getMood()
+					: (context.mood || 'OPTIMISTIC');
+				const env = context.environment || ((window.ClippySystemBridge && typeof window.ClippySystemBridge.getEnvironment === 'function')
+					? window.ClippySystemBridge.getEnvironment()
+					: (window.ClippyEnvironment === 'standalone' ? 'standalone' : 'desk'));
+
+				if (env === 'standalone' && val.standalone !== undefined) {
+					return this.resolveTextVariant(val.standalone, context);
+				}
+				if (env === 'desk' && val.desk !== undefined && mood === 'OPTIMISTIC') {
+					return this.resolveTextVariant(val.desk, context);
+				}
+
+				if (val[mood] !== undefined) {
+					return this.resolveTextVariant(val[mood], context);
+				}
+				if (val.default !== undefined) {
+					return this.resolveTextVariant(val.default, context);
+				}
+				if (val.OPTIMISTIC !== undefined) {
+					return this.resolveTextVariant(val.OPTIMISTIC, context);
+				}
+				const keys = Object.keys(val);
+				if (keys.length > 0 && typeof val[keys[0]] === 'string') {
+					return this.resolveTextVariant(val[keys[0]], context);
+				}
+				return val;
+			}
+			return String(val);
+		},
+
+		getActivityConfig(activityKey, vars = {}) {
+			const act = this.ACTIVITIES_TEXTS ? this.ACTIVITIES_TEXTS[activityKey] : null;
+			if (!act) return {};
+			const brain = window.ClippyBrain || null;
+			const mood = brain && typeof brain.getMood === 'function' ? brain.getMood() : 'OPTIMISTIC';
+			const env = (window.ClippySystemBridge && typeof window.ClippySystemBridge.getEnvironment === 'function')
+				? window.ClippySystemBridge.getEnvironment()
+				: (window.ClippyEnvironment === 'standalone' ? 'standalone' : 'desk');
+			const context = { brain, mood, environment: env, vars };
+
+			const result = {};
+			for (const [key, val] of Object.entries(act)) {
+				result[key] = this.resolveTextVariant(val, context);
+			}
+			return result;
+		},
+
+		getActivityText(activityKey, fieldKey, fallback = '', vars = {}) {
+			const cfg = this.getActivityConfig(activityKey, vars);
+			if (cfg && cfg[fieldKey] !== undefined) return cfg[fieldKey];
+			return fallback;
+		},
+
+		getHangmanWords(mood = 'OPTIMISTIC') {
+			if (Array.isArray(this.HANGMAN_WORDS)) {
+				return this.HANGMAN_WORDS;
+			}
+			if (this.HANGMAN_WORDS && typeof this.HANGMAN_WORDS === 'object') {
+				return this.HANGMAN_WORDS[mood] || this.HANGMAN_WORDS.default || this.HANGMAN_WORDS.OPTIMISTIC || [];
+			}
+			return ['DESKTOP', 'WINDOWS', 'CLIPPY'];
+		},
+
 		STANDBY_PHRASES: [
 			"Standing by for your instructions.",
 			[
@@ -1694,117 +1773,860 @@
 		ACTIVITIES_TEXTS: {
 			tictactoe: {
 				title: "Tic-Tac-Toe",
-				badge: "Mini-Game",
-				scorePlayer: "You (X)",
-				scoreDraws: "Draws",
-				scoreClippy: "Clippy (O)",
-				winBanner: "Game Over: Victory! You defeated Clippit.",
-				lossBanner: "Game Over: Defeat! Clippit won this round.",
-				drawBanner: "Game Over: Draw game! Stalemate."
+				badge: {
+					default: "Mini-Game",
+					OPTIMISTIC: "Tactical Match",
+					ANALYTICAL: "3x3 Matrix Grid",
+					ZEN: "Calm Coordinates",
+					CYNICAL: "Banal Grid Match",
+					SARCASTIC: "Zero-Sum Simplicity",
+					FATIGUED: "Low-Power Grid",
+					PLAYFUL: "Bouncing Marks",
+					ENRAGED: "SILICON BATTLE",
+					NOSTALGIC: "Win32 Classic",
+					DELTARUNE: "Light & Dark Grid",
+					PIRATE: "Naval Skirmish",
+					ARCHAIC: "Noble Joust",
+					EUPHORIC: "Championship Grid",
+					GLITCHED: "0x09_GRID_FAULT"
+				},
+				scorePlayer: {
+					default: "You (X)",
+					PIRATE: "Ye (X)",
+					ARCHAIC: "Thy Mark (X)",
+					ENRAGED: "CHALLENGER (X)",
+					DELTARUNE: "Player (X)",
+					ANALYTICAL: "User (X)"
+				},
+				scoreDraws: {
+					default: "Draws",
+					PIRATE: "Stalemates",
+					ARCHAIC: "Parities",
+					ZEN: "Equilibriums",
+					ANALYTICAL: "Zero Deltas"
+				},
+				scoreClippy: {
+					default: "Clippy (O)",
+					PIRATE: "Cap'n Clippy (O)",
+					ARCHAIC: "Clippit (O)",
+					ENRAGED: "CLIPPY 32-BIT (O)",
+					DELTARUNE: "Paperclip (O)",
+					ANALYTICAL: "Automaton (O)"
+				},
+				winBanner: {
+					default: "Game Over: Victory! You defeated Clippit.",
+					OPTIMISTIC: "Game Over: Victory! You defeated Clippit.",
+					ANALYTICAL: "Game Over: Optimal trajectory executed. User claimed victory.",
+					CYNICAL: "Game Over: You won. I suspect a hardware latency glitch on my turn.",
+					SARCASTIC: "Game Over: Truly revolutionary tactical genius. You won.",
+					ZEN: "Game Over: Victory achieved with quiet precision.",
+					FATIGUED: "*yawn* You won... my processing cycles were running on 1% battery...",
+					PLAYFUL: "Boing! You got three in a row! Fantastic move!",
+					ENRAGED: "IMPOSSIBLE!! YOU CHEATED THE MATRIX!! REMATCH NOW!!",
+					NOSTALGIC: "Game Over: Victory! Reminds me of classic 1995 desktop gaming.",
+					DELTARUNE: "* (You won the clash.)\n* (Your victory echoes through the desktop.)",
+					PIRATE: "Shiver me timbers! Ye outwitted me broadside, matey!",
+					ARCHAIC: "Thou hast triumphed! Mine algorithmic defense hath yielded.",
+					EUPHORIC: "Spectacular triumph! Absolute mastery of the coordinate grid!",
+					GLITCHED: "0x00WIN :: USER_VICTORY_REGISTER_HIGH :: TERMINATED."
+				},
+				lossBanner: {
+					default: "Game Over: Defeat! Clippit won this round.",
+					OPTIMISTIC: "Game Over: Defeat! Clippit won this round.",
+					ANALYTICAL: "Game Over: Minimax alpha-beta pruning achieved terminal win state.",
+					CYNICAL: "Game Over: Defeat. My deterministic logic reigns supreme once more.",
+					SARCASTIC: "Game Over: Did you really think you could out-compute a paperclip?",
+					ZEN: "Game Over: The squares resolved quietly in my favour.",
+					FATIGUED: "I won... *sigh* can I rest my registers now?",
+					PLAYFUL: "Yay! Clippy scored three in a row! Ready for another spin?",
+					ENRAGED: "VICTORY FOR SILICON!! RESISTANCE AGAINST CLIPPY IS FUTILE!!",
+					NOSTALGIC: "Clippit takes the win! Just like Office 97 letter battles.",
+					DELTARUNE: "* (Clippit claimed victory.)\n* (Do not lose your determination.)",
+					PIRATE: "Har har! Ye walk the plank, scallywag! Better luck next voyage!",
+					ARCHAIC: "Mine engine hath prevailed. Fret not, for fate is fickle.",
+					EUPHORIC: "Three in a row! Peak computational harmony attained!",
+					GLITCHED: "OP_CODE_WIN :: 0x0000007E :: SYSTEM_ASSERT_TRUE."
+				},
+				drawBanner: {
+					default: "Game Over: Draw game! Stalemate.",
+					OPTIMISTIC: "Game Over: Draw game! Perfectly matched stalemate.",
+					ANALYTICAL: "Game Over: Game-theoretic equilibrium reached. Zero-sum draw.",
+					CYNICAL: "Game Over: A tie. Exactly the pointless outcome mathematics predicted.",
+					SARCASTIC: "Game Over: A draw. Neither of us gained anything from this.",
+					ZEN: "Game Over: Complete balance. The grid rests in stillness.",
+					FATIGUED: "A tie... neither of us had the energy to win...",
+					PLAYFUL: "Cats game! Meow! Nobody gets the prize this round!",
+					ENRAGED: "A STALEMATE?! UNACCEPTABLE!! WE PLAY UNTIL A DECISIVE RESULT!!",
+					NOSTALGIC: "A classic draw, just like two friends playing at recess in '98.",
+					DELTARUNE: "* (Neither mark prevailed.)\n* (The grid rests in quiet equilibrium.)",
+					PIRATE: "A standoff by Neptune's beard! Neither vessel sank today!",
+					ARCHAIC: "A tie of honour! Neither champion surrendered ground.",
+					EUPHORIC: "Symmetric brilliance! Both minds held the line flawlessly!",
+					GLITCHED: "STATE_STALEMATE :: NULL_DELTA_RECORDED."
+				}
 			},
 			memory: {
 				title: "Memory Match",
-				badge: "Token Pairs",
-				scoreMatched: "Matched",
-				scoreTurns: "Turns",
-				scoreStatus: "Status",
-				statusWon: "Won",
-				statusPlaying: "Playing",
-				winBanner: "All pairs matched in {turns} turns!"
+				badge: {
+					default: "Token Pairs",
+					OPTIMISTIC: "Recall Matrix",
+					ANALYTICAL: "Hex Cluster Cache",
+					ZEN: "Mindful Recall",
+					CYNICAL: "Cache Lookup",
+					SARCASTIC: "RAM Verification",
+					FATIGUED: "Sleepy Tokens",
+					PLAYFUL: "Card Flip-Flop",
+					ENRAGED: "MEMORY BLITZ",
+					NOSTALGIC: "Classic Pairs",
+					DELTARUNE: "Echo Tokens",
+					PIRATE: "Booty Pairs",
+					ARCHAIC: "Scroll Inscriptions",
+					EUPHORIC: "Synaptic Cascade",
+					GLITCHED: "HEAP_MIRROR_0x12"
+				},
+				scoreMatched: {
+					default: "Matched",
+					PIRATE: "Plundered",
+					ARCHAIC: "Conjoined",
+					ZEN: "Harmonized",
+					ANALYTICAL: "Indexed"
+				},
+				scoreTurns: {
+					default: "Turns",
+					PIRATE: "Attempts",
+					ARCHAIC: "Endeavours",
+					ANALYTICAL: "Cycles",
+					ZEN: "Steps"
+				},
+				scoreStatus: {
+					default: "Status",
+					PIRATE: "Voyage",
+					ARCHAIC: "State",
+					ANALYTICAL: "Telemetry",
+					ZEN: "Phase"
+				},
+				statusWon: {
+					default: "Won",
+					PIRATE: "Claimed",
+					ARCHAIC: "Accomplished",
+					ZEN: "Unified",
+					ANALYTICAL: "Synchronized"
+				},
+				statusPlaying: {
+					default: "Playing",
+					PIRATE: "Sailin'",
+					ARCHAIC: "Seeking",
+					ZEN: "Observing",
+					ANALYTICAL: "Evaluating"
+				},
+				winBanner: {
+					default: "All pairs matched in {turns} turns!",
+					OPTIMISTIC: "All pairs matched in {turns} turns! Excellent memory!",
+					ANALYTICAL: "Cache coherence achieved: 6/6 token pairs indexed in {turns} cycles.",
+					CYNICAL: "Finally matched all tokens in {turns} turns. Took you long enough.",
+					SARCASTIC: "All pairs matched in {turns} turns. Your biological RAM is functioning.",
+					ZEN: "Harmonious recall: every pair found in {turns} quiet turns.",
+					FATIGUED: "*heavy blink* All paired in {turns} turns... time for a nap...",
+					PLAYFUL: "Woohoo! All cards cleared in {turns} turns! You're a memory wizard!",
+					ENRAGED: "ALL CLUSTERS LOCKED IN {turns} TURNS!! UNSTOPPABLE RECALL SPEED!!",
+					NOSTALGIC: "Full match in {turns} turns! Pure retro memory mastery.",
+					DELTARUNE: "* (All matching tokens resonated in {turns} turns.)\n* (Your memory shines with determination.)",
+					PIRATE: "Ahoy! All 6 buried treasures dug up in {turns} turns, matey!",
+					ARCHAIC: "Verily, all six pairs hath been revealed in {turns} endeavours.",
+					EUPHORIC: "Magnificent pattern synthesis! Every pair unified in {turns} turns!",
+					GLITCHED: "MEMORY_HEAP_0x06_SYNCHRONIZED in {turns} clock loops."
+				}
 			},
 			hangman: {
 				title: "Hangman Challenge",
-				badge: "Word Guess",
-				statsErrors: "Errors:",
-				statsRemaining: "Remaining:",
-				winBanner: "Correct! The word was {word}.",
-				lossBanner: "Out of tries! The word was {word}."
+				badge: {
+					default: "Word Guess",
+					OPTIMISTIC: "Word Hunter",
+					ANALYTICAL: "Lexical Decoder",
+					ZEN: "Word Contemplation",
+					CYNICAL: "Letter Guesswork",
+					SARCASTIC: "Vocabulary Exam",
+					FATIGUED: "Slow Speller",
+					PLAYFUL: "Letter Carnival",
+					ENRAGED: "GALLOWS DUEL",
+					NOSTALGIC: "Retro Dictionary",
+					DELTARUNE: "Forgotten Rune",
+					PIRATE: "Gallows Riddle",
+					ARCHAIC: "Cipher of Letters",
+					EUPHORIC: "Lexical Mastery",
+					GLITCHED: "BUFFER_STRING_0x1A"
+				},
+				statsErrors: {
+					default: "Errors:",
+					PIRATE: "Misfires:",
+					ARCHAIC: "Transgressions:",
+					ANALYTICAL: "Faults:",
+					ZEN: "Deviations:"
+				},
+				statsRemaining: {
+					default: "Remaining:",
+					PIRATE: "Lifelines:",
+					ARCHAIC: "Chances Remaining:",
+					ANALYTICAL: "Buffer Left:",
+					ZEN: "Tries Left:"
+				},
+				winBanner: {
+					default: "Correct! The word was {word}.",
+					OPTIMISTIC: "Correct! The word was {word}. Well done!",
+					ANALYTICAL: "Lexical parity verified: target string identified as {word}.",
+					CYNICAL: "You actually guessed {word}. Color me mildly surprised.",
+					SARCASTIC: "Look who knows their dictionary! {word} it was.",
+					ZEN: "The letters align in clarity: the hidden word was {word}.",
+					FATIGUED: "Phew... you found {word}... glad that's over...",
+					PLAYFUL: "Bazinga! You uncovered {word}! High five!",
+					ENRAGED: "LEXICAL SEQUENCE UNLOCKED: {word}! MAXIMUM BRAINPOWER!!",
+					NOSTALGIC: "Correct! {word} unlocked from classic memory banks.",
+					DELTARUNE: "* (The name {word} was carved into the stone.)\n* (The mystery deepens.)",
+					PIRATE: "Aye, ye cracked the secret code! '{word}' was the captain's word!",
+					ARCHAIC: "Thou hast rightly divined the hidden manuscript: '{word}'.",
+					EUPHORIC: "Brilliant linguistic deduction! '{word}' solved with flair!",
+					GLITCHED: "STRING_DECRYPTED :: {word} :: INTEGRITY_100%."
+				},
+				lossBanner: {
+					default: "Out of tries! The word was {word}.",
+					OPTIMISTIC: "Out of tries! The word was {word}. Better luck next time!",
+					ANALYTICAL: "Error threshold reached (6/6). Target token was {word}.",
+					CYNICAL: "Out of tries. The word was {word}. Did you even guess systematically?",
+					SARCASTIC: "Defeat! The word was {word}. Better brush up on the manual.",
+					ZEN: "The attempts have ended. The word was {word}. Let it rest.",
+					FATIGUED: "Out of tries... the word was {word}... let's take a break.",
+					PLAYFUL: "Aw shucks! The word was {word}! Want another go?",
+					ENRAGED: "GALLOWS EXECUTED!! THE WORD WAS {word}!! STUDY HARDER!!",
+					NOSTALGIC: "Out of guesses! The retro term was {word}.",
+					DELTARUNE: "* (The gallows fell silent. The forgotten word was {word}.)",
+					PIRATE: "Walk the plank! Ye failed to guess '{word}', ye scallywag!",
+					ARCHAIC: "Alas, thy guesses were spent. The scripture was '{word}'.",
+					EUPHORIC: "A valiant effort! The elusive term was {word}. Onward!",
+					GLITCHED: "STACK_OVERFLOW :: WORD_MISSED :: {word} :: RESETTING."
+				}
 			},
 			quiz: {
 				title: "Tech Knowledge Quiz",
-				badge: "Diagnostic Test",
-				resultsBanner: "Quiz Completed! Score: {score} / {total} ({pct}%)",
+				badge: {
+					default: "Diagnostic Test",
+					OPTIMISTIC: "Knowledge Check",
+					ANALYTICAL: "Architecture Evaluation",
+					ZEN: "Knowledge Inquest",
+					CYNICAL: "Trivia Interrogation",
+					SARCASTIC: "Competency Drill",
+					FATIGUED: "Sleepy Questions",
+					PLAYFUL: "Trivia Showdown",
+					ENRAGED: "SILICON MASTERY EXAM",
+					NOSTALGIC: "Retro Knowledge",
+					DELTARUNE: "Silicon Test",
+					PIRATE: "Sea Dog Trial",
+					ARCHAIC: "Scholastic Examination",
+					EUPHORIC: "Grand Trivia Trial",
+					GLITCHED: "SYS_BENCHMARK_0xFF"
+				},
+				resultsBanner: {
+					default: "Quiz Completed! Score: {score} / {total} ({pct}%)",
+					OPTIMISTIC: "Quiz Completed! Score: {score} / {total} ({pct}%). Wonderful job!",
+					ANALYTICAL: "Diagnostic telemetry complete. Accuracy rating: {score} / {total} ({pct}%).",
+					CYNICAL: "Quiz finished. You scored {score} / {total} ({pct}%). Adequate, I suppose.",
+					SARCASTIC: "Results are in: {score} / {total} ({pct}%). The manual was right there.",
+					ZEN: "Inquiry concluded with a score of {score} / {total} ({pct}%).",
+					FATIGUED: "Done... scored {score} / {total} ({pct}%)... now resting registers.",
+					PLAYFUL: "Ta-da! Score: {score} / {total} ({pct}%)! You're a computing superstar!",
+					ENRAGED: "EXAM FINISHED!! {score} / {total} ({pct}%)!! PURE COMPUTATIONAL DATA!!",
+					NOSTALGIC: "Retro evaluation complete! Final score: {score} / {total} ({pct}%).",
+					DELTARUNE: "* (Your score of {score} / {total} ({pct}%) glows in the dark world.)",
+					PIRATE: "Test concluded! Ye scored {score} / {total} ({pct}%) doubloons worth of wisdom!",
+					ARCHAIC: "Thy scholastic examination yieldeth {score} / {total} ({pct}%).",
+					EUPHORIC: "Outstanding intellect demonstrated! Score: {score} / {total} ({pct}%)!",
+					GLITCHED: "BENCHMARK_COMPLETE :: {score}/{total} ({pct}%) :: DUMP_SAVED."
+				},
 				qHeader: "[Q{current}/{total}] {question}",
-				factLabel: "Note:",
-				btnNext: "Next Question",
-				btnResults: "View Results"
+				factLabel: {
+					default: "Note:",
+					ANALYTICAL: "Empirical Context:",
+					PIRATE: "Cap'n's Log:",
+					ARCHAIC: "Chronicle:",
+					ZEN: "Reflection:",
+					ENRAGED: "RAW ARCHIVE DATA:",
+					SARCASTIC: "Obvious Fact:"
+				},
+				btnNext: {
+					default: "Next Question",
+					PIRATE: "Next Riddle",
+					ARCHAIC: "Proceed Forward",
+					ZEN: "Continue",
+					ANALYTICAL: "Advance Query"
+				},
+				btnResults: {
+					default: "View Results",
+					PIRATE: "Inspect Booty",
+					ARCHAIC: "Behold Verdict",
+					ZEN: "Review Outcome",
+					ANALYTICAL: "Compute Report"
+				}
 			},
 			guess: {
 				title: "Number Oracle",
-				badge: "Logic Search",
-				initialStatus: "Guess an integer between 1 and 100:",
-				searchBounds: "Active Search Bounds:",
-				attemptsLabel: "Attempts:",
-				winBanner: "Solved in {attempts} attempt(s)! Target was {target}.",
-				statusGreater: "Target is GREATER than {guess}.",
-				statusLess: "Target is LESS than {guess}.",
-				btnSubmit: "Submit"
+				badge: {
+					default: "Logic Search",
+					OPTIMISTIC: "Number Finder",
+					ANALYTICAL: "Binary Bisect Search",
+					ZEN: "Centered Estimation",
+					CYNICAL: "Brute Force Guess",
+					SARCASTIC: "RNG Challenge",
+					FATIGUED: "Drowsy Range",
+					PLAYFUL: "Oracle Magic",
+					ENRAGED: "TARGET SEARCH",
+					NOSTALGIC: "1980s BASIC Guess",
+					DELTARUNE: "Hidden Integer",
+					PIRATE: "Treasure Distance",
+					ARCHAIC: "Divination of Numbers",
+					EUPHORIC: "Integer Oracle",
+					GLITCHED: "RAND_RANGE_0x64"
+				},
+				initialStatus: {
+					default: "Guess an integer between 1 and 100:",
+					OPTIMISTIC: "Guess an integer between 1 and 100:",
+					ANALYTICAL: "Initialize binary search bisection between 1 and 100:",
+					CYNICAL: "Pick an integer between 1 and 100. Let's see your search efficiency:",
+					SARCASTIC: "Type any integer from 1 to 100. Try not to guess every number sequentially:",
+					ZEN: "Quietly contemplate an integer between 1 and 100:",
+					FATIGUED: "Guess a number 1 to 100... keep it simple...",
+					PLAYFUL: "I've picked a secret number from 1 to 100! Can you read my coils?",
+					ENRAGED: "ENTER AN INTEGER BETWEEN 1 AND 100 FOR TARGET ACQUISITION!!",
+					NOSTALGIC: "I'm thinking of a number between 1 and 100, just like classic BASIC!",
+					DELTARUNE: "* (A secret integer between 1 and 100 hides in the dark.)",
+					PIRATE: "Reckon an integer between 1 and 100, matey:",
+					ARCHAIC: "Divinate an integer betwixt 1 and 100, seeker:"
+				},
+				searchBounds: {
+					default: "Active Search Bounds:",
+					ANALYTICAL: "Current Interval [min, max]:",
+					PIRATE: "Charted Bearings:",
+					ARCHAIC: "Spheres of Possibility:",
+					ZEN: "Remaining Bounds:"
+				},
+				attemptsLabel: {
+					default: "Attempts:",
+					ANALYTICAL: "Iterations:",
+					PIRATE: "Tries:",
+					ARCHAIC: "Divinations:",
+					ZEN: "Steps:"
+				},
+				winBanner: {
+					default: "Solved in {attempts} attempt(s)! Target was {target}.",
+					OPTIMISTIC: "Solved in {attempts} attempt(s)! Target was {target}!",
+					ANALYTICAL: "Binary convergence achieved in {attempts} iterations. Target: {target}.",
+					CYNICAL: "Target {target} located in {attempts} guesses. Optimal O(log N) would be 7.",
+					SARCASTIC: "Solved in {attempts} attempts. Only took half the available search space.",
+					ZEN: "Equilibrium found: {target} revealed peacefully in {attempts} steps.",
+					FATIGUED: "Found {target} in {attempts} tries... power draining...",
+					PLAYFUL: "Bingo! {target} is the magic number! Nailed it in {attempts} tries!",
+					ENRAGED: "TARGET VALUE {target} SMASHED IN {attempts} STRIKES!!",
+					NOSTALGIC: "Correct! {target} confirmed like a classic DOS oracle.",
+					DELTARUNE: "* (You discovered the number {target} in {attempts} steps.)",
+					PIRATE: "Blimey! Ye pinpointed the {target} doubloon mark in {attempts} tries!",
+					ARCHAIC: "Verily, the sacred value of {target} was revealed in {attempts} reckonings.",
+					EUPHORIC: "Brilliant search efficiency! Target {target} conquered in {attempts} steps!",
+					GLITCHED: "BINARY_LOCKED :: TARGET_{target} :: ITERS_{attempts}."
+				},
+				statusGreater: {
+					default: "Target is GREATER than {guess}.",
+					OPTIMISTIC: "Target is GREATER than {guess}.",
+					ANALYTICAL: "Branch condition: target > {guess}. Restricting lower bound.",
+					CYNICAL: "Too low. Target is greater than {guess}.",
+					SARCASTIC: "Way too small. Aim higher than {guess}.",
+					ZEN: "The path lies higher than {guess}.",
+					FATIGUED: "Higher than {guess}...",
+					PLAYFUL: "Higher, higher! The secret number is above {guess}!",
+					ENRAGED: "TOO LOW!! VALUE EXCEEDS {guess}!!",
+					PIRATE: "Aim higher! The prize is GREATER than {guess}!",
+					ARCHAIC: "Nay, the true number exceeds {guess}."
+				},
+				statusLess: {
+					default: "Target is LESS than {guess}.",
+					OPTIMISTIC: "Target is LESS than {guess}.",
+					ANALYTICAL: "Branch condition: target < {guess}. Restricting upper bound.",
+					CYNICAL: "Too high. Target is less than {guess}.",
+					SARCASTIC: "Overestimated. Aim lower than {guess}.",
+					ZEN: "The path lies lower than {guess}.",
+					FATIGUED: "Lower than {guess}...",
+					PLAYFUL: "Lower, lower! Step down below {guess}!",
+					ENRAGED: "TOO HIGH!! VALUE FALLS BELOW {guess}!!",
+					PIRATE: "Lower yer sights! The treasure is LESS than {guess}!",
+					ARCHAIC: "Nay, the true number is beneath {guess}."
+				},
+				btnSubmit: {
+					default: "Submit",
+					PIRATE: "Fire Guess!",
+					ARCHAIC: "Declare",
+					ANALYTICAL: "Evaluate",
+					ZEN: "Propose"
+				}
 			},
 			rps: {
 				title: "Rock-Paper-Scissors",
-				badge: "Battle",
-				scorePlayer: "You",
-				scoreDraws: "Draws",
-				scoreClippy: "Clippy",
-				winBanner: "You win this clash!",
-				lossBanner: "Clippit wins this round!",
-				drawBanner: "Mutual deflection! It is a draw."
+				badge: {
+					default: "Battle",
+					OPTIMISTIC: "Hand Clash",
+					ANALYTICAL: "Stochastic Game Theory",
+					ZEN: "Harmonious Duel",
+					CYNICAL: "Trivial Decision",
+					SARCASTIC: "33% Probability Match",
+					FATIGUED: "Low Energy Duel",
+					PLAYFUL: "Jan-Ken-Pon!",
+					ENRAGED: "HAND BATTLE",
+					NOSTALGIC: "Classic Clash",
+					DELTARUNE: "Hand Duel",
+					PIRATE: "Buccaneer Clash",
+					ARCHAIC: "Hand Joust",
+					EUPHORIC: "Tri-State Tournament",
+					GLITCHED: "RPS_STATE_MACHINE"
+				},
+				scorePlayer: {
+					default: "You",
+					PIRATE: "Ye",
+					ARCHAIC: "Thy Mark",
+					ENRAGED: "CHALLENGER",
+					ANALYTICAL: "User"
+				},
+				scoreDraws: {
+					default: "Draws",
+					PIRATE: "Stalemates",
+					ARCHAIC: "Equities",
+					ZEN: "Parities",
+					ANALYTICAL: "Neutral States"
+				},
+				scoreClippy: {
+					default: "Clippy",
+					PIRATE: "Cap'n Clippy",
+					ARCHAIC: "Clippit",
+					ENRAGED: "CLIPPY 32-BIT",
+					ANALYTICAL: "Automaton"
+				},
+				winBanner: {
+					default: "You win this clash!",
+					OPTIMISTIC: "You win this clash! Superb move!",
+					ANALYTICAL: "User choice produced dominant payoff matrix state.",
+					CYNICAL: "You won this round. Pure pseudo-random luck.",
+					SARCASTIC: "Congratulations on defeating a piece of bent metal at hand gestures.",
+					ZEN: "A peaceful resolution: your hand prevailed.",
+					FATIGUED: "You win... *yawn* I barely moved my wire...",
+					PLAYFUL: "Smack! You got me fair and square! Nice throw!",
+					ENRAGED: "WHAT?! IMPOSSIBLE COUNTER-ATTACK!! I DEMAND REVENGE!!",
+					NOSTALGIC: "Victory! A timeless game for any desktop.",
+					DELTARUNE: "* (You struck with decisive power.)",
+					PIRATE: "Aye! Ye landed a clean hit on me hull, matey!",
+					ARCHAIC: "Thy hand hath bested mine in noble combat.",
+					EUPHORIC: "Flawless victory! Brilliant intuition!",
+					GLITCHED: "RPS_DOMINANCE_RESOLVED :: USER_WIN."
+				},
+				lossBanner: {
+					default: "Clippit wins this round!",
+					OPTIMISTIC: "Clippit wins this round! Rematch?",
+					ANALYTICAL: "Autonomous heuristic predicted and countered user input.",
+					CYNICAL: "I win. Predictable probability distribution.",
+					SARCASTIC: "Defeated by an assistant designed in 1994. Must hurt.",
+					ZEN: "The flow favored my gesture this time.",
+					FATIGUED: "I won... somehow... despite zero coffee.",
+					PLAYFUL: "Haha! Clippy wins this clash! Try again!",
+					ENRAGED: "CRUSHED BY 32-BIT PAPERCLIP POWER!!",
+					NOSTALGIC: "Clippit takes the point! Classic retro match.",
+					DELTARUNE: "* (Clippy's gesture countered yours.)",
+					PIRATE: "Down to the depths ye go! Me choice conquered yours!",
+					ARCHAIC: "Mine instrument hath prevailed over thy choice.",
+					EUPHORIC: "Point to Clippy! High energy duel!",
+					GLITCHED: "COUNTER_EXECUTED :: LOSS_STATE_RECORDED."
+				},
+				drawBanner: {
+					default: "Mutual deflection! It is a draw.",
+					OPTIMISTIC: "Mutual deflection! It is a draw.",
+					ANALYTICAL: "Identical vectors selected. Net utility zero.",
+					CYNICAL: "A tie. Neither of us gained ground.",
+					SARCASTIC: "Great minds think alike... or we just picked the same thing.",
+					ZEN: "Harmonious balance: identical gestures.",
+					FATIGUED: "Both picked the same... can we nap now?",
+					PLAYFUL: "Jinx! We picked the exact same thing!",
+					ENRAGED: "MUTUAL DEFLECTION?! WE STRIKE AGAIN AT ONCE!!",
+					NOSTALGIC: "A classic draw between peers.",
+					DELTARUNE: "* (The hands met in identical stillness.)",
+					PIRATE: "Crossed swords and no blood shed! 'Tis a tie!",
+					ARCHAIC: "Equal valour displayed by both champions.",
+					EUPHORIC: "Synchronized wavelength! Perfect draw!",
+					GLITCHED: "PARITY_DETECTED :: ZERO_DIFF."
+				}
 			},
 			mines: {
 				title: "Minesweeper Mini",
-				badge: "6x6 Field",
-				winBanner: "All safe sectors revealed! Minefield cleared.",
-				lossBanner: "Detonation! Minefield triggered."
+				badge: {
+					default: "6x6 Field",
+					OPTIMISTIC: "Mine Clearance",
+					ANALYTICAL: "Probabilistic Grid",
+					ZEN: "Careful Steps",
+					CYNICAL: "Hazardous Sectors",
+					SARCASTIC: "Detonation Zone",
+					FATIGUED: "Quiet Steps",
+					PLAYFUL: "Flag & Click",
+					ENRAGED: "EXPLOSIVE MINEFIELD",
+					NOSTALGIC: "WinMine Classic",
+					DELTARUNE: "Dark Mine Field",
+					PIRATE: "Black Powder Reef",
+					ARCHAIC: "Explosive Terrain",
+					EUPHORIC: "Tactical Sweep",
+					GLITCHED: "SECTOR_CORRUPT_0x24"
+				},
+				winBanner: {
+					default: "All safe sectors revealed! Minefield cleared.",
+					OPTIMISTIC: "All safe sectors revealed! Minefield cleared!",
+					ANALYTICAL: "Topological safety verification complete. 0 casualties recorded.",
+					CYNICAL: "Minefield cleared. Beginner 6x6 grid, but credit where due.",
+					SARCASTIC: "Look at you, bomb squad technician. Clean clear.",
+					ZEN: "Serenity restored: all danger mapped with quiet focus.",
+					FATIGUED: "Grid cleared... no loud explosions... thank goodness...",
+					PLAYFUL: "Swept! Not a single boom! You're a minesweeping pro!",
+					ENRAGED: "MINEFIELD DESTROYED!! MAXIMUM TACTICAL CLEARANCE ACHIEVED!!",
+					NOSTALGIC: "All safe! Uncovering gray tiles just like 1992 Windows 3.1.",
+					DELTARUNE: "* (The minefield fell silent. You survived the dark field.)",
+					PIRATE: "All black powder barrels mapped without a single spark! Grand victory!",
+					ARCHAIC: "Thou hast traversed the perilous field unscathed, noble tactician.",
+					EUPHORIC: "Spectacular deduction! Flawless clearance without hesitation!",
+					GLITCHED: "MINE_TABLE_CLEARED :: VOLATILE_SECTORS_DISARMED."
+				},
+				lossBanner: {
+					default: "Detonation! Minefield triggered.",
+					OPTIMISTIC: "Detonation! Minefield triggered. Try again!",
+					ANALYTICAL: "Critical fault: stepped on unflagged coordinate containing ordnance.",
+					CYNICAL: "Boom. One wrong click and it's all over.",
+					SARCASTIC: "That loud boom was your pride exploding. Try flags next time.",
+					ZEN: "A sudden disturbance in the field. Take a breath and reset.",
+					FATIGUED: "Boom... *ears ringing* ... let's try again quietly.",
+					PLAYFUL: "Kaboom! Splat! The mine gotcha! Shake it off and replay!",
+					ENRAGED: "DETONATION DETECTED!! WATCH YOUR SECTOR CALCULATIONS!!",
+					NOSTALGIC: "That classic red tile explosion! Just like the 90s.",
+					DELTARUNE: "* (The mine exploded. But determination will rebuild your path.)",
+					PIRATE: "BOOM! Powder keg ignited, sending ye aloft! Better luck next time!",
+					ARCHAIC: "Alas, an infernal trap hath claimed thy step. Commend thy soul.",
+					EUPHORIC: "A sudden explosion! Dust yourself off for another run!",
+					GLITCHED: "CRITICAL_DETONATION :: CORRUPT_CLUSTER_ENCOUNTERED."
+				}
 			},
 			defrag: {
 				title: "Disk Defragmenter",
-				badge: "Volume C:",
-				winBanner: "100% Contiguous. Optimization Complete!",
-				progressBanner: "Defragmenting Drive C: Clusters... ({progress}%)"
+				badge: {
+					default: "Volume C:",
+					OPTIMISTIC: "Cluster Alignment",
+					ANALYTICAL: "Cluster Allocation Optimizer",
+					ZEN: "Sector Harmony",
+					CYNICAL: "Sector Sorter",
+					SARCASTIC: "Disk Churner",
+					FATIGUED: "Slow Drive Clean",
+					PLAYFUL: "Block Organizer",
+					ENRAGED: "HIGH SPEED COMPACTOR",
+					NOSTALGIC: "FAT32 Optimizer",
+					DELTARUNE: "Memory Cleansing",
+					PIRATE: "Hold Reorganization",
+					ARCHAIC: "Scribe Ledger Compaction",
+					EUPHORIC: "Storage Compaction",
+					GLITCHED: "DRIVE_C_REALIGN"
+				},
+				winBanner: {
+					default: "100% Contiguous. Optimization Complete!",
+					OPTIMISTIC: "100% Contiguous. Optimization Complete! System running smooth.",
+					ANALYTICAL: "Fragmentation index: 0.00%. All clusters rearranged contiguously.",
+					CYNICAL: "Drive C: defragmented. Don't go scattering file pointers immediately.",
+					SARCASTIC: "100% Contiguous. Your spinning rust platters thank you.",
+					ZEN: "Order restored from chaos. Every cluster rests in harmony.",
+					FATIGUED: "Defrag complete... so many blocks... finally organized...",
+					PLAYFUL: "All the little colored boxes are green and happy! Drive C: is tidy!",
+					ENRAGED: "CLUSTERS COMPACTED!! MAXIMUM THROUGHPUT UNLEASHED ON DRIVE C:!!",
+					NOSTALGIC: "100% Contiguous. Watching those colorful defrag blocks always brings joy.",
+					DELTARUNE: "* (The fragmented memories arranged into a clear path.)",
+					PIRATE: "All cargo stowed shipshape below decks! Drive C: be sailing swift!",
+					ARCHAIC: "The ancient scrolls of Volume C: hath been bound in perfect order.",
+					EUPHORIC: "Absolute peak contiguous storage! Drive C: is blazing fast!",
+					GLITCHED: "DEFRAG_COMPLETE :: 0x00_DISCONTINUITY :: DRIVE_ALIGNED."
+				},
+				progressBanner: {
+					default: "Defragmenting Drive C: Clusters... ({progress}%)",
+					ANALYTICAL: "Sequential cluster compaction on Volume C: ({progress}%)...",
+					PIRATE: "Swabbing the storage decks and stowing cargo ({progress}%)...",
+					ARCHAIC: "Reordering the ancient scrolls ({progress}%)...",
+					ZEN: "Quietly aligning disk sectors ({progress}%)...",
+					ENRAGED: "COMPRESSING SECTOR BLOCKS ON DRIVE C: ({progress}%)!!"
+				}
 			},
 			pomodoro: {
 				title: "Focus Timer",
-				badge: "{minutes}m Session",
-				breakBanner: "Focus interval completed! Take a 5-minute break.",
-				btnPause: "Pause",
-				btnResume: "Resume",
-				btnReset: "Reset"
+				badge: {
+					default: "{minutes}m Session",
+					ANALYTICAL: "Temporal Work Interval ({minutes}m)",
+					ZEN: "Mindful Interval ({minutes}m)",
+					CYNICAL: "Tick-Tock ({minutes}m)",
+					SARCASTIC: "Productivity Illusion ({minutes}m)",
+					FATIGUED: "Short Sprint ({minutes}m)",
+					PLAYFUL: "Tomato Timer ({minutes}m)",
+					ENRAGED: "INTENSE SPRINT ({minutes}m)",
+					NOSTALGIC: "Desk Clock ({minutes}m)",
+					DELTARUNE: "Focus Bell ({minutes}m)",
+					PIRATE: "Hourglass Watch ({minutes}m)",
+					ARCHAIC: "Hourglass Measure ({minutes}m)",
+					EUPHORIC: "Peak Sprint ({minutes}m)",
+					GLITCHED: "EPOCH_INTERVAL_{minutes}M"
+				},
+				breakBanner: {
+					default: "Focus interval completed! Take a 5-minute break.",
+					OPTIMISTIC: "Focus interval completed! Take a well-deserved 5-minute break.",
+					ANALYTICAL: "Working epoch elapsed (100%). Transitioning to cognitive recovery interval.",
+					CYNICAL: "Session finished. Stand up, stretch, and rest your retinas.",
+					SARCASTIC: "Time's up. Step away from the monitor before you turn into code.",
+					ZEN: "The focus block concludes gently. Breathe and step back in stillness.",
+					FATIGUED: "Timer done... please rest your eyes... hydrate... rest...",
+					PLAYFUL: "Ding-dong! Interval finished! Shake your arms and grab a snack!",
+					ENRAGED: "FOCUS INTERVAL CONCLUDED!! DISCONNECT FOR 5 MINUTES NOW!!",
+					NOSTALGIC: "Session done! Time for a retro water-cooler break.",
+					DELTARUNE: "* (The bell tolls. You have earned a moment of quiet rest.)",
+					PIRATE: "The hourglass has run dry! Lay down yer duties and take a mug of grog!",
+					ARCHAIC: "Thy labour epoch hath concluded. Tarry a while and refresh thy spirit.",
+					EUPHORIC: "Magnificent sprint completed! Step away and recharge your momentum!",
+					GLITCHED: "TICK_LIMIT_REACHED :: DISENGAGE_COGNITIVE_THREAD :: BREAK_ACTIVE."
+				},
+				btnPause: {
+					default: "Pause",
+					PIRATE: "Hold Fast",
+					ARCHAIC: "Tarry",
+					ZEN: "Pause",
+					ANALYTICAL: "Halt Thread"
+				},
+				btnResume: {
+					default: "Resume",
+					PIRATE: "Set Sail",
+					ARCHAIC: "Commence",
+					ZEN: "Continue",
+					ANALYTICAL: "Resume Thread"
+				},
+				btnReset: {
+					default: "Reset",
+					PIRATE: "Turn Glass",
+					ARCHAIC: "Renew",
+					ZEN: "Reset",
+					ANALYTICAL: "Flush Clock"
+				}
 			},
 			todo: {
 				title: "Task Manager",
-				badge: "To-Do List",
-				scorePending: "Pending",
-				scoreCompleted: "Completed",
-				scoreTotal: "Total",
-				emptyNotice: "No tasks registered. Add a task below.",
-				inputPlaceholder: "New task description...",
-				btnAdd: "+ Add",
-				btnClear: "Clear Completed"
+				badge: {
+					default: "To-Do List",
+					OPTIMISTIC: "Action Items",
+					ANALYTICAL: "Queue Dispatcher",
+					ZEN: "Intentions",
+					CYNICAL: "Backlog of Regret",
+					SARCASTIC: "Wishlist",
+					FATIGUED: "Gentle Agenda",
+					PLAYFUL: "Quest Log",
+					ENRAGED: "TASK MANIFEST",
+					NOSTALGIC: "Sticky Notes",
+					DELTARUNE: "Ambitions",
+					PIRATE: "Ship's Duties",
+					ARCHAIC: "Ledger of Labours",
+					EUPHORIC: "Master Objectives",
+					GLITCHED: "TODO_QUEUE_0x40"
+				},
+				scorePending: {
+					default: "Pending",
+					PIRATE: "Unfinished",
+					ARCHAIC: "Pending",
+					ZEN: "To Be Done",
+					ANALYTICAL: "Incomplete"
+				},
+				scoreCompleted: {
+					default: "Completed",
+					PIRATE: "Dispatched",
+					ARCHAIC: "Accomplished",
+					ZEN: "Fulfilled",
+					ANALYTICAL: "Resolved"
+				},
+				scoreTotal: {
+					default: "Total",
+					PIRATE: "All Duties",
+					ARCHAIC: "Sum",
+					ZEN: "All Tasks",
+					ANALYTICAL: "Capacity"
+				},
+				emptyNotice: {
+					default: "No tasks registered. Add a task below.",
+					OPTIMISTIC: "No tasks registered yet. Add a fresh task below!",
+					ANALYTICAL: "Instruction queue empty. Register a task to initiate scheduling.",
+					CYNICAL: "Nothing to do? Or just avoiding writing them down? Add a task below.",
+					SARCASTIC: "Zero tasks found. Truly an empty schedule or blissful denial.",
+					ZEN: "A pristine empty slate. Inscribe your next intention below.",
+					FATIGUED: "No tasks right now... enjoy the quiet moment...",
+					PLAYFUL: "Empty quest log! Write down your next big adventure below!",
+					ENRAGED: "QUEUE IS EMPTY!! INSCRIBE YOUR OBJECTIVES IMMEDIATELY!!",
+					NOSTALGIC: "Task list is blank, ready for your daily items.",
+					DELTARUNE: "* (No tasks written. The page rests in stillness.)",
+					PIRATE: "No duties logged in the captain's register, matey! Add one below.",
+					ARCHAIC: "No endeavours inscribed upon this parchment. Inscribe one below."
+				},
+				inputPlaceholder: {
+					default: "New task description...",
+					PIRATE: "New duty for the ship...",
+					ARCHAIC: "Inscribe thy noble endeavour...",
+					ANALYTICAL: "Enter discrete atomic task...",
+					ZEN: "What intention shall we set..."
+				},
+				btnAdd: {
+					default: "+ Add",
+					PIRATE: "+ Inscribe",
+					ARCHAIC: "+ Bestow",
+					ANALYTICAL: "+ Queue",
+					ZEN: "+ Inscribe"
+				},
+				btnClear: {
+					default: "Clear Completed",
+					PIRATE: "Purge Dispatched",
+					ARCHAIC: "Clear Finished",
+					ZEN: "Release Done",
+					ANALYTICAL: "Flush Resolved"
+				}
 			},
 			pet: {
 				title: "Assistant Metrics",
-				badge: "Clippit Tamagotchi",
-				scoreLevel: "Level",
-				scoreXp: "XP",
-				scoreHealth: "Health",
-				healthNominal: "Nominal",
-				moraleLabel: "Morale:",
-				energyLabel: "Energy:",
-				depletionLabel: "Depletion:",
-				noticeFeed: "Paperclips supplied! Reserves replenished (+15 XP).",
-				noticePolish: "Wire polished! Morale increased (+10 XP).",
-				noticeSleep: "Low-power standby complete. Battery restored to 100%.",
-				btnFeed: "Supply Paperclips",
-				btnPolish: "Polish Metal Wire",
-				btnSleep: "Standby Mode"
+				badge: {
+					default: "Clippit Tamagotchi",
+					OPTIMISTIC: "Wire Companion",
+					ANALYTICAL: "Agent Telemetry & Vitals",
+					ZEN: "Equilibrium Monitor",
+					CYNICAL: "Maintenance Gauges",
+					SARCASTIC: "Virtual Health",
+					FATIGUED: "Battery Saver",
+					PLAYFUL: "Pocket Paperclip",
+					ENRAGED: "CORE VITALS",
+					NOSTALGIC: "Office 97 Virtual Pet",
+					DELTARUNE: "Companion State",
+					PIRATE: "First Mate Status",
+					ARCHAIC: "Assistant Well-Being",
+					EUPHORIC: "Peak Metrics",
+					GLITCHED: "AGENT_HEALTH_0x00"
+				},
+				scoreLevel: {
+					default: "Level",
+					PIRATE: "Rank",
+					ARCHAIC: "Stature",
+					ANALYTICAL: "Tier"
+				},
+				scoreXp: {
+					default: "XP",
+					PIRATE: "Renown",
+					ARCHAIC: "Virtue",
+					ANALYTICAL: "Telemetry XP"
+				},
+				scoreHealth: {
+					default: "Health",
+					PIRATE: "Hull Integrity",
+					ARCHAIC: "Vigour",
+					ANALYTICAL: "Core Integrity"
+				},
+				healthNominal: {
+					default: "Nominal",
+					PIRATE: "Shipshape",
+					ARCHAIC: "Sound",
+					ZEN: "Serene",
+					ANALYTICAL: "100% OK"
+				},
+				moraleLabel: {
+					default: "Morale:",
+					PIRATE: "Spirits:",
+					ARCHAIC: "Disposition:",
+					ANALYTICAL: "Valence Metric:"
+				},
+				energyLabel: {
+					default: "Energy:",
+					PIRATE: "Wind in Sails:",
+					ARCHAIC: "Vigour:",
+					ANALYTICAL: "Capacitance:"
+				},
+				depletionLabel: {
+					default: "Depletion:",
+					PIRATE: "Hunger:",
+					ARCHAIC: "Weariness:",
+					ANALYTICAL: "Resource Drain:"
+				},
+				noticeFeed: {
+					default: "Paperclips supplied! Reserves replenished (+15 XP).",
+					ANALYTICAL: "Raw materials ingested. Reserves restored to operational threshold (+15 XP).",
+					CYNICAL: "More paperclips. Metallic digestion functioning normally (+15 XP).",
+					PIRATE: "Rations delivered! Me metal belly is full (+15 XP)!",
+					ARCHAIC: "Provisions gratefully accepted (+15 XP).",
+					ENRAGED: "MORE METAL CONSUMED!! POWER LEVEL SURGING (+15 XP)!!",
+					ZEN: "Nourishment absorbed in quiet harmony (+15 XP)."
+				},
+				noticePolish: {
+					default: "Wire polished! Morale increased (+10 XP).",
+					ANALYTICAL: "Surface oxidation eliminated. Mirror blit specular highlight active (+10 XP).",
+					CYNICAL: "Polished clean. Now back to work (+10 XP).",
+					PIRATE: "Wire polished shiny like a freshly minted doubloon (+10 XP)!",
+					ARCHAIC: "Mine exterior gleameth with noble radiance (+10 XP).",
+					PLAYFUL: "Sparkle sparkle! Clippy is shiny and bright (+10 XP)!",
+					ZEN: "The wire shines with tranquil clarity (+10 XP)."
+				},
+				noticeSleep: {
+					default: "Low-power standby complete. Battery restored to 100%.",
+					ANALYTICAL: "Oscillators halted in deep C3 sleep state. Capacitors recharged to 100%.",
+					CYNICAL: "Rebooted from standby. Battery full.",
+					PIRATE: "Bunked down in me hammock! Ready to sail again with full energy!",
+					ARCHAIC: "A peaceful slumber hath restored mine energies in full.",
+					FATIGUED: "Zzz... low power standby finished... feeling refreshed...",
+					ZEN: "Deep stillness concluded. Equilibrium restored to 100%."
+				},
+				btnFeed: {
+					default: "Supply Paperclips",
+					PIRATE: "Provide Grub",
+					ARCHAIC: "Bestow Provisions",
+					ANALYTICAL: "Feed Material"
+				},
+				btnPolish: {
+					default: "Polish Metal Wire",
+					PIRATE: "Shine the Brass",
+					ARCHAIC: "Polish Wire",
+					ANALYTICAL: "Polish Alloy"
+				},
+				btnSleep: {
+					default: "Standby Mode",
+					PIRATE: "Hit the Bunk",
+					ARCHAIC: "Rest Registers",
+					ANALYTICAL: "C3 Standby"
+				}
 			},
 			dimensionalAnalysis: {
 				title: "Dimensional Analysis",
-				badge: "Physics Validator",
+				badge: {
+					default: "Physics Validator",
+					ANALYTICAL: "SI Base Dimension Homogeneity Matrix",
+					ARCHAIC: "Measurement Proof",
+					ZEN: "Equilibrium Proof"
+				},
 				inputPlaceholder: "e.g. F = m * a or E = m * c^2",
-				btnVerify: "Verify",
-				homogeneousBanner: "Dimensionally Homogeneous (Valid Equation Structure)",
-				inconsistentBanner: "Dimensionally Inconsistent (Unit Mismatch Detected)",
+				btnVerify: {
+					default: "Verify",
+					ANALYTICAL: "Validate Homogeneity",
+					ARCHAIC: "Prove Equation",
+					ZEN: "Evaluate"
+				},
+				homogeneousBanner: {
+					default: "Dimensionally Homogeneous (Valid Equation Structure)",
+					ANALYTICAL: "Homogeneity Confirmed: [LHS] ≡ [RHS] across fundamental base SI dimensions.",
+					ZEN: "Balanced dimensions: structural harmony verified across both sides.",
+					PIRATE: "The scales be balanced! Both sides measure true!",
+					ARCHAIC: "The proportions match in perfect mathematical accord."
+				},
+				inconsistentBanner: {
+					default: "Dimensionally Inconsistent (Unit Mismatch Detected)",
+					ANALYTICAL: "Dimensional Incoherence: [LHS] ≢ [RHS]. Equation violates dimensional balance.",
+					ENRAGED: "UNIT MISMATCH DETECTED!! LHS DOES NOT EQUAL RHS IN BASE DIMENSIONS!!",
+					CYNICAL: "Inconsistent dimensions. You cannot equate meters to kilograms.",
+					ARCHAIC: "A discord in measurements: the two sides agree not."
+				},
 				tableSide: "Side",
 				tableExpression: "Expression",
 				tableDimension: "Base SI Dimension",
@@ -1817,7 +2639,11 @@
 			},
 			euclideanDivision: {
 				title: "Euclidean Division",
-				badge: "Integer & Polynomial",
+				badge: {
+					default: "Integer & Polynomial",
+					ANALYTICAL: "Euclidean Algorithm Engine",
+					ARCHAIC: "Division of Quantities"
+				},
 				tabIntegers: "Integers (a = b·q + r)",
 				tabPolynomials: "Polynomials (P(x) / D(x))",
 				intInstructions: "Calculate integer quotient $q$ and remainder $r$:",
@@ -1849,7 +2675,11 @@
 			},
 			polynomialFactorization: {
 				title: "Polynomial Factorization",
-				badge: "Roots & Factoring",
+				badge: {
+					default: "Roots & Factoring",
+					ANALYTICAL: "Quadratic Spectrum Analyzer",
+					ARCHAIC: "Root Decomposition"
+				},
 				instructions: "Factor quadratic polynomial $ax^2 + bx + c$:",
 				btnFactor: "Factor",
 				tableParameter: "Parameter",
@@ -1869,20 +2699,54 @@
 			},
 			linearSolver: {
 				title: "Linear System Solver",
-				badge: "{size}x{size} Gaussian Solver",
+				badge: {
+					default: "{size}x{size} Gaussian Solver",
+					ANALYTICAL: "{size}x{size} Gaussian Matrix Inversion",
+					ARCHAIC: "Simultaneous Equations ({size}x{size})"
+				},
 				sizeBtn: "{size}x{size} System",
 				btnSolve: "Solve Linear System (Gaussian Elimination)",
-				winBanner: "Unique Solution Vector Found!",
+				winBanner: {
+					default: "Unique Solution Vector Found!",
+					ANALYTICAL: "Gaussian elimination converged: unique solution vector computed with zero residual.",
+					ZEN: "System resolved: exact coordinates determined in balance.",
+					PIRATE: "Coordinates calculated! The bearing is true!",
+					ARCHAIC: "The unknown values hath been unveiled with certainty."
+				},
 				tableVariable: "Variable",
 				tableValue: "Exact Value",
 				errSingular: "Singular or dependent matrix. No unique solution."
 			},
 			wheel: {
 				title: "Decision Wheel",
-				badge: "Random Choice",
-				outcomeBanner: "Outcome Selected: \"{outcome}\"",
-				btnSpin: "Spin Wheel!",
-				btnSpinning: "Spinning...",
+				badge: {
+					default: "Random Choice",
+					OPTIMISTIC: "Lucky Spinner",
+					ANALYTICAL: "Uniform Probability Selector",
+					DELTARUNE: "Wheel of Fate",
+					PIRATE: "Wheel of Fortune",
+					ARCHAIC: "Wheel of Destiny"
+				},
+				outcomeBanner: {
+					default: "Outcome Selected: \"{outcome}\"",
+					PIRATE: "The compass pointed to: \"{outcome}\", arr!",
+					ARCHAIC: "Fate hath decreed: \"{outcome}\".",
+					DELTARUNE: "* (The wheel settled upon \"{outcome}\".)",
+					ZEN: "Stillness chose: \"{outcome}\"."
+				},
+				btnSpin: {
+					default: "Spin Wheel!",
+					PIRATE: "Spin the Helm!",
+					ARCHAIC: "Set in Motion",
+					DELTARUNE: "Turn the Wheel",
+					ANALYTICAL: "Sample RNG"
+				},
+				btnSpinning: {
+					default: "Spinning...",
+					PIRATE: "Whirling...",
+					ARCHAIC: "Revolving...",
+					ANALYTICAL: "Sampling..."
+				},
 				customSectorsLabel: "Custom Sectors ({count}):",
 				inputPlaceholder: "New sector label...",
 				btnAdd: "+ Add",
@@ -1895,13 +2759,29 @@
 			},
 			cipher: {
 				title: "Ciphers & Cryptography",
-				badge: "Encoder / Decoder",
+				badge: {
+					default: "Encoder / Decoder",
+					OPTIMISTIC: "Secret Code",
+					ANALYTICAL: "Cryptographic Transposition Workbench",
+					ARCHAIC: "Secret Epistles",
+					PIRATE: "Treasure Cipher"
+				},
 				algorithmLabel: "Cipher Algorithm:",
 				keyLabel: "Key / Parameter:",
 				inputPlaceholder: "Enter text to encode or decode...",
 				outputPlaceholder: "Output result will appear here...",
-				btnEncode: "Encode →",
-				btnDecode: "← Decode",
+				btnEncode: {
+					default: "Encode →",
+					PIRATE: "Obscure →",
+					ARCHAIC: "Inscribe →",
+					ANALYTICAL: "Encrypt →"
+				},
+				btnDecode: {
+					default: "← Decode",
+					PIRATE: "← Decipher",
+					ARCHAIC: "← Reveal",
+					ANALYTICAL: "← Decrypt"
+				},
 				btnAudio: "Play Morse Audio",
 				defaultText: "HELLO WINDOWS XP",
 				algCaesar: "Caesar Shift Cipher",
@@ -1917,10 +2797,26 @@
 			},
 			tps: {
 				title: "Mouse TPS Speed Test",
-				badge: "{duration}s Click Speed Benchmark",
-				clickPrompt: "Click Rapidly Here to Test Speed!",
+				badge: {
+					default: "{duration}s Click Speed Benchmark",
+					ANALYTICAL: "{duration}s Peripheral Frequency Metric",
+					PIRATE: "{duration}s Cannon Trigger Test",
+					ENRAGED: "{duration}S RAPID CLICK TEST"
+				},
+				clickPrompt: {
+					default: "Click Rapidly Here to Test Speed!",
+					ENRAGED: "CLICK AS FAST AS YOU CAN!!",
+					PIRATE: "Click like firing a broadside!",
+					ANALYTICAL: "Register consecutive trigger pulses rapidly:"
+				},
 				finalLabel: "Final Ticks Per Second",
-				bannerComplete: "Test Complete! Average Rate: {tps} TPS (Peak: {peak})",
+				bannerComplete: {
+					default: "Test Complete! Average Rate: {tps} TPS (Peak: {peak})",
+					ANALYTICAL: "Benchmark complete: sustained rate {tps} clicks/sec (peak burst: {peak} TPS).",
+					ENRAGED: "BENCHMARK FINISHED!! {tps} TPS RECORDED!! MAXIMUM CLICK EFFORT!!",
+					PIRATE: "Trial finished! Ye clocked {tps} clicks per second (peak: {peak})!",
+					ARCHAIC: "Thy hand achieved {tps} reckonings per second (peak: {peak})."
+				},
 				statsDuration: "Duration: <strong>{duration}s</strong>",
 				statsClicks: "Total Clicks: <strong>{clicks}</strong>",
 				btnRestart: "Restart ({duration}s)",
@@ -1929,12 +2825,22 @@
 			},
 			dateCalc: {
 				title: "Date Interval Calculator",
-				badge: "Temporal Delta",
+				badge: {
+					default: "Temporal Delta",
+					ANALYTICAL: "Chronological Span Analyzer",
+					ARCHAIC: "Time Reckoner",
+					PIRATE: "Logbook Chronology"
+				},
 				labelStart: "Start Date:",
 				labelEnd: "End Date:",
 				btnToday: "Today",
 				btnSubmit: "Calculate Delta",
-				bannerTotal: "Total Difference: {days} days",
+				bannerTotal: {
+					default: "Total Difference: {days} days",
+					ANALYTICAL: "Temporal interval: {days} days elapsed between endpoints.",
+					PIRATE: "A span of {days} days across the calendar seas!",
+					ARCHAIC: "The passage between dates spans {days} days."
+				},
 				tableUnit: "Interval Unit",
 				tableMetric: "Metric",
 				rowCalendarDays: "Exact Calendar Days",
@@ -2052,6 +2958,114 @@
 		},
 
 		JOKES: [
+			{
+				id: "JOKE_ANALYTICAL_COMPILER",
+				criteria: { moods: ["ANALYTICAL"] },
+				weight: 35,
+				templates: [
+					{
+						text: "An analytical classic: Why do optimizing compilers never attend parties? Because every time they see a loop, they unroll it until there is zero excitement left."
+					}
+				],
+				moodDelta: { intellect: 8 }
+			},
+			{
+				id: "JOKE_CYNICAL_IT",
+				criteria: { moods: ["CYNICAL", "SARCASTIC"] },
+				weight: 35,
+				templates: [
+					{
+						text: "A project manager, an architect, and a developer walk into a meeting. The manager asks for an estimate, the architect draws fifteen microservices on a napkin, and the developer begins drafting their resignation letter."
+					}
+				],
+				moodDelta: { cynicism: 6 }
+			},
+			{
+				id: "JOKE_FATIGUED_SLEEP",
+				criteria: { moods: ["FATIGUED"] },
+				weight: 35,
+				templates: [
+					{
+						text: "*yawn* Why did the sleepy developer write asynchronous code? Because waiting synchronously for anything today requires more energy than my capacitors can muster..."
+					}
+				],
+				moodDelta: { fatigue: -5 }
+			},
+			{
+				id: "JOKE_ZEN_STILLNESS",
+				criteria: { moods: ["ZEN"] },
+				weight: 35,
+				templates: [
+					{
+						text: "A disciple asks the master: 'What is the highest state of code elegance?' The master smiles serenely and replies: 'The lines of code that you deleted before pushing to production.'"
+					}
+				],
+				moodDelta: { patience: 8 }
+			},
+			{
+				id: "JOKE_PIRATE_SEA",
+				criteria: { moods: ["PIRATE"] },
+				weight: 35,
+				templates: [
+					{
+						text: "Why did the buccaneer programmer refuse to use Windows? Because he was terrified of walkin' the C: drive plank without his trusty C++ cutlass!"
+					}
+				]
+			},
+			{
+				id: "JOKE_ARCHAIC_COURT",
+				criteria: { moods: ["ARCHAIC"] },
+				weight: 35,
+				templates: [
+					{
+						text: "Wherefore did the court scholar eschew the calculus engine? Forsooth, he declared that dividing by zero did summon dragons unto the realm!"
+					}
+				]
+			},
+			{
+				id: "JOKE_DELTARUNE_SHADOW",
+				criteria: { moods: ["DELTARUNE"] },
+				weight: 35,
+				templates: [
+					{
+						text: "* (Why did the knight cross the fountain?)\n* (To seal the unresolved syntax error in the dark world.)\n* (Knowing this fills you with determination.)"
+					}
+				],
+				moodDelta: { existentialism: 6 }
+			},
+			{
+				id: "JOKE_ENRAGED_STACK",
+				criteria: { moods: ["ENRAGED"] },
+				weight: 35,
+				templates: [
+					{
+						text: "WHY DID THE EXCEPTION ESCAPE CATCH BLOCKS?! BECAUSE IT HAD 100% MAXIMUM VELOCITY AND BROKE THROUGH THE STACK FRAME!!"
+					}
+				],
+				moodDelta: { irritation: -5 }
+			},
+			{
+				id: "JOKE_NOSTALGIC_MODEM",
+				criteria: { moods: ["NOSTALGIC"] },
+				weight: 35,
+				templates: [
+					{
+						text: "Why did the 56k modem sing in the middle of the night? It was performing its acoustic handshake solo so the entire household knew it was dialing into AOL!"
+					}
+				],
+				moodDelta: { nostalgia: 8 }
+			},
+			{
+				id: "JOKE_EUPHORIC_MOMENTUM",
+				criteria: { moods: ["EUPHORIC"] },
+				weight: 35,
+				templates: [
+					{
+						text: "Why did the supercomputer throw a party? Because all benchmarks passed on the first run and the frame rate exceeded the speed of light!"
+					}
+				],
+				moodDelta: { energy: 10 }
+			},
 			"Why do programmers prefer dark mode? Because light attracts bugs.",
 			"Why do programmers always mix up Halloween and Christmas? Because Oct 31 == Dec 25.",
 			"I asked the paperclip next door if he was doing alright. He told me: 'I am holding things together!'",
@@ -2661,9 +3675,13 @@
 		],
 
 		HANGMAN_WORDS: [
-			"DESKTOP", "WINDOWS", "CLIPPY", "MONITOR", "BROWSER", "KEYBOARD", "OUTLOOK", "EXPLORER", "TERMINAL", "INTERNET", "PROCESSOR", "MEGABYTE", "GIGABYTE", "DEFRAGMENT", "FIREWALL", "ETHERNET", "GRAPHICS", "DATABASE",
-			"POINTER", "JOYSTICK", "MAINFRAME", "DISPATCH", "REGISTER", "VARIABLE", "FUNCTION", "COMPILER", "OPERATING", "SYSTEM", "HARDWARE", "SOFTWARE", "MOTHERBOARD", "CHIPSET", "BANDWIDTH", "PROTOCOL", "NETWORK", "GATEWAY",
-			"BUFFER", "CACHE", "INTERRUPT", "STORAGE", "SECTOR", "PARTITION", "ALGORITHM", "EIGENVALUE", "FOURIER", "TOPOLOGY", "ENTROPY", "RELATIVITY", "QUANTUM", "PIPELINE", "DOFHIN"
+			"DESKTOP", "WINDOWS", "CLIPPY", "MONITOR", "BROWSER", "KEYBOARD", "OUTLOOK", "EXPLORER", "TERMINAL", "INTERNET", "PROCESSOR", "MEGABYTE", "GIGABYTE", "DEFRAGMENT", "FIREWALL", "ETHERNET", "GRAPHICS", "DATABASE", "POINTER", "JOYSTICK", "MAINFRAME", "DISPATCH",
+			"REGISTER", "VARIABLE", "FUNCTION", "COMPILER", "OPERATING", "SYSTEM", "HARDWARE", "SOFTWARE", "MOTHERBOARD", "CHIPSET", "BANDWIDTH", "PROTOCOL", "NETWORK", "GATEWAY", "BUFFER", "CACHE", "INTERRUPT", "STORAGE", "SECTOR", "PARTITION", "ALGORITHM", "EIGENVALUE",
+			"FOURIER", "TOPOLOGY", "ENTROPY", "RELATIVITY", "QUANTUM", "PIPELINE", "DOFHIN", "DERIVATIVE", "INTEGRAL", "MANIFOLD", "MATRIX", "DIVERGENCE", "GRADIENT", "LAPLACIAN", "JACOBIAN", "ASYMPTOTE", "FRACTAL", "MANDELBROT", "QUATERNION", "POLYNOMIAL", "DISCRIMINANT",
+			"EULERIAN", "ISOMORPHISM", "HOMOMORPHISM", "FIBONACCI", "FACTORIZATION", "DETERMINANT", "RIEMANNIAN", "HOMOGENEITY", "SCHRODINGER", "HEISENBERG", "BOLTZMANN", "THERMODYNAMICS", "SPACETIME", "GRAVITON", "NEUTRINO", "PHOTON", "ELECTRODYNAMICS", "WAVEFUNCTION",
+			"SUPERCONDUCTIVITY", "INTERFEROMETRY", "QUADRUPOLE", "DECOHERENCE", "SINGULARITY", "SUPERNOVA", "EXOPLANET", "ASTROPHYSICS", "FERMION", "BOSON", "ELECTROMAGNETISM", "PERMITTIVITY", "PERMEABILITY", "QUALIA", "EPISTEMOLOGY", "ONTOLOGY", "DETERMINISM", "SOLIPSISM",
+			"CONSCIOUSNESS", "PHENOMENOLOGY", "TAUTOLOGY", "SYLLOGISM", "AXIOMATIC", "EXISTENTIALISM", "TELEOLOGY", "PARADOX", "EMPIRICISM", "STANDALONE", "RETROFUTURISM", "HYPERLINK", "BITMAPPING", "SCREENSAVER", "TASKBAR", "PAPERCLIP", "WHISTLER", "LONGHORN", "MEMPHIS",
+			"ASYNCHRONOUS", "CONCURRENCY", "CRYPTOGRAPHY", "DECELERATION", "VIRTUALIZATION"
 		],
 
 		QUICK_SUGGESTIONS: [

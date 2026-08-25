@@ -50,8 +50,10 @@
 			this.board = Array(9).fill(null);
 			this.winner = null;
 			this.winningLine = [];
-			const txt = (window.ClippyKnowledge && window.ClippyKnowledge.ACTIVITIES_TEXTS && window.ClippyKnowledge.ACTIVITIES_TEXTS.tictactoe) || { title: 'Tic-Tac-Toe', badge: 'Mini-Game' };
-			this.card = window.ClippyUI.createActivityCard(txt.title, txt.badge);
+			const txt = (window.ClippyKnowledge && typeof window.ClippyKnowledge.getActivityConfig === 'function')
+				? window.ClippyKnowledge.getActivityConfig('tictactoe')
+				: ((window.ClippyKnowledge && window.ClippyKnowledge.ACTIVITIES_TEXTS && window.ClippyKnowledge.ACTIVITIES_TEXTS.tictactoe) || { title: 'Tic-Tac-Toe', badge: 'Mini-Game' });
+			this.card = window.ClippyUI.createActivityCard(txt.title || 'Tic-Tac-Toe', txt.badge || 'Mini-Game');
 			this.render();
 		}
 
@@ -146,12 +148,14 @@
 			const body = this.card.bodyElement;
 			body.innerHTML = '';
 
-			const txt = (window.ClippyKnowledge && window.ClippyKnowledge.ACTIVITIES_TEXTS && window.ClippyKnowledge.ACTIVITIES_TEXTS.tictactoe) || {
-				scorePlayer: "You (X)", scoreDraws: "Draws", scoreClippy: "Clippy (O)",
-				winBanner: "Game Over: Victory! You defeated Clippit.",
-				lossBanner: "Game Over: Defeat! Clippit won this round.",
-				drawBanner: "Game Over: Draw game! Stalemate."
-			};
+			const txt = (window.ClippyKnowledge && typeof window.ClippyKnowledge.getActivityConfig === 'function')
+				? window.ClippyKnowledge.getActivityConfig('tictactoe')
+				: ((window.ClippyKnowledge && window.ClippyKnowledge.ACTIVITIES_TEXTS && window.ClippyKnowledge.ACTIVITIES_TEXTS.tictactoe) || {
+					scorePlayer: "You (X)", scoreDraws: "Draws", scoreClippy: "Clippy (O)",
+					winBanner: "Game Over: Victory! You defeated Clippit.",
+					lossBanner: "Game Over: Defeat! Clippit won this round.",
+					drawBanner: "Game Over: Draw game! Stalemate."
+				});
 
 			const scoreboard = document.createElement('div');
 			scoreboard.className = 'clippy-scoreboard';
@@ -225,8 +229,10 @@
 			this.flipped = [];
 			this.moves = 0;
 			this.isLocked = false;
-			const txt = (window.ClippyKnowledge && window.ClippyKnowledge.ACTIVITIES_TEXTS && window.ClippyKnowledge.ACTIVITIES_TEXTS.memory) || { title: 'Memory Match', badge: 'Token Pairs' };
-			this.card = window.ClippyUI.createActivityCard(txt.title, txt.badge);
+			const txt = (window.ClippyKnowledge && typeof window.ClippyKnowledge.getActivityConfig === 'function')
+				? window.ClippyKnowledge.getActivityConfig('memory')
+				: ((window.ClippyKnowledge && window.ClippyKnowledge.ACTIVITIES_TEXTS && window.ClippyKnowledge.ACTIVITIES_TEXTS.memory) || { title: 'Memory Match', badge: 'Token Pairs' });
+			this.card = window.ClippyUI.createActivityCard(txt.title || 'Memory Match', txt.badge || 'Token Pairs');
 			this.render();
 		}
 
@@ -283,10 +289,12 @@
 			const matchedCount = this.matched.filter(Boolean).length / 2;
 			const isComplete = this.matched.every(Boolean);
 
-			const txt = (window.ClippyKnowledge && window.ClippyKnowledge.ACTIVITIES_TEXTS && window.ClippyKnowledge.ACTIVITIES_TEXTS.memory) || {
-				scoreMatched: "Matched", scoreTurns: "Turns", scoreStatus: "Status",
-				statusWon: "Won", statusPlaying: "Playing", winBanner: "All pairs matched in {turns} turns!"
-			};
+			const txt = (window.ClippyKnowledge && typeof window.ClippyKnowledge.getActivityConfig === 'function')
+				? window.ClippyKnowledge.getActivityConfig('memory', { turns: this.moves })
+				: ((window.ClippyKnowledge && window.ClippyKnowledge.ACTIVITIES_TEXTS && window.ClippyKnowledge.ACTIVITIES_TEXTS.memory) || {
+					scoreMatched: "Matched", scoreTurns: "Turns", scoreStatus: "Status",
+					statusWon: "Won", statusPlaying: "Playing", winBanner: "All pairs matched in {turns} turns!"
+				});
 
 			const scoreboard = document.createElement('div');
 			scoreboard.className = 'clippy-scoreboard';
@@ -347,12 +355,16 @@
 		}
 
 		mount() {
-			const pool = (window.ClippyKnowledge && window.ClippyKnowledge.HANGMAN_WORDS) || ['WINDOWS', 'EXPLORER', 'CLIPPY', 'DESKTOP'];
+			const pool = (window.ClippyKnowledge && typeof window.ClippyKnowledge.getHangmanWords === 'function')
+				? window.ClippyKnowledge.getHangmanWords(window.ClippyBrain ? window.ClippyBrain.getMood() : 'OPTIMISTIC')
+				: ((window.ClippyKnowledge && window.ClippyKnowledge.HANGMAN_WORDS) || ['WINDOWS', 'EXPLORER', 'CLIPPY', 'DESKTOP']);
 			this.word = pool[Math.floor(Math.random() * pool.length)].toUpperCase();
 			this.guessed = new Set();
 			this.errors = 0;
-			const txt = (window.ClippyKnowledge && window.ClippyKnowledge.ACTIVITIES_TEXTS && window.ClippyKnowledge.ACTIVITIES_TEXTS.hangman) || { title: 'Hangman Challenge', badge: 'Word Guess' };
-			this.card = window.ClippyUI.createActivityCard(txt.title, txt.badge);
+			const txt = (window.ClippyKnowledge && typeof window.ClippyKnowledge.getActivityConfig === 'function')
+				? window.ClippyKnowledge.getActivityConfig('hangman')
+				: ((window.ClippyKnowledge && window.ClippyKnowledge.ACTIVITIES_TEXTS && window.ClippyKnowledge.ACTIVITIES_TEXTS.hangman) || { title: 'Hangman Challenge', badge: 'Word Guess' });
+			this.card = window.ClippyUI.createActivityCard(txt.title || 'Hangman Challenge', txt.badge || 'Word Guess');
 			this.render();
 		}
 
@@ -408,10 +420,12 @@
 			wordEl.textContent = masked;
 			displayBox.appendChild(wordEl);
 
-			const txt = (window.ClippyKnowledge && window.ClippyKnowledge.ACTIVITIES_TEXTS && window.ClippyKnowledge.ACTIVITIES_TEXTS.hangman) || {
-				statsErrors: "Errors:", statsRemaining: "Remaining:",
-				winBanner: "Correct! The word was {word}.", lossBanner: "Out of tries! The word was {word}."
-			};
+			const txt = (window.ClippyKnowledge && typeof window.ClippyKnowledge.getActivityConfig === 'function')
+				? window.ClippyKnowledge.getActivityConfig('hangman', { word: this.word })
+				: ((window.ClippyKnowledge && window.ClippyKnowledge.ACTIVITIES_TEXTS && window.ClippyKnowledge.ACTIVITIES_TEXTS.hangman) || {
+					statsErrors: "Errors:", statsRemaining: "Remaining:",
+					winBanner: "Correct! The word was {word}.", lossBanner: "Out of tries! The word was {word}."
+				});
 
 			const stats = document.createElement('div');
 			stats.className = 'clippy-hangman-stats';
@@ -479,8 +493,10 @@
 			this.score = 0;
 			this.selectedOption = null;
 			this.isAnswered = false;
-			const txt = (window.ClippyKnowledge && window.ClippyKnowledge.ACTIVITIES_TEXTS && window.ClippyKnowledge.ACTIVITIES_TEXTS.quiz) || { title: 'Tech Knowledge Quiz', badge: 'Diagnostic Test' };
-			this.card = window.ClippyUI.createActivityCard(txt.title, txt.badge);
+			const txt = (window.ClippyKnowledge && typeof window.ClippyKnowledge.getActivityConfig === 'function')
+				? window.ClippyKnowledge.getActivityConfig('quiz')
+				: ((window.ClippyKnowledge && window.ClippyKnowledge.ACTIVITIES_TEXTS && window.ClippyKnowledge.ACTIVITIES_TEXTS.quiz) || { title: 'Tech Knowledge Quiz', badge: 'Diagnostic Test' });
+			this.card = window.ClippyUI.createActivityCard(txt.title || 'Tech Knowledge Quiz', txt.badge || 'Diagnostic Test');
 			this.render();
 		}
 
@@ -525,13 +541,16 @@
 			const body = this.card.bodyElement;
 			body.innerHTML = '';
 
-			const txt = (window.ClippyKnowledge && window.ClippyKnowledge.ACTIVITIES_TEXTS && window.ClippyKnowledge.ACTIVITIES_TEXTS.quiz) || {
-				resultsBanner: "Quiz Completed! Score: {score} / {total} ({pct}%)",
-				qHeader: "[Q{current}/{total}] {question}",
-				factLabel: "Note:",
-				btnNext: "Next Question",
-				btnResults: "View Results"
-			};
+			const pctVal = this.questions.length > 0 ? Math.round((this.score / this.questions.length) * 100) : 0;
+			const txt = (window.ClippyKnowledge && typeof window.ClippyKnowledge.getActivityConfig === 'function')
+				? window.ClippyKnowledge.getActivityConfig('quiz', { score: this.score, total: this.questions.length, pct: pctVal })
+				: ((window.ClippyKnowledge && window.ClippyKnowledge.ACTIVITIES_TEXTS && window.ClippyKnowledge.ACTIVITIES_TEXTS.quiz) || {
+					resultsBanner: "Quiz Completed! Score: {score} / {total} ({pct}%)",
+					qHeader: "[Q{current}/{total}] {question}",
+					factLabel: "Note:",
+					btnNext: "Next Question",
+					btnResults: "View Results"
+				});
 
 			const isComplete = this.currentIndex >= this.questions.length;
 
@@ -649,10 +668,12 @@
 			this.maxBound = 100;
 			this.attempts = 0;
 			this.lastGuess = null;
-			const txt = (window.ClippyKnowledge && window.ClippyKnowledge.ACTIVITIES_TEXTS && window.ClippyKnowledge.ACTIVITIES_TEXTS.guess) || { title: 'Number Oracle', badge: 'Logic Search', initialStatus: 'Guess an integer between 1 and 100:' };
-			this.statusText = txt.initialStatus;
+			const txt = (window.ClippyKnowledge && typeof window.ClippyKnowledge.getActivityConfig === 'function')
+				? window.ClippyKnowledge.getActivityConfig('guess')
+				: ((window.ClippyKnowledge && window.ClippyKnowledge.ACTIVITIES_TEXTS && window.ClippyKnowledge.ACTIVITIES_TEXTS.guess) || { title: 'Number Oracle', badge: 'Logic Search', initialStatus: 'Guess an integer between 1 and 100:' });
+			this.statusText = txt.initialStatus || 'Guess an integer between 1 and 100:';
 			this.isWon = false;
-			this.card = window.ClippyUI.createActivityCard(txt.title, txt.badge);
+			this.card = window.ClippyUI.createActivityCard(txt.title || 'Number Oracle', txt.badge || 'Logic Search');
 			this.render();
 		}
 
@@ -661,10 +682,12 @@
 			if (isNaN(num) || num < 1 || num > 100 || this.isWon) return;
 			this.attempts++;
 			this.lastGuess = num;
-			const txt = (window.ClippyKnowledge && window.ClippyKnowledge.ACTIVITIES_TEXTS && window.ClippyKnowledge.ACTIVITIES_TEXTS.guess) || {
-				statusGreater: "Target is GREATER than {guess}.",
-				statusLess: "Target is LESS than {guess}."
-			};
+			const txt = (window.ClippyKnowledge && typeof window.ClippyKnowledge.getActivityConfig === 'function')
+				? window.ClippyKnowledge.getActivityConfig('guess', { guess: num, attempts: this.attempts, target: this.target })
+				: ((window.ClippyKnowledge && window.ClippyKnowledge.ACTIVITIES_TEXTS && window.ClippyKnowledge.ACTIVITIES_TEXTS.guess) || {
+					statusGreater: "Target is GREATER than {guess}.",
+					statusLess: "Target is LESS than {guess}."
+				});
 
 			if (num === this.target) {
 				this.isWon = true;
@@ -702,12 +725,14 @@
 			const container = document.createElement('div');
 			container.className = 'clippy-guess-container';
 
-			const txt = (window.ClippyKnowledge && window.ClippyKnowledge.ACTIVITIES_TEXTS && window.ClippyKnowledge.ACTIVITIES_TEXTS.guess) || {
-				searchBounds: "Active Search Bounds:",
-				attemptsLabel: "Attempts:",
-				winBanner: "Solved in {attempts} attempt(s)! Target was {target}.",
-				btnSubmit: "Submit"
-			};
+			const txt = (window.ClippyKnowledge && typeof window.ClippyKnowledge.getActivityConfig === 'function')
+				? window.ClippyKnowledge.getActivityConfig('guess', { attempts: this.attempts, target: this.target, guess: this.lastGuess })
+				: ((window.ClippyKnowledge && window.ClippyKnowledge.ACTIVITIES_TEXTS && window.ClippyKnowledge.ACTIVITIES_TEXTS.guess) || {
+					searchBounds: "Active Search Bounds:",
+					attemptsLabel: "Attempts:",
+					winBanner: "Solved in {attempts} attempt(s)! Target was {target}.",
+					btnSubmit: "Submit"
+				});
 
 			const range = document.createElement('div');
 			range.className = 'clippy-guess-range';
@@ -779,8 +804,10 @@
 			this.lastUserMove = null;
 			this.lastClippyMove = null;
 			this.lastResult = null;
-			const txt = (window.ClippyKnowledge && window.ClippyKnowledge.ACTIVITIES_TEXTS && window.ClippyKnowledge.ACTIVITIES_TEXTS.rps) || { title: 'Rock-Paper-Scissors', badge: 'Battle' };
-			this.card = window.ClippyUI.createActivityCard(txt.title, txt.badge);
+			const txt = (window.ClippyKnowledge && typeof window.ClippyKnowledge.getActivityConfig === 'function')
+				? window.ClippyKnowledge.getActivityConfig('rps')
+				: ((window.ClippyKnowledge && window.ClippyKnowledge.ACTIVITIES_TEXTS && window.ClippyKnowledge.ACTIVITIES_TEXTS.rps) || { title: 'Rock-Paper-Scissors', badge: 'Battle' });
+			this.card = window.ClippyUI.createActivityCard(txt.title || 'Rock-Paper-Scissors', txt.badge || 'Battle');
 			this.render();
 		}
 
@@ -816,10 +843,12 @@
 			const body = this.card.bodyElement;
 			body.innerHTML = '';
 
-			const txt = (window.ClippyKnowledge && window.ClippyKnowledge.ACTIVITIES_TEXTS && window.ClippyKnowledge.ACTIVITIES_TEXTS.rps) || {
-				scorePlayer: "You", scoreDraws: "Draws", scoreClippy: "Clippy",
-				winBanner: "You win this clash!", lossBanner: "Clippit wins this round!", drawBanner: "Mutual deflection! It is a draw."
-			};
+			const txt = (window.ClippyKnowledge && typeof window.ClippyKnowledge.getActivityConfig === 'function')
+				? window.ClippyKnowledge.getActivityConfig('rps')
+				: ((window.ClippyKnowledge && window.ClippyKnowledge.ACTIVITIES_TEXTS && window.ClippyKnowledge.ACTIVITIES_TEXTS.rps) || {
+					scorePlayer: "You", scoreDraws: "Draws", scoreClippy: "Clippy",
+					winBanner: "You win this clash!", lossBanner: "Clippit wins this round!", drawBanner: "Mutual deflection! It is a draw."
+				});
 
 			const scoreboard = document.createElement('div');
 			scoreboard.className = 'clippy-scoreboard';
@@ -890,8 +919,10 @@
 
 		mount() {
 			this.initBoard();
-			const txt = (window.ClippyKnowledge && window.ClippyKnowledge.ACTIVITIES_TEXTS && window.ClippyKnowledge.ACTIVITIES_TEXTS.mines) || { title: 'Minesweeper Mini', badge: '6x6 Field' };
-			this.card = window.ClippyUI.createActivityCard(txt.title, txt.badge);
+			const txt = (window.ClippyKnowledge && typeof window.ClippyKnowledge.getActivityConfig === 'function')
+				? window.ClippyKnowledge.getActivityConfig('mines')
+				: ((window.ClippyKnowledge && window.ClippyKnowledge.ACTIVITIES_TEXTS && window.ClippyKnowledge.ACTIVITIES_TEXTS.mines) || { title: 'Minesweeper Mini', badge: '6x6 Field' });
+			this.card = window.ClippyUI.createActivityCard(txt.title || 'Minesweeper Mini', txt.badge || '6x6 Field');
 			this.render();
 		}
 
@@ -1041,10 +1072,12 @@
 			container.appendChild(grid);
 			body.appendChild(container);
 
-			const txt = (window.ClippyKnowledge && window.ClippyKnowledge.ACTIVITIES_TEXTS && window.ClippyKnowledge.ACTIVITIES_TEXTS.mines) || {
-				winBanner: "All safe sectors revealed! Minefield cleared.",
-				lossBanner: "Detonation! Minefield triggered."
-			};
+			const txt = (window.ClippyKnowledge && typeof window.ClippyKnowledge.getActivityConfig === 'function')
+				? window.ClippyKnowledge.getActivityConfig('mines')
+				: ((window.ClippyKnowledge && window.ClippyKnowledge.ACTIVITIES_TEXTS && window.ClippyKnowledge.ACTIVITIES_TEXTS.mines) || {
+					winBanner: "All safe sectors revealed! Minefield cleared.",
+					lossBanner: "Detonation! Minefield triggered."
+				});
 
 			if (this.isWon) {
 				const banner = document.createElement('div');
@@ -1084,8 +1117,10 @@
 					state: Math.random() > 0.45 ? 'frag' : (Math.random() > 0.3 ? 'used' : 'free')
 				});
 			}
-			const txt = (window.ClippyKnowledge && window.ClippyKnowledge.ACTIVITIES_TEXTS && window.ClippyKnowledge.ACTIVITIES_TEXTS.defrag) || { title: 'Disk Defragmenter', badge: 'Volume C:' };
-			this.card = window.ClippyUI.createActivityCard(txt.title, txt.badge);
+			const txt = (window.ClippyKnowledge && typeof window.ClippyKnowledge.getActivityConfig === 'function')
+				? window.ClippyKnowledge.getActivityConfig('defrag')
+				: ((window.ClippyKnowledge && window.ClippyKnowledge.ACTIVITIES_TEXTS && window.ClippyKnowledge.ACTIVITIES_TEXTS.defrag) || { title: 'Disk Defragmenter', badge: 'Volume C:' });
+			this.card = window.ClippyUI.createActivityCard(txt.title || 'Disk Defragmenter', txt.badge || 'Volume C:');
 			this.render();
 			this.runSimulation();
 		}
@@ -1122,10 +1157,12 @@
 			const body = this.card.bodyElement;
 			body.innerHTML = '';
 
-			const txt = (window.ClippyKnowledge && window.ClippyKnowledge.ACTIVITIES_TEXTS && window.ClippyKnowledge.ACTIVITIES_TEXTS.defrag) || {
-				winBanner: "100% Contiguous. Optimization Complete!",
-				progressBanner: "Defragmenting Drive C: Clusters... ({progress}%)"
-			};
+			const txt = (window.ClippyKnowledge && typeof window.ClippyKnowledge.getActivityConfig === 'function')
+				? window.ClippyKnowledge.getActivityConfig('defrag', { progress: this.progress })
+				: ((window.ClippyKnowledge && window.ClippyKnowledge.ACTIVITIES_TEXTS && window.ClippyKnowledge.ACTIVITIES_TEXTS.defrag) || {
+					winBanner: "100% Contiguous. Optimization Complete!",
+					progressBanner: "Defragmenting Drive C: Clusters... ({progress}%)"
+				});
 
 			const banner = document.createElement('div');
 			banner.className = `clippy-activity-banner ${this.progress >= 100 ? 'win' : 'info'}`;
@@ -1179,9 +1216,11 @@
 			this.totalSeconds = minutes * 60;
 			this.remaining = minutes * 60;
 			this.isRunning = true;
-			const txt = (window.ClippyKnowledge && window.ClippyKnowledge.ACTIVITIES_TEXTS && window.ClippyKnowledge.ACTIVITIES_TEXTS.pomodoro) || { title: 'Focus Timer', badge: '{minutes}m Session' };
-			const badgeText = window.ClippyKnowledge.formatString(txt.badge, { minutes });
-			this.card = window.ClippyUI.createActivityCard(txt.title, badgeText);
+			const txt = (window.ClippyKnowledge && typeof window.ClippyKnowledge.getActivityConfig === 'function')
+				? window.ClippyKnowledge.getActivityConfig('pomodoro', { minutes })
+				: ((window.ClippyKnowledge && window.ClippyKnowledge.ACTIVITIES_TEXTS && window.ClippyKnowledge.ACTIVITIES_TEXTS.pomodoro) || { title: 'Focus Timer', badge: '{minutes}m Session' });
+			const badgeText = window.ClippyKnowledge.formatString(txt.badge || '{minutes}m Session', { minutes });
+			this.card = window.ClippyUI.createActivityCard(txt.title || 'Focus Timer', badgeText);
 			this.start();
 			this.render();
 		}
@@ -1241,10 +1280,12 @@
 			pbox.appendChild(fill);
 			body.appendChild(pbox);
 
-			const txt = (window.ClippyKnowledge && window.ClippyKnowledge.ACTIVITIES_TEXTS && window.ClippyKnowledge.ACTIVITIES_TEXTS.pomodoro) || {
-				breakBanner: "Focus interval completed! Take a 5-minute break.",
-				btnPause: "Pause", btnResume: "Resume", btnReset: "Reset"
-			};
+			const txt = (window.ClippyKnowledge && typeof window.ClippyKnowledge.getActivityConfig === 'function')
+				? window.ClippyKnowledge.getActivityConfig('pomodoro', { minutes: Math.round(this.totalSeconds / 60) })
+				: ((window.ClippyKnowledge && window.ClippyKnowledge.ACTIVITIES_TEXTS && window.ClippyKnowledge.ACTIVITIES_TEXTS.pomodoro) || {
+					breakBanner: "Focus interval completed! Take a 5-minute break.",
+					btnPause: "Pause", btnResume: "Resume", btnReset: "Reset"
+				});
 
 			if (this.remaining === 0) {
 				const banner = document.createElement('div');
@@ -1288,8 +1329,10 @@
 
 		mount() {
 			this.todos = ActivitiesManager.getStoredTodos();
-			const txt = (window.ClippyKnowledge && window.ClippyKnowledge.ACTIVITIES_TEXTS && window.ClippyKnowledge.ACTIVITIES_TEXTS.todo) || { title: 'Task Manager', badge: 'To-Do List' };
-			this.card = window.ClippyUI.createActivityCard(txt.title, txt.badge);
+			const txt = (window.ClippyKnowledge && typeof window.ClippyKnowledge.getActivityConfig === 'function')
+				? window.ClippyKnowledge.getActivityConfig('todo')
+				: ((window.ClippyKnowledge && window.ClippyKnowledge.ACTIVITIES_TEXTS && window.ClippyKnowledge.ACTIVITIES_TEXTS.todo) || { title: 'Task Manager', badge: 'To-Do List' });
+			this.card = window.ClippyUI.createActivityCard(txt.title || 'Task Manager', txt.badge || 'To-Do List');
 			this.render();
 		}
 
@@ -1332,11 +1375,13 @@
 			const body = this.card.bodyElement;
 			body.innerHTML = '';
 
-			const txt = (window.ClippyKnowledge && window.ClippyKnowledge.ACTIVITIES_TEXTS && window.ClippyKnowledge.ACTIVITIES_TEXTS.todo) || {
-				scorePending: "Pending", scoreCompleted: "Completed", scoreTotal: "Total",
-				emptyNotice: "No tasks registered. Add a task below.", inputPlaceholder: "New task description...",
-				btnAdd: "+ Add", btnClear: "Clear Completed"
-			};
+			const txt = (window.ClippyKnowledge && typeof window.ClippyKnowledge.getActivityConfig === 'function')
+				? window.ClippyKnowledge.getActivityConfig('todo')
+				: ((window.ClippyKnowledge && window.ClippyKnowledge.ACTIVITIES_TEXTS && window.ClippyKnowledge.ACTIVITIES_TEXTS.todo) || {
+					scorePending: "Pending", scoreCompleted: "Completed", scoreTotal: "Total",
+					emptyNotice: "No tasks registered. Add a task below.", inputPlaceholder: "New task description...",
+					btnAdd: "+ Add", btnClear: "Clear Completed"
+				});
 
 			const pendingCount = this.todos.filter(t => !t.done).length;
 			const scoreboard = document.createElement('div');
@@ -1442,8 +1487,10 @@
 
 		mount() {
 			this.pet = ActivitiesManager.getPetState();
-			const txt = (window.ClippyKnowledge && window.ClippyKnowledge.ACTIVITIES_TEXTS && window.ClippyKnowledge.ACTIVITIES_TEXTS.pet) || { title: 'Assistant Metrics', badge: 'Clippit Tamagotchi' };
-			this.card = window.ClippyUI.createActivityCard(txt.title, txt.badge);
+			const txt = (window.ClippyKnowledge && typeof window.ClippyKnowledge.getActivityConfig === 'function')
+				? window.ClippyKnowledge.getActivityConfig('pet')
+				: ((window.ClippyKnowledge && window.ClippyKnowledge.ACTIVITIES_TEXTS && window.ClippyKnowledge.ACTIVITIES_TEXTS.pet) || { title: 'Assistant Metrics', badge: 'Clippit Tamagotchi' });
+			this.card = window.ClippyUI.createActivityCard(txt.title || 'Assistant Metrics', txt.badge || 'Clippit Tamagotchi');
 			this.render();
 		}
 
@@ -1453,7 +1500,9 @@
 			this.pet.xp += 15;
 			ActivitiesManager.savePetState(this.pet);
 			if (window.ClippyAudio) window.ClippyAudio.play('win');
-			const txt = (window.ClippyKnowledge && window.ClippyKnowledge.ACTIVITIES_TEXTS && window.ClippyKnowledge.ACTIVITIES_TEXTS.pet) || {};
+			const txt = (window.ClippyKnowledge && typeof window.ClippyKnowledge.getActivityConfig === 'function')
+				? window.ClippyKnowledge.getActivityConfig('pet')
+				: ((window.ClippyKnowledge && window.ClippyKnowledge.ACTIVITIES_TEXTS && window.ClippyKnowledge.ACTIVITIES_TEXTS.pet) || {});
 			this.render(txt.noticeFeed || 'Paperclips supplied! Reserves replenished (+15 XP).');
 		}
 
@@ -1462,7 +1511,9 @@
 			this.pet.xp += 10;
 			ActivitiesManager.savePetState(this.pet);
 			if (window.ClippyAudio) window.ClippyAudio.play('action');
-			const txt = (window.ClippyKnowledge && window.ClippyKnowledge.ACTIVITIES_TEXTS && window.ClippyKnowledge.ACTIVITIES_TEXTS.pet) || {};
+			const txt = (window.ClippyKnowledge && typeof window.ClippyKnowledge.getActivityConfig === 'function')
+				? window.ClippyKnowledge.getActivityConfig('pet')
+				: ((window.ClippyKnowledge && window.ClippyKnowledge.ACTIVITIES_TEXTS && window.ClippyKnowledge.ACTIVITIES_TEXTS.pet) || {});
 			this.render(txt.noticePolish || 'Wire polished! Morale increased (+10 XP).');
 		}
 
@@ -1472,7 +1523,9 @@
 			this.pet.xp += 10;
 			ActivitiesManager.savePetState(this.pet);
 			if (window.ClippyAudio) window.ClippyAudio.play('action');
-			const txt = (window.ClippyKnowledge && window.ClippyKnowledge.ACTIVITIES_TEXTS && window.ClippyKnowledge.ACTIVITIES_TEXTS.pet) || {};
+			const txt = (window.ClippyKnowledge && typeof window.ClippyKnowledge.getActivityConfig === 'function')
+				? window.ClippyKnowledge.getActivityConfig('pet')
+				: ((window.ClippyKnowledge && window.ClippyKnowledge.ACTIVITIES_TEXTS && window.ClippyKnowledge.ACTIVITIES_TEXTS.pet) || {});
 			this.render(txt.noticeSleep || 'Low-power standby complete. Battery restored to 100%.');
 		}
 
@@ -1481,11 +1534,13 @@
 			const body = this.card.bodyElement;
 			body.innerHTML = '';
 
-			const txt = (window.ClippyKnowledge && window.ClippyKnowledge.ACTIVITIES_TEXTS && window.ClippyKnowledge.ACTIVITIES_TEXTS.pet) || {
-				scoreLevel: "Level", scoreXp: "XP", scoreHealth: "Health", healthNominal: "Nominal",
-				moraleLabel: "Morale:", energyLabel: "Energy:", depletionLabel: "Depletion:",
-				btnFeed: "Supply Paperclips", btnPolish: "Polish Metal Wire", btnSleep: "Standby Mode"
-			};
+			const txt = (window.ClippyKnowledge && typeof window.ClippyKnowledge.getActivityConfig === 'function')
+				? window.ClippyKnowledge.getActivityConfig('pet')
+				: ((window.ClippyKnowledge && window.ClippyKnowledge.ACTIVITIES_TEXTS && window.ClippyKnowledge.ACTIVITIES_TEXTS.pet) || {
+					scoreLevel: "Level", scoreXp: "XP", scoreHealth: "Health", healthNominal: "Nominal",
+					moraleLabel: "Morale:", energyLabel: "Energy:", depletionLabel: "Depletion:",
+					btnFeed: "Supply Paperclips", btnPolish: "Polish Metal Wire", btnSleep: "Standby Mode"
+				});
 
 			const scoreboard = document.createElement('div');
 			scoreboard.className = 'clippy-scoreboard';
@@ -1550,8 +1605,10 @@
 		}
 
 		mount(initialEq = 'F = m * a') {
-			const txt = (window.ClippyKnowledge && window.ClippyKnowledge.ACTIVITIES_TEXTS && window.ClippyKnowledge.ACTIVITIES_TEXTS.dimensionalAnalysis) || { title: 'Dimensional Analysis', badge: 'Physics Validator' };
-			this.card = window.ClippyUI.createActivityCard(txt.title, txt.badge);
+			const txt = (window.ClippyKnowledge && typeof window.ClippyKnowledge.getActivityConfig === 'function')
+				? window.ClippyKnowledge.getActivityConfig('dimensionalAnalysis')
+				: ((window.ClippyKnowledge && window.ClippyKnowledge.ACTIVITIES_TEXTS && window.ClippyKnowledge.ACTIVITIES_TEXTS.dimensionalAnalysis) || { title: 'Dimensional Analysis', badge: 'Physics Validator' });
+			this.card = window.ClippyUI.createActivityCard(txt.title || 'Dimensional Analysis', txt.badge || 'Physics Validator');
 			this.render(initialEq);
 		}
 
@@ -1677,14 +1734,16 @@
 
 			const res = currentEq ? this.checkHomogeneity(currentEq) : null;
 
-			const txt = (window.ClippyKnowledge && window.ClippyKnowledge.ACTIVITIES_TEXTS && window.ClippyKnowledge.ACTIVITIES_TEXTS.dimensionalAnalysis) || {
-				inputPlaceholder: "e.g. F = m * a or E = m * c^2", btnVerify: "Verify",
-				homogeneousBanner: "Dimensionally Homogeneous (Valid Equation Structure)",
-				inconsistentBanner: "Dimensionally Inconsistent (Unit Mismatch Detected)",
-				tableSide: "Side", tableExpression: "Expression", tableDimension: "Base SI Dimension",
-				labelLhs: "LHS", labelRhs: "RHS", errGeneric: "Parsing error.",
-				samples: ['F = m * a', 'E = m * c^2', 'v = d / t', 'P = F * v', 'E = m * g * h']
-			};
+			const txt = (window.ClippyKnowledge && typeof window.ClippyKnowledge.getActivityConfig === 'function')
+				? window.ClippyKnowledge.getActivityConfig('dimensionalAnalysis')
+				: ((window.ClippyKnowledge && window.ClippyKnowledge.ACTIVITIES_TEXTS && window.ClippyKnowledge.ACTIVITIES_TEXTS.dimensionalAnalysis) || {
+					inputPlaceholder: "e.g. F = m * a or E = m * c^2", btnVerify: "Verify",
+					homogeneousBanner: "Dimensionally Homogeneous (Valid Equation Structure)",
+					inconsistentBanner: "Dimensionally Inconsistent (Unit Mismatch Detected)",
+					tableSide: "Side", tableExpression: "Expression", tableDimension: "Base SI Dimension",
+					labelLhs: "LHS", labelRhs: "RHS", errGeneric: "Parsing error.",
+					samples: ['F = m * a', 'E = m * c^2', 'v = d / t', 'P = F * v', 'E = m * g * h']
+				});
 
 			const inputRow = document.createElement('div');
 			inputRow.className = 'clippy-guess-input-row';
@@ -1752,8 +1811,10 @@
 		}
 
 		mount() {
-			const txt = (window.ClippyKnowledge && window.ClippyKnowledge.ACTIVITIES_TEXTS && window.ClippyKnowledge.ACTIVITIES_TEXTS.euclideanDivision) || { title: 'Euclidean Division', badge: 'Integer & Polynomial' };
-			this.card = window.ClippyUI.createActivityCard(txt.title, txt.badge);
+			const txt = (window.ClippyKnowledge && typeof window.ClippyKnowledge.getActivityConfig === 'function')
+				? window.ClippyKnowledge.getActivityConfig('euclideanDivision')
+				: ((window.ClippyKnowledge && window.ClippyKnowledge.ACTIVITIES_TEXTS && window.ClippyKnowledge.ACTIVITIES_TEXTS.euclideanDivision) || { title: 'Euclidean Division', badge: 'Integer & Polynomial' });
+			this.card = window.ClippyUI.createActivityCard(txt.title || 'Euclidean Division', txt.badge || 'Integer & Polynomial');
 			this.render();
 		}
 
@@ -1815,21 +1876,23 @@
 			const body = this.card.bodyElement;
 			body.innerHTML = '';
 
-			const txt = (window.ClippyKnowledge && window.ClippyKnowledge.ACTIVITIES_TEXTS && window.ClippyKnowledge.ACTIVITIES_TEXTS.euclideanDivision) || {
-				tabIntegers: 'Integers (a = b·q + r)', tabPolynomials: 'Polynomials (P(x) / D(x))',
-				intInstructions: 'Calculate integer quotient $q$ and remainder $r$:',
-				intDividendPlaceholder: 'Dividend a', intDivisorPlaceholder: 'Divisor b', intBtnCompute: 'Compute',
-				polyInstructions: 'Divide polynomial $P(x)$ by $D(x)$ (enter coefficients from constant to highest power):',
-				polyDividendLabel: 'P(x) Coeffs:', polyDivisorLabel: 'D(x) Coeffs:',
-				polyDividendPlaceholder: 'e.g. -5, 4, -3, 2 for 2x³ - 3x² + 4x - 5',
-				polyDivisorPlaceholder: 'e.g. -2, 1 for x - 2', polyBtnDivide: 'Divide Polynomials',
-				polyFormulaBanner: 'P(x) = D(x) · Q(x) + R(x)',
-				tableProperty: 'Property', tableValue: 'Value', tableComponent: 'Component', tableExpression: 'Polynomial Expression',
-				labelDividend: 'Dividend ($a$)', labelDivisor: 'Divisor ($b$)', labelQuotient: 'Quotient ($q$)', labelRemainder: 'Remainder ($r$)',
-				labelPolyDividend: 'Dividend $P(x)$', labelPolyDivisor: 'Divisor $D(x)$', labelPolyQuotient: 'Quotient $Q(x)$', labelPolyRemainder: 'Remainder $R(x)$',
-				errDivZero: 'Division by zero is undefined.', errPolyZero: 'Division by zero polynomial.',
-				errPolyCoeffs: 'Please enter valid comma-separated numerical coefficients.'
-			};
+			const txt = (window.ClippyKnowledge && typeof window.ClippyKnowledge.getActivityConfig === 'function')
+				? window.ClippyKnowledge.getActivityConfig('euclideanDivision')
+				: ((window.ClippyKnowledge && window.ClippyKnowledge.ACTIVITIES_TEXTS && window.ClippyKnowledge.ACTIVITIES_TEXTS.euclideanDivision) || {
+					tabIntegers: 'Integers (a = b·q + r)', tabPolynomials: 'Polynomials (P(x) / D(x))',
+					intInstructions: 'Calculate integer quotient $q$ and remainder $r$:',
+					intDividendPlaceholder: 'Dividend a', intDivisorPlaceholder: 'Divisor b', intBtnCompute: 'Compute',
+					polyInstructions: 'Divide polynomial $P(x)$ by $D(x)$ (enter coefficients from constant to highest power):',
+					polyDividendLabel: 'P(x) Coeffs:', polyDivisorLabel: 'D(x) Coeffs:',
+					polyDividendPlaceholder: 'e.g. -5, 4, -3, 2 for 2x³ - 3x² + 4x - 5',
+					polyDivisorPlaceholder: 'e.g. -2, 1 for x - 2', polyBtnDivide: 'Divide Polynomials',
+					polyFormulaBanner: 'P(x) = D(x) · Q(x) + R(x)',
+					tableProperty: 'Property', tableValue: 'Value', tableComponent: 'Component', tableExpression: 'Polynomial Expression',
+					labelDividend: 'Dividend ($a$)', labelDivisor: 'Divisor ($b$)', labelQuotient: 'Quotient ($q$)', labelRemainder: 'Remainder ($r$)',
+					labelPolyDividend: 'Dividend $P(x)$', labelPolyDivisor: 'Divisor $D(x)$', labelPolyQuotient: 'Quotient $Q(x)$', labelPolyRemainder: 'Remainder $R(x)$',
+					errDivZero: 'Division by zero is undefined.', errPolyZero: 'Division by zero polynomial.',
+					errPolyCoeffs: 'Please enter valid comma-separated numerical coefficients.'
+				});
 
 			const tabRow = document.createElement('div');
 			tabRow.className = 'clippy-actions-bar';
@@ -1970,8 +2033,10 @@
 		}
 
 		mount(initialExpr = 'x^2 - 5x + 6') {
-			const txt = (window.ClippyKnowledge && window.ClippyKnowledge.ACTIVITIES_TEXTS && window.ClippyKnowledge.ACTIVITIES_TEXTS.polynomialFactorization) || { title: 'Polynomial Factorization', badge: 'Roots & Factoring' };
-			this.card = window.ClippyUI.createActivityCard(txt.title, txt.badge);
+			const txt = (window.ClippyKnowledge && typeof window.ClippyKnowledge.getActivityConfig === 'function')
+				? window.ClippyKnowledge.getActivityConfig('polynomialFactorization')
+				: ((window.ClippyKnowledge && window.ClippyKnowledge.ACTIVITIES_TEXTS && window.ClippyKnowledge.ACTIVITIES_TEXTS.polynomialFactorization) || { title: 'Polynomial Factorization', badge: 'Roots & Factoring' });
+			this.card = window.ClippyUI.createActivityCard(txt.title || 'Polynomial Factorization', txt.badge || 'Roots & Factoring');
 			this.render(initialExpr);
 		}
 
@@ -2088,14 +2153,16 @@
 				}
 			}
 
-			const txt = (window.ClippyKnowledge && window.ClippyKnowledge.ACTIVITIES_TEXTS && window.ClippyKnowledge.ACTIVITIES_TEXTS.polynomialFactorization) || {
-				instructions: "Factor quadratic polynomial $ax^2 + bx + c$:", btnFactor: "Factor",
-				tableParameter: "Parameter", tableValue: "Value", discriminantLabel: "Discriminant ($Δ$)",
-				classificationLabel: "Root Classification", rootsLabel: "Roots ($x_k$)",
-				factoredBanner: "Factored: {factored}", rootsNone: "None",
-				errNumeric: "Please enter valid numeric coefficients for a, b, and c.",
-				errZeroA: "Coefficient 'a' cannot be zero for a quadratic polynomial."
-			};
+			const txt = (window.ClippyKnowledge && typeof window.ClippyKnowledge.getActivityConfig === 'function')
+				? window.ClippyKnowledge.getActivityConfig('polynomialFactorization')
+				: ((window.ClippyKnowledge && window.ClippyKnowledge.ACTIVITIES_TEXTS && window.ClippyKnowledge.ACTIVITIES_TEXTS.polynomialFactorization) || {
+					instructions: "Factor quadratic polynomial $ax^2 + bx + c$:", btnFactor: "Factor",
+					tableParameter: "Parameter", tableValue: "Value", discriminantLabel: "Discriminant ($Δ$)",
+					classificationLabel: "Root Classification", rootsLabel: "Roots ($x_k$)",
+					factoredBanner: "Factored: {factored}", rootsNone: "None",
+					errNumeric: "Please enter valid numeric coefficients for a, b, and c.",
+					errZeroA: "Coefficient 'a' cannot be zero for a quadratic polynomial."
+				});
 
 			const container = document.createElement('div');
 			container.innerHTML = `
@@ -2168,9 +2235,11 @@
 
 		mount(size = 3) {
 			this.size = size;
-			const txt = (window.ClippyKnowledge && window.ClippyKnowledge.ACTIVITIES_TEXTS && window.ClippyKnowledge.ACTIVITIES_TEXTS.linearSolver) || { title: 'Linear System Solver', badge: '{size}x{size} Gaussian Solver' };
-			const badgeText = window.ClippyKnowledge.formatString(txt.badge, { size });
-			this.card = window.ClippyUI.createActivityCard(txt.title, badgeText);
+			const txt = (window.ClippyKnowledge && typeof window.ClippyKnowledge.getActivityConfig === 'function')
+				? window.ClippyKnowledge.getActivityConfig('linearSolver', { size })
+				: ((window.ClippyKnowledge && window.ClippyKnowledge.ACTIVITIES_TEXTS && window.ClippyKnowledge.ACTIVITIES_TEXTS.linearSolver) || { title: 'Linear System Solver', badge: '{size}x{size} Gaussian Solver' });
+			const badgeText = window.ClippyKnowledge.formatString(txt.badge || '{size}x{size} Gaussian Solver', { size });
+			this.card = window.ClippyUI.createActivityCard(txt.title || 'Linear System Solver', badgeText);
 			this.render();
 		}
 
@@ -2221,14 +2290,16 @@
 			const container = document.createElement('div');
 			container.className = 'clippy-linear-container';
 
-			const txt = (window.ClippyKnowledge && window.ClippyKnowledge.ACTIVITIES_TEXTS && window.ClippyKnowledge.ACTIVITIES_TEXTS.linearSolver) || {
-				sizeBtn: "{size}x{size} System",
-				btnSolve: "Solve Linear System (Gaussian Elimination)",
-				winBanner: "Unique Solution Vector Found!",
-				tableVariable: "Variable",
-				tableValue: "Exact Value",
-				errSingular: "Singular or dependent matrix. No unique solution."
-			};
+			const txt = (window.ClippyKnowledge && typeof window.ClippyKnowledge.getActivityConfig === 'function')
+				? window.ClippyKnowledge.getActivityConfig('linearSolver', { size: this.size })
+				: ((window.ClippyKnowledge && window.ClippyKnowledge.ACTIVITIES_TEXTS && window.ClippyKnowledge.ACTIVITIES_TEXTS.linearSolver) || {
+					sizeBtn: "{size}x{size} System",
+					btnSolve: "Solve Linear System (Gaussian Elimination)",
+					winBanner: "Unique Solution Vector Found!",
+					tableVariable: "Variable",
+					tableValue: "Exact Value",
+					errSingular: "Singular or dependent matrix. No unique solution."
+				});
 
 			const sizeBar = document.createElement('div');
 			sizeBar.className = 'clippy-actions-bar';
@@ -2341,8 +2412,10 @@
 			} else {
 				this.slices = ['Yes', 'No'];
 			}
-			const txt = (window.ClippyKnowledge && window.ClippyKnowledge.ACTIVITIES_TEXTS && window.ClippyKnowledge.ACTIVITIES_TEXTS.wheel) || { title: 'Decision Wheel', badge: 'Random Choice' };
-			this.card = window.ClippyUI.createActivityCard(txt.title, txt.badge);
+			const txt = (window.ClippyKnowledge && typeof window.ClippyKnowledge.getActivityConfig === 'function')
+				? window.ClippyKnowledge.getActivityConfig('wheel')
+				: ((window.ClippyKnowledge && window.ClippyKnowledge.ACTIVITIES_TEXTS && window.ClippyKnowledge.ACTIVITIES_TEXTS.wheel) || { title: 'Decision Wheel', badge: 'Random Choice' });
+			this.card = window.ClippyUI.createActivityCard(txt.title || 'Decision Wheel', txt.badge || 'Random Choice');
 			this.render();
 		}
 
@@ -2466,16 +2539,18 @@
 
 			this.drawWheel(canvas);
 
-			const txt = (window.ClippyKnowledge && window.ClippyKnowledge.ACTIVITIES_TEXTS && window.ClippyKnowledge.ACTIVITIES_TEXTS.wheel) || {
-				outcomeBanner: 'Outcome Selected: "{outcome}"', btnSpin: 'Spin Wheel!', btnSpinning: 'Spinning...',
-				customSectorsLabel: 'Custom Sectors ({count}):', inputPlaceholder: 'New sector label...', btnAdd: '+ Add',
-				presets: [
-					{ label: 'Yes / No', slices: ['Yes', 'No'] },
-					{ label: '1 - 6 Die', slices: ['1', '2', '3', '4', '5', '6'] },
-					{ label: 'RPS', slices: ['Rock', 'Paper', 'Scissors'] },
-					{ label: 'Work Focus', slices: ['Deep Work', 'Rest Break', 'Read Book', 'Code Review'] }
-				]
-			};
+			const txt = (window.ClippyKnowledge && typeof window.ClippyKnowledge.getActivityConfig === 'function')
+				? window.ClippyKnowledge.getActivityConfig('wheel', { outcome: this.selectedOutcome, count: this.slices.length })
+				: ((window.ClippyKnowledge && window.ClippyKnowledge.ACTIVITIES_TEXTS && window.ClippyKnowledge.ACTIVITIES_TEXTS.wheel) || {
+					outcomeBanner: 'Outcome Selected: "{outcome}"', btnSpin: 'Spin Wheel!', btnSpinning: 'Spinning...',
+					customSectorsLabel: 'Custom Sectors ({count}):', inputPlaceholder: 'New sector label...', btnAdd: '+ Add',
+					presets: [
+						{ label: 'Yes / No', slices: ['Yes', 'No'] },
+						{ label: '1 - 6 Die', slices: ['1', '2', '3', '4', '5', '6'] },
+						{ label: 'RPS', slices: ['Rock', 'Paper', 'Scissors'] },
+						{ label: 'Work Focus', slices: ['Deep Work', 'Rest Break', 'Read Book', 'Code Review'] }
+					]
+				});
 
 			if (this.selectedOutcome) {
 				const banner = document.createElement('div');
@@ -2567,8 +2642,10 @@
 		}
 
 		mount() {
-			const txt = (window.ClippyKnowledge && window.ClippyKnowledge.ACTIVITIES_TEXTS && window.ClippyKnowledge.ACTIVITIES_TEXTS.cipher) || { title: 'Ciphers & Cryptography', badge: 'Encoder / Decoder' };
-			this.card = window.ClippyUI.createActivityCard(txt.title, txt.badge);
+			const txt = (window.ClippyKnowledge && typeof window.ClippyKnowledge.getActivityConfig === 'function')
+				? window.ClippyKnowledge.getActivityConfig('cipher')
+				: ((window.ClippyKnowledge && window.ClippyKnowledge.ACTIVITIES_TEXTS && window.ClippyKnowledge.ACTIVITIES_TEXTS.cipher) || { title: 'Ciphers & Cryptography', badge: 'Encoder / Decoder' });
+			this.card = window.ClippyUI.createActivityCard(txt.title || 'Ciphers & Cryptography', txt.badge || 'Encoder / Decoder');
 			this.render();
 		}
 
@@ -2700,16 +2777,18 @@
 			const body = this.card.bodyElement;
 			body.innerHTML = '';
 
-			const txt = (window.ClippyKnowledge && window.ClippyKnowledge.ACTIVITIES_TEXTS && window.ClippyKnowledge.ACTIVITIES_TEXTS.cipher) || {
-				algorithmLabel: "Cipher Algorithm:",
-				keyLabel: "Key / Parameter:",
-				inputPlaceholder: "Enter text to encode or decode...",
-				outputPlaceholder: "Output result will appear here...",
-				btnEncode: "Encode →",
-				btnDecode: "← Decode",
-				btnAudio: "Play Morse Audio",
-				defaultText: "HELLO WINDOWS XP"
-			};
+			const txt = (window.ClippyKnowledge && typeof window.ClippyKnowledge.getActivityConfig === 'function')
+				? window.ClippyKnowledge.getActivityConfig('cipher')
+				: ((window.ClippyKnowledge && window.ClippyKnowledge.ACTIVITIES_TEXTS && window.ClippyKnowledge.ACTIVITIES_TEXTS.cipher) || {
+					algorithmLabel: "Cipher Algorithm:",
+					keyLabel: "Key / Parameter:",
+					inputPlaceholder: "Enter text to encode or decode...",
+					outputPlaceholder: "Output result will appear here...",
+					btnEncode: "Encode →",
+					btnDecode: "← Decode",
+					btnAudio: "Play Morse Audio",
+					defaultText: "HELLO WINDOWS XP"
+				});
 
 			const container = document.createElement('div');
 			container.className = 'clippy-cipher-container';
@@ -2824,9 +2903,11 @@
 			this.isActive = false;
 			this.isFinished = false;
 			this.peakTPS = 0;
-			const txt = (window.ClippyKnowledge && window.ClippyKnowledge.ACTIVITIES_TEXTS && window.ClippyKnowledge.ACTIVITIES_TEXTS.tps) || { title: 'Mouse TPS Speed Test', badge: '{duration}s Click Speed Benchmark' };
-			const badgeText = window.ClippyKnowledge.formatString(txt.badge, { duration });
-			this.card = window.ClippyUI.createActivityCard(txt.title, badgeText);
+			const txt = (window.ClippyKnowledge && typeof window.ClippyKnowledge.getActivityConfig === 'function')
+				? window.ClippyKnowledge.getActivityConfig('tps', { duration })
+				: ((window.ClippyKnowledge && window.ClippyKnowledge.ACTIVITIES_TEXTS && window.ClippyKnowledge.ACTIVITIES_TEXTS.tps) || { title: 'Mouse TPS Speed Test', badge: '{duration}s Click Speed Benchmark' });
+			const badgeText = window.ClippyKnowledge.formatString(txt.badge || '{duration}s Click Speed Benchmark', { duration });
+			this.card = window.ClippyUI.createActivityCard(txt.title || 'Mouse TPS Speed Test', badgeText);
 			this.render();
 		}
 
@@ -2881,14 +2962,17 @@
 			const body = this.card.bodyElement;
 			body.innerHTML = '';
 
-			const txt = (window.ClippyKnowledge && window.ClippyKnowledge.ACTIVITIES_TEXTS && window.ClippyKnowledge.ACTIVITIES_TEXTS.tps) || {
-				clickPrompt: "Click Rapidly Here to Test Speed!",
-				finalLabel: "Final Ticks Per Second",
-				bannerComplete: "Test Complete! Average Rate: {tps} TPS (Peak: {peak})",
-				statsDuration: "Duration: <strong>{duration}s</strong>",
-				statsClicks: "Total Clicks: <strong>{clicks}</strong>",
-				btnRestart: "Restart ({duration}s)"
-			};
+			const finalTPSVal = this.duration > 0 ? (this.clicks / this.duration) : 0;
+			const txt = (window.ClippyKnowledge && typeof window.ClippyKnowledge.getActivityConfig === 'function')
+				? window.ClippyKnowledge.getActivityConfig('tps', { duration: this.duration, clicks: this.clicks, tps: finalTPSVal.toFixed(2), peak: this.peakTPS.toFixed(1) })
+				: ((window.ClippyKnowledge && window.ClippyKnowledge.ACTIVITIES_TEXTS && window.ClippyKnowledge.ACTIVITIES_TEXTS.tps) || {
+					clickPrompt: "Click Rapidly Here to Test Speed!",
+					finalLabel: "Final Ticks Per Second",
+					bannerComplete: "Test Complete! Average Rate: {tps} TPS (Peak: {peak})",
+					statsDuration: "Duration: <strong>{duration}s</strong>",
+					statsClicks: "Total Clicks: <strong>{clicks}</strong>",
+					btnRestart: "Restart ({duration}s)"
+				});
 
 			const container = document.createElement('div');
 			container.className = 'clippy-tps-container';
@@ -2945,8 +3029,10 @@
 		}
 
 		mount() {
-			const txt = (window.ClippyKnowledge && window.ClippyKnowledge.ACTIVITIES_TEXTS && window.ClippyKnowledge.ACTIVITIES_TEXTS.dateCalc) || { title: 'Date Interval Calculator', badge: 'Temporal Delta' };
-			this.card = window.ClippyUI.createActivityCard(txt.title, txt.badge);
+			const txt = (window.ClippyKnowledge && typeof window.ClippyKnowledge.getActivityConfig === 'function')
+				? window.ClippyKnowledge.getActivityConfig('dateCalc')
+				: ((window.ClippyKnowledge && window.ClippyKnowledge.ACTIVITIES_TEXTS && window.ClippyKnowledge.ACTIVITIES_TEXTS.dateCalc) || { title: 'Date Interval Calculator', badge: 'Temporal Delta' });
+			this.card = window.ClippyUI.createActivityCard(txt.title || 'Date Interval Calculator', txt.badge || 'Temporal Delta');
 			this.render();
 		}
 
@@ -2981,13 +3067,15 @@
 			body.innerHTML = '';
 
 			const todayIso = new Date().toISOString().split('T')[0];
-			const txt = (window.ClippyKnowledge && window.ClippyKnowledge.ACTIVITIES_TEXTS && window.ClippyKnowledge.ACTIVITIES_TEXTS.dateCalc) || {
-				labelStart: "Start Date:", labelEnd: "End Date:", btnToday: "Today", btnSubmit: "Calculate Delta",
-				bannerTotal: "Total Difference: {days} days", tableUnit: "Interval Unit", tableMetric: "Metric",
-				rowCalendarDays: "Exact Calendar Days", rowWeeksDays: "Weeks & Days", rowWorkdays: "Business / Workdays", rowHours: "Total Hours",
-				valDays: "{days} days", valWeeksDays: "{weeks} weeks, {days} days", valWorkdays: "{days} business days", valHours: "{hours} hours",
-				errFormat: "Please enter valid date formats (YYYY-MM-DD)."
-			};
+			const txt = (window.ClippyKnowledge && typeof window.ClippyKnowledge.getActivityConfig === 'function')
+				? window.ClippyKnowledge.getActivityConfig('dateCalc')
+				: ((window.ClippyKnowledge && window.ClippyKnowledge.ACTIVITIES_TEXTS && window.ClippyKnowledge.ACTIVITIES_TEXTS.dateCalc) || {
+					labelStart: "Start Date:", labelEnd: "End Date:", btnToday: "Today", btnSubmit: "Calculate Delta",
+					bannerTotal: "Total Difference: {days} days", tableUnit: "Interval Unit", tableMetric: "Metric",
+					rowCalendarDays: "Exact Calendar Days", rowWeeksDays: "Weeks & Days", rowWorkdays: "Business / Workdays", rowHours: "Total Hours",
+					valDays: "{days} days", valWeeksDays: "{weeks} weeks, {days} days", valWorkdays: "{days} business days", valHours: "{hours} hours",
+					errFormat: "Please enter valid date formats (YYYY-MM-DD)."
+				});
 
 			const container = document.createElement('div');
 			container.className = 'clippy-date-calc-container';
