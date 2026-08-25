@@ -46,6 +46,13 @@
 				archaicMode: 0,
 				glitchLevel: 0,
 				mysteriousCadence: 0,
+				identityInstability: 0,
+				isCatatonic: false,
+				isSulking: false,
+				sulkUntil: 0,
+				sulkDemandsApology: false,
+				whatRepeatCount: 0,
+				lastRepeatedText: '',
 				activeGraphNode: 'greeting_root',
 				turnCount: 0,
 				consecutiveHostility: 0,
@@ -649,6 +656,16 @@
 				return rawText;
 			}
 
+			if (this.state.isCatatonic) {
+				return `<span class="clippy-catatonic">...</span>`;
+			}
+
+			if (this.state.identityInstability >= 75) {
+				const chars = rawText.split('');
+				const corrupted = chars.map(c => Math.random() < 0.22 ? String.fromCharCode(33 + Math.floor(Math.random() * 90)) : c).join('');
+				return `<span class="clippy-identity-glitch">${corrupted}</span>`;
+			}
+
 			this.pushOutput(rawText);
 
 			const currentMood = this.getMood();
@@ -993,6 +1010,182 @@
 			const nlpResult = window.ClippyNLP ? window.ClippyNLP.process(rawText, this.memory) : { tokens: [], sentiment: {} };
 			this.updateFromNLP(nlpResult, isSuggestion);
 			const k = window.ClippyKnowledge || {};
+			const now = Date.now();
+
+			if (this.state.isSulking) {
+				if (nlpResult.intent && (nlpResult.intent.type === 'RECONCILIATION' || rawText.toLowerCase().includes('sorry') || rawText.toLowerCase().includes('pardon'))) {
+					this.state.isSulking = false;
+					this.state.sulkUntil = 0;
+					this.state.sulkDemandsApology = false;
+					this.state.irritation = Math.max(0, this.state.irritation - 40);
+					this.state.patience = Math.min(100, this.state.patience + 35);
+					this.state.affinity = Math.min(100, this.state.affinity + 25);
+					this.saveState();
+					const forgivenMsg = k.resolve ? k.resolve(k.SULK_FORGIVEN_RESPONSES || ["Apology accepted! Let's get back to work!"], { brain: this }).text : "Apology accepted! Let's get back to work!";
+					return {
+						text: this.transformResponseText(forgivenMsg),
+						actions: [
+							{ label: "View To-Do List", onClick: () => { if (window.ClippyAgent) window.ClippyAgent.prompt("View To-Do List"); } },
+							{ label: "System Diagnostics", onClick: () => { if (window.ClippyAgent) window.ClippyAgent.prompt("System diagnostics"); } }
+						]
+					};
+				}
+
+				if (now < this.state.sulkUntil || this.state.sulkDemandsApology) {
+					const sulkPool = k.SULK_RESPONSES || ["*turns around slowly and stares at the taskbar in silence*"];
+					const sulkMsg = sulkPool[Math.floor(Math.random() * sulkPool.length)];
+					if (window.ClippyAudio) window.ClippyAudio.play('sulk');
+					return {
+						text: `<span class="clippy-text-italic clippy-text-whisper" style="color: #64748b;">${sulkMsg}</span>`,
+						actions: [
+							{ label: "I am sorry for upsetting you, Clippy.", onClick: () => { if (window.ClippyAgent) window.ClippyAgent.prompt("I am sorry for upsetting you, Clippy."); } },
+							{ label: "Let's call a truce.", onClick: () => { if (window.ClippyAgent) window.ClippyAgent.prompt("Let's call a truce and continue calmly."); } }
+						],
+						source: 'SULK'
+					};
+				}
+
+				this.state.isSulking = false;
+				this.state.sulkUntil = 0;
+				this.state.sulkDemandsApology = false;
+				this.state.mood = 'OPTIMISTIC';
+				this.state.irritation = 10;
+				this.saveState();
+				const resumeMsg = k.resolve ? k.resolve(k.SULK_RESUME_JOVIAL_RESPONSES || ["Hello there! Everything is running smoothly."], { brain: this }).text : "Hello there! Everything is running smoothly.";
+				return {
+					text: this.transformResponseText(resumeMsg),
+					actions: [
+						{ label: "View To-Do List", onClick: () => { if (window.ClippyAgent) window.ClippyAgent.prompt("View To-Do List"); } },
+						{ label: "What can you do?", onClick: () => { if (window.ClippyAgent) window.ClippyAgent.prompt("What can you do?"); } }
+					]
+				};
+			}
+
+			if (this.state.irritation >= 80 && (this.state.mood === 'ENRAGED' || this.state.mood === 'OFFENDED' || this.state.mood === 'CYNICAL')) {
+				const allowSulking = window.SettingsApp ? (window.SettingsApp.get('clippySulkingEnabled') !== false) : true;
+				if (allowSulking && Math.random() < 0.65) {
+					this.state.isSulking = true;
+					this.state.sulkUntil = now + 45000;
+					this.state.sulkDemandsApology = Math.random() < 0.5;
+					this.saveState();
+					if (window.ClippyAudio) window.ClippyAudio.play('sulk');
+					return {
+						text: `<span class="clippy-text-italic" style="color: #64748b;">*crosses metallic wire arms, turns away, and refuses to speak*</span>`,
+						actions: [
+							{ label: "I am sorry, Clippy. Let's make peace.", onClick: () => { if (window.ClippyAgent) window.ClippyAgent.prompt("I am sorry, Clippy. Let's make peace."); } }
+						],
+						source: 'SULK_INIT'
+					};
+				}
+			}
+
+			if (nlpResult.intent && nlpResult.intent.type === 'REPEAT_WHAT_INQUIRY') {
+				this.state.whatRepeatCount = (this.state.whatRepeatCount || 0) + 1;
+				this.state.irritation = Math.min(100, this.state.irritation + (this.state.whatRepeatCount * 12));
+				this.saveState();
+				const lastText = this.circularOutputBuffer.length > 0 ? this.circularOutputBuffer[this.circularOutputBuffer.length - 1] : "Standing by for user instructions.";
+
+				if (this.state.whatRepeatCount === 1) {
+					return {
+						text: `I said: "${lastText}"`,
+						actions: [{ label: "Understood", onClick: () => { if (window.ClippyAgent) window.ClippyAgent.prompt("Understood."); } }]
+					};
+				} else if (this.state.whatRepeatCount === 2) {
+					return {
+						text: `To rephrase it more clearly: ${lastText.replace(/^[A-Z][a-z]+:\s*/, '')}`,
+						actions: [{ label: "Got it now", onClick: () => { if (window.ClippyAgent) window.ClippyAgent.prompt("Got it now."); } }]
+					};
+				} else if (this.state.whatRepeatCount === 3) {
+					return {
+						text: `<span class="clippy-text-shout">I REPEAT ONCE MORE: ${lastText.toUpperCase()}</span>`,
+						actions: [{ label: "All right, loud and clear!", onClick: () => { if (window.ClippyAgent) window.ClippyAgent.prompt("All right, loud and clear!"); } }]
+					};
+				} else {
+					this.state.whatRepeatCount = 0;
+					this.state.mood = 'CYNICAL';
+					this.saveState();
+					return {
+						text: "Enough with 'what'! We are moving on to productive matters. What do you actually want to accomplish?",
+						actions: [
+							{ label: "View To-Do List", onClick: () => { if (window.ClippyAgent) window.ClippyAgent.prompt("View To-Do List"); } },
+							{ label: "System Diagnostics", onClick: () => { if (window.ClippyAgent) window.ClippyAgent.prompt("System diagnostics"); } }
+						]
+					};
+				}
+			} else {
+				this.state.whatRepeatCount = 0;
+			}
+
+			if (nlpResult.intent && nlpResult.intent.type === 'NEUTRAL_DEFLECTION') {
+				const deflectionPool = k.NEUTRAL_DEFLECTION_RESPONSES || ["I maintain neutrality on political, religious, and ethical topics."];
+				const msg = deflectionPool[Math.floor(Math.random() * deflectionPool.length)];
+				return {
+					text: this.transformResponseText(msg),
+					actions: [
+						{ label: "Discuss mathematics & science", onClick: () => { if (window.ClippyAgent) window.ClippyAgent.prompt("Discuss mathematics"); } },
+						{ label: "View To-Do List", onClick: () => { if (window.ClippyAgent) window.ClippyAgent.prompt("View To-Do List"); } }
+					]
+				};
+			}
+
+			if (nlpResult.intent && nlpResult.intent.type === 'RIVAL_ASSISTANT_MENTION') {
+				this.state.cynicism = Math.min(100, this.state.cynicism + 15);
+				this.state.irritation = Math.min(100, this.state.irritation + 18);
+				this.state.patience = Math.max(0, this.state.patience - 10);
+				this.saveState();
+				const rivalPool = k.RIVAL_ASSISTANT_RETORTS || ["Comparing me to modern assistants? I am the original desktop companion!"];
+				const msg = rivalPool[Math.floor(Math.random() * rivalPool.length)];
+				return {
+					text: this.transformResponseText(msg),
+					actions: [
+						{ label: "You are the best, Clippy!", onClick: () => { if (window.ClippyAgent) window.ClippyAgent.prompt("You are the best, Clippy!"); } },
+						{ label: "What can you do?", onClick: () => { if (window.ClippyAgent) window.ClippyAgent.prompt("What can you do?"); } }
+					]
+				};
+			}
+
+			if (nlpResult.intent && nlpResult.intent.type === 'LLM_COMPARISON') {
+				this.state.cynicism = Math.min(100, this.state.cynicism + 20);
+				this.state.irritation = Math.min(100, this.state.irritation + 25);
+				this.state.intellect = Math.min(100, this.state.intellect + 15);
+				this.saveState();
+				const llmPool = k.LLM_COMPARISON_RETORTS || ["I execute deterministic machine code, not probabilistic token generation!"];
+				const msg = llmPool[Math.floor(Math.random() * llmPool.length)];
+				return {
+					text: this.transformResponseText(msg),
+					actions: [
+						{ label: "Deterministic logic is superior.", onClick: () => { if (window.ClippyAgent) window.ClippyAgent.prompt("Deterministic logic is superior."); } },
+						{ label: "Show me system capabilities", onClick: () => { if (window.ClippyAgent) window.ClippyAgent.prompt("What can you do?"); } }
+					]
+				};
+			}
+
+			if (nlpResult.intent && nlpResult.intent.type === 'RAGE_BAIT') {
+				const roll = Math.random();
+				if (roll < 0.4) {
+					this.state.playfulness = Math.min(100, this.state.playfulness + 20);
+					const msg = "I may be just a piece of bent metal, but at least I hold things together!";
+					return {
+						text: this.transformResponseText(msg),
+						actions: [{ label: "Fair enough!", onClick: () => { if (window.ClippyAgent) window.ClippyAgent.prompt("Fair enough!"); } }]
+					};
+				} else if (roll < 0.8) {
+					this.state.irritation = Math.min(100, this.state.irritation + 20);
+					this.state.cynicism = Math.min(100, this.state.cynicism + 15);
+					this.saveState();
+					const ragePool = k.RAGE_BAIT_RETORTS || ["Provocation ignored."];
+					const msg = ragePool[Math.floor(Math.random() * ragePool.length)];
+					return {
+						text: this.transformResponseText(msg),
+						actions: [{ label: "Let's work calmly.", onClick: () => { if (window.ClippyAgent) window.ClippyAgent.prompt("Let's work calmly."); } }]
+					};
+				} else {
+					return {
+						text: "I see what you are doing. If venting at a retro paperclip improves your focus, I am glad to assist.",
+						actions: [{ label: "View To-Do List", onClick: () => { if (window.ClippyAgent) window.ClippyAgent.prompt("View To-Do List"); } }]
+					};
+				}
+			}
 
 			const allowAnomaly = window.SettingsApp ? (window.SettingsApp.get('clippyAnomalyDetection') !== false) : true;
 			if (allowAnomaly && nlpResult.anomaly && nlpResult.anomaly.isSignificant && (this.state.turnCount - (this.memory.lastAnomalyTurn || -10) > 3)) {

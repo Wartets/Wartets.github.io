@@ -36,6 +36,12 @@
 			if (window.ClippyTrees && window.ClippyTrees.paradox && window.ClippyTrees.paradox[nodeId]) {
 				return window.ClippyTrees.paradox[nodeId];
 			}
+			if (window.ClippyTrees && window.ClippyTrees.identity && window.ClippyTrees.identity[nodeId]) {
+				return window.ClippyTrees.identity[nodeId];
+			}
+			if (window.ClippyTrees && window.ClippyTrees.philosophy && window.ClippyTrees.philosophy[nodeId]) {
+				return window.ClippyTrees.philosophy[nodeId];
+			}
 			const dict = (window.ClippyKnowledge && window.ClippyKnowledge.DIALOGUE_NODES) || this.nodes;
 			if (dict && dict[nodeId]) return dict[nodeId];
 			return dict ? dict.greeting_root : null;

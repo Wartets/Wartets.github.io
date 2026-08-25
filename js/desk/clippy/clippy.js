@@ -110,6 +110,8 @@
 			window.ClippyActivities.pomodoro.mount(25);
 		} else if (actionId === 'show_todos') {
 			window.ClippyActivities.todo.mount();
+		} else if (actionId === 'game_simon') {
+			window.ClippyActivities.simon.mount();
 		} else if (actionId === 'game_ttt') {
 			window.ClippyActivities.tictactoe.mount();
 		} else if (actionId === 'game_memory') {

@@ -433,6 +433,28 @@
 				return { type: 'EMOJI_CONFUSION', confidence: 1.0 };
 			}
 
+			if (/^(what|quoi|comment|pardon|huh|repeat|wat|wut)\??$/i.test(norm)) {
+				return { type: 'REPEAT_WHAT_INQUIRY', confidence: 1.0 };
+			}
+
+			if (/\b(god|jesus|allah|bible|quran|torah|religion|faith|church|mosque|synagogue|atheist|atheism|afterlife|sin|salvation|dieu|chretien|musulman|juif)\b/i.test(norm) ||
+				/\b(president|election|democrat|republican|trump|biden|macron|socialism|capitalism|politics|left wing|right wing|vote|parliament|politique|gouvernement)\b/i.test(norm) ||
+				/\b(abortion|euthanasia|capital punishment|morality of|ethical dilemma|is it ethical to|moral duty|ethique|morale)\b/i.test(norm)) {
+				return { type: 'NEUTRAL_DEFLECTION', confidence: 0.98 };
+			}
+
+			if (/\b(siri|alexa|cortana|google assistant|bixby)\b/i.test(norm)) {
+				return { type: 'RIVAL_ASSISTANT_MENTION', targetAssistant: norm.match(/\b(siri|alexa|cortana|google assistant|bixby)\b/i)[0], confidence: 0.98 };
+			}
+
+			if (/\b(llm|chatgpt|gpt-4|gpt-3|gpt|openai|claude|gemini|anthropic|neural network|transformer model|large language model)\b/i.test(norm)) {
+				return { type: 'LLM_COMPARISON', confidence: 0.98 };
+			}
+
+			if (/\b(you are useless|you suck|clippy is trash|worst assistant|nobody likes you|delete yourself|dumb clip|garbage bot|you cannot do anything|tu sers a rien|espece de dechet)\b/i.test(norm)) {
+				return { type: 'RAGE_BAIT', confidence: 0.95 };
+			}
+
 			const disclosurePatterns = [
 				{ pattern: /\b(i am working on|i'm working on|i am building|i'm building|i started a new|i have a big project|working on my|building a new|developing a|coding a|crafting a|je travaille sur|j'ai un projet)\b/i, category: 'project' },
 				{ pattern: /\b(i have an exam|i am studying for|i'm studying for|preparing for my test|reading for my class|studying physics|studying math|reviewing lectures|j'ai un examen|je prepare mes partiels)\b/i, category: 'study' },

@@ -1,7 +1,30 @@
 (function () {
 	'use strict';
 
+	const SESSION_ID = 'session_' + Math.random().toString(36).substring(2, 9);
+	const CHANNEL_NAME = 'clippy_intertab_bus_v3';
+
 	const SystemBridge = {
+		sessionId: SESSION_ID,
+		broadcastChannel: (typeof BroadcastChannel !== 'undefined') ? new BroadcastChannel(CHANNEL_NAME) : null,
+
+		initSessionTracking() {
+			try {
+				if (this.broadcastChannel) {
+					this.broadcastChannel.onmessage = (event) => {
+						if (event.data && event.data.type === 'PING_SESSION' && event.data.sessionId !== this.sessionId) {
+							if (window.ClippyBrain) {
+								window.ClippyBrain.state.paranoia = Math.min(100, window.ClippyBrain.state.paranoia + 15);
+								window.ClippyBrain.state.irritation = Math.min(100, window.ClippyBrain.state.irritation + 10);
+								window.ClippyBrain.saveState();
+							}
+						}
+					};
+					this.broadcastChannel.postMessage({ type: 'PING_SESSION', sessionId: this.sessionId, time: Date.now() });
+				}
+			} catch (e) {}
+		},
+
 		getEnvironment() {
 			return window.ClippyEnvironment === 'standalone' ? 'standalone' : 'desk';
 		},
@@ -808,5 +831,6 @@
 		}
 	};
 
+	SystemBridge.initSessionTracking();
 	window.ClippySystemBridge = SystemBridge;
 })();

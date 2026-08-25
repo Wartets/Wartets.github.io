@@ -37,6 +37,173 @@
 		return res;
 	}
 
+	class SimonSaysActivity {
+		constructor() {
+			this.sequence = [];
+			this.playerStep = 0;
+			this.round = 0;
+			this.bestScore = 0;
+			this.isPlaying = false;
+			this.isPlayerTurn = false;
+			this.isAnimating = false;
+			this.card = null;
+			this.colors = ['green', 'red', 'yellow', 'blue'];
+		}
+
+		mount() {
+			this.sequence = [];
+			this.playerStep = 0;
+			this.round = 0;
+			this.isPlaying = false;
+			this.isPlayerTurn = false;
+			this.isAnimating = false;
+			const txt = (window.ClippyKnowledge && window.ClippyKnowledge.ACTIVITIES_TEXTS && window.ClippyKnowledge.ACTIVITIES_TEXTS.simon) || { title: 'Simon Says', badge: 'Memory Sequence' };
+			this.card = window.ClippyUI.createActivityCard(txt.title, txt.badge);
+			this.render();
+		}
+
+		startGame() {
+			if (this.isAnimating) return;
+			this.sequence = [];
+			this.round = 0;
+			this.playerStep = 0;
+			this.isPlaying = true;
+			this.nextRound();
+		}
+
+		nextRound() {
+			this.round++;
+			if (this.round > this.bestScore) {
+				this.bestScore = this.round;
+			}
+			this.playerStep = 0;
+			this.isPlayerTurn = false;
+			const nextColor = this.colors[Math.floor(Math.random() * this.colors.length)];
+			this.sequence.push(nextColor);
+			this.render();
+			this.playSequence();
+		}
+
+		playSequence() {
+			this.isAnimating = true;
+			let idx = 0;
+			const interval = setInterval(() => {
+				if (idx < this.sequence.length) {
+					this.flashColor(this.sequence[idx]);
+					idx++;
+				} else {
+					clearInterval(interval);
+					this.isAnimating = false;
+					this.isPlayerTurn = true;
+					this.render();
+				}
+			}, 600);
+		}
+
+		flashColor(color) {
+			if (!this.card) return;
+			const pad = this.card.bodyElement.querySelector(`.clippy-simon-pad.${color}`);
+			if (pad) {
+				pad.classList.add('lit');
+				if (window.ClippyAudio) window.ClippyAudio.play(`simon_${color}`);
+				setTimeout(() => {
+					pad.classList.remove('lit');
+				}, 320);
+			}
+		}
+
+		handlePlayerInput(color) {
+			if (!this.isPlaying || !this.isPlayerTurn || this.isAnimating) return;
+
+			this.flashColor(color);
+
+			if (this.sequence[this.playerStep] === color) {
+				this.playerStep++;
+				if (this.playerStep >= this.sequence.length) {
+					this.isPlayerTurn = false;
+					if (window.ClippyAudio) window.ClippyAudio.play('win');
+					setTimeout(() => {
+						this.nextRound();
+					}, 700);
+				}
+			} else {
+				this.isPlaying = false;
+				this.isPlayerTurn = false;
+				if (window.ClippyAudio) window.ClippyAudio.play('simon_fail');
+				this.render(true);
+				if (window.ClippyAgent && typeof window.ClippyAgent.notifyGameEnded === 'function') {
+					window.ClippyAgent.notifyGameEnded('Simon Says', `Round ${this.round}`, () => {
+						this.startGame();
+					});
+				}
+			}
+		}
+
+		render(isFailed = false) {
+			if (!this.card) return;
+			const body = this.card.bodyElement;
+			body.innerHTML = '';
+
+			const txt = (window.ClippyKnowledge && window.ClippyKnowledge.ACTIVITIES_TEXTS && window.ClippyKnowledge.ACTIVITIES_TEXTS.simon) || {
+				scoreRound: "Round", scoreBest: "Best", scoreStatus: "Status",
+				btnStart: "Start Game", statusWatch: "Watch pattern...", statusYourTurn: "Your turn!",
+				statusGameOver: "Game Over! Final Round: {round}"
+			};
+
+			const scoreboard = document.createElement('div');
+			scoreboard.className = 'clippy-scoreboard';
+			let statusLabel = 'Idle';
+			if (isFailed) statusLabel = 'Game Over';
+			else if (this.isPlayerTurn) statusLabel = txt.statusYourTurn;
+			else if (this.isPlaying) statusLabel = txt.statusWatch;
+
+			scoreboard.innerHTML = `
+				<div class="clippy-score-item"><span>${txt.scoreRound}</span><strong>${this.round}</strong></div>
+				<div class="clippy-score-item"><span>${txt.scoreBest}</span><strong>${this.bestScore}</strong></div>
+				<div class="clippy-score-item"><span>${txt.scoreStatus}</span><strong>${statusLabel}</strong></div>
+			`;
+			body.appendChild(scoreboard);
+
+			if (isFailed) {
+				const banner = document.createElement('div');
+				banner.className = 'clippy-activity-banner loss';
+				banner.textContent = window.ClippyKnowledge && window.ClippyKnowledge.formatString
+					? window.ClippyKnowledge.formatString(txt.statusGameOver, { round: this.round })
+					: `Game Over! Reached Round ${this.round}`;
+				body.appendChild(banner);
+			}
+
+			const container = document.createElement('div');
+			container.className = 'clippy-simon-container';
+
+			const grid = document.createElement('div');
+			grid.className = 'clippy-simon-grid';
+
+			this.colors.forEach(col => {
+				const pad = document.createElement('button');
+				pad.type = 'button';
+				pad.className = `clippy-simon-pad ${col}`;
+				pad.disabled = !this.isPlayerTurn || this.isAnimating;
+				pad.addEventListener('click', () => this.handlePlayerInput(col));
+				grid.appendChild(pad);
+			});
+
+			container.appendChild(grid);
+
+			if (!this.isPlaying) {
+				const startBtn = document.createElement('button');
+				startBtn.type = 'button';
+				startBtn.className = 'clippy-action-btn';
+				startBtn.textContent = txt.btnStart;
+				startBtn.addEventListener('click', () => this.startGame());
+				container.appendChild(startBtn);
+			}
+
+			body.appendChild(container);
+			window.ClippyUI.scrollLogToBottom();
+		}
+	}
+
 	class TicTacToeActivity {
 		constructor() {
 			this.board = Array(9).fill(null);
@@ -3147,6 +3314,7 @@
 	const ActivitiesManager = {
 		activePomodoroTimer: null,
 
+		simon: new SimonSaysActivity(),
 		tictactoe: new TicTacToeActivity(),
 		memory: new MemoryMatchActivity(),
 		hangman: new HangmanActivity(),

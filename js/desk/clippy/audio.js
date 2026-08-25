@@ -164,6 +164,85 @@
 						osc.start(now + idx * 0.08);
 						osc.stop(now + idx * 0.08 + 0.16);
 					});
+				} else if (type === 'simon_green') {
+					const osc = this.ctx.createOscillator();
+					const gain = this.ctx.createGain();
+					osc.connect(gain);
+					gain.connect(this.ctx.destination);
+					osc.type = 'sine';
+					osc.frequency.setValueAtTime(415.30, now);
+					gain.gain.setValueAtTime(0.08, now);
+					gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.32);
+					osc.start(now);
+					osc.stop(now + 0.32);
+				} else if (type === 'simon_red') {
+					const osc = this.ctx.createOscillator();
+					const gain = this.ctx.createGain();
+					osc.connect(gain);
+					gain.connect(this.ctx.destination);
+					osc.type = 'sine';
+					osc.frequency.setValueAtTime(310.00, now);
+					gain.gain.setValueAtTime(0.08, now);
+					gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.32);
+					osc.start(now);
+					osc.stop(now + 0.32);
+				} else if (type === 'simon_yellow') {
+					const osc = this.ctx.createOscillator();
+					const gain = this.ctx.createGain();
+					osc.connect(gain);
+					gain.connect(this.ctx.destination);
+					osc.type = 'sine';
+					osc.frequency.setValueAtTime(252.00, now);
+					gain.gain.setValueAtTime(0.08, now);
+					gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.32);
+					osc.start(now);
+					osc.stop(now + 0.32);
+				} else if (type === 'simon_blue') {
+					const osc = this.ctx.createOscillator();
+					const gain = this.ctx.createGain();
+					osc.connect(gain);
+					gain.connect(this.ctx.destination);
+					osc.type = 'sine';
+					osc.frequency.setValueAtTime(209.25, now);
+					gain.gain.setValueAtTime(0.08, now);
+					gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.32);
+					osc.start(now);
+					osc.stop(now + 0.32);
+				} else if (type === 'simon_fail') {
+					const osc = this.ctx.createOscillator();
+					const gain = this.ctx.createGain();
+					osc.connect(gain);
+					gain.connect(this.ctx.destination);
+					osc.type = 'sawtooth';
+					osc.frequency.setValueAtTime(92.5, now);
+					osc.frequency.linearRampToValueAtTime(55.0, now + 0.45);
+					gain.gain.setValueAtTime(0.08, now);
+					gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.45);
+					osc.start(now);
+					osc.stop(now + 0.45);
+				} else if (type === 'sulk') {
+					const osc = this.ctx.createOscillator();
+					const gain = this.ctx.createGain();
+					osc.connect(gain);
+					gain.connect(this.ctx.destination);
+					osc.type = 'sine';
+					osc.frequency.setValueAtTime(300, now);
+					osc.frequency.exponentialRampToValueAtTime(110, now + 0.35);
+					gain.gain.setValueAtTime(0.03, now);
+					gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.35);
+					osc.start(now);
+					osc.stop(now + 0.35);
+				} else if (type === 'glitch_burst') {
+					const osc = this.ctx.createOscillator();
+					const gain = this.ctx.createGain();
+					osc.connect(gain);
+					gain.connect(this.ctx.destination);
+					osc.type = 'sawtooth';
+					osc.frequency.setValueAtTime(800 + Math.random() * 600, now);
+					gain.gain.setValueAtTime(0.04, now);
+					gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.08);
+					osc.start(now);
+					osc.stop(now + 0.08);
 				}
 			} catch (e) {}
 		}

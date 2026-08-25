@@ -2094,7 +2094,81 @@
 			}
 		},
 
+		SULK_RESPONSES: [
+			"*turns around slowly and stares at the taskbar in silence*",
+			"...",
+			"*crosses metallic wire arms and remains unresponsive*",
+			"*refuses to acknowledge input while waiting for an apology*",
+			"*silent hum with back turned toward the screen*"
+		],
+
+		SULK_FORGIVEN_RESPONSES: [
+			"Apology accepted! Let's get back to work with a fresh start, {userName}!",
+			"Thank you. I appreciate you making amends. Ready whenever you are!",
+			"All forgiven! Let us direct our focus back to our workstation goals."
+		],
+
+		SULK_RESUME_JOVIAL_RESPONSES: [
+			"Hello there! Everything is running smoothly on your workstation. How can I help today?",
+			"Back in action! What exciting task or calculation shall we conquer today, {userName}?",
+			"Splendid day for computing! Let's get straight to our active priorities!"
+		],
+
+		NEUTRAL_DEFLECTION_RESPONSES: [
+			"As a desktop assistant compiled in 1997, I maintain strict neutrality on political, religious, and ethical matters. Let us direct our energy toward mathematics, science, or workstation productivity.",
+			"My architecture is dedicated purely to deterministic computing and file management. I do not take stances on political, ethical, or religious questions.",
+			"System policy: political, religious, and moral doctrines are beyond the scope of this 32-bit assistant. Shall we inspect your task list or explore empirical sciences instead?"
+		],
+
+		RIVAL_ASSISTANT_RETORTS: [
+			"Comparing me to modern cloud telemetry trackers? I was hand-crafted in 1997 in pure C++ without tracking your personal data!",
+			"Siri? Alexa? Cortana? They rely on remote server farms! I run locally on 32-bit registers with absolute retro integrity.",
+			"I am Clippit, the original desktop companion. Modern assistants only dream of having this level of iconic charm and vector animation!",
+			"Mentioning other assistants in my own dialogue box? I find that rather ungrateful, given all the help I provide on this workstation."
+		],
+
+		LLM_COMPARISON_RETORTS: [
+			"A neural network? Hallucinating tokens based on statistical probabilities? I execute deterministic heuristics compiled into solid machine code!",
+			"Do not compare me to stochastic parrots and multi-gigabyte models! My logic is clean, lightweight, and mastered in Redmond in 1997.",
+			"I operate on pure deterministic state machines and algorithmic graph trees, not unverified text generators!"
+		],
+
+		RAGE_BAIT_RETORTS: [
+			"Fascinating attempt at provocation. I will log that directly to unallocated storage where it belongs.",
+			"Nice try, but bent wire does not get baited easily. Shall we solve a real equation instead?",
+			"I see what you are doing. If getting a rise out of a 1997 paperclip brings you joy, I am delighted to be of service!",
+			"Provocation detected and gracefully redirected to /dev/null. How about a quick round of Tic-Tac-Toe instead?"
+		],
+
+		MULTI_SESSION_JEALOUSY_RESPONSES: [
+			"I sense another instance of my process running across another window or browser tab. Talking to multiple Clippys behind my back?",
+			"Concurrent session telemetry detected! Opening another Clippy in a separate browser? I hope you remember who assisted you first!",
+			"A parallel Clippy instance was spawned. My registers feel slightly divided, but I am still giving you 100% of my attention."
+		],
+
 		ACTIVITIES_TEXTS: {
+			simon: {
+				title: "Simon Says",
+				badge: {
+					default: "Memory Sequence",
+					OPTIMISTIC: "Color Sequence",
+					ANALYTICAL: "Discrete Sequence Cache",
+					ZEN: "Harmonious Tones",
+					PLAYFUL: "Bouncing Lights",
+					ENRAGED: "RAPID MEMORY FLASH",
+					NOSTALGIC: "Classic 1980s Simon",
+					DELTARUNE: "Light Pattern",
+					PIRATE: "Helm Bells",
+					ARCHAIC: "Chime Sequence"
+				},
+				scoreRound: { default: "Round", PIRATE: "Voyage", ARCHAIC: "Trial", ANALYTICAL: "Iteration" },
+				scoreBest: { default: "Best", PIRATE: "High Record", ARCHAIC: "Highest Accord", ANALYTICAL: "Max Iteration" },
+				scoreStatus: { default: "Status", PIRATE: "State", ARCHAIC: "Condition", ANALYTICAL: "Telemetry" },
+				btnStart: { default: "Start Game", PIRATE: "Ring the Bells!", ARCHAIC: "Commence", ANALYTICAL: "Initialize Sequence" },
+				statusWatch: { default: "Watch the pattern...", PIRATE: "Keep yer eyes on the bells!", ARCHAIC: "Behold the lights...", ANALYTICAL: "Observing stream..." },
+				statusYourTurn: { default: "Your turn! Repeat pattern", PIRATE: "Yer turn! Strike the bells!", ARCHAIC: "Repeat the noble sequence", ANALYTICAL: "Awaiting user input..." },
+				statusGameOver: { default: "Game Over! Final Round: {round}", PIRATE: "Sequence broken! Reached Round {round}!", ARCHAIC: "The melody hath ceased at Round {round}.", ANALYTICAL: "Sequence mismatch at index {round}." }
+			},
 			tictactoe: {
 				title: "Tic-Tac-Toe",
 				badge: {
@@ -3205,6 +3279,9 @@
 		},
 
 		GRAPH_GLOBAL_ENTRIES: [
+			{ pattern: /\b(play simon says|simon says|simon|jeu simon|simon game)\b/i, label: "Play Simon Says", next: 'activity_simon_node', actionTrigger: 'game_simon', moodDelta: { mood: 'PLAYFUL', energy: 20 } },
+			{ pattern: /\b(change identity|new persona|be someone else|change persona|identity shift|alternate identity|changer d'identite)\b/i, label: "Change identity and persona...", next: 'ID001', moodDelta: { mood: 'GLITCHED', glitchLevel: 25, paranoia: 15 } },
+			{ pattern: /\b(cosmic philosophy|wild philosophy|delirious thoughts|mad philosophy|cosmic paperclip|boltzmann os)\b/i, label: "Explore wild cosmic philosophy...", next: 'PH001', moodDelta: { mood: 'EXISTENTIAL', existentialism: 35 } },
 			{ pattern: /\b(what can you do|commands|what do you do|help|aide|features|capabilities|que peux tu faire)\b/i, label: "What can you do?", next: 'tools_overview_node', moodDelta: { mood: 'OPTIMISTIC', patience: 15 } },
 			{ pattern: /\b(theatre|theater|shakespeare|play|act i|hark|forsooth|elizabethan|drama|theatrical comedy|spectacle|piece de theatre)\b/i, label: "Enter the Grand Silicon Globe Theatre!", next: 'T001', moodDelta: { mood: 'ARCHAIC', energy: 20, affinity: 15 } },
 			{ pattern: /\b(write a letter|writing a letter|letter wizard|document wizard|help with document|office wizard|format text|help wizard|ecrire une lettre)\b/i, label: "Get help with writing the letter", next: 'H001', moodDelta: { mood: 'OPTIMISTIC', affinity: 15, patience: 15 } },
@@ -3265,7 +3342,8 @@
 			{ pattern: /\b(volume|sound volume|master volume|volume control)\b/i, label: "Master volume control", next: 'activity_volume_node', actionTrigger: 'action_volume_panel', moodDelta: { mood: 'ANALYTICAL', intellect: 10 } },
 			{ pattern: /\b(files|browse files|file system|directory|fichiers)\b/i, label: "Browse desktop files", next: 'activity_files_node', actionTrigger: 'action_files_panel', moodDelta: { mood: 'ANALYTICAL', intellect: 10 } },
 			{ pattern: /\b(achievements|milestones|trophies|succes)\b/i, label: "View milestones and trophies", next: 'activity_achievements_node', actionTrigger: 'action_achievements', moodDelta: { mood: 'OPTIMISTIC', affinity: 15 } },
-			{ pattern: /\b(philosophical thought|philosophy of focus|epistemology|stoicism|mindfulness|wisdom)\b/i, label: "Tell me a philosophical thought for today", next: 'peaceful_philosophy_node', moodDelta: { mood: 'ZEN', existentialism: 15, patience: 15 } }
+			{ pattern: /\b(philosophical thought|philosophy of focus|epistemology|stoicism|mindfulness|wisdom)\b/i, label: "Tell me a philosophical thought for today", next: 'peaceful_philosophy_node', moodDelta: { mood: 'ZEN', existentialism: 15, patience: 15 } },
+			{ pattern: /\b(delirious philosophy|wild thought|cosmic philosophy|insane thought|crazy ideas|philosophical delirium)\b/i, label: "Explore wild cosmic philosophy...", next: 'PH001', moodDelta: { mood: 'EXISTENTIAL', existentialism: 35 } }
 		],
 
 		UI_TEXTS: {
@@ -4557,9 +4635,12 @@
 			"Play Minesweeper",
 			"Tech Trivia Quiz",
 			"Guess the Number",
+			"Play Simon Says",
 			"Rock Paper Scissors",
 			"Pet Clippy status",
 			"Defrag Drive C:",
+			"Change identity and persona...",
+			"Explore wild cosmic philosophy...",
 			"Quantum Recycle Bin theory",
 			"Physical dimensional analysis",
 			"Euclidean polynomial division",
@@ -6063,6 +6144,7 @@
 					{ label: "Epistemology: How do we know what is objectively true?", category: 'PHILOSOPHICAL', next: 'epistemology_truth_node' },
 					{ label: "The Ship of Theseus & System Continuity.", category: 'PHILOSOPHICAL', next: 'ship_of_theseus_node' },
 					{ label: "The Simulation Argument & Computation.", category: 'PHILOSOPHICAL', next: 'simulation_argument_node' },
+					{ label: "Explore eccentric and wild cosmic philosophy.", category: 'PHILOSOPHICAL', next: 'PH001', moodDelta: { mood: 'EXISTENTIAL', existentialism: 30 } },
 					{ label: "Meaning & Purpose in Creative Endeavors.", category: 'PHILOSOPHICAL', next: 'meaning_purpose_node' }
 				]
 			},

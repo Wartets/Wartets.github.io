@@ -588,6 +588,78 @@
 	color: #f57f17;
 }
 
+.clippy-activity-banner.sulk {
+	background: #f1f5f9;
+	border-color: #64748b;
+	color: #334155;
+	font-style: italic;
+}
+
+.clippy-simon-container {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 8px;
+	padding: 6px;
+}
+
+.clippy-simon-grid {
+	display: grid;
+	grid-template-columns: repeat(2, 68px);
+	grid-gap: 8px;
+	margin: 6px auto;
+	justify-content: center;
+}
+
+.clippy-simon-pad {
+	width: 68px;
+	height: 68px;
+	border: 3px outset #ffffff;
+	border-radius: 8px;
+	cursor: pointer;
+	opacity: 0.72;
+	transition: opacity 0.1s ease, transform 0.08s ease, filter 0.1s ease;
+	user-select: none;
+	box-shadow: 0 2px 4px rgba(0,0,0,0.25);
+}
+
+.clippy-simon-pad.green { background: #16a34a; border-color: #4ade80 #15803d #15803d #4ade80; }
+.clippy-simon-pad.red { background: #dc2626; border-color: #f87171 #991b1b #991b1b #f87171; }
+.clippy-simon-pad.yellow { background: #ca8a04; border-color: #fde047 #854d0e #854d0e #fde047; }
+.clippy-simon-pad.blue { background: #2563eb; border-color: #60a5fa #1e40af #1e40af #60a5fa; }
+
+.clippy-simon-pad:hover:not(:disabled) {
+	opacity: 0.9;
+	transform: scale(1.03);
+}
+
+.clippy-simon-pad:active:not(:disabled),
+.clippy-simon-pad.lit {
+	opacity: 1;
+	filter: brightness(1.6) drop-shadow(0 0 8px currentColor);
+	transform: scale(0.96);
+	border-style: inset;
+}
+
+.clippy-simon-pad:disabled {
+	cursor: default;
+}
+
+.clippy-identity-glitch {
+	display: inline-block;
+	color: #b91c1c;
+	font-family: 'Lucida Console', monospace;
+	letter-spacing: 1px;
+	text-shadow: 1px 0 #00ffff, -1px 0 #ff00ff;
+	animation: clippyTextGlitch 0.18s infinite;
+}
+
+.clippy-catatonic {
+	color: #64748b;
+	font-style: italic;
+	letter-spacing: 4px;
+}
+
 .clippy-scoreboard {
 	display: flex;
 	justify-content: space-around;
