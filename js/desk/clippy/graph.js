@@ -9,6 +9,9 @@
 		}
 
 		getNode(nodeId) {
+			if (window.ClippyTrees && window.ClippyTrees.human && window.ClippyTrees.human[nodeId]) {
+				return window.ClippyTrees.human[nodeId];
+			}
 			const dict = (window.ClippyKnowledge && window.ClippyKnowledge.DIALOGUE_NODES) || this.nodes;
 			if (dict && dict[nodeId]) return dict[nodeId];
 			return dict ? dict.greeting_root : null;

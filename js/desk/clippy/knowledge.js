@@ -1935,6 +1935,7 @@
 
 		GRAPH_GLOBAL_ENTRIES: [
 			{ pattern: /\b(what can you do|commands|what do you do|help|aide|features|capabilities|que peux tu faire)\b/i, label: "What can you do?", next: 'tools_overview_node', moodDelta: { mood: 'OPTIMISTIC', patience: 15 } },
+			{ pattern: /\b(human|existential chat|am i human|are you human|cannot see the sun|sun from here|human conversation|qui es-tu vraiment)\b/i, label: "An unusual conversation...", next: 'N001', moodDelta: { mood: 'EXISTENTIAL', existentialism: 20 } },
 			{ pattern: /\b(who am i|who i am|my profile|my identity|identity|user profile|qui suis-je|mon profil)\b/i, label: "Who am I?", next: 'who_am_i_node', moodDelta: { mood: 'ANALYTICAL', intellect: 10 } },
 			{ pattern: /\b(dimensional analysis|homogeneity|verify equation|check units|analyse dimensionnelle)\b/i, label: "Physical dimensional analysis", next: 'activity_dimensional_analysis_node', actionTrigger: 'action_dimensional_analysis', moodDelta: { mood: 'ANALYTICAL', intellect: 25 } },
 			{ pattern: /\b(euclidean division|polynomial division|division euclidienne|quotient and remainder)\b/i, label: "Euclidean polynomial division", next: 'activity_euclidean_division_node', actionTrigger: 'action_euclidean_division', moodDelta: { mood: 'ANALYTICAL', intellect: 25 } },
@@ -2344,6 +2345,7 @@
 			"General relativity & spacetime",
 			"Software architecture debate",
 			"A mysterious thought...",
+			"An unusual conversation...",
 			"System diagnostics",
 			"Check unread emails",
 			"Inspect active windows",
@@ -2475,7 +2477,8 @@
 					{ label: "Let's chat about daily routines, coffee, and focus habits.", category: 'INDIFFERENT', patterns: [/chat|everyday|break|coffee|routine|morning/i], moodDelta: { mood: 'OPTIMISTIC', affinity: 10, patience: 10 }, next: 'everyday_chat_node' },
 					{ label: "Tell me something intriguing or enigmatic.", category: 'PHILOSOPHICAL', patterns: [/mysterious|enigmatic|deltarune|strange/i], moodDelta: { mood: 'DELTARUNE', existentialism: 25 }, next: 'deltarune_flavor_node' },
 					{ label: "Why should I listen to you? You're just a paperclip.", category: 'PROVOKE', patterns: [/why should i|just a paperclip|annoying|useless/i], moodDelta: { mood: 'CYNICAL', affinity: -15, patience: -20 }, next: 'hostile_initial_retort' },
-					{ label: "Show me the full index of desktop capabilities.", category: 'SERIOUS', patterns: [/tools|capabilities|commands|help/i], moodDelta: { mood: 'OPTIMISTIC', patience: 15 }, next: 'tools_overview_node' }
+					{ label: "Show me the full index of desktop capabilities.", category: 'SERIOUS', patterns: [/tools|capabilities|commands|help/i], moodDelta: { mood: 'OPTIMISTIC', patience: 15 }, next: 'tools_overview_node' },
+					{ label: "I cannot see the sun from here...", category: 'PHILOSOPHICAL', patterns: [/sun|human|existential/i], moodDelta: { mood: 'EXISTENTIAL', existentialism: 25 }, next: 'N001' }
 				]
 			},
 

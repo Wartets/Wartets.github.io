@@ -374,6 +374,11 @@
 			};
 		}
 
+		if (norm === 'an unusual conversation...' || norm === 'an unusual conversation' || norm === 'unusual conversation' || norm === 'cannot see the sun from here' || norm === 'human conversation') {
+			const node = window.ClippyBrain ? window.ClippyBrain.navigateGraphNode('N001') : null;
+			return node ? { text: node.text, actions: window.ClippyBrain.buildGraphActions(node.options) } : { text: "Good morning. I cannot see the sun from here.", actionTrigger: null };
+		}
+
 		if (norm === 'inspect active windows' || norm === 'active windows' || norm === 'list windows' || norm === 'open windows' || norm === 'fenetres actives') {
 			return { text: "Inspecting running workspace windows...", actionTrigger: 'action_inspect_windows' };
 		}
