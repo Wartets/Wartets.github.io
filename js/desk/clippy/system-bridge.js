@@ -7,6 +7,7 @@
 	const SystemBridge = {
 		sessionId: SESSION_ID,
 		broadcastChannel: (typeof BroadcastChannel !== 'undefined') ? new BroadcastChannel(CHANNEL_NAME) : null,
+		lastObservationTime: 0,
 
 		initSessionTracking() {
 			try {
@@ -53,6 +54,10 @@
 			if (!window.SettingsApp || window.SettingsApp.get('clippyContextualBubbles') === false) return;
 			if (window.ClippyUI && window.ClippyUI.isOpen) return;
 
+			const now = Date.now();
+			if (now - (this.lastObservationTime || 0) < 22000) return;
+			this.lastObservationTime = now;
+
 			const templatesDict = (window.ClippyKnowledge && window.ClippyKnowledge.PROACTIVE_BUBBLE_TEMPLATES) || {};
 			let candidateList = templatesDict[eventType] || null;
 
@@ -96,6 +101,23 @@
 
 			setTimeout(() => {
 				if (window.ClippyUI && !window.ClippyUI.isOpen) {
+					let actionAnim = 'GetAttention';
+					if (eventType === 'paint_opened') actionAnim = 'GetArtsy';
+					else if (eventType === 'notepad_opened') actionAnim = 'Writing';
+					else if (eventType === 'outlook_opened') actionAnim = 'CheckingSomething';
+					else if (eventType === 'mediaplayer_opened' || eventType === 'winamp_opened') actionAnim = 'Hearing_1';
+					else if (eventType === 'recyclebin_opened' || eventType === 'recyclebin_full') actionAnim = 'EmptyTrash';
+					else if (eventType === 'minesweeper_opened') actionAnim = 'Searching';
+					else if (eventType === 'calc_opened') actionAnim = 'Thinking';
+					else if (eventType === 'cmd_opened') actionAnim = 'Processing';
+					else if (eventType === 'settings_opened') actionAnim = 'GetWizardy';
+					else if (eventType === 'theme_changed') actionAnim = 'GetWizardy';
+					else if (eventType === 'wallpaper_changed') actionAnim = 'GetArtsy';
+					else if (eventType === 'error_triggered') actionAnim = 'IdleHeadScratch';
+					else if (eventType === 'many_windows') actionAnim = 'Searching';
+					else if (eventType === 'idle_long' || eventType === 'user_late_night') actionAnim = 'IdleSnooze';
+					else if (eventType === 'user_all_caps') actionAnim = 'Alert';
+
 					window.ClippyUI.showIdleBubble(text, () => {
 						if (window.ClippyAgent) {
 							window.ClippyAgent.open();
@@ -105,7 +127,7 @@
 								window.ClippyAgent.executeAction(item.action);
 							}
 						}
-					});
+					}, actionAnim);
 				}
 			}, 900);
 		},
@@ -174,6 +196,7 @@
 			try {
 				if (window.MailStore && typeof window.MailStore.sendMessage === 'function') {
 					window.MailStore.sendMessage({ to, subject, body });
+					if (window.ClippyAnimator) window.ClippyAnimator.playForAction('send_mail');
 					if (window.AchievementsManager) {
 						window.AchievementsManager.progress('mail_sender', 1);
 					}
@@ -260,6 +283,7 @@
 				}
 				if (typeof fs !== 'undefined' && fs && fs.emptyRecycleBin) {
 					fs.emptyRecycleBin();
+					if (window.ClippyAnimator) window.ClippyAnimator.playForAction('empty_trash');
 					if (typeof refreshUI === 'function') refreshUI();
 					return true;
 				}
@@ -450,6 +474,7 @@
 
 		toggleMusicPlayback() {
 			try {
+				if (window.ClippyAnimator) window.ClippyAnimator.playForAction('play_music');
 				if (window.DeskAPI && typeof window.DeskAPI.toggleMusicPlayback === 'function') {
 					return window.DeskAPI.toggleMusicPlayback();
 				}
@@ -636,6 +661,7 @@
 			try {
 				if (typeof fs !== 'undefined' && fs) {
 					const f = fs.create('File', path || '/', name, { content });
+					if (window.ClippyAnimator) window.ClippyAnimator.playForAction('create_file');
 					if (typeof refreshUI === 'function') refreshUI();
 					return f;
 				}
@@ -826,6 +852,7 @@
 
 		unlockAchievement(id, count = 1) {
 			try {
+				if (window.ClippyAnimator) window.ClippyAnimator.playForAction('milestone_unlock');
 				if (window.AchievementsManager && typeof window.AchievementsManager.progress === 'function') {
 					window.AchievementsManager.progress(id, count);
 				}

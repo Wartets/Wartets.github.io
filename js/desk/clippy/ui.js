@@ -189,6 +189,10 @@
 			this.inputElement = this.popupElement.querySelector('.clippy-popup-input');
 			this.faceImage = this.popupElement.querySelector('.clippy-popup-avatar');
 			this.suggestionsContainer = this.popupElement.querySelector('.clippy-suggestions-bar');
+
+			if (window.ClippyAnimator && this.faceImage) {
+				window.ClippyAnimator.registerElement(this.faceImage);
+			}
 			const headerHandle = this.popupElement.querySelector('.clippy-popup-header');
 			const sendBtn = this.popupElement.querySelector('.clippy-popup-send');
 			const closeBtn = this.popupElement.querySelector('.clippy-popup-close');
@@ -232,6 +236,9 @@
 			this.inputElement.addEventListener('input', () => {
 				if (this.historyIndex === -1) {
 					this.currentDraft = this.inputElement.value;
+				}
+				if (window.ClippyAnimator && !window.ClippyAnimator.isPlayingProtectedAnimation() && this.inputElement.value.trim().length === 1) {
+					window.ClippyAnimator.playLook('down', { priority: 1, restart: false });
 				}
 			});
 
@@ -316,6 +323,19 @@
 		setVisualState(state) {
 			if (!this.faceImage) return;
 			this.faceImage.classList.remove('clippy-anim-nod', 'clippy-anim-think', 'clippy-anim-wiggle', 'clippy-anim-shake');
+
+			if (window.ClippyAnimator) {
+				if (state === 'talk' || state === 'happy') {
+					window.ClippyAnimator.playTalking();
+				} else if (state === 'think' || state === 'alert') {
+					window.ClippyAnimator.playThinking();
+				} else if (state === 'write') {
+					window.ClippyAnimator.playForAction('compose_mail', { priority: 3 });
+				} else {
+					window.ClippyAnimator.playIdle();
+				}
+				return;
+			}
 
 			if (state === 'think' || state === 'alert') {
 				this.faceImage.src = `${IMAGE_BASE}${FACES.THINK}`;
@@ -506,7 +526,9 @@
 				this.activeMessageFinalizer = null;
 				row.innerHTML = renderedContent;
 				this.isTyping = false;
-				this.setVisualState('idle');
+				if (!window.ClippyAnimator || !window.ClippyAnimator.isPlayingProtectedAnimation()) {
+					this.setVisualState('idle');
+				}
 				attachActions();
 				this.saveChatHistory();
 				this.scrollLogToBottom();
@@ -741,7 +763,7 @@
 			}
 		}
 
-		showIdleBubble(text, onClickAction = null) {
+		showIdleBubble(text, onClickAction = null, customAnimation = null) {
 			if (this.isOpen) return;
 			const bubble = this.ensureBubble();
 			bubble.innerHTML = '';
@@ -763,6 +785,13 @@
 			bubble.appendChild(closeBtn);
 
 			bubble.classList.remove('hidden');
+			if (window.ClippyAnimator) {
+				if (customAnimation) {
+					window.ClippyAnimator.play(customAnimation, { priority: 4, lock: true });
+				} else if (!window.ClippyAnimator.isPlayingProtectedAnimation()) {
+					window.ClippyAnimator.play('GetAttention', { priority: 3, lock: true });
+				}
+			}
 			if (window.ClippyAudio) window.ClippyAudio.play('popup');
 
 			const executeBubble = () => {

@@ -67,7 +67,7 @@
 	function handleUserInput(rawText, isSuggestion = false) {
 		if (!rawText || isThinking) return;
 		if (window.ClippyUI && window.ClippyUI.isTyping && window.ClippyUI.currentTypeInterval) {
-			clearInterval(window.ClippyUI.currentTypeInterval);
+			clearTimeout(window.ClippyUI.currentTypeInterval);
 			window.ClippyUI.currentTypeInterval = null;
 			window.ClippyUI.isTyping = false;
 		}
@@ -133,8 +133,10 @@
 		} else if (actionId === 'action_personality_test_cyber') {
 			window.ClippyActivities.personalityQuiz.mount('cyber-netrunner');
 		} else if (actionId === 'timer_25') {
+			if (window.ClippyAnimator) window.ClippyAnimator.play('Processing', { priority: 5, lock: true });
 			window.ClippyActivities.pomodoro.mount(25);
 		} else if (actionId === 'show_todos') {
+			if (window.ClippyAnimator) window.ClippyAnimator.play('Writing', { priority: 5, lock: true });
 			window.ClippyActivities.todo.mount();
 		} else if (actionId === 'game_pong') {
 			window.ClippyActivities.pong.mount();
@@ -157,12 +159,16 @@
 		} else if (actionId === 'action_defrag') {
 			window.ClippyActivities.defrag.mount();
 		} else if (actionId === 'action_dimensional_analysis') {
+			if (window.ClippyAnimator) window.ClippyAnimator.play('GetTechy', { priority: 5, lock: true });
 			window.ClippyActivities.dimensionalAnalysis.mount();
 		} else if (actionId === 'action_euclidean_division') {
+			if (window.ClippyAnimator) window.ClippyAnimator.play('GetTechy', { priority: 5, lock: true });
 			window.ClippyActivities.euclideanDivision.mount();
 		} else if (actionId === 'action_polynomial_factorization') {
+			if (window.ClippyAnimator) window.ClippyAnimator.play('GetTechy', { priority: 5, lock: true });
 			window.ClippyActivities.polynomialFactorization.mount();
 		} else if (actionId === 'action_linear_solver') {
+			if (window.ClippyAnimator) window.ClippyAnimator.play('GetTechy', { priority: 5, lock: true });
 			window.ClippyActivities.linearSolver.mount();
 		} else if (actionId === 'action_wheel') {
 			window.ClippyActivities.wheel.mount();
@@ -171,36 +177,47 @@
 		} else if (actionId === 'action_tps') {
 			window.ClippyActivities.tps.mount();
 		} else if (actionId === 'action_date_calc') {
+			if (window.ClippyAnimator) window.ClippyAnimator.play('CheckingSomething', { priority: 5, lock: true });
 			window.ClippyActivities.dateCalc.mount();
 		} else if (actionId === 'pet_status' || actionId === 'pet_feed' || actionId === 'pet_polish') {
 			window.ClippyActivities.pet.mount();
 		} else if (actionId === 'action_trivia') {
+			if (window.ClippyAnimator) window.ClippyAnimator.play('CheckingSomething', { priority: 4, lock: true });
 			const res = window.ClippyKnowledge.resolve(window.ClippyKnowledge.TRIVIA, { brain: window.ClippyBrain });
 			window.ClippyUI.appendAssistantMessage(res.text, [
 				{ label: "Another Trivia", onClick: () => executeActionTrigger('action_trivia') }
 			]);
 		} else if (actionId === 'action_joke') {
+			if (window.ClippyAnimator) window.ClippyAnimator.play('Wave', { priority: 4, lock: true });
 			const res = window.ClippyKnowledge.resolve(window.ClippyKnowledge.JOKES, { brain: window.ClippyBrain });
 			window.ClippyUI.appendAssistantMessage(res.text, [
 				{ label: "Another Joke", onClick: () => executeActionTrigger('action_joke') }
 			]);
 		} else if (actionId === 'action_status') {
+			if (window.ClippyAnimator) window.ClippyAnimator.play('Processing', { priority: 4, lock: true });
 			window.ClippyUI.appendAssistantMessage(window.ClippySystemBridge.getSystemSpecs());
 		} else if (actionId === 'action_shortcuts') {
+			if (window.ClippyAnimator) window.ClippyAnimator.play('CheckingSomething', { priority: 4, lock: true });
 			window.ClippyUI.appendAssistantMessage((window.ClippyKnowledge ? window.ClippyKnowledge.SHORTCUTS : []).join('\n'));
 		} else if (actionId === 'action_pass') {
+			if (window.ClippyAnimator) window.ClippyAnimator.play('Save', { priority: 4, lock: true });
 			const pwd = window.ClippyActivities.generatePassword(16);
 			const rawTpl = (window.ClippyKnowledge && window.ClippyKnowledge.SYSTEM_TEXTS && window.ClippyKnowledge.SYSTEM_TEXTS.password && window.ClippyKnowledge.SYSTEM_TEXTS.password.generated) || "Generated Secure Password ({length} chars):\n**`{password}`**";
 			const tpl = window.ClippyKnowledge.resolveTextVariant ? window.ClippyKnowledge.resolveTextVariant(rawTpl, { brain: window.ClippyBrain, vars: { length: 16, password: pwd } }) : rawTpl;
 			window.ClippyUI.appendAssistantMessage(window.ClippyKnowledge.formatString(tpl, { length: 16, password: pwd }));
 		} else if (actionId === 'action_pass_24') {
+			if (window.ClippyAnimator) window.ClippyAnimator.play('Save', { priority: 4, lock: true });
 			const pwd = window.ClippyActivities.generatePassword(24);
 			const rawTpl = (window.ClippyKnowledge && window.ClippyKnowledge.SYSTEM_TEXTS && window.ClippyKnowledge.SYSTEM_TEXTS.password && window.ClippyKnowledge.SYSTEM_TEXTS.password.generatedEntropy) || "Generated High-Entropy Password ({length} chars):\n**`{password}`**";
 			const tpl = window.ClippyKnowledge.resolveTextVariant ? window.ClippyKnowledge.resolveTextVariant(rawTpl, { brain: window.ClippyBrain, vars: { length: 24, password: pwd } }) : rawTpl;
 			window.ClippyUI.appendAssistantMessage(window.ClippyKnowledge.formatString(tpl, { length: 24, password: pwd }));
 		} else if (actionId === 'action_inspect_windows') {
-			if (isDeskEnvironment()) renderActiveWindowsList();
-			else respondDeskOnlyFeature('Window Manager');
+			if (isDeskEnvironment()) {
+				if (window.ClippyAnimator) window.ClippyAnimator.play('Searching', { priority: 4, lock: true });
+				renderActiveWindowsList();
+			} else {
+				respondDeskOnlyFeature('Window Manager');
+			}
 		} else if (actionId === 'action_show_desktop') {
 			if (isDeskEnvironment()) {
 				window.ClippySystemBridge.minimizeAllWindows();
@@ -229,11 +246,13 @@
 				respondDeskOnlyFeature('Window Manager');
 			}
 		} else if (actionId === 'action_constant_c') {
+			if (window.ClippyAnimator) window.ClippyAnimator.play('GetTechy', { priority: 4, lock: true });
 			const cVal = (window.ClippyKnowledge && window.ClippyKnowledge.PHYSICAL_CONSTANTS && window.ClippyKnowledge.PHYSICAL_CONSTANTS.c) || { value: 299792458, unit: "m s^-1" };
 			const rawTpl = (window.ClippyKnowledge && window.ClippyKnowledge.SYSTEM_TEXTS && window.ClippyKnowledge.SYSTEM_TEXTS.constants && window.ClippyKnowledge.SYSTEM_TEXTS.constants.speedOfLightText) || "Speed of light in vacuum (c):\n**{value} {unit}** (exact standard)";
 			const tpl = window.ClippyKnowledge.resolveTextVariant ? window.ClippyKnowledge.resolveTextVariant(rawTpl, { brain: window.ClippyBrain, vars: { value: cVal.value.toLocaleString(), unit: cVal.unit } }) : rawTpl;
 			window.ClippyUI.appendAssistantMessage(window.ClippyKnowledge.formatString(tpl, { value: cVal.value.toLocaleString(), unit: cVal.unit }));
 		} else if (actionId === 'action_constant_h') {
+			if (window.ClippyAnimator) window.ClippyAnimator.play('GetTechy', { priority: 4, lock: true });
 			const hVal = (window.ClippyKnowledge && window.ClippyKnowledge.PHYSICAL_CONSTANTS && window.ClippyKnowledge.PHYSICAL_CONSTANTS.h) || { value: 6.62607015e-34, unit: "J s" };
 			const rawTpl = (window.ClippyKnowledge && window.ClippyKnowledge.SYSTEM_TEXTS && window.ClippyKnowledge.SYSTEM_TEXTS.constants && window.ClippyKnowledge.SYSTEM_TEXTS.constants.planckText) || "Planck constant (h):\n**{value} {unit}** (exact standard)";
 			const tpl = window.ClippyKnowledge.resolveTextVariant ? window.ClippyKnowledge.resolveTextVariant(rawTpl, { brain: window.ClippyBrain, vars: { value: hVal.value, unit: hVal.unit } }) : rawTpl;
@@ -243,28 +262,57 @@
 		} else if (actionId === 'action_achievements') {
 			renderAchievementsList();
 		} else if (actionId === 'action_theme_panel') {
-			if (isDeskEnvironment()) renderThemeSelectorCard();
-			else respondDeskOnlyFeature('Theme Switcher');
+			if (isDeskEnvironment()) {
+				if (window.ClippyAnimator) window.ClippyAnimator.play('GetWizardy', { priority: 4, lock: true });
+				renderThemeSelectorCard();
+			} else {
+				respondDeskOnlyFeature('Theme Switcher');
+			}
 		} else if (actionId === 'action_wallpaper_panel') {
-			if (isDeskEnvironment()) renderWallpaperSelectorCard();
-			else respondDeskOnlyFeature('Desktop Wallpapers');
+			if (isDeskEnvironment()) {
+				if (window.ClippyAnimator) window.ClippyAnimator.play('GetArtsy', { priority: 4, lock: true });
+				renderWallpaperSelectorCard();
+			} else {
+				respondDeskOnlyFeature('Desktop Wallpapers');
+			}
 		} else if (actionId === 'action_music_panel') {
-			if (isDeskEnvironment()) renderMusicPlayerController();
-			else respondDeskOnlyFeature('Audio Player');
+			if (isDeskEnvironment()) {
+				if (window.ClippyAnimator) window.ClippyAnimator.play('Hearing_1', { priority: 4, lock: true });
+				renderMusicPlayerController();
+			} else {
+				respondDeskOnlyFeature('Audio Player');
+			}
 		} else if (actionId === 'action_files_panel') {
-			if (isDeskEnvironment()) renderFileListCard('/');
-			else respondDeskOnlyFeature('File System');
+			if (isDeskEnvironment()) {
+				if (window.ClippyAnimator) window.ClippyAnimator.play('Searching', { priority: 4, lock: true });
+				renderFileListCard('/');
+			} else {
+				respondDeskOnlyFeature('File System');
+			}
 		} else if (actionId === 'action_volume_panel') {
-			if (isDeskEnvironment()) renderVolumeControllerCard();
-			else respondDeskOnlyFeature('Audio Volume Controller');
+			if (isDeskEnvironment()) {
+				if (window.ClippyAnimator) window.ClippyAnimator.play('Alert', { priority: 4, lock: true });
+				renderVolumeControllerCard();
+			} else {
+				respondDeskOnlyFeature('Audio Volume Controller');
+			}
 		} else if (actionId === 'action_system_tools') {
-			if (isDeskEnvironment()) renderSystemToolsCard();
-			else respondDeskOnlyFeature('System Diagnostics');
+			if (isDeskEnvironment()) {
+				if (window.ClippyAnimator) window.ClippyAnimator.play('Processing', { priority: 4, lock: true });
+				renderSystemToolsCard();
+			} else {
+				respondDeskOnlyFeature('System Diagnostics');
+			}
 		} else if (actionId === 'action_check_mail') {
-			if (isDeskEnvironment()) renderMailListCard();
-			else respondDeskOnlyFeature('Outlook Express');
+			if (isDeskEnvironment()) {
+				if (window.ClippyAnimator) window.ClippyAnimator.play('CheckingSomething', { priority: 4, lock: true });
+				renderMailListCard();
+			} else {
+				respondDeskOnlyFeature('Outlook Express');
+			}
 		} else if (actionId === 'action_compose_mail') {
 			if (isDeskEnvironment()) {
+				if (window.ClippyAnimator) window.ClippyAnimator.play('SendMail', { priority: 5, lock: true });
 				window.ClippySystemBridge.launchApp('outlook');
 				const mailTexts = (window.ClippyKnowledge && window.ClippyKnowledge.SYSTEM_TEXTS && window.ClippyKnowledge.SYSTEM_TEXTS.mailControls) || {};
 				window.ClippyUI.appendAssistantMessage(mailTexts.launched || "Outlook Express launched for drafting messages.");
@@ -273,6 +321,7 @@
 			}
 		} else if (actionId === 'action_inspect_bin') {
 			if (isDeskEnvironment()) {
+				if (window.ClippyAnimator) window.ClippyAnimator.play('EmptyTrash', { priority: 4, lock: true });
 				const count = window.ClippySystemBridge.getRecycleBinCount();
 				const rbTexts = (window.ClippyKnowledge && window.ClippyKnowledge.SYSTEM_TEXTS && window.ClippyKnowledge.SYSTEM_TEXTS.recycleBin) || {};
 				const msg = count > 0 
@@ -768,6 +817,7 @@
 
 		if (norm.startsWith('note ') || norm.startsWith('scratchpad write ')) {
 			const memo = rawText.replace(/^(note|scratchpad write)\s+/i, '').trim();
+			if (window.ClippyAnimator) window.ClippyAnimator.playSequence(['Writing', 'Save'], { priority: 4, lock: true });
 			window.ClippyActivities.saveScratchpadNote(memo);
 			return { text: window.ClippyKnowledge.formatString(fTexts.noteCommitted || "[SCRATCHPAD COMMITTED] Memo saved to local storage:\n\"{memo}\"", { memo }) };
 		}
@@ -798,6 +848,7 @@
 			}
 			const q = rawText.replace(/^(find|search)\s+/i, '').trim();
 			if (q) {
+				if (window.ClippyAnimator) window.ClippyAnimator.playSequence(['Searching', 'LookLeft', 'LookRight'], { priority: 4, lock: true });
 				const hits = window.ClippySystemBridge.searchFiles(q);
 				if (hits.length > 0) {
 					return {
@@ -1612,6 +1663,9 @@
 				}
 			}
 
+			if (window.ClippyAnimator) {
+				window.ClippyAnimator.playForMood(currentMood, 'idle');
+			}
 			const idlePool = idleTexts.pool || [
 				"Need a hand with your tasks or want to discuss a new idea? Click me anytime!",
 				"It looks like you're exploring the desktop. Let me know if you need assistance!",
@@ -1645,7 +1699,13 @@
 	}
 
 	function closeAssistant() {
-		window.ClippyUI.close();
+		if (window.ClippyAnimator) {
+			window.ClippyAnimator.play('GoodBye', { priority: 6, lock: true }).then(() => {
+				window.ClippyUI.close();
+			});
+		} else {
+			window.ClippyUI.close();
+		}
 		if (chatMarathonTimer) {
 			clearInterval(chatMarathonTimer);
 			chatMarathonTimer = null;
@@ -1653,6 +1713,9 @@
 	}
 
 	function renderInitialGreeting() {
+		if (window.ClippyAnimator) {
+			window.ClippyAnimator.play('Greeting', { priority: 5, lock: true });
+		}
 		if (window.ClippyBrain && typeof window.ClippyBrain.navigateGraphNode === 'function') {
 			const entry = window.ClippyBrain.navigateGraphNode('greeting_root');
 			const actions = window.ClippyBrain.buildGraphActions(entry.options);
@@ -1664,6 +1727,9 @@
 	}
 
 	function init() {
+		if (window.ClippyAnimator) {
+			window.ClippyAnimator.preloadKeyAnimations();
+		}
 		startIdleDaemon();
 
 		window.addEventListener('offline', () => {
@@ -1717,6 +1783,14 @@
 
 	function notifyGameEnded(gameTitle, resultSummary, restartCallback) {
 		setTimeout(() => {
+			const isWin = resultSummary && (resultSummary.toLowerCase().includes('win') || resultSummary.toLowerCase().includes('victory') || resultSummary.toLowerCase().includes('cleared') || resultSummary.toLowerCase().includes('100%'));
+			if (window.ClippyAnimator) {
+				if (isWin) {
+					window.ClippyAnimator.play('Congratulate', { priority: 4, lock: true });
+				} else {
+					window.ClippyAnimator.play('IdleHeadScratch', { priority: 4, lock: true });
+				}
+			}
 			const k = window.ClippyKnowledge || {};
 			const cfg = (k.SYSTEM_TEXTS && k.SYSTEM_TEXTS.gameEnded) || {
 				prompt: "Round completed in **{game}** ({result}). Would you like to play another round?",

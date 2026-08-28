@@ -355,6 +355,9 @@
 			}
 
 			this.applyMoodDelta(appliedDelta);
+			if (window.ClippyAnimator) {
+				window.ClippyAnimator.playForAction('milestone_unlock');
+			}
 			this.saveState();
 			this.saveMemory();
 		}
@@ -393,6 +396,9 @@
 		setMood(newMood) {
 			if (typeof newMood === 'string') {
 				this.state.mood = newMood.toUpperCase();
+				if (window.ClippyAnimator && !window.ClippyAnimator.isPlayingProtectedAnimation()) {
+					window.ClippyAnimator.playForMood(this.state.mood, 'idle');
+				}
 				this.saveState();
 			}
 		}
@@ -1247,6 +1253,7 @@
 					this.state.sulkDemandsApology = Math.random() < 0.5;
 					this.saveState();
 					if (window.ClippyAudio) window.ClippyAudio.play('sulk');
+					if (window.ClippyAnimator) window.ClippyAnimator.play('IdleRopePile', { lock: true, duration: 45000 });
 					return {
 						text: `<span class="clippy-text-italic" style="color: #64748b;">*crosses metallic wire arms, turns away, and refuses to speak*</span>`,
 						actions: [

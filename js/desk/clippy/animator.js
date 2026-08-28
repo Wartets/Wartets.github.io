@@ -172,7 +172,7 @@
 			reaction: ["GetAttention", "Searching"]
 		},
 		EXISTENTIAL: {
-			idle: ["RestPose", "IdleAtom", "LookingUp"],
+			idle: ["RestPose", "IdleAtom", "LookUp"],
 			talk: ["RestPose", "Explain"],
 			think: ["Thinking", "IdleAtom"],
 			reaction: ["GetTechy", "RestPose"]
@@ -224,6 +224,20 @@
 		defrag: "Processing",
 		game_win: "Congratulate",
 		game_lose: "IdleHeadScratch",
+		game_pong: "Alert",
+		game_simon: "GetArtsy",
+		game_ttt: "Wave",
+		game_memory: "CheckingSomething",
+		game_hangman: "Writing",
+		game_quiz: "CheckingSomething",
+		game_guess: "Thinking",
+		game_rps: "Wave",
+		game_mines: "Searching",
+		personality_quiz: "GetWizardy",
+		wheel: "GetArtsy",
+		cipher: "CheckingSomething",
+		tps: "Wave",
+		date_calc: "CheckingSomething",
 		milestone_unlock: "Congratulate",
 		play_music: "Hearing_1",
 		toggle_music: "Alert",
@@ -235,6 +249,10 @@
 		tech_inquiry: "GetTechy",
 		math_inquiry: "Thinking",
 		artsy_inquiry: "GetArtsy",
+		atom: "IdleAtom",
+		tap: "IdleFingerTap",
+		snooze: "IdleSnooze",
+		fatigue: "IdleRopePile",
 		gesture_down: "GestureDown",
 		gesture_up: "GestureUp",
 		gesture_left: "GestureLeft",
@@ -242,16 +260,21 @@
 		look_down: "LookDown",
 		look_up: "LookUp",
 		look_left: "LookLeft",
-		look_right: "LookRight"
+		look_right: "LookRight",
+		look_down_left: "LookDownLeft",
+		look_down_right: "LookDownRight",
+		look_up_left: "LookUpLeft",
+		look_up_right: "LookUpRight"
 	};
 
 	const PRIORITY = {
 		IDLE: 0,
-		TALK: 1,
-		THINK: 2,
-		REACTION: 3,
-		ACTION: 4,
-		CRITICAL: 5
+		LOOK: 1,
+		TALK: 2,
+		THINK: 3,
+		REACTION: 4,
+		ACTION: 5,
+		CRITICAL: 6
 	};
 
 	class ClippyAnimatorController {
@@ -265,6 +288,7 @@
 			this.targetElements = new Set();
 			this.themeStyle = 'classic';
 			this.isLocked = false;
+			this.lastLookTimestamp = 0;
 			this.fallbackStaticPath = '../assets/images/desk/clippy/idle.png';
 			this.initSettings();
 		}
@@ -329,19 +353,6 @@
 			this.targetElements.delete(element);
 		}
 
-		updateElementSource(element, animName) {
-			if (!element) return;
-			const isImg = element.tagName === 'IMG';
-			const path = this.getAnimationPath(animName);
-			if (isImg) {
-				if (element.src !== path && !element.src.endsWith(path)) {
-					element.src = path;
-				}
-			} else {
-				element.style.backgroundImage = `url("${path}")`;
-			}
-		}
-
 		setThemeStyle(style) {
 			this.themeStyle = style === 'modern' ? 'modern' : 'classic';
 			this.play(this.currentAnimation, { force: true });
@@ -349,7 +360,7 @@
 
 		isPlayingProtectedAnimation() {
 			const now = Date.now();
-			return (this.isLocked || (this.currentPriority >= PRIORITY.ACTION && now < this.animEndTime));
+			return (this.isLocked || (this.currentPriority >= PRIORITY.THINK && now < this.animEndTime));
 		}
 
 		play(animationName, options = {}) {
@@ -360,25 +371,28 @@
 			if (!isEnabled) {
 				this.currentAnimation = 'RestPose';
 				this.currentPriority = PRIORITY.IDLE;
-				this.targetElements.forEach(el => this.updateElementSource(el, 'RestPose'));
+				this.isLocked = false;
+				this.targetElements.forEach(el => this.updateElementSource(el, 'RestPose', false));
 				return Promise.resolve();
 			}
 
 			const priority = options.priority !== undefined ? options.priority : PRIORITY.ACTION;
 			const now = Date.now();
 
-			if (this.isPlayingProtectedAnimation() && priority < this.currentPriority && !options.force) {
-				return Promise.resolve();
-			}
-
 			if (this.isLocked && !options.force) {
 				return Promise.resolve();
 			}
 
+			if (now < this.animEndTime && priority < this.currentPriority && !options.force) {
+				return Promise.resolve();
+			}
+
 			const targetAnim = this.resolveAnimationName(animationName);
+			const duration = options.duration || this.getAnimationDuration(targetAnim);
+			const isSameRunning = (this.currentAnimation === targetAnim && now < this.animEndTime && !options.force);
+
 			this.currentAnimation = targetAnim;
 			this.currentPriority = priority;
-			const duration = options.duration || this.getAnimationDuration(targetAnim);
 			this.animEndTime = now + duration;
 			const loop = !!options.loop;
 
@@ -391,9 +405,11 @@
 				this.currentTimer = null;
 			}
 
-			this.targetElements.forEach(el => {
-				this.updateElementSource(el, targetAnim, options.restart !== false);
-			});
+			if (!isSameRunning || options.restart) {
+				this.targetElements.forEach(el => {
+					this.updateElementSource(el, targetAnim, options.restart === true);
+				});
+			}
 
 			return new Promise((resolve) => {
 				if (loop) {
@@ -438,15 +454,14 @@
 			return this.play(firstAnim, firstOpts);
 		}
 
-		updateElementSource(element, animName, restart = true) {
+		updateElementSource(element, animName, restart = false) {
 			if (!element) return;
 			const isImg = element.tagName === 'IMG';
 			const path = this.getAnimationPath(animName);
 			if (isImg) {
-				if (restart && element.src.includes(path)) {
-					element.src = '';
+				if (element.src !== path && !element.src.endsWith(path)) {
 					element.src = path;
-				} else if (element.src !== path && !element.src.endsWith(path)) {
+				} else if (restart) {
 					element.src = path;
 				}
 			} else {
@@ -468,29 +483,35 @@
 		}
 
 		playTalking(mood, options = {}) {
-			if (this.isPlayingProtectedAnimation() && !options.force) return Promise.resolve();
+			if (this.isLocked && !options.force) return Promise.resolve();
+			const now = Date.now();
+			if (now < this.animEndTime && this.currentPriority >= PRIORITY.ACTION && !options.force) return Promise.resolve();
+			const isThinking = this.currentPriority === PRIORITY.THINK;
 			const moodKey = (mood || (window.ClippyBrain ? window.ClippyBrain.getMood() : 'OPTIMISTIC')).toUpperCase();
 			const config = MOOD_ANIMATION_MAP[moodKey] || MOOD_ANIMATION_MAP.OPTIMISTIC;
 			const pool = config.talk || ['Explain', 'IdleEyeBrowRaise'];
 			const picked = pool[Math.floor(Math.random() * pool.length)];
-			return this.play(picked, { loop: true, persist: true, priority: PRIORITY.TALK, ...options });
+			return this.play(picked, { loop: false, persist: true, priority: PRIORITY.TALK, restart: false, force: isThinking, ...options });
 		}
 
 		playThinking(mood, options = {}) {
 			if (this.isPlayingProtectedAnimation() && !options.force) return Promise.resolve();
+			if (this.isLocked && !options.force) return Promise.resolve();
 			const moodKey = (mood || (window.ClippyBrain ? window.ClippyBrain.getMood() : 'OPTIMISTIC')).toUpperCase();
 			const config = MOOD_ANIMATION_MAP[moodKey] || MOOD_ANIMATION_MAP.OPTIMISTIC;
 			const pool = config.think || ['Thinking', 'CheckingSomething'];
 			const picked = pool[Math.floor(Math.random() * pool.length)];
-			return this.play(picked, { loop: true, persist: true, priority: PRIORITY.THINK, ...options });
+			return this.play(picked, { loop: false, persist: true, priority: PRIORITY.THINK, restart: false, ...options });
 		}
 
 		playIdle(options = {}) {
 			if (this.isPlayingProtectedAnimation() && !options.force) return Promise.resolve();
-			if (this.isLocked) return Promise.resolve();
+			if (this.isLocked && !options.force) return Promise.resolve();
+			const now = Date.now();
+			if (now < this.animEndTime && this.currentPriority > PRIORITY.IDLE && !options.force) return Promise.resolve();
 			const brain = window.ClippyBrain;
 			const mood = brain ? brain.getMood() : 'OPTIMISTIC';
-			return this.playForMood(mood, 'idle', { loop: false, persist: true, priority: PRIORITY.IDLE, ...options });
+			return this.playForMood(mood, 'idle', { loop: false, persist: true, priority: PRIORITY.IDLE, restart: false, ...options });
 		}
 
 		playGesture(direction = 'down', options = {}) {
@@ -498,17 +519,56 @@
 			if (direction === 'up') anim = 'GestureUp';
 			else if (direction === 'left') anim = 'GestureLeft';
 			else if (direction === 'right') anim = 'GestureRight';
-			return this.play(anim, options);
+			return this.play(anim, { priority: PRIORITY.REACTION, lock: true, ...options });
+		}
+
+		playLook(direction = 'down', options = {}) {
+			const now = Date.now();
+			if (now - this.lastLookTimestamp < 3500 && !options.force) {
+				return Promise.resolve();
+			}
+			if (this.isPlayingProtectedAnimation() && !options.force) {
+				return Promise.resolve();
+			}
+			if (this.isLocked && !options.force) {
+				return Promise.resolve();
+			}
+			if (now < this.animEndTime && this.currentPriority > PRIORITY.LOOK && !options.force) {
+				return Promise.resolve();
+			}
+			this.lastLookTimestamp = now;
+			const gazeMap = {
+				down: 'LookDown',
+				up: 'LookUp',
+				left: 'LookLeft',
+				right: 'LookRight',
+				down_left: 'LookDownLeft',
+				down_right: 'LookDownRight',
+				up_left: 'LookUpLeft',
+				up_right: 'LookUpRight'
+			};
+			const anim = gazeMap[direction] || 'LookDown';
+			return this.play(anim, { priority: PRIORITY.LOOK, restart: false, ...options });
 		}
 
 		preloadKeyAnimations() {
-			const keyList = ['Idle1_1', 'Explain', 'Thinking', 'Greeting', 'Congratulate', 'Save', 'EmptyTrash', 'SendMail', 'Searching', 'Writing', 'RestPose'];
+			const keyList = [
+				'Idle1_1', 'Explain', 'Thinking', 'Greeting', 'Congratulate', 'Save',
+				'EmptyTrash', 'SendMail', 'Searching', 'Writing', 'RestPose',
+				'Alert', 'Hearing_1', 'GetTechy', 'GetWizardy', 'GetArtsy',
+				'GetAttention', 'GoodBye', 'Print', 'Processing'
+			];
 			const baseUrl = this.getBaseUrl();
 			keyList.forEach(name => {
-				const meta = MANIFEST[name];
-				if (meta) {
+				const classicMeta = MANIFEST[name];
+				if (classicMeta) {
 					const img = new Image();
-					img.src = `${baseUrl}${meta.file}`;
+					img.src = `${baseUrl}${classicMeta.file}`;
+				}
+				const modernName = CLASSIC_TO_MODERN_MAP[name];
+				if (modernName && MANIFEST[modernName]) {
+					const mImg = new Image();
+					mImg.src = `${baseUrl}${MANIFEST[modernName].file}`;
 				}
 			});
 		}

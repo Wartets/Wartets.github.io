@@ -588,8 +588,10 @@
 
 			if (!isPlayerWinner) {
 				if (window.ClippyAudio) window.ClippyAudio.play('win');
+				if (window.ClippyAnimator) window.ClippyAnimator.playForAction('game_win', { priority: 5, lock: true });
 			} else {
 				if (window.ClippyAudio) window.ClippyAudio.play('lose');
+				if (window.ClippyAnimator) window.ClippyAnimator.playForAction('game_lose', { priority: 5, lock: true });
 			}
 
 			this.render(true, bannerMsg, isPlayerWinner);
@@ -1017,13 +1019,16 @@
 			if (this.winner === 'X') {
 				this.scores.player++;
 				if (window.ClippyAudio) window.ClippyAudio.play('win');
+				if (window.ClippyAnimator) window.ClippyAnimator.playForAction('game_win', { priority: 5, lock: true });
 				if (window.ClippySystemBridge) window.ClippySystemBridge.unlockAchievement('clippy_tictactoe_win', 1);
 			} else if (this.winner === 'O') {
 				this.scores.clippy++;
 				if (window.ClippyAudio) window.ClippyAudio.play('lose');
+				if (window.ClippyAnimator) window.ClippyAnimator.playForAction('game_lose', { priority: 5, lock: true });
 			} else {
 				this.scores.draws++;
 				if (window.ClippyAudio) window.ClippyAudio.play('action');
+				if (window.ClippyAnimator) window.ClippyAnimator.play('Explain', { priority: 4, lock: true });
 			}
 
 			this.render();
@@ -1146,6 +1151,7 @@
 
 					if (this.matched.every(Boolean)) {
 						if (window.ClippyAudio) window.ClippyAudio.play('tada');
+						if (window.ClippyAnimator) window.ClippyAnimator.playForAction('game_win', { priority: 5, lock: true });
 					}
 					this.render();
 				} else {
@@ -2040,6 +2046,7 @@
 					this.progress = 100;
 					this.blocks.forEach(b => b.state = 'optimized');
 					if (window.ClippyAudio) window.ClippyAudio.play('tada');
+					if (window.ClippyAnimator) window.ClippyAnimator.playForAction('game_win', { priority: 5, lock: true });
 				}
 
 				this.render();
@@ -2468,6 +2475,7 @@
 			this.pet.xp += 12;
 			this.pet.totalPolishes = (this.pet.totalPolishes || 0) + 1;
 			this.setCooldown('polish', 10);
+			if (window.ClippyAnimator) window.ClippyAnimator.play('GetWizardy', { priority: 4, lock: true });
 
 			if (window.ClippyBrain) {
 				window.ClippyBrain.applyMoodDelta({ affinity: 8, patience: 8, irritation: -8 });
@@ -2505,6 +2513,7 @@
 			this.pet.xp += 15;
 			this.pet.totalSleeps = (this.pet.totalSleeps || 0) + 1;
 			this.setCooldown('sleep', 15);
+			if (window.ClippyAnimator) window.ClippyAnimator.play('IdleSnooze', { priority: 4, lock: true });
 
 			if (window.ClippyBrain) {
 				window.ClippyBrain.applyMoodDelta({ fatigue: -35, energy: 35, patience: 15 });
@@ -3495,6 +3504,7 @@
 			if (this.isSpinning || this.slices.length < 2) return;
 			this.isSpinning = true;
 			this.selectedOutcome = null;
+			if (window.ClippyAnimator) window.ClippyAnimator.play('GetArtsy', { priority: 5, lock: true, duration: 3200 });
 
 			const spinRounds = 4 + Math.random() * 4;
 			const targetExtraAngle = Math.random() * 2 * Math.PI;
@@ -3864,6 +3874,7 @@
 				const text = txtIn.value;
 				const key = keyInput.value;
 				let out = '';
+				if (window.ClippyAnimator) window.ClippyAnimator.play('Writing', { priority: 4, lock: true, duration: 2400 });
 
 				if (alg === 'caesar') out = this.caesar(text, parseInt(key, 10) || 3, isDecode);
 				else if (alg === 'vigenere') out = this.vigenere(text, key || 'KEY', isDecode);
@@ -4273,6 +4284,7 @@
 			this.saveResultHistory(this.computedResult);
 
 			if (window.ClippyAudio) window.ClippyAudio.play('tada');
+			if (window.ClippyAnimator) window.ClippyAnimator.play('Congratulate', { priority: 5, lock: true });
 			if (window.ClippySystemBridge) window.ClippySystemBridge.unlockAchievement('clippy_personality_master', 1);
 
 			if (window.ClippyBrain && typeof window.ClippyBrain.applyPersonalityResult === 'function') {
@@ -4726,6 +4738,7 @@
 
 		saveScratchpadNote(text) {
 			try {
+				if (window.ClippyAnimator) window.ClippyAnimator.playForAction('save_note');
 				if (window.DeskStorage) window.DeskStorage.setItem(STORAGE_KEY_NOTES, text);
 				else localStorage.setItem(STORAGE_KEY_NOTES, text);
 			} catch (e) {}
