@@ -196,7 +196,7 @@
 			try {
 				if (window.MailStore && typeof window.MailStore.sendMessage === 'function') {
 					window.MailStore.sendMessage({ to, subject, body });
-					if (window.ClippyAnimator) window.ClippyAnimator.playForAction('send_mail');
+					if (window.ClippyAnimator) window.ClippyAnimator.playForAction('send_mail', { priority: 5, lock: true });
 					if (window.AchievementsManager) {
 						window.AchievementsManager.progress('mail_sender', 1);
 					}
@@ -283,7 +283,7 @@
 				}
 				if (typeof fs !== 'undefined' && fs && fs.emptyRecycleBin) {
 					fs.emptyRecycleBin();
-					if (window.ClippyAnimator) window.ClippyAnimator.playForAction('empty_trash');
+					if (window.ClippyAnimator) window.ClippyAnimator.playForAction('empty_trash', { priority: 5, lock: true });
 					if (typeof refreshUI === 'function') refreshUI();
 					return true;
 				}
@@ -474,7 +474,7 @@
 
 		toggleMusicPlayback() {
 			try {
-				if (window.ClippyAnimator) window.ClippyAnimator.playForAction('play_music');
+				if (window.ClippyAnimator) window.ClippyAnimator.playForAction('play_music', { priority: 5, lock: true });
 				if (window.DeskAPI && typeof window.DeskAPI.toggleMusicPlayback === 'function') {
 					return window.DeskAPI.toggleMusicPlayback();
 				}
@@ -661,7 +661,7 @@
 			try {
 				if (typeof fs !== 'undefined' && fs) {
 					const f = fs.create('File', path || '/', name, { content });
-					if (window.ClippyAnimator) window.ClippyAnimator.playForAction('create_file');
+					if (window.ClippyAnimator) window.ClippyAnimator.playForAction('create_file', { priority: 5, lock: true });
 					if (typeof refreshUI === 'function') refreshUI();
 					return f;
 				}
@@ -852,7 +852,7 @@
 
 		unlockAchievement(id, count = 1) {
 			try {
-				if (window.ClippyAnimator) window.ClippyAnimator.playForAction('milestone_unlock');
+				if (window.ClippyAnimator) window.ClippyAnimator.playForAction('milestone_unlock', { priority: 5, lock: true });
 				if (window.AchievementsManager && typeof window.AchievementsManager.progress === 'function') {
 					window.AchievementsManager.progress(id, count);
 				}

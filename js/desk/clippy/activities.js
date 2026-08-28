@@ -4738,7 +4738,7 @@
 
 		saveScratchpadNote(text) {
 			try {
-				if (window.ClippyAnimator) window.ClippyAnimator.playForAction('save_note');
+				if (window.ClippyAnimator) window.ClippyAnimator.playForAction('save_note', { priority: 5, lock: true });
 				if (window.DeskStorage) window.DeskStorage.setItem(STORAGE_KEY_NOTES, text);
 				else localStorage.setItem(STORAGE_KEY_NOTES, text);
 			} catch (e) {}

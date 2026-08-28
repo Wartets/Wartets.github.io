@@ -325,6 +325,9 @@
 			this.faceImage.classList.remove('clippy-anim-nod', 'clippy-anim-think', 'clippy-anim-wiggle', 'clippy-anim-shake');
 
 			if (window.ClippyAnimator) {
+				if (window.ClippyAnimator.isPlayingProtectedAnimation()) {
+					return;
+				}
 				if (state === 'talk' || state === 'happy') {
 					window.ClippyAnimator.playTalking();
 				} else if (state === 'think' || state === 'alert') {
@@ -488,7 +491,9 @@
 			this.logElement.appendChild(messageContainer);
 
 			this.isTyping = true;
-			this.setVisualState('talk');
+			if (!window.ClippyAnimator || !window.ClippyAnimator.isPlayingProtectedAnimation()) {
+				this.setVisualState('talk');
+			}
 			const targetText = String(text || '');
 			const parsedTarget = parseMarkdown(targetText);
 

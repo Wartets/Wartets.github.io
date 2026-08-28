@@ -1714,7 +1714,7 @@
 
 	function renderInitialGreeting() {
 		if (window.ClippyAnimator) {
-			window.ClippyAnimator.play('Greeting', { priority: 5, lock: true });
+			window.ClippyAnimator.play('Greeting', { priority: 6, lock: true });
 		}
 		if (window.ClippyBrain && typeof window.ClippyBrain.navigateGraphNode === 'function') {
 			const entry = window.ClippyBrain.navigateGraphNode('greeting_root');
@@ -1729,6 +1729,14 @@
 	function init() {
 		if (window.ClippyAnimator) {
 			window.ClippyAnimator.preloadKeyAnimations();
+			const standaloneAvatar = document.getElementById('clippy-standalone-avatar');
+			if (standaloneAvatar) {
+				window.ClippyAnimator.registerElement(standaloneAvatar);
+			}
+			const taskbarIcon = document.querySelector('#clippy-taskbar-icon img');
+			if (taskbarIcon) {
+				window.ClippyAnimator.registerElement(taskbarIcon);
+			}
 		}
 		startIdleDaemon();
 
@@ -1784,7 +1792,7 @@
 	function notifyGameEnded(gameTitle, resultSummary, restartCallback) {
 		setTimeout(() => {
 			const isWin = resultSummary && (resultSummary.toLowerCase().includes('win') || resultSummary.toLowerCase().includes('victory') || resultSummary.toLowerCase().includes('cleared') || resultSummary.toLowerCase().includes('100%'));
-			if (window.ClippyAnimator) {
+			if (window.ClippyAnimator && !window.ClippyAnimator.isPlayingProtectedAnimation()) {
 				if (isWin) {
 					window.ClippyAnimator.play('Congratulate', { priority: 4, lock: true });
 				} else {

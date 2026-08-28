@@ -291,6 +291,25 @@
 			this.lastLookTimestamp = 0;
 			this.fallbackStaticPath = '../assets/images/desk/clippy/idle.png';
 			this.initSettings();
+			this.loadManifest();
+		}
+
+		async loadManifest() {
+			if (typeof fetch !== 'function') return;
+			try {
+				const manifestUrl = `${this.getBaseUrl()}manifest.json`;
+				const response = await fetch(manifestUrl);
+				if (response.ok) {
+					const data = await response.json();
+					if (data && typeof data === 'object') {
+						for (const [key, meta] of Object.entries(data)) {
+							if (meta && meta.file) {
+								MANIFEST[key] = Object.assign(MANIFEST[key] || {}, meta);
+							}
+						}
+					}
+				}
+			} catch (e) {}
 		}
 
 		initSettings() {
@@ -304,13 +323,6 @@
 		}
 
 		getBaseUrl() {
-			const env = (window.ClippySystemBridge && typeof window.ClippySystemBridge.getEnvironment === 'function')
-				? window.ClippySystemBridge.getEnvironment()
-				: (window.ClippyEnvironment === 'standalone' ? 'standalone' : 'desk');
-
-			if (env === 'standalone') {
-				return 'assets/images/desk/clippy/gifs/';
-			}
 			return '../assets/images/desk/clippy/gifs/';
 		}
 
@@ -360,7 +372,7 @@
 
 		isPlayingProtectedAnimation() {
 			const now = Date.now();
-			return (this.isLocked || (this.currentPriority >= PRIORITY.THINK && now < this.animEndTime));
+			return (this.isLocked || (this.currentPriority >= PRIORITY.ACTION && now < this.animEndTime));
 		}
 
 		play(animationName, options = {}) {
@@ -459,9 +471,10 @@
 			const isImg = element.tagName === 'IMG';
 			const path = this.getAnimationPath(animName);
 			if (isImg) {
-				if (element.src !== path && !element.src.endsWith(path)) {
+				if (restart) {
+					element.src = '';
 					element.src = path;
-				} else if (restart) {
+				} else if (element.src !== path && !element.src.endsWith(path)) {
 					element.src = path;
 				}
 			} else {
@@ -486,17 +499,18 @@
 			if (this.isLocked && !options.force) return Promise.resolve();
 			const now = Date.now();
 			if (now < this.animEndTime && this.currentPriority >= PRIORITY.ACTION && !options.force) return Promise.resolve();
-			const isThinking = this.currentPriority === PRIORITY.THINK;
 			const moodKey = (mood || (window.ClippyBrain ? window.ClippyBrain.getMood() : 'OPTIMISTIC')).toUpperCase();
 			const config = MOOD_ANIMATION_MAP[moodKey] || MOOD_ANIMATION_MAP.OPTIMISTIC;
 			const pool = config.talk || ['Explain', 'IdleEyeBrowRaise'];
 			const picked = pool[Math.floor(Math.random() * pool.length)];
-			return this.play(picked, { loop: false, persist: true, priority: PRIORITY.TALK, restart: false, force: isThinking, ...options });
+			return this.play(picked, { loop: false, persist: true, priority: PRIORITY.TALK, restart: false, ...options });
 		}
 
 		playThinking(mood, options = {}) {
 			if (this.isPlayingProtectedAnimation() && !options.force) return Promise.resolve();
 			if (this.isLocked && !options.force) return Promise.resolve();
+			const now = Date.now();
+			if (now < this.animEndTime && this.currentPriority >= PRIORITY.ACTION && !options.force) return Promise.resolve();
 			const moodKey = (mood || (window.ClippyBrain ? window.ClippyBrain.getMood() : 'OPTIMISTIC')).toUpperCase();
 			const config = MOOD_ANIMATION_MAP[moodKey] || MOOD_ANIMATION_MAP.OPTIMISTIC;
 			const pool = config.think || ['Thinking', 'CheckingSomething'];
@@ -524,7 +538,7 @@
 
 		playLook(direction = 'down', options = {}) {
 			const now = Date.now();
-			if (now - this.lastLookTimestamp < 3500 && !options.force) {
+			if (now - this.lastLookTimestamp < 4000 && !options.force) {
 				return Promise.resolve();
 			}
 			if (this.isPlayingProtectedAnimation() && !options.force) {
@@ -533,7 +547,7 @@
 			if (this.isLocked && !options.force) {
 				return Promise.resolve();
 			}
-			if (now < this.animEndTime && this.currentPriority > PRIORITY.LOOK && !options.force) {
+			if (now < this.animEndTime && this.currentPriority > PRIORITY.IDLE && !options.force) {
 				return Promise.resolve();
 			}
 			this.lastLookTimestamp = now;
@@ -552,6 +566,7 @@
 		}
 
 		preloadKeyAnimations() {
+			this.loadManifest();
 			const keyList = [
 				'Idle1_1', 'Explain', 'Thinking', 'Greeting', 'Congratulate', 'Save',
 				'EmptyTrash', 'SendMail', 'Searching', 'Writing', 'RestPose',

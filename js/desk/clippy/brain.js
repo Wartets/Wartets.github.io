@@ -356,7 +356,7 @@
 
 			this.applyMoodDelta(appliedDelta);
 			if (window.ClippyAnimator) {
-				window.ClippyAnimator.playForAction('milestone_unlock');
+				window.ClippyAnimator.playForAction('milestone_unlock', { priority: 5, lock: true });
 			}
 			this.saveState();
 			this.saveMemory();
